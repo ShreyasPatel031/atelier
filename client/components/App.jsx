@@ -17,6 +17,9 @@ export default function App() {
   const [isSessionActive, setIsSessionActive] = useState(true); // Always active
   const [isConnecting, setIsConnecting] = useState(false);
   const [isAgentReady, setIsAgentReady] = useState(true); // Always ready
+  
+  // Right panel collapse state
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false)
 
   const startSession = () => {
     // No-op since chat is always available
@@ -56,17 +59,10 @@ export default function App() {
       </div>
       
       {/* Right Panel */}
-      <div className="w-[416px] h-full bg-white border-l border-gray-300 flex flex-col">
-        <RightPanelChat 
-          className="flex-1" 
-          sendTextMessage={sendTextMessage}
-          startSession={startSession}
-          stopSession={stopSession}
-          isSessionActive={isSessionActive}
-          isConnecting={isConnecting}
-          isAgentReady={isAgentReady}
-        />
-      </div>
+      <RightPanelChat 
+        isCollapsed={rightPanelCollapsed}
+        onToggleCollapse={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+      />
     </div>
   );
 }
