@@ -206,7 +206,7 @@ const ArchitectureSidebar: React.FC<ArchitectureSidebarProps> = ({
                       className="w-full text-left pr-8 relative"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="font-medium truncate text-gray-800">{architecture.name}</div>
+                        <div className="font-medium truncate text-gray-800 text-sm">{architecture.name}</div>
                         {/* Loading spinner for ongoing operations - positioned to the far right */}
                         {isArchitectureOperationRunning(architecture.id) && (
                           <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin flex-shrink-0 ml-auto" />

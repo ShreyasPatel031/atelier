@@ -314,7 +314,7 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
               <MessageSquare className="w-4 h-4" />
             </button>
           ) : (
-            <div className="flex items-center gap-2 h-10">
+            <div className="flex items-center justify-center h-10">
               <MessageSquare className="w-4 h-4" />
             </div>
           )}
@@ -331,8 +331,8 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto px-4">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <MessageSquare className="w-12 h-12 text-gray-400" />
+                <div className="flex flex-col items-center justify-center h-full">
+                  <MessageSquare className="w-8 h-8 text-gray-300" />
                 </div>
               ) : (
                 <div className="space-y-4 pb-4">
