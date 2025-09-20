@@ -316,7 +316,6 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
           ) : (
             <div className="flex items-center gap-2 h-10">
               <MessageSquare className="w-4 h-4" />
-              <h3 className="font-semibold text-gray-800">AI Chat Assistant</h3>
             </div>
           )}
         </div>
@@ -333,18 +332,7 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
             <div className="flex-1 overflow-y-auto px-4">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <Bot className="w-12 h-12 mb-4 text-gray-400" />
-                  <h4 className="text-lg font-medium text-gray-600 mb-2">
-                    AI Chat Assistant
-                  </h4>
-                  <p className="text-sm text-gray-500 max-w-xs mb-4">
-                    Ask me to create architecture diagrams or answer questions about your designs.
-                  </p>
-                  <div className="text-xs text-gray-400 space-y-1">
-                    <p>💡 Try: "Create a microservices architecture"</p>
-                    <p>💡 Try: "Design a serverless web app"</p>
-                    <p>💡 Try: "Build a cloud infrastructure"</p>
-                  </div>
+                  <MessageSquare className="w-12 h-12 text-gray-400" />
                 </div>
               ) : (
                 <div className="space-y-4 pb-4">

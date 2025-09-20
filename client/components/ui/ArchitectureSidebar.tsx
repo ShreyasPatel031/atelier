@@ -193,7 +193,7 @@ const ArchitectureSidebar: React.FC<ArchitectureSidebarProps> = ({
                   <div
                     key={architecture.id}
                     className={`
-                      w-full text-left p-3 rounded-lg transition-colors group relative
+                      w-full text-left p-2 rounded-lg transition-colors group relative
                       ${selectedArchitectureId === architecture.id 
                         ? 'bg-gray-100 border border-gray-300' 
                         : 'hover:bg-gray-50 border border-transparent'
