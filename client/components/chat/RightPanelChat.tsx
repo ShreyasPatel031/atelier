@@ -37,6 +37,7 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isDiagramGenerating, setIsDiagramGenerating] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -159,6 +160,10 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                 console.log('🚀 Triggering diagram creation with:', parsed.requirements)
                 console.log('🔍 Full trigger_diagram object:', parsed)
                 
+                // Set loading state for diagram generation
+                setIsDiagramGenerating(true)
+                console.log('🔄 Set diagram generation loading state to true')
+                
                 // Set global state (needed for naming and other functions)
                 ;(window as any).originalChatTextInput = parsed.requirements
                 ;(window as any).chatTextInput = parsed.requirements
@@ -182,6 +187,10 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                     }).catch(fallbackError => {
                       console.error('❌ Failed to import process_user_requirements:', fallbackError)
                     })
+                  } finally {
+                    // Clear loading state after completion
+                    setIsDiagramGenerating(false)
+                    console.log('✅ Set diagram generation loading state to false')
                   }
                 } else {
                   console.error('❌ handleChatSubmit function not found on window object')
@@ -191,6 +200,10 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                     process_user_requirements()
                   }).catch(error => {
                     console.error('❌ Failed to import process_user_requirements:', error)
+                  }).finally(() => {
+                    // Clear loading state after completion
+                    setIsDiagramGenerating(false)
+                    console.log('✅ Set diagram generation loading state to false')
                   })
                 }
                 continue // Continue processing other messages in the same chunk
@@ -408,6 +421,20 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                     </div>
                   )}
                   
+                  {isDiagramGenerating && (
+                    <div className="flex gap-3 justify-start">
+                      <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <Cpu className="w-4 h-4" />
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-sm">
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                          <span className="text-sm text-gray-500">Generating architecture...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div ref={messagesEndRef} />
                 </div>
               )}
@@ -423,19 +450,19 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                   onKeyPress={handleKeyPress}
                   data-testid="chat-input"
                   placeholder="Ask me to create an architecture..."
-                  disabled={isLoading}
+                  disabled={isLoading || isDiagramGenerating}
                   className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-sm placeholder:text-gray-400"
                 />
                 <button
                   type="submit"
-                  disabled={!inputValue.trim() || isLoading}
+                  disabled={!inputValue.trim() || isLoading || isDiagramGenerating}
                   className={`flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0 transition-all duration-200 ${
-                    !inputValue.trim() || isLoading
+                    !inputValue.trim() || isLoading || isDiagramGenerating
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-gray-900 hover:bg-gray-800 text-white shadow-sm hover:shadow-md'
                   }`}
                   data-testid="send-button"
-                  title={isLoading ? "Sending..." : "Send message"}
+                  title={isLoading ? "Sending..." : isDiagramGenerating ? "Generating architecture..." : "Send message"}
                 >
                   {isLoading ? (
                     <Loader2 className="w-3 h-3 animate-spin" />
