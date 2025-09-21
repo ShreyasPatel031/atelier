@@ -141,6 +141,49 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
         // Clear any previous layout errors
         setLayoutError(null);
         
+        // Validate graph structure before processing
+        const validateGraph = (node: any, visited = new Set()): boolean => {
+          if (!node || typeof node !== 'object') return false;
+          if (visited.has(node)) return false; // Prevent cycles
+          visited.add(node);
+          
+          if (!node.id || typeof node.id !== 'string') {
+            console.error("[ELK] Invalid node - missing or invalid ID:", node);
+            return false;
+          }
+          
+          // Validate children
+          if (node.children) {
+            if (!Array.isArray(node.children)) {
+              console.error("[ELK] Invalid node - children is not an array:", node);
+              return false;
+            }
+            for (const child of node.children) {
+              if (!validateGraph(child, visited)) return false;
+            }
+          }
+          
+          // Validate edges
+          if (node.edges) {
+            if (!Array.isArray(node.edges)) {
+              console.error("[ELK] Invalid node - edges is not an array:", node);
+              return false;
+            }
+            for (const edge of node.edges) {
+              if (!edge.id || !edge.sources || !edge.targets) {
+                console.error("[ELK] Invalid edge:", edge);
+                return false;
+              }
+            }
+          }
+          
+          return true;
+        };
+        
+        if (!validateGraph(rawGraph)) {
+          throw new Error("Graph validation failed - invalid structure detected");
+        }
+        
         // 1) inject IDs + elkOptions onto a clone of rawGraph
         const prepared = ensureIds(structuredClone(rawGraph));
         
@@ -169,8 +212,36 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
       } catch (e: any) {
         if (e.name !== "AbortError") {
           console.error("[ELK] layout failed", e);
+          console.error("[ELK] Raw graph that caused failure:", JSON.stringify(rawGraph, null, 2));
+          
           // Set the error state so it can be accessed by components
           setLayoutError(e.message || e.toString());
+          
+          // Try to create a minimal fallback graph to prevent complete failure
+          try {
+            console.log("[ELK] Creating fallback graph...");
+            const fallbackGraph = {
+              id: "root",
+              children: [],
+              edges: []
+            };
+            
+            const fallbackLayouted = await elk.layout(fallbackGraph);
+            const { nodes: fallbackNodes, edges: fallbackEdges } = processLayoutedGraph(fallbackLayouted, {
+              width      : NON_ROOT_DEFAULT_OPTIONS.width,
+              height     : NON_ROOT_DEFAULT_OPTIONS.height,
+              groupWidth : NON_ROOT_DEFAULT_OPTIONS.width  * 3,
+              groupHeight: NON_ROOT_DEFAULT_OPTIONS.height * 3,
+              padding    : 10
+            });
+            
+            setNodes(fallbackNodes);
+            setEdges(fallbackEdges);
+            incLayoutVersion(v => v + 1);
+            console.log("[ELK] Fallback graph created successfully");
+          } catch (fallbackError) {
+            console.error("[ELK] Fallback graph creation also failed:", fallbackError);
+          }
         }
       }
     })();

@@ -162,8 +162,18 @@ class IconFallbackService {
         const fallbackIcon = globalBestMatch.provider === 'general' 
           ? globalBestMatch.icon 
           : `${globalBestMatch.provider}_${globalBestMatch.icon}`;
-        // Found best fallback silently
+        
+        // CRITICAL: Verify the fallback icon actually exists as a file
+        const iconExists = await this.verifyIconExists(fallbackIcon);
+        if (!iconExists) {
+          console.log(`❌ IconFallback: Fallback icon "${fallbackIcon}" does not exist as file, trying next best match`);
+          // Try to find the next best match that actually exists
+          return await this.findNextBestMatch(missingIconName, searchEmbedding, globalBestMatch);
+        }
+        
+        // Found valid fallback
         this.fallbackCache[missingIconName] = fallbackIcon;
+        console.log(`✅ IconFallback: Found valid fallback "${missingIconName}" → "${fallbackIcon}"`);
         return fallbackIcon;
       } else {
         console.log(`❌ IconFallback: No icons found in database for "${missingIconName}"`);
@@ -173,6 +183,72 @@ class IconFallbackService {
     } catch (error) {
       return null;
     }
+  }
+
+  private async verifyIconExists(iconName: string): Promise<boolean> {
+    try {
+      // Check if it's a general icon (no provider prefix)
+      if (!iconName.includes('_') || (!iconName.startsWith('aws_') && !iconName.startsWith('gcp_') && !iconName.startsWith('azure_'))) {
+        // Try both PNG and SVG for general icons
+        const pngPath = `/assets/canvas/${iconName}.png`;
+        const svgPath = `/assets/canvas/${iconName}.svg`;
+        
+        const pngResponse = await fetch(pngPath, { method: 'HEAD' });
+        const svgResponse = await fetch(svgPath, { method: 'HEAD' });
+        
+        return pngResponse.ok || svgResponse.ok;
+      } else {
+        // Provider-specific icon
+        const [provider, actualIconName] = iconName.split('_', 2);
+        const iconPath = `/icons/${provider}/${actualIconName}.png`;
+        const response = await fetch(iconPath, { method: 'HEAD' });
+        return response.ok;
+      }
+    } catch (error) {
+      return false;
+    }
+  }
+
+  private async findNextBestMatch(
+    missingIconName: string, 
+    searchEmbedding: number[], 
+    excludeMatch: { icon: string; provider: string; similarity: number }
+  ): Promise<string | null> {
+    let nextBestMatch: { icon: string; similarity: number; provider: string } | null = null;
+
+    // Search through all embeddings again, excluding the already found match
+    for (const [iconName, iconEmbedding] of Object.entries(this.precomputedData!.embeddings)) {
+      // Skip the already found match
+      if (iconName === excludeMatch.icon) continue;
+      
+      const similarity = this.cosineSimilarity(searchEmbedding, iconEmbedding);
+      
+      if (!nextBestMatch || similarity > nextBestMatch.similarity) {
+        const isGeneralIcon = !iconName.match(/^(aws|gcp|azure)_/);
+        
+        nextBestMatch = {
+          icon: iconName,
+          similarity,
+          provider: isGeneralIcon ? 'general' : iconName.split('_')[0]
+        };
+      }
+    }
+
+    if (nextBestMatch) {
+      const fallbackIcon = nextBestMatch.provider === 'general' 
+        ? nextBestMatch.icon 
+        : `${nextBestMatch.provider}_${nextBestMatch.icon}`;
+      
+      const iconExists = await this.verifyIconExists(fallbackIcon);
+      if (iconExists) {
+        this.fallbackCache[missingIconName] = fallbackIcon;
+        console.log(`✅ IconFallback: Found alternative fallback "${missingIconName}" → "${fallbackIcon}"`);
+        return fallbackIcon;
+      }
+    }
+
+    console.log(`❌ IconFallback: No valid fallback icons found for "${missingIconName}"`);
+    return null;
   }
 }
 
