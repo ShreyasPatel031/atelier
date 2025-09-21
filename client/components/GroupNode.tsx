@@ -415,16 +415,18 @@ const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable
               }}
             />
           )}
-          {/* Show clear failure indicator when icon fails */}
+          {/* Show black circle outline when icon fails */}
           {(data.icon || data.groupIcon) && (!finalIconSrc || iconError) && (
-            <span style={{ 
-              color: '#ff0000', 
-              fontSize: '10px', 
-              fontWeight: 'bold',
-              marginRight: '6px'
+            <div style={{ 
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              border: '1px solid #000000',
+              backgroundColor: 'transparent',
+              marginRight: '6px',
+              flexShrink: 0
             }}>
-              ❌
-            </span>
+            </div>
           )}
           <span style={{ 
             overflow: 'hidden', 

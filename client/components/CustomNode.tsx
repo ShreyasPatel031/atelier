@@ -388,13 +388,13 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
           )}
           {(!finalIconSrc || iconError) && id !== 'root' && (
             <div style={{ 
-              color: '#ff0000', 
-              fontSize: '12px', 
-              fontWeight: 'bold',
-              textAlign: 'center',
-              lineHeight: '1.2'
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              border: '2px solid #000000',
+              backgroundColor: 'transparent',
+              margin: 'auto'
             }}>
-              ❌<br/>MISSING<br/>ICON
             </div>
           )}
         </div>
