@@ -2,9 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
-  timeout: 90000, // 90 seconds for complete architecture generation
+  timeout: 60000, // 60 seconds for complete architecture generation
   expect: {
-    timeout: 30000 // 30 seconds for individual expectations
+    timeout: 15000 // 15 seconds for individual expectations
   },
   fullyParallel: false, // Run tests sequentially to avoid port conflicts
   forbidOnly: !!process.env.CI,
