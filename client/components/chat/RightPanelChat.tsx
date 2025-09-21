@@ -164,6 +164,10 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                 setIsDiagramGenerating(true)
                 console.log('🔄 Set diagram generation loading state to true')
                 
+                // Fire processing start events for status indicators
+                console.log('🔄 Firing userRequirementsStart event for processing indicators')
+                window.dispatchEvent(new CustomEvent('userRequirementsStart'))
+                
                 // Set global state (needed for naming and other functions)
                 ;(window as any).originalChatTextInput = parsed.requirements
                 ;(window as any).chatTextInput = parsed.requirements
@@ -191,6 +195,10 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                     // Clear loading state after completion
                     setIsDiagramGenerating(false)
                     console.log('✅ Set diagram generation loading state to false')
+                    
+                    // Fire completion event for status indicators
+                    console.log('🏁 Firing allProcessingComplete event for processing indicators')
+                    window.dispatchEvent(new CustomEvent('allProcessingComplete'))
                   }
                 } else {
                   console.error('❌ handleChatSubmit function not found on window object')
@@ -204,6 +212,10 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                     // Clear loading state after completion
                     setIsDiagramGenerating(false)
                     console.log('✅ Set diagram generation loading state to false')
+                    
+                    // Fire completion event for status indicators
+                    console.log('🏁 Firing allProcessingComplete event for processing indicators')
+                    window.dispatchEvent(new CustomEvent('allProcessingComplete'))
                   })
                 }
                 continue // Continue processing other messages in the same chunk
