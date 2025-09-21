@@ -11,9 +11,6 @@ if [[ "$*" == *"--no-verify"* ]]; then
     echo -e "\033[0;34mTo see what's failing, run:\033[0m"
     echo -e "\033[0;34m  npm run test:vercel-preview\033[0m"
     echo ""
-    echo -e "\033[1;31m🚨 REMEMBER: These tests prevent broken deployments in production!\033[0m"
-    echo -e "\033[1;31m   Bypassing them could break the live site for users.\033[0m"
-    echo ""
     exit 1
 fi
 

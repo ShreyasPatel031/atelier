@@ -7,55 +7,7 @@ import { iconCacheService } from '../utils/iconCacheService';
 import { useApiEndpoint, buildAssetUrl } from '../contexts/ApiEndpointContext';
 import { splitTextIntoLines } from '../utils/textMeasurement';
 
-// Heuristic fallback mapping for common icon patterns
-const getHeuristicFallback = (iconName: string): string | null => {
-  const prefixMatch = iconName.match(/^(aws|gcp|azure)_(.+)$/);
-  if (!prefixMatch) return null;
-  
-  const [, provider, name] = prefixMatch;
-  const lowerName = name.toLowerCase();
-  
-  // Common fallback mappings based on keywords
-  const fallbackMappings: { [key: string]: string[] } = {
-    // Compute services
-    compute: ['compute_engine', 'ec2', 'virtual_machines'],
-    vm: ['compute_engine', 'ec2', 'virtual_machines'],
-    instance: ['compute_engine', 'ec2', 'virtual_machines'],
-    
-    // Storage services
-    storage: ['cloud_storage', 's3', 'blob_storage'],
-    bucket: ['cloud_storage', 's3', 'blob_storage'],
-    disk: ['persistent_disk', 'ebs', 'disk_storage'],
-    
-    // Database services
-    database: ['cloud_sql', 'rds', 'sql_database'],
-    sql: ['cloud_sql', 'rds', 'sql_database'],
-    db: ['cloud_sql', 'rds', 'sql_database'],
-    
-    // Networking
-    network: ['vpc', 'vpc', 'virtual_networks'],
-    vpc: ['vpc', 'vpc', 'virtual_networks'],
-    dns: ['cloud_dns', 'route_53', 'dns'],
-    
-    // Monitoring
-    monitoring: ['cloud_monitoring', 'cloudwatch', 'monitor'],
-    trace: ['cloud_trace', 'x_ray', 'application_insights'],
-    log: ['cloud_logging', 'cloudwatch', 'log_analytics']
-  };
-  
-  // Find matching pattern
-  for (const [pattern, fallbacks] of Object.entries(fallbackMappings)) {
-    if (lowerName.includes(pattern)) {
-      const providerIndex = provider === 'gcp' ? 0 : provider === 'aws' ? 1 : 2;
-      const fallback = fallbacks[providerIndex];
-      if (fallback) {
-        return `${provider}_${fallback}`;
-      }
-    }
-  }
-  
-  return null;
-};
+// NO HEURISTIC FALLBACKS - let semantic fallback service handle everything
 
 interface CustomNodeProps {
   data: {
@@ -105,6 +57,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
     
     const prefixMatch = iconName.match(/^(aws|gcp|azure)_(.+)$/);
     if (prefixMatch) {
+      // Provider icon (aws_, gcp_, azure_)
       const [, provider, actualIconName] = prefixMatch;
       const category = findIconCategory(provider, actualIconName);
       if (category) {
@@ -136,16 +89,46 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
             return fullIconUrl;
           }
         } catch (error) {
-          console.log(`❌ Icon not found in database: ${iconName} (${error instanceof Error ? error.message : 'Unknown error'})`);
-          // Continue to legacy fallback
+          console.log(`❌ Provider icon not found: ${iconName} (${error instanceof Error ? error.message : 'Unknown error'})`);
         }
       } else {
-        console.log(`❌ Icon not in database: ${iconName} (${provider})`);
+        console.log(`❌ Provider icon category not found: ${iconName} (${provider})`);
       }
+    } else {
+      // General icon (no provider prefix) - try canvas assets
+      const generalIconPaths = [
+        `/assets/canvas/${iconName}.png`,
+        `/assets/canvas/${iconName}.svg`
+      ];
+      
+      // General icon (no provider prefix) - try canvas assets
+      for (const iconPath of generalIconPaths) {
+        try {
+          const fullIconUrl = buildAssetUrl(iconPath, apiEndpoint);
+          const response = await fetch(fullIconUrl);
+          
+          if (response.ok && !response.headers.get('content-type')?.includes('text/html')) {
+            const img = new Image();
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = fullIconUrl;
+            });
+            
+            // Cache the successfully loaded icon
+            iconCacheService.cacheIcon(iconName, fullIconUrl);
+            console.log(`✅ General icon loaded: ${iconName} (${iconPath})`);
+            return fullIconUrl;
+          }
+        } catch (error) {
+          // Try next path
+        }
+      }
+      console.log(`❌ General icon not found: ${iconName}`);
     }
     
-    // Icon not found in main database - let semantic fallback handle it
-    throw new Error(`Icon not found in database: ${iconName}`);
+    // Icon not found anywhere
+    throw new Error(`Icon not found: ${iconName}`);
   };
 
   useEffect(() => {
@@ -155,55 +138,67 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
     setFallbackAttempted(false);
 
     if (data.icon) {
+      // Try to load the specified icon
       tryLoadIcon(data.icon)
         .then((path) => {
           setFinalIconSrc(path);
           setIconLoaded(true);
           setIconError(false);
-          setFallbackAttempted(false);
         })
         .catch(() => {
+          // Icon failed to load - use semantic fallback service
           setIconError(true);
-          // Immediate fallback attempt (removed delay)
           if (!fallbackAttempted) {
             setFallbackAttempted(true);
             iconFallbackService.findFallbackIcon(data.icon)
               .then(async (fallbackIcon) => {
                 if (fallbackIcon) {
+                  console.log(`🔍 Semantic fallback found: ${data.icon} → ${fallbackIcon}`);
                   try {
                     const fallbackPath = await tryLoadIcon(fallbackIcon);
                     setFinalIconSrc(fallbackPath);
                     setIconLoaded(true);
                     setIconError(false);
-                    return;
-                  } catch {}
+                    console.log(`✅ Fallback SUCCESS: ${data.icon} → ${fallbackIcon} (loaded: ${fallbackPath})`);
+                  } catch (error) {
+                    console.log(`❌ Fallback FAILED to load: ${fallbackIcon}`, error);
+                  }
+                } else {
+                  console.log(`❌ No semantic fallback found for: ${data.icon}`);
                 }
               })
-              .catch(() => {});
+              .catch((error) => {
+                console.error(`💥 Semantic fallback error for ${data.icon}:`, error);
+              });
           }
         });
     } else {
+      // No icon specified - try semantic fallback based on node ID
       setIconError(true);
       
-      // Skip icon fallback for root node
-      if (id === 'root') {
-        return;
+      if (!fallbackAttempted) {
+        setFallbackAttempted(true);
+        iconFallbackService.findFallbackIcon(id)
+          .then(async (fallbackIcon) => {
+            if (fallbackIcon) {
+              console.log(`🔍 Node ID semantic fallback found: ${id} → ${fallbackIcon}`);
+              try {
+                const fallbackPath = await tryLoadIcon(fallbackIcon);
+                setFinalIconSrc(fallbackPath);
+                setIconLoaded(true);
+                setIconError(false);
+                console.log(`✅ Node ID fallback SUCCESS: ${id} → ${fallbackIcon} (loaded: ${fallbackPath})`);
+              } catch (error) {
+                console.log(`❌ Node ID fallback FAILED to load: ${fallbackIcon}`, error);
+              }
+            } else {
+              console.log(`❌ No semantic fallback found for node ID: ${id}`);
+            }
+          })
+          .catch((error) => {
+            console.error(`💥 Semantic fallback error for node ID ${id}:`, error);
+          });
       }
-      
-      // Immediate fallback attempt (removed delay)
-      iconFallbackService.findFallbackIcon(`gcp_${id}`)
-        .then(async (fallbackIcon) => {
-          if (fallbackIcon) {
-            try {
-              const fallbackPath = await tryLoadIcon(fallbackIcon);
-              setFinalIconSrc(fallbackPath);
-              setIconLoaded(true);
-              setIconError(false);
-              return;
-            } catch {}
-          }
-        })
-        .catch(() => {});
     }
   }, [data.icon, id]);
 
@@ -216,47 +211,16 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
     setLabel(e.target.value);
   };
 
-  // On Enter: commit label and fetch icon (existing behavior)
+  // On Enter: commit label - no manual icon fetching
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       setIsEditing(false);
       onLabelChange(id, label);
-      iconFallbackService.findFallbackIcon(`gcp_${label}`)
-        .then(async (fallbackIcon) => {
-          if (fallbackIcon) {
-            try {
-              const fallbackPath = await tryLoadIcon(fallbackIcon);
-              setFinalIconSrc(fallbackPath);
-              setIconLoaded(true);
-              setIconError(false);
-            } catch {}
-          }
-        });
+      // Let the useEffect handle icon loading based on the new label
     }
   };
 
-  // Debounced icon update while editing
-  useEffect(() => {
-    if (!isEditing) return;
-    if (!label || label.trim() === '') return;
-    const t = setTimeout(() => {
-      iconFallbackService.findFallbackIcon(`gcp_${label}`)
-        .then(async (fallbackIcon) => {
-          if (fallbackIcon) {
-            try {
-              const fallbackPath = await tryLoadIcon(fallbackIcon);
-              setFinalIconSrc(fallbackPath);
-              setIconLoaded(true);
-              setIconError(false);
-            } catch {
-              // ignore
-            }
-          }
-        })
-        .catch(() => {});
-    }, 600);
-    return () => clearTimeout(t);
-  }, [isEditing, label]);
+  // No debounced icon updates while editing - let semantic fallback handle it
 
   const handleDoubleClick = () => {
     setIsEditing(true);
@@ -422,8 +386,16 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
               onError={() => setIconError(true)}
             />
           )}
-          {(!finalIconSrc || iconError) && (
-            <span>{data.label.charAt(0).toUpperCase()}</span>
+          {(!finalIconSrc || iconError) && id !== 'root' && (
+            <div style={{ 
+              color: '#ff0000', 
+              fontSize: '12px', 
+              fontWeight: 'bold',
+              textAlign: 'center',
+              lineHeight: '1.2'
+            }}>
+              ❌<br/>MISSING<br/>ICON
+            </div>
           )}
         </div>
         {isEditing ? (

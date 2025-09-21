@@ -53,6 +53,7 @@ export default function App() {
               sendTextMessage={sendTextMessage}
               sendClientEvent={sendClientEvent}
               events={[]}
+              rightPanelCollapsed={rightPanelCollapsed}
             />
           </ViewModeProvider>
         </ErrorBoundary>

@@ -57,7 +57,13 @@ export default async function handler(req, res) {
     // Create chat completion with streaming and tools
     const stream = await openai.chat.completions.create({
       model: 'gpt-4.1',
-      messages: messages,
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a helpful AI assistant. Keep responses concise and focused. Avoid long lists of questions - ask 1-2 key questions at a time. Use markdown formatting for better readability.'
+        },
+        ...messages
+      ],
       stream: true,
       temperature: 0.7,
       max_tokens: 1000,

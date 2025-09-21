@@ -1,0 +1,65 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - button "Sign in" [ref=e10] [cursor=pointer]:
+      - img [ref=e11] [cursor=pointer]
+    - generic [ref=e14]:
+      - button "Atelier" [ref=e17] [cursor=pointer]:
+        - img "Atelier" [ref=e18] [cursor=pointer]
+      - generic [ref=e19]:
+        - button "Share" [disabled] [ref=e20]:
+          - img [ref=e21]
+          - generic [ref=e24]: Share
+        - button "Export" [disabled] [ref=e25]:
+          - img [ref=e26]
+          - generic [ref=e29]: Export
+        - button "Save" [disabled] [ref=e30]:
+          - img [ref=e31]
+          - generic [ref=e35]: Save
+        - button "Sign in" [ref=e37] [cursor=pointer]:
+          - img [ref=e38] [cursor=pointer]
+      - generic [ref=e43]:
+        - generic [ref=e45]:
+          - generic:
+            - img
+            - button "❌ MISSING ICON" [ref=e46] [cursor=pointer]:
+              - generic [ref=e50] [cursor=pointer]:
+                - text: ❌
+                - text: MISSING
+                - text: ICON
+        - img [ref=e51]
+        - generic [ref=e53]:
+          - button "zoom in" [ref=e54] [cursor=pointer]:
+            - img [ref=e55] [cursor=pointer]
+          - button "zoom out" [ref=e57] [cursor=pointer]:
+            - img [ref=e58] [cursor=pointer]
+          - button "fit view" [ref=e60] [cursor=pointer]:
+            - img [ref=e61] [cursor=pointer]
+          - button "toggle interactivity" [ref=e63] [cursor=pointer]:
+            - img [ref=e64] [cursor=pointer]
+        - link "React Flow attribution" [ref=e67] [cursor=pointer]:
+          - /url: https://reactflow.dev
+          - text: React Flow
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - button "GCP microservices with Kubernetes" [ref=e72] [cursor=pointer]
+          - button "AWS serverless web application" [ref=e73] [cursor=pointer]
+          - button "Multi-cloud data pipeline" [ref=e74] [cursor=pointer]
+        - generic [ref=e76]:
+          - textbox "Describe your architecture requirements" [ref=e77]
+          - button [ref=e78] [cursor=pointer]:
+            - img [ref=e79] [cursor=pointer]
+  - generic [ref=e82]:
+    - generic [ref=e84]:
+      - img [ref=e86]
+      - button "Close Chat Panel" [ref=e89] [cursor=pointer]:
+        - img [ref=e90] [cursor=pointer]
+    - generic [ref=e93]:
+      - img [ref=e97]
+      - generic [ref=e101]:
+        - textbox "Ask me to create an architecture..." [active] [ref=e102]
+        - button "Send message" [disabled] [ref=e103]:
+          - img [ref=e104]
+```

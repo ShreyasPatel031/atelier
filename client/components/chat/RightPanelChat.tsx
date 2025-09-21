@@ -9,9 +9,11 @@ import {
   Loader2, 
   MessageSquare,
   PanelRightClose,
-  PanelRightOpen
+  PanelRightOpen,
+  Cpu
 } from "lucide-react"
 import { cn } from "../../lib/utils"
+import ReactMarkdown from "react-markdown"
 
 interface RightPanelChatProps {
   className?: string
@@ -286,40 +288,32 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
   return (
     <div className={cn(`
       relative h-full bg-gray-50 text-gray-700 border-l border-gray-200 transition-all duration-300 ease-in-out
-      ${isCollapsed ? 'w-16' : 'w-80'}
+      ${isCollapsed ? 'w-18' : 'w-96'}
     `, className)}>
       
-      {/* Close Button - Left side when expanded */}
-      {!isCollapsed && (
-        <button
-          onClick={onToggleCollapse}
-          className="absolute top-4 left-4 z-50 w-10 h-10 flex items-center justify-center rounded-lg shadow-lg border bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:shadow-md transition-all duration-200"
-          title="Close Chat Panel"
-        >
-          <PanelRightClose className="w-4 h-4" />
-        </button>
-      )}
+      {/* Agent Icon - Always visible at top-right, never moves, with hover overlay for both states */}
+      <div className="absolute top-4 right-4 z-50">
+        <div className="relative group" data-testid="agent-icon">
+          <div className="w-10 h-10 flex items-center justify-center rounded-lg shadow-lg border bg-white text-gray-700 border-gray-200">
+            <Cpu className="w-4 h-4" />
+          </div>
+          {/* Hover overlay - show expand icon when collapsed, collapse icon when expanded */}
+          <button 
+            onClick={onToggleCollapse}
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-lg"
+            title={isCollapsed ? "Open Chat Panel" : "Close Chat Panel"}
+          >
+            {isCollapsed ? (
+              <PanelRightOpen className="w-4 h-4" />
+            ) : (
+              <PanelRightClose className="w-4 h-4" />
+            )}
+          </button>
+        </div>
+      </div>
 
       {/* Main Icon Layout - Always Visible */}
-      <div className="flex flex-col h-full pt-[4.75rem]">
-        {/* Icon Bar - Fixed Positions */}
-        <div className="flex flex-col gap-3 px-4">
-          {/* Chat Icon - Extended Button (collapsed) or Header (expanded) */}
-          {isCollapsed ? (
-            <button
-              onClick={onToggleCollapse}
-              className="w-10 h-10 flex items-center justify-center rounded-lg shadow-lg border bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:shadow-md transition-all duration-200"
-              title="Open Chat Panel"
-            >
-              <MessageSquare className="w-4 h-4" />
-            </button>
-          ) : (
-            <div className="flex items-center justify-center h-10">
-              <MessageSquare className="w-4 h-4" />
-            </div>
-          )}
-        </div>
-
+      <div className="flex flex-col h-full pt-16">
         {/* Divider */}
         {!isCollapsed && (
           <div className="mx-4 my-4 border-t border-gray-300"></div>
@@ -329,10 +323,10 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
         {!isCollapsed && (
           <>
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-4">
+            <div className="flex-1 overflow-y-auto px-4 mt-4">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full">
-                  <MessageSquare className="w-8 h-8 text-gray-300" />
+                  <Cpu className="w-8 h-8 text-gray-300" />
                 </div>
               ) : (
                 <div className="space-y-4 pb-4">
@@ -352,13 +346,19 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                       
                       <div
                         className={cn(
-                          "max-w-[75%] rounded-lg px-3 py-2 shadow-sm",
+                          "max-w-3/4 rounded-lg px-3 py-2 shadow-sm",
                           message.role === 'user'
                             ? "bg-gray-900 text-white"
                             : "bg-white border border-gray-200 text-gray-900"
                         )}
                       >
-                        <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>
+                        {message.role === 'assistant' ? (
+                          <div className="text-sm prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal prose-li:marker:text-gray-500">
+                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                          </div>
+                        ) : (
+                          <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>
+                        )}
                         {message.isStreaming && (
                           <div className="flex items-center gap-1 mt-1">
                             <div className="w-1 h-1 bg-gray-500 rounded-full animate-bounce"></div>
@@ -402,13 +402,14 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
             </div>
 
             {/* Input Area */}
-            <div className="px-4 pb-4 border-t border-gray-300 pt-4">
-              <form onSubmit={handleSendMessage} className="flex items-center gap-3 bg-white rounded-lg border border-gray-300 shadow-sm p-3 hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+            <div className="mx-4 mt-4 border-t border-gray-300 pt-4 pb-4">
+              <form onSubmit={handleSendMessage} className="flex items-center gap-3 bg-white rounded-lg border border-gray-300 shadow-sm p-3 hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-gray-400 focus-within:border-gray-400">
                 <Input
                   ref={inputRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  data-testid="chat-input"
                   placeholder="Ask me to create an architecture..."
                   disabled={isLoading}
                   className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-sm placeholder:text-gray-400"
@@ -421,6 +422,7 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-gray-900 hover:bg-gray-800 text-white shadow-sm hover:shadow-md'
                   }`}
+                  data-testid="send-button"
                   title={isLoading ? "Sending..." : "Send message"}
                 >
                   {isLoading ? (

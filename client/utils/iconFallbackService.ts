@@ -115,9 +115,7 @@ class IconFallbackService {
         // Prefixed names: search only the specified provider
         searchProviders = [provider];
       } else {
-        // Non-prefixed names: first search general icons using embeddings, then cloud providers
-        // Searching general icons first
-        
+        // Non-prefixed names: first search general icons, then cloud providers
         // Search through all embeddings to find general icons (no provider prefix)
         for (const [iconName, iconEmbedding] of Object.entries(this.precomputedData.embeddings)) {
           // General icons don't have provider prefixes (aws_, gcp_, azure_)
@@ -129,8 +127,7 @@ class IconFallbackService {
           }
         }
         
-        // Always search cloud providers to find the absolute best match across all icons
-        // Found general icon match, also searching cloud providers
+        // Also search cloud providers to find the absolute best match across all icons
         searchProviders = ['gcp', 'aws', 'azure'];
       }
 

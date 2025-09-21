@@ -156,11 +156,6 @@ const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable
       // No icon specified - show letter fallback immediately, then try AI search asynchronously
       setIconError(true);
       
-      // Skip icon fallback for root node
-      if (id === 'root') {
-        return;
-      }
-      
       // Immediate fallback attempt (removed delay)  
       if (!fallbackAttempted) {
         setFallbackAttempted(true);
@@ -419,6 +414,17 @@ const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable
                 setIconError(true);
               }}
             />
+          )}
+          {/* Show clear failure indicator when icon fails */}
+          {(data.icon || data.groupIcon) && (!finalIconSrc || iconError) && (
+            <span style={{ 
+              color: '#ff0000', 
+              fontSize: '10px', 
+              fontWeight: 'bold',
+              marginRight: '6px'
+            }}>
+              ❌
+            </span>
           )}
           <span style={{ 
             overflow: 'hidden', 

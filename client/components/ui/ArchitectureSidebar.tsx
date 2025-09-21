@@ -122,22 +122,12 @@ const ArchitectureSidebar: React.FC<ArchitectureSidebarProps> = ({
   return (
     <div className={`
       relative h-full bg-gray-50 text-gray-700 border-r border-gray-200 transition-all duration-300 ease-in-out
-      ${isCollapsed ? 'w-16' : 'w-80'}
+      ${isCollapsed ? 'w-18' : 'w-80'}
     `}>
-      {/* Close Button - Right side when expanded */}
-      {!isCollapsed && (
-        <button
-          onClick={onToggleCollapse}
-          className="absolute top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-lg shadow-lg border bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:shadow-md transition-all duration-200"
-          title="Close Sidebar"
-        >
-          <PanelRightOpen className="w-4 h-4" />
-        </button>
-      )}
-
+      {/* Close Button removed - now handled by hover overlay on Atelier icon */}
 
       {/* Main Icon Layout - Always Visible */}
-      <div className="flex flex-col h-full pt-[4.75rem]"> {/* pt-[4.75rem] for consistent spacing with Atelier */}
+      <div className="flex flex-col h-full pt-20"> {/* pt-20 for consistent spacing with Atelier */}
         {/* Icon Bar - Fixed Positions */}
         <div className="flex flex-col gap-3 px-4">
           {/* Search - Extended Button/Input (only show when user is signed in) */}
@@ -193,7 +183,7 @@ const ArchitectureSidebar: React.FC<ArchitectureSidebarProps> = ({
                   <div
                     key={architecture.id}
                     className={`
-                      w-full text-left p-2 rounded-lg transition-colors group relative
+                      w-full text-left p-2 pl-4 rounded-lg transition-colors group relative
                       ${selectedArchitectureId === architecture.id 
                         ? 'bg-gray-100 border border-gray-300' 
                         : 'hover:bg-gray-50 border border-transparent'

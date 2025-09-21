@@ -38,7 +38,7 @@ import ProcessingStatusIcon from "../ProcessingStatusIcon"
 import { auth } from "../../lib/firebase"
 import { onAuthStateChanged, User } from "firebase/auth"
 import { Timestamp } from "firebase/firestore"
-import { Settings, PanelRightOpen, PanelRightClose, Save, Edit, Share, Download, X, Menu, Share2, Check } from "lucide-react"
+import { Settings, PanelRightOpen, PanelRightClose, Save, Edit, Share, Download, X, Menu, Share2, Check, Search } from "lucide-react"
 import { DEFAULT_ARCHITECTURE as EXTERNAL_DEFAULT_ARCHITECTURE } from "../../data/defaultArchitecture"
 // Removed mock architectures import - only using real user architectures now
 import SaveAuth from "../auth/SaveAuth"
@@ -49,6 +49,7 @@ import { architectureSearchService } from "../../utils/architectureSearchService
 import ArchitectureSidebar from "./ArchitectureSidebar"
 import { onElkGraph, dispatchElkGraph } from "../../events/graphEvents"
 import { assertRawGraph } from "../../events/graphSchema"
+import { iconFallbackService } from "../../utils/iconFallbackService"
 import { useViewMode } from "../../contexts/ViewModeContext"
 // import toast, { Toaster } from 'react-hot-toast' // Removed toaster
 
@@ -57,57 +58,9 @@ const ChatBox = Chatbox as React.ComponentType<any>
 
 // Helper function to add appropriate icons to nodes based on their IDs
 const addIconsToArchitecture = (architecture: any) => {
-  const iconMap: Record<string, string> = {
-    // External clients
-    "external_client": "browser_client",
-    
-
-    
-    // GCP API Gateway services
-    "cloud_lb": "gcp_cloud_load_balancing",
-    "cloud_armor": "gcp_cloud_armor",
-    "certificate_manager": "gcp_security", // Using security icon as fallback
-    "cloud_cdn": "gcp_cloud_cdn",
-    
-    // Gateway Management
-    "cloud_dns": "gcp_cloud_dns",
-    "gke_gateway_controller": "gcp_google_kubernetes_engine",
-    "k8s_gateway_api": "gcp_google_kubernetes_engine",
-    
-    // App Services
-    "cloud_run": "gcp_cloud_run",
-    "web_client": "browser_client",
-    
-    // Data services
-    "cloud_sql": "gcp_cloud_sql",
-    "cloud_storage": "gcp_cloud_storage",
-    "memorystore": "gcp_memorystore",
-    
-    // AI/ML services
-    "vertex_ai": "gcp_vertexai",
-    "document_ai": "gcp_document_ai",
-    "translation_api": "gcp_cloud_translation_api",
-    
-    // Monitoring
-    "cloud_logging": "gcp_cloud_logging",
-    "cloud_monitoring": "gcp_cloud_monitoring",
-    "error_reporting": "gcp_error_reporting",
-    
-    // Security
-    "secret_manager": "gcp_secret_manager",
-    "identity_platform": "gcp_identity_platform",
-    "cloud_kms": "gcp_key_management_service"
-  };
-  
+  // NO HARDCODED MAPPINGS - let everything fail and use semantic fallback
   const addIconsToNode = (node: any) => {
-    if (node.id && iconMap[node.id]) {
-      node.data = node.data || {};
-      node.data.icon = iconMap[node.id];
-
-    } else if (node.id) {
-
-    }
-    
+    // Don't assign any icons here - let the components handle fallback
     if (node.children) {
       node.children.forEach(addIconsToNode);
     }
@@ -142,6 +95,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   events = [],
   apiEndpoint,
   isPublicMode = false,
+  rightPanelCollapsed = false,
 }) => {
   // State for DevPanel visibility
   const [showDev, setShowDev] = useState(false);
@@ -3736,29 +3690,37 @@ Use this ${matchedArch.group} reference pattern as inspiration for your architec
       )}
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'ml-0' : 'ml-0'}`}>
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* ProcessingStatusIcon with sidebar toggle - Always visible */}
       <div className="absolute top-4 left-4 z-[101]">
-            {/* Atelier icon with hover overlay */}
+            {/* Atelier icon with hover overlay for both states */}
             <div className="relative group">
-              <ProcessingStatusIcon onClick={!isPublicMode && sidebarCollapsed && user ? handleToggleSidebar : undefined} />
-              {/* Hover overlay - show panel-right-close on hover when sidebar is CLOSED and user is signed in (not in public mode) */}
-              {!isPublicMode && sidebarCollapsed && user && (
+              {/* Base icon - disable button functionality to prevent interference */}
+              <div className="w-10 h-10 flex items-center justify-center rounded-lg shadow-lg border bg-white text-gray-700 border-gray-200 transition-all duration-200 p-0 overflow-hidden pointer-events-none">
+                {/* Just show the icon content without button wrapper */}
+                <Search className="w-4 h-4" />
+              </div>
+              {/* Hover overlay - show expand icon when collapsed, collapse icon when expanded */}
+              {!isPublicMode && user && (
                 <button 
                   onClick={handleToggleSidebar}
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-lg"
-                  title="Open Sidebar"
+                  title={sidebarCollapsed ? "Open Sidebar" : "Close Sidebar"}
                 >
-                  <PanelRightClose className="w-4 h-4 text-gray-700" />
+                  {sidebarCollapsed ? (
+                    <PanelRightClose className="w-4 h-4 text-gray-700" />
+                  ) : (
+                    <PanelRightOpen className="w-4 h-4 text-gray-700" />
+                  )}
                 </button>
               )}
-      </div>
-      </div>
+            </div>
+        </div>
 
 
 
       {/* Save/Edit and Settings buttons - top-right */}
-      <div className="absolute top-4 right-[436px] z-[100] flex gap-2">
+      <div className={`absolute top-4 z-[100] flex gap-2 transition-all duration-300 ${rightPanelCollapsed ? 'right-24' : 'right-[25rem]'}`}>
         {/* Share Button - Always visible for all users */}
         <button
           onClick={handleShareCurrent}

@@ -94,6 +94,38 @@ test.describe('Chat Agent to Diagram Agent Flow', () => {
       if (elementCount > 0) {
         console.log(`✅ Architecture generated successfully! Found ${elementCount} elements`);
         expect(elementCount).toBeGreaterThan(0);
+        
+        // CRITICAL: Validate that NO icons are missing
+        console.log('🔍 Validating all icons are properly displayed...');
+        
+        // Wait for all icons to load
+        await page.waitForTimeout(3000);
+        
+        // Check for missing icon indicators in the entire page
+        const missingIconIndicators = await page.locator('text="❌ MISSING ICON"').count();
+        const missingIconX = await page.locator('text="❌"').count();
+        
+        if (missingIconIndicators > 0 || missingIconX > 0) {
+          console.log(`❌ CRITICAL: Found ${missingIconIndicators + missingIconX} missing icon indicators!`);
+          
+          // Get console logs for debugging
+          const consoleLogs: string[] = [];
+          page.on('console', (msg) => {
+            if (msg.type() === 'log' && (msg.text().includes('❌') || msg.text().includes('icon'))) {
+              consoleLogs.push(msg.text());
+            }
+          });
+          
+          // Take a screenshot of the failure
+          await page.screenshot({ 
+            path: 'test-results/icon-validation-failure.png',
+            fullPage: true 
+          });
+          
+          throw new Error(`ICON VALIDATION FAILED: ${missingIconIndicators + missingIconX} icons are not displaying properly. Check test-results/icon-validation-failure.png`);
+        }
+        
+        console.log('✅ All icons are properly displayed - no missing icon indicators found');
       } else {
         console.log('ℹ️ No architecture elements found, but tool call was successful');
       }

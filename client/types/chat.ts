@@ -43,6 +43,7 @@ export interface InteractiveCanvasProps {
   events?: any[]; // Add events from the server
   apiEndpoint?: string; // API endpoint for backend calls
   isPublicMode?: boolean; // Enable public/embedded mode
+  rightPanelCollapsed?: boolean; // Right panel collapse state for button positioning
 }
 
 export interface ElkLabel {
