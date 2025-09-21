@@ -217,31 +217,8 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
           // Set the error state so it can be accessed by components
           setLayoutError(e.message || e.toString());
           
-          // Try to create a minimal fallback graph to prevent complete failure
-          try {
-            console.log("[ELK] Creating fallback graph...");
-            const fallbackGraph = {
-              id: "root",
-              children: [],
-              edges: []
-            };
-            
-            const fallbackLayouted = await elk.layout(fallbackGraph);
-            const { nodes: fallbackNodes, edges: fallbackEdges } = processLayoutedGraph(fallbackLayouted, {
-              width      : NON_ROOT_DEFAULT_OPTIONS.width,
-              height     : NON_ROOT_DEFAULT_OPTIONS.height,
-              groupWidth : NON_ROOT_DEFAULT_OPTIONS.width  * 3,
-              groupHeight: NON_ROOT_DEFAULT_OPTIONS.height * 3,
-              padding    : 10
-            });
-            
-            setNodes(fallbackNodes);
-            setEdges(fallbackEdges);
-            incLayoutVersion(v => v + 1);
-            console.log("[ELK] Fallback graph created successfully");
-          } catch (fallbackError) {
-            console.error("[ELK] Fallback graph creation also failed:", fallbackError);
-          }
+          // NO FALLBACK - Let it fail loudly so we can fix the actual issue
+          throw new Error(`ELK layout failed: ${e.message}. Fix the graph structure instead of using fallbacks.`);
         }
       }
     })();

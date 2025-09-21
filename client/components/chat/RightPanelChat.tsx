@@ -171,15 +171,20 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                 console.log('✅ Set global state for diagram generation')
                 
                 // Use the SAME PATH as regular architecture generation
-                // This ensures all ProcessingStatusIcon events are fired correctly
-                console.log('📞 Using unified architecture generation path via process_user_requirements...')
+                // Call handleChatSubmit directly since process_user_requirements is disabled
+                console.log('📞 Using unified architecture generation path via handleChatSubmit...')
                 try {
-                  // Import and call the same function that the regular flow uses
-                  const { process_user_requirements } = await import('../../components/graph/userRequirements')
-                  await process_user_requirements()
-                  console.log('✅ process_user_requirements completed successfully')
+                  const handleChatSubmit = (window as any).handleChatSubmit
+                  if (handleChatSubmit && typeof handleChatSubmit === 'function') {
+                    console.log('✅ Found handleChatSubmit function, calling it...')
+                    await handleChatSubmit(parsed.requirements)
+                    console.log('✅ handleChatSubmit completed successfully')
+                  } else {
+                    console.error('❌ handleChatSubmit function not found on window object')
+                    throw new Error('handleChatSubmit function not available')
+                  }
                 } catch (error) {
-                  console.error('❌ process_user_requirements failed:', error)
+                  console.error('❌ Architecture generation failed:', error)
                 } finally {
                   // Clear loading state after completion
                   setIsDiagramGenerating(false)
