@@ -277,7 +277,7 @@ const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable
   };
 
   return (
-    <div style={groupStyle}>
+    <div style={groupStyle} data-testid="react-flow-node">
       {/* Left handles */}
       {data.leftHandles && data.leftHandles.map((yPos: string, index: number) => (
         <React.Fragment key={`left-${index}`}>

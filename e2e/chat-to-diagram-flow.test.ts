@@ -1,134 +1,103 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Chat Agent to Diagram Agent Flow', () => {
-  test('Chat agent calls diagram agent via API and triggers diagram generation', async ({ page }) => {
-    console.log('🚀 Starting chat-to-diagram integration test...');
+  test('Complete end-to-end flow from chat agent to architecture generation', async ({ page }) => {
+    console.log('🚀 Starting complete chat-to-diagram integration test...');
     
     // Navigate to the application
     await page.goto('http://localhost:3000');
     await page.waitForLoadState('networkidle');
     console.log('✅ Page loaded successfully');
     
-    // Set up a listener for the global chatTextInput variable that gets set by the chat agent
-    await page.evaluate(() => {
-      (window as any).chatTriggered = false;
-      (window as any).originalChatTextInput = (window as any).chatTextInput;
+    // Expand the right panel if it's collapsed
+    const agentIcon = page.locator('[data-testid="agent-icon"]');
+    await agentIcon.click();
+    console.log('✅ Expanded chat panel');
+    
+    // Wait for panel to expand
+    await page.waitForTimeout(500);
+    
+    // Find the chat input and send button
+    const chatInput = page.locator('[data-testid="chat-input"]');
+    const sendButton = page.locator('[data-testid="send-button"]');
+    
+    // Verify elements are visible
+    await expect(chatInput).toBeVisible();
+    await expect(sendButton).toBeVisible();
+    console.log('✅ Chat input and send button found');
+    
+    // Send a message to create an architecture
+    const testMessage = 'Create a microservices architecture with API gateway, database, load balancer, and authentication service';
+    await chatInput.fill(testMessage);
+    console.log('✅ Filled chat input with test message');
+    
+    // Click send button
+    await sendButton.click();
+    console.log('✅ Clicked send button');
+    
+    // Wait for the chat agent to process and trigger diagram generation
+    console.log('⏳ Waiting for chat agent to process message...');
+    
+    // Wait for the diagram creation message to appear
+    await page.waitForSelector('text=Creating architecture diagram for:', { timeout: 30000 });
+    console.log('✅ Diagram creation message received');
+    
+    // Wait for architecture generation to complete
+    console.log('⏳ Waiting for architecture generation to complete...');
+    
+    // Wait for React Flow nodes to appear (this indicates the architecture was generated)
+    await page.waitForSelector('[data-testid="react-flow-node"]', { timeout: 60000 });
+    console.log('✅ Architecture nodes appeared');
+    
+    // Wait a bit more for all icons to load
+    await page.waitForTimeout(3000);
+    
+    // Count the generated nodes
+    const nodes = await page.locator('[data-testid="react-flow-node"]').count();
+    console.log(`✅ Found ${nodes} architecture nodes`);
+    
+    // Verify we have a reasonable number of nodes (at least 2 for a microservices architecture)
+    expect(nodes).toBeGreaterThanOrEqual(2);
+    
+    // CRITICAL: Validate that NO icons are missing
+    console.log('🔍 Validating all icons are properly displayed...');
+    
+    // Check for missing icon indicators in the entire page
+    const missingIconIndicators = await page.locator('text="❌ MISSING ICON"').count();
+    const missingIconX = await page.locator('text="❌"').count();
+    
+    if (missingIconIndicators > 0 || missingIconX > 0) {
+      console.log(`❌ CRITICAL: Found ${missingIconIndicators + missingIconX} missing icon indicators!`);
       
-      // Override the chatTextInput setter to detect when it's set
-      Object.defineProperty(window, 'chatTextInput', {
-        get: function() { return this._chatTextInput; },
-        set: function(value) {
-          console.log('🎯 chatTextInput set to:', value);
-          this._chatTextInput = value;
-          this.chatTriggered = true;
-        }
-      });
-    });
-    
-    // Make a direct API call to the chat agent (simulating what the UI would do)
-    console.log('🔧 Making API call to chat agent...');
-    const response = await page.evaluate(async () => {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{
-            role: 'user',
-            content: 'Create a serverless web application architecture with AWS Lambda, API Gateway, and DynamoDB'
-          }]
-        })
-      });
-      
-      const reader = response.body?.getReader();
-      let result = '';
-      let toolCallDetected = false;
-      
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          
-          const chunk = new TextDecoder().decode(value);
-          result += chunk;
-          
-          // Check for tool call messages
-          if (chunk.includes('trigger_diagram')) {
-            toolCallDetected = true;
-            console.log('🎯 Tool call detected in API response!');
-          }
-        }
-      }
-      
-      return { result, toolCallDetected };
-    });
-    
-    console.log('✅ API call completed');
-    console.log('🔍 Tool call detected:', response.toolCallDetected);
-    
-    // Verify the tool call was detected
-    expect(response.toolCallDetected).toBe(true);
-    console.log('✅ Chat agent successfully called the diagram tool!');
-    
-    // Wait a moment and check if the chatTextInput was set (indicating diagram generation was triggered)
-    await page.waitForTimeout(2000);
-    
-    const chatTriggered = await page.evaluate(() => (window as any).chatTriggered);
-    console.log('🔍 Chat trigger detected:', chatTriggered);
-    
-    // If the chat was triggered, we can run the existing architecture generation test
-    if (chatTriggered) {
-      console.log('🎯 Diagram generation was triggered! Running architecture generation...');
-      
-      // Trigger the process_user_requirements function
-      await page.evaluate(async () => {
-        const { process_user_requirements } = await import('./components/graph/userRequirements');
-        await process_user_requirements();
+      // Take a screenshot of the failure
+      await page.screenshot({ 
+        path: 'test-results/icon-validation-failure.png',
+        fullPage: true 
       });
       
-      // Wait for architecture elements to appear
-      await page.waitForTimeout(5000);
-      
-      const architectureElements = page.locator('svg g[data-testid*="node"], svg g[class*="react-flow__node"]');
-      const elementCount = await architectureElements.count();
-      
-      if (elementCount > 0) {
-        console.log(`✅ Architecture generated successfully! Found ${elementCount} elements`);
-        expect(elementCount).toBeGreaterThan(0);
-        
-        // CRITICAL: Validate that NO icons are missing
-        console.log('🔍 Validating all icons are properly displayed...');
-        
-        // Wait for all icons to load
-        await page.waitForTimeout(3000);
-        
-        // Check for missing icon indicators in the entire page
-        const missingIconIndicators = await page.locator('text="❌ MISSING ICON"').count();
-        const missingIconX = await page.locator('text="❌"').count();
-        
-        if (missingIconIndicators > 0 || missingIconX > 0) {
-          console.log(`❌ CRITICAL: Found ${missingIconIndicators + missingIconX} missing icon indicators!`);
-          
-          // Get console logs for debugging
-          const consoleLogs: string[] = [];
-          page.on('console', (msg) => {
-            if (msg.type() === 'log' && (msg.text().includes('❌') || msg.text().includes('icon'))) {
-              consoleLogs.push(msg.text());
-            }
-          });
-          
-          // Take a screenshot of the failure
-          await page.screenshot({ 
-            path: 'test-results/icon-validation-failure.png',
-            fullPage: true 
-          });
-          
-          throw new Error(`ICON VALIDATION FAILED: ${missingIconIndicators + missingIconX} icons are not displaying properly. Check test-results/icon-validation-failure.png`);
-        }
-        
-        console.log('✅ All icons are properly displayed - no missing icon indicators found');
-      } else {
-        console.log('ℹ️ No architecture elements found, but tool call was successful');
-      }
+      throw new Error(`ICON VALIDATION FAILED: ${missingIconIndicators + missingIconX} icons are not displaying properly. Check test-results/icon-validation-failure.png`);
+    }
+    
+    console.log('✅ All icons are properly displayed - no missing icon indicators found');
+    
+    // Verify the architecture has meaningful content
+    const nodeLabels = await page.locator('[data-testid="react-flow-node"]').allTextContents();
+    console.log('📋 Generated node labels:', nodeLabels);
+    
+    // Check that we have some expected microservices components
+    const hasApiGateway = nodeLabels.some(label => 
+      label.toLowerCase().includes('api') || 
+      label.toLowerCase().includes('gateway')
+    );
+    const hasDatabase = nodeLabels.some(label => 
+      label.toLowerCase().includes('database') || 
+      label.toLowerCase().includes('db')
+    );
+    
+    if (hasApiGateway || hasDatabase) {
+      console.log('✅ Architecture contains expected microservices components');
+    } else {
+      console.log('⚠️ Architecture may not contain expected components, but nodes were generated');
     }
     
     // Take a screenshot for verification
@@ -138,6 +107,6 @@ test.describe('Chat Agent to Diagram Agent Flow', () => {
     });
     console.log('✅ Screenshot saved');
     
-    console.log('🎉 Chat-to-diagram integration test completed successfully!');
+    console.log('🎉 Complete chat-to-diagram integration test completed successfully!');
   });
 });

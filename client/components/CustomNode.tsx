@@ -244,7 +244,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
   };
 
   return (
-    <div style={nodeStyle}>
+    <div style={nodeStyle} data-testid="react-flow-node">
       {/* Left handles */}
       {leftHandles.map((yPos: string, index: number) => (
         <React.Fragment key={`left-${index}`}>
