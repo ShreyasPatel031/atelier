@@ -2372,6 +2372,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
   // Chat submission handler - PROPER OPENAI RESPONSES API CHAINING
   const handleChatSubmit = useCallback(async (message: string) => {
+    console.log('🚀 handleChatSubmit called with message:', message);
     
     // Fire processing start events for status indicators
     console.log('🔄 Firing userRequirementsStart event for processing indicators');
@@ -2455,6 +2456,12 @@ Use this ${matchedArch.group} reference pattern as inspiration for your architec
       
       // Make initial conversation call to get response_id
       console.log(`📞 Making initial agent call for conversation start`);
+      console.log('📤 Request payload:', { 
+        message: message.trim(), 
+        conversationHistory,
+        currentGraph: currentGraph,
+        referenceArchitecture: referenceArchitecture
+      });
       
       const initialResponse = await fetch('/api/simple-agent', {
         method: 'POST',

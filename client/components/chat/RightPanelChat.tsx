@@ -170,7 +170,19 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                 const handleChatSubmit = (window as any).handleChatSubmit
                 if (handleChatSubmit && typeof handleChatSubmit === 'function') {
                   console.log('✅ Found handleChatSubmit function, calling it...')
-                  handleChatSubmit(parsed.requirements)
+                  try {
+                    await handleChatSubmit(parsed.requirements)
+                    console.log('✅ handleChatSubmit completed successfully')
+                  } catch (error) {
+                    console.error('❌ handleChatSubmit failed:', error)
+                    // Fallback to the old method
+                    import('../../components/graph/userRequirements').then(({ process_user_requirements }) => {
+                      console.log('🔄 Falling back to process_user_requirements...')
+                      process_user_requirements()
+                    }).catch(fallbackError => {
+                      console.error('❌ Failed to import process_user_requirements:', fallbackError)
+                    })
+                  }
                 } else {
                   console.error('❌ handleChatSubmit function not found on window object')
                   // Fallback to the old method
