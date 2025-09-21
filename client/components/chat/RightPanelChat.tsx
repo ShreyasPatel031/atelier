@@ -164,59 +164,26 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                 setIsDiagramGenerating(true)
                 console.log('🔄 Set diagram generation loading state to true')
                 
-                // Fire processing start events for status indicators
-                console.log('🔄 Firing userRequirementsStart event for processing indicators')
-                window.dispatchEvent(new CustomEvent('userRequirementsStart'))
-                
                 // Set global state (needed for naming and other functions)
                 ;(window as any).originalChatTextInput = parsed.requirements
                 ;(window as any).chatTextInput = parsed.requirements
                 ;(window as any).selectedImages = []
                 console.log('✅ Set global state for diagram generation')
                 
-                // Call the actual working diagram generation function
-                console.log('📞 Calling handleChatSubmit from InteractiveCanvas...')
-                const handleChatSubmit = (window as any).handleChatSubmit
-                if (handleChatSubmit && typeof handleChatSubmit === 'function') {
-                  console.log('✅ Found handleChatSubmit function, calling it...')
-                  try {
-                    await handleChatSubmit(parsed.requirements)
-                    console.log('✅ handleChatSubmit completed successfully')
-                  } catch (error) {
-                    console.error('❌ handleChatSubmit failed:', error)
-                    // Fallback to the old method
-                    import('../../components/graph/userRequirements').then(({ process_user_requirements }) => {
-                      console.log('🔄 Falling back to process_user_requirements...')
-                      process_user_requirements()
-                    }).catch(fallbackError => {
-                      console.error('❌ Failed to import process_user_requirements:', fallbackError)
-                    })
-                  } finally {
-                    // Clear loading state after completion
-                    setIsDiagramGenerating(false)
-                    console.log('✅ Set diagram generation loading state to false')
-                    
-                    // Fire completion event for status indicators
-                    console.log('🏁 Firing allProcessingComplete event for processing indicators')
-                    window.dispatchEvent(new CustomEvent('allProcessingComplete'))
-                  }
-                } else {
-                  console.error('❌ handleChatSubmit function not found on window object')
-                  // Fallback to the old method
-                  import('../../components/graph/userRequirements').then(({ process_user_requirements }) => {
-                    console.log('🔄 Falling back to process_user_requirements...')
-                    process_user_requirements()
-                  }).catch(error => {
-                    console.error('❌ Failed to import process_user_requirements:', error)
-                  }).finally(() => {
-                    // Clear loading state after completion
-                    setIsDiagramGenerating(false)
-                    console.log('✅ Set diagram generation loading state to false')
-                    
-                    // Fire completion event for status indicators
-                    console.log('🏁 Firing allProcessingComplete event for processing indicators')
-                    window.dispatchEvent(new CustomEvent('allProcessingComplete'))
-                  })
+                // Use the SAME PATH as regular architecture generation
+                // This ensures all ProcessingStatusIcon events are fired correctly
+                console.log('📞 Using unified architecture generation path via process_user_requirements...')
+                try {
+                  // Import and call the same function that the regular flow uses
+                  const { process_user_requirements } = await import('../../components/graph/userRequirements')
+                  await process_user_requirements()
+                  console.log('✅ process_user_requirements completed successfully')
+                } catch (error) {
+                  console.error('❌ process_user_requirements failed:', error)
+                } finally {
+                  // Clear loading state after completion
+                  setIsDiagramGenerating(false)
+                  console.log('✅ Set diagram generation loading state to false')
                 }
                 continue // Continue processing other messages in the same chunk
               }
