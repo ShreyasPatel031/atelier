@@ -1,0 +1,55 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - button "Sign in" [ref=e10] [cursor=pointer]:
+      - img [ref=e11] [cursor=pointer]
+    - generic [ref=e14]:
+      - generic [ref=e16]:
+        - generic:
+          - img
+      - generic [ref=e17]:
+        - button "Share" [disabled] [ref=e18]:
+          - img [ref=e19]
+          - generic [ref=e22]: Share
+        - button "Export" [disabled] [ref=e23]:
+          - img [ref=e24]
+          - generic [ref=e27]: Export
+        - button "Save" [disabled] [ref=e28]:
+          - img [ref=e29]
+          - generic [ref=e33]: Save
+        - button "Sign in" [ref=e35] [cursor=pointer]:
+          - img [ref=e36] [cursor=pointer]
+      - generic [ref=e41]:
+        - generic [ref=e43]:
+          - generic:
+            - img
+            - button [ref=e44] [cursor=pointer]
+        - img [ref=e48]
+        - generic [ref=e50]:
+          - button "zoom in" [disabled]:
+            - img
+          - button "zoom out" [ref=e51] [cursor=pointer]:
+            - img [ref=e52] [cursor=pointer]
+          - button "fit view" [ref=e54] [cursor=pointer]:
+            - img [ref=e55] [cursor=pointer]
+          - button "toggle interactivity" [ref=e57] [cursor=pointer]:
+            - img [ref=e58] [cursor=pointer]
+        - link "React Flow attribution" [ref=e61] [cursor=pointer]:
+          - /url: https://reactflow.dev
+          - text: React Flow
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - button "GCP microservices with Kubernetes" [ref=e66] [cursor=pointer]
+          - button "AWS serverless web application" [ref=e67] [cursor=pointer]
+          - button "Multi-cloud data pipeline" [ref=e68] [cursor=pointer]
+        - generic [ref=e70]:
+          - textbox "Describe your architecture requirements" [ref=e71]
+          - button [ref=e72] [cursor=pointer]:
+            - img [ref=e73] [cursor=pointer]
+  - generic [ref=e78]:
+    - img [ref=e80]
+    - button "Open Chat Panel" [active] [ref=e83] [cursor=pointer]:
+      - img [ref=e84] [cursor=pointer]
+```

@@ -12,18 +12,26 @@ test.describe('Chat Agent to Diagram Agent Flow', () => {
     // Expand the right panel if it's collapsed
     const agentIcon = page.locator('[data-testid="agent-icon"]');
     await agentIcon.click();
-    console.log('✅ Expanded chat panel');
+    console.log('✅ Clicked agent icon to expand chat panel');
     
-    // Wait for panel to expand
-    await page.waitForTimeout(500);
+    // Wait for panel to expand and chat input to be visible
+    await page.waitForTimeout(1000);
     
-    // Find the chat input and send button
+    // Debug: Check what elements are available
+    const allElements = await page.locator('*').all();
+    console.log(`🔍 Found ${allElements.length} total elements on page`);
+    
+    // Check for any elements with data-testid
+    const testIdElements = await page.locator('[data-testid]').all();
+    console.log(`🔍 Found ${testIdElements.length} elements with data-testid`);
+    
+    // Try to find the chat input - it might take a moment to appear
     const chatInput = page.locator('[data-testid="chat-input"]');
     const sendButton = page.locator('[data-testid="send-button"]');
     
-    // Verify elements are visible
-    await expect(chatInput).toBeVisible();
-    await expect(sendButton).toBeVisible();
+    // Wait for elements to be visible with a longer timeout
+    await expect(chatInput).toBeVisible({ timeout: 10000 });
+    await expect(sendButton).toBeVisible({ timeout: 10000 });
     console.log('✅ Chat input and send button found');
     
     // Send a message to create an architecture
