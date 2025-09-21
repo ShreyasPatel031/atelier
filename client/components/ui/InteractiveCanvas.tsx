@@ -3700,12 +3700,11 @@ Use this ${matchedArch.group} reference pattern as inspiration for your architec
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* ProcessingStatusIcon with sidebar toggle - Always visible */}
       <div className="absolute top-4 left-4 z-[101]">
-            {/* Atelier icon with hover overlay for both states */}
+            {/* ProcessingStatusIcon with hover overlay for both states */}
             <div className="relative group">
-              {/* Base icon - disable button functionality to prevent interference */}
-              <div className="w-10 h-10 flex items-center justify-center rounded-lg shadow-lg border bg-white text-gray-700 border-gray-200 transition-all duration-200 p-0 overflow-hidden pointer-events-none">
-                {/* Just show the icon content without button wrapper */}
-                <Search className="w-4 h-4" />
+              {/* Base icon - ProcessingStatusIcon component */}
+              <div className="pointer-events-none">
+                <ProcessingStatusIcon />
               </div>
               {/* Hover overlay - show expand icon when collapsed, collapse icon when expanded */}
               {!isPublicMode && user && (
