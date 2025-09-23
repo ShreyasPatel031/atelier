@@ -14,6 +14,7 @@ import ReactFlow, {
 } from "reactflow"
 import "reactflow/dist/style.css"
 import { cn } from "../../lib/utils"
+import { markEmbedToCanvasTransition } from "../../utils/chatPersistence"
 
 // Import types from separate type definition files
 import { InteractiveCanvasProps } from "../../types/chat"
@@ -97,6 +98,9 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   isPublicMode = false,
   rightPanelCollapsed = false,
 }) => {
+  // Get ViewMode configuration
+  const { config: viewModeConfig } = useViewMode();
+  
   // State for DevPanel visibility
   const [showDev, setShowDev] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
@@ -2382,6 +2386,11 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     try {
       let conversationHistory: any[] = [];
       let currentGraph = JSON.parse(JSON.stringify(rawGraph));
+      
+      // Update global state for chat agent
+      (window as any).currentGraph = currentGraph;
+      console.log('📊 Updated global currentGraph for chat agent:', currentGraph ? `${currentGraph.children?.length || 0} nodes` : 'none');
+      
       let turnNumber = 1;
       let referenceArchitecture = "";
       let errorCount = 0;
@@ -2392,15 +2401,17 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       
       // 🏗️ Search for matching reference architecture to guide the agent
       try {
+        console.log('🔍 Starting architecture search...');
         const searchInput = message.toLowerCase().trim();
         const availableArchs = architectureSearchService.getAvailableArchitectures();
         
         if (availableArchs.length === 0) {
-          console.warn('⚠️ No architectures loaded in service yet, proceeding without reference');
-          addFunctionCallingMessage(`⚠️ Architecture database not ready, proceeding without reference`);
-        } else {
-          console.log(`🔍 Searching for reference architecture: "${searchInput}"`);
-          const matchedArch = await architectureSearchService.findMatchingArchitecture(searchInput);
+          throw new Error('❌ FATAL: No architectures loaded in service! Pre-computed embeddings failed to load.');
+        }
+        
+        console.log(`🔍 Searching for reference architecture: "${searchInput}"`);
+        addFunctionCallingMessage(`🔍 Searching architecture database...`);
+        const matchedArch = await architectureSearchService.findMatchingArchitecture(searchInput);
           
           if (matchedArch) {
             // Parse the architecture JSON to extract useful patterns for the agent
@@ -2431,10 +2442,8 @@ This reference provides proven patterns for ${matchedArch.group} applications.
 Adapt these patterns to your specific requirements while maintaining the overall structure.`;
               
             } catch (error) {
-              console.warn('⚠️ Could not parse reference architecture:', error);
-              architectureGuidance = `\n\nREFERENCE ARCHITECTURE: ${matchedArch.subgroup} (${matchedArch.cloud.toUpperCase()})
-SOURCE: ${matchedArch.source}
-Use this ${matchedArch.group} reference pattern as inspiration for your architecture.`;
+              console.error('❌ FATAL: Could not parse reference architecture:', error);
+              throw new Error(`Failed to parse reference architecture: ${error.message}`);
             }
             
             referenceArchitecture = architectureGuidance;
@@ -2448,10 +2457,10 @@ Use this ${matchedArch.group} reference pattern as inspiration for your architec
             console.log('❌ No suitable architecture match found');
             addFunctionCallingMessage(`⚠️ No matching reference architecture found`);
           }
-        }
       } catch (error) {
-        console.warn("⚠️ Architecture search failed:", error);
-        addFunctionCallingMessage(`⚠️ Architecture search failed, proceeding without reference`);
+        console.error("❌ FATAL: Architecture search failed:", error);
+        addFunctionCallingMessage(`❌ FATAL ERROR: ${error.message}`);
+        throw error; // Re-throw to fail loudly
       }
       
       // Make initial conversation call to get response_id
@@ -2535,6 +2544,10 @@ Use this ${matchedArch.group} reference pattern as inspiration for your architec
                 break;
               case 'batch_update':
                   currentGraph = batchUpdate(args.operations, currentGraph);
+                  
+                  // Update global state for chat agent after graph modifications
+                  (window as any).currentGraph = currentGraph;
+                  
                   executionResult = `Successfully executed batch update: ${args.operations.length} operations`;
                   updateStreamingMessage(messageId, `✅ Batch update: ${args.operations.length} operations`, true, name);
                 break;
@@ -3699,34 +3712,38 @@ Use this ${matchedArch.group} reference pattern as inspiration for your architec
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* ProcessingStatusIcon with sidebar toggle - Always visible */}
-      <div className="absolute top-4 left-4 z-[101]">
-            {/* ProcessingStatusIcon with hover overlay for both states */}
-            <div className="relative group">
-              {/* Base icon - ProcessingStatusIcon component */}
-              <div className="pointer-events-none">
-                <ProcessingStatusIcon />
-              </div>
-              {/* Hover overlay - show expand icon when collapsed, collapse icon when expanded */}
-              {!isPublicMode && user && (
-                <button 
-                  onClick={handleToggleSidebar}
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-lg"
-                  title={sidebarCollapsed ? "Open Sidebar" : "Close Sidebar"}
-                >
-                  {sidebarCollapsed ? (
-                    <PanelRightClose className="w-4 h-4 text-gray-700" />
-                  ) : (
-                    <PanelRightOpen className="w-4 h-4 text-gray-700" />
-                  )}
-                </button>
-              )}
+        <div className="absolute top-4 left-4 z-[101]">
+          {/* ProcessingStatusIcon with hover overlay for both states */}
+          <div className="relative group">
+            {/* Base icon - ProcessingStatusIcon component */}
+            <div className="pointer-events-none">
+              <ProcessingStatusIcon />
             </div>
+            {/* Hover overlay - show expand icon when collapsed, collapse icon when expanded */}
+            {!isPublicMode && user && (
+              <button 
+                onClick={handleToggleSidebar}
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-lg"
+                title={sidebarCollapsed ? "Open Sidebar" : "Close Sidebar"}
+              >
+                {sidebarCollapsed ? (
+                  <PanelRightClose className="w-4 h-4 text-gray-700" />
+                ) : (
+                  <PanelRightOpen className="w-4 h-4 text-gray-700" />
+                )}
+              </button>
+            )}
+          </div>
         </div>
 
 
 
-      {/* Save/Edit and Settings buttons - top-right */}
-      <div className={`absolute top-4 z-[100] flex gap-2 transition-all duration-300 ${rightPanelCollapsed ? 'right-24' : 'right-[25rem]'}`}>
+      {/* Save/Edit and Settings buttons - positioned relative to right panel */}
+      <div className={`absolute top-4 z-[100] flex gap-2 transition-all duration-300 ${
+        viewModeConfig.showChatPanel 
+          ? (rightPanelCollapsed ? 'right-20' : 'right-[25rem]') 
+          : 'right-4'
+      }`}>
         {/* Share Button - Always visible for all users */}
         <button
           onClick={handleShareCurrent}
@@ -3798,6 +3815,9 @@ Use this ${matchedArch.group} reference pattern as inspiration for your architec
           <button
             onClick={async () => {
               try {
+                // Mark that user is transitioning from embed to canvas view
+                markEmbedToCanvasTransition();
+                
                 // Open in new tab for editing (from embedded contexts)
             const urlParams = new URLSearchParams(window.location.search);
             const hasArchitectureId = urlParams.has('arch');
@@ -3966,32 +3986,34 @@ Use this ${matchedArch.group} reference pattern as inspiration for your architec
         
       </div>
       
-      {/* ChatBox at the bottom */}
-      <div className="flex-none min-h-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg z-10">
-        <Chatbox 
-          onSubmit={handleChatSubmit}
-          onProcessStart={() => {
-            console.log('🔄 Starting operation for architecture:', selectedArchitectureId);
-            console.log('🔒 LOCKING agent to architecture:', selectedArchitectureId);
-            
-            // Lock agent to current architecture for the entire session
-            setAgentLockedArchitectureId(selectedArchitectureId);
-            setArchitectureOperationState(selectedArchitectureId, true);
-            
-            // Set global architecture ID to locked architecture
-            (window as any).currentArchitectureId = selectedArchitectureId;
-          }}
-          isDisabled={agentBusy}
-          isSessionActive={isSessionActive}
-          isConnecting={isConnecting}
-          isAgentReady={isAgentReady}
-          onStartSession={startSession}
-          onStopSession={stopSession}
-          onTriggerReasoning={() => {
-            console.log("Reasoning trigger - now handled directly by process_user_requirements");
-          }}
-        />
-      </div>
+      {/* ChatBox at the bottom - Conditionally shown based on ViewMode config */}
+      {viewModeConfig.showChatbox && (
+        <div className="flex-none min-h-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg z-10">
+          <Chatbox 
+            onSubmit={handleChatSubmit}
+            onProcessStart={() => {
+              console.log('🔄 Starting operation for architecture:', selectedArchitectureId);
+              console.log('🔒 LOCKING agent to architecture:', selectedArchitectureId);
+              
+              // Lock agent to current architecture for the entire session
+              setAgentLockedArchitectureId(selectedArchitectureId);
+              setArchitectureOperationState(selectedArchitectureId, true);
+              
+              // Set global architecture ID to locked architecture
+              (window as any).currentArchitectureId = selectedArchitectureId;
+            }}
+            isDisabled={agentBusy}
+            isSessionActive={isSessionActive}
+            isConnecting={isConnecting}
+            isAgentReady={isAgentReady}
+            onStartSession={startSession}
+            onStopSession={stopSession}
+            onTriggerReasoning={() => {
+              console.log("Reasoning trigger - now handled directly by process_user_requirements");
+            }}
+          />
+        </div>
+      )}
       
       {/* Connection status indicator - HIDDEN */}
       {/* 

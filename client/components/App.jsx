@@ -6,13 +6,16 @@ import { useEffect, useRef, useState } from "react";
 import ErrorBoundary from "./console/ErrorBoundary";
 import InteractiveCanvas from "./ui/InteractiveCanvas";
 import RightPanelChat from "./chat/RightPanelChat";
-import { ViewModeProvider } from "../contexts/ViewModeContext";
+import { ViewModeProvider, useViewMode } from "../contexts/ViewModeContext";
 // Import test functions to make them available in console
 import "../utils/testIconFallback";
 import "../utils/testArchitectureSearch";
 
 
-export default function App() {
+// Inner component that has access to ViewMode context
+function AppContent() {
+  const { config } = useViewMode();
+  
   // Simple state management for chat
   const [isSessionActive, setIsSessionActive] = useState(true); // Always active
   const [isConnecting, setIsConnecting] = useState(false);
@@ -43,28 +46,37 @@ export default function App() {
       {/* Main Canvas Area */}
       <div className="flex-1 overflow-hidden">
         <ErrorBoundary>
-          <ViewModeProvider fallbackMode="auth">
-            <InteractiveCanvas
-              isSessionActive={isSessionActive}
-              isConnecting={isConnecting}
-              isAgentReady={isAgentReady}
-              startSession={startSession}
-              stopSession={stopSession}
-              sendTextMessage={sendTextMessage}
-              sendClientEvent={sendClientEvent}
-              events={[]}
-              rightPanelCollapsed={rightPanelCollapsed}
-            />
-          </ViewModeProvider>
+          <InteractiveCanvas
+            isSessionActive={isSessionActive}
+            isConnecting={isConnecting}
+            isAgentReady={isAgentReady}
+            startSession={startSession}
+            stopSession={stopSession}
+            sendTextMessage={sendTextMessage}
+            sendClientEvent={sendClientEvent}
+            events={[]}
+            rightPanelCollapsed={rightPanelCollapsed}
+          />
         </ErrorBoundary>
       </div>
       
-      {/* Right Panel */}
-      <RightPanelChat 
-        isCollapsed={rightPanelCollapsed}
-        onToggleCollapse={() => setRightPanelCollapsed(!rightPanelCollapsed)}
-      />
+      {/* Right Panel - Conditionally shown based on ViewMode config */}
+      {config.showChatPanel && (
+        <RightPanelChat 
+          isCollapsed={rightPanelCollapsed}
+          onToggleCollapse={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+          currentGraph={null} // TODO: Pass actual graph from InteractiveCanvas
+        />
+      )}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ViewModeProvider fallbackMode="auth">
+      <AppContent />
+    </ViewModeProvider>
   );
 }
 

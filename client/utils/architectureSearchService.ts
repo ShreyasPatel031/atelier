@@ -57,7 +57,13 @@ class ArchitectureSearchService {
   /** Embed an arbitrary text once, then cache it. */
   private async embedQuery(text: string): Promise<number[]> {
     const key = text.toLowerCase();
-    if (this.queryCache.has(key)) return this.queryCache.get(key)!;
+    if (this.queryCache.has(key)) {
+      console.log('🎯 Using cached embedding for:', key.substring(0, 50) + '...');
+      return this.queryCache.get(key)!;
+    }
+
+    console.log('🔄 Generating new embedding for:', key.substring(0, 50) + '...');
+    const startTime = performance.now();
 
     // Call the backend instead of the OpenAI SDK
     const res = await fetch('/api/embed', {
@@ -68,10 +74,13 @@ class ArchitectureSearchService {
 
     if (!res.ok) {
       const detail = await res.text();
-      throw new Error(`Backend /api/embed failed ${res.status}: ${detail}`);
+      throw new Error(`❌ FATAL: Backend /api/embed failed ${res.status}: ${detail}. Check if server is running on correct port!`);
     }
 
     const { embedding } = await res.json();
+    const endTime = performance.now();
+    console.log(`⚡ Embedding generated in ${(endTime - startTime).toFixed(0)}ms`);
+    
     this.queryCache.set(key, embedding);
     return embedding as number[];
   }
@@ -92,19 +101,18 @@ class ArchitectureSearchService {
 
   public async findMatchingArchitecture(userInput: string): Promise<ReferenceArchitecture | null> {
     if (!this.isInitialized) {
-      throw new Error('❌ ArchitectureSearchService: Not properly initialized with pre-computed embeddings');
+      throw new Error('❌ FATAL: ArchitectureSearchService not initialized! Pre-computed embeddings failed to load.');
     }
 
+    console.log('🔍 Starting architecture search for:', userInput);
+    return await this.performSearch(userInput);
+  }
 
-
+  private async performSearch(userInput: string): Promise<ReferenceArchitecture | null> {
     // 1️⃣ embed the query
-    let queryVec: number[];
-    try {
-      queryVec = await this.embedQuery(userInput);
-    } catch (err) {
-      console.error('❌ Unable to embed query', err);
-      return null;
-    }
+    console.log('🔄 Embedding user query...');
+    const queryVec = await this.embedQuery(userInput);
+    console.log('✅ Query embedded successfully');
 
     // 2️⃣ cosine-similarity over ALL reference vectors
     let bestArch: ReferenceArchitecture | null = null;

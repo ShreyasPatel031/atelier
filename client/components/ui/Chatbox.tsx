@@ -7,6 +7,7 @@ import { Send, Loader2 } from "lucide-react"
 import { cn } from "../../lib/utils"
 import { process_user_requirements } from "../graph/userRequirements"
 import type { ChatBoxProps } from "../../types/chat"
+import { saveChatMessage, saveChatboxInput, getChatboxInput, clearChatboxInput } from "../../utils/chatPersistence"
 
 const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProcessStart }) => {
   const [textInput, setTextInput] = useState("")
@@ -20,6 +21,15 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
     "Multi-cloud data pipeline"
   ];
 
+  // Load saved chatbox input on mount
+  useEffect(() => {
+    const savedInput = getChatboxInput();
+    if (savedInput) {
+      setTextInput(savedInput);
+      console.log('📥 Restored chatbox input:', savedInput);
+    }
+  }, []);
+
   // Auto-focus input when component mounts
   useEffect(() => {
     if (inputRef.current) {
@@ -28,6 +38,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
     }
   }, []);
 
+  // Save input text as user types
+  useEffect(() => {
+    saveChatboxInput(textInput);
+  }, [textInput]);
+
   const handleExampleClick = async (example: string) => {
     if (isProcessing || isDisabled) return; // Prevent clicks during processing or when disabled
     
@@ -35,6 +50,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
     setIsProcessing(true);
     
     try {
+      // Save the example message to persistence
+      saveChatMessage(example, 'user');
+      
       // Notify parent that processing is starting
       if (onProcessStart) {
         onProcessStart();
@@ -58,6 +76,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
       
       // Clear the input after processing starts
       setTextInput("");
+      // Clear the saved input since message was submitted
+      clearChatboxInput();
       
       // Optional: call onSubmit for any parent component compatibility
       if (onSubmit) {
@@ -77,20 +97,24 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (textInput.trim() && !isProcessing && !isDisabled) {
+      const messageText = textInput.trim();
       setIsProcessing(true);
       
       try {
+        // Save the message to persistence before processing
+        saveChatMessage(messageText, 'user');
+        
         // Notify parent that processing is starting
         if (onProcessStart) {
           onProcessStart();
         }
         
         // Store text input globally for reasoning agent
-        (window as any).originalChatTextInput = textInput.trim(); // Keep original for chat naming
-        (window as any).chatTextInput = textInput.trim();
+        (window as any).originalChatTextInput = messageText; // Keep original for chat naming
+        (window as any).chatTextInput = messageText;
         (window as any).selectedImages = [];
         
-        console.log('🚀 Chatbox: Processing user input:', textInput.trim());
+        console.log('🚀 Chatbox: Processing user input:', messageText);
         console.log('🌍 Global state set:', {
           originalChatTextInput: (window as any).originalChatTextInput,
           chatTextInput: (window as any).chatTextInput,
@@ -103,10 +127,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
         
         // Clear the input after processing starts
         setTextInput("");
+        // Clear the saved input since message was submitted
+        clearChatboxInput();
         
         // Optional: call onSubmit for any parent component compatibility
         if (onSubmit) {
-          onSubmit(textInput.trim());
+          onSubmit(messageText);
         }
         
       } catch (error) {

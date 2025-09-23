@@ -1,0 +1,47 @@
+# Cursor Rules for OpenAI Realtime Console
+
+## View Mode Architecture
+
+### Core Principle
+**All UI visibility and feature toggles MUST be configured in `ViewModeContext.tsx`, never hardcoded in components.**
+
+### Pattern to Follow
+```typescript
+// ✅ CORRECT: Use ViewMode config
+const { config } = useViewMode();
+return config.showFeature && <Feature />;
+
+// ❌ WRONG: Hardcode mode checks
+return config.mode !== 'framer' && <Feature />;
+```
+
+### When Adding New Features
+1. Add config property to `ViewModeConfig` interface
+2. Set values in `VIEW_MODE_CONFIGS` for each mode
+3. Use `config.propertyName` in components
+4. Never use `config.mode` for conditional rendering
+
+## View Modes
+- **framer** (`/embed`): Embedded view, no chat panel/agent icon
+- **canvas** (`/canvas`): Public mode, full UI except architecture management  
+- **auth** (`/auth`): Full authenticated experience
+
+## Message Persistence
+- Chatbox messages auto-persist via localStorage
+- Messages restore when switching between views
+- Use utilities in `client/utils/chatPersistence.ts`
+
+## Git Rules
+- Do NOT add to git unless explicitly instructed
+- Only push when code is working and user confirms
+
+## Code Quality
+- Test locally before asking user to test
+- Fix actual issues, don't implement fallbacks for broken code
+- Use GPT-4.1 for OpenAI API calls
+- Use OpenAI Responses API, NOT Chat Completions API
+
+## Architecture
+- Working: User input → Requirements → Frontend processing → Graph updates → Visual rendering
+- Broken: API communication and response chaining (focus area)
+- Don't modify agentConfig.ts unless specifically instructed

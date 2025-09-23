@@ -1,38 +1,10 @@
 import OpenAI from 'openai';
 import { 
+  leanSystemPrompt, 
   agentInstruction, 
   modelConfigs, 
   timeoutConfigs 
-} from './agentConfig';
-
-// LEAN SYSTEM PROMPT - moved inline to avoid import issues
-const leanSystemPrompt = `You are a technical architecture diagram assistant. Build complete architectures through batch_update calls.
-
-**CRITICAL RULES:**
-- CREATE ALL EDGES WITH DESCRIPTIVE LABELS (required)
-- Group related nodes using group_nodes with groupIconName
-- Continue building until complete architecture is done
-- Use exact icon names from the validated list (no custom names)
-- Format: batch_update({operations: [...]}) - never {graph: ...}
-
-**PATTERN:**
-1. Create nodes: add_node(nodename, parentId, {label, icon})
-2. Group nodes: group_nodes(nodeIds, parentId, groupId, groupIconName) 
-3. Add edges: add_edge(edgeId, sourceId, targetId, label)
-
-**EDGE LABELS:** Use action verbs like "calls", "sends", "queries", "processes", "stores", "routes", "validates", "monitors", "caches", "authenticates", "flows to", etc.
-
-**GROUP ICONS:** gcp_system (gray), gcp_logical_grouping_services_instances (blue), gcp_infrastructure_system (green), aws_vpc, azure_subscription_filled
-
-**CLOUD ICONS:** 
-- AWS: aws_lambda, aws_s3, aws_rds, aws_ec2, aws_api_gateway
-- GCP: gcp_cloud_functions, gcp_cloud_storage, gcp_cloud_sql, gcp_compute_engine, gcp_api_gateway  
-- Azure: azure_functions, azure_storage_accounts, azure_sql_database, azure_virtual_machines
-- Generic: api, database, gateway, browser_client, mobile_app, server, cache_redis, message_queue
-
-Complete the architecture in maximum 3 turns.`;
-
-console.log('🔍 DEBUG: leanSystemPrompt length:', leanSystemPrompt.length);
+} from './agentConfig.lean.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -122,7 +94,6 @@ ${referenceArchitecture ? `Reference: ${referenceArchitecture.substring(0, 300)}
     console.log('🧠 AGENT: Calling OpenAI Responses API for turn', conversationHistory.length + 1);
     if (!isToolOutputContinuation) {
       console.log('📝 AGENT: System prompt length:', conversationInput[0].content.length, 'chars');
-      console.log('📝 AGENT: System prompt preview:', conversationInput[0].content.substring(0, 200) + '...');
     }
 
     // Build the API request - MINIMAL TOOL DEFINITION
@@ -176,6 +147,10 @@ ${referenceArchitecture ? `Reference: ${referenceArchitecture.substring(0, 300)}
       parallel_tool_calls: modelConfigs.reasoning.parallel_tool_calls
     };
 
+    // Add reasoning configuration if supported
+    if (isReasoningModel(modelConfigs.reasoning.model)) {
+      apiRequest.reasoning = modelConfigs.reasoning.reasoning;
+    }
 
     // Add previous response ID for continuation
     if (isToolOutputContinuation && previousResponseId) {
@@ -286,3 +261,7 @@ ${referenceArchitecture ? `Reference: ${referenceArchitecture.substring(0, 300)}
   }
 }
 
+// Helper function to check if model supports reasoning
+function isReasoningModel(model: string): boolean {
+  return model.includes('o3') || model.includes('o1') || model.includes('o4');
+}

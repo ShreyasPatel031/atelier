@@ -123,34 +123,38 @@ export class StreamExecutor {
 
           
           if (availableArchs.length === 0) {
-            console.warn('⚠️ No architectures loaded in service yet, proceeding without reference');
-            addLine(`⚠️ Architecture database not ready, proceeding without reference`);
-            } else {
-            // Use the optimized architecture search with pre-computed embeddings
-              const matchedArch = await architectureSearchService.findMatchingArchitecture(searchInput);
-              
-              if (matchedArch) {
-                referenceArchitecture = `\n\nREFERENCE ARCHITECTURE:
+            throw new Error('❌ FATAL: No architectures loaded in service! Pre-computed embeddings failed to load.');
+          }
+          
+          console.log('🔍 Searching for matching architecture...');
+          addLine(`🔍 Searching architecture database...`);
+          
+          // Use the optimized architecture search with pre-computed embeddings
+          const matchedArch = await architectureSearchService.findMatchingArchitecture(searchInput);
+          
+          if (matchedArch) {
+            referenceArchitecture = `\n\nREFERENCE ARCHITECTURE:
 This is a reference architecture for the use case. Please replicate it:
 ${matchedArch.architecture}`;
-                
-                // Enhanced logging with URL
+            
+            // Enhanced logging with URL
+            console.log('✅ Found matching architecture:', matchedArch.subgroup);
 
-
-                // Debug: Log the full architecture content being appended
-                if ((window as any).__LLM_DEBUG__) {
-                  console.log('%c📐 reference architecture (full)', 'color:#06f', matchedArch.architecture);
-                }
-                
-                addLine(`🏗️ Found reference architecture: ${matchedArch.subgroup}`);
-                addLine(`🔗 Reference URL: ${matchedArch.source}`);
-          } else {
-              console.log('❌ No suitable architecture match found');
-              addLine(`⚠️ No matching reference architecture found`);
+            // Debug: Log the full architecture content being appended
+            if ((window as any).__LLM_DEBUG__) {
+              console.log('%c📐 reference architecture (full)', 'color:#06f', matchedArch.architecture);
             }
+            
+            addLine(`🏗️ Found reference architecture: ${matchedArch.subgroup}`);
+            addLine(`🔗 Reference URL: ${matchedArch.source}`);
+          } else {
+            console.log('❌ No suitable architecture match found');
+            addLine(`⚠️ No matching reference architecture found`);
           }
         } catch (error) {
-          console.warn("⚠️ Architecture search failed:", error);
+          console.error("❌ FATAL: Architecture search failed:", error);
+          addLine(`❌ FATAL ERROR: ${error.message}`);
+          throw error; // Re-throw to fail loudly
         }
       }
       

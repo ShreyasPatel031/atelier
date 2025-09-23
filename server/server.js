@@ -79,6 +79,7 @@ app.use(cors());
 app.use(express.json());                     // for application/json
 app.use(express.urlencoded({ extended: false })); // for x-www-form-urlencoded
 
+
 // ============================================================================
 // API ROUTES - Import handlers from /api/ directory (shared with Vercel)
 // ============================================================================
@@ -196,6 +197,9 @@ const vite = await createViteServer({
 app.use('/.well-known', (req, res) => {
   res.status(404).send('Not found');
 });
+
+// Serve static files from public directory (before Vite middleware)
+app.use(express.static(resolve(__dirname, '../public')));
 
 // Serve precomputed embeddings JSON file with correct Content-Type
 app.get('/precomputed-icon-embeddings.json', (req, res) => {

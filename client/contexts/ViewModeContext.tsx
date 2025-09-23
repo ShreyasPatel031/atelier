@@ -22,6 +22,9 @@ export interface ViewModeConfig {
   // UI Features
   showDevPanel: boolean;
   showSettings: boolean;
+  showChatPanel: boolean;
+  showAgentIcon: boolean; // Controls the agent icon in RightPanelChat, not the Atelier ProcessingStatusIcon
+  showChatbox: boolean; // Controls the bottom chatbox - only needed in embed view
 }
 
 const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbedded'>> = {
@@ -36,6 +39,9 @@ const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbed
     allowArchitectureManagement: false,
     showDevPanel: false,
     showSettings: false,
+    showChatPanel: false, // Hide chat panel in embed view
+    showAgentIcon: false, // Hide agent icon in embed view
+    showChatbox: true, // Show chatbox in embed view (only way to chat)
   },
   canvas: {
     requiresAuth: false,
@@ -48,6 +54,9 @@ const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbed
     allowArchitectureManagement: false,
     showDevPanel: false,
     showSettings: false,
+    showChatPanel: true, // Show chat panel in canvas view
+    showAgentIcon: true, // Show agent icon in canvas view
+    showChatbox: false, // Hide chatbox in canvas view (use right chat panel instead)
   },
   auth: {
     requiresAuth: true,
@@ -60,6 +69,9 @@ const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbed
     allowArchitectureManagement: true,
     showDevPanel: true,
     showSettings: true,
+    showChatPanel: true, // Show chat panel in auth view
+    showAgentIcon: true, // Show agent icon in auth view
+    showChatbox: false, // Hide chatbox in auth view (use right chat panel instead)
   }
 };
 

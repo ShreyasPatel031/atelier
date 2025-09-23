@@ -14,11 +14,14 @@ import {
 } from "lucide-react"
 import { cn } from "../../lib/utils"
 import ReactMarkdown from "react-markdown"
+import { getChatMessages, type PersistedChatMessage, clearEmbedToCanvasFlag } from "../../utils/chatPersistence"
+import { useViewMode } from "../../contexts/ViewModeContext"
 
 interface RightPanelChatProps {
   className?: string
   isCollapsed: boolean
   onToggleCollapse?: () => void
+  currentGraph?: any // Add current graph prop
 }
 
 interface ChatMessage {
@@ -32,8 +35,10 @@ interface ChatMessage {
 const RightPanelChat: React.FC<RightPanelChatProps> = ({
   className,
   isCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  currentGraph
 }) => {
+  const { config } = useViewMode();
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -41,6 +46,24 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
   const [isMinimized, setIsMinimized] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Load persisted messages on mount
+  useEffect(() => {
+    const persistedMessages = getChatMessages();
+    if (persistedMessages.length > 0) {
+      const chatMessages: ChatMessage[] = persistedMessages.map(msg => ({
+        id: msg.id,
+        role: msg.sender,
+        content: msg.content,
+        timestamp: new Date(msg.timestamp)
+      }));
+      setMessages(chatMessages);
+      console.log('📥 Loaded persisted chat messages:', chatMessages.length);
+      
+      // Clear the embed-to-canvas flag after loading messages
+      clearEmbedToCanvasFlag();
+    }
+  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -63,6 +86,10 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
   const callOpenAI = async (userMessage: string) => {
     console.log('🚀 Starting OpenAI call with message:', userMessage)
     
+    // Get current graph from global state (set by InteractiveCanvas)
+    const currentGraphFromGlobal = (window as any).currentGraph || currentGraph;
+    console.log('📊 Current graph for chat:', currentGraphFromGlobal ? `${currentGraphFromGlobal.children?.length || 0} nodes` : 'none');
+    
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -73,7 +100,8 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
           messages: [
             ...messages.map(msg => ({ role: msg.role, content: msg.content })),
             { role: 'user', content: userMessage }
-          ]
+          ],
+          currentGraph: currentGraphFromGlobal
         }),
       })
 
@@ -300,29 +328,31 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
       ${isCollapsed ? 'w-18' : 'w-96'}
     `, className)}>
       
-      {/* Agent Icon - Always visible at top-right, never moves, with hover overlay for both states */}
-      <div className="absolute top-4 right-4 z-50">
-        <div className="relative group" data-testid="agent-icon">
-          <div className="w-10 h-10 flex items-center justify-center rounded-lg shadow-lg border bg-white text-gray-700 border-gray-200">
-            <Cpu className="w-4 h-4" />
+      {/* Agent Icon - Conditionally shown based on ViewMode config */}
+      {config.showAgentIcon && (
+        <div className="absolute top-4 right-4 z-50">
+          <div className="relative group" data-testid="agent-icon">
+            <div className="w-10 h-10 flex items-center justify-center rounded-lg shadow-lg border bg-white text-gray-700 border-gray-200">
+              <Cpu className="w-4 h-4" />
+            </div>
+            {/* Hover overlay - show expand icon when collapsed, collapse icon when expanded */}
+            <button 
+              onClick={onToggleCollapse}
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-lg"
+              title={isCollapsed ? "Open Chat Panel" : "Close Chat Panel"}
+            >
+              {isCollapsed ? (
+                <PanelRightOpen className="w-4 h-4" />
+              ) : (
+                <PanelRightClose className="w-4 h-4" />
+              )}
+            </button>
           </div>
-          {/* Hover overlay - show expand icon when collapsed, collapse icon when expanded */}
-          <button 
-            onClick={onToggleCollapse}
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-lg"
-            title={isCollapsed ? "Open Chat Panel" : "Close Chat Panel"}
-          >
-            {isCollapsed ? (
-              <PanelRightOpen className="w-4 h-4" />
-            ) : (
-              <PanelRightClose className="w-4 h-4" />
-            )}
-          </button>
         </div>
-      </div>
+      )}
 
       {/* Main Icon Layout - Always Visible */}
-      <div className="flex flex-col h-full pt-16">
+      <div className="flex flex-col h-full pt-20">
         {/* Divider */}
         {!isCollapsed && (
           <div className="mx-4 my-4 border-t border-gray-300"></div>

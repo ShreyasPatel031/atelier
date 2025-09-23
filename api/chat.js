@@ -32,8 +32,9 @@ export default async function handler(req, res) {
     }
 
     console.log('✅ API key found');
-    const { messages } = req.body;
+    const { messages, currentGraph } = req.body;
     console.log('📨 Received messages:', messages);
+    console.log('📊 Received current graph:', currentGraph ? `${currentGraph.children?.length || 0} nodes` : 'none');
 
     if (!messages || !Array.isArray(messages)) {
       console.log('❌ Invalid messages format');
@@ -46,6 +47,31 @@ export default async function handler(req, res) {
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
+
+    // Helper function to get all node IDs recursively
+    const getAllNodeIds = (node) => {
+      const ids = [node.id];
+      if (node.children) {
+        node.children.forEach((child) => {
+          ids.push(...getAllNodeIds(child));
+        });
+      }
+      return ids;
+    };
+
+    // Build current graph state description
+    const graphStateDescription = currentGraph ? `
+CURRENT ARCHITECTURE STATE:
+${currentGraph.children?.length ? 
+  `EXISTING NODES: ${getAllNodeIds(currentGraph).filter(id => id !== 'root').join(', ')}
+EXISTING EDGES: ${currentGraph.edges?.length ? currentGraph.edges.map((edge) => `${edge.source} → ${edge.target}`).join(', ') : 'none'}
+
+📊 Architecture Summary: ${currentGraph.children.length} top-level nodes, ${currentGraph.edges?.length || 0} edges
+
+FULL GRAPH JSON:
+${JSON.stringify(currentGraph, null, 2)}` 
+  : 'EXISTING NODES: none, EXISTING EDGES: none'
+}` : 'CURRENT ARCHITECTURE STATE: Empty (no architecture created yet)';
 
     console.log('📡 Setting up streaming response');
     // Set up streaming response
@@ -60,13 +86,17 @@ export default async function handler(req, res) {
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful AI assistant. Keep responses concise and focused. Avoid long lists of questions - ask 1-2 key questions at a time. Use markdown formatting for better readability.'
+          content: `You are a helpful AI assistant specialized in architecture design and technical discussions. Keep responses concise and focused. Avoid long lists of questions - ask 1-2 key questions at a time. Use markdown formatting for better readability.
+
+${graphStateDescription}
+
+When discussing the current architecture, you can reference the existing nodes and edges from the FULL GRAPH JSON above. If the user asks about modifications or improvements, you can suggest specific changes to the current architecture by referencing the exact node IDs and structure shown in the JSON.`
         },
         ...messages
       ],
       stream: true,
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: 1024,
       tools: [
         {
           type: "function",
