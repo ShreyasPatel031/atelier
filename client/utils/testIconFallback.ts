@@ -204,8 +204,5 @@ if (typeof window !== 'undefined') {
   (window as any).testIconFallback = testIconFallback;
   (window as any).testSingleIcon = testSingleIcon;
   (window as any).debugIconFallback = debugIconFallback;
-  console.log('🛠️ Icon fallback test functions available:');
-  console.log('   testIconFallback() - Full test suite');
-  console.log('   testSingleIcon("icon_name") - Test single icon');
-  console.log('   debugIconFallback() - Quick debug test');
+  // Icon fallback test functions available in console
 } 

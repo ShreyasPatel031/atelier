@@ -67,12 +67,12 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    console.log('🔄 Messages changed, attempting to scroll. Messages count:', messages.length, 'isMinimized:', isMinimized)
+    // Messages changed, attempting to scroll
     if (messagesEndRef.current && !isMinimized) {
-      console.log('📜 Scrolling to bottom...')
+      // Scrolling to bottom
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     } else {
-      console.log('❌ Cannot scroll - messagesEndRef:', !!messagesEndRef.current, 'isMinimized:', isMinimized)
+      // Cannot scroll - element not available or minimized
     }
   }, [messages, isMinimized])
 

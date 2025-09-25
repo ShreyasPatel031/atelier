@@ -34,10 +34,5 @@ export const db = getFirestore(app);
 
 // Debug logging for development (client-side only)
 if (import.meta.env.DEV && typeof window !== 'undefined') {
-  console.log('🔥 Firebase initialized:', {
-    projectId: firebaseConfig.projectId,
-    authDomain: firebaseConfig.authDomain,
-    hasApiKey: !!firebaseConfig.apiKey,
-    currentOrigin: window.location.origin
-  });
+  // Firebase initialized successfully
 }

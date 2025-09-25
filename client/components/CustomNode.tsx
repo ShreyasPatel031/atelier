@@ -117,14 +117,14 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
             
             // Cache the successfully loaded icon
             iconCacheService.cacheIcon(iconName, fullIconUrl);
-            console.log(`✅ General icon loaded: ${iconName} (${iconPath})`);
+            // General icon loaded successfully
             return fullIconUrl;
           }
         } catch (error) {
           // Try next path
         }
       }
-      console.log(`❌ General icon not found: ${iconName}`);
+      // General icon not found
     }
     
     // Icon not found anywhere
@@ -181,18 +181,18 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
         iconFallbackService.findFallbackIcon(id)
           .then(async (fallbackIcon) => {
             if (fallbackIcon) {
-              console.log(`🔍 Node ID semantic fallback found: ${id} → ${fallbackIcon}`);
+              // Node ID semantic fallback found
               try {
                 const fallbackPath = await tryLoadIcon(fallbackIcon);
                 setFinalIconSrc(fallbackPath);
                 setIconLoaded(true);
                 setIconError(false);
-                console.log(`✅ Node ID fallback SUCCESS: ${id} → ${fallbackIcon} (loaded: ${fallbackPath})`);
+                // Node ID fallback success
               } catch (error) {
-                console.log(`❌ Node ID fallback FAILED to load: ${fallbackIcon}`, error);
+                // Node ID fallback failed to load
               }
             } else {
-              console.log(`❌ No semantic fallback found for node ID: ${id}`);
+              // No semantic fallback found for node ID
             }
           })
           .catch((error) => {

@@ -168,7 +168,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       await ArchitectureService.cleanupInvalidArchitectures(userId);
       
       const firebaseArchs = await ArchitectureService.loadUserArchitectures(userId);
-      console.log(`📥 Raw Firebase architectures:`, firebaseArchs);
+      // Raw Firebase architectures loaded
       
       if (firebaseArchs.length > 0) {
         // Convert Firebase architectures to local format with validation
@@ -433,7 +433,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
                 nodeCount: rawGraph?.children?.length || 0
               });
               
-              const baseChatName = await generateChatName(userPrompt || 'Canvas Architecture', rawGraph);
+              const baseChatName = await generateChatName(userPrompt, rawGraph);
               console.log('🎯 [SIGN-IN] Generated chat name from API:', baseChatName);
               
               let finalBaseName = baseChatName;
@@ -587,7 +587,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         }
         
         // Only sync once when user signs in
-        console.log('🚀 Initial sync for user:', user.uid);
+        // Initial sync for user
         syncWithFirebase(user.uid);
         setHasInitialSync(true);
       } else {
@@ -1183,7 +1183,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
                     
                     // Generate name and save as user architecture
                     const userPrompt = (window as any).originalChatTextInput || (window as any).chatTextInput || '';
-                    const baseChatName = await generateChatName(userPrompt || 'Architecture from URL', urlArch.rawGraph);
+                    const baseChatName = await generateChatName(userPrompt, urlArch.rawGraph);
                     
                     // Save as new user architecture
                     const savedArchId = await ArchitectureService.saveArchitecture({
@@ -1191,7 +1191,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
                       userId: currentUser.uid,
                       userEmail: currentUser.email || '',
                       rawGraph: urlArch.rawGraph,
-                      userPrompt: userPrompt || 'Architecture from URL',
+                      userPrompt: userPrompt,
                       nodes: [],
                       edges: []
                     });
@@ -1368,7 +1368,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
           nodeCount: rawGraph?.children?.length || 0 
         });
         
-        const baseChatName = await generateChatName(effectivePrompt || 'Manual Save Architecture', rawGraph);
+        const baseChatName = await generateChatName(effectivePrompt, rawGraph);
         console.log('🎯 Generated chat name from API for manual save:', baseChatName);
         const newChatName = ensureUniqueName(baseChatName, savedArchitectures);
         
@@ -1502,7 +1502,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
             effectivePrompt = `Architecture with components: ${nodeLabels.slice(0, 5).join(', ')}`;
           }
           
-          const architectureName = await generateChatName(effectivePrompt || 'Shared Architecture', rawGraph);
+          const architectureName = await generateChatName(effectivePrompt, rawGraph);
           
           // Save as anonymous architecture and get shareable ID
           const anonymousId = await anonymousArchitectureService.saveAnonymousArchitecture(
@@ -1659,12 +1659,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
   // Debug logging for graph state changes
   useEffect(() => {
-    console.log('🔍 [GRAPH-DEBUG] rawGraph changed:', {
-      hasContent: !!(rawGraph?.children?.length),
-      childrenCount: rawGraph?.children?.length || 0,
-      selectedArchitectureId,
-      timestamp: new Date().toISOString()
-    });
+    // Graph state updated
   }, [rawGraph, selectedArchitectureId]);
 
   // Handler for PNG export functionality  
@@ -1676,6 +1671,18 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
     try {
       console.log('📸 Starting PNG export...');
+      
+      // Temporarily hide sidebar during export to avoid interference
+      const sidebar = document.querySelector('[class*="w-80"]') || document.querySelector('[class*="w-18"]');
+      const originalSidebarDisplay = sidebar ? sidebar.style.display : '';
+      if (sidebar) {
+        sidebar.style.display = 'none';
+        console.log('🔧 Temporarily hiding sidebar for export');
+      }
+      
+      // Small delay to ensure sidebar is hidden
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       console.log('📊 Export context:', {
         nodesCount: nodes.length,
         edgesCount: edges.length,
@@ -2008,6 +2015,12 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         
         console.log('✅ PNG export completed successfully');
         
+        // Restore sidebar after successful export
+        if (sidebar) {
+          sidebar.style.display = originalSidebarDisplay;
+          console.log('🔧 Restored sidebar after export');
+        }
+        
         // Show success notification if available
         if (typeof showNotification === 'function') {
           showNotification('success', 'Export Complete', 'Architecture exported as PNG');
@@ -2016,6 +2029,12 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       
     } catch (error) {
       console.error('❌ PNG export failed:', error);
+      
+      // Restore sidebar after failed export
+      if (sidebar) {
+        sidebar.style.display = originalSidebarDisplay;
+        console.log('🔧 Restored sidebar after failed export');
+      }
       
       // Show error notification if available
       if (typeof showNotification === 'function') {
@@ -2052,7 +2071,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         nodeCount: rawGraph?.children?.length || 0 
       });
       
-      const architectureName = await generateChatName(effectivePrompt || 'Saved Architecture', rawGraph);
+      const architectureName = await generateChatName(effectivePrompt, rawGraph);
       
       // Prepare the architecture data for saving with validation
       const architectureData = {
@@ -2309,7 +2328,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
             effectivePrompt = `Architecture with components: ${nodeLabels.slice(0, 5).join(', ')}`;
           }
           
-          const architectureName = await generateChatName(effectivePrompt || 'Anonymous Architecture', newGraph);
+          const architectureName = await generateChatName(effectivePrompt, newGraph);
           const newArchId = await anonymousArchitectureService.saveAnonymousArchitecture(architectureName, newGraph);
           console.log('✅ New anonymous architecture saved with ID:', newArchId);
         }
@@ -2997,7 +3016,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
                 effectivePrompt = `Architecture with components: ${nodeLabels.slice(0, 5).join(', ')}`;
               }
               
-              const architectureName = await generateChatName(effectivePrompt || 'AI Generated Architecture', elkGraph);
+              const architectureName = await generateChatName(effectivePrompt, elkGraph);
               const newArchId = await anonymousArchitectureService.saveAnonymousArchitecture(architectureName, elkGraph);
               console.log('✅ New anonymous architecture saved after AI update with ID:', newArchId);
             }
@@ -3847,7 +3866,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
                       effectivePrompt = `Architecture with components: ${nodeLabels.slice(0, 5).join(', ')}`;
                     }
                     
-                    const architectureName = await generateChatName(effectivePrompt || 'Embed Architecture', rawGraph);
+                    const architectureName = await generateChatName(effectivePrompt, rawGraph);
                     const anonymousId = await anonymousArchitectureService.saveAnonymousArchitecture(
                       architectureName,
                           rawGraph

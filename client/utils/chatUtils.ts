@@ -8,6 +8,10 @@ import { Message } from '../types/chat';
  * Generate chat name from user input and architecture
  */
 export async function generateChatName(userPrompt: string, architecture: any): Promise<string> {
+  if (!userPrompt || userPrompt.trim() === '') {
+    throw new Error('❌ FATAL: User prompt is required for chat name generation');
+  }
+  
   console.log('🔧 [generateChatName] Starting with:', { userPrompt, hasArchitecture: !!architecture });
   
   try {
@@ -44,7 +48,7 @@ export async function generateChatName(userPrompt: string, architecture: any): P
         throw new Error('API returned empty name');
       }
       
-      const cleanName = data.name.replace(/^["']|["']$/g, ''); // Remove quotes
+      const cleanName = data.name.replace(/^["']|["']$/g, '').replace(/^["']|["']$/g, ''); // Remove quotes and extra quotes
       console.log('✅ [generateChatName] Final clean name:', cleanName);
       return cleanName;
     } else {

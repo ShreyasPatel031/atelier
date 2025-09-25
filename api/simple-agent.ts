@@ -3,7 +3,7 @@ import {
   agentInstruction, 
   modelConfigs, 
   timeoutConfigs 
-} from './agentConfig';
+} from './agentConfig.lean.js';
 
 // LEAN SYSTEM PROMPT - moved inline to avoid import issues
 const leanSystemPrompt = `You are a technical architecture diagram assistant. Build complete architectures through batch_update calls.
@@ -55,7 +55,7 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Message required for new conversation' });
   }
 
-  console.log('🤖 AGENT: Mode:', isToolOutputContinuation ? 'TOOL_OUTPUT_CONTINUATION' : 'NEW_CONVERSATION');
+  // Agent mode determined
   if (!isToolOutputContinuation) {
     console.log('🤖 AGENT: Received user message:', message);
     console.log('🔄 AGENT: Conversation history length:', conversationHistory.length);

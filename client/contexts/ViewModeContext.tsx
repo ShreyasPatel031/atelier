@@ -54,7 +54,7 @@ const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbed
     allowArchitectureManagement: false,
     showDevPanel: false,
     showSettings: false,
-    showChatPanel: true, // Show chat panel in canvas view
+        showChatPanel: true, // Show chat panel in canvas view
     showAgentIcon: true, // Show agent icon in canvas view
     showChatbox: false, // Hide chatbox in canvas view (use right chat panel instead)
   },
@@ -110,16 +110,7 @@ export function ViewModeProvider({ children, fallbackMode = 'auth' }: ViewModePr
       const hasPort = window.location.port && window.location.port !== '80' && window.location.port !== '443';
       const isDevelopment = isLocalhost || hasPort;
       
-      console.log('🌍 Environment check:', { 
-        NODE_ENV: process.env.NODE_ENV, 
-        isProduction, 
-        isDevelopment,
-        isLocalhost,
-        hasPort,
-        hostname: window.location.hostname,
-        port: window.location.port,
-        href: window.location.href
-      });
+      // Environment check completed
       
       // Path-based mode detection (primary)
       if (path === '/embed') {

@@ -215,7 +215,7 @@ export const useChatSession = ({
     // Look for the latest session.created
     const created = events?.find(e => e.type === "session.created");
     if (!created) {
-      console.log("⏳ Waiting for session.created event...");
+      // Waiting for session.created event
       return;
     }
 

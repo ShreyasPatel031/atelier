@@ -19,6 +19,10 @@ export default async function handler(req: any, res: any) {
 
   const { architecture, userPrompt, nodeCount, edgeCount, services }: ChatNameRequest = req.body;
 
+  if (!userPrompt || userPrompt.trim() === '') {
+    return res.status(400).json({ error: 'User prompt is required for chat name generation' });
+  }
+
   try {
     // Extract key information for naming
     const architectureInfo = extractArchitectureInfo(architecture);
@@ -38,7 +42,7 @@ export default async function handler(req: any, res: any) {
       messages: [
         { 
           role: "system", 
-          content: "You are a technical architect who creates concise, professional names for chat sessions about cloud architectures. Generate 2-4 word names that capture the essence and purpose of the architecture. Avoid generic terms like 'Chat' or 'Session'. Focus on the technical pattern, platform, or use case."
+          content: "You are a technical architect who creates concise, professional names for chat sessions about cloud architectures. Generate ONE single name that captures the essence and purpose of the architecture. The name should be 2-4 words. Avoid generic terms like 'Chat', 'Session', 'URL', 'Web', 'Link', or 'Based'. Focus on the technical pattern, platform, or use case. IMPORTANT: Return ONLY the single name text without any quotes, brackets, numbering, or extra formatting. Just the plain name."
         },
         { 
           role: "user", 
@@ -49,7 +53,17 @@ export default async function handler(req: any, res: any) {
       temperature: 0.7,
     });
 
-    const generatedName = completion.choices[0].message.content?.trim();
+    const rawName = completion.choices[0].message.content?.trim() || '';
+    console.log('Raw name from OpenAI:', JSON.stringify(rawName));
+    // Clean the name: remove quotes, numbering, and take only the first line
+    let generatedName = rawName.replace(/^["']+|["']+$/g, '').replace(/^["']+|["']+$/g, '');
+    // If it's a numbered list, take only the first item
+    if (generatedName.includes('\n')) {
+      generatedName = generatedName.split('\n')[0];
+    }
+    // Remove numbering like "1. " or "2. "
+    generatedName = generatedName.replace(/^\d+\.\s*/, '');
+    console.log('Cleaned name:', JSON.stringify(generatedName));
 
     if (generatedName) {
       res.status(200).json({ 

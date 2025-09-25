@@ -102,10 +102,10 @@ export function getChatMessages(): PersistedChatMessage[] {
   // Only return messages if user is coming from embed view to canvas view
   if (isEmbedToCanvasTransition()) {
     const messages = getCurrentConversation();
-    console.log('📥 Loading persisted messages from embed view:', messages.length);
+    // Loading persisted messages from embed view
     return messages;
   } else {
-    console.log('📥 No persisted messages (not from embed view)');
+    // No persisted messages (not from embed view)
     return [];
   }
 }
