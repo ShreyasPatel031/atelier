@@ -1125,8 +1125,8 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   // Listen for auth state changes (moved here after config is defined)
   useEffect(() => {
     
-    // In framer (embed) mode, handle shared architectures but don't set up auth listeners
-    if (config.mode === 'framer') {
+    // In embed mode, handle shared architectures but don't set up auth listeners
+    if (config.mode === 'embed') {
       setUser(null);
       setSidebarCollapsed(true);
       
@@ -3713,8 +3713,8 @@ Adapt these patterns to your specific requirements while maintaining the overall
       {/* Architecture Sidebar - Show only when allowed by view mode */}
       {config.showSidebar && (
       <ArchitectureSidebar
-          isCollapsed={config.mode === 'framer' ? true : (config.mode === 'canvas' ? true : sidebarCollapsed)}
-          onToggleCollapse={config.mode === 'framer' ? undefined : (config.mode === 'canvas' ? handleToggleSidebar : (user ? handleToggleSidebar : undefined))}
+          isCollapsed={config.mode === 'embed' ? true : (config.mode === 'canvas' ? true : sidebarCollapsed)}
+          onToggleCollapse={config.mode === 'embed' ? undefined : (config.mode === 'canvas' ? handleToggleSidebar : (user ? handleToggleSidebar : undefined))}
         onNewArchitecture={handleNewArchitecture}
         onSelectArchitecture={handleSelectArchitecture}
         onDeleteArchitecture={handleDeleteArchitecture}

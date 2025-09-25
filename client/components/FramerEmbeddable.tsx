@@ -47,7 +47,7 @@ function FramerEmbeddable({
 
   return (
     <ApiEndpointProvider apiEndpoint={apiEndpoint}>
-      <ViewModeProvider fallbackMode="framer">
+      <ViewModeProvider fallbackMode="embed">
         <div style={containerStyle}>
           <InteractiveCanvas
             isSessionActive={isSessionActive}
