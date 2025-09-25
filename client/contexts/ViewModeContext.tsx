@@ -24,7 +24,7 @@ export interface ViewModeConfig {
   showSettings: boolean;
   showChatPanel: boolean;
   showAgentIcon: boolean; // Controls the agent icon in RightPanelChat, not the Atelier ProcessingStatusIcon
-  showChatbox: boolean; // Controls the bottom chatbox - only needed in embed view
+  showChatbox: boolean; // Controls the chatbox in InteractiveCanvas
 }
 
 const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbedded'>> = {
