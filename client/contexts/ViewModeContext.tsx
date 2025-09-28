@@ -91,6 +91,23 @@ export function useViewMode(): ViewModeContextValue {
   return context;
 }
 
+// --- Convenience helpers (keep all feature decisions centralized) --- //
+type BooleanKeys<T> = { [K in keyof T]-?: T[K] extends boolean ? K : never }[keyof T];
+export type FeatureKey = BooleanKeys<ViewModeConfig>;
+
+export function useFeature(flag: FeatureKey): boolean {
+  const { config } = useViewMode();
+  return Boolean(config[flag]);
+}
+
+// Optional: tiny component gate to avoid inline ternaries everywhere
+export function FeatureGate(
+  { flag, children, fallback = null }:
+  { flag: FeatureKey; children: React.ReactNode; fallback?: React.ReactNode }
+) {
+  return useFeature(flag) ? <>{children}</> : <>{fallback}</>;
+}
+
 interface ViewModeProviderProps {
   children: React.ReactNode;
   fallbackMode?: ViewMode;
@@ -102,6 +119,12 @@ export function ViewModeProvider({ children, fallbackMode = 'canvas' }: ViewMode
     const getViewMode = (): { mode: ViewMode; isEmbedded: boolean } => {
       if (typeof window === 'undefined') {
         return { mode: fallbackMode, isEmbedded: false };
+      }
+      
+      // Optional: localStorage override for QA (centralized here)
+      const override = localStorage.getItem('viewModeOverride') as ViewMode | null;
+      if (override && ['embed', 'canvas', 'auth'].includes(override)) {
+        return { mode: override, isEmbedded: false };
       }
       
       const path = window.location.pathname;

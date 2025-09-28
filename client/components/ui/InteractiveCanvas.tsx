@@ -14,7 +14,8 @@ import ReactFlow, {
 } from "reactflow"
 import "reactflow/dist/style.css"
 import { cn } from "../../lib/utils"
-import { markEmbedToCanvasTransition } from "../../utils/chatPersistence"
+import { markEmbedToCanvasTransition, isEmbedToCanvasTransition, clearEmbedToCanvasFlag, getChatMessages } from "../../utils/chatPersistence"
+import ViewControls from "./ViewControls"
 
 // Import types from separate type definition files
 import { InteractiveCanvasProps } from "../../types/chat"
@@ -1126,7 +1127,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   useEffect(() => {
     
     // In embed mode, handle shared architectures but don't set up auth listeners
-    if (config.mode === 'embed') {
+    if (config.isEmbedded) {
       setUser(null);
       setSidebarCollapsed(true);
       
@@ -1139,12 +1140,21 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       return; // Don't set up any Firebase listeners
     }
 
+    // Check for URL architecture immediately on mount (before auth state)
+    const urlArchId = anonymousArchitectureService.getArchitectureIdFromUrl();
+    console.log('🔍 [URL-ARCH] Initial check for URL architecture ID:', urlArchId);
+    
+    if (urlArchId && config.requiresAuth) {
+      console.log('🔍 [URL-ARCH] Auth mode with URL architecture - processing immediately');
+      loadSharedAnonymousArchitecture(urlArchId);
+    }
+
     // Set up auth listener based on mode
     if (auth) {
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         
         // Canvas mode: redirect to auth if user signs in, preserving architecture URL parameter
-        if (config.mode === 'canvas' && currentUser) {
+        if (!config.requiresAuth && currentUser) {
           
           // Preserve the architecture ID from the current URL
           const currentParams = new URLSearchParams(window.location.search);
@@ -1160,15 +1170,30 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         }
         
         // Auth mode: use actual auth state
-        if (config.mode === 'auth') {
+        if (config.requiresAuth) {
           setUser(currentUser);
           
           // Auto-open sidebar when user signs in, close when they sign out
           if (currentUser) {
             setSidebarCollapsed(false);
             
+            // Check if user is coming from embed view (Edit button transition)
+            const isFromEmbed = isEmbedToCanvasTransition();
+            if (isFromEmbed) {
+              console.log('🔄 Detected embed-to-auth transition, clearing flag and ensuring sync');
+              clearEmbedToCanvasFlag();
+              
+              // Force Firebase sync if user is already authenticated but coming from embed
+              if (!hasInitialSync) {
+                console.log('🔄 Forcing Firebase sync for embed-to-auth transition');
+                syncWithFirebase(currentUser.uid);
+                setHasInitialSync(true);
+              }
+            }
+            
             // Check if there's a URL architecture that needs to be processed
             const urlArchId = anonymousArchitectureService.getArchitectureIdFromUrl();
+            console.log('🔍 [URL-ARCH] Checking for URL architecture ID:', urlArchId);
             if (urlArchId) {
               // Set flag immediately to prevent Firebase sync
               setUrlArchitectureProcessed(true);
@@ -1182,8 +1207,28 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
                     setRawGraph(urlArch.rawGraph);
                     
                     // Generate name and save as user architecture
-                    const userPrompt = (window as any).originalChatTextInput || (window as any).chatTextInput || '';
-                    const baseChatName = await generateChatName(userPrompt, urlArch.rawGraph);
+                    // Get user prompt from chat persistence (more reliable than window globals)
+                    const persistedMessages = getChatMessages();
+                    const lastUserMessage = persistedMessages.filter(msg => msg.sender === 'user').pop();
+                    const userPrompt = lastUserMessage?.content || (window as any).originalChatTextInput || (window as any).chatTextInput || '';
+                    
+                    console.log('🔍 [URL-ARCH] User prompt sources:', {
+                      fromPersistence: lastUserMessage?.content || 'none',
+                      fromWindow: (window as any).originalChatTextInput || 'none',
+                      finalPrompt: userPrompt
+                    });
+                    
+                    let baseChatName;
+                    if (userPrompt) {
+                      baseChatName = await generateChatName(userPrompt, urlArch.rawGraph);
+                      console.log('✅ [URL-ARCH] Generated name from prompt:', baseChatName);
+                    } else {
+                      // Fallback: generate name from architecture content
+                      const nodeLabels = urlArch.rawGraph?.children?.map((node: any) => node.data?.label || node.id).filter(Boolean) || [];
+                      const fallbackPrompt = nodeLabels.length > 0 ? `Architecture with: ${nodeLabels.slice(0, 3).join(', ')}` : 'Cloud Architecture';
+                      baseChatName = await generateChatName(fallbackPrompt, urlArch.rawGraph);
+                      console.log('🔄 [URL-ARCH] Generated name from architecture content:', baseChatName);
+                    }
                     
                     // Save as new user architecture
                     const savedArchId = await ArchitectureService.saveArchitecture({
@@ -1196,7 +1241,8 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
                       edges: []
                     });
                     
-                    // Load existing user architectures
+                    // ALWAYS load existing user architectures to ensure sidebar shows all saved architectures
+                    console.log('🔄 Loading all Firebase architectures for authenticated user');
                     const firebaseArchs = await ArchitectureService.loadUserArchitectures(currentUser.uid);
                     const validArchs = firebaseArchs.filter(arch => arch && arch.id && arch.name && arch.rawGraph);
                     
@@ -1206,11 +1252,13 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
                       name: baseChatName,
                       timestamp: new Date(),
                       rawGraph: urlArch.rawGraph,
-                      firebaseId: savedArchId
+                      firebaseId: savedArchId,
+                      userPrompt: userPrompt,
+                      isFromFirebase: true
                     };
                     
-                    // Convert other Firebase architectures to local format
-                    const otherArchs = validArchs.filter(arch => arch.id !== savedArchId).map(arch => ({
+                    // Convert ALL Firebase architectures to local format
+                    const allFirebaseArchs = validArchs.map(arch => ({
                       id: arch.id,
                       firebaseId: arch.id,
                       name: arch.name,
@@ -1220,20 +1268,68 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
                       isFromFirebase: true
                     }));
                     
-                    // Set URL architecture FIRST, then existing architectures
-                    const allArchs = [newUrlArchTab, ...otherArchs];
-                    setSavedArchitectures(allArchs);
+                    // Add the newly saved architecture to the list (in case it's not in Firebase query yet)
+                    const allArchitectures = [newUrlArchTab, ...allFirebaseArchs.filter(arch => arch.id !== savedArchId)];
+                    
+                    // Set all architectures including the new one
+                    setSavedArchitectures(allArchitectures);
                     setSelectedArchitectureId(savedArchId);
                     setCurrentChatName(baseChatName);
+                    
+                    console.log('✅ Loaded URL architecture and all Firebase architectures:', {
+                      urlArchId: savedArchId,
+                      totalArchitectures: allArchitectures.length,
+                      selectedId: savedArchId,
+                      newTabName: baseChatName
+                    });
                   }
                 } catch (error) {
                   console.error('❌ Failed to process URL architecture:', error);
+                  
+                  // Even if URL processing fails, still load Firebase architectures
+                  try {
+                    console.log('🔄 URL processing failed, loading Firebase architectures anyway');
+                    const firebaseArchs = await ArchitectureService.loadUserArchitectures(currentUser.uid);
+                    const validArchs = firebaseArchs.filter(arch => arch && arch.id && arch.name && arch.rawGraph);
+                    
+                    const allFirebaseArchs = validArchs.map(arch => ({
+                      id: arch.id,
+                      firebaseId: arch.id,
+                      name: arch.name,
+                      timestamp: arch.timestamp?.toDate ? arch.timestamp.toDate() : new Date(arch.timestamp),
+                      rawGraph: arch.rawGraph,
+                      userPrompt: arch.userPrompt || '',
+                      isFromFirebase: true
+                    }));
+                    
+                    setSavedArchitectures(allFirebaseArchs);
+                    if (allFirebaseArchs.length > 0) {
+                      setSelectedArchitectureId(allFirebaseArchs[0].id);
+                    }
+                  } catch (fallbackError) {
+                    console.error('❌ Failed to load Firebase architectures as fallback:', fallbackError);
+                  }
                 }
               })();
+            } else {
+              // No URL architecture, but still ensure Firebase sync happens
+              console.log('🔄 No URL architecture, ensuring Firebase sync happens');
+              if (!hasInitialSync) {
+                syncWithFirebase(currentUser.uid);
+                setHasInitialSync(true);
+              }
             }
-          } else {
-            setSidebarCollapsed(true);
+        } else {
+          setSidebarCollapsed(true);
+          
+          // Even when not signed in, check for URL architecture and load it
+          const urlArchId = anonymousArchitectureService.getArchitectureIdFromUrl();
+          console.log('🔍 [URL-ARCH] Non-authenticated user - checking for URL architecture ID:', urlArchId);
+          if (urlArchId) {
+            console.log('🔍 Loading URL architecture for non-authenticated user:', urlArchId);
+            loadSharedAnonymousArchitecture(urlArchId);
           }
+        }
         }
       });
       return () => unsubscribe();
@@ -1301,17 +1397,39 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
   // Load shared anonymous architecture from URL
   const loadSharedAnonymousArchitecture = useCallback(async (architectureId: string) => {
+    console.log('🔍 [LOAD-SHARED] Starting to load shared architecture:', architectureId);
     try {
       const sharedArch = await anonymousArchitectureService.loadAnonymousArchitectureById(architectureId);
       
       if (sharedArch) {
-        console.log('✅ Loaded shared anonymous architecture:', sharedArch.name);
+        console.log('✅ [LOAD-SHARED] Loaded shared anonymous architecture:', sharedArch.name);
         
         // Set the graph to the shared architecture
         setRawGraph(sharedArch.rawGraph);
         
+        // Update the current chat name to reflect the loaded architecture
+        setCurrentChatName(sharedArch.name);
+        
+        // Create a tab for this architecture (even for non-authenticated users)
+        const newTab = {
+          id: architectureId,
+          name: sharedArch.name,
+          timestamp: new Date(),
+          rawGraph: sharedArch.rawGraph,
+          isShared: true
+        };
+        
+        // Add the tab to savedArchitectures, replacing any existing tab with same ID
+        setSavedArchitectures(prev => {
+          const filtered = prev.filter(arch => arch.id !== architectureId);
+          return [newTab, ...filtered];
+        });
+        
+        // Select this architecture
+        setSelectedArchitectureId(architectureId);
+        
         // Update the architecture name in the UI (optional - could show "Viewing: Architecture Name")
-        console.log('🎯 Displaying shared architecture:', sharedArch.name);
+        console.log('🎯 Displaying shared architecture with new tab:', sharedArch.name);
       } else {
         console.warn('⚠️ Shared architecture not found or expired');
         // Could show a toast notification here
@@ -2156,6 +2274,17 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
   const handleSelectArchitecture = useCallback((architectureId: string) => {
     console.log('🔄 Selecting architecture:', architectureId);
+    
+    // Save current architecture before switching (if it has content and is not the same architecture)
+    if (selectedArchitectureId !== architectureId && rawGraph?.children && rawGraph.children.length > 0) {
+      console.log('💾 Saving current architecture before switching:', selectedArchitectureId);
+      setSavedArchitectures(prev => prev.map(arch => 
+        arch.id === selectedArchitectureId 
+          ? { ...arch, rawGraph: rawGraph, timestamp: new Date() }
+          : arch
+      ));
+    }
+    
     setSelectedArchitectureId(architectureId);
     
     // Only update global architecture ID if agent is not locked to another architecture
@@ -2187,7 +2316,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       console.warn('⚠️ Architecture not found:', architectureId);
       console.warn('⚠️ Available architectures:', savedArchitectures.map(arch => ({ id: arch.id, name: arch.name })));
     }
-  }, [savedArchitectures, agentLockedArchitectureId, setCurrentChatName]);
+  }, [savedArchitectures, agentLockedArchitectureId, setCurrentChatName, selectedArchitectureId, rawGraph]);
 
   // Ensure currentChatName stays in sync with selectedArchitectureId
   useEffect(() => {
@@ -3713,8 +3842,8 @@ Adapt these patterns to your specific requirements while maintaining the overall
       {/* Architecture Sidebar - Show only when allowed by view mode */}
       {config.showSidebar && (
       <ArchitectureSidebar
-          isCollapsed={config.mode === 'embed' ? true : (config.mode === 'canvas' ? true : sidebarCollapsed)}
-          onToggleCollapse={config.mode === 'embed' ? undefined : (config.mode === 'canvas' ? handleToggleSidebar : (user ? handleToggleSidebar : undefined))}
+          isCollapsed={config.isEmbedded ? true : (!config.requiresAuth ? true : sidebarCollapsed)}
+          onToggleCollapse={config.isEmbedded ? undefined : (!config.requiresAuth ? handleToggleSidebar : (user ? handleToggleSidebar : undefined))}
         onNewArchitecture={handleNewArchitecture}
         onSelectArchitecture={handleSelectArchitecture}
         onDeleteArchitecture={handleDeleteArchitecture}
@@ -3782,139 +3911,15 @@ Adapt these patterns to your specific requirements while maintaining the overall
           <span className="text-sm font-medium">Share</span>
         </button>
         
-        {/* Export Button - Show when allowed by view mode */}
-        {config.allowExporting && (
-          <button
-            onClick={handleExportPNG}
-            disabled={!rawGraph || !rawGraph.children || rawGraph.children.length === 0}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-md transition-all duration-200 ${
-              !rawGraph || !rawGraph.children || rawGraph.children.length === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-            title={
-              !rawGraph || !rawGraph.children || rawGraph.children.length === 0
-                ? 'Create some content first to export'
-                : 'Export architecture as high-definition PNG'
-            }
-          >
-            <Download className="w-4 h-4" />
-            <span className="text-sm font-medium">Export</span>
-          </button>
-        )}
-        
-        {/* Save Button (when allowed by view mode) or Edit Button (when not signed in or public mode) */}
-        {config.showSaveButton ? (
-          <button
-            onClick={handleManualSave}
-            disabled={isSaving || !rawGraph || !rawGraph.children || rawGraph.children.length === 0}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-md transition-all duration-200 ${
-              isSaving 
-                ? 'bg-blue-100 text-blue-600 cursor-not-allowed' 
-                : (!rawGraph || !rawGraph.children || rawGraph.children.length === 0)
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-            title={
-              isSaving ? 'Saving...' 
-              : (!rawGraph || !rawGraph.children || rawGraph.children.length === 0) ? 'Create some content first to save'
-              : 'Save current architecture'
-            }
-          >
-            {isSaving ? (
-              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            ) : saveSuccess ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            <span className="text-sm font-medium">Save</span>
-          </button>
-        ) : config.showEditButton ? (
-          <button
-            onClick={async () => {
-              try {
-                // Mark that user is transitioning from embed to canvas view
-                markEmbedToCanvasTransition();
-                
-                // Open in new tab for editing (from embedded contexts)
-            const urlParams = new URLSearchParams(window.location.search);
-            const hasArchitectureId = urlParams.has('arch');
-                
-                // Use current origin for development, production URL for production
-                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                const hasPort = window.location.port && window.location.port !== '80' && window.location.port !== '443';
-                const isDevelopment = isLocalhost || hasPort;
-                
-                let targetUrl = isDevelopment 
-                  ? `${window.location.origin}/auth`  // Local development
-                  : 'https://app.atelier-inc.net';     // Production
-                
-                    if (hasArchitectureId) {
-                  // If there's already an architecture ID, use it
-                  targetUrl += window.location.search;
-                } else if (rawGraph && rawGraph.children && rawGraph.children.length > 0) {
-                  // If there's content but no ID, save as anonymous architecture first
-                  console.log('💾 [EDIT] Saving current architecture to get shareable ID...');
-                  
-                  try {
-                    // Generate AI-powered name for embed architecture
-                    const userPrompt = (window as any).originalChatTextInput || (window as any).chatTextInput || '';
-                    let effectivePrompt = userPrompt;
-                    if (!effectivePrompt && rawGraph && rawGraph.children && rawGraph.children.length > 0) {
-                      const nodeLabels = rawGraph.children.map((node: any) => node.data?.label || node.id).filter(Boolean);
-                      effectivePrompt = `Architecture with components: ${nodeLabels.slice(0, 5).join(', ')}`;
-                    }
-                    
-                    const architectureName = await generateChatName(effectivePrompt, rawGraph);
-                    const anonymousId = await anonymousArchitectureService.saveAnonymousArchitecture(
-                      architectureName,
-                          rawGraph
-                        );
-                    console.log('✅ [EDIT] Saved architecture with ID:', anonymousId);
-                    targetUrl += `?arch=${anonymousId}`;
-                      } catch (error) {
-                    console.error('❌ [EDIT] Failed to save architecture:', error);
-                        // Continue without ID if save fails
-                      }
-                    }
-                    
-                console.log('🚀 [EDIT] Opening main app:', targetUrl);
-                    window.open(targetUrl, '_blank');
-              } catch (error) {
-                console.error('❌ [EDIT] Failed to open main app:', error);
-              }
-            }}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:shadow-md transition-all duration-200"
-            title="Edit in full app"
-          >
-            <Edit className="w-4 h-4" />
-            <span className="text-sm font-medium">Edit</span>
-          </button>
-        ) : null}
-        
-
-
-        {/* Profile/Auth - Show when allowed by view mode */}
-        {config.showProfileSection && (
-          <SaveAuth 
-            onSave={config.mode === 'canvas' ? () => {
-              // Preserve the architecture ID from the current URL when redirecting to auth
-              const currentParams = new URLSearchParams(window.location.search);
-              const archId = currentParams.get('arch');
-              
-              let authUrl = window.location.origin + '/auth';
-              if (archId) {
-                authUrl += `?arch=${archId}`;
-                console.log('🔗 Preserving architecture ID in profile redirect:', archId);
-              }
-              
-              window.location.href = authUrl;
-            } : handleSave} 
-            isCollapsed={true} 
-            user={user} 
-          />
-        )}
+        <ViewControls
+          isSaving={isSaving}
+          saveSuccess={saveSuccess}
+          rawGraph={rawGraph}
+          handleManualSave={handleManualSave}
+          handleSave={handleSave}
+          user={user}
+          onExport={handleExportPNG}
+        />
       </div>
 
       {/* Main Graph Area */}

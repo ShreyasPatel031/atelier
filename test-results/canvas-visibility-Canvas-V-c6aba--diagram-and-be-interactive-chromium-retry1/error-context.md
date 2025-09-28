@@ -1,0 +1,65 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - button "Sign in" [ref=e10] [cursor=pointer]:
+      - img [ref=e11] [cursor=pointer]
+    - generic [ref=e14]:
+      - generic [ref=e16]:
+        - generic:
+          - button "Atelier":
+            - img "Atelier"
+      - generic [ref=e17]:
+        - button "Share" [disabled] [ref=e18]:
+          - img [ref=e19]
+          - generic [ref=e22]: Share
+        - generic [ref=e23]:
+          - button "Export" [ref=e24] [cursor=pointer]:
+            - img [ref=e25] [cursor=pointer]
+            - generic [ref=e28] [cursor=pointer]: Export
+          - button "Save" [disabled] [ref=e29]:
+            - img [ref=e30]
+            - generic [ref=e34]: Save
+          - button "Sign in" [ref=e36] [cursor=pointer]:
+            - img [ref=e37] [cursor=pointer]
+      - generic [ref=e42]:
+        - generic [ref=e44]:
+          - generic:
+            - img
+            - button [ref=e45] [cursor=pointer]
+        - img [ref=e49]
+        - generic [ref=e51]:
+          - button "zoom in" [ref=e52] [cursor=pointer]:
+            - img [ref=e53] [cursor=pointer]
+          - button "zoom out" [ref=e55] [cursor=pointer]:
+            - img [ref=e56] [cursor=pointer]
+          - button "fit view" [ref=e58] [cursor=pointer]:
+            - img [ref=e59] [cursor=pointer]
+          - button "toggle interactivity" [ref=e61] [cursor=pointer]:
+            - img [ref=e62] [cursor=pointer]
+        - link "React Flow attribution" [ref=e65] [cursor=pointer]:
+          - /url: https://reactflow.dev
+          - text: React Flow
+  - generic [ref=e67]:
+    - generic [ref=e69]:
+      - img [ref=e71]
+      - button "Close Chat Panel" [ref=e74] [cursor=pointer]:
+        - img [ref=e75] [cursor=pointer]
+    - generic [ref=e78]:
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - generic [ref=e83]:
+            - paragraph [ref=e84]: Create a simple web app with a database
+            - paragraph [ref=e85]: 04:41 PM
+          - img [ref=e87]
+        - generic [ref=e90]:
+          - img [ref=e92]
+          - generic [ref=e95]:
+            - paragraph [ref=e97]: "Creating architecture diagram for: monolith"
+            - paragraph [ref=e98]: 04:41 PM
+      - generic [ref=e100]:
+        - textbox "Ask me to create an architecture..." [ref=e101]
+        - button "Send message" [disabled] [ref=e102]:
+          - img [ref=e103]
+```

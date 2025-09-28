@@ -7,6 +7,9 @@ import ErrorBoundary from "./console/ErrorBoundary";
 import InteractiveCanvas from "./ui/InteractiveCanvas";
 import RightPanelChat from "./chat/RightPanelChat";
 import { ViewModeProvider, useViewMode } from "../contexts/ViewModeContext";
+import EmbedView from "./views/EmbedView";
+import CanvasView from "./views/CanvasView";
+import AuthView from "./views/AuthView";
 // Import test functions to make them available in console
 import "../utils/testIconFallback";
 import "../utils/testArchitectureSearch";
@@ -46,17 +49,45 @@ function AppContent() {
       {/* Main Canvas Area */}
       <div className="flex-1 overflow-hidden">
         <ErrorBoundary>
-          <InteractiveCanvas
-            isSessionActive={isSessionActive}
-            isConnecting={isConnecting}
-            isAgentReady={isAgentReady}
-            startSession={startSession}
-            stopSession={stopSession}
-            sendTextMessage={sendTextMessage}
-            sendClientEvent={sendClientEvent}
-            events={[]}
-            rightPanelCollapsed={rightPanelCollapsed}
-          />
+          {config.mode === 'embed' && (
+            <EmbedView
+              isSessionActive={isSessionActive}
+              isConnecting={isConnecting}
+              isAgentReady={isAgentReady}
+              startSession={startSession}
+              stopSession={stopSession}
+              sendTextMessage={sendTextMessage}
+              sendClientEvent={sendClientEvent}
+              events={[]}
+              rightPanelCollapsed={rightPanelCollapsed}
+            />
+          )}
+          {config.mode === 'canvas' && (
+            <CanvasView
+              isSessionActive={isSessionActive}
+              isConnecting={isConnecting}
+              isAgentReady={isAgentReady}
+              startSession={startSession}
+              stopSession={stopSession}
+              sendTextMessage={sendTextMessage}
+              sendClientEvent={sendClientEvent}
+              events={[]}
+              rightPanelCollapsed={rightPanelCollapsed}
+            />
+          )}
+          {config.mode === 'auth' && (
+            <AuthView
+              isSessionActive={isSessionActive}
+              isConnecting={isConnecting}
+              isAgentReady={isAgentReady}
+              startSession={startSession}
+              stopSession={stopSession}
+              sendTextMessage={sendTextMessage}
+              sendClientEvent={sendClientEvent}
+              events={[]}
+              rightPanelCollapsed={rightPanelCollapsed}
+            />
+          )}
         </ErrorBoundary>
       </div>
       

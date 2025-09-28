@@ -6,14 +6,108 @@
 
 import fetch from 'node-fetch';
 
-const VERCEL_DEV_URL = 'http://localhost:3000';
+async function findLocalServer() {
+    const ports = [3000, 3001, 3002, 3003, 3004];
+    
+    for (const port of ports) {
+        try {
+            const response = await fetch(`http://localhost:${port}/api/embed`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: 'test' })
+            });
+            
+            if (response.ok) {
+                return `http://localhost:${port}`;
+            }
+        } catch (error) {
+            // Port not available, try next
+        }
+    }
+    return null;
+}
 
-async function waitForServer(maxRetries = 30) {
-    console.log('🔍 Waiting for Vercel dev server...');
+async function waitForServers(maxRetries = 30) {
+    console.log('🔍 Waiting for servers...');
+    
+    // Check Vercel dev server first
+    const VERCEL_DEV_URL = 'http://localhost:3000';
+    let vercelReady = false;
+    let localUrl = null;
     
     for (let i = 0; i < maxRetries; i++) {
+        // Check Vercel
+        if (!vercelReady) {
+            try {
+                const response = await fetch(`${VERCEL_DEV_URL}/api/embed`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: 'test' })
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Vercel dev server is ready');
+                    vercelReady = true;
+                }
+            } catch (error) {
+                // Vercel not ready yet
+            }
+        }
+        
+        // Check local server
+        if (!localUrl) {
+            localUrl = await findLocalServer();
+            if (localUrl) {
+                console.log(`✅ Local dev server is ready at ${localUrl}`);
+            }
+        }
+        
+        if (vercelReady && localUrl) {
+            return { vercel: VERCEL_DEV_URL, local: localUrl };
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+    }
+    
+    throw new Error('❌ Servers not found within timeout');
+}
+
+async function runTests() {
+    const { vercel, local } = await waitForServers();
+    
+    console.log('🧪 Testing Icon Fallback System');
+    console.log('===============================\n');
+    
+    let allTestsPassed = true;
+    
+    // Test both servers
+    for (const [serverName, serverUrl] of Object.entries({ vercel, local })) {
+        console.log(`\n🌐 Testing ${serverName.toUpperCase()} server at ${serverUrl}`);
+        console.log('─'.repeat(50));
+        
+        // Test 1: Verify missing icon scenario
+        console.log('1️⃣ Testing missing icon: gcp_cloud_trace');
+        
         try {
-            const response = await fetch(`${VERCEL_DEV_URL}/api/embed`, {
+            const iconResponse = await fetch(`${serverUrl}/icons/gcp/gcp_cloud_trace.png`);
+            const contentType = iconResponse.headers.get('content-type') || '';
+            
+            if (contentType.includes('text/html')) {
+                console.log('   ✅ Icon correctly detected as missing (HTML response)');
+            } else {
+                console.log('   ❌ Icon loading detection failed');
+                allTestsPassed = false;
+            }
+        } catch (error) {
+            console.log(`   ❌ Error testing icon URL: ${error.message}`);
+            allTestsPassed = false;
+        }
+        
+        // Test 2: Check fallback embedding availability
+        console.log('\n2️⃣ Testing fallback embedding availability');
+        
+        try {
+            const response = await fetch(`${serverUrl}/api/embed`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: 'test' })
@@ -151,9 +245,7 @@ async function testIconFallback() {
 // Main execution
 async function main() {
     try {
-        await waitForServer();
-        const success = await testIconFallback();
-        process.exit(success ? 0 : 1);
+        await runTests();
     } catch (error) {
         console.error(`🚨 Icon fallback test failed: ${error.message}`);
         process.exit(1);
@@ -165,4 +257,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     main();
 }
 
-export { testIconFallback, waitForServer };
+export { runTests };

@@ -617,10 +617,12 @@ export const batchUpdate = (operations: Array<{
         if (!args.nodename || typeof args.nodename !== 'string') {
           throw new Error(`add_node requires 'nodename' as a string, got: ${JSON.stringify(args.nodename)}`);
         }
-        if (!args.parentId || typeof args.parentId !== 'string') {
+        // Default parentId to "root" if not provided
+        const parentId = args.parentId || "root";
+        if (typeof parentId !== 'string') {
           throw new Error(`add_node requires 'parentId' as a string, got: ${JSON.stringify(args.parentId)}`);
         }
-        updatedGraph = addNode(args.nodename, args.parentId, updatedGraph, args.data);
+        updatedGraph = addNode(args.nodename, parentId, updatedGraph, args.data);
         break;
         
       case "delete_node":

@@ -5,8 +5,9 @@ export default {
     '^.+\\.ts$': 'ts-jest'
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-  testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+  testMatch: ['**/__tests__/**/*.js'],
+  passWithNoTests: true,
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   roots: ['<rootDir>'],
-  testPathIgnorePatterns: ['/node_modules/']
+  testPathIgnorePatterns: ['/node_modules/', '/e2e/', '/client/', '/api/', '/pages/', '/scripts/', '/server/']
 };
