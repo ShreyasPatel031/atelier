@@ -113,7 +113,7 @@ const ViewControls: React.FC<ViewControlsProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       {/* Export Button */}
       {config.allowExporting && onExport && (
         <button
