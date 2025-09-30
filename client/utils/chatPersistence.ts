@@ -99,13 +99,19 @@ export function getCurrentConversation(): PersistedChatMessage[] {
  * Get all persisted chat messages (only if coming from embed view)
  */
 export function getChatMessages(): PersistedChatMessage[] {
-  // Only return messages if user is coming from embed view to canvas view
-  if (isEmbedToCanvasTransition()) {
-    const messages = getCurrentConversation();
-    // Loading persisted messages from embed view
+  const messages = getCurrentConversation();
+  console.log('💬 [CHAT-PERSISTENCE] getChatMessages called:', {
+    isEmbedToCanvas: isEmbedToCanvasTransition(),
+    messageCount: messages.length,
+    messages: messages.map(m => ({ sender: m.sender, content: m.content.substring(0, 50) + '...' }))
+  });
+  
+  // Return messages if user is coming from embed view to canvas view OR if there are any saved messages
+  if (isEmbedToCanvasTransition() || messages.length > 0) {
+    console.log('💬 [CHAT-PERSISTENCE] Returning persisted messages:', messages.length);
     return messages;
   } else {
-    // No persisted messages (not from embed view)
+    console.log('💬 [CHAT-PERSISTENCE] No persisted messages');
     return [];
   }
 }

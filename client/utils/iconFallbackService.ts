@@ -166,17 +166,14 @@ class IconFallbackService {
         // CRITICAL: Verify the fallback icon actually exists as a file
         const iconExists = await this.verifyIconExists(fallbackIcon);
         if (!iconExists) {
-          console.log(`❌ IconFallback: Fallback icon "${fallbackIcon}" does not exist as file, trying next best match`);
           // Try to find the next best match that actually exists
           return await this.findNextBestMatch(missingIconName, searchEmbedding, globalBestMatch);
         }
         
         // Found valid fallback
         this.fallbackCache[missingIconName] = fallbackIcon;
-        console.log(`✅ IconFallback: Found valid fallback "${missingIconName}" → "${fallbackIcon}"`);
         return fallbackIcon;
       } else {
-        console.log(`❌ IconFallback: No icons found in database for "${missingIconName}"`);
         return null;
       }
 

@@ -2,6 +2,7 @@ import {
   collection, 
   addDoc, 
   getDocs, 
+  getDoc,
   query, 
   where, 
   orderBy, 
@@ -240,6 +241,27 @@ export class ArchitectureService {
       console.log('✅ Architecture deleted from Firebase:', architectureId);
     } catch (error) {
       console.error('❌ Error deleting architecture:', error);
+      throw error;
+    }
+  }
+
+  static async getArchitectureById(architectureId: string): Promise<SavedArchitecture | null> {
+    try {
+      const docRef = doc(db, this.COLLECTION_NAME, architectureId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          ...data
+        } as SavedArchitecture;
+      } else {
+        console.log('❌ Architecture not found:', architectureId);
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ Error fetching architecture by ID:', error);
       throw error;
     }
   }

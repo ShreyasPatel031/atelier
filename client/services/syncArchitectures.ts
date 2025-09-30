@@ -32,15 +32,22 @@ export async function syncWithFirebase(options: SyncArchitectureOptions): Promis
     callback
   } = options;
 
+  console.log('🔄 [FIREBASE-SYNC] Starting sync with options:', {
+    userId,
+    isPublicMode,
+    urlArchitectureProcessed,
+    hasCallback: !!callback
+  });
+
   // Don't load architectures in public mode
   if (isPublicMode) {
-    console.log('🔒 Public mode - skipping Firebase sync');
+    console.log('🔒 [FIREBASE-SYNC] Public mode - skipping Firebase sync');
     return;
   }
   
   // Always sync Firebase architectures, but handle URL architecture processing differently
   if (urlArchitectureProcessed) {
-    console.log('🔗 URL architecture already processed - proceeding with Firebase sync for historical tabs');
+    console.log('🔗 [FIREBASE-SYNC] URL architecture already processed - proceeding with Firebase sync for historical tabs');
   }
   
   let timeoutId: NodeJS.Timeout;
@@ -87,20 +94,20 @@ export async function syncWithFirebase(options: SyncArchitectureOptions): Promis
       const sortedValidArchs = validArchs.sort((a, b) => (b.createdAt || b.timestamp).getTime() - (a.createdAt || a.timestamp).getTime());
       
       // Handle priority architecture (transferred from anonymous session)
-      const finalValidArchs = await handlePriorityArchitecture(sortedValidArchs);
-      
+      const { finalValidArchs, priorityArchId } = await handlePriorityArchitecture(sortedValidArchs);
+
       // Only include "New Architecture" tab if user has no existing architectures
       const allArchs = finalValidArchs.length > 0 ? finalValidArchs : [newArchTab];
       callback.setSavedArchitectures(allArchs);
-      
+
       console.log(`✅ Loaded ${validArchs.length} valid architectures from Firebase`);
       console.log(`📊 Total architectures: ${allArchs.length}`);
-      
+
       // Log current tab order for debugging
       logTabOrder(allArchs);
-      
+
       // Handle architecture selection
-      await handleArchitectureSelection(allArchs, finalValidArchs, callback);
+      await handleArchitectureSelection(allArchs, finalValidArchs, priorityArchId, callback);
     }
   } catch (error) {
     console.error('❌ Failed to sync with Firebase:', error);
@@ -167,19 +174,20 @@ function safeTimestampConversion(timestamp: any): Date {
 
 /**
  * Handle priority architecture from localStorage
+ * Returns both the reordered architectures and the priority ID (before it's removed)
  */
-async function handlePriorityArchitecture(sortedValidArchs: any[]): Promise<any[]> {
+async function handlePriorityArchitecture(sortedValidArchs: any[]): Promise<{ finalValidArchs: any[], priorityArchId: string | null }> {
   const priorityArchId = localStorage.getItem('priority_architecture_id');
   console.log('🔥 [PRIORITY-ARCH] Priority architecture ID from localStorage:', priorityArchId);
   console.log('🔥 [PRIORITY-ARCH] Available arch IDs:', sortedValidArchs.map(a => a.id));
   console.log('🔥 [PRIORITY-ARCH] Current localStorage keys:', Object.keys(localStorage));
-  
+
   let finalValidArchs = sortedValidArchs;
-  
+
   if (priorityArchId) {
     console.log('🔥 [PRIORITY-ARCH] 📌 Checking for priority architecture:', priorityArchId);
     const priorityArchIndex = sortedValidArchs.findIndex(arch => arch.id === priorityArchId);
-    
+
     if (priorityArchIndex >= 0) {
       console.log('🔥 [PRIORITY-ARCH] ✅ Found priority architecture in existing list, moving to top');
       const priorityArch = sortedValidArchs[priorityArchIndex];
@@ -191,10 +199,10 @@ async function handlePriorityArchitecture(sortedValidArchs: any[]): Promise<any[
       console.log('🔥 [PRIORITY-ARCH] 🧹 Cleared priority architecture flag');
     } else {
       console.log('🔥 [PRIORITY-ARCH] ⚠️ Priority architecture not found in existing list, fetching directly...');
-      
+
       try {
         await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for Firebase consistency
-        
+
         const priorityArch = await ArchitectureService.getArchitectureById(priorityArchId);
         if (priorityArch) {
           console.log('🔥 [PRIORITY-ARCH] ✅ Found priority architecture via direct fetch:', priorityArch.name);
@@ -212,9 +220,9 @@ async function handlePriorityArchitecture(sortedValidArchs: any[]): Promise<any[
   } else {
     console.log('🔥 [PRIORITY-ARCH] No priority architecture ID found in localStorage');
   }
-  
+
   console.log('🔥 [PRIORITY-ARCH] Final architectures after priority handling:', finalValidArchs.map(a => ({id: a.id, name: a.name})));
-  return finalValidArchs;
+  return { finalValidArchs, priorityArchId };
 }
 
 /**
@@ -245,15 +253,16 @@ function logTabOrder(allArchs: any[]): void {
  * Handle architecture selection logic
  */
 async function handleArchitectureSelection(
-  allArchs: any[], 
-  finalValidArchs: any[], 
+  allArchs: any[],
+  finalValidArchs: any[],
+  priorityArchId: string | null,
   callback: SyncArchitectureOptions['callback']
 ): Promise<void> {
   const { setSelectedArchitectureId, setCurrentChatName, setRawGraph, setPendingArchitectureSelection } = callback;
-  
-  // Find priority architecture in final list
-  const foundPriorityArch = allArchs.find(arch => arch.id === localStorage.getItem('priority_architecture_id')?.toString());
-  
+
+  // Find priority architecture in final list using the ID we captured before removal
+  const foundPriorityArch = priorityArchId ? allArchs.find(arch => arch.id === priorityArchId) : null;
+
   // Handle architecture selection
   if (foundPriorityArch) {
     console.log('✅ User signed in - will auto-select transferred architecture after state update:', foundPriorityArch.id, foundPriorityArch.name);
@@ -264,7 +273,7 @@ async function handleArchitectureSelection(
     console.log('📋 User has existing architectures - auto-selecting first one:', firstArch.name);
     setSelectedArchitectureId(firstArch.id);
     setCurrentChatName(firstArch.name);
-    
+
     // Load the architecture content
     if (firstArch.rawGraph) {
       console.log('📂 Loading existing architecture content to replace empty canvas');
@@ -279,7 +288,7 @@ async function handleArchitectureSelection(
       rawGraph: { id: "root", children: [], edges: [] },
       isNew: true
     };
-    
+
     setSelectedArchitectureId('new-architecture');
     setCurrentChatName('New Architecture');
   }

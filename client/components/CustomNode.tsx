@@ -91,8 +91,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
         } catch (error) {
           console.log(`❌ Provider icon not found: ${iconName} (${error instanceof Error ? error.message : 'Unknown error'})`);
         }
-      } else {
-        console.log(`❌ Provider icon category not found: ${iconName} (${provider})`);
       }
     } else {
       // General icon (no provider prefix) - try canvas assets
@@ -153,18 +151,14 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
             iconFallbackService.findFallbackIcon(data.icon)
               .then(async (fallbackIcon) => {
                 if (fallbackIcon) {
-                  console.log(`🔍 Semantic fallback found: ${data.icon} → ${fallbackIcon}`);
                   try {
                     const fallbackPath = await tryLoadIcon(fallbackIcon);
                     setFinalIconSrc(fallbackPath);
                     setIconLoaded(true);
                     setIconError(false);
-                    console.log(`✅ Fallback SUCCESS: ${data.icon} → ${fallbackIcon} (loaded: ${fallbackPath})`);
                   } catch (error) {
-                    console.log(`❌ Fallback FAILED to load: ${fallbackIcon}`, error);
+                    // Silent fallback failure
                   }
-                } else {
-                  console.log(`❌ No semantic fallback found for: ${data.icon}`);
                 }
               })
               .catch((error) => {

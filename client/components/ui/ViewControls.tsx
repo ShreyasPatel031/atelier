@@ -74,13 +74,14 @@ const ViewControls: React.FC<ViewControlsProps> = ({
             const nodeLabels = rawGraph.children.map((node: any) => node.data?.label || node.id).filter(Boolean);
             effectivePrompt = `Architecture with components: ${nodeLabels.slice(0, 5).join(', ')}`;
           }
-          
+
           const architectureName = await generateChatName(effectivePrompt, rawGraph);
           const anonymousId = await anonymousArchitectureService.saveAnonymousArchitecture(
             architectureName,
-            rawGraph
+            rawGraph,
+            userPrompt  // Pass the original userPrompt to be saved with the architecture
           );
-          console.log('✅ [EDIT] Saved architecture with ID:', anonymousId);
+          console.log('✅ [EDIT] Saved architecture with ID:', anonymousId, 'with userPrompt:', userPrompt ? 'YES' : 'NO');
           targetUrl += `?arch=${anonymousId}`;
         } catch (error) {
           console.error('❌ [EDIT] Failed to save architecture:', error);

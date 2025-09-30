@@ -27,22 +27,29 @@ export async function generateNameWithFallback(rawGraph: any, userPrompt?: strin
     nodeCount: rawGraph?.children?.length || 0 
   });
   
-  let name = await generateChatName(prompt, rawGraph);
-  console.log('🎯 Generated chat name from API:', name);
-  
-  // If API returned default name, try with better prompt
-  if (!name || name === "New Architecture") {
-    console.warn('⚠️ API returned default name, trying with better prompt');
-    const retryPrompt = componentsHintFromGraph(rawGraph);
-    const retry = await generateChatName(retryPrompt, rawGraph);
-    console.log('🔄 Retry generated name:', retry);
+  try {
+    let name = await generateChatName(prompt, rawGraph);
+    console.log('🎯 Generated chat name from API:', name);
     
-    if (retry && retry !== "New Architecture") {
-      name = retry;
+    // If API returned default name, try with better prompt
+    if (!name || name === "New Architecture") {
+      console.warn('⚠️ API returned default name, trying with better prompt');
+      const retryPrompt = componentsHintFromGraph(rawGraph);
+      const retry = await generateChatName(retryPrompt, rawGraph);
+      console.log('🔄 Retry generated name:', retry);
+      
+      if (retry && retry !== "New Architecture") {
+        name = retry;
+      }
     }
+    
+    return name || "New Architecture";
+  } catch (error) {
+    console.error('❌ generateChatName API failed, using fallback:', error);
+    // Fallback to components-based naming
+    const fallbackName = componentsHintFromGraph(rawGraph);
+    return fallbackName || "New Architecture";
   }
-  
-  return name || "New Architecture";
 }
 
 /**

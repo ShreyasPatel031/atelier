@@ -445,7 +445,8 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       try {
         anonymousId = await anonymousArchitectureService.saveAnonymousArchitecture(
           `${architecture.name} (Shared)`,
-          architecture.rawGraph
+          architecture.rawGraph,
+          architecture.userPrompt  // Include userPrompt when sharing
         );
       } catch (error) {
         console.warn('⚠️ Share creation throttled:', error.message);
@@ -797,9 +798,16 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
             
             const urlArchFound = await checkAndLoadUrlArchitecture();
             if (urlArchFound) {
-              // Set flag immediately to prevent Firebase sync
+              // Set flag to indicate URL architecture was processed
               setUrlArchitectureProcessed(true);
               console.log('🔥 [AUTH-MODE] ✅ URL architecture processed and flag set');
+              
+              // Still run Firebase sync to load historical tabs
+              if (!hasInitialSync) {
+                console.log('🔥 [AUTH-MODE] Running Firebase sync for historical tabs...');
+                syncWithFirebase(currentUser.uid);
+                setHasInitialSync(true);
+              }
             } else {
               // No URL architecture, but still ensure Firebase sync happens
               console.log('🔥 [AUTH-MODE] No URL architecture found - will run Firebase sync');
@@ -1335,7 +1343,8 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
   const { checkAndLoadUrlArchitecture, loadSharedAnonymousArchitecture } = useUrlArchitecture({
     loadArchitecture: loadArchitectureFromUrl,
-    config: viewModeConfig
+    config: viewModeConfig,
+    currentUser: user
   });
 
   const handleSelectArchitecture = useCallback((architectureId: string) => {
@@ -2609,11 +2618,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
 
 
       {/* Save/Edit and Settings buttons - positioned relative to right panel */}
-      <div className={`absolute top-4 z-[100] flex gap-2 transition-all duration-300 ${
-        viewModeConfig.showChatPanel 
-          ? (rightPanelCollapsed ? 'right-20' : 'right-[25rem]') 
-          : 'right-4'
-      }`}>
+      <div className="absolute top-4 right-4 z-[100] flex gap-2">
         {/* Share Button - Always visible for all users */}
         <button
           onClick={handleShareCurrent}
@@ -2767,6 +2772,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
         <ConnectionStatus />
       </div>
       */}
+
 
 
       {/* Dev Panel */}

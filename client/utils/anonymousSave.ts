@@ -8,7 +8,7 @@ import { generateNameWithFallback } from './naming';
 
 export interface AnonymousArchitectureService {
   getArchitectureIdFromUrl(): string | null;
-  saveAnonymousArchitecture(name: string, graph: any): Promise<string>;
+  saveAnonymousArchitecture(name: string, graph: any, userPrompt?: string): Promise<string>;
   updateAnonymousArchitecture(id: string, payload: any): Promise<void>;
 }
 
@@ -57,9 +57,9 @@ export async function ensureAnonymousSaved({
     // Create new anonymous architecture with AI-generated name
     console.log('🤖 Generating name for new anonymous architecture');
     const name = await generateNameWithFallback(rawGraph, userPrompt);
-    
-    const newId = await anonymousService.saveAnonymousArchitecture(name, rawGraph);
-    console.log('✅ New anonymous architecture saved with ID:', newId);
+
+    const newId = await anonymousService.saveAnonymousArchitecture(name, rawGraph, userPrompt);
+    console.log('✅ New anonymous architecture saved with ID:', newId, 'with userPrompt:', userPrompt ? 'YES' : 'NO');
     return newId;
     
   } catch (error) {

@@ -3,15 +3,22 @@
  * Replaces scattered URL architecture checking and loading logic
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { anonymousArchitectureService, AnonymousArchitecture } from '../services/anonymousArchitectureService';
 
 interface UseUrlArchitectureProps {
   loadArchitecture: (architecture: AnonymousArchitecture, source: string) => void;
   config: { isEmbedded: boolean; requiresAuth?: boolean };
+  currentUser?: {
+    uid: string;
+    email: string | null;
+  } | null;
 }
 
-export function useUrlArchitecture({ loadArchitecture, config }: UseUrlArchitectureProps) {
+export function useUrlArchitecture({ loadArchitecture, config, currentUser }: UseUrlArchitectureProps) {
+  // Store the current user in a ref so it's always up to date
+  const currentUserRef = useRef(currentUser);
+  currentUserRef.current = currentUser;
   /**
    * Check for URL architecture ID and load it if present
    * Returns whether URL architecture was found and loaded
@@ -58,30 +65,58 @@ export function useUrlArchitecture({ loadArchitecture, config }: UseUrlArchitect
           // In auth mode, we need to convert the anonymous architecture to a Firebase architecture
           // and set it as priority so it becomes the first tab
           console.log('🔥 [LOAD-SHARED] 🔐 Processing URL architecture for authenticated user');
-          
+
+          // Check if user is authenticated
+          if (!currentUserRef.current?.uid || !currentUserRef.current?.email) {
+            console.log('🔥 [LOAD-SHARED] ⚠️ User not authenticated yet - will process after sign-in');
+            // Still load the architecture as anonymous for now
+            loadArchitecture(sharedArch, 'url-shared-anonymous');
+            return true;
+          }
+
           try {
             // Import required modules
             const { ArchitectureService } = await import('../services/architectureService');
             const { generateNameWithFallback } = await import('../utils/naming');
             const { getChatMessages } = await import('../utils/chatPersistence');
-            
-            // Get chat messages for naming
-            const persistedMessages = getChatMessages();
-            const lastUserMessage = persistedMessages.filter(msg => msg.sender === 'user').pop();
-            const userPrompt = lastUserMessage?.content || (window as any).originalChatTextInput || (window as any).chatTextInput || '';
-            
-            console.log('🔥 [LOAD-SHARED] 📝 Chat messages for naming:', persistedMessages);
-            console.log('🔥 [LOAD-SHARED] 🏷️ User prompt for naming:', userPrompt);
-            
-            // Generate name using backend API
+
+            // PRIORITY ORDER for getting userPrompt:
+            // 1. From the loaded architecture (most reliable - saved with the architecture)
+            // 2. From persisted chat messages (fallback for old architectures)
+            // 3. From window global (fallback for current session)
+            // 4. Empty string (will trigger componentsHintFromGraph fallback)
+
+            let userPrompt = sharedArch.userPrompt || '';
+
+            if (!userPrompt) {
+              console.log('🔥 [LOAD-SHARED] ⚠️ No userPrompt in architecture, trying chat messages...');
+              const persistedMessages = getChatMessages();
+              const lastUserMessage = persistedMessages.filter(msg => msg.sender === 'user').pop();
+              userPrompt = lastUserMessage?.content || (window as any).originalChatTextInput || (window as any).chatTextInput || '';
+
+              console.log('🔥 [LOAD-SHARED] 📝 Chat messages for naming:', persistedMessages);
+              console.log('🔥 [LOAD-SHARED] 🔍 Fallback debug info:', {
+                messageCount: persistedMessages.length,
+                lastUserMessage: lastUserMessage?.content,
+                windowOriginalChat: (window as any).originalChatTextInput,
+                windowChatText: (window as any).chatTextInput,
+                finalPrompt: userPrompt
+              });
+            } else {
+              console.log('🔥 [LOAD-SHARED] ✅ Using userPrompt from architecture:', userPrompt);
+            }
+
+            console.log('🔥 [LOAD-SHARED] 🏷️ Final user prompt for naming:', userPrompt || '(empty - will use graph components)');
+
+            // Generate name using backend API (will use componentsHintFromGraph if userPrompt is empty)
             const baseChatName = await generateNameWithFallback(sharedArch.rawGraph, userPrompt);
             console.log('🔥 [LOAD-SHARED] 🎯 Generated architecture name:', baseChatName);
             
             // Save to Firebase
             const savedArchId = await ArchitectureService.saveArchitecture({
               name: baseChatName,
-              userId: ArchitectureService.getCurrentUserId() || '',
-              userEmail: ArchitectureService.getCurrentUserEmail() || '',
+              userId: currentUserRef.current.uid,
+              userEmail: currentUserRef.current.email,
               rawGraph: sharedArch.rawGraph,
               userPrompt: userPrompt,
               nodes: [],

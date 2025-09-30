@@ -15,6 +15,7 @@ export interface AnonymousArchitecture {
   isAnonymous: true;
   userAgent?: string;
   ipHash?: string; // For cleanup purposes (hashed IP)
+  userPrompt?: string; // Original user prompt that created the architecture
 }
 
 class AnonymousArchitectureService {
@@ -46,13 +47,13 @@ class AnonymousArchitectureService {
   /**
    * Save an anonymous architecture
    */
-  async saveAnonymousArchitecture(name: string, rawGraph: any): Promise<string> {
+  async saveAnonymousArchitecture(name: string, rawGraph: any, userPrompt?: string): Promise<string> {
     try {
       // Ensure we're running on client side
       if (typeof window === 'undefined') {
         throw new Error('Anonymous architecture saving only works on client side');
       }
-      
+
       // Ensure Firebase is initialized
       if (!db) {
         throw new Error('Firebase db is not initialized');
@@ -65,9 +66,15 @@ class AnonymousArchitectureService {
         console.log('⏳ Save throttled - too soon after last save');
         throw new Error('Save throttled - please wait before saving again');
       }
-      
+
       const sessionId = this.getSessionId();
-      
+
+      // Try to get userPrompt from various sources if not provided
+      const finalUserPrompt = userPrompt
+        || (window as any).originalChatTextInput
+        || (window as any).chatTextInput
+        || '';
+
       const anonymousArch: Omit<AnonymousArchitecture, 'id'> = {
         name,
         rawGraph,
@@ -75,20 +82,21 @@ class AnonymousArchitectureService {
         timestamp: Timestamp.now(),
         isAnonymous: true,
         userAgent: navigator.userAgent,
+        userPrompt: finalUserPrompt,
       };
 
-      console.log('💾 Saving anonymous architecture:', name, 'for session:', sessionId);
-      
+      console.log('💾 Saving anonymous architecture:', name, 'for session:', sessionId, 'with userPrompt:', finalUserPrompt ? 'YES' : 'NO');
+
       const docRef = await addDoc(collection(db, 'anonymous_architectures'), anonymousArch);
-      
+
       console.log('✅ Anonymous architecture saved with ID:', docRef.id);
-      
+
       // Update throttling state
       this.lastSaveTime = now;
-      
+
       // Update URL with architecture ID for sharing
       this.updateUrlWithArchitectureId(docRef.id);
-      
+
       return docRef.id;
     } catch (error) {
       console.error('❌ Error saving anonymous architecture:', error);

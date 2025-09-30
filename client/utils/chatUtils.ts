@@ -8,8 +8,10 @@ import { Message } from '../types/chat';
  * Generate chat name from user input and architecture
  */
 export async function generateChatName(userPrompt: string, architecture: any): Promise<string> {
+  // Handle empty prompts gracefully
   if (!userPrompt || userPrompt.trim() === '') {
-    throw new Error('❌ FATAL: User prompt is required for chat name generation');
+    console.log('🔧 [generateChatName] Empty prompt provided, using fallback');
+    return "New Architecture";
   }
   
   console.log('🔧 [generateChatName] Starting with:', { userPrompt, hasArchitecture: !!architecture });
