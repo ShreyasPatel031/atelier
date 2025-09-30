@@ -121,6 +121,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   
   // Sync right panel state with prop changes from App.jsx
   useEffect(() => {
+    console.log('🔄 Right panel state changed:', rightPanelCollapsed);
     setIsRightPanelCollapsed(rightPanelCollapsed);
   }, [rightPanelCollapsed]);
   
@@ -2626,7 +2627,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
 
       {/* Save/Edit and Settings buttons - positioned to avoid right panel overlap */}
       <div className={`absolute top-4 z-[100] flex gap-2 transition-all duration-300 ${
-        viewModeConfig.showChatPanel
+        viewModeConfig.showChatPanel 
           ? (isRightPanelCollapsed ? 'right-20' : 'right-[25rem]')
           : 'right-4'
       }`}>
