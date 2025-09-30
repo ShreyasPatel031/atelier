@@ -11,8 +11,22 @@ COLORS_YELLOW='\033[1;33m'
 COLORS_BLUE='\033[0;34m'
 COLORS_NC='\033[0m' # No Color
 
-echo -e "${COLORS_BLUE}🔒 PRE-PUSH PROTECTION: Vercel Preview Testing${COLORS_NC}"
+echo -e "${COLORS_BLUE}🔒 PRE-PUSH PROTECTION: Running Tests${COLORS_NC}"
 echo "=================================================================="
+
+# Step 0: Run local tests first (fast fail)
+echo -e "${COLORS_BLUE}🧪 Step 0: Running local test suite...${COLORS_NC}"
+if ! npm test; then
+    echo ""
+    echo -e "${COLORS_RED}❌ PUSH BLOCKED: Local tests failed${COLORS_NC}"
+    echo -e "${COLORS_RED}Fix the failing tests before pushing.${COLORS_NC}"
+    echo -e "${COLORS_YELLOW}💡 To skip this check (NOT RECOMMENDED): git push --no-verify${COLORS_NC}"
+    echo ""
+    exit 1
+fi
+
+echo -e "${COLORS_GREEN}✅ Local tests passed${COLORS_NC}"
+echo ""
 
 # Check if we're pushing to main/master branch
 remote="$1"
