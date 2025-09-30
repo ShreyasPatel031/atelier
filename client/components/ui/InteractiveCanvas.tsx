@@ -47,7 +47,6 @@ import DevPanel from "../DevPanel"
 import StreamViewer from "../StreamViewer"
 
 import Chatbox from "./Chatbox"
-import RightPanelChat from "../chat/RightPanelChat"
 import { ApiEndpointProvider } from '../../contexts/ApiEndpointContext'
 import ProcessingStatusIcon from "../ProcessingStatusIcon"
 import { auth } from "../../lib/firebase"
@@ -118,7 +117,6 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   // State for DevPanel visibility
   const [showDev, setShowDev] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
-  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(rightPanelCollapsed);
   // Architecture data from saved architectures
   const [savedArchitectures, setSavedArchitectures] = useState<any[]>(() => {
     // Start with "New Architecture" as first tab
@@ -1437,10 +1435,6 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     setSidebarCollapsed(prev => !prev);
   }, []);
 
-  const handleToggleRightPanel = useCallback(() => {
-    setIsRightPanelCollapsed(prev => !prev);
-  }, []);
-
   // Handler for graph changes from DevPanel or manual interactions
   const handleGraphChange = useCallback(async (newGraph: RawGraph) => {
     console.group('[Graph Change] Manual/DevPanel Update');
@@ -2623,12 +2617,8 @@ Adapt these patterns to your specific requirements while maintaining the overall
 
 
 
-      {/* Save/Edit and Settings buttons - positioned relative to right panel */}
-      <div className={`absolute top-4 z-[100] flex gap-2 transition-all duration-300 ${
-        viewModeConfig.showChatPanel 
-          ? (isRightPanelCollapsed ? 'right-20' : 'right-[25rem]')
-          : 'right-4'
-      }`}>
+      {/* Save/Edit and Settings buttons */}
+      <div className="absolute top-4 right-4 z-[100] flex gap-2">
         {/* Share Button - Always visible for all users */}
         <button
           onClick={handleShareCurrent}
@@ -2783,15 +2773,6 @@ Adapt these patterns to your specific requirements while maintaining the overall
       </div>
       */}
 
-
-      {/* Right Panel Chat - Show when configured by view mode */}
-      {viewModeConfig.showChatPanel && (
-        <RightPanelChat
-          isCollapsed={isRightPanelCollapsed}
-          onToggleCollapse={handleToggleRightPanel}
-          currentGraph={rawGraph}
-        />
-      )}
 
       {/* Dev Panel */}
       {showDev && (
