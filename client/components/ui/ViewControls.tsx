@@ -44,19 +44,21 @@ const ViewControls: React.FC<ViewControlsProps> = ({
       // Determine target URL based on environment
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const hasPort = window.location.port && window.location.port !== '80' && window.location.port !== '443';
-      const isVercelPreview = window.location.hostname.includes('vercel.app') && !window.location.hostname.includes('app.atelier-inc.net');
-      const isProduction = window.location.hostname === 'app.atelier-inc.net';
+      const isProduction = window.location.hostname === 'atelier-inc.net' || 
+                           window.location.hostname === 'app.atelier-inc.net' ||
+                           window.location.hostname === 'www.atelier-inc.net';
+      const isVercelPreview = window.location.hostname.includes('vercel.app') && !isProduction;
       
       let targetUrl;
       if (isLocalhost || hasPort) {
         // Local development
         targetUrl = `${window.location.origin}/auth`;
-      } else if (isVercelPreview) {
+      } else if (isProduction) {
+        // Production - redirect to main auth domain
+        targetUrl = 'https://app.atelier-inc.net/auth';
+      } else {
         // Vercel preview/staging - stay in same environment
         targetUrl = `${window.location.origin}/auth`;
-      } else {
-        // Production
-        targetUrl = 'https://app.atelier-inc.net/auth';
       }
       
       console.log('🔍 [EDIT] Edit button state check:', {
