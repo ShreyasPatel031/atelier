@@ -729,12 +729,12 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       return; // Don't set up any Firebase listeners
     }
 
-    // Check for URL architecture immediately on mount (before auth state)
-    if (viewModeConfig.requiresAuth) {
+    // Check for URL architecture immediately on mount for both canvas and auth modes
+    if (viewModeConfig.requiresAuth || viewModeConfig.mode === 'canvas') {
       (async () => {
         const urlArchFound = await checkAndLoadUrlArchitecture();
         if (urlArchFound) {
-          console.log('🔍 [URL-ARCH] Auth mode with URL architecture - processing immediately');
+          console.log('🔍 [URL-ARCH] URL architecture loaded in', viewModeConfig.mode, 'mode');
         }
       })();
     }
