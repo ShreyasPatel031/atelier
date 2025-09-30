@@ -8,12 +8,14 @@ import {
   User,
   LogOut,
   PanelRightOpen,
+  PanelRightClose,
   MoreHorizontal,
   Trash2,
   Share,
   Edit3
 } from 'lucide-react';
 import SaveAuth from '../auth/SaveAuth';
+import ProcessingStatusIcon from '../ProcessingStatusIcon';
 import { User as FirebaseUser } from 'firebase/auth';
 
 interface Architecture {
@@ -124,7 +126,29 @@ const ArchitectureSidebar: React.FC<ArchitectureSidebarProps> = ({
       relative h-full bg-gray-50 text-gray-700 border-r border-gray-200 transition-all duration-300 ease-in-out
       ${isCollapsed ? 'w-18' : 'w-80'}
     `}>
-      {/* Close Button removed - now handled by hover overlay on Atelier icon */}
+      {/* ProcessingStatusIcon with sidebar toggle - Always visible at top-left */}
+      <div className="absolute top-4 left-4 z-[101]">
+        <div className="relative group">
+          {/* Base icon - ProcessingStatusIcon component */}
+          <div className="pointer-events-none">
+            <ProcessingStatusIcon />
+          </div>
+          {/* Hover overlay - show expand icon when collapsed, collapse icon when expanded */}
+          {user && (
+            <button 
+              onClick={onToggleCollapse}
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-lg"
+              title={isCollapsed ? "Open Sidebar" : "Close Sidebar"}
+            >
+              {isCollapsed ? (
+                <PanelRightClose className="w-4 h-4 text-gray-700" />
+              ) : (
+                <PanelRightOpen className="w-4 h-4 text-gray-700" />
+              )}
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Main Icon Layout - Always Visible */}
       <div className="flex flex-col h-full pt-20"> {/* pt-20 for consistent spacing with Atelier */}

@@ -323,12 +323,15 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
   }
 
   return (
-    <div className={cn(`
-      relative h-full bg-gray-50 text-gray-700 border-l border-gray-200 transition-all duration-300 ease-in-out
-      ${isCollapsed ? 'w-18' : 'w-96'}
-    `, className)}>
+    <div 
+      className={cn(`
+        relative h-full bg-gray-50 text-gray-700 border-l border-gray-200 transition-all duration-300 ease-in-out flex-shrink-0
+        ${isCollapsed ? 'w-18 min-w-18' : 'w-96 min-w-96'}
+      `, className)}
+      style={{ width: isCollapsed ? '4.5rem' : '24rem' }}
+    >
       
-      {/* Agent Icon - Conditionally shown based on ViewMode config */}
+      {/* Agent Icon - Always visible, fixed position */}
       {config.showAgentIcon && (
         <div className="absolute top-4 right-4 z-50">
           <div className="relative group" data-testid="agent-icon">

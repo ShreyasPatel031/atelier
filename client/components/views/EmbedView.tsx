@@ -20,7 +20,6 @@ const EmbedView: React.FC<EmbedViewProps> = (props) => {
     <InteractiveCanvas
       {...props}
       isPublicMode={true}
-      rightPanelCollapsed={true}
     />
   );
 };

@@ -20,7 +20,6 @@ const AuthView: React.FC<AuthViewProps> = (props) => {
     <InteractiveCanvas
       {...props}
       isPublicMode={false}
-      rightPanelCollapsed={false}
     />
   );
 };

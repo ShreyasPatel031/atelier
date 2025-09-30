@@ -20,7 +20,6 @@ const CanvasView: React.FC<CanvasViewProps> = (props) => {
     <InteractiveCanvas
       {...props}
       isPublicMode={true}
-      rightPanelCollapsed={false}
     />
   );
 };

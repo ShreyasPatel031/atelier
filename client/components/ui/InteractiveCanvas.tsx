@@ -33,7 +33,6 @@ import ShareOverlay from "../canvas/ShareOverlay"
 import PromptModal from "../canvas/PromptModal"
 import ConfirmModal from "../canvas/ConfirmModal"
 import NotificationModal from "../canvas/NotificationModal"
-import RightControlPanel from "./RightControlPanel"
 import { exportArchitectureAsPNG } from "../../utils/exportPng"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 import { generateNameWithFallback, ensureUniqueName } from "../../utils/naming"
@@ -118,7 +117,6 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   // State for DevPanel visibility
   const [showDev, setShowDev] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
-  const [rightControlPanelCollapsed, setRightControlPanelCollapsed] = useState(true);
   // Architecture data from saved architectures
   const [savedArchitectures, setSavedArchitectures] = useState<any[]>(() => {
     // Start with "New Architecture" as first tab
@@ -1431,14 +1429,10 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     }, 150);
 
     return () => clearTimeout(timeoutId);
-  }, [sidebarCollapsed]);
+  }, [sidebarCollapsed, rightPanelCollapsed]);
 
   const handleToggleSidebar = useCallback(() => {
     setSidebarCollapsed(prev => !prev);
-  }, []);
-
-  const handleToggleRightPanel = useCallback(() => {
-    setRightControlPanelCollapsed(prev => !prev);
   }, []);
 
   // Handler for graph changes from DevPanel or manual interactions
@@ -2596,30 +2590,6 @@ Adapt these patterns to your specific requirements while maintaining the overall
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        {/* ProcessingStatusIcon with sidebar toggle - Always visible */}
-        <div className="absolute top-4 left-4 z-[101]">
-          {/* ProcessingStatusIcon with hover overlay for both states */}
-          <div className="relative group">
-            {/* Base icon - ProcessingStatusIcon component */}
-            <div className="pointer-events-none">
-              <ProcessingStatusIcon />
-            </div>
-            {/* Hover overlay - show expand icon when collapsed, collapse icon when expanded */}
-            {!isPublicMode && user && (
-              <button 
-                onClick={handleToggleSidebar}
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-gray-200 shadow-lg"
-                title={sidebarCollapsed ? "Open Sidebar" : "Close Sidebar"}
-              >
-                {sidebarCollapsed ? (
-                  <PanelRightClose className="w-4 h-4 text-gray-700" />
-                ) : (
-                  <PanelRightOpen className="w-4 h-4 text-gray-700" />
-                )}
-              </button>
-            )}
-          </div>
-        </div>
 
 
 
@@ -2797,21 +2767,43 @@ Adapt these patterns to your specific requirements while maintaining the overall
         confirmText={notification.confirmText || "OK"}
       />
       
-      </div>
+              </div>
 
-      {/* Right Control Panel */}
-      <RightControlPanel
-        isCollapsed={rightControlPanelCollapsed}
-        onToggleCollapse={handleToggleRightPanel}
-        user={user}
-        rawGraph={rawGraph}
-        isSaving={isSaving}
-        saveSuccess={saveSuccess}
-        onShare={handleShareCurrent}
-        onExport={handleExportPNG}
-        onManualSave={handleManualSave}
-        onSave={handleSave}
-      />
+      {/* Save/Edit and Settings buttons - aligned to right chat panel */}
+      <div className={`absolute top-4 z-[100] flex gap-2 transition-all duration-300 ${
+        viewModeConfig.showChatPanel
+          ? (rightPanelCollapsed ? 'right-[5.5rem]' : 'right-[25rem]')
+          : 'right-4'
+      }`}>
+        {/* Share Button - Always visible for all users */}
+        <button
+          onClick={handleShareCurrent}
+          disabled={!rawGraph || !rawGraph.children || rawGraph.children.length === 0}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-md transition-all duration-200 ${
+            !rawGraph || !rawGraph.children || rawGraph.children.length === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+          }`}
+          title={
+            !rawGraph || !rawGraph.children || rawGraph.children.length === 0
+              ? 'Create some content first to share'
+              : 'Share current architecture'
+          }
+        >
+          <Share className="w-4 h-4" />
+          <span className="text-sm font-medium">Share</span>
+        </button>
+        
+        <ViewControls
+          isSaving={isSaving}
+          saveSuccess={saveSuccess}
+          rawGraph={rawGraph}
+          handleManualSave={handleManualSave}
+          handleSave={handleSave}
+          user={user} 
+          onExport={handleExportPNG}
+        />
+      </div>
     </div>
   );
 };
