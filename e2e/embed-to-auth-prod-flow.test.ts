@@ -59,25 +59,33 @@ test.describe('Embed-to-Auth Production Flow', () => {
     // Look for Edit button
     const editButton = page.locator('button:has-text("Edit"), button[title="Edit"]').first();
     await editButton.waitFor({ state: 'visible', timeout: 10000 });
-    await editButton.click();
     
-    console.log('✅ Clicked Edit button');
+    // Get current URL before clicking
+    const embedUrl = await page.url();
+    console.log(`📍 Current embed URL: ${embedUrl}`);
     
-    // Should redirect to auth mode with architecture ID in URL
-    await page.waitForURL('**/auth**', { timeout: 15000 });
-    const authUrl = await page.url();
-    console.log(`🔐 Redirected to auth URL: ${authUrl}`);
+    // Edit button opens in new tab, so we need to wait for it
+    const [newPage] = await Promise.all([
+      page.context().waitForEvent('page'),
+      editButton.click()
+    ]);
     
-    // URL should contain architecture ID
+    console.log('✅ Edit button clicked, waiting for new tab...');
+    await newPage.waitForLoadState('networkidle');
+    
+    const authUrl = await newPage.url();
+    console.log(`🔐 Opened URL: ${authUrl}`);
+    
+    // URL should be /auth path with architecture ID
     expect(authUrl).toContain('arch=');
     expect(authUrl).toContain('/auth');
 
-    // Step 4: Wait for auth mode to load
+    // Step 4: Wait for auth mode to load (use newPage, not page)
     console.log('⏳ Step 4: Waiting for auth mode to initialize...');
-    await page.waitForLoadState('networkidle');
+    await newPage.waitForLoadState('networkidle');
     
     // Give Firebase time to sync (real Firebase operations take time)
-    await page.waitForTimeout(3000);
+    await newPage.waitForTimeout(3000);
     
     console.log('✅ Auth mode loaded');
 
@@ -85,7 +93,7 @@ test.describe('Embed-to-Auth Production Flow', () => {
     console.log('📂 Step 5: Verifying architecture sidebar...');
     
     // Wait for sidebar to appear
-    const sidebar = page.locator('[class*="w-80"], [class*="sidebar"]').first();
+    const sidebar = newPage.locator('[class*="w-80"], [class*="sidebar"]').first();
     await sidebar.waitFor({ state: 'visible', timeout: 10000 });
     console.log('✅ Sidebar visible');
 
@@ -93,50 +101,35 @@ test.describe('Embed-to-Auth Production Flow', () => {
     console.log('📑 Step 6: Verifying transferred architecture tab...');
     
     // Architecture tabs should be clickable elements in sidebar
-    const tabs = page.locator('[class*="cursor-pointer"]:has-text("Architecture"), button:has-text("Architecture"), div[role="button"]').filter({
-      has: page.locator('text=/Architecture|Cloud|Serverless|API|Lambda/i')
+    const tabs = newPage.locator('[class*="cursor-pointer"]:has-text("Architecture"), button:has-text("Architecture"), div[role="button"]').filter({
+      has: newPage.locator('text=/Architecture|Cloud|Serverless|API|Lambda/i')
     });
     
     // Wait for at least one tab to appear
-    await page.waitForTimeout(2000); // Give time for Firebase to load and name to generate
+    await newPage.waitForTimeout(2000); // Give time for Firebase to load and name to generate
     
     // Check if we have any tabs
     const tabCount = await tabs.count();
     console.log(`📊 Found ${tabCount} architecture tabs`);
+    expect(tabCount).toBeGreaterThan(0);
     
-    if (tabCount === 0) {
-      // Try alternative selectors for architecture items
-      const altTabs = page.locator('div[class*="p-"], li[class*="cursor"]').filter({
-        hasText: /Architecture|Cloud|Serverless|API|Lambda|Blueprint/i
-      });
-      const altTabCount = await altTabs.count();
-      console.log(`📊 Found ${altTabCount} architecture items (alternative selector)`);
-      expect(altTabCount).toBeGreaterThan(0);
-      
-      // Get first tab text
-      const firstTabText = await altTabs.first().textContent();
-      console.log(`📋 First tab name: "${firstTabText}"`);
-      
-      // Should NOT be generic fallback name
-      expect(firstTabText).not.toContain('URL-based microservice');
-      expect(firstTabText).not.toBe('New Architecture');
-      
-    } else {
-      expect(tabCount).toBeGreaterThan(0);
-      
-      // Get first tab text
-      const firstTabText = await tabs.first().textContent();
-      console.log(`📋 First tab name: "${firstTabText}"`);
-      
-      // Should NOT be generic fallback name
-      expect(firstTabText).not.toContain('URL-based microservice');
-      expect(firstTabText).not.toBe('New Architecture');
-    }
+    // Get first tab text
+    const firstTabText = await tabs.first().textContent();
+    console.log(`📋 First tab name: "${firstTabText}"`);
+    
+    // CRITICAL: First tab should have custom AI-generated name (not generic fallback)
+    expect(firstTabText).not.toContain('URL-based microservice');
+    expect(firstTabText).not.toBe('New Architecture');
+    expect(firstTabText).not.toContain('Architecture 9/');
+    
+    // Should contain meaningful architecture-related words
+    const hasArchitectureTerms = /serverless|api|lambda|dynamo|gateway|cloud|aws/i.test(firstTabText || '');
+    expect(hasArchitectureTerms).toBe(true);
 
     // Step 7: Verify canvas shows the architecture
     console.log('🎨 Step 7: Verifying canvas content in auth mode...');
     
-    const canvasNodes = page.locator('.react-flow__node');
+    const canvasNodes = newPage.locator('.react-flow__node');
     const canvasNodeCount = await canvasNodes.count();
     console.log(`🎨 Canvas has ${canvasNodeCount} nodes in auth mode`);
     
@@ -147,22 +140,33 @@ test.describe('Embed-to-Auth Production Flow', () => {
     // Step 8: Verify chat messages are preserved
     console.log('💬 Step 8: Checking if chat messages persisted...');
     
-    // In auth mode, chat might be in a different panel
-    const chatMessages = page.locator('[class*="message"], [class*="chat"]').filter({
-      hasText: /serverless|lambda|api/i
+    // In auth mode, chat is in right panel
+    const chatMessages = newPage.locator('[class*="message"], [class*="chat"]').filter({
+      hasText: /serverless|lambda|api|dynamo|gateway/i
     });
     
     const messageCount = await chatMessages.count();
     console.log(`💬 Found ${messageCount} chat-related elements`);
     
-    // Even if no messages visible, the test passes as long as architecture was created
+    // Chat should be preserved
     if (messageCount > 0) {
-      console.log('✅ Chat context appears to be preserved');
+      console.log('✅ Chat messages preserved from embed to auth');
     } else {
-      console.log('ℹ️  Chat messages not visible in UI (may be collapsed)');
+      // Try expanding the chat panel if it's collapsed
+      const chatToggle = newPage.locator('button[title*="Chat"]').first();
+      const chatToggleExists = await chatToggle.isVisible({ timeout: 2000 }).catch(() => false);
+      
+      if (chatToggleExists) {
+        await chatToggle.click();
+        await newPage.waitForTimeout(500);
+        const messagesAfterExpand = await chatMessages.count();
+        console.log(`💬 After expanding: ${messagesAfterExpand} messages`);
+      }
     }
 
     console.log('🎉 Embed-to-Auth production flow test PASSED!');
+    
+    await newPage.close();
   });
 
   test('Direct shared architecture URL in auth mode', async ({ page }) => {
