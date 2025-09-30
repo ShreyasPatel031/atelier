@@ -25,6 +25,12 @@ export interface SavedArchitecture {
   userId: string;
   userEmail: string;
   userPrompt?: string;
+  chatMessages?: Array<{
+    id: string;
+    content: string;
+    timestamp: number;
+    sender: 'user' | 'assistant';
+  }>;
   isPublic?: boolean;
   tags?: string[];
 }

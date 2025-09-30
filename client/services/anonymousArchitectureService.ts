@@ -16,6 +16,12 @@ export interface AnonymousArchitecture {
   userAgent?: string;
   ipHash?: string; // For cleanup purposes (hashed IP)
   userPrompt?: string; // Original user prompt that created the architecture
+  chatMessages?: Array<{
+    id: string;
+    content: string;
+    timestamp: number;
+    sender: 'user' | 'assistant';
+  }>;
 }
 
 class AnonymousArchitectureService {
@@ -75,6 +81,18 @@ class AnonymousArchitectureService {
         || (window as any).chatTextInput
         || '';
 
+      // Get chat messages from localStorage if available
+      let chatMessages: Array<{id: string; content: string; timestamp: number; sender: 'user' | 'assistant'}> | undefined;
+      try {
+        const { getCurrentConversation } = await import('../utils/chatPersistence');
+        const messages = getCurrentConversation();
+        if (messages && messages.length > 0) {
+          chatMessages = messages;
+        }
+      } catch (error) {
+        console.warn('Failed to get chat messages for architecture:', error);
+      }
+
       const anonymousArch: Omit<AnonymousArchitecture, 'id'> = {
         name,
         rawGraph,
@@ -83,9 +101,10 @@ class AnonymousArchitectureService {
         isAnonymous: true,
         userAgent: navigator.userAgent,
         userPrompt: finalUserPrompt,
+        chatMessages,
       };
 
-      console.log('💾 Saving anonymous architecture:', name, 'for session:', sessionId, 'with userPrompt:', finalUserPrompt ? 'YES' : 'NO');
+      console.log('💾 Saving anonymous architecture:', name, 'for session:', sessionId, 'with userPrompt:', finalUserPrompt ? 'YES' : 'NO', 'with chatMessages:', chatMessages?.length || 0);
 
       const docRef = await addDoc(collection(db, 'anonymous_architectures'), anonymousArch);
 
