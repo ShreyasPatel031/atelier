@@ -33,6 +33,7 @@ import ShareOverlay from "../canvas/ShareOverlay"
 import PromptModal from "../canvas/PromptModal"
 import ConfirmModal from "../canvas/ConfirmModal"
 import NotificationModal from "../canvas/NotificationModal"
+import RightControlPanel from "./RightControlPanel"
 import { exportArchitectureAsPNG } from "../../utils/exportPng"
 import { copyToClipboard } from "../../utils/copyToClipboard"
 import { generateNameWithFallback, ensureUniqueName } from "../../utils/naming"
@@ -117,14 +118,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   // State for DevPanel visibility
   const [showDev, setShowDev] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
-  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(rightPanelCollapsed);
-  
-  // Sync right panel state with prop changes from App.jsx
-  useEffect(() => {
-    console.log('🔄 Right panel state changed:', rightPanelCollapsed);
-    setIsRightPanelCollapsed(rightPanelCollapsed);
-  }, [rightPanelCollapsed]);
-  
+  const [rightControlPanelCollapsed, setRightControlPanelCollapsed] = useState(true);
   // Architecture data from saved architectures
   const [savedArchitectures, setSavedArchitectures] = useState<any[]>(() => {
     // Start with "New Architecture" as first tab
@@ -1443,6 +1437,10 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     setSidebarCollapsed(prev => !prev);
   }, []);
 
+  const handleToggleRightPanel = useCallback(() => {
+    setRightControlPanelCollapsed(prev => !prev);
+  }, []);
+
   // Handler for graph changes from DevPanel or manual interactions
   const handleGraphChange = useCallback(async (newGraph: RawGraph) => {
     console.group('[Graph Change] Manual/DevPanel Update');
@@ -2597,7 +2595,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
         {/* ProcessingStatusIcon with sidebar toggle - Always visible */}
         <div className="absolute top-4 left-4 z-[101]">
           {/* ProcessingStatusIcon with hover overlay for both states */}
@@ -2625,41 +2623,6 @@ Adapt these patterns to your specific requirements while maintaining the overall
 
 
 
-      {/* Save/Edit and Settings buttons - positioned to avoid right panel overlap */}
-      <div className={`absolute top-4 z-[100] flex gap-2 transition-all duration-300 ${
-        viewModeConfig.showChatPanel 
-          ? (isRightPanelCollapsed ? 'right-20' : 'right-[25rem]')
-          : 'right-4'
-      }`}>
-        {/* Share Button - Always visible for all users */}
-        <button
-          onClick={handleShareCurrent}
-          disabled={!rawGraph || !rawGraph.children || rawGraph.children.length === 0}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-md transition-all duration-200 ${
-            !rawGraph || !rawGraph.children || rawGraph.children.length === 0
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-gray-700 hover:bg-gray-50'
-          }`}
-          title={
-            !rawGraph || !rawGraph.children || rawGraph.children.length === 0
-              ? 'Create some content first to share'
-              : 'Share current architecture'
-          }
-        >
-          <Share className="w-4 h-4" />
-          <span className="text-sm font-medium">Share</span>
-        </button>
-        
-        <ViewControls
-          isSaving={isSaving}
-          saveSuccess={saveSuccess}
-          rawGraph={rawGraph}
-          handleManualSave={handleManualSave}
-          handleSave={handleSave}
-            user={user} 
-          onExport={handleExportPNG}
-          />
-      </div>
 
       {/* Main Graph Area */}
       <div className="flex-1 relative min-h-0 overflow-hidden">
@@ -2786,6 +2749,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
       */}
 
 
+
       {/* Dev Panel */}
       {showDev && (
             <DevPanel 
@@ -2834,6 +2798,20 @@ Adapt these patterns to your specific requirements while maintaining the overall
       />
       
       </div>
+
+      {/* Right Control Panel */}
+      <RightControlPanel
+        isCollapsed={rightControlPanelCollapsed}
+        onToggleCollapse={handleToggleRightPanel}
+        user={user}
+        rawGraph={rawGraph}
+        isSaving={isSaving}
+        saveSuccess={saveSuccess}
+        onShare={handleShareCurrent}
+        onExport={handleExportPNG}
+        onManualSave={handleManualSave}
+        onSave={handleSave}
+      />
     </div>
   );
 };

@@ -7,7 +7,6 @@ const path = fileURLToPath(import.meta.url);
 
 export default defineConfig({
   root: join(dirname(path), "client"),
-  publicDir: join(dirname(path), "public"),
   plugins: [react()],
   optimizeDeps: {
     include: ['@excalidraw/excalidraw', 'roughjs'],
