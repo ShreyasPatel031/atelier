@@ -48,7 +48,7 @@ const ViewControls: React.FC<ViewControlsProps> = ({
       
       let targetUrl = isDevelopment 
         ? `${window.location.origin}/auth`  // Local development
-        : 'https://app.atelier-inc.net';     // Production
+        : 'https://app.atelier-inc.net/auth';     // Production - go to auth mode
       
       console.log('🔍 [EDIT] Edit button state check:', {
         hasArchitectureId,

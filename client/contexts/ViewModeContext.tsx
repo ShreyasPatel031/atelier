@@ -139,7 +139,19 @@ export function ViewModeProvider({ children, fallbackMode = 'canvas' }: ViewMode
         return { mode: 'auth', isEmbedded: false };
       }
       
-      // Default to canvas for root and any other path
+      // Default: root path (/) - determine mode based on auth state
+      // Check if user is authenticated (Firebase auth)
+      try {
+        const { auth } = require('../lib/firebase');
+        if (auth && auth.currentUser) {
+          // User is authenticated - use auth mode
+          return { mode: 'auth', isEmbedded: false };
+        }
+      } catch (error) {
+        // Firebase not available or error - fall back to canvas
+      }
+      
+      // Not authenticated - use canvas for root path
       return { mode: 'canvas', isEmbedded: false };
     };
     
