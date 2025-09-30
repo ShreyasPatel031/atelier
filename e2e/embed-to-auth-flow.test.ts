@@ -28,13 +28,23 @@ test.describe('Embed-to-Auth Flow', () => {
     await chatInput.fill(prompt);
     await page.locator('button[type="submit"]').first().click();
 
-    await page.waitForTimeout(5000);
+    // Wait for architecture generation to complete
+    await page.waitForTimeout(8000);
     const nodes = page.locator('.react-flow__node');
     await nodes.first().waitFor({ state: 'visible', timeout: 20000 });
     
-    const embedNodeCount = await nodes.count();
+    // Wait for multiple nodes (not just the root)
+    let embedNodeCount = await nodes.count();
+    let retries = 0;
+    while (embedNodeCount < 3 && retries < 5) {
+      console.log(`⏳ Waiting for more nodes... (${embedNodeCount} nodes, retry ${retries + 1}/5)`);
+      await page.waitForTimeout(2000);
+      embedNodeCount = await nodes.count();
+      retries++;
+    }
+    
     console.log(`✅ Embed: ${embedNodeCount} nodes`);
-    expect(embedNodeCount).toBeGreaterThan(0);
+    expect(embedNodeCount).toBeGreaterThan(1); // Must have more than just root node
 
     console.log('🔧 Clicking Edit to open auth (this will save architecture)...');
     const editButton = page.locator('button:has-text("Edit")').first();
