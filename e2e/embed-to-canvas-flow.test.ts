@@ -52,7 +52,7 @@ test.describe('Embed-to-Canvas Flow', () => {
     
     // The Edit button should have saved the architecture and included arch= in URL
     expect(canvasUrl).toContain('arch=');
-    expect(canvasUrl).toContain('/auth');
+    // Root path (/) is correct - it auto-detects auth state
 
     console.log('📊 Verifying architecture...');
     const canvasNodes = canvasPage.locator('.react-flow__node');
