@@ -51,14 +51,14 @@ const ViewControls: React.FC<ViewControlsProps> = ({
       
       let targetUrl;
       if (isLocalhost || hasPort) {
-        // Local development
-        targetUrl = `${window.location.origin}/auth`;
+        // Local development - use root path, will auto-detect auth state
+        targetUrl = `${window.location.origin}/`;
       } else if (isProduction) {
-        // Production - redirect to main auth domain
-        targetUrl = 'https://app.atelier-inc.net/auth';
+        // Production - redirect to main app domain (root path)
+        targetUrl = 'https://app.atelier-inc.net/';
       } else {
-        // Vercel preview/staging - stay in same environment
-        targetUrl = `${window.location.origin}/auth`;
+        // Vercel preview/staging - stay in same environment (root path)
+        targetUrl = `${window.location.origin}/`;
       }
       
       console.log('🔍 [EDIT] Edit button state check:', {
