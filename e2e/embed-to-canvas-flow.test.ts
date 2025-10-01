@@ -62,15 +62,21 @@ test.describe('Embed-to-Canvas Flow', () => {
     expect(canvasNodeCount).toBe(embedNodeCount);
 
     console.log('💬 Checking chat persistence...');
-    // Chat should be available in right panel
-    const chatPanel = canvasPage.locator('[class*="bg-gray-50"][class*="border-l"]').filter({
-      has: canvasPage.locator('[data-testid="agent-icon"]')
+    // Verify chat messages were persisted by checking localStorage
+    const chatMessages = await canvasPage.evaluate(() => {
+      const stored = localStorage.getItem('atelier_current_conversation');
+      return stored ? JSON.parse(stored) : [];
     });
     
-    const chatPanelVisible = await chatPanel.isVisible({ timeout: 2000 }).catch(() => false);
-    if (chatPanelVisible) {
-      console.log('✅ Chat panel present');
-    }
+    console.log(`📝 Found ${chatMessages.length} chat messages in canvas`);
+    expect(chatMessages.length).toBeGreaterThan(0);
+    
+    // Verify the original prompt is in the chat messages
+    const hasOriginalPrompt = chatMessages.some((msg: any) => 
+      msg.content && msg.content.toLowerCase().includes('lambda') && msg.content.toLowerCase().includes('dynamodb')
+    );
+    expect(hasOriginalPrompt).toBe(true);
+    console.log('✅ Chat messages persisted correctly with original prompt');
 
     console.log('🎉 Embed-to-Canvas PASSED!');
     await canvasPage.close();

@@ -66,7 +66,6 @@ test.describe('Embed-to-Auth Flow', () => {
     expect(authUrl).toContain('/auth');
 
     console.log('📊 Verifying architecture loads in auth mode...');
-    // Just verify the architecture loads - auth flow requires real Firebase auth
     const authNodes = authPage.locator('.react-flow__node');
     await authNodes.first().waitFor({ state: 'visible', timeout: 15000 });
     
@@ -74,7 +73,29 @@ test.describe('Embed-to-Auth Flow', () => {
     console.log(`✅ Auth: ${authNodeCount} nodes`);
     expect(authNodeCount).toBeGreaterThan(0);
 
-    console.log('🎉 Embed-to-Auth URL Transfer PASSED!');
+    console.log('💬 Verifying chat persistence in auth mode...');
+    // Check that chat messages were restored from the architecture
+    const chatMessages = await authPage.evaluate(() => {
+      const stored = localStorage.getItem('atelier_current_conversation');
+      return stored ? JSON.parse(stored) : [];
+    });
+    
+    console.log(`📝 Found ${chatMessages.length} chat messages in auth`);
+    expect(chatMessages.length).toBeGreaterThan(0);
+    
+    // Verify the original prompt is in the chat messages
+    const hasOriginalPrompt = chatMessages.some((msg: any) => 
+      msg.content && (
+        msg.content.toLowerCase().includes('serverless') || 
+        msg.content.toLowerCase().includes('lambda') || 
+        msg.content.toLowerCase().includes('api gateway')
+      )
+    );
+    expect(hasOriginalPrompt).toBe(true);
+    console.log('✅ Chat messages persisted from embed to auth');
+
+    console.log('🎉 Embed-to-Auth Complete Flow PASSED!');
+    console.log('Note: First tab and custom name validation requires Firebase auth, tested manually');
     await authPage.close();
   });
 });
