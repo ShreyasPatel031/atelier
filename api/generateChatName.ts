@@ -42,15 +42,15 @@ export default async function handler(req: any, res: any) {
       messages: [
         { 
           role: "system", 
-          content: "You are a technical architect who creates concise, professional names for chat sessions about cloud architectures. Generate ONE single name that captures the essence and purpose of the architecture. The name should be 2-4 words. Avoid generic terms like 'Chat', 'Session', 'URL', 'Web', 'Link', or 'Based'. Focus on the technical pattern, platform, or use case. IMPORTANT: Return ONLY the single name text without any quotes, brackets, numbering, or extra formatting. Just the plain name."
+          content: "You are a technical architect naming system architectures. Given a user's request and the actual architecture components, create a concise, descriptive name that captures BOTH the user's intent AND the technical implementation. The name should be 2-4 words, technical but readable. Avoid generic terms like 'Chat', 'Session', 'URL', 'Web', 'Link', or 'Based'. Focus on what the architecture DOES and what platforms/patterns it uses. Examples: 'GCP Microservices API', 'Multi-Cloud Data Pipeline', 'Serverless Payment Gateway'. Return ONLY the name without quotes, brackets, or formatting."
         },
         { 
           role: "user", 
-          content: `Generate a chat name for this architecture discussion:\n\n${context}`
+          content: `Create a concise name for this architecture:\n\n${context}\n\nName should reflect both the user's goal and the actual technical components used.`
         }
       ],
-      max_tokens: 15,
-      temperature: 0.7,
+      max_tokens: 20,
+      temperature: 0.5,
     });
 
     const rawName = completion.choices[0].message.content?.trim() || '';

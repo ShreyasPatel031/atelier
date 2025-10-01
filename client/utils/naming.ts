@@ -10,7 +10,7 @@ import { generateChatName } from './chatUtils';
  */
 export function componentsHintFromGraph(rawGraph: any): string {
   const labels = rawGraph?.children?.map((n: any) => n?.data?.label || n?.id).filter(Boolean) || [];
-  return labels.length ? `Architecture with components: ${labels.slice(0, 5).join(", ")}` : "Cloud Architecture";
+  return labels.length ? `Architecture with components: ${labels.slice(0, 5).join(", ")}` : "";
 }
 
 /**
