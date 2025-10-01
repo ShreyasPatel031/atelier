@@ -96,22 +96,25 @@ export function getCurrentConversation(): PersistedChatMessage[] {
 }
 
 /**
- * Get all persisted chat messages (only if coming from embed view)
+ * Get all persisted chat messages (ONLY during embed-to-canvas/auth transitions)
  */
 export function getChatMessages(): PersistedChatMessage[] {
   const messages = getCurrentConversation();
+  const isTransition = isEmbedToCanvasTransition();
+  
   console.log('💬 [CHAT-PERSISTENCE] getChatMessages called:', {
-    isEmbedToCanvas: isEmbedToCanvasTransition(),
+    isEmbedToCanvas: isTransition,
     messageCount: messages.length,
     messages: messages.map(m => ({ sender: m.sender, content: m.content.substring(0, 50) + '...' }))
   });
   
-  // Return messages if user is coming from embed view to canvas view OR if there are any saved messages
-  if (isEmbedToCanvasTransition() || messages.length > 0) {
-    console.log('💬 [CHAT-PERSISTENCE] Returning persisted messages:', messages.length);
+  // ONLY return messages if user is coming from embed view (Edit button transition)
+  // Do NOT return messages for normal canvas/auth visits
+  if (isTransition) {
+    console.log('💬 [CHAT-PERSISTENCE] Returning persisted messages from embed transition:', messages.length);
     return messages;
   } else {
-    console.log('💬 [CHAT-PERSISTENCE] No persisted messages');
+    console.log('💬 [CHAT-PERSISTENCE] Not an embed transition - returning empty array');
     return [];
   }
 }

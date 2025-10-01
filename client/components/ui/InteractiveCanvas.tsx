@@ -114,6 +114,19 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   // Get ViewMode configuration
   const { config: viewModeConfig } = useViewMode();
   
+  // Clear chat localStorage on mount if NOT coming from embed
+  useEffect(() => {
+    if (!isEmbedToCanvasTransition()) {
+      // User is visiting directly, not from embed - clear any stale chat
+      try {
+        localStorage.removeItem('atelier_current_conversation');
+        console.log('🧹 [MOUNT] Cleared stale chat messages (direct visit, not from embed)');
+      } catch (error) {
+        console.warn('Failed to clear chat on mount:', error);
+      }
+    }
+  }, []); // Run once on mount
+  
   // State for DevPanel visibility
   const [showDev, setShowDev] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
