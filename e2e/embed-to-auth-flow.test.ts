@@ -21,6 +21,7 @@ test.describe('Embed-to-Auth Flow', () => {
 
     console.log('🏗️ Creating architecture...');
     const prompt = 'Serverless API with Lambda, API Gateway, and DynamoDB';
+    console.log(`📝 Test prompt: "${prompt}"`);
     
     // Chatbox uses Input component (input element, not textarea)
     const chatInput = page.locator('input[placeholder*="architecture" i], input[placeholder*="describe" i]').first();
@@ -83,16 +84,18 @@ test.describe('Embed-to-Auth Flow', () => {
     console.log(`📝 Found ${chatMessages.length} chat messages in auth`);
     expect(chatMessages.length).toBeGreaterThan(0);
     
-    // Verify the original prompt is in the chat messages
-    const hasOriginalPrompt = chatMessages.some((msg: any) => 
-      msg.content && (
-        msg.content.toLowerCase().includes('serverless') || 
-        msg.content.toLowerCase().includes('lambda') || 
-        msg.content.toLowerCase().includes('api gateway')
-      )
+    // CRITICAL: Verify the EXACT prompt from embed is in auth chat
+    const exactPromptMatch = chatMessages.some((msg: any) => 
+      msg.content && msg.content.trim() === prompt.trim()
     );
-    expect(hasOriginalPrompt).toBe(true);
-    console.log('✅ Chat messages persisted from embed to auth');
+    
+    if (!exactPromptMatch) {
+      console.error('❌ Expected chat message:', prompt);
+      console.error('❌ Actual chat messages:', chatMessages.map((m: any) => m.content));
+    }
+    
+    expect(exactPromptMatch).toBe(true);
+    console.log(`✅ Chat messages persisted correctly - found exact prompt: "${prompt}"`);
 
     console.log('🎉 Embed-to-Auth Complete Flow PASSED!');
     console.log('Note: First tab and custom name validation requires Firebase auth, tested manually');

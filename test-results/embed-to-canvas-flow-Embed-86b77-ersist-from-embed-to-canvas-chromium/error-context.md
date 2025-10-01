@@ -1,0 +1,80 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e5]:
+  - generic [ref=e6]:
+    - generic [ref=e8]:
+      - generic:
+        - button "Executing function call":
+          - img
+    - button "Sign in" [ref=e12] [cursor=pointer]:
+      - img [ref=e13] [cursor=pointer]
+  - generic [ref=e16]:
+    - generic [ref=e19]:
+      - generic [ref=e21]:
+        - generic:
+          - img:
+            - generic:
+              - button "Edge from client to api_gateway"
+              - button "Edge from api_gateway to lambda"
+              - button "Edge from lambda to dynamodb"
+          - generic:
+            - generic [ref=e22]: sends API requests to
+            - generic [ref=e23]: invokes
+            - generic [ref=e24]: reads/writes data to
+          - generic:
+            - button [ref=e25] [cursor=pointer]
+            - button "Client Client" [ref=e27] [cursor=pointer]:
+              - generic [ref=e31] [cursor=pointer]:
+                - img "Client" [ref=e33] [cursor=pointer]
+                - generic [ref=e35] [cursor=pointer]: Client
+            - button "aws_group" [ref=e36] [cursor=pointer]:
+              - generic [ref=e39] [cursor=pointer]: aws_group
+            - button "API Gateway API Gateway" [ref=e40] [cursor=pointer]:
+              - generic [ref=e46] [cursor=pointer]:
+                - img "API Gateway" [ref=e48] [cursor=pointer]
+                - generic [ref=e50] [cursor=pointer]: API Gateway
+            - button "Lambda Function Lambda Function" [ref=e51] [cursor=pointer]:
+              - generic [ref=e57] [cursor=pointer]:
+                - img "Lambda Function" [ref=e59] [cursor=pointer]
+                - generic [ref=e60] [cursor=pointer]:
+                  - generic [ref=e61] [cursor=pointer]: Lambda
+                  - generic [ref=e62] [cursor=pointer]: Function
+            - button "DynamoDB DynamoDB" [ref=e63] [cursor=pointer]:
+              - generic [ref=e67] [cursor=pointer]:
+                - img "DynamoDB" [ref=e69] [cursor=pointer]
+                - generic [ref=e71] [cursor=pointer]: DynamoDB
+      - img [ref=e72]
+      - generic [ref=e74]:
+        - button "zoom in" [ref=e75] [cursor=pointer]:
+          - img [ref=e76] [cursor=pointer]
+        - button "zoom out" [ref=e78] [cursor=pointer]:
+          - img [ref=e79] [cursor=pointer]
+        - button "fit view" [ref=e81] [cursor=pointer]:
+          - img [ref=e82] [cursor=pointer]
+        - button "toggle interactivity" [ref=e84] [cursor=pointer]:
+          - img [ref=e85] [cursor=pointer]
+      - link "React Flow attribution" [ref=e88] [cursor=pointer]:
+        - /url: https://reactflow.dev
+        - text: React Flow
+    - generic [ref=e91]:
+      - generic [ref=e92]:
+        - button "GCP microservices with Kubernetes" [disabled] [ref=e93]
+        - button "AWS serverless web application" [disabled] [ref=e94]
+        - button "Multi-cloud data pipeline" [disabled] [ref=e95]
+      - generic [ref=e97]:
+        - textbox "Describe your architecture requirements" [disabled] [ref=e98]
+        - button [disabled]:
+          - img
+  - generic [ref=e99]:
+    - button "Share" [ref=e100] [cursor=pointer]:
+      - img [ref=e101] [cursor=pointer]
+      - generic [ref=e104] [cursor=pointer]: Share
+    - generic [ref=e105]:
+      - button "Export" [ref=e106] [cursor=pointer]:
+        - img [ref=e107] [cursor=pointer]
+        - generic [ref=e110] [cursor=pointer]: Export
+      - button "Edit" [active] [ref=e111] [cursor=pointer]:
+        - img [ref=e112] [cursor=pointer]
+        - generic [ref=e115] [cursor=pointer]: Edit
+```
