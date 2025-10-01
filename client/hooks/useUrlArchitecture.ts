@@ -58,14 +58,17 @@ export function useUrlArchitecture({ loadArchitecture, config, currentUser }: Us
           hasChatMessages: !!(sharedArch as any).chatMessages?.length
         });
         
-        // Restore chat messages from architecture to localStorage
-        if ((sharedArch as any).chatMessages && (sharedArch as any).chatMessages.length > 0) {
-          try {
-            localStorage.setItem('atelier_current_conversation', JSON.stringify((sharedArch as any).chatMessages));
-            console.log('💬 [LOAD-SHARED] Restored', (sharedArch as any).chatMessages.length, 'chat messages from architecture');
-          } catch (error) {
-            console.warn('Failed to restore chat messages:', error);
+        // ALWAYS set chat messages from architecture (even if empty) to clear any stale localStorage data
+        try {
+          const archChatMessages = (sharedArch as any).chatMessages || [];
+          localStorage.setItem('atelier_current_conversation', JSON.stringify(archChatMessages));
+          if (archChatMessages.length > 0) {
+            console.log('💬 [LOAD-SHARED] Restored', archChatMessages.length, 'chat messages from architecture');
+          } else {
+            console.log('💬 [LOAD-SHARED] Cleared chat messages (architecture has no saved messages)');
           }
+        } catch (error) {
+          console.warn('Failed to restore/clear chat messages:', error);
         }
         
         // Check if we're in auth mode (user is authenticated)
