@@ -1,5 +1,5 @@
 // Auto-generated dynamic lists for agents at build time
-// Generated on: 2025-10-01T05:32:11.651Z
+// Generated on: 2025-10-14T15:47:11.067Z
 
 export interface DynamicAgentResources {
   groupIcons: {

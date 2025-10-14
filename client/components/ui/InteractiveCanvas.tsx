@@ -157,6 +157,31 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     const targetArchitectureId = agentLockedArchitectureId || selectedArchitectureId;
     (window as any).currentArchitectureId = targetArchitectureId;
   }, [selectedArchitectureId, agentLockedArchitectureId]);
+
+  // Console command to toggle default architecture
+  useEffect(() => {
+    (window as any).toggleDefaultArchitecture = (enabled: boolean) => {
+      if (enabled) {
+        console.log('✅ Enabling default architecture...');
+        setRawGraph(DEFAULT_ARCHITECTURE);
+        console.log('🏗️ Default architecture loaded with', DEFAULT_ARCHITECTURE.children?.length || 0, 'top-level components');
+      } else {
+        console.log('🔄 Resetting to empty root...');
+        setRawGraph({ id: "root", children: [], edges: [] });
+        console.log('✅ Canvas cleared - empty root loaded');
+      }
+    };
+
+    // Log help message
+    console.log('💡 Console commands available:');
+    console.log('  - toggleDefaultArchitecture(true)  → Load default architecture');
+    console.log('  - toggleDefaultArchitecture(false) → Reset to empty canvas');
+
+    // Cleanup
+    return () => {
+      delete (window as any).toggleDefaultArchitecture;
+    };
+  }, []);
   
   // State for auth flow
   const [user, setUser] = useState<User | null>(null);
