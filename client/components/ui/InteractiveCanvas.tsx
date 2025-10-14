@@ -54,6 +54,7 @@ import { onAuthStateChanged, User } from "firebase/auth"
 import { Timestamp } from "firebase/firestore"
 import { Settings, PanelRightOpen, PanelRightClose, Save, Edit, Share, Download, X, Menu, Share2, Check, Search } from "lucide-react"
 import { DEFAULT_ARCHITECTURE as EXTERNAL_DEFAULT_ARCHITECTURE } from "../../data/defaultArchitecture"
+import { SIMPLE_DEFAULT_ARCHITECTURE } from "../../data/simpleDefaultArchitecture"
 // Removed mock architectures import - only using real user architectures now
 import SaveAuth from "../auth/SaveAuth"
 import ArchitectureService from "../../services/architectureService"
@@ -86,6 +87,7 @@ const addIconsToArchitecture = (architecture: any) => {
 
 // Use external architecture file instead of hardcoded data
 const DEFAULT_ARCHITECTURE = addIconsToArchitecture(EXTERNAL_DEFAULT_ARCHITECTURE);
+const SIMPLE_DEFAULT = addIconsToArchitecture(SIMPLE_DEFAULT_ARCHITECTURE);
 
 // Register node and edge types
 const nodeTypes = {
@@ -157,28 +159,51 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     const targetArchitectureId = agentLockedArchitectureId || selectedArchitectureId;
     (window as any).currentArchitectureId = targetArchitectureId;
   }, [selectedArchitectureId, agentLockedArchitectureId]);
-
-  // Console command to toggle default architecture
+  
+  // Console commands to toggle default architectures
   useEffect(() => {
+    // Command to load simple default (serverless API)
+    (window as any).loadSimpleDefault = () => {
+      console.log('✅ Loading simple default architecture (Serverless API)...');
+      setRawGraph(SIMPLE_DEFAULT);
+      console.log('🏗️ Simple default loaded: Client → API Gateway → Lambda → DynamoDB');
+    };
+
+    // Command to load complex default (full GCP example)
+    (window as any).loadComplexDefault = () => {
+      console.log('✅ Loading complex default architecture (GCP Full Example)...');
+      setRawGraph(DEFAULT_ARCHITECTURE);
+      console.log('🏗️ Complex default loaded with', DEFAULT_ARCHITECTURE.children?.length || 0, 'top-level components');
+    };
+
+    // Command to reset to empty
+    (window as any).resetCanvas = () => {
+      console.log('🔄 Resetting to empty root...');
+      setRawGraph({ id: "root", children: [], edges: [] });
+      console.log('✅ Canvas cleared - empty root loaded');
+    };
+
+    // Legacy command for backward compatibility
     (window as any).toggleDefaultArchitecture = (enabled: boolean) => {
       if (enabled) {
-        console.log('✅ Enabling default architecture...');
-        setRawGraph(DEFAULT_ARCHITECTURE);
-        console.log('🏗️ Default architecture loaded with', DEFAULT_ARCHITECTURE.children?.length || 0, 'top-level components');
+        (window as any).loadSimpleDefault();
       } else {
-        console.log('🔄 Resetting to empty root...');
-        setRawGraph({ id: "root", children: [], edges: [] });
-        console.log('✅ Canvas cleared - empty root loaded');
+        (window as any).resetCanvas();
       }
     };
 
     // Log help message
     console.log('💡 Console commands available:');
-    console.log('  - toggleDefaultArchitecture(true)  → Load default architecture');
-    console.log('  - toggleDefaultArchitecture(false) → Reset to empty canvas');
+    console.log('  - loadSimpleDefault()    → Load simple serverless API architecture');
+    console.log('  - loadComplexDefault()   → Load complex GCP test architecture');
+    console.log('  - resetCanvas()          → Reset to empty canvas');
+    console.log('  - toggleDefaultArchitecture(true/false) → Legacy toggle command');
 
     // Cleanup
     return () => {
+      delete (window as any).loadSimpleDefault;
+      delete (window as any).loadComplexDefault;
+      delete (window as any).resetCanvas;
       delete (window as any).toggleDefaultArchitecture;
     };
   }, []);
@@ -2814,7 +2839,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
           : 'right-4'
       }`}>
         {/* Share Button - Always visible for all users */}
-        <button
+                <button
           onClick={handleShareCurrent}
           disabled={!rawGraph || !rawGraph.children || rawGraph.children.length === 0}
           className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-md transition-all duration-200 ${
@@ -2830,7 +2855,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
         >
           <Share className="w-4 h-4" />
           <span className="text-sm font-medium">Share</span>
-        </button>
+                </button>
         
         <ViewControls
           isSaving={isSaving}
