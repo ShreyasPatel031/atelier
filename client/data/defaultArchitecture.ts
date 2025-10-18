@@ -274,6 +274,18 @@ export const DEFAULT_ARCHITECTURE = {
           "sources": ["cloud_lb"],
           "targets": ["api_gw"],
           "labels": [{ "text": "routes" }]
+        },
+        {
+          "id": "e_apigw_to_svc1_c1",
+          "sources": ["api_gw"],
+          "targets": ["anthos_svc1_c1"],
+          "labels": [{ "text": "routes to" }]
+        },
+        {
+          "id": "e_apigw_to_svc1_c2",
+          "sources": ["api_gw"],
+          "targets": ["anthos_svc1_c2"],
+          "labels": [{ "text": "routes to" }]
         }
       ],
       "data": {}
@@ -313,6 +325,18 @@ export const DEFAULT_ARCHITECTURE = {
       "sources": ["external_client"],
       "targets": ["cloud_lb"],
       "labels": [{ "text": "requests" }]
+    },
+    {
+      "id": "edge_web_client_gateway",
+      "sources": ["web_client"],
+      "targets": ["gateway_mgmt"],
+      "labels": [{ "text": "connects to" }]
+    },
+    {
+      "id": "edge_mobile_client_gateway",
+      "sources": ["mobile_client"],
+      "targets": ["gateway_mgmt"],
+      "labels": [{ "text": "connects to" }]
     }
   ]
 };

@@ -76,8 +76,8 @@ const upload = multer({
 
 // Middleware
 app.use(cors());
-app.use(express.json());                     // for application/json
-app.use(express.urlencoded({ extended: false })); // for x-www-form-urlencoded
+app.use(express.json({ limit: '50mb' }));                     // for application/json - increased limit for images
+app.use(express.urlencoded({ extended: false, limit: '50mb' })); // for x-www-form-urlencoded
 
 
 // ============================================================================

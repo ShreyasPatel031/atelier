@@ -1,6 +1,4 @@
-// DISABLED: StreamExecutor import - using simple agent instead
-// import { StreamExecutor } from "../../reasoning/StreamExecutor";
-  import { addReasoningMessage, addFunctionCallingMessage, updateStreamingMessage, addProcessCompleteMessage, makeChatVisible } from "../../utils/chatUtils";
+import { addReasoningMessage, addFunctionCallingMessage, updateStreamingMessage, addProcessCompleteMessage, makeChatVisible } from "../../utils/chatUtils";
 
 export async function process_user_requirements() {
     console.log('🚀 process_user_requirements: FUNCTION CALLED!');
@@ -36,7 +34,7 @@ export async function process_user_requirements() {
     // Clear any previous conversation data to start fresh
     (window as any).chatConversationData = "";
     
-    // Store current input globally for StreamExecutor to access
+    // Store current input globally for processing
     (window as any).chatTextInput = currentTextInput;
     
     const dataCollectionTime = performance.now();
@@ -56,6 +54,14 @@ export async function process_user_requirements() {
     // Get images from global state
     const storedImages = (window as any).selectedImages || [];
     console.log('🖼️ Retrieved stored images:', storedImages.length, 'images');
+    console.log('🖼️ Image data:', storedImages);
+    
+    // DEBUG: Check if images are being used
+    if (storedImages.length > 0) {
+      console.log('📸 DEBUG: Images found in process_user_requirements - will be included in architecture generation');
+    } else {
+      console.log('📸 DEBUG: No images found in process_user_requirements');
+    }
 
           
     // Build conversationData as formatted string
@@ -67,7 +73,7 @@ ${currentTextInput}`;
     const conversationPrepTime = performance.now();
 
     
-    // Store globally for StreamExecutor
+    // Store globally for processing
     (window as any).chatConversationData = conversationData;
     console.log('💾 Stored conversation data globally');
 

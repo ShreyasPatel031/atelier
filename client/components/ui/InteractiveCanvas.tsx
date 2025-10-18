@@ -44,7 +44,6 @@ import { generateSVG, handleSvgZoom } from "../../utils/svgExport"
 import GroupNode from "../GroupNode"
 import StepEdge from "../StepEdge"
 import DevPanel from "../DevPanel"
-import StreamViewer from "../StreamViewer"
 
 import Chatbox from "./Chatbox"
 import { ApiEndpointProvider } from '../../contexts/ApiEndpointContext'
@@ -122,7 +121,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       // User is visiting directly, not from embed - clear any stale chat
       try {
         localStorage.removeItem('atelier_current_conversation');
-        console.log('🧹 [MOUNT] Cleared stale chat messages (direct visit, not from embed)');
+        // console.log('🧹 [MOUNT] Cleared stale chat messages (direct visit, not from embed)');
       } catch (error) {
         console.warn('Failed to clear chat on mount:', error);
       }
@@ -193,11 +192,11 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     };
 
     // Log help message
-    console.log('💡 Console commands available:');
-    console.log('  - loadSimpleDefault()    → Load simple serverless API architecture');
-    console.log('  - loadComplexDefault()   → Load complex GCP test architecture');
-    console.log('  - resetCanvas()          → Reset to empty canvas');
-    console.log('  - toggleDefaultArchitecture(true/false) → Legacy toggle command');
+  // console.log('💡 Console commands available:');
+  // console.log('  - loadSimpleDefault()    → Load simple serverless API architecture');
+  // console.log('  - loadComplexDefault()   → Load complex GCP test architecture');
+  // console.log('  - resetCanvas()          → Reset to empty canvas');
+  // console.log('  - toggleDefaultArchitecture(true/false) → Legacy toggle command');
 
     // Cleanup
     return () => {
@@ -313,15 +312,13 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   }, [user, hasInitialSync, syncWithFirebase]);
 
   
-  // State for StreamViewer visibility
-  // const [showStreamViewer, setShowStreamViewer] = useState(false);
+  
+  // StreamViewer is now standalone and doesn't need refs
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   
   // State for current chat name
   const [currentChatName, setCurrentChatName] = useState<string>('New Architecture');
-  
-  // State for manual save
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   
   // State for share overlay (for embedded version when clipboard fails)
   const [shareOverlay, setShareOverlay] = useState<{ show: boolean; url: string; error?: string; copied?: boolean }>({ show: false, url: '' });
@@ -1738,6 +1735,10 @@ Adapt these patterns to your specific requirements while maintaining the overall
         referenceArchitecture: referenceArchitecture
       });
       
+      // DEBUG: Check if images should be included
+      const storedImages = (window as any).selectedImages || [];
+      console.log('📸 DEBUG: InteractiveCanvas - storedImages:', storedImages.length);
+      
       const initialResponse = await fetch('/api/simple-agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1745,7 +1746,8 @@ Adapt these patterns to your specific requirements while maintaining the overall
           message: message.trim(), 
           conversationHistory,
           currentGraph: currentGraph,
-          referenceArchitecture: referenceArchitecture
+          referenceArchitecture: referenceArchitecture,
+          images: storedImages // Add images to the request
         })
       });
 

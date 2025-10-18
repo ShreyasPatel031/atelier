@@ -3,6 +3,11 @@
   "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist",
   "installCommand": "npm install",
+  "functions": {
+    "api/chat.js": {
+      "maxDuration": 30
+    }
+  },
 
   "rewrites": [
     {

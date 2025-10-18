@@ -208,8 +208,8 @@ export const addNode = (
   graph: RawGraph,
   data?: { label?: string; icon?: string; style?: any }
 ): RawGraph => {
-  console.group(`[mutation] addNode '${nodeName}' → parent '${parentId}'`);
-  console.time("addNode");
+  // console.group(`[mutation] addNode '${nodeName}' → parent '${parentId}'`);
+  // console.time("addNode");
 
   // Check for duplicate ID using normalized name
   const normalizedId = createNodeID(nodeName);
@@ -254,8 +254,8 @@ export const addNode = (
   // Add to parent
   parentNode.children.push(newNode);
   
-  console.timeEnd("addNode");
-  console.groupEnd();
+  // console.timeEnd("addNode");
+  // console.groupEnd();
   return graph;
 };
 
@@ -602,15 +602,15 @@ export const batchUpdate = (operations: Array<{
   label?: string;
   style?: any;
 }>, graph: RawGraph) => {
-  console.group(`[mutation] batchUpdate (${operations.length} operations)`);
-  console.time("batchUpdate");
+  // console.group(`[mutation] batchUpdate (${operations.length} operations)`);
+  // console.time("batchUpdate");
   
   let updatedGraph = { ...graph };
   
   for (const operation of operations) {
     const { name, ...args } = operation;
     
-    console.log(`🔍 Processing batch operation '${name}' with args:`, args);
+    // console.log(`🔍 Processing batch operation '${name}' with args:`, args);
     
     switch (name) {
       case "add_node":
@@ -687,7 +687,7 @@ export const batchUpdate = (operations: Array<{
     }
   }
   
-  console.timeEnd("batchUpdate");
-  console.groupEnd();
+  // console.timeEnd("batchUpdate");
+  // console.groupEnd();
   return updatedGraph;
 }; 

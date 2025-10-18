@@ -30,7 +30,7 @@ export function useUrlArchitecture({ loadArchitecture, config, currentUser }: Us
     }
 
     const urlArchId = anonymousArchitectureService.getArchitectureIdFromUrl();
-    console.log('🔍 [URL-ARCH] Checking for URL architecture ID:', urlArchId);
+    // console.log('🔍 [URL-ARCH] Checking for URL architecture ID:', urlArchId);
     
     if (urlArchId) {
       console.log('🔄 [URL-ARCH] Loading shared architecture from URL');

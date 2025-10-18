@@ -45,8 +45,15 @@ export default async function handler(req: any, res: any) {
     currentGraph, 
     referenceArchitecture = "",
     toolOutputs = null,
-    previousResponseId = null
+    previousResponseId = null,
+    images = [] // Add images parameter
   } = req.body;
+  
+  // DEBUG: Log images received
+  console.log('📸 DEBUG: simple-agent received images:', images?.length || 0);
+  if (images && images.length > 0) {
+    console.log('📸 DEBUG: Image data received:', images.map((img: any) => img.substring(0, 50) + '...'));
+  }
   
   // Handle two modes: initial conversation start OR tool output continuation
   const isToolOutputContinuation = toolOutputs && previousResponseId;

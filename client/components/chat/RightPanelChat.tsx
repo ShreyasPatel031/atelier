@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { Input } from "../ui/input"
 import { 
   Send, 
@@ -30,6 +30,7 @@ interface ChatMessage {
   content: string
   timestamp: Date
   isStreaming?: boolean
+  images?: string[] // Array of data URLs for images
 }
 
 const RightPanelChat: React.FC<RightPanelChatProps> = ({
@@ -44,6 +45,7 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [isDiagramGenerating, setIsDiagramGenerating] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
+  const [pastedImages, setPastedImages] = useState<string[]>([]) // Array of data URLs
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -83,8 +85,76 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
     }
   }, [isMinimized])
 
-  const callOpenAI = async (userMessage: string) => {
+  // Handle paste events to detect images
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      
+      // Check if the item is an image
+      if (item.type.startsWith('image/')) {
+        e.preventDefault(); // Prevent default paste behavior for images
+        
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        // Compress image before converting to base64
+        const compressImage = (file: File, maxWidth: number = 800, quality: number = 0.8): Promise<string> => {
+          return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+              // Calculate new dimensions
+              let { width, height } = img;
+              if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+              }
+              
+              canvas.width = width;
+              canvas.height = height;
+              
+              // Draw and compress
+              ctx?.drawImage(img, 0, 0, width, height);
+              const dataUrl = canvas.toDataURL('image/jpeg', quality);
+              resolve(dataUrl);
+            };
+            
+            img.src = URL.createObjectURL(file);
+          });
+        };
+
+        // Convert to compressed base64 data URL
+        compressImage(file).then((dataUrl) => {
+          console.log('📸 Image compressed and added:', dataUrl.substring(0, 50) + '...');
+          setPastedImages(prev => [...prev, dataUrl]);
+        }).catch((error) => {
+          console.error('❌ Image compression failed:', error);
+        });
+      }
+    }
+  }, []);
+
+  // Remove an image from the pasted images list
+  const removeImage = useCallback((index: number) => {
+    setPastedImages(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const callOpenAI = async (userMessage: string, images?: string[]) => {
     console.log('🚀 Starting OpenAI call with message:', userMessage)
+    console.log('📸 Images provided:', images?.length || 0)
+    
+    // Store images globally for the agent to access
+    if (images && images.length > 0) {
+      (window as any).selectedImages = images;
+      console.log('🌍 Stored images globally for agent:', images.length);
+    } else {
+      (window as any).selectedImages = [];
+    }
     
     // Get current graph from global state (set by InteractiveCanvas)
     const currentGraphFromGlobal = (window as any).currentGraph || currentGraph;
@@ -101,7 +171,8 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
             ...messages.map(msg => ({ role: msg.role, content: msg.content })),
             { role: 'user', content: userMessage }
           ],
-          currentGraph: currentGraphFromGlobal
+          currentGraph: currentGraphFromGlobal,
+          images: images || []
         }),
       })
 
@@ -143,13 +214,13 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
         }
 
         const chunk = decoder.decode(value)
-        console.log('📦 Received chunk:', chunk)
+        // console.log('📦 Received chunk:', chunk)
         const lines = chunk.split('\n')
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6)
-            console.log('📊 Processing data:', data)
+            // console.log('📊 Processing data:', data)
             
             if (data === '[DONE]') {
               console.log('🏁 Stream marked as done')
@@ -166,8 +237,8 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
 
             try {
               const parsed = JSON.parse(data)
-              console.log('🔍 Parsed data:', parsed)
-              console.log('🔍 Parsed data type:', parsed.type)
+              // console.log('🔍 Parsed data:', parsed)
+              // console.log('🔍 Parsed data type:', parsed.type)
               
               // Handle special diagram creation messages
               if (parsed.type === 'diagram_creation') {
@@ -282,18 +353,21 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
       id: `user-${Date.now()}`,
       role: 'user',
       content: inputValue.trim(),
-      timestamp: new Date()
+      timestamp: new Date(),
+      images: pastedImages.length > 0 ? [...pastedImages] : undefined
     }
 
     console.log('💬 Adding user message:', userMessage)
     setMessages(prev => [...prev, userMessage])
     const messageText = inputValue.trim()
     setInputValue("")
+    setPastedImages([]) // Clear pasted images after sending
     setIsLoading(true)
 
     console.log('🚀 Calling OpenAI with message:', messageText)
+    console.log('📸 Images being sent:', pastedImages.length > 0 ? pastedImages.length : 'none')
     try {
-      await callOpenAI(messageText)
+      await callOpenAI(messageText, pastedImages.length > 0 ? pastedImages : undefined)
     } finally {
       console.log('🏁 OpenAI call completed')
       setIsLoading(false)
@@ -399,7 +473,21 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                             <ReactMarkdown>{message.content}</ReactMarkdown>
                           </div>
                         ) : (
-                          <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>
+                          <div>
+                            <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>
+                            {message.images && message.images.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {message.images.map((dataUrl, index) => (
+                                  <img
+                                    key={index}
+                                    src={dataUrl}
+                                    alt={`Attached image ${index + 1}`}
+                                    className="w-20 h-20 object-cover rounded border border-gray-300"
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         )}
                         {message.isStreaming && (
                           <div className="flex items-center gap-1 mt-1">
@@ -457,6 +545,34 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
               )}
             </div>
 
+            {/* Image previews */}
+            {pastedImages.length > 0 && (
+              <div className="mx-4 mt-4">
+                <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <span className="text-sm text-gray-600 w-full mb-2">
+                    {pastedImages.length} image{pastedImages.length > 1 ? 's' : ''} attached:
+                  </span>
+                  {pastedImages.map((dataUrl, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={dataUrl}
+                        alt={`Pasted image ${index + 1}`}
+                        className="w-16 h-16 object-cover rounded border border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"        
+                        title="Remove image"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Input Area */}
             <div className="mx-4 mt-4 border-t border-gray-300 pt-4 pb-4">
               <form onSubmit={handleSendMessage} className="flex items-center gap-3 bg-white rounded-lg border border-gray-300 shadow-sm p-3 hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-gray-400 focus-within:border-gray-400">
@@ -465,6 +581,7 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
+                  onPaste={handlePaste}
                   data-testid="chat-input"
                   placeholder="Ask me to create an architecture..."
                   disabled={isLoading || isDiagramGenerating}

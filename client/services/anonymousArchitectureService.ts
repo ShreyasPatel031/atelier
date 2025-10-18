@@ -104,7 +104,7 @@ class AnonymousArchitectureService {
         chatMessages,
       };
 
-      console.log('💾 Saving anonymous architecture:', name, 'for session:', sessionId, 'with userPrompt:', finalUserPrompt ? 'YES' : 'NO', 'with chatMessages:', chatMessages?.length || 0);
+      console.log('💾 Saving anonymous architecture:', name, 'for session:', sessionId);
 
       const docRef = await addDoc(collection(db, 'anonymous_architectures'), anonymousArch);
 

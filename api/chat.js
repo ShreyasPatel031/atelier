@@ -32,9 +32,10 @@ export default async function handler(req, res) {
     }
 
     console.log('✅ API key found');
-    const { messages, currentGraph } = req.body;
+    const { messages, currentGraph, images } = req.body;
     console.log('📨 Received messages:', messages);
     console.log('📊 Received current graph:', currentGraph ? `${currentGraph.children?.length || 0} nodes` : 'none');
+    console.log('📸 Received images:', images ? `${images.length} images` : 'none');
 
     if (!messages || !Array.isArray(messages)) {
       console.log('❌ Invalid messages format');
@@ -80,9 +81,44 @@ ${JSON.stringify(currentGraph, null, 2)}`
     res.setHeader('Connection', 'keep-alive');
 
     console.log('🔄 Creating chat completion...');
+    
+    // Process messages to include images if provided
+    const processedMessages = messages.map(msg => {
+      // Check if this message has images (either from the message itself or from the global images array)
+      const messageImages = msg.images || (msg.role === 'user' && images ? images : []);
+      
+    console.log('🔍 Processing message:', msg.role, 'has images:', !!msg.images, 'global images:', images?.length || 0);
+    console.log('🔍 MessageImages:', messageImages?.length || 0);
+      
+      if (messageImages && messageImages.length > 0) {
+        // Convert images to OpenAI format
+        const imageContent = messageImages.map(imageDataUrl => ({
+          type: "image_url",
+          image_url: {
+            url: imageDataUrl
+          }
+        }));
+        
+        console.log('📸 Created image content for message:', imageContent.length, 'images');
+        
+        return {
+          role: msg.role,
+          content: [
+            { type: "text", text: msg.content },
+            ...imageContent
+          ]
+        };
+      }
+      return msg;
+    });
+    
+    // Use gpt-4.1 which supports images
+    const modelToUse = 'gpt-4.1';
+    console.log('🤖 Using model:', modelToUse);
+    
     // Create chat completion with streaming and tools
     const stream = await openai.chat.completions.create({
-      model: 'gpt-4.1',
+      model: modelToUse,
       messages: [
         {
           role: 'system',
@@ -90,9 +126,11 @@ ${JSON.stringify(currentGraph, null, 2)}`
 
 ${graphStateDescription}
 
-When discussing the current architecture, you can reference the existing nodes and edges from the FULL GRAPH JSON above. If the user asks about modifications or improvements, you can suggest specific changes to the current architecture by referencing the exact node IDs and structure shown in the JSON.`
+When discussing the current architecture, you can reference the existing nodes and edges from the FULL GRAPH JSON above. If the user asks about modifications or improvements, you can suggest specific changes to the current architecture by referencing the exact node IDs and structure shown in the JSON.
+
+${images && images.length > 0 ? `IMPORTANT: The user has provided ${images.length} image(s) showing architecture diagrams. Analyze these images carefully and provide insights about the architecture shown, suggest improvements, or help replicate similar patterns.` : ''}`
         },
-        ...messages
+        ...processedMessages
       ],
       stream: true,
       temperature: 0.7,
