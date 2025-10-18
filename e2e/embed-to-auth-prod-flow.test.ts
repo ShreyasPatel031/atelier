@@ -12,9 +12,14 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { getBaseUrl } from './test-config.js';
 
 test.describe('Embed-to-Auth Production Flow', () => {
-  const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:3001';
+  let BASE_URL: string;
+  
+  test.beforeAll(async () => {
+    BASE_URL = await getBaseUrl();
+  });
   
   test('Real embed-to-auth flow with actual Firebase', async ({ page }) => {
     // Step 1: Navigate to embed mode

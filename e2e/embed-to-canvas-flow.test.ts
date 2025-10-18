@@ -7,9 +7,14 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { getBaseUrl } from './test-config.js';
 
 test.describe('Embed-to-Canvas Flow', () => {
-  const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:3001';
+  let BASE_URL: string;
+  
+  test.beforeAll(async () => {
+    BASE_URL = await getBaseUrl();
+  });
   
   test('Architecture and chat persist from embed to canvas', async ({ page, context }) => {
     console.log('📱 Loading embed mode...');

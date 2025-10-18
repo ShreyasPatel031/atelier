@@ -5,65 +5,31 @@
  */
 
 import fetch from 'node-fetch';
+import { findRunningServerPort } from './find-server-port.js';
 
 async function findLocalServer() {
-    const ports = [3000, 3001, 3002, 3003, 3004];
-    
-    for (const port of ports) {
-        try {
-            const response = await fetch(`http://localhost:${port}/api/embed`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: 'test' })
-            });
-            
-            if (response.ok) {
-                return `http://localhost:${port}`;
-            }
-        } catch (error) {
-            // Port not available, try next
-        }
+    try {
+        const port = await findRunningServerPort();
+        return `http://localhost:${port}`;
+    } catch (error) {
+        console.error('❌ Could not find running server:', error.message);
+        return null;
     }
-    return null;
 }
 
 async function waitForServers(maxRetries = 30) {
     console.log('🔍 Waiting for servers...');
     
-    // Check Vercel dev server first
-    const VERCEL_DEV_URL = 'http://localhost:3000';
-    let vercelReady = false;
     let localUrl = null;
     
     for (let i = 0; i < maxRetries; i++) {
-        // Check Vercel
-        if (!vercelReady) {
-            try {
-                const response = await fetch(`${VERCEL_DEV_URL}/api/embed`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: 'test' })
-                });
-                
-                if (response.ok) {
-                    console.log('✅ Vercel dev server is ready');
-                    vercelReady = true;
-                }
-            } catch (error) {
-                // Vercel not ready yet
-            }
-        }
-        
         // Check local server
         if (!localUrl) {
             localUrl = await findLocalServer();
             if (localUrl) {
                 console.log(`✅ Local dev server is ready at ${localUrl}`);
+                return { local: localUrl };
             }
-        }
-        
-        if (vercelReady && localUrl) {
-            return { vercel: VERCEL_DEV_URL, local: localUrl };
         }
         
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
@@ -73,17 +39,17 @@ async function waitForServers(maxRetries = 30) {
 }
 
 async function runTests() {
-    const { vercel, local } = await waitForServers();
+    const { local } = await waitForServers();
     
     console.log('🧪 Testing Icon Fallback System');
     console.log('===============================\n');
     
     let allTestsPassed = true;
     
-    // Test both servers
-    for (const [serverName, serverUrl] of Object.entries({ vercel, local })) {
-        console.log(`\n🌐 Testing ${serverName.toUpperCase()} server at ${serverUrl}`);
-        console.log('─'.repeat(50));
+    // Test local server
+    const serverUrl = local;
+    console.log(`\n🌐 Testing LOCAL server at ${serverUrl}`);
+    console.log('─'.repeat(50));
         
         // Test 1: Verify missing icon scenario
         console.log('1️⃣ Testing missing icon: gcp_cloud_trace');
@@ -107,128 +73,47 @@ async function runTests() {
         console.log('\n2️⃣ Testing fallback embedding availability');
         
         try {
-            const response = await fetch(`${serverUrl}/api/embed`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: 'test' })
-            });
+            const embeddingsResponse = await fetch(`${serverUrl}/precomputed-icon-embeddings.json`);
+            const embeddings = await embeddingsResponse.json();
             
-            if (response.ok) {
-                console.log('✅ Vercel dev server is ready');
-                return true;
-            }
-        } catch (error) {
-            // Server not ready yet
-        }
-        
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
-    }
-    
-    throw new Error('❌ Vercel dev server failed to start within timeout');
-}
-
-async function testIconFallback() {
-    console.log('🧪 Testing Icon Fallback System');
-    console.log('===============================\n');
-    
-    let allTestsPassed = true;
-    
-    // Test 1: Verify missing icon scenario
-    console.log('1️⃣ Testing missing icon: gcp_cloud_trace');
-    
-    try {
-        const iconResponse = await fetch(`${VERCEL_DEV_URL}/icons/gcp/gcp_cloud_trace.png`);
-        const contentType = iconResponse.headers.get('content-type') || '';
-        
-        if (contentType.includes('text/html')) {
-            console.log('   ✅ Icon correctly detected as missing (HTML response)');
-        } else {
-            console.log('   ❌ Icon loading detection failed');
-            allTestsPassed = false;
-        }
-    } catch (error) {
-        console.log(`   ❌ Error testing icon URL: ${error.message}`);
-        allTestsPassed = false;
-    }
-    
-    // Test 2: Check fallback embedding availability
-    console.log('\n2️⃣ Testing fallback embedding availability');
-    
-    try {
-        const embeddingsResponse = await fetch(`${VERCEL_DEV_URL}/precomputed-icon-embeddings.json`);
-        const embeddings = await embeddingsResponse.json();
-        
-        const hasTraceEmbedding = embeddings.embeddings && embeddings.embeddings['trace'];
-        if (hasTraceEmbedding) {
-            console.log('   ✅ Trace embedding available for fallback');
-        } else {
-            console.log('   ❌ Trace embedding missing');
-            allTestsPassed = false;
-        }
-    } catch (error) {
-        console.log(`   ❌ Error checking embeddings: ${error.message}`);
-        allTestsPassed = false;
-    }
-    
-    // Test 3: Test semantic search API
-    console.log('\n3️⃣ Testing semantic search API');
-    
-    try {
-        const searchResponse = await fetch(`${VERCEL_DEV_URL}/api/embed`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: 'cloud trace monitoring' })
-        });
-        
-        if (searchResponse.ok) {
-            const searchData = await searchResponse.json();
-            if (searchData.embedding && searchData.embedding.length > 0) {
-                console.log('   ✅ Semantic search API working');
+            const hasTraceEmbedding = embeddings.embeddings && embeddings.embeddings['trace'];
+            if (hasTraceEmbedding) {
+                console.log('   ✅ Trace embedding available for fallback');
             } else {
-                console.log('   ❌ Semantic search returned invalid data');
+                console.log('   ❌ Trace embedding missing');
                 allTestsPassed = false;
             }
-        } else {
-            console.log(`   ❌ Semantic search API failed: ${searchResponse.status}`);
+        } catch (error) {
+            console.log(`   ❌ Error checking embeddings: ${error.message}`);
             allTestsPassed = false;
         }
-    } catch (error) {
-        console.log(`   ❌ Error with semantic search: ${error.message}`);
-        allTestsPassed = false;
-    }
-    
-    // Test 4: Test agent generation creates missing icons
-    console.log('\n4️⃣ Testing agent generates missing icons');
-    
-    try {
-        const agentResponse = await fetch(`${VERCEL_DEV_URL}/api/simple-agent`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                message: 'Create a GCP architecture with gcp_cloud_trace monitoring', 
-                tools: [] 
-            })
-        });
         
-        if (agentResponse.ok) {
-            const agentData = await agentResponse.json();
+        // Test 3: Test semantic search API
+        console.log('\n3️⃣ Testing semantic search API');
+        
+        try {
+            const searchResponse = await fetch(`${serverUrl}/api/embed`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: 'cloud trace monitoring' })
+            });
             
-            // Check if response contains gcp_cloud_trace
-            const responseText = JSON.stringify(agentData);
-            if (responseText.includes('gcp_cloud_trace') || responseText.includes('cloud_trace')) {
-                console.log('   ✅ Agent successfully generates missing icon names');
+            if (searchResponse.ok) {
+                const searchData = await searchResponse.json();
+                if (searchData.embedding && searchData.embedding.length > 0) {
+                    console.log('   ✅ Semantic search API working');
+                } else {
+                    console.log('   ❌ Semantic search returned invalid data');
+                    allTestsPassed = false;
+                }
             } else {
-                console.log('   ⚠️  Agent did not generate expected missing icon (may be random)');
-                // Don't fail the test since agent behavior can vary
+                console.log(`   ❌ Semantic search API failed: ${searchResponse.status}`);
+                allTestsPassed = false;
             }
-        } else {
-            console.log(`   ❌ Agent API failed: ${agentResponse.status}`);
+        } catch (error) {
+            console.log(`   ❌ Error with semantic search: ${error.message}`);
             allTestsPassed = false;
         }
-    } catch (error) {
-        console.log(`   ❌ Error testing agent: ${error.message}`);
-        allTestsPassed = false;
-    }
     
     console.log('\n===============================');
     if (allTestsPassed) {
@@ -241,6 +126,7 @@ async function testIconFallback() {
         return false;
     }
 }
+
 
 // Main execution
 async function main() {

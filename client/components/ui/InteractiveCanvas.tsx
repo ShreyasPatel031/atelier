@@ -2835,7 +2835,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
               </div>
 
       {/* Save/Edit and Settings buttons - aligned to right chat panel */}
-      <div className={`absolute top-4 z-[100] flex gap-2 transition-all duration-300 ${
+      <div className={`absolute top-4 z-[100] flex gap-3 transition-all duration-300 ${
         viewModeConfig.showChatPanel
           ? (rightPanelCollapsed ? 'right-[5.5rem]' : 'right-[25rem]')
           : 'right-4'
