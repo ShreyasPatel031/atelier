@@ -1,0 +1,51 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e5]:
+  - generic [ref=e6]:
+    - generic [ref=e8]:
+      - generic:
+        - button "Searching for architecture":
+          - img
+    - button "Sign in" [ref=e12] [cursor=pointer]:
+      - img [ref=e13] [cursor=pointer]
+  - generic [ref=e16]:
+    - generic [ref=e19]:
+      - generic [ref=e21]:
+        - generic:
+          - img
+          - button [ref=e22] [cursor=pointer]
+      - img [ref=e26]
+      - generic [ref=e28]:
+        - button "zoom in" [disabled]:
+          - img
+        - button "zoom out" [ref=e29] [cursor=pointer]:
+          - img [ref=e30] [cursor=pointer]
+        - button "fit view" [ref=e32] [cursor=pointer]:
+          - img [ref=e33] [cursor=pointer]
+        - button "toggle interactivity" [ref=e35] [cursor=pointer]:
+          - img [ref=e36] [cursor=pointer]
+      - link "React Flow attribution" [ref=e39] [cursor=pointer]:
+        - /url: https://reactflow.dev
+        - text: React Flow
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - button "GCP microservices with Kubernetes" [disabled] [ref=e44]
+        - button "AWS serverless web application" [disabled] [ref=e45]
+        - button "Multi-cloud data pipeline" [disabled] [ref=e46]
+      - generic [ref=e48]:
+        - textbox "Describe your architecture requirements" [disabled] [ref=e49]
+        - button [disabled]:
+          - img
+  - generic [ref=e50]:
+    - button "Share" [disabled] [ref=e51]:
+      - img [ref=e52]
+      - generic [ref=e55]: Share
+    - generic [ref=e56]:
+      - button "Export" [ref=e57] [cursor=pointer]:
+        - img [ref=e58] [cursor=pointer]
+        - generic [ref=e61] [cursor=pointer]: Export
+      - button "Edit" [active] [ref=e62] [cursor=pointer]:
+        - img [ref=e63] [cursor=pointer]
+        - generic [ref=e66] [cursor=pointer]: Edit
+```
