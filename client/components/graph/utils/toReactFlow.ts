@@ -13,6 +13,11 @@ interface NodeDimensions {
 }
 
 export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) {
+  // Snap-to-grid configuration (keep in sync with canvas grid)
+  const GRID_SIZE = 16;
+  const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
+  const snapPos = (p: { x: number; y: number }) => ({ x: snap(p.x), y: snap(p.y) });
+
   // Calculate absolute positions for all nodes in the graph
   const absolutePositions = computeAbsolutePositions(elkGraph);
   
@@ -25,13 +30,21 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
 
   /* ---------- helper to create RF nodes -------------------------------- */
   const createNode = (node: any, parentAbsolutePosition = { x: 0, y: 0 }, parentId?: string) => {
-    const absPos = absolutePositions[node.id]; 
+    const absPosRaw = absolutePositions[node.id];
+    const absPos = snapPos(absPosRaw);
     const isGroupNode = (node.children?.length ?? 0) > 0;
+
+    // Quantize node sizes to grid so both start and end land on grid
+    const quantizeSize = (v: number) => Math.max(GRID_SIZE, Math.round(v / GRID_SIZE) * GRID_SIZE);
+    const nodeWidth  = quantizeSize(node.width  || dimensions.width);
+    const nodeHeight = quantizeSize(node.height || dimensions.height);
+    const groupWidth  = quantizeSize(node.width  || dimensions.groupWidth);
+    const groupHeight = quantizeSize(node.height || dimensions.groupHeight);
 
     nodes.push({
       id: node.id,
       type: isGroupNode ? "group" : "custom",
-      position: parentId ? { x: node.x ?? 0, y: node.y ?? 0 } : { x: absPos.x, y: absPos.y },
+      position: parentId ? snapPos({ x: node.x ?? 0, y: node.y ?? 0 }) : { x: absPos.x, y: absPos.y },
       parentId,
       zIndex: isGroupNode ? 5 : 50,
       selectable: true,
@@ -39,8 +52,8 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
       draggable: true,
       data: {
         label: node.labels?.[0]?.text || (node.id === 'root' ? '' : node.id),
-        width: node.width || dimensions.width,
-        height: node.height || dimensions.height,
+        width: nodeWidth,
+        height: nodeHeight,
         isParent: isGroupNode,
         // Pass through icon if it exists in the node data
         ...(node.data?.icon && { icon: node.data.icon }),
@@ -49,26 +62,26 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
         // Pass through groupIcon if it exists in the node data
         ...(node.data?.groupIcon && { groupIcon: node.data.groupIcon }),
         leftHandles: (edgeConnectionPoints[node.id]?.left ?? []).map(connectionPoint => {
-          const delta = connectionPoint.y - absPos.y;
+          const delta = snap(connectionPoint.y) - absPos.y;
           return delta;
         }),
         rightHandles: (edgeConnectionPoints[node.id]?.right ?? []).map(connectionPoint => {
-          const delta = connectionPoint.y - absPos.y;
+          const delta = snap(connectionPoint.y) - absPos.y;
           return delta;
         }),
         topHandles: (edgeConnectionPoints[node.id]?.top ?? []).map(connectionPoint => {
-          const delta = connectionPoint.x - absPos.x;
+          const delta = snap(connectionPoint.x) - absPos.x;
           return delta;
         }),
         bottomHandles: (edgeConnectionPoints[node.id]?.bottom ?? []).map(connectionPoint => {
-          const delta = connectionPoint.x - absPos.x;
+          const delta = snap(connectionPoint.x) - absPos.x;
           return delta;
         }),
         position: { x: absPos.x, y: absPos.y }
       },
       style: isGroupNode ? {
-        width: node.width || dimensions.groupWidth,
-        height: node.height || dimensions.groupHeight,
+        width: groupWidth,
+        height: groupHeight,
         backgroundColor: 'transparent',
         border: 'none',
         display: 'flex',
@@ -195,7 +208,8 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
   };
 
   const processEdges = (node: any) => {
-    const abs = absolutePositions[node.id];      // abs pos of this container
+    const absRaw = absolutePositions[node.id];      // abs pos of this container
+    const abs = snapPos(absRaw);
     (node.edges || []).forEach((e: any) => createEdge(e, abs));
     (node.children || []).forEach(processEdges);
   };

@@ -229,8 +229,25 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
   /* -------------------------------------------------- */
   /* 🔹 6. react-flow helpers                           */
   /* -------------------------------------------------- */
+  // Snap-to-grid for interactive moves (dragging etc.)
   const onNodesChange = useCallback(
-    (c: NodeChange[]) => setNodes(n => applyNodeChanges(c, n)), []);
+    (changes: NodeChange[]) => {
+      const GRID_SIZE = 16;
+      const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
+      const snapPos = (p: { x: number; y: number }) => ({ x: snap(p.x), y: snap(p.y) });
+
+      const snappedChanges = changes.map((ch) => {
+        if (ch.type === 'position' && (ch as any).position) {
+          const pos = (ch as any).position as { x: number; y: number };
+          return { ...ch, position: snapPos(pos) } as NodeChange;
+        }
+        return ch;
+      });
+
+      setNodes((nodesState) => applyNodeChanges(snappedChanges, nodesState));
+    },
+    []
+  );
   
   const onEdgesChange = useCallback(
     (c: EdgeChange[]) => setEdges(e => applyEdgeChanges(c, e)), []);
