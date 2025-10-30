@@ -1,5 +1,6 @@
 export const DEFAULT_ARCHITECTURE = {
   "id": "root",
+  "mode": "FREE",
   "children": [
     {
       "id": "external_clients",

@@ -66,16 +66,36 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [layoutVersion, incLayoutVersion] = useState(0);
   
+  /* 4) view-state (authoritative geometry, prep for future phases) */
+  const viewStateRef = useRef<{ node: Record<string, { x: number; y: number; w: number; h: number }>; group: Record<string, { x: number; y: number; w: number; h: number }>; edge: Record<string, { waypoints?: Array<{ x: number; y: number }> }> }>({
+    node: {},
+    group: {},
+    edge: {},
+  });
+  
   /* -------------------------------------------------- */
   /* 🔹 3. mutate helper (sync hash update)              */
   /* -------------------------------------------------- */
   type MutFn = (...a: any[]) => any;
+  type MutateOptions = { source?: 'ai' | 'user'; scopeId?: string };
   
-  const mutate = useCallback((fn: MutFn, ...a: any[]) => {
+  // Pass-through mutate wrapper that accepts optional options as the first arg.
+  // For Phase 0.3 this is ignored (no behavior change).
+  const mutate = useCallback((...args: any[]) => {
+    let fn: MutFn;
+    let rest: any[];
+    if (typeof args[0] === 'function') {
+      fn = args[0] as MutFn;
+      rest = args.slice(1);
+    } else {
+      // args[0] could be options; ignore for now
+      fn = args[1] as MutFn;
+      rest = args.slice(2);
+    }
     setRawGraph(prev => {
-      const next = fn(...a, prev) as RawGraph;
-      hashRef.current = structuralHash(next);       // hash before layout
-      return next;                                  // triggers useEffect
+      const next = fn(...rest, prev) as RawGraph;
+      hashRef.current = structuralHash(next);
+      return next;
     });
   }, []);
   
@@ -83,6 +103,7 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
   /* 🔹 4.  exposed handlers                            */
   /* -------------------------------------------------- */
   const handlers = useMemo(() => ({
+    // Backward compatible variants (no options)
     handleAddNode     : (...a: any[]) => mutate(addNode,      ...a),
     handleDeleteNode  : (...a: any[]) => mutate(deleteNode,   ...a),
     handleMoveNode    : (...a: any[]) => mutate(moveNode,     ...a),
@@ -91,6 +112,15 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
     handleGroupNodes  : (...a: any[]) => mutate(groupNodes,   ...a),
     handleRemoveGroup : (...a: any[]) => mutate(removeGroup,  ...a),
     handleBatchUpdate : (...a: any[]) => mutate(batchUpdate,  ...a),
+    // New option-aware variants (ignored for now)
+    addNodeWith       : (opts: MutateOptions, ...a: any[]) => mutate(opts, addNode,     ...a),
+    deleteNodeWith    : (opts: MutateOptions, ...a: any[]) => mutate(opts, deleteNode,  ...a),
+    moveNodeWith      : (opts: MutateOptions, ...a: any[]) => mutate(opts, moveNode,    ...a),
+    addEdgeWith       : (opts: MutateOptions, ...a: any[]) => mutate(opts, addEdge,     ...a),
+    deleteEdgeWith    : (opts: MutateOptions, ...a: any[]) => mutate(opts, deleteEdge,  ...a),
+    groupNodesWith    : (opts: MutateOptions, ...a: any[]) => mutate(opts, groupNodes,  ...a),
+    removeGroupWith   : (opts: MutateOptions, ...a: any[]) => mutate(opts, removeGroup, ...a),
+    batchUpdateWith   : (opts: MutateOptions, ...a: any[]) => mutate(opts, batchUpdate, ...a),
   }), [mutate]);
   
   const handleAddNode = useCallback(
@@ -208,6 +238,20 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
         
         setNodes(rfNodes);
         setEdges(rfEdges);
+
+        // Populate viewStateRef from ELK output (no behavior change)
+        const nextNodeState: Record<string, { x: number; y: number; w: number; h: number }> = {};
+        const nextGroupState: Record<string, { x: number; y: number; w: number; h: number }> = {};
+        for (const n of rfNodes) {
+          const geom = { x: n.position.x, y: n.position.y, w: (n as any).width ?? 0, h: (n as any).height ?? 0 };
+          // Heuristic: treat nodes with type 'group' as groups; others as nodes
+          if ((n as any).type === 'group') {
+            nextGroupState[n.id] = geom;
+          } else {
+            nextNodeState[n.id] = geom;
+          }
+        }
+        viewStateRef.current = { node: nextNodeState, group: nextGroupState, edge: {} };
         incLayoutVersion(v => v + 1);
       } catch (e: any) {
         if (e.name !== "AbortError") {
@@ -264,6 +308,7 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
   return {
     rawGraph, layoutGraph, layoutError, nodes, edges, layoutVersion,
     setRawGraph, setNodes, setEdges,
+    viewStateRef,
     ...handlers,
     onNodesChange, onEdgesChange, onConnect,
     handleAddNode,

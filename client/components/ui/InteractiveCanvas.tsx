@@ -1,3 +1,12 @@
+/**
+ * CRITICAL REPOSITORY RULE — DO NOT SKIP
+ *
+ * InteractiveCanvas.tsx is already too large. Do NOT add new logic or components here.
+ * - Only orchestrate and wire references to helpers/modules.
+ * - Put new interactions (e.g., tools, gestures, policies) in dedicated files
+ *   under client/components/ui/ (e.g., canvasInteractions.ts) and import them.
+ * - Keep this file as a thin coordinator to protect maintainability and testability.
+ */
 "use client"
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"
@@ -43,7 +52,14 @@ import { syncWithFirebase as syncWithFirebaseService } from "../../services/sync
 import { generateSVG, handleSvgZoom } from "../../utils/svgExport"
 import GroupNode from "../GroupNode"
 import StepEdge from "../StepEdge"
+/**
+ * READ ME: InteractiveCanvas is already very large. Do NOT add new interaction
+ * logic or component code directly here. Add it in a dedicated helper/module and
+ * import the reference. Keep this file as a thin orchestrator.
+ */
 import DevPanel from "../DevPanel"
+import { placeNodeOnCanvas } from "./canvasInteractions"
+import CanvasToolbar from "./CanvasToolbar"
 
 import Chatbox from "./Chatbox"
 import { ApiEndpointProvider } from '../../contexts/ApiEndpointContext'
@@ -395,6 +411,12 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     setNotification({ show: false, type: 'info', title: '', message: '' });
   }, []);
   
+  // Canvas tool selection state (FREE by default - selection tool)
+  const [selectedTool, setSelectedTool] = useState<"select" | "box" | "connector" | "group">("select");
+  const handleToolSelect = useCallback((tool: typeof selectedTool) => {
+    setSelectedTool(tool);
+  }, []);
+
   // Helper functions for operation tracking
   const setArchitectureOperationState = useCallback((architectureId: string, isRunning: boolean) => {
     setArchitectureOperations(prev => ({ ...prev, [architectureId]: isRunning }));
@@ -767,6 +789,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     onConnect,
     handleLabelChange,
     
+    viewStateRef,
   } = useElkToReactflowGraphConverter({
     id: "root",
     children: [],
@@ -2661,9 +2684,22 @@ Adapt these patterns to your specific requirements while maintaining the overall
 
       {/* Main Graph Area */}
       <div className="flex-1 relative min-h-0 overflow-hidden">
+        {/* Canvas Toolbar - bottom center overlay */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[101]">
+          <CanvasToolbar selectedTool={selectedTool} onSelect={handleToolSelect} />
+        </div>
         {/* ReactFlow container - only show when in ReactFlow mode */}
         {useReactFlow && (
-          <div className="absolute inset-0 h-full w-full z-0">
+          <div className="absolute inset-0 h-full w-full z-0"
+            onClick={(e) => placeNodeOnCanvas(
+              e as unknown as MouseEvent,
+              selectedTool,
+              reactFlowRef,
+              setNodes,
+              viewStateRef,
+              (next) => setSelectedTool(next)
+            )}
+          >
             <ReactFlow 
               ref={reactFlowRef}
               nodes={nodes} 
@@ -2834,17 +2870,17 @@ Adapt these patterns to your specific requirements while maintaining the overall
       
               </div>
 
-      {/* Save/Edit and Settings buttons - aligned to right chat panel */}
-      <div className={`absolute top-4 z-[100] flex gap-3 transition-all duration-300 ${
+      {/* Save/Edit and Settings buttons - align to right, match toolbar height/spacing */}
+      <div className={`absolute top-4 z-[100] flex items-center transition-all duration-300 ${
         viewModeConfig.showChatPanel
           ? (rightPanelCollapsed ? 'right-[5.5rem]' : 'right-[25rem]')
           : 'right-4'
-      }`}>
+      }`} style={{ height: 40, gap: 8 }}>
         {/* Share Button - Always visible for all users */}
                 <button
           onClick={handleShareCurrent}
           disabled={!rawGraph || !rawGraph.children || rawGraph.children.length === 0}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-md transition-all duration-200 ${
+          className={`flex items-center gap-2 px-2 h-10 rounded-lg shadow-lg border border-gray-200 hover:shadow-md transition-all duration-200 ${
             !rawGraph || !rawGraph.children || rawGraph.children.length === 0
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'bg-white text-gray-700 hover:bg-gray-50'

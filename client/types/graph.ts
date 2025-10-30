@@ -39,6 +39,7 @@ export interface ElkGraphNode {
   labels?: { text: string }[];
   children?: ElkGraphNode[];
   edges?: ElkGraphEdge[];
+  mode?: 'FREE' | 'LOCK';  // default FREE - controls auto-layout behavior
   data?: {
     label?: string;
     icon?: string;

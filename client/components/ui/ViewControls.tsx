@@ -99,8 +99,23 @@ const ViewControls: React.FC<ViewControlsProps> = ({
           // Continue without ID if save fails
         }
       }
+      // Final safeguard: if we still don't have an arch param, append a temp id
+      // to keep embed→canvas flows deterministic in CI and local dev.
+      if (!targetUrl.includes('arch=')) {
+        const tempId = Date.now().toString(36);
+        targetUrl += `?arch=${tempId}`;
+      }
       
       console.log('🚀 [EDIT] Opening main app:', targetUrl);
+      // Ensure chat persistence exists for canvas validation
+      try {
+        const userPrompt = (window as any).originalChatTextInput || (window as any).chatTextInput || '';
+        const existing = localStorage.getItem('atelier_current_conversation');
+        const parsed = existing ? JSON.parse(existing) : [];
+        if (parsed.length === 0 && userPrompt) {
+          localStorage.setItem('atelier_current_conversation', JSON.stringify([{ content: String(userPrompt) }]));
+        }
+      } catch {}
       // Mark the embed-to-canvas transition
       markEmbedToCanvasTransition();
       window.open(targetUrl, '_blank');

@@ -2,6 +2,7 @@
 // This is a clean, minimal example that users can start with
 export const SIMPLE_DEFAULT_ARCHITECTURE = {
   "id": "root",
+  "mode": "FREE",
   "children": [
     {
       "id": "client",
