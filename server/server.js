@@ -40,7 +40,12 @@ import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
-import "dotenv/config";
+import { config } from "dotenv";
+
+// Load .env file from project root (works in worktrees too)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+config({ path: resolve(__dirname, "..", ".env") });
 import cors from 'cors';
 import multer from 'multer';
 // Import tools from catalog
@@ -50,7 +55,6 @@ import { modelConfigs } from '../api/agentConfig.ts';
 
 const app = express();
 const apiKey = process.env.OPENAI_API_KEY;
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const connectionManager = ConnectionManager.getInstance();
 
 if (!apiKey) {

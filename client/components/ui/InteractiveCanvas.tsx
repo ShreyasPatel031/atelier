@@ -59,6 +59,7 @@ import StepEdge from "../StepEdge"
  */
 import DevPanel from "../DevPanel"
 import { placeNodeOnCanvas } from "./canvasInteractions"
+import NodeHoverPreview from "./NodeHoverPreview"
 import CanvasToolbar from "./CanvasToolbar"
 
 import Chatbox from "./Chatbox"
@@ -416,7 +417,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   const handleToolSelect = useCallback((tool: typeof selectedTool) => {
     setSelectedTool(tool);
   }, []);
-
+  
   // Helper functions for operation tracking
   const setArchitectureOperationState = useCallback((architectureId: string, isRunning: boolean) => {
     setArchitectureOperations(prev => ({ ...prev, [architectureId]: isRunning }));
@@ -2688,6 +2689,8 @@ Adapt these patterns to your specific requirements while maintaining the overall
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[101]">
           <CanvasToolbar selectedTool={selectedTool} onSelect={handleToolSelect} />
         </div>
+        {/* Hover preview for Box placement (snap-to-grid) */}
+        <NodeHoverPreview reactFlowRef={reactFlowRef} visible={selectedTool === 'box'} />
         {/* ReactFlow container - only show when in ReactFlow mode */}
         {useReactFlow && (
           <div className="absolute inset-0 h-full w-full z-0"
