@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Handle, Position } from 'reactflow';
-import { baseHandleStyle } from './graph/handles';
+import React, { useEffect, useState, useRef } from 'react';
 import { iconLists } from '../generated/iconLists';
 import { iconFallbackService } from '../utils/iconFallbackService';
 import { iconCacheService } from '../utils/iconCacheService';
 import { useApiEndpoint, buildAssetUrl } from '../contexts/ApiEndpointContext';
 import { splitTextIntoLines } from '../utils/textMeasurement';
+import SelectedNodeDots from './node/SelectedNodeDots';
+import ConnectorDots from './node/ConnectorDots';
+import NodeHandles from './node/NodeHandles';
 
 // NO HEURISTIC FALLBACKS - let semantic fallback service handle everything
 
@@ -24,10 +25,15 @@ interface CustomNodeProps {
   id: string;
   selected?: boolean;
   onLabelChange: (id: string, label: string) => void;
+  selectedTool?: 'select' | 'box' | 'connector' | 'group';
+  connectingFrom?: string | null;
+  connectingFromHandle?: string | null;
+  onConnectorDotClick?: (nodeId: string, handleId: string) => void;
 }
 
-const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChange }) => {
+const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChange, selectedTool = 'select', connectingFrom, connectingFromHandle, onConnectorDotClick }) => {
   const { leftHandles = [], rightHandles = [], topHandles = [], bottomHandles = [] } = data;
+  
   const [isEditing, setIsEditing] = useState(data.isEditing);
   const [label, setLabel] = useState(data.label);
   const [iconLoaded, setIconLoaded] = useState(false);
@@ -221,177 +227,122 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
   };
 
   const nodeStyle = {
-    background: selected ? '#f8f9fa' : 'white',
-    border: selected ? '2px solid #6c757d' : '1px solid #ccc',
-    borderRadius: '4px',
-    padding: '0px', // Remove padding to center content properly
-    width: data.width || 80,
-    height: data.height || 40,
+    background: 'white', // Always white from Figma
+    border: '1px solid #e4e4e4', // Figma exact border color
+    borderRadius: '8px', // Figma 8px radius
+    padding: '0px',
+    // Default square footprint aligned to 16px grid; data.width/height can override
+    width: data.width || 96,
+    height: data.height || 96,
+    boxSizing: 'border-box' as const,
     display: 'flex',
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
     fontSize: '12px',
-    boxShadow: selected ? '0 0 5px rgba(0, 0, 0, 0.3)' : '0 1px 4px rgba(0, 0, 0, 0.1)',
+    boxShadow: 'none', // No shadow from Figma
     position: 'relative' as const,
     zIndex: selected ? 100 : 50,
     pointerEvents: 'all' as const
   };
 
+  const [nodeEl, setNodeEl] = useState<HTMLDivElement | null>(null);
+  const [nodeScale, setNodeScale] = useState<number>(1);
+  
+  // FIXED: Recalculate nodeScale on zoom changes using ResizeObserver
+  useEffect(() => {
+    if (!nodeEl) return;
+    
+    const cssWidth = data.width || 96; // Use data.width from props
+    
+    const updateScale = () => {
+      const rect = nodeEl.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        const actualScale = rect.width / cssWidth;
+        // Sanity check: scale should be between 0.1 and 10
+        if (actualScale >= 0.1 && actualScale <= 10) {
+          setNodeScale(actualScale);
+        }
+      }
+    };
+    
+    // FIXED: Wait for next frame to ensure ReactFlow has rendered/scaled the node
+    // Use double RAF to ensure layout has settled
+    let rafId1: number;
+    let rafId2: number;
+    
+    rafId1 = requestAnimationFrame(() => {
+      rafId2 = requestAnimationFrame(() => {
+        updateScale();
+      });
+    });
+    
+    // FIXED: Also update after a short delay to catch any late ReactFlow transforms
+    // This is especially important when nodes are created while zoomed out
+    const timeoutId = setTimeout(() => {
+      updateScale();
+    }, 100);
+    
+    // Watch for size changes (which happen on zoom)
+    const resizeObserver = new ResizeObserver(() => {
+      // Use RAF to batch updates and avoid excessive calculations
+      requestAnimationFrame(() => {
+        updateScale();
+      });
+    });
+    
+    resizeObserver.observe(nodeEl);
+    
+    return () => {
+      if (rafId1) cancelAnimationFrame(rafId1);
+      if (rafId2) cancelAnimationFrame(rafId2);
+      clearTimeout(timeoutId);
+      resizeObserver.disconnect();
+    };
+  }, [nodeEl, data.width]);
+  
+
+
   return (
-    <div style={nodeStyle} data-testid="react-flow-node">
-      {/* Left handles */}
-      {leftHandles.map((yPos: string, index: number) => (
-        <React.Fragment key={`left-${index}`}>
-          <Handle
-            type="target"
-            position={Position.Left}
-            id={`left-${index}-target`}
-            style={{ 
-              ...baseHandleStyle,
-              position: 'absolute',
-              top: yPos
-            }}
-          />
-          <Handle
-            type="source"
-            position={Position.Left}
-            id={`left-${index}-source`}
-            style={{ 
-              ...baseHandleStyle,
-              position: 'absolute',
-              top: yPos,
-              opacity: 0 // Make it invisible but functional
-            }}
-          />
-        </React.Fragment>
-      ))}
+    <div 
+      style={nodeStyle} 
+      data-testid="react-flow-node" 
+      ref={(el) => {
+        setNodeEl(el);
+        // Scale calculation now handled by ResizeObserver in useEffect
+      }}
+    >
+      {/* Connector mode dots - shown when connector tool is selected (NOT when just selected) */}
+      {selectedTool === 'connector' && (
+        <ConnectorDots 
+          nodeId={id} 
+          nodeWidth={data.width || 96}
+          connectingFrom={connectingFrom}
+          connectingFromHandle={connectingFromHandle}
+          onHandleClick={onConnectorDotClick}
+        />
+      )}
       
-      {/* Right handles */}
-      {rightHandles.map((yPos: string, index: number) => (
-        <React.Fragment key={`right-${index}`}>
-          <Handle
-            type="source"
-            position={Position.Right}
-            id={`right-${index}-source`}
-            style={{ 
-              ...baseHandleStyle,
-              top: yPos
-            }}
-          />
-          <Handle
-            type="target"
-            position={Position.Right}
-            id={`right-${index}-target`}
-            style={{ 
-              ...baseHandleStyle,
-              top: yPos,
-              opacity: 0 // Make it invisible but functional
-            }}
-          />
-        </React.Fragment>
-      ))}
+      {/* Edge connection handles */}
+      <NodeHandles
+        leftHandles={leftHandles}
+        rightHandles={rightHandles}
+        topHandles={topHandles}
+        bottomHandles={bottomHandles}
+      />
       
-      {/* Top handles */}
-      {topHandles.map((xPos: string, index: number) => (
-        <React.Fragment key={`top-${index}`}>
-          <Handle
-            type="source"
-            position={Position.Top}
-            id={`top-${index}-source`}
-            style={{ 
-              ...baseHandleStyle,
-              left: xPos
-            }}
-          />
-          <Handle
-            type="target"
-            position={Position.Top}
-            id={`top-${index}-target`}
-            style={{ 
-              ...baseHandleStyle,
-              left: xPos,
-              opacity: 0 // Make it invisible but functional
-            }}
-          />
-        </React.Fragment>
-      ))}
-      
-      {/* Bottom handles */}
-      {bottomHandles.map((xPos: string, index: number) => (
-        <React.Fragment key={`bottom-${index}`}>
-          <Handle
-            type="target"
-            position={Position.Bottom}
-            id={`bottom-${index}-target`}
-            style={{ 
-              ...baseHandleStyle,
-              left: xPos
-            }}
-          />
-          <Handle
-            type="source"
-            position={Position.Bottom}
-            id={`bottom-${index}-source`}
-            style={{ 
-              ...baseHandleStyle,
-              left: xPos,
-              opacity: 0 // Make it invisible but functional
-            }}
-          />
-        </React.Fragment>
-      ))}
-      
-      {/* Node icon and label */}
+      {/* Node text - only show if data provided, center aligned */}
+      {data.label && (
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
         width: '100%',
         height: '100%',
-        position: 'relative'
+        position: 'relative',
+        zIndex: 1, // Lower z-index than green hover areas (zIndex: 1000)
+        pointerEvents: 'auto' // Allow text interaction
       }}>
-        {/* Icon container - FIXED: 48x48 square for all icons */}
-        <div style={{
-          width: '48px',
-          height: '48px',
-          borderRadius: data.icon ? '8px' : '8px', // Square for all icons
-          backgroundColor: finalIconSrc && !iconError ? 'transparent' : '#f0f0f0',
-          border: finalIconSrc && !iconError ? 'none' : '2px solid #ddd',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#333',
-          fontWeight: 'bold',
-          fontSize: '16px',
-          marginTop: '12px', // Adjust for removed container padding
-          overflow: 'hidden'
-        }}>
-          {finalIconSrc && !iconError && (
-            <img
-              key={`${id}-${finalIconSrc}`}
-              src={finalIconSrc}
-              alt={data.label}
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                objectFit: 'contain'
-              }}
-              onError={() => setIconError(true)}
-            />
-          )}
-          {(!finalIconSrc || iconError) && id !== 'root' && (
-            <div style={{ 
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              border: '2px solid #000000',
-              backgroundColor: 'transparent',
-              margin: 'auto'
-            }}>
-            </div>
-          )}
-        </div>
         {isEditing ? (
           <input
             type="text"
@@ -407,24 +358,25 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
               textAlign: 'center',
             }}
           />
-        ) : (
+        ) : data.label ? (
           <div
             onDoubleClick={handleDoubleClick}
             style={{
               textAlign: 'center',
               cursor: 'pointer',
-              fontSize: '12px',
-              lineHeight: '14px',
-              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-              fontWeight: 'normal',
-              width: '100px', // Match the full node width for better centering
-              paddingLeft: '12px', // Add horizontal padding for breathing room
-              paddingRight: '12px',
+              fontSize: '8px',
+              lineHeight: '10px',
+              fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+              fontWeight: 400,
+              color: '#e4e4e4',
+              width: '100%',
+              paddingLeft: '10px',
+              paddingRight: '10px',
               margin: '0 auto',
-              marginTop: '12px', // Direct 12px gap between icon and text
+              marginTop: '2px',
               wordBreak: 'normal',
               overflowWrap: 'normal',
-              boxSizing: 'border-box' // Include padding in width calculation
+              boxSizing: 'border-box'
             }}
           >
             {/* Render each line manually to match ELK calculation */}
@@ -432,7 +384,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
               const lines = splitTextIntoLines(label, 76);
               return lines.map((line, index) => (
                 <div key={index} style={{ 
-                  lineHeight: '14px',
+                  lineHeight: '10px',
                   width: '100%',
                   textAlign: 'center',
                   overflow: 'hidden',
@@ -444,8 +396,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
               ));
             })()}
           </div>
-        )}
+        ) : null}
       </div>
+      )}
     </div>
   );
 };
