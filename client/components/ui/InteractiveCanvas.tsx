@@ -19,7 +19,9 @@ import ReactFlow, {
   OnConnectStartParams,
   useReactFlow,
   getRectOfNodes,
-  getTransformForBounds
+  getTransformForBounds,
+  BaseEdge,
+  EdgeLabelRenderer
 } from "reactflow"
 import "reactflow/dist/style.css"
 import { cn } from "../../lib/utils"
@@ -61,7 +63,6 @@ import DevPanel from "../DevPanel"
 import { placeNodeOnCanvas } from "./canvasInteractions"
 import NodeHoverPreview from "./NodeHoverPreview"
 import CanvasToolbar from "./CanvasToolbar"
-import NodeStyleSettings from "./NodeStyleSettings"
 
 import Chatbox from "./Chatbox"
 import { ApiEndpointProvider } from '../../contexts/ApiEndpointContext'
@@ -2177,51 +2178,201 @@ Adapt these patterns to your specific requirements while maintaining the overall
     };
   }, [selectedNodes, selectedEdges, rawGraph, handleGraphChange]);
   
-  // Create node types with handlers - memoized to prevent recreation
-  const memoizedNodeTypes = useMemo(() => {
-    const types = {
-    custom: (props: any) => <CustomNodeComponent {...props} onLabelChange={handleLabelChange} />,
-    group: (props: any) => <GroupNode {...props} onAddNode={handleAddNodeToGroup} />,
-    };
-    return types;
-  }, [handleLabelChange, handleAddNodeToGroup]);
-  const memoizedEdgeTypes = useMemo(() => edgeTypes, []);
-
-  // Edge creation: track source node when starting a connection
+  // Edge creation: track source node and handle when starting a connection
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
+  const [connectingFromHandle, setConnectingFromHandle] = useState<string | null>(null);
+
+  // Track mouse position for edge preview
+  const [connectionMousePos, setConnectionMousePos] = useState<{ x: number; y: number } | null>(null);
 
   const handleConnectStart = useCallback((_e: any, params: OnConnectStartParams) => {
-    setConnectingFrom(params.nodeId ?? null);
+    // DISABLED: We don't want ReactFlow's default drag-to-connect
+    // Only our custom click-to-connect via handleConnectorDotClick should work
+    // This prevents the bezier edge from appearing when dragging
+    return;
   }, []);
 
   const handleConnectEnd = useCallback((event: any) => {
-    const target = event.target as HTMLElement;
-    const droppedOnPane = target?.classList?.contains('react-flow__pane');
-    if (!droppedOnPane || !connectingFrom) {
+    // Reset connection state when connection ends
+    // For click-to-connect, onConnect will handle the actual connection
+    setConnectingFrom(null);
+    setConnectingFromHandle(null);
+    setConnectionMousePos(null);
+  }, []);
+
+  // Manual handler for clicking on connector dots to start connection with edge preview
+  const handleConnectorDotClick = useCallback((nodeId: string, handleId: string) => {
+    console.log(`[InteractiveCanvas] handleConnectorDotClick called:`, { nodeId, handleId, currentConnectingFrom: connectingFrom });
+    
+    // Check if handleId is a target handle (completing a connection)
+    if (handleId.includes('target') && connectingFrom && connectingFrom !== nodeId) {
+      // Complete the connection
+      console.log(`[InteractiveCanvas] Completing connection from ${connectingFrom} to ${nodeId}`, {
+        source: connectingFrom,
+        sourceHandle: connectingFromHandle,
+        target: nodeId,
+        targetHandle: handleId
+      });
+      
+      // Create the connection with proper handle IDs
+      const connection = { 
+        source: connectingFrom, 
+        sourceHandle: connectingFromHandle || undefined, 
+        target: nodeId, 
+        targetHandle: handleId || undefined
+      };
+      
+      console.log(`[InteractiveCanvas] Calling onConnect with:`, connection);
+      console.log(`[InteractiveCanvas] Connection details:`, {
+        source: connection.source,
+        sourceHandle: connection.sourceHandle,
+        target: connection.target,
+        targetHandle: connection.targetHandle,
+        sourceHandleType: connection.sourceHandle?.includes('connector') ? 'connector' : 'regular',
+        targetHandleType: connection.targetHandle?.includes('connector') ? 'connector' : 'regular'
+      });
+      
+      // Call onConnect - this will trigger ReactFlow's onConnect handler
+      // which then calls our graph onConnect handler
+      onConnect(connection);
+      
+      // Clear connection state
       setConnectingFrom(null);
+      setConnectingFromHandle(null);
+      setConnectionMousePos(null);
       return;
     }
+    
+    // Otherwise, start a new connection
+    console.log(`[InteractiveCanvas] Starting new connection from ${nodeId}, handle ${handleId}`);
+    setConnectingFrom(nodeId);
+    setConnectingFromHandle(handleId);
+    
+    // Track mouse movement to show edge preview (always show when connecting)
+    const handleMouseMove = (e: MouseEvent) => {
+      if (reactFlowRef.current) {
+        const rf = reactFlowRef.current;
+        const flowPos = (rf as any).screenToFlowPosition
+          ? (rf as any).screenToFlowPosition({ x: e.clientX, y: e.clientY })
+          : rf.project({ x: e.clientX, y: e.clientY });
+        
+        // Always show preview line while moving
+        setConnectionMousePos(flowPos);
+      }
+    };
+    
+    const handleMouseUp = (e: MouseEvent) => {
+      // Remove mouse tracking
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      
+      const currentConnectingFrom = connectingFrom;
+      const currentConnectingFromHandle = connectingFromHandle;
+      
+      if (!currentConnectingFrom) {
+        setConnectionMousePos(null);
+        return;
+      }
+      
+      // Check if clicked on a target handle
+      const target = e.target as HTMLElement;
+      const targetHandle = target.closest('.react-flow__handle') as HTMLElement;
+      
+      if (targetHandle) {
+        const handleType = targetHandle.getAttribute('data-handletype');
+        const handleId = targetHandle.getAttribute('data-id') || targetHandle.id;
+        
+        // Find the node that contains this handle
+        const nodeElement = targetHandle.closest('.react-flow__node') as HTMLElement;
+        const targetNodeId = nodeElement?.getAttribute('data-id') || nodeElement?.id;
+        
+        // Check if it's a target handle (or connector target handle)
+        if (targetNodeId && handleId && 
+            (handleType === 'target' || handleId.includes('target')) && 
+            targetNodeId !== currentConnectingFrom) {
+          // Create connection
+          onConnect({ source: currentConnectingFrom, sourceHandle: currentConnectingFromHandle, target: targetNodeId, targetHandle: handleId });
+          // Clear connection state after successful connection
+          setConnectingFrom(null);
+          setConnectingFromHandle(null);
+          setConnectionMousePos(null);
+          return;
+        }
+      }
+      
+      // Also check if clicking on another connector dot (to connect to it)
+      const clickedConnectorDot = target.closest('[data-connector-dot]') as HTMLElement;
+      if (clickedConnectorDot) {
+        const targetNodeId = clickedConnectorDot.getAttribute('data-node-id');
+        const targetHandleId = clickedConnectorDot.getAttribute('data-handle-id');
+        
+        if (targetNodeId && targetHandleId && targetNodeId !== currentConnectingFrom) {
+          // Create connection to the clicked connector dot
+          onConnect({ source: currentConnectingFrom, sourceHandle: currentConnectingFromHandle, target: targetNodeId, targetHandle: targetHandleId });
+          setConnectingFrom(null);
+          setConnectingFromHandle(null);
+          setConnectionMousePos(null);
+          return;
+        }
+      }
+      
+      // If clicked anywhere else (empty space, node, etc.), cancel connection (deselect)
+      console.log(`[InteractiveCanvas] Clicked outside port area, cancelling connection (deselection)`);
+      setConnectingFrom(null);
+      setConnectingFromHandle(null);
+      setConnectionMousePos(null);
+    };
+    
+    const handleClick = (e: MouseEvent) => {
+      // Check if this is a click on a connector port (source or target)
+      const target = e.target as HTMLElement;
+      const isConnectorPortClick = target.closest('[data-connector-dot]') || 
+                                   target.closest('[style*="rgba(0, 255, 0"]') ||
+                                   target.closest('.react-flow__handle[id*="connector"]');
+      
+      // If clicking anywhere EXCEPT a connector port, cancel the connection (deselect)
+      if (!isConnectorPortClick) {
+        console.log(`[InteractiveCanvas] Click outside connector port detected, cancelling connection (deselection)`);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('click', handleClick);
+        setConnectingFrom(null);
+        setConnectingFromHandle(null);
+        setConnectionMousePos(null);
+      } else {
+        // Click was on a connector port - let the port click handler deal with it
+        // Just clean up the event listeners
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('click', handleClick);
+      }
+    };
+    
+    // Start tracking mouse
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp, { once: true });
+    // Listen for clicks to detect deselection (clicking anywhere outside ports)
+    document.addEventListener('click', handleClick, { once: true, capture: true });
+  }, [connectingFrom, connectingFromHandle, onConnect, handleConnectEnd]);
 
-    // Create a new node next to the cursor and connect from source → new
-    const sourceNode = nodes.find(n => n.id === connectingFrom);
-    const parentForNew = (sourceNode as any)?.parentId || 'root';
-    const nodeName = `node_${Date.now()}`;
-    const edgeId = `edge_${Math.random().toString(36).slice(2, 9)}`;
-    const newNodeId = nodeName.toLowerCase();
-
-    const updated = batchUpdate([
-      { name: 'add_node', nodename: nodeName, parentId: parentForNew, data: { label: 'New Node' } },
-      { name: 'add_edge', edgeId, sourceId: connectingFrom, targetId: newNodeId }
-    ], structuredClone(rawGraph));
-
-    handleGraphChange(updated);
-    // Focus edit the newly added node in RF view once nodes sync
-    setTimeout(() => {
-      setNodes(nds => nds.map(n => n.id === newNodeId ? { ...n, data: { ...n.data, isEditing: true } } : n));
-    }, 0);
-
-    setConnectingFrom(null);
-  }, [connectingFrom, nodes, rawGraph, setNodes, setRawGraph]);
+  // Create node types with handlers - memoized to prevent recreation
+  // Use useCallback for each node type component to prevent ReactFlow warnings
+  const CustomNodeWrapper = useCallback((props: any) => {
+    return <CustomNodeComponent {...props} onLabelChange={handleLabelChange} selectedTool={selectedTool} connectingFrom={connectingFrom} connectingFromHandle={connectingFromHandle} onConnectorDotClick={handleConnectorDotClick} />;
+  }, [handleLabelChange, selectedTool, connectingFrom, connectingFromHandle, handleConnectorDotClick]);
+  
+  const GroupNodeWrapper = useCallback((props: any) => {
+    return <GroupNode {...props} onAddNode={handleAddNodeToGroup} />;
+  }, [handleAddNodeToGroup]);
+  
+  const memoizedNodeTypes = useMemo(() => {
+    return {
+      custom: CustomNodeWrapper,
+      group: GroupNodeWrapper,
+    };
+  }, [CustomNodeWrapper, GroupNodeWrapper]);
+  
+  const memoizedEdgeTypes = useMemo(() => edgeTypes, []);
   
   const {
     messages,
@@ -2710,7 +2861,18 @@ Adapt these patterns to your specific requirements while maintaining the overall
               edges={edges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
+              onConnect={(connection: any) => {
+                console.log(`[InteractiveCanvas] ReactFlow onConnect called:`, connection);
+                
+                // Call the hook's onConnect first to create the edge with handle info
+                console.log(`[InteractiveCanvas] Calling graph onConnect handler with:`, connection);
+                onConnect(connection);
+                
+                // Then clear connecting state
+                setConnectingFrom(null);
+                setConnectingFromHandle(null);
+                setConnectionMousePos(null);
+              }}
               onSelectionChange={onSelectionChange}
               onInit={(instance) => {
                 reactFlowRef.current = instance;
@@ -2719,9 +2881,16 @@ Adapt these patterns to your specific requirements while maintaining the overall
               edgeTypes={memoizedEdgeTypes}
               className={`w-full h-full ${CANVAS_STYLES.canvas.background.light} dark:${CANVAS_STYLES.canvas.background.dark}`}
               defaultEdgeOptions={{
+                type: 'step', // Right-angled edges (not bezier/smoothstep)
                 style: CANVAS_STYLES.edges.default,
                 animated: false,
-                zIndex: CANVAS_STYLES.zIndex.edges,
+                zIndex: CANVAS_STYLES.zIndex.edgeLabels,
+                markerEnd: {
+                  type: 'arrowclosed',
+                  width: 20,
+                  height: 20,
+                  color: '#555'
+                }
               }}
               fitView
               minZoom={CANVAS_STYLES.canvas.zoom.min}
@@ -2733,10 +2902,10 @@ Adapt these patterns to your specific requirements while maintaining the overall
               selectionOnDrag
               elementsSelectable={true}
               nodesDraggable={true}
-              nodesConnectable={true}
+              nodesConnectable={false} // Disable ReactFlow's default drag-to-connect, we use custom click-to-connect
               selectNodesOnDrag={true}
               style={{ cursor: 'grab' }}
-              elevateEdgesOnSelect={false}
+              elevateEdgesOnSelect={true}
               disableKeyboardA11y={false}
               edgesFocusable={true}
               edgesUpdatable={true}
@@ -2744,8 +2913,65 @@ Adapt these patterns to your specific requirements while maintaining the overall
               onConnectEnd={handleConnectEnd}
               deleteKeyCode="Delete"
               connectOnClick={false}
-              elevateNodesOnSelect={true}
+              elevateNodesOnSelect={false}
             >
+              {/* Edge preview that follows cursor when connecting */}
+              {connectingFrom && connectionMousePos && (() => {
+                const sourceNode = nodes.find(n => n.id === connectingFrom);
+                if (!sourceNode || !reactFlowRef.current) return null;
+                
+                const rf = reactFlowRef.current;
+                const nodeElement = document.querySelector(`[data-id="${connectingFrom}"]`);
+                if (!nodeElement) return null;
+                
+                // Get handle position - connector handles are on borders
+                const nodeRect = (nodeElement as HTMLElement).getBoundingClientRect();
+                const paneRect = document.querySelector('.react-flow__pane')?.getBoundingClientRect();
+                if (!paneRect) return null;
+                
+                // Find which handle was clicked based on handleId
+                const handleSide = connectingFromHandle?.includes('top') ? 'top' :
+                                   connectingFromHandle?.includes('right') ? 'right' :
+                                   connectingFromHandle?.includes('bottom') ? 'bottom' : 'left';
+                
+                const nodeWidth = (sourceNode.data as any)?.width || 96;
+                const nodeCenterX = sourceNode.position.x + nodeWidth / 2;
+                const nodeCenterY = sourceNode.position.y + nodeWidth / 2;
+                
+                let sourceX: number, sourceY: number;
+                if (handleSide === 'top') {
+                  sourceX = nodeCenterX;
+                  sourceY = sourceNode.position.y;
+                } else if (handleSide === 'bottom') {
+                  sourceX = nodeCenterX;
+                  sourceY = sourceNode.position.y + nodeWidth;
+                } else if (handleSide === 'left') {
+                  sourceX = sourceNode.position.x;
+                  sourceY = nodeCenterY;
+                } else {
+                  sourceX = sourceNode.position.x + nodeWidth;
+                  sourceY = nodeCenterY;
+                }
+                
+                const targetX = connectionMousePos.x;
+                const targetY = connectionMousePos.y;
+                const midX = sourceX + (targetX - sourceX) / 2;
+                const edgePath = `M ${sourceX} ${sourceY} L ${midX} ${sourceY} L ${midX} ${targetY} L ${targetX} ${targetY}`;
+                
+                return (
+                  <EdgeLabelRenderer>
+                    <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 10000 }}>
+                      <path
+                        d={edgePath}
+                        stroke="#b1b1b7"
+                        strokeWidth={2}
+                        fill="none"
+                        strokeDasharray="5 5"
+                      />
+                    </svg>
+                  </EdgeLabelRenderer>
+                );
+              })()}
               <Background 
                 color="#333" 
                 gap={16} 
@@ -2909,9 +3135,6 @@ Adapt these patterns to your specific requirements while maintaining the overall
           onExport={handleExportPNG}
         />
       </div>
-
-      {/* Node Style Settings Panel */}
-      <NodeStyleSettings />
     </div>
   );
 };

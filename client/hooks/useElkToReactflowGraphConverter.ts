@@ -107,7 +107,7 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
     handleAddNode     : (...a: any[]) => mutate(addNode,      ...a),
     handleDeleteNode  : (...a: any[]) => mutate(deleteNode,   ...a),
     handleMoveNode    : (...a: any[]) => mutate(moveNode,     ...a),
-    handleAddEdge     : (...a: any[]) => mutate(addEdge,      ...a),
+    handleAddEdge     : (...a: any[]) => mutate(addEdge,      ...a), // Now supports handle IDs: (edgeId, sourceId, targetId, graph, label?, sourceHandle?, targetHandle?)
     handleDeleteEdge  : (...a: any[]) => mutate(deleteEdge,   ...a),
     handleGroupNodes  : (...a: any[]) => mutate(groupNodes,   ...a),
     handleRemoveGroup : (...a: any[]) => mutate(removeGroup,  ...a),
@@ -296,10 +296,47 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph) {
   const onEdgesChange = useCallback(
     (c: EdgeChange[]) => setEdges(e => applyEdgeChanges(c, e)), []);
   
-  const onConnect: OnConnect = useCallback(({ source, target }: Connection) => {
+  // Track pending connections to prevent duplicates
+  const pendingConnectionsRef = useRef<Set<string>>(new Set());
+  
+  const onConnect: OnConnect = useCallback(({ source, target, sourceHandle, targetHandle }: Connection) => {
     if (!source || !target) return;
-    const id = `edge-${Math.random().toString(36).slice(2, 9)}`;
-    handlers.handleAddEdge(id, source, target);
+    
+    console.log(`[useElkToReactflowGraphConverter] onConnect called:`, { source, target, sourceHandle, targetHandle });
+    
+    // Create a unique key for this connection attempt
+    const connectionKey = `${source}:${sourceHandle || ''}->${target}:${targetHandle || ''}`;
+    
+    // Check if this connection is already pending
+    if (pendingConnectionsRef.current.has(connectionKey)) {
+      console.log('⚠️ Duplicate connection attempt ignored:', connectionKey);
+      return;
+    }
+    
+    // Mark as pending
+    pendingConnectionsRef.current.add(connectionKey);
+    
+    // Generate unique edge ID with timestamp and counter to avoid collisions
+    const counter = Date.now();
+    const random = Math.random().toString(36).slice(2, 11);
+    const id = `edge-${counter}-${random}`;
+    
+    try {
+      // Pass handle IDs to addEdge if they're connector handles
+      // Note: mutate automatically passes graph as the last parameter, so we pass: edgeId, sourceId, targetId, label?, sourceHandle?, targetHandle?
+      console.log(`[useElkToReactflowGraphConverter] Calling handleAddEdge with handles:`, { id, source, target, sourceHandle, targetHandle });
+      handlers.handleAddEdge(id, source, target, undefined, sourceHandle || undefined, targetHandle || undefined);
+    } catch (error) {
+      // If edge creation fails (e.g., duplicate), remove from pending
+      console.error('Failed to create edge:', error);
+      pendingConnectionsRef.current.delete(connectionKey);
+      throw error;
+    }
+    
+    // Remove from pending after a short delay (edge should be created by then)
+    setTimeout(() => {
+      pendingConnectionsRef.current.delete(connectionKey);
+    }, 100);
   }, [handlers]);
   
   /* -------------------------------------------------- */

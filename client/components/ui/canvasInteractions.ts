@@ -27,10 +27,9 @@ export function placeNodeOnCanvas(
 
   setNodes((nds) => nds.concat({
     id,
-    data: { label: '', isEditing: true, width: NODE_SIZE, height: NODE_SIZE },
+    data: { label: 'Add text', isEditing: false, width: NODE_SIZE, height: NODE_SIZE },
     position: { x: topLeft.x, y: topLeft.y },
-    type: 'custom',
-    selected: true // Auto-select new nodes so dots appear
+    type: 'custom'
   } as unknown as Node));
 
   try {

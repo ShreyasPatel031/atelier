@@ -148,13 +148,16 @@ interface EdgeCollection {
 /**
  * Recursively traverses the layout and collects all edge arrays with their parent node.
  */
-const collectEdges = (node: ElkGraphNode, collection: EdgeCollection[] = []): EdgeCollection[] => {
+const collectEdges = (node: ElkGraphNode | null | undefined, collection: EdgeCollection[] = []): EdgeCollection[] => {
+  if (!node) return collection;
   if (node.edges) {
     collection.push({ edgeArr: node.edges, parent: node });
   }
   if (node.children) {
     for (const child of node.children) {
-      collectEdges(child, collection);
+      if (child) {
+        collectEdges(child, collection);
+      }
     }
   }
   return collection;
@@ -345,16 +348,45 @@ export const moveNode = (nodeId: NodeID, newParentId: NodeID, graph: RawGraph): 
 /**
  * Add an edge between nodes at the common ancestor level
  */
-export const addEdge = (edgeId: EdgeID, sourceId: NodeID, targetId: NodeID, graph: RawGraph, label?: string): RawGraph => {
+export const addEdge = (edgeId: EdgeID, sourceId: NodeID, targetId: NodeID, labelOrGraph?: string | RawGraph, sourceHandle?: string, targetHandle?: string, graph?: RawGraph): RawGraph => {
+  // Detect if graph was passed as 4th parameter (backward compatibility)
+  // If 4th param is an object with 'id' property, it's a graph, not a label
+  if (labelOrGraph && typeof labelOrGraph === 'object' && 'id' in labelOrGraph) {
+    // Old signature: (edgeId, sourceId, targetId, graph, label?, sourceHandle?, targetHandle?)
+    const actualGraph = labelOrGraph as RawGraph;
+    const actualLabel = sourceHandle as string | undefined; // Shifted params
+    const actualSourceHandle = targetHandle;
+    const actualTargetHandle = graph as string | undefined;
+    return addEdgeInternal(edgeId, sourceId, targetId, actualGraph, actualLabel, actualSourceHandle, actualTargetHandle);
+  }
+  // New signature: graph is last parameter (from mutate function)
+  // (edgeId, sourceId, targetId, label?, sourceHandle?, targetHandle?, graph)
+  if (!graph) {
+    throw new Error('Graph parameter is required');
+  }
+  const actualLabel = typeof labelOrGraph === 'string' ? labelOrGraph : undefined;
+  return addEdgeInternal(edgeId, sourceId, targetId, graph, actualLabel, sourceHandle, targetHandle);
+};
+
+/**
+ * Internal implementation of addEdge
+ */
+const addEdgeInternal = (edgeId: EdgeID, sourceId: NodeID, targetId: NodeID, graph: RawGraph, label?: string, sourceHandle?: string, targetHandle?: string): RawGraph => {
+  // Use unique timer name to avoid conflicts
+  const timerName = `addEdge-${edgeId}`;
   console.group(`[mutation] addEdge '${edgeId}' (${sourceId} → ${targetId})${label ? ` with label "${label}"` : ''}`);
-  console.time("addEdge");
+  console.time(timerName);
   
   // duplicate-ID check
   if (edgeIdExists(graph, edgeId)) {
+    console.timeEnd(timerName);
+    console.groupEnd();
     throw new Error(`Edge id '${edgeId}' already exists`);
   }
   // self-loop guard
   if (sourceId === targetId) {
+    console.timeEnd(timerName);
+    console.groupEnd();
     throw new Error(`Self-loop edges are not supported (source === target '${sourceId}')`);
   }
   
@@ -374,6 +406,14 @@ export const addEdge = (edgeId: EdgeID, sourceId: NodeID, targetId: NodeID, grap
       targets: [targetId]
     };
     
+    // Store handle IDs if provided (for connector handles)
+    if (sourceHandle || targetHandle) {
+      newEdge.data = {
+        sourceHandle,
+        targetHandle
+      };
+    }
+    
     // Add label if provided
     if (label) {
       newEdge.labels = [{ text: label }];
@@ -387,7 +427,7 @@ export const addEdge = (edgeId: EdgeID, sourceId: NodeID, targetId: NodeID, grap
     // Add the edge to the root
     root.edges.push(newEdge);
     
-    console.timeEnd("addEdge");
+    console.timeEnd(timerName);
     console.groupEnd();
     return graph;
   }
@@ -398,6 +438,14 @@ export const addEdge = (edgeId: EdgeID, sourceId: NodeID, targetId: NodeID, grap
     sources: [sourceId],
     targets: [targetId]
   };
+  
+  // Store handle IDs if provided (for connector handles)
+  if (sourceHandle || targetHandle) {
+    newEdge.data = {
+      sourceHandle,
+      targetHandle
+    };
+  }
   
   // Add label if provided
   if (label) {
@@ -412,7 +460,7 @@ export const addEdge = (edgeId: EdgeID, sourceId: NodeID, targetId: NodeID, grap
   // Add the edge to the common ancestor
   commonAncestor.edges.push(newEdge);
   
-  console.timeEnd("addEdge");
+  console.timeEnd(timerName);
   console.groupEnd();
   return graph;
 };
@@ -652,7 +700,7 @@ export const batchUpdate = (operations: Array<{
         if (!args.targetId || typeof args.targetId !== 'string') {
           throw new Error(`add_edge requires 'targetId' as a string, got: ${JSON.stringify(args.targetId)}`);
         }
-        updatedGraph = addEdge(args.edgeId, args.sourceId, args.targetId, updatedGraph, args.label);
+        updatedGraph = addEdge(args.edgeId, args.sourceId, args.targetId, args.label, undefined, undefined, updatedGraph);
         break;
         
       case "delete_edge":

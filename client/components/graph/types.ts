@@ -68,6 +68,11 @@ export interface ElkGraphEdge {
     originalX: number;
     originalY: number;
   }>;
+  // Store handle IDs for connector handles (bypasses connection point lookup)
+  data?: {
+    sourceHandle?: string;
+    targetHandle?: string;
+  };
 }
 
 export interface ElkGraph {
