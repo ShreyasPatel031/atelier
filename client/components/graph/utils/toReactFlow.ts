@@ -46,7 +46,7 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
       type: isGroupNode ? "group" : "custom",
       position: parentId ? snapPos({ x: node.x ?? 0, y: node.y ?? 0 }) : { x: absPos.x, y: absPos.y },
       parentId,
-      zIndex: isGroupNode ? 5 : 50,
+      zIndex: isGroupNode ? CANVAS_STYLES.zIndex.groups : CANVAS_STYLES.zIndex.nodes,
       selectable: true,
       selected: false,
       draggable: true,

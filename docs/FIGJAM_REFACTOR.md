@@ -441,9 +441,9 @@ For each overlapping obstacle O (fixed order: by distance from Sel's top-left; t
    * **Then** disallow; offer "Arrange All" instead with confirmation.
 
 10. **AI edit always ELK**
-    * **Given** AI adds A,B and edge A→B into target section X (FREE or LOCK).
-    * **When** operation completes.
-    * **Then** ELK runs on X; geometry written; anchored.
+* **Given** AI adds A,B and edge A→B into target section X (FREE or LOCK).
+* **When** operation completes.
+* **Then** ELK runs on X; geometry written; anchored.
 
 11. **Bump collision resolution**
     * **Given** AI adds nodes inside LOCK group G, causing G to grow and overlap obstacle O.

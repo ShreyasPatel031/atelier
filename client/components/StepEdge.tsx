@@ -1,6 +1,6 @@
 import React from 'react';
 import { BaseEdge, EdgeLabelRenderer, EdgeProps } from 'reactflow';
-import { getEdgeStyle } from './graph/styles/canvasStyles';
+import { getEdgeStyle, CANVAS_STYLES } from './graph/styles/canvasStyles';
 
 const StepEdge: React.FC<EdgeProps> = ({ 
   id, 
@@ -105,7 +105,7 @@ const StepEdge: React.FC<EdgeProps> = ({
               fontSize: 11,
               fontFamily: 'sans-serif',
               pointerEvents: 'all',
-              zIndex: 5000
+              zIndex: CANVAS_STYLES.zIndex.edgeLabels
             }}
           >
             {edgeLabel}

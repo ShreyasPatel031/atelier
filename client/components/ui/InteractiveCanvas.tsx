@@ -61,6 +61,7 @@ import DevPanel from "../DevPanel"
 import { placeNodeOnCanvas } from "./canvasInteractions"
 import NodeHoverPreview from "./NodeHoverPreview"
 import CanvasToolbar from "./CanvasToolbar"
+import NodeStyleSettings from "./NodeStyleSettings"
 
 import Chatbox from "./Chatbox"
 import { ApiEndpointProvider } from '../../contexts/ApiEndpointContext'
@@ -2720,7 +2721,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
               defaultEdgeOptions={{
                 style: CANVAS_STYLES.edges.default,
                 animated: false,
-                zIndex: CANVAS_STYLES.zIndex.edgeLabels,
+                zIndex: CANVAS_STYLES.zIndex.edges,
               }}
               fitView
               minZoom={CANVAS_STYLES.canvas.zoom.min}
@@ -2735,7 +2736,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
               nodesConnectable={true}
               selectNodesOnDrag={true}
               style={{ cursor: 'grab' }}
-              elevateEdgesOnSelect={true}
+              elevateEdgesOnSelect={false}
               disableKeyboardA11y={false}
               edgesFocusable={true}
               edgesUpdatable={true}
@@ -2743,7 +2744,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
               onConnectEnd={handleConnectEnd}
               deleteKeyCode="Delete"
               connectOnClick={false}
-              elevateNodesOnSelect={false}
+              elevateNodesOnSelect={true}
             >
               <Background 
                 color="#333" 
@@ -2908,6 +2909,9 @@ Adapt these patterns to your specific requirements while maintaining the overall
           onExport={handleExportPNG}
         />
       </div>
+
+      {/* Node Style Settings Panel */}
+      <NodeStyleSettings />
     </div>
   );
 };

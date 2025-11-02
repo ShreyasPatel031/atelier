@@ -7,6 +7,7 @@ import ErrorBoundary from "./console/ErrorBoundary";
 import InteractiveCanvas from "./ui/InteractiveCanvas";
 import RightPanelChat from "./chat/RightPanelChat";
 import { ViewModeProvider, useViewMode } from "../contexts/ViewModeContext";
+import { NodeStyleProvider } from "../contexts/NodeStyleContext";
 import EmbedView from "./views/EmbedView";
 import CanvasView from "./views/CanvasView";
 import AuthView from "./views/AuthView";
@@ -106,7 +107,9 @@ function AppContent() {
 export default function App() {
   return (
     <ViewModeProvider fallbackMode="auth">
-      <AppContent />
+      <NodeStyleProvider>
+        <AppContent />
+      </NodeStyleProvider>
     </ViewModeProvider>
   );
 }

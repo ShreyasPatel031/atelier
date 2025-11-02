@@ -8,6 +8,8 @@ import { iconFallbackService } from '../utils/iconFallbackService';
 import { iconCacheService } from '../utils/iconCacheService';
 import { useApiEndpoint, buildAssetUrl } from '../contexts/ApiEndpointContext';
 import { splitTextIntoLines } from '../utils/textMeasurement';
+import { CANVAS_STYLES } from './graph/styles/canvasStyles';
+import { useNodeStyle } from '../contexts/NodeStyleContext';
 
 // NO HEURISTIC FALLBACKS - let semantic fallback service handle everything
 
@@ -30,6 +32,7 @@ interface CustomNodeProps {
 
 const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChange }) => {
   const { leftHandles = [], rightHandles = [], topHandles = [], bottomHandles = [] } = data;
+  const { settings } = useNodeStyle();
   
   // CONFIGURABLE: Handle proximity distance (change this to adjust sensitivity)
   const HANDLE_PROXIMITY_DISTANCE = 24; // pixels from dot center to trigger expansion (increased from 12)
@@ -41,7 +44,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
   const [fallbackAttempted, setFallbackAttempted] = useState(false);
   const apiEndpoint = useApiEndpoint();
   const lastBlurTimeRef = useRef<number>(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // helpers hoisted for reuse
   const findIconCategory = (provider: string, iconName: string): string | null => {
@@ -226,40 +229,43 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
     }
   }, [selected]);
 
-  // Focus input when entering edit mode
+  // Focus input when entering edit mode and auto-resize textarea
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      // Small delay to ensure DOM is updated
       const timer = setTimeout(() => {
-        inputRef.current?.focus();
-        // Move cursor to end if there's text
-        if (inputRef.current && label) {
-          inputRef.current.setSelectionRange(label.length, label.length);
+        if (inputRef.current) {
+          inputRef.current.focus();
+          // Auto-resize textarea to fit content
+          const textarea = inputRef.current;
+          textarea.style.height = 'auto';
+          textarea.style.height = `${textarea.scrollHeight}px`;
         }
       }, 0);
       return () => clearTimeout(timer);
     }
   }, [isEditing, label]);
 
-  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLabel(e.target.value);
+  const handleLabelChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newLabel = e.target.value;
+    setLabel(newLabel);
+    
+    // Auto-resize textarea to fit content - ResizeObserver will handle node height
+    const textarea = e.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
-  // On Enter: commit label - no manual icon fetching
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      lastBlurTimeRef.current = Date.now();
-      setIsEditing(false);
-      onLabelChange(id, label || ''); // Save empty string if no text
-      // Let the useEffect handle icon loading based on the new label
-    }
+  // On Escape: exit edit mode, Enter allows new lines
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Escape') {
       lastBlurTimeRef.current = Date.now();
       setIsEditing(false);
+      onLabelChange(id, label || ''); // Save current text
       if (!label.trim()) {
         onLabelChange(id, ''); // Save empty if no text on escape
-      }
     }
+    }
+    // Enter key now creates new lines (default textarea behavior)
   };
 
   // No debounced icon updates while editing - let semantic fallback handle it
@@ -273,13 +279,14 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
   const nodeStyle = {
     background: 'white', // Always white from Figma
     border: '1px solid #e4e4e4', // Figma exact border color
-    borderRadius: '8px', // Figma 8px radius
+    borderRadius: '4px', // Less rounded
     padding: '0px',
-    // Default square footprint aligned to 16px grid; data.width/height can override
+    // Width fixed, height auto-sizes to content
     width: data.width || 96,
-    height: data.height || 96,
+    minHeight: 96,
     boxSizing: 'border-box' as const,
     display: 'flex',
+    flexDirection: 'column' as const,
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
     fontSize: '12px',
@@ -290,17 +297,50 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
   };
 
   const [nodeEl, setNodeEl] = useState<HTMLDivElement | null>(null);
+  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
+
+
 
   const [hoveredHandle, setHoveredHandle] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const [nodeScale, setNodeScale] = useState<number>(1);
   const [expandedHandles, setExpandedHandles] = useState<Set<string>>(new Set());
+  const [actualNodeWidth, setActualNodeWidth] = useState<number>(data.width || 96);
+  const [actualNodeHeight, setActualNodeHeight] = useState<number>(96);
+  
+  // Update actual node dimensions when data changes or node resizes
+  useEffect(() => {
+    if (!nodeEl) return;
+    
+    const updateDimensions = () => {
+      // Get the computed style to get the actual CSS dimensions (accounting for inline styles)
+      const computedStyle = window.getComputedStyle(nodeEl);
+      const width = parseFloat(computedStyle.width) || data.width || 96;
+      const height = parseFloat(computedStyle.height) || 96;
+      setActualNodeWidth(width);
+      setActualNodeHeight(height);
+    };
+    
+    // Initial update
+    updateDimensions();
+    
+    // Watch for size changes
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(updateDimensions);
+    });
+    
+    resizeObserver.observe(nodeEl);
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [nodeEl, data.width]);
   
   // FIXED: Recalculate nodeScale on zoom changes using ResizeObserver
   useEffect(() => {
     if (!nodeEl) return;
     
-    const cssWidth = data.width || 96; // Use data.width from props
+    const cssWidth = actualNodeWidth; // Use actual rendered width
     
     const updateScale = () => {
       const rect = nodeEl.getBoundingClientRect();
@@ -346,7 +386,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
       clearTimeout(timeoutId);
       resizeObserver.disconnect();
     };
-  }, [nodeEl, data.width]);
+  }, [nodeEl, actualNodeWidth]);
   
   // FIXED: Track expansion time to prevent rapid flickering
   const expansionTimeRef = useRef<Map<string, number>>(new Map());
@@ -429,29 +469,23 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
         }}
       >
       {/* Four directional handles (Figma exact design) - always show when selected */}
-      {selected && (
-        <>
-          {[
-            // FIXED: Dots positioned 8px from border edge uniformly
-            // Node is 96x96. Border is at 0,0 to 96,96. Want dots 8px outside border.
-            // Top: dot center at (48, -11) for small, (48, -16) for large to keep 8px gap
-            // Right: dot center at (107, 48) for small, (112, 48) for large to keep 8px gap  
-            // Bottom: dot center at (48, 107) for small, (48, 112) for large to keep 8px gap
-            // Left: dot center at (-11, 48) for small, (-16, 48) for large to keep 8px gap
-            { key: 'top', rotation: 0 },
-            { key: 'right', rotation: 90 },
-            { key: 'bottom', rotation: 180 },
-            { key: 'left', rotation: 270 },
-          ].map(({ key, rotation }) => {
-            // CORRECTED: Calculate positions in CSS coordinate system (before ReactFlow scaling)
-            // ReactFlow will scale these, so we work in the base 96px coordinate system
-            
-            // STANDARDIZED: Simple uniform calculation for all directions
-            // Node center is at (48, 48), borders are 48px away in each direction
-            // All dots are exactly 8px outside the border + half their size
-            const GAP = 8; // pixels from border
-            const NODE_CENTER = 48; // center of 96px node
-            const BORDER_DISTANCE = 48; // distance from center to border
+      {selected && (() => {
+        // Calculate node centers once for all handles - use actual rendered dimensions
+        const nodeWidth = actualNodeWidth;
+        const nodeHeight = actualNodeHeight;
+        const NODE_CENTER_X = nodeWidth / 2;
+        const NODE_CENTER_Y = nodeHeight / 2;
+        
+        return (
+          <>
+            {[
+              // DYNAMIC: Dots positioned 8px from border edge based on actual node dimensions
+              { key: 'top', rotation: 0 },
+              { key: 'right', rotation: 90 },
+              { key: 'bottom', rotation: 180 },
+              { key: 'left', rotation: 270 },
+            ].map(({ key, rotation }) => {
+              const GAP = 8; // pixels from border
             
             // Small dot: 4x6, so half-sizes are 2x3
             // Large dot: 16x16, so half-sizes are 8x8
@@ -475,29 +509,29 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
             // This way both small and large dots will be perfectly centered at the same coordinates
             
             if (key === 'top') {
-              // Both dots centered at (48, Y) where Y changes for animation
-              baseSmallCx = NODE_CENTER;     // X: always centered at 48
-              baseSmallCy = 0 - 8 - 3;      // Y: top border - 8px gap - 3px to center = -11
-              baseLargeCx = NODE_CENTER;     // X: always centered at 48 (same as small)
-              baseLargeCy = 0 - 8 - 8;      // Y: top border - 8px gap - 8px to center = -16
+              // Both dots centered at (centerX, Y) where Y changes for animation
+              baseSmallCx = NODE_CENTER_X;     // X: always centered
+              baseSmallCy = 0 - GAP - smallHalfH;      // Y: top border - gap - half height
+              baseLargeCx = NODE_CENTER_X;     // X: always centered (same as small)
+              baseLargeCy = 0 - GAP - largeHalfH;      // Y: top border - gap - half height
             } else if (key === 'bottom') {
-              // Both dots centered at (48, Y) where Y stays same
-              baseSmallCx = NODE_CENTER;     // X: always centered at 48
-              baseSmallCy = 96 + 8 + 3;     // Y: bottom border + 8px gap + 3px to center = 107
-              baseLargeCx = NODE_CENTER;     // X: always centered at 48 (same as small)
-              baseLargeCy = 96 + 8 + 8;     // Y: bottom border + 8px gap + 8px to center = 112
+              // Both dots centered at (centerX, Y) where Y stays same
+              baseSmallCx = NODE_CENTER_X;     // X: always centered
+              baseSmallCy = nodeHeight + GAP + smallHalfH;     // Y: bottom border + gap + half height
+              baseLargeCx = NODE_CENTER_X;     // X: always centered (same as small)
+              baseLargeCy = nodeHeight + GAP + largeHalfH;     // Y: bottom border + gap + half height
             } else if (key === 'left') {
-              // Both dots centered at (X, 48) where X changes for animation
-              baseSmallCx = 0 - 8 - 2;      // X: left border - 8px gap - 2px to center = -10
-              baseSmallCy = NODE_CENTER;     // Y: always centered at 48
-              baseLargeCx = 0 - 8 - 8;      // X: left border - 8px gap - 8px to center = -16
-              baseLargeCy = NODE_CENTER;     // Y: always centered at 48 (same as small)
+              // Both dots centered at (X, centerY) where X changes for animation
+              baseSmallCx = 0 - GAP - smallHalfW;      // X: left border - gap - half width
+              baseSmallCy = NODE_CENTER_Y;     // Y: always centered
+              baseLargeCx = 0 - GAP - largeHalfW;      // X: left border - gap - half width
+              baseLargeCy = NODE_CENTER_Y;     // Y: always centered (same as small)
             } else { // right
-              // Both dots centered at (X, 48) where X stays same
-              baseSmallCx = 96 + 8 + 2;     // X: right border + 8px gap + 2px to center = 106
-              baseSmallCy = NODE_CENTER;     // Y: always centered at 48
-              baseLargeCx = 96 + 8 + 8;     // X: right border + 8px gap + 8px to center = 112
-              baseLargeCy = NODE_CENTER;     // Y: always centered at 48 (same as small)
+              // Both dots centered at (X, centerY) where X stays same
+              baseSmallCx = nodeWidth + GAP + smallHalfW;     // X: right border + gap + half width
+              baseSmallCy = NODE_CENTER_Y;     // Y: always centered
+              baseLargeCx = nodeWidth + GAP + largeHalfW;     // X: right border + gap + half width
+              baseLargeCy = NODE_CENTER_Y;     // Y: always centered (same as small)
             }
             
             // Actual centers after ReactFlow scaling (for proximity detection)
@@ -599,12 +633,12 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
                     height: 64,
                     background: isExpanded ? 'rgba(0, 255, 0, 0.1)' : 'rgba(0, 255, 0, 0.3)', // Green proximity area for debugging
                     pointerEvents: 'auto', // Always interactive - big dot will be above with higher z-index
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    zIndex: 1000 // High z-index to ensure hover areas are above node content
-                  }}
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: CANVAS_STYLES.zIndex.nodeDotsHoverArea
+                          }}
                   onMouseEnter={() => {
                     // FIXED: Cancel any pending collapse when entering green area
                     const existingTimeout = timeoutRefs.current.get(`collapse-${key}`);
@@ -663,8 +697,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
                                 const greenAreaSize = 64; // Fixed size in screen pixels (large hover target with slight overlap)
                                 const bigDotSize = 16 * nodeScale; // Big dot scales with zoom
                                 // Convert hoverAreaPos from CSS pixels to screen pixels for distance comparison
-                                const greenCenterX = (typeof hoverAreaPos.left === 'number' ? hoverAreaPos.left : 48) * nodeScale;
-                                const greenCenterY = (typeof hoverAreaPos.top === 'number' ? hoverAreaPos.top : 48) * nodeScale;
+                                const greenCenterX = (typeof hoverAreaPos.left === 'number' ? hoverAreaPos.left : NODE_CENTER_X) * nodeScale;
+                                const greenCenterY = (typeof hoverAreaPos.top === 'number' ? hoverAreaPos.top : NODE_CENTER_Y) * nodeScale;
                                 
                                 const distFromGreenCenter = Math.sqrt(
                                   Math.pow(mousePos.x - greenCenterX, 2) + 
@@ -710,10 +744,10 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
                     position: 'absolute',
                     left: '50%',
                     top: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    pointerEvents: isExpanded ? 'auto' : 'none', // Allow events when expanded so big dot can receive them
-                    zIndex: isExpanded ? 2000 : 1 // Higher z-index when expanded
-                  }}
+                            transform: 'translate(-50%, -50%)',
+                            pointerEvents: isExpanded ? 'auto' : 'none', // Allow events when expanded so big dot can receive them
+                            zIndex: isExpanded ? CANVAS_STYLES.zIndex.nodeDotsExpanded : CANVAS_STYLES.zIndex.nodeDots
+                          }}
                 >
                   {/* Visual dot - only handles size, color, and offset transforms */}
                   <motion.div
@@ -730,8 +764,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
                     }}
                    initial={(() => {
                      const initialValues = {
-                       x: (isExpanded || isWhite ? largeCssCx : smallCssCx) - NODE_CENTER,
-                       y: (isExpanded || isWhite ? largeCssCy : smallCssCy) - NODE_CENTER,
+                       x: (isExpanded || isWhite ? largeCssCx : smallCssCx) - NODE_CENTER_X,
+                       y: (isExpanded || isWhite ? largeCssCy : smallCssCy) - NODE_CENTER_Y,
                        width: isWhite ? 16 : (isExpanded ? 16 : 4),
                        height: isWhite ? 16 : (isExpanded ? 16 : 6),
                        rotate: isWhite ? 0 : (isExpanded ? 0 : rotation),
@@ -752,8 +786,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
                    })()}
                   animate={(() => {
                     const animateValues = {
-                      x: (isExpanded || isWhite ? largeCssCx : smallCssCx) - NODE_CENTER,
-                      y: (isExpanded || isWhite ? largeCssCy : smallCssCy) - NODE_CENTER,
+                      x: (isExpanded || isWhite ? largeCssCx : smallCssCx) - NODE_CENTER_X,
+                      y: (isExpanded || isWhite ? largeCssCy : smallCssCy) - NODE_CENTER_Y,
                       width: isWhite ? 16 : (isExpanded ? 16 : 4),
                       height: isWhite ? 16 : (isExpanded ? 16 : 6),
                       rotate: isWhite ? 0 : (isExpanded ? 0 : rotation),
@@ -866,8 +900,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
               </>
             );
           })}
-        </>
-      )}
+          </>
+        );
+      })()}
       {/* Left handles */}
       {leftHandles.map((yPos: string, index: number) => (
         <React.Fragment key={`left-${index}`}>
@@ -977,46 +1012,77 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
+        flex: 1,
         zIndex: 1, // Lower z-index than green hover areas (zIndex: 1000)
-        pointerEvents: isEditing ? 'auto' : 'none' // Only interactive when editing
+        pointerEvents: isEditing ? 'auto' : 'none', // Only interactive when editing
+        boxSizing: 'border-box'
       }}>
         {isEditing ? (
-          <input
-            ref={inputRef}
-            type="text"
+        <div 
+          ref={contentWrapperRef}
+          style={{
+            width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: (!label || !label.trim()) && !(iconLoaded && finalIconSrc) ? 'center' : 'flex-start',
+          paddingTop: `${settings.nodePaddingVertical}px`,
+          paddingBottom: `${settings.nodePaddingVertical}px`,
+          paddingLeft: `${settings.nodePaddingHorizontal}px`,
+          paddingRight: `${settings.nodePaddingHorizontal}px`,
+            boxSizing: 'border-box',
+            gap: iconLoaded && finalIconSrc && (label && label.trim()) ? `${settings.textPadding}px` : '0',
+        }}>
+            {iconLoaded && finalIconSrc && (
+            <img
+              src={finalIconSrc}
+                alt="" 
+              style={{ 
+                  width: `${settings.iconSize}px`,
+                  height: `${settings.iconSize}px`,
+                  objectFit: 'contain',
+                  flexShrink: 0
+                }}
+              />
+            )}
+            <textarea
+              ref={inputRef}
             value={label}
             onChange={handleLabelChange}
             onKeyDown={handleKeyDown}
-            onBlur={() => {
-              lastBlurTimeRef.current = Date.now();
-              setIsEditing(false);
-              onLabelChange(id, label || ''); // Save empty string if no text
-            }}
-            placeholder={selected || !label ? "Add text" : ""}
+              onBlur={() => {
+                lastBlurTimeRef.current = Date.now();
+                setIsEditing(false);
+                onLabelChange(id, label || ''); // Save empty string if no text
+              }}
+              placeholder={selected || !label ? "Add text" : ""}
             style={{
               width: '100%',
-              height: '100%',
-              padding: '0',
-              border: 'none',
-              borderRadius: '8px',
+                maxWidth: '100%',
+                minHeight: label ? 'auto' : '10px',
+                padding: '0',
+                boxSizing: 'border-box',
+                border: 'none',
+                borderRadius: '4px',
               textAlign: 'center',
-              fontSize: '8px',
-              lineHeight: '10px',
-              fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-              fontWeight: 400,
-              color: '#333',
-              background: 'transparent',
-              outline: 'none',
-              resize: 'none',
-              cursor: 'text'
-            }}
-            className="node-text-input"
-          />
-        ) : label && label.trim() ? (
+                fontSize: '8px',
+                lineHeight: '10px',
+                fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                fontWeight: 400,
+                color: '#333',
+                background: 'transparent',
+                outline: 'none',
+                resize: 'none',
+                cursor: 'text',
+                overflow: 'hidden',
+                whiteSpace: 'pre-wrap',
+                wordWrap: 'break-word',
+                flexShrink: 0
+              }}
+              className="node-text-input"
+            />
+          </div>
+        ) : (
           <div
             onClick={handleClick}
             style={{
@@ -1028,34 +1094,42 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChan
               fontWeight: 400,
               color: '#000000',
               width: '100%',
-              paddingLeft: '10px',
-              paddingRight: '10px',
-              margin: '0 auto',
-              marginTop: '2px',
-              wordBreak: 'normal',
-              overflowWrap: 'normal',
+              paddingTop: `${settings.nodePaddingVertical}px`,
+              paddingBottom: `${settings.nodePaddingVertical}px`,
+              paddingLeft: `${settings.nodePaddingHorizontal}px`,
+              paddingRight: `${settings.nodePaddingHorizontal}px`,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
               boxSizing: 'border-box',
-              pointerEvents: 'auto' // Allow double-click to edit
+              pointerEvents: 'auto', // Allow click to edit
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+              whiteSpace: 'pre-wrap',
+              gap: (label && label.trim()) && iconLoaded ? `${settings.textPadding}px` : '0',
+              overflow: 'hidden'
             }}
           >
-            {/* Render each line manually to match ELK calculation */}
-            {(() => {
-              const lines = splitTextIntoLines(label, 76);
-              return lines.map((line, index) => (
-                <div key={index} style={{ 
-                  lineHeight: '10px',
-                  width: '100%',
-                  textAlign: 'center',
-                  overflow: 'hidden',
-                  whiteSpace: 'nowrap',
-                  textOverflow: 'ellipsis'
-                }}>
-                  {line}
+            {iconLoaded && finalIconSrc && (
+              <img 
+                src={finalIconSrc} 
+                alt="" 
+                style={{
+                  width: `${settings.iconSize}px`,
+                  height: `${settings.iconSize}px`,
+                  objectFit: 'contain',
+                  flexShrink: 0
+                }}
+              />
+            )}
+            {label && label.trim() && (
+              <div style={{ width: '100%' }}>
+                {label}
                 </div>
-              ));
-            })()}
+            )}
           </div>
-        ) : null}
+        )}
       </div>
     </div>
     </>
