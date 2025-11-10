@@ -1,7 +1,6 @@
 import React from "react";
 import * as Lucide from "lucide-react";
-
-type Tool = "select" | "box" | "connector" | "group";
+import { Tool } from '../../hooks/useToolSelection';
 
 export interface CanvasToolbarProps {
   selectedTool: Tool;
@@ -29,7 +28,15 @@ const CanvasToolbar: React.FC<CanvasToolbarProps> = ({ selectedTool, onSelect, c
       type="button"
       aria-label={title}
       title={title}
-      onClick={() => onSelect(tool)}
+      onMouseDown={(e) => {
+        // Fire tool switch ASAP (before ReactFlow mouseup/select handlers)
+        e.stopPropagation();
+        e.preventDefault();
+        onSelect(tool);
+      }}
+      onClick={(e) => {
+        onSelect(tool);
+      }}
       className={`${baseBtn} ${selectedTool === tool ? selected : unselected}`}
       style={selectedTool === tool ? { backgroundColor: BLUE_HEX } : undefined}
     >

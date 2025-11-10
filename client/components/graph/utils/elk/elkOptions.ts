@@ -28,9 +28,12 @@ export const NON_ROOT_DEFAULT_OPTIONS = {
     "elk.padding": "[top=60.0,left=30.0,bottom=30.0,right=30.0]",
     "elk.layered.nodePlacement.favorStraightEdges": true,
     "elk.layered.priority.shortness": 100, 
-    "spacing.edgeNode": 30,
+    // Enable orthogonal edge routing (routes edges around nodes)
+    "elk.edgeRouting": "ORTHOGONAL",
+    // Increase spacing so edges go around nodes with clear separation
+    "spacing.edgeNode": 40,
     "spacing.nodeNode": 30,
-    "spacing.edgeEdge": 30,
+    "spacing.edgeEdge": 20,
     "spacing.edgeEdgeBetweenLayers": 50,
     "spacing.nodeNodeBetweenLayers": 50,
     "spacing.edgeNodeBetweenLayers": 50,
