@@ -17,6 +17,7 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL: BASE_URL,
+    headless: true, // Run all tests headless to avoid interrupting user flow
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
