@@ -1,13 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { BaseEdge, EdgeLabelRenderer, EdgeProps, Position, useStore } from 'reactflow';
 import { getEdgeStyle, CANVAS_STYLES } from './graph/styles/canvasStyles';
 import { testEdgeCollision } from '../utils/edgeCollisionTest';
 import { AvoidLib } from 'libavoid-js';
 import { useViewMode } from '../contexts/ViewModeContext';
+import { getBatchRoutingCoordinator } from '../lib/BatchRoutingCoordinator';
 
 const DEFAULT_NODE_WIDTH = 96;
 const DEFAULT_NODE_HEIGHT = 96;
-const DEFAULT_OBSTACLE_MARGIN = 12;
+const DEFAULT_OBSTACLE_MARGIN = 8; // Reduced from 20 - smaller spacing makes routing work better
 
 const safeNumber = (value: unknown, fallback: number): number =>
   typeof value === 'number' && Number.isFinite(value) ? value : fallback;
@@ -88,7 +89,8 @@ const deriveDirectionBetween = (from: Point, to: Point): Position => {
   return dy >= 0 ? Position.Bottom : Position.Top;
 };
 
-const StepEdge: React.FC<EdgeProps> = ({ 
+const StepEdge: React.FC<EdgeProps> = (props) => {
+  const { 
   id, 
   source,
   target,
@@ -102,8 +104,21 @@ const StepEdge: React.FC<EdgeProps> = ({
   markerEnd,
   selected,
   style = {},
-}) => {
+  } = props;
   const edgeData = data as any;
+  
+  // Debug logging for edge-vertical
+  if (id === 'edge-vertical') {
+    console.log(`[StepEdge:${id}] 🔍 MOUNTED`, {
+      source, target,
+      hasStaticObstacleIds: !!edgeData?.staticObstacleIds,
+      obstacleCount: edgeData?.staticObstacleIds?.length,
+      hasRerouteKey: !!edgeData?.rerouteKey,
+      hasStaticObstacles: !!edgeData?.staticObstacles,
+      staticObstaclesCount: edgeData?.staticObstacles?.length
+    });
+  }
+  
   const [computedBendPoints, setComputedBendPoints] = useState<Point[]>([]);
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [edgePath, setEdgePath] = useState<string>(() =>
@@ -111,6 +126,10 @@ const StepEdge: React.FC<EdgeProps> = ({
   );
   const [routingStatus, setRoutingStatus] = useState<RoutingStatus>('ok');
   const [routingMessage, setRoutingMessage] = useState<string>('');
+  
+  // State for batch routing - stores pathPoints from coordinator
+  const [coordinatorPathPoints, setCoordinatorPathPoints] = useState<Point[] | null>(null);
+  const coordinatorCallbackRef = useRef<((route: Point[]) => void) | null>(null);
 
   // Get libavoid options from context (for FREE mode parameter tuning)
   const { config, libavoidOptions: contextLibavoidOptions } = useViewMode();
@@ -146,6 +165,12 @@ const StepEdge: React.FC<EdgeProps> = ({
   const allEdges = useStore((state) => state?.edges ?? []);
   const nodeCount = allNodes.length;
   const edgeCount = allEdges.length;
+  
+  // Step 3: Update expected edge count when allEdges changes
+  useEffect(() => {
+    const coordinator = getBatchRoutingCoordinator();
+    coordinator.setExpectedEdgeCount(allEdges.length);
+  }, [allEdges.length]);
 
   const condensedNodes = useMemo<NodeRect[]>(
     () =>
@@ -172,8 +197,19 @@ const StepEdge: React.FC<EdgeProps> = ({
       ? edgeData.staticObstacles
       : [];
 
+    // Debug for edge-vertical
+    if (id === 'edge-vertical') {
+      console.log(`[StepEdge:${id}] 🔍 Resolving obstacles`, {
+        staticObstacleIdsCount: staticObstacleIds.length,
+        staticObstaclesCount: staticObstacles.length,
+        condensedNodesCount: condensedNodes.length
+      });
+    }
+
+    let result: NodeRect[];
+    
     if (staticObstacleIds.length > 0) {
-      return staticObstacleIds.map((obstacleId, index) => {
+      result = staticObstacleIds.map((obstacleId, index) => {
         const liveNode = condensedNodes.find((node) => node.id === obstacleId);
         const initialRect = staticObstacles.find((rect: any) => rect?.id === obstacleId);
         
@@ -195,13 +231,10 @@ const StepEdge: React.FC<EdgeProps> = ({
           height,
         };
       });
-    }
-
-    if (staticObstacles.length === 0) {
-      return condensedNodes;
-    }
-
-    return staticObstacles.map((rect, index) => {
+    } else if (staticObstacles.length === 0) {
+      result = condensedNodes;
+    } else {
+      result = staticObstacles.map((rect, index) => {
       const liveNode = rect?.id ? condensedNodes.find((node) => node.id === rect.id) : undefined;
       const width = safeNumber(liveNode?.width ?? rect?.width, DEFAULT_NODE_WIDTH);
       const height = safeNumber(liveNode?.height ?? rect?.height, DEFAULT_NODE_HEIGHT);
@@ -221,6 +254,17 @@ const StepEdge: React.FC<EdgeProps> = ({
         height,
       };
     });
+    }
+    
+    // Debug for edge-vertical - log final resolved obstacles
+    if (id === 'edge-vertical') {
+      console.log(`[StepEdge:${id}] 🔍 Resolved obstacles:`, {
+        count: result.length,
+        sample: result.slice(0, 3).map(r => ({ id: r.id, x: r.x, y: r.y }))
+      });
+    }
+    
+    return result;
   }, [edgeData?.staticObstacleIds, edgeData?.staticObstacles, condensedNodes, id]);
 
   const obstacleSignature = useMemo(() => {
@@ -261,6 +305,8 @@ const StepEdge: React.FC<EdgeProps> = ({
 
     const routeWithLibavoid = async () => {
       try {
+        // Debug: Log all edge routing to see which edges are being routed
+        console.log(`[STRAIGHT-DEBUG:${id}] 🚀 ROUTING STARTED`);
         avoidModule = await ensureAvoidInstance();
         if (cancelled) return;
 
@@ -268,27 +314,13 @@ const StepEdge: React.FC<EdgeProps> = ({
         // Reset router when optionsVersion or obstacle positions change
         // Combine optionsVersion and obstacleSignature to create a unique router version
         const routerVersion = `${optionsVersion}:${obstacleSignature}`;
-        if (!(window as any).__libavoidSharedRouter || (window as any).__libavoidSharedRouterVersion !== routerVersion) {
-          console.log(`[StepEdge:${id}] 🆕 Creating NEW shared router for version ${routerVersion}`);
-          const newRouter = new avoidModule.Router(avoidModule.OrthogonalRouting);
-          (window as any).__libavoidSharedRouter = newRouter;
-          (window as any).__libavoidSharedRouterVersion = routerVersion;
-          // Initialize pinIdMap and pinObjectMap on the new router
-          (newRouter as any).__pinIdMap = new Map<string, number>();
-          (newRouter as any).__pinObjectMap = new Map<number, any>();
-          (newRouter as any).__nextPinId = 1000;
-        }
         
-        const router = register((window as any).__libavoidSharedRouter);
-        
-        console.log(`[StepEdge:${id}] ♻️ Using shared router (pinIdMap has ${((router as any).__pinIdMap as Map<string, number>).size} pins, nextPinId=${(router as any).__nextPinId})`);
-
-        
-        // Use libavoidOptions.shapeBufferDistance from context as priority, fallback to edgeData.obstacleMargin
-        const spacing = safeNumber(libavoidOptions?.shapeBufferDistance, safeNumber(edgeData?.obstacleMargin, DEFAULT_OBSTACLE_MARGIN));
-        
+        // Router configuration helper - sets all parameters ONCE per router version
+        // This matches Joint.js pattern: configure router once, then batch route all connections
+        const configureRouter = (router: any, avoidModule: any, libavoidOptions: any, spacing: number) => {
+          // Enable nudging options
         if (typeof avoidModule.nudgeOrthogonalSegmentsConnectedToShapes === 'number') {
-          router.setRoutingOption?.(avoidModule.nudgeOrthogonalSegmentsConnectedToShapes, !!libavoidOptions?.nudgeOrthSegments);
+            router.setRoutingOption?.(avoidModule.nudgeOrthogonalSegmentsConnectedToShapes, libavoidOptions?.nudgeOrthSegments !== false);
         }
         if (typeof avoidModule.nudgeSharedPathsWithCommonEndPoint === 'number') {
           router.setRoutingOption?.(avoidModule.nudgeSharedPathsWithCommonEndPoint, !!libavoidOptions?.nudgeSharedPaths);
@@ -296,14 +328,43 @@ const StepEdge: React.FC<EdgeProps> = ({
         if (typeof avoidModule.nudgeOrthogonalTouchingColinearSegments === 'number') {
           router.setRoutingOption?.(avoidModule.nudgeOrthogonalTouchingColinearSegments, !!libavoidOptions?.nudgeTouchingColinear);
         }
+          
+          // Critical: Unifying nudging preprocessing - "unifies segments and centers them in free space"
+          // This is the key to proper edge spacing that Joint.js uses
+          if (typeof avoidModule.performUnifyingNudgingPreprocessingStep === 'number') {
+            router.setRoutingOption?.(avoidModule.performUnifyingNudgingPreprocessingStep, true);
+          }
+          
+          // Enable additional spacing options if available
+          if (typeof (avoidModule as any).improvingConnectorNudging === 'number') {
+            router.setRoutingOption?.((avoidModule as any).improvingConnectorNudging, true);
+          }
+          
+          // Enable sideDirections to enforce side-constrained pins (critical for preventing overlap)
+          if (typeof (avoidModule as any).sideDirections === 'number') {
+            router.setRoutingOption?.((avoidModule as any).sideDirections, true);
+            console.log(`[StepEdge:ROUTER-CONFIG] ✅ Enabled sideDirections for side-constrained pins`);
+          } else {
+            console.log(`[StepEdge:ROUTER-CONFIG] ⚠️  sideDirections not available in this libavoid build`);
+          }
+          
+          // Set routing parameters
         if (typeof avoidModule.shapeBufferDistance === 'number') {
           router.setRoutingParameter?.(avoidModule.shapeBufferDistance, spacing);
+        }
+          // idealNudgingDistance: The PRIMARY parameter for uniform spacing between parallel edges
+          // This controls the spacing when libavoid nudges overlapping parallel segments apart
+          // Set to match the spacing between ports on nodes for visual consistency
+          if (typeof avoidModule.idealNudgingDistance === 'number') {
+            const nudgingDistance = safeNumber(libavoidOptions?.idealNudgingDistance, 56);
+            router.setRoutingParameter?.(avoidModule.idealNudgingDistance, nudgingDistance);
+            console.log(`[StepEdge:ROUTER-CONFIG] ✅ idealNudgingDistance set to ${nudgingDistance}px (uniform edge spacing)`);
         }
         if (typeof avoidModule.portDirectionPenalty === 'number') {
           router.setRoutingParameter?.(avoidModule.portDirectionPenalty, 50);
         }
         if (typeof avoidModule.segmentPenalty === 'number') {
-          router.setRoutingParameter?.(avoidModule.segmentPenalty, safeNumber(libavoidOptions?.segmentPenalty, 5));
+            router.setRoutingParameter?.(avoidModule.segmentPenalty, safeNumber(libavoidOptions?.segmentPenalty, 1));
         }
         if (typeof avoidModule.bendPenalty === 'number') {
           router.setRoutingParameter?.(avoidModule.bendPenalty, safeNumber(libavoidOptions?.bendPenalty, 20));
@@ -312,8 +373,44 @@ const StepEdge: React.FC<EdgeProps> = ({
           router.setRoutingParameter?.(avoidModule.crossingPenalty, safeNumber(libavoidOptions?.crossingPenalty, 100));
         }
         if (typeof avoidModule.sharedPathPenalty === 'number') {
-          router.setRoutingParameter?.(avoidModule.sharedPathPenalty, safeNumber(libavoidOptions?.sharedPathPenalty, 50));
+            router.setRoutingParameter?.(avoidModule.sharedPathPenalty, safeNumber(libavoidOptions?.sharedPathPenalty, 10000));
+          }
+        };
+        
+        // Use libavoidOptions.shapeBufferDistance from context as priority, fallback to edgeData.obstacleMargin
+        const spacing = safeNumber(libavoidOptions?.shapeBufferDistance, safeNumber(edgeData?.obstacleMargin, DEFAULT_OBSTACLE_MARGIN));
+        
+        // Create or get shared router - configure ONCE per router version
+        if (!(window as any).__libavoidSharedRouter || (window as any).__libavoidSharedRouterVersion !== routerVersion) {
+          const newRouter = new avoidModule.Router(avoidModule.OrthogonalRouting);
+          (window as any).__libavoidSharedRouter = newRouter;
+          (window as any).__libavoidSharedRouterVersion = routerVersion;
+          
+          // Initialize pinIdMap and pinObjectMap on the new router
+          (newRouter as any).__pinIdMap = new Map<string, number>();
+          (newRouter as any).__pinObjectMap = new Map<number, any>();
+          (newRouter as any).__nextPinId = 1000;
+          
+          // Configure router ONCE when created - this is critical for Joint.js-style batch routing
+          configureRouter(newRouter, avoidModule, libavoidOptions, spacing);
+          
+          // Step 2 & 3: Initialize batch routing coordinator for new router
+          const coordinator = getBatchRoutingCoordinator();
+          coordinator.reset();
+          coordinator.initialize(newRouter, avoidModule, routerVersion);
+          coordinator.setExpectedEdgeCount(allEdges.length);
         }
+        
+        const router = register((window as any).__libavoidSharedRouter);
+        
+        // Step 2: Get coordinator and ensure it's initialized (will be reused later in routing)
+        const coordinatorInstance = getBatchRoutingCoordinator();
+        if (!coordinatorInstance.getStatus().routerVersion || coordinatorInstance.getStatus().routerVersion !== routerVersion) {
+          coordinatorInstance.initialize(router, avoidModule, routerVersion);
+          coordinatorInstance.setExpectedEdgeCount(allEdges.length);
+        }
+        
+        // coordinatorInstance is now available for use in the routing section below
 
         type ShapeInfo = {
           shape: any;
@@ -323,6 +420,7 @@ const StepEdge: React.FC<EdgeProps> = ({
         };
 
         const shapeMap = new Map<string, ShapeInfo>();
+        
         const pinIdMap = (router as any).__pinIdMap;
         let nextPinId = (router as any).__nextPinId;
 
@@ -336,6 +434,22 @@ const StepEdge: React.FC<EdgeProps> = ({
 
         const obstacleRects: NodeRect[] = resolvedObstacleRects;
 
+        // DEBUG: Log obstacle registration
+        console.log(`[StepEdge:${id}] 🔍 OBSTACLES: ${obstacleRects.length} nodes to register as obstacles:`, 
+          obstacleRects.map(n => `${n.id}(${Math.round(n.x)},${Math.round(n.y)},${Math.round(n.width)}x${Math.round(n.height)})`).join(', '));
+
+        // CRITICAL FIX: Skip routing if all obstacles are at origin (0,0)
+        // This prevents routing with invalid positions before nodes are positioned
+        const allAtOrigin = obstacleRects.length > 0 && obstacleRects.every(n => n.x === 0 && n.y === 0);
+        if (allAtOrigin) {
+          console.log(`[StepEdge:${id}] ⏳ SKIPPING ROUTING - all obstacles at origin (0,0), waiting for valid positions`);
+          return;
+        }
+
+        // CRITICAL: Register obstacles BEFORE creating connections
+        // Obstacles are registered synchronously, so they're guaranteed to be in router before connections
+        // IMPORTANT: Do NOT exclude source/target nodes - they need to be obstacles too!
+        // Only the pins on source/target should allow connections, the rest of the node should be an obstacle
         obstacleRects.forEach((node) => {
           const width = safeNumber(node.width, DEFAULT_NODE_WIDTH);
           const height = safeNumber(node.height, DEFAULT_NODE_HEIGHT);
@@ -344,12 +458,9 @@ const StepEdge: React.FC<EdgeProps> = ({
           const rectangle = register(new avoidModule.Rectangle(topLeft, bottomRight));
           const shape = register(new avoidModule.ShapeRef(router, rectangle));
           
-          // Create a default center pin for edges that don't need port spacing
-          // This ensures all edges can connect even if they don't create custom pins
-          const centerPin = register(
-            new avoidModule.ShapeConnectionPin(shape, 1, 0.5, 0.5, true, 0, allDirFlag)
-          );
-          centerPin.setExclusive?.(false);
+          // Do NOT create default center pin - Joint.js pattern: only create side pins that are actually used
+          // This prevents libavoid from treating nodes as having "all-direction" connection points
+          // which can cause edges to merge into shared trunks
           
           shapeMap.set(node.id, {
             shape,
@@ -358,6 +469,9 @@ const StepEdge: React.FC<EdgeProps> = ({
             height,
           });
         });
+        
+        // CRITICAL: Ensure obstacles are registered in router before proceeding
+        // This is synchronous, so obstacles are guaranteed to be in router before connections
 
         // Port edge tracking using global registry
         // Initialize shared port registry on window if not exists
@@ -457,8 +571,6 @@ const StepEdge: React.FC<EdgeProps> = ({
         const tgtEdgeIndex = tgtEdgeList.indexOf(id);
         const preComputedSrcOffset = srcEdgeIndex >= 0 ? srcEdgeIndex - (srcEdgeList.length - 1) / 2 : 0;
         const preComputedTgtOffset = tgtEdgeIndex >= 0 ? tgtEdgeIndex - (tgtEdgeList.length - 1) / 2 : 0;
-        
-        console.log(`[StepEdge:${id}] 🗂️ Port map: src=${srcPortKey} has ${srcEdgeList.length} edges [${srcEdgeList.join(',')}], tgt=${tgtPortKey} has ${tgtEdgeList.length} edges [${tgtEdgeList.join(',')}], portEdgeSpacing=${portEdgeSpacing}px, preComputed offsets: src=${preComputedSrcOffset.toFixed(2)}, tgt=${preComputedTgtOffset.toFixed(2)}`);
 
         function getConnDirDown(): number {
           if (typeof avoidModule.ConnDirDown === 'number') {
@@ -467,10 +579,9 @@ const StepEdge: React.FC<EdgeProps> = ({
           if (typeof avoidModule.ConnDirBottom === 'number') {
             return avoidModule.ConnDirBottom;
           }
-          if (typeof avoidModule.ConnDirAll === 'number') {
-            return avoidModule.ConnDirAll;
-          }
-          return 0;
+          // CRITICAL FIX: Never return ConnDirAll - use ConnDirRight as safe fallback
+          // This prevents edges from "sliding" along node faces and passing through nodes
+          return avoidModule.ConnDirRight ?? 0;
         }
 
         const getConnDirFlag = (dx: number, dy: number) => {
@@ -491,8 +602,10 @@ const StepEdge: React.FC<EdgeProps> = ({
           if (pos === Position.Left) return avoidModule.ConnDirLeft;
           if (pos === Position.Right) return avoidModule.ConnDirRight;
           if (pos === Position.Top) return avoidModule.ConnDirUp;
+          // CRITICAL FIX: Never return ConnDirAll - use getConnDirDown() or ConnDirRight as fallback
+          // This prevents edges from "sliding" along node faces and passing through nodes
           const downFlag = getConnDirDown();
-          return downFlag || avoidModule.ConnDirAll;
+          return downFlag || (avoidModule.ConnDirRight ?? 0);
         };
 
         const createConnEndForNode = (nodeId: string, point: Point, preferredDirection?: Position, edgeOffset: number = 0) => {
@@ -569,29 +682,44 @@ const StepEdge: React.FC<EdgeProps> = ({
           const clampedOffsetY = Number.isFinite(offsetY)
             ? Math.min(1, Math.max(0, offsetY))
             : 0.5;
-          const direction = preferredDirection
+          
+          // CRITICAL: Always use side-constrained direction flag (Joint.js pattern)
+          // Never use ConnDirAll - this prevents edges from "sliding" along node faces
+          // and forces proper separation at the port level
+          let direction = preferredDirection
             ? positionToFlag(preferredDirection)
-            : typeof avoidModule.ConnDirAll === 'number'
-            ? avoidModule.ConnDirAll
             : getConnDirFlag(
                 point.x - (origin.x + width / 2),
                 point.y - (origin.y + height / 2)
               );
+          
+          // PREVENTIVE Safety: Validate direction BEFORE creating pin to ensure ConnDirAll is never used
+          // This prevents libavoid from processing pins with ConnDirAll, which can cause edges to pass through nodes
+          // For center pins (0.5, 0.5), determine direction from which side the connection approaches
+          if (!direction || (typeof avoidModule.ConnDirAll === 'number' && direction === avoidModule.ConnDirAll)) {
+            // Calculate direction from pin position relative to node center
+            const dx = clampedOffsetX - 0.5;
+            const dy = clampedOffsetY - 0.5;
+            if (Math.abs(dx) > Math.abs(dy)) {
+              direction = dx > 0 ? (avoidModule.ConnDirRight ?? 0) : (avoidModule.ConnDirLeft ?? 0);
+            } else if (dy !== 0) {
+              direction = dy > 0 ? (avoidModule.ConnDirDown ?? getConnDirDown()) : (avoidModule.ConnDirUp ?? 0);
+            } else {
+              // True center (0.5, 0.5) - use Right as default (most common case)
+              direction = avoidModule.ConnDirRight ?? 0;
+            }
+            // Final safety: ensure we have a valid direction (never ConnDirAll)
+            if (!direction || (typeof avoidModule.ConnDirAll === 'number' && direction === avoidModule.ConnDirAll)) {
+              direction = (avoidModule.ConnDirRight ?? 0) || (avoidModule.ConnDirLeft ?? 0) || (avoidModule.ConnDirUp ?? 0) || getConnDirDown();
+            }
+          }
           
           // Include edge offset and portEdgeSpacing in pin key to ensure pins are recreated when spacing changes
           const pinKey = `${nodeId}:${clampedOffsetX.toFixed(4)}:${clampedOffsetY.toFixed(4)}:${edgeOffset}:${portEdgeSpacing}`;
           const pinIdMap = (router as any).__pinIdMap as Map<string, number>;
           let pinId = pinIdMap.get(pinKey);
           
-          // If edgeOffset is 0 and position is center (0.5, 0.5), reuse the default center pin (pinId = 1)
-          const isCenterPin = edgeOffset === 0 && 
-            Math.abs(clampedOffsetX - 0.5) < 0.01 && 
-            Math.abs(clampedOffsetY - 0.5) < 0.01;
-          
-          if (isCenterPin && !pinId) {
-            pinId = 1; // Reuse the center pin created for the shape
-            pinIdMap.set(pinKey, pinId);
-          }
+          // No center pin fallback - Joint.js pattern: only create side pins that are actually used
           
           let pinObj;
           if (!pinId) {
@@ -616,7 +744,13 @@ const StepEdge: React.FC<EdgeProps> = ({
             const pinObjectMap = (router as any).__pinObjectMap as Map<number, any>;
             pinObjectMap.set(pinId, pinObj);
             
-            console.log(`[StepEdge:${id}] 🔌 Created pin ${pinId} for ${nodeId} at (${clampedOffsetX.toFixed(3)}, ${clampedOffsetY.toFixed(3)}) with edgeOffset ${edgeOffset}`);
+            // Debug pin creation for moving edges
+            if (id === 'edge-straight' || id.startsWith('edge-port-')) {
+              const pixelX = origin.x + clampedOffsetX * width;
+              const pixelY = origin.y + clampedOffsetY * height;
+              const pinType = nodeId === source ? 'SRC' : nodeId === target ? 'TGT' : 'OTHER';
+              console.log(`[STRAIGHT-DEBUG:${id}] 🔌 PIN CREATED [${pinType}]: ${nodeId} pinId=${pinId} norm=(${clampedOffsetX.toFixed(3)},${clampedOffsetY.toFixed(3)}) pixel=(${pixelX.toFixed(1)},${pixelY.toFixed(1)}) dir=${preferredDirection || 'auto'} edgeOffset=${edgeOffset}`);
+            }
           } else {
             // Retrieve existing pin object
             const pinObjectMap = (router as any).__pinObjectMap as Map<number, any>;
@@ -640,26 +774,308 @@ const StepEdge: React.FC<EdgeProps> = ({
         const connection = register(new avoidModule.ConnRef(router));
         connection.setSourceEndpoint?.(srcEnd);
         connection.setDestEndpoint?.(dstEnd);
-        const wantOrthogonal = libavoidOptions?.routingType === 'orthogonal';
-        const hasPoly = typeof avoidModule.ConnType_PolyLine === 'number';
+        
+        // Always force orthogonal routing (never polyline) to ensure pins are respected
         const hasOrth = typeof avoidModule.ConnType_Orthogonal === 'number';
-        const routingType = wantOrthogonal && hasOrth
+        const routingType = hasOrth
           ? avoidModule.ConnType_Orthogonal
-          : hasPoly
-          ? avoidModule.ConnType_PolyLine
           : (avoidModule.ConnType_Orthogonal as number);
         connection.setRoutingType?.(routingType);
+        
+        // Debug: Verify routing type is set correctly
+        if (id === 'edge-straight' || id.startsWith('edge-port-')) {
+          console.log(`[STRAIGHT-DEBUG:${id}] 🔧 ROUTING TYPE SET: ${routingType} (ConnType_Orthogonal=${avoidModule.ConnType_Orthogonal})`);
+        }
         if (typeof connection.setHateCrossings === 'function') {
           connection.setHateCrossings?.(!!libavoidOptions?.hateCrossings);
         }
 
-        router.processTransaction?.();
-
-        const polyline = register(connection.displayRoute());
-        const pathPoints: Point[] = [];
-        for (let i = 0; i < polyline.size(); i += 1) {
-          const pt = register(polyline.get_ps(i));
-          pathPoints.push({ x: pt.x, y: pt.y });
+        // Step 2: Register with batch routing coordinator instead of processing immediately
+        // This allows libavoid to see all edges together and properly nudge overlapping segments
+        // Reuse coordinatorInstance from above (already initialized)
+        
+        // Create callback to receive route when batch processing completes
+        const onRouteReady = (route: Point[]) => {
+          if (!cancelled) {
+            setCoordinatorPathPoints(route);
+            // State update will trigger re-render, which will call routeWithLibavoid again
+            // and this time the route will be available
+          }
+        };
+        coordinatorCallbackRef.current = onRouteReady;
+        
+        // Register edge with coordinator
+        coordinatorInstance.registerEdge(id, connection, source, target, onRouteReady);
+        
+        // Check if we already have a route from coordinator (either from state or coordinator cache)
+        let routeFromCoordinator = coordinatorPathPoints || coordinatorInstance.getRoute(id);
+        
+        // If route not ready, check if we should force process
+        if (!routeFromCoordinator || routeFromCoordinator.length === 0) {
+          const status = coordinatorInstance.getStatus();
+          if (status.registeredEdgeCount >= status.expectedEdgeCount && status.expectedEdgeCount > 0 && !status.batchProcessed) {
+            // All edges registered but batch not processed yet - force it
+            console.log(`[StepEdge:${id}] ⚠️ All edges registered but batch not processed, forcing...`);
+            coordinatorInstance.forceProcess();
+            routeFromCoordinator = coordinatorInstance.getRoute(id);
+          }
+        }
+        
+        // If still no route, wait for batch processing
+        if (!routeFromCoordinator || routeFromCoordinator.length === 0) {
+          console.log(`[StepEdge:${id}] ⏳ Waiting for batch processing to complete...`);
+          return; // Exit early, will be called again when route is ready via callback
+        }
+        
+        // Use route from coordinator
+        const pathPoints = routeFromCoordinator;
+        
+        // Log that we've reached the diagnostic section - this confirms routing happened
+        console.log(`[DIAG:${id}] ✅ ROUTING COMPLETE (from coordinator) - pathPoints.length=${pathPoints.length}, source=${source}, target=${target}, routerVersion=${routerVersion}`);
+        
+        // CRITICAL FIX: If we got a routed path (more than 2 points), don't allow it to be overwritten by a straight line
+        // This prevents race conditions where a later routing with fewer obstacles overwrites a correct route
+        if (pathPoints.length > 2) {
+          console.log(`[StepEdge:${id}] 🎯 ROUTED PATH FOUND with ${pathPoints.length} points - marking as stable`);
+          (window as any).__stableEdgePaths = (window as any).__stableEdgePaths || {};
+          (window as any).__stableEdgePaths[id] = pathPoints;
+        } else if ((window as any).__stableEdgePaths?.[id]?.length > 2) {
+          // If we have a stable routed path and the new path is a straight line, use the stable path
+          console.log(`[StepEdge:${id}] ⚠️ IGNORING STRAIGHT LINE - using stable routed path with ${(window as any).__stableEdgePaths[id].length} points`);
+          pathPoints.length = 0;
+          pathPoints.push(...(window as any).__stableEdgePaths[id]);
+        }
+        
+        // DIAGNOSTIC: Boundary sanity check for all edges
+        // Enable diagnostics for all edges by default (can be disabled via window.__enableEdgeDiagnostics = false)
+        const enableDiagnostics = typeof (window as any).__enableEdgeDiagnostics === 'boolean' 
+          ? (window as any).__enableEdgeDiagnostics 
+          : true; // Enable by default for all edges
+        
+        console.log(`[DIAG:${id}] 🔧 enableDiagnostics=${enableDiagnostics}, window.__enableEdgeDiagnostics=${typeof (window as any).__enableEdgeDiagnostics}`);
+        
+        // Initialize diagnostics map if needed
+        if (enableDiagnostics && !(window as any).__edgeDiagnostics) {
+          (window as any).__edgeDiagnostics = new Map();
+        }
+        
+        if (enableDiagnostics) {
+          // Initialize diagnostics map if needed (redundant check but safe)
+          if (!(window as any).__edgeDiagnostics) {
+            (window as any).__edgeDiagnostics = new Map();
+          }
+          
+          console.log(`[DIAG:${id}] 🔍 Entering diagnostic block, pathPoints.length=${pathPoints.length}`);
+          
+          if (pathPoints.length >= 2) {
+            const srcInfo = shapeMap.get(source);
+            const tgtInfo = shapeMap.get(target);
+            
+            console.log(`[DIAG:${id}] 🔍 pathPoints.length >= 2, srcInfo=${!!srcInfo}, tgtInfo=${!!tgtInfo}`);
+            
+            // Always store diagnostic data, even if shapeMap entries are missing
+            // Initialize diagnostics map if needed
+            if (!(window as any).__edgeDiagnostics) {
+              (window as any).__edgeDiagnostics = new Map();
+            }
+            
+            if (srcInfo && tgtInfo) {
+            // Calculate actual pin positions in pixels
+            const srcPinX = srcInfo.origin.x + (effectiveSourcePosition === Position.Right ? srcInfo.width : 
+                              effectiveSourcePosition === Position.Left ? 0 : 
+                              effectiveSourcePosition === Position.Top || effectiveSourcePosition === Position.Bottom ? srcInfo.width / 2 : srcInfo.width / 2);
+            const srcPinY = srcInfo.origin.y + (effectiveSourcePosition === Position.Bottom ? srcInfo.height :
+                              effectiveSourcePosition === Position.Top ? 0 :
+                              effectiveSourcePosition === Position.Left || effectiveSourcePosition === Position.Right ? srcInfo.height / 2 : srcInfo.height / 2);
+            const tgtPinX = tgtInfo.origin.x + (effectiveTargetPosition === Position.Right ? tgtInfo.width :
+                              effectiveTargetPosition === Position.Left ? 0 :
+                              effectiveTargetPosition === Position.Top || effectiveTargetPosition === Position.Bottom ? tgtInfo.width / 2 : tgtInfo.width / 2);
+            const tgtPinY = tgtInfo.origin.y + (effectiveTargetPosition === Position.Bottom ? tgtInfo.height :
+                              effectiveTargetPosition === Position.Top ? 0 :
+                              effectiveTargetPosition === Position.Left || effectiveTargetPosition === Position.Right ? tgtInfo.height / 2 : tgtInfo.height / 2);
+            
+            // Check if first point matches source pin (within tolerance)
+            const firstPoint = pathPoints[0];
+            const pinMatchTolerance = 2.0;
+            const srcPinMatches = Math.abs(firstPoint.x - srcPinX) < pinMatchTolerance && 
+                                 Math.abs(firstPoint.y - srcPinY) < pinMatchTolerance;
+            
+            // Check if pin is on the correct boundary
+            const srcNodeRect = {
+              x: srcInfo.origin.x,
+              y: srcInfo.origin.y,
+              width: srcInfo.width,
+              height: srcInfo.height
+            };
+            const tgtNodeRect = {
+              x: tgtInfo.origin.x,
+              y: tgtInfo.origin.y,
+              width: tgtInfo.width,
+              height: tgtInfo.height
+            };
+            
+            const boundaryTolerance = 1.0;
+            let srcPinOnBoundary = false;
+            let srcPinBoundaryIssue = '';
+            if (effectiveSourcePosition === Position.Left) {
+              srcPinOnBoundary = Math.abs(srcPinX - srcNodeRect.x) < boundaryTolerance;
+              if (!srcPinOnBoundary) srcPinBoundaryIssue = `Expected X=${srcNodeRect.x}, got ${srcPinX.toFixed(1)}`;
+            } else if (effectiveSourcePosition === Position.Right) {
+              srcPinOnBoundary = Math.abs(srcPinX - (srcNodeRect.x + srcNodeRect.width)) < boundaryTolerance;
+              if (!srcPinOnBoundary) srcPinBoundaryIssue = `Expected X=${(srcNodeRect.x + srcNodeRect.width).toFixed(1)}, got ${srcPinX.toFixed(1)}`;
+            } else if (effectiveSourcePosition === Position.Top) {
+              srcPinOnBoundary = Math.abs(srcPinY - srcNodeRect.y) < boundaryTolerance;
+              if (!srcPinOnBoundary) srcPinBoundaryIssue = `Expected Y=${srcNodeRect.y}, got ${srcPinY.toFixed(1)}`;
+            } else if (effectiveSourcePosition === Position.Bottom) {
+              srcPinOnBoundary = Math.abs(srcPinY - (srcNodeRect.y + srcNodeRect.height)) < boundaryTolerance;
+              if (!srcPinOnBoundary) srcPinBoundaryIssue = `Expected Y=${(srcNodeRect.y + srcNodeRect.height).toFixed(1)}, got ${srcPinY.toFixed(1)}`;
+            } else {
+              srcPinOnBoundary = false;
+              srcPinBoundaryIssue = `Unknown position: ${effectiveSourcePosition}`;
+            }
+            
+            // Check if first segment exits source node
+            const secondPoint = pathPoints[1];
+            const firstSegmentExits = !(
+              secondPoint.x >= srcNodeRect.x && 
+              secondPoint.x <= srcNodeRect.x + srcNodeRect.width &&
+              secondPoint.y >= srcNodeRect.y && 
+              secondPoint.y <= srcNodeRect.y + srcNodeRect.height
+            );
+            
+            console.log(`[DIAG:${id}] 🔍 BOUNDARY SANITY CHECK:`);
+            console.log(`  Source: ${source} @ (${srcNodeRect.x},${srcNodeRect.y}) ${srcNodeRect.width}x${srcNodeRect.height}`);
+            console.log(`  Target: ${target} @ (${tgtNodeRect.x},${tgtNodeRect.y}) ${tgtNodeRect.width}x${tgtNodeRect.height}`);
+            console.log(`  Effective positions: src=${effectiveSourcePosition}, tgt=${effectiveTargetPosition}`);
+            console.log(`  Source pin: (${srcPinX.toFixed(1)},${srcPinY.toFixed(1)}) [${srcPinOnBoundary ? '✅ ON BOUNDARY' : '❌ NOT ON BOUNDARY: ' + srcPinBoundaryIssue}]`);
+            console.log(`  Target pin: (${tgtPinX.toFixed(1)},${tgtPinY.toFixed(1)})`);
+            console.log(`  Route first point: (${firstPoint.x.toFixed(1)},${firstPoint.y.toFixed(1)}) [${srcPinMatches ? '✅ MATCHES PIN' : '❌ DOES NOT MATCH PIN'}]`);
+            console.log(`  Route second point: (${secondPoint.x.toFixed(1)},${secondPoint.y.toFixed(1)}) [${firstSegmentExits ? '✅ EXITS SOURCE' : '❌ STAYS INSIDE SOURCE'}]`);
+            
+            // Store diagnostic data for window.__edgeSanity()
+            if (!(window as any).__edgeDiagnostics) {
+              (window as any).__edgeDiagnostics = new Map();
+            }
+            (window as any).__edgeDiagnostics.set(id, {
+              source, target,
+              srcNodeRect, tgtNodeRect,
+              effectiveSourcePosition, effectiveTargetPosition,
+              srcPin: { x: srcPinX, y: srcPinY },
+              tgtPin: { x: tgtPinX, y: tgtPinY },
+              routePoints: pathPoints,
+              srcPinOnBoundary,
+              srcPinMatches,
+              firstSegmentExits,
+              issues: [
+                !srcPinOnBoundary && `Source pin not on boundary: ${srcPinBoundaryIssue}`,
+                !srcPinMatches && `First route point doesn't match source pin`,
+                !firstSegmentExits && `First segment stays inside source node`
+              ].filter(Boolean)
+            });
+          } else {
+            // Store basic diagnostic data even when shapeMap entries are missing
+            (window as any).__edgeDiagnostics.set(id, {
+              source, target,
+              srcNodeRect: srcInfo ? { x: srcInfo.origin.x, y: srcInfo.origin.y, width: srcInfo.width, height: srcInfo.height } : null,
+              tgtNodeRect: tgtInfo ? { x: tgtInfo.origin.x, y: tgtInfo.origin.y, width: tgtInfo.width, height: tgtInfo.height } : null,
+              effectiveSourcePosition, effectiveTargetPosition,
+              srcPin: null,
+              tgtPin: null,
+              routePoints: pathPoints,
+              srcPinOnBoundary: false,
+              srcPinMatches: false,
+              firstSegmentExits: false,
+              issues: [
+                !srcInfo && `Source node info missing from shapeMap`,
+                !tgtInfo && `Target node info missing from shapeMap`
+              ].filter(Boolean)
+            });
+          }
+          } else {
+            // Store basic diagnostic data for edges with insufficient route points
+            const srcInfo = shapeMap.get(source);
+            const tgtInfo = shapeMap.get(target);
+            if (!(window as any).__edgeDiagnostics) {
+              (window as any).__edgeDiagnostics = new Map();
+            }
+            (window as any).__edgeDiagnostics.set(id, {
+              source, target,
+              srcNodeRect: srcInfo ? { x: srcInfo.origin.x, y: srcInfo.origin.y, width: srcInfo.width, height: srcInfo.height } : null,
+              tgtNodeRect: tgtInfo ? { x: tgtInfo.origin.x, y: tgtInfo.origin.y, width: tgtInfo.width, height: tgtInfo.height } : null,
+              effectiveSourcePosition, effectiveTargetPosition,
+              srcPin: null,
+              tgtPin: null,
+              routePoints: pathPoints,
+              srcPinOnBoundary: false,
+              srcPinMatches: false,
+              firstSegmentExits: false,
+              issues: [
+                `Insufficient route points: ${pathPoints.length} (need at least 2)`
+              ]
+            });
+          }
+        }
+        
+        // Debug logs for moving edges (straight and port edges)
+        const isMovingEdge = id === 'edge-straight' || id.startsWith('edge-port-');
+        console.log(`[STRAIGHT-DEBUG:${id}] 🔍 CHECKING: id="${id}", isMovingEdge=${isMovingEdge}, source=${source}, target=${target}`);
+        if (isMovingEdge) {
+          const libavoidSegs = pathPoints.length - 1;
+          console.log(`[STRAIGHT-DEBUG:${id}] 📍 LIBAVOID: ${pathPoints.length} points, ${libavoidSegs} segments`);
+          if (pathPoints.length > 0 && pathPoints.length <= 3) {
+            console.log(`[STRAIGHT-DEBUG:${id}]   Points:`, pathPoints.map(p => `(${p.x.toFixed(1)},${p.y.toFixed(1)})`).join(' → '));
+          }
+          
+          // Log pin positions in actual pixels
+          const srcInfo = shapeMap.get(source);
+          const tgtInfo = shapeMap.get(target);
+          if (srcInfo && tgtInfo) {
+            const srcPinX = srcInfo.origin.x + (effectiveSourcePosition === Position.Right ? srcInfo.width : 
+                              effectiveSourcePosition === Position.Left ? 0 : srcInfo.width / 2);
+            const srcPinY = srcInfo.origin.y + (effectiveSourcePosition === Position.Bottom ? srcInfo.height :
+                              effectiveSourcePosition === Position.Top ? 0 : srcInfo.height / 2);
+            const tgtPinX = tgtInfo.origin.x + (effectiveTargetPosition === Position.Right ? tgtInfo.width :
+                              effectiveTargetPosition === Position.Left ? 0 : tgtInfo.width / 2);
+            const tgtPinY = tgtInfo.origin.y + (effectiveTargetPosition === Position.Bottom ? tgtInfo.height :
+                              effectiveTargetPosition === Position.Top ? 0 : tgtInfo.height / 2);
+            
+            console.log(`[STRAIGHT-DEBUG:${id}] 📌 PINS: src=(${srcPinX.toFixed(1)},${srcPinY.toFixed(1)}) [${effectiveSourcePosition}] tgt=(${tgtPinX.toFixed(1)},${tgtPinY.toFixed(1)}) [${effectiveTargetPosition}]`);
+            console.log(`[STRAIGHT-DEBUG:${id}] 📌 SRC NODE: pos=(${srcInfo.origin.x},${srcInfo.origin.y}) size=${srcInfo.width}x${srcInfo.height}`);
+            console.log(`[STRAIGHT-DEBUG:${id}] 📌 TGT NODE: pos=(${tgtInfo.origin.x},${tgtInfo.origin.y}) size=${tgtInfo.width}x${tgtInfo.height}`);
+          }
+          
+          // Log obstacles
+          const otherObstacles = obstacleRects.filter(n => n.id !== source && n.id !== target);
+          console.log(`[STRAIGHT-DEBUG:${id}] 🚧 OBSTACLES: ${otherObstacles.length} registered`);
+          if (otherObstacles.length > 0) {
+            otherObstacles.forEach(obs => {
+              console.log(`[STRAIGHT-DEBUG:${id}]   ${obs.id}: (${obs.x},${obs.y}) ${obs.width}x${obs.height}`);
+            });
+          }
+          
+          // Check if straight line would intersect obstacles
+          if (pathPoints.length === 2 && otherObstacles.length > 0) {
+            const start = pathPoints[0];
+            const end = pathPoints[pathPoints.length - 1];
+            const intersections = otherObstacles.filter(obs => {
+              // Simple line-rectangle intersection
+              const minX = Math.min(start.x, end.x);
+              const maxX = Math.max(start.x, end.x);
+              const minY = Math.min(start.y, end.y);
+              const maxY = Math.max(start.y, end.y);
+              const obsMaxX = obs.x + obs.width;
+              const obsMaxY = obs.y + obs.height;
+              return !(maxX < obs.x || minX > obsMaxX || maxY < obs.y || minY > obsMaxY);
+            });
+            if (intersections.length > 0) {
+              console.log(`[STRAIGHT-DEBUG:${id}] ⚠️  STRAIGHT LINE INTERSECTS ${intersections.length} obstacle(s):`, intersections.map(o => o.id));
+            } else {
+              console.log(`[STRAIGHT-DEBUG:${id}] ✅ Straight line does NOT intersect obstacles (libavoid thinks it's valid)`);
+            }
+          }
+          
+          // Log routing options
+          console.log(`[STRAIGHT-DEBUG:${id}] ⚙️  ROUTING: type=orthogonal (forced), buffer=${spacing.toFixed(1)}px, hateCrossings=${!!libavoidOptions?.hateCrossings}, nudgeOrth=${!!libavoidOptions?.nudgeOrthSegments}, nudgeShared=${!!libavoidOptions?.nudgeSharedPaths}, nudgeColinear=${!!libavoidOptions?.nudgeTouchingColinear}, sharedPathPenalty=${safeNumber(libavoidOptions?.sharedPathPenalty, 200)}`);
         }
 
         const rawPathForLog = pathPoints.map((point) => ({
@@ -688,6 +1104,35 @@ const StepEdge: React.FC<EdgeProps> = ({
 
         if (finalPoints.length === 1) {
           finalPoints.push(targetPoint);
+        }
+        
+        // Debug comparison for moving edges
+        if (isMovingEdge) {
+          const renderedSegs = finalPoints.length - 1;
+          const libavoidSegs = pathPoints.length - 1;
+          console.log(`[STRAIGHT-DEBUG:${id}] 🎨 RENDERED: ${finalPoints.length} points, ${renderedSegs} segments`);
+          if (finalPoints.length > 0 && finalPoints.length <= 3) {
+            console.log(`[STRAIGHT-DEBUG:${id}]   Points:`, finalPoints.map(p => `(${p.x.toFixed(1)},${p.y.toFixed(1)})`).join(' → '));
+          }
+          if (libavoidSegs > renderedSegs) {
+            console.log(`[STRAIGHT-DEBUG:${id}] ⚠️  SIMPLIFICATION: ${libavoidSegs} → ${renderedSegs} segments (lost ${libavoidSegs - renderedSegs})`);
+          } else if (libavoidSegs === renderedSegs) {
+            console.log(`[STRAIGHT-DEBUG:${id}] ✅ No simplification: ${renderedSegs} segments`);
+          }
+        }
+        
+        // Store libavoid path in window for console comparison (for ALL edges)
+        if (typeof window !== 'undefined') {
+          if (!(window as any).__edgeLibavoidPaths) {
+            (window as any).__edgeLibavoidPaths = new Map();
+          }
+          (window as any).__edgeLibavoidPaths.set(id, {
+            libavoid: pathPoints,
+            rendered: finalPoints,
+            source,
+            target,
+            timestamp: Date.now()
+          });
         }
 
         const obstacles = obstacleRects
@@ -728,6 +1173,7 @@ const StepEdge: React.FC<EdgeProps> = ({
           const bendPoints = finalPoints.slice(1, -1);
           const debugPayload = {
             router: 'libavoid-js',
+            rawPath: pathPoints, // Original libavoid path before any processing
             rawPolyline: rawPathForLog,
             pathPoints: finalPoints,
             obstacles,
@@ -834,6 +1280,10 @@ const StepEdge: React.FC<EdgeProps> = ({
 
     return () => {
       cancelled = true;
+      // Clean up coordinator callback
+      if (coordinatorCallbackRef.current) {
+        coordinatorCallbackRef.current = null;
+      }
     };
   }, [
     id,
@@ -843,8 +1293,11 @@ const StepEdge: React.FC<EdgeProps> = ({
     sourceY,
     targetX,
     targetY,
+    coordinatorPathPoints, // Re-run when route from coordinator is ready
     edgeData?.obstacleMargin,
     edgeData?.rerouteKey,
+    edgeData?.staticObstacleIds, // Re-route when obstacles are first configured
+    edgeData?.staticObstacles, // Re-route when obstacle positions change
     obstacleSignature,
     sourcePosition,
     targetPosition,
@@ -855,11 +1308,203 @@ const StepEdge: React.FC<EdgeProps> = ({
     edgeCount, // Re-route when edges are added/removed (for port spacing)
   ]);
 
+  // Step 4: Check for routes when batch completes (deferred route application)
+  // This is a separate useEffect at component level (not nested)
+  useEffect(() => {
+    const coordinator = getBatchRoutingCoordinator();
+    if (coordinator.isBatchComplete()) {
+      const route = coordinator.getRoute(id);
+      if (route && route.length > 0 && !coordinatorPathPoints) {
+        setCoordinatorPathPoints(route);
+      }
+    }
+  }, [id, coordinatorPathPoints]);
+
   useEffect(() => {
     if (edgeData && debugInfo) {
       edgeData._elkDebug = debugInfo;
+      edgeData.debugInfo = debugInfo; // Also store as debugInfo for browser console access
     }
   }, [edgeData, debugInfo]);
+
+  // Set up console function for comparing edges when they line up
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).compareEdges = function(edgeId1: string, edgeId2: string) {
+        console.log(`\n🔍 COMPARING EDGES: ${edgeId1} vs ${edgeId2}`);
+        console.log('═'.repeat(80));
+        
+        const paths = (window as any).__edgeLibavoidPaths;
+        if (!paths) {
+          console.log('❌ No edge paths stored. Edges may not have routed yet.');
+          return;
+        }
+        
+        const edge1 = paths.get(edgeId1);
+        const edge2 = paths.get(edgeId2);
+        
+        if (!edge1 || !edge2) {
+          console.log(`❌ One or both edges not found. Available:`, Array.from(paths.keys()));
+          return;
+        }
+        
+        console.log(`\n📊 EDGE 1 (${edgeId1}):`);
+        console.log(`  Source: ${edge1.source} → Target: ${edge1.target}`);
+        console.log(`  Libavoid points: ${edge1.libavoid.length}`);
+        console.log(`  Libavoid path:`, edge1.libavoid.map((p: Point) => `(${p.x.toFixed(1)},${p.y.toFixed(1)})`).join(' → '));
+        console.log(`  Rendered points: ${edge1.rendered.length}`);
+        console.log(`  Rendered path:`, edge1.rendered.map((p: Point) => `(${p.x.toFixed(1)},${p.y.toFixed(1)})`).join(' → '));
+        
+        console.log(`\n📊 EDGE 2 (${edgeId2}):`);
+        console.log(`  Source: ${edge2.source} → Target: ${edge2.target}`);
+        console.log(`  Libavoid points: ${edge2.libavoid.length}`);
+        console.log(`  Libavoid path:`, edge2.libavoid.map((p: Point) => `(${p.x.toFixed(1)},${p.y.toFixed(1)})`).join(' → '));
+        console.log(`  Rendered points: ${edge2.rendered.length}`);
+        console.log(`  Rendered path:`, edge2.rendered.map((p: Point) => `(${p.x.toFixed(1)},${p.y.toFixed(1)})`).join(' → '));
+        
+        // Check if paths are identical or overlapping
+        console.log(`\n⚖️  COMPARISON:`);
+        
+        // Compare libavoid paths
+        const libavoidSame = edge1.libavoid.length === edge2.libavoid.length &&
+          edge1.libavoid.every((p: Point, i: number) => {
+            const p2 = edge2.libavoid[i];
+            return p2 && Math.abs(p.x - p2.x) < 0.1 && Math.abs(p.y - p2.y) < 0.1;
+          });
+        
+        // Compare rendered paths
+        const renderedSame = edge1.rendered.length === edge2.rendered.length &&
+          edge1.rendered.every((p: Point, i: number) => {
+            const p2 = edge2.rendered[i];
+            return p2 && Math.abs(p.x - p2.x) < 0.1 && Math.abs(p.y - p2.y) < 0.1;
+          });
+        
+        // Check for parallel segments (same Y for horizontal, same X for vertical)
+        const parallelSegments: Array<{edge: string, seg: number, type: string, coord: number}> = [];
+        edge1.rendered.forEach((p: Point, i: number) => {
+          if (i < edge1.rendered.length - 1) {
+            const next = edge1.rendered[i + 1];
+            const isHorizontal = Math.abs(p.y - next.y) < 0.1;
+            const isVertical = Math.abs(p.x - next.x) < 0.1;
+            if (isHorizontal) parallelSegments.push({edge: edgeId1, seg: i, type: 'H', coord: p.y});
+            if (isVertical) parallelSegments.push({edge: edgeId1, seg: i, type: 'V', coord: p.x});
+          }
+        });
+        edge2.rendered.forEach((p: Point, i: number) => {
+          if (i < edge2.rendered.length - 1) {
+            const next = edge2.rendered[i + 1];
+            const isHorizontal = Math.abs(p.y - next.y) < 0.1;
+            const isVertical = Math.abs(p.x - next.x) < 0.1;
+            if (isHorizontal) parallelSegments.push({edge: edgeId2, seg: i, type: 'H', coord: p.y});
+            if (isVertical) parallelSegments.push({edge: edgeId2, seg: i, type: 'V', coord: p.x});
+          }
+        });
+        
+        // Find overlapping parallel segments
+        const overlapping: Array<{type: string, coord: number, edges: string[]}> = [];
+        parallelSegments.forEach(seg1 => {
+          parallelSegments.forEach(seg2 => {
+            if (seg1.edge !== seg2.edge && seg1.type === seg2.type && Math.abs(seg1.coord - seg2.coord) < 0.1) {
+              const existing = overlapping.find(o => o.type === seg1.type && Math.abs(o.coord - seg1.coord) < 0.1);
+              if (existing) {
+                if (!existing.edges.includes(seg1.edge)) existing.edges.push(seg1.edge);
+                if (!existing.edges.includes(seg2.edge)) existing.edges.push(seg2.edge);
+              } else {
+                overlapping.push({type: seg1.type, coord: seg1.coord, edges: [seg1.edge, seg2.edge]});
+              }
+            }
+          });
+        });
+        
+        if (libavoidSame) {
+          console.log(`  🔥 ROUTING PROBLEM: Libavoid returned IDENTICAL paths for both edges!`);
+        } else {
+          console.log(`  ✅ Libavoid paths are different`);
+        }
+        
+        if (renderedSame) {
+          console.log(`  🔥 RENDERING PROBLEM: Rendered paths are IDENTICAL (but libavoid was different)`);
+        } else {
+          console.log(`  ✅ Rendered paths are different`);
+        }
+        
+        if (overlapping.length > 0) {
+          console.log(`  ⚠️  PARALLEL OVERLAP DETECTED: ${overlapping.length} segment(s) at same coordinates:`);
+          overlapping.forEach(overlap => {
+            console.log(`    ${overlap.type} segment at ${overlap.coord.toFixed(1)}: edges ${overlap.edges.join(', ')}`);
+          });
+          console.log(`  💡 This is a ROUTING problem - libavoid should space these apart`);
+        } else if (!libavoidSame && !renderedSame) {
+          console.log(`  ✅ No overlapping segments detected`);
+        }
+        
+        console.log('\n' + '═'.repeat(80));
+        
+        return {
+          libavoidSame,
+          renderedSame,
+          overlapping,
+          edge1,
+          edge2
+        };
+      };
+      
+      (window as any).listAllEdgePaths = function() {
+        const paths = (window as any).__edgeLibavoidPaths;
+        if (!paths) {
+          console.log('No edge paths stored');
+          return;
+        }
+        console.log(`\n📋 ALL STORED EDGE PATHS (${paths.size} edges):`);
+        paths.forEach((data: any, id: string) => {
+          console.log(`  ${id}: ${data.source} → ${data.target} (${data.libavoid.length} libavoid points, ${data.rendered.length} rendered points)`);
+        });
+      };
+      
+      (window as any).__edgeSanity = function(edgeId: string) {
+        const diagnostics = (window as any).__edgeDiagnostics;
+        if (!diagnostics) {
+          console.log('❌ No edge diagnostics available. Edges may not have routed yet.');
+          return null;
+        }
+        
+        const diag = diagnostics.get(edgeId);
+        if (!diag) {
+          console.log(`❌ Edge ${edgeId} not found in diagnostics. Available:`, Array.from(diagnostics.keys()));
+          return null;
+        }
+        
+        console.log(`\n🔍 EDGE SANITY CHECK: ${edgeId}`);
+        console.log('═'.repeat(80));
+        console.log(`Source: ${diag.source} @ (${diag.srcNodeRect.x},${diag.srcNodeRect.y}) ${diag.srcNodeRect.width}x${diag.srcNodeRect.height}`);
+        console.log(`Target: ${diag.target} @ (${diag.tgtNodeRect.x},${diag.tgtNodeRect.y}) ${diag.tgtNodeRect.width}x${diag.tgtNodeRect.height}`);
+        console.log(`Effective positions: src=${diag.effectiveSourcePosition}, tgt=${diag.effectiveTargetPosition}`);
+        console.log(`\n📍 PINS:`);
+        console.log(`  Source pin: (${diag.srcPin.x.toFixed(1)},${diag.srcPin.y.toFixed(1)}) [${diag.srcPinOnBoundary ? '✅ ON BOUNDARY' : '❌ NOT ON BOUNDARY'}]`);
+        console.log(`  Target pin: (${diag.tgtPin.x.toFixed(1)},${diag.tgtPin.y.toFixed(1)})`);
+        console.log(`\n🛤️  ROUTE (${diag.routePoints.length} points):`);
+        diag.routePoints.forEach((p: Point, i: number) => {
+          console.log(`  [${i}] (${p.x.toFixed(1)},${p.y.toFixed(1)})`);
+        });
+        console.log(`\n✅ CHECKS:`);
+        console.log(`  Source pin on boundary: ${diag.srcPinOnBoundary ? '✅ YES' : '❌ NO'}`);
+        console.log(`  First point matches pin: ${diag.srcPinMatches ? '✅ YES' : '❌ NO'}`);
+        console.log(`  First segment exits source: ${diag.firstSegmentExits ? '✅ YES' : '❌ NO'}`);
+        if (diag.issues.length > 0) {
+          console.log(`\n⚠️  ISSUES DETECTED:`);
+          diag.issues.forEach((issue: string) => console.log(`  - ${issue}`));
+    } else {
+          console.log(`\n✅ All checks passed!`);
+        }
+        console.log('═'.repeat(80));
+        
+        return diag;
+      };
+      
+      // Enable diagnostics for all edges (can be toggled)
+      (window as any).__enableEdgeDiagnostics = true;
+    }
+  }, []);
 
   const edgeLabel = edgeData?.label;
   const hasRoutingIssue = routingStatus !== 'ok';

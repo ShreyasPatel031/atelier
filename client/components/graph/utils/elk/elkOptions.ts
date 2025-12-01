@@ -41,4 +41,7 @@ export const NON_ROOT_DEFAULT_OPTIONS = {
     "edgeLabels.placement": "CENTER",
     "elk.edgeLabels.inline": true,
   }
-}; 
+};
+
+// Frame padding for group/section frames (used in ScopedLayoutRunner)
+export const GROUP_FRAME_PADDING = 30; 

@@ -138,6 +138,77 @@ const findCommonAncestor = (
 };
 
 /**
+ * Find Lowest Common Group (LCG) for N nodes.
+ * Generalizes findCommonAncestor to work with any number of nodes.
+ * Uses existing traversal approach - unoptimized but works.
+ * 
+ * Key semantic: LCG is the PARENT container that contains all selected items,
+ * never one of the selected items itself (even if it's a group).
+ * 
+ * @param graph - The root graph node
+ * @param ids - Array of node IDs to find LCG for
+ * @returns The lowest common group node, or null if not found
+ */
+export const findLCG = (
+  graph: ElkGraphNode,
+  ids: NodeID[]
+): ElkGraphNode | null => {
+  // Edge case: empty array
+  if (ids.length === 0) {
+    return null;
+  }
+
+  // Deduplicate IDs to handle duplicate selections
+  const uniqueIds = Array.from(new Set(ids));
+
+  // Edge case: single unique node - return its parent (or root if no parent)
+  if (uniqueIds.length === 1) {
+    const node = findNodeById(graph, uniqueIds[0]);
+    if (!node) return null;
+    const parent = findParentOfNode(graph, uniqueIds[0]);
+    return parent || graph;
+  }
+
+  // For 2+ nodes: get paths for all nodes
+  const paths = uniqueIds
+    .map(id => getPathToNode(graph, id))
+    .filter((path): path is ElkGraphNode[] => path !== null);
+
+  // If any node not found, return null
+  if (paths.length !== uniqueIds.length) {
+    return null;
+  }
+
+  // Find longest common prefix across all paths
+  if (paths.length === 0) {
+    return null;
+  }
+
+  let common: ElkGraphNode | null = null;
+  const minLength = Math.min(...paths.map(p => p.length));
+
+  for (let i = 0; i < minLength; i++) {
+    const firstId = paths[0][i].id;
+    // Check if all paths have the same node at this depth
+    if (paths.every(p => p[i].id === firstId)) {
+      common = paths[0][i];
+    } else {
+      // Paths diverge at this depth, stop here
+      break;
+    }
+  }
+
+  // Critical fix: Check if the common ancestor is one of the selected items
+  // If so, return its parent instead (LCG should be PARENT of selection, not part of it)
+  if (common && uniqueIds.includes(common.id)) {
+    const parent = findParentOfNode(graph, common.id);
+    return parent || graph;
+  }
+
+  return common;
+};
+
+/**
  * Used to hold edge arrays during traversal.
  */
 interface EdgeCollection {
@@ -637,6 +708,97 @@ export const removeGroup = (groupId: NodeID, graph: RawGraph): RawGraph => {
   console.timeEnd("removeGroup");
   console.groupEnd();
   return graph;
+};
+
+/**
+ * Creates a wrapper section for multi-select auto-layout (CP1 Wave 2)
+ * 
+ * Finds LCG of selection, creates new wrapper under LCG,
+ * reparents ONLY selected nodes (no closure expansion)
+ * 
+ * @param selectionIds - Node IDs to wrap
+ * @param graph - Current graph
+ * @returns Updated graph and wrapper ID
+ */
+export const createWrapperSection = (
+  selectionIds: NodeID[], 
+  graph: RawGraph
+): { graph: RawGraph; wrapperId: NodeID } => {
+  if (!graph) {
+    throw new Error('Cannot create wrapper section: graph is null or undefined');
+  }
+  
+  if (selectionIds.length === 0) {
+    throw new Error('Cannot create wrapper section: no nodes selected');
+  }
+  
+  // 1. Find LCG of selection
+  const lcg = findLCG(graph, selectionIds);
+  if (!lcg) {
+    throw new Error('Cannot create wrapper section: no common ancestor found');
+  }
+  
+  // 2. Create wrapper ID
+  const wrapperId = createNodeID(`wrapper-${Date.now()}`);
+  
+  // 3. Create wrapper group node (always FREE mode)
+  const wrapperNode: ElkGraphNode = {
+    id: wrapperId,
+    labels: [{ text: 'Wrapper Section' }],
+    children: [],
+    edges: [],
+    // Phase 3: No longer write mode to Domain - mode will be set in ViewState.layout
+    data: {
+      label: 'Wrapper Section',
+      isGroup: true,
+      groupIcon: 'gcp_system'
+    }
+  };
+  
+  // 4. Deep clone graph to avoid mutations
+  const updatedGraph = JSON.parse(JSON.stringify(graph));
+  const updatedLcg = findNodeById(updatedGraph, lcg.id);
+  if (!updatedLcg || !updatedLcg.children) {
+    throw new Error(`LCG "${lcg.id}" not found in updated graph`);
+  }
+  
+  // 5. Find and move selected nodes into wrapper (reparent only explicit selection)
+  const movedNodeIds: NodeID[] = [];
+  
+  for (const nodeId of selectionIds) {
+    const node = findNodeById(updatedGraph, nodeId);
+    if (!node) {
+      console.warn(`[createWrapperSection] Node "${nodeId}" not found, skipping`);
+      continue;
+    }
+    
+    // Find actual parent and remove from parent
+    const actualParent = findParentOfNode(updatedGraph, nodeId);
+    if (actualParent && actualParent.children) {
+      actualParent.children = actualParent.children.filter(child => child.id !== nodeId);
+      
+      // Add to wrapper
+      if (!wrapperNode.children) wrapperNode.children = [];
+      wrapperNode.children.push(node);
+      movedNodeIds.push(nodeId);
+    }
+  }
+  
+  if (movedNodeIds.length === 0) {
+    throw new Error('No nodes were successfully moved to wrapper section');
+  }
+  
+  // 6. Add wrapper to LCG
+  updatedLcg.children.push(wrapperNode);
+  
+  // 7. Reattach edges for moved subtrees
+  if (movedNodeIds.length > 0) {
+    movedNodeIds
+      .map(id => findNodeById(updatedGraph, id)!)
+      .forEach(subRoot => reattachEdgesForSubtree(subRoot, updatedGraph));
+  }
+  
+  return { graph: updatedGraph, wrapperId };
 };
 
 /**

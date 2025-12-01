@@ -15,7 +15,7 @@ export default function ShareOverlay({
 }) {
   const [copyState, setCopyState] = useState<'idle' | 'copying' | 'success'>('idle');
   
-  if (!state.show) return null;
+  if (!state || !state.show) return null;
   const { url, error, copied } = state;
 
   return (

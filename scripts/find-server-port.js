@@ -9,19 +9,28 @@
 import fetch from 'node-fetch';
 import { spawn } from 'child_process';
 
-const COMMON_PORTS = [3000, 3001, 3002, 3003, 3004, 3005];
+// Check higher ports first (dev server often uses 3004+ when 3000-3003 are in use)
+const COMMON_PORTS = [3004, 3005, 3006, 3007, 3000, 3001, 3002, 3003, 3008, 3009];
 
 async function checkPort(port) {
     try {
-        const response = await fetch(`http://localhost:${port}/api/embed`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: 'test' }),
+        // Try to fetch the root page or canvas page to check if server is running
+        const response = await fetch(`http://localhost:${port}/canvas`, {
+            method: 'GET',
             timeout: 1000
         });
-        return response.ok;
+        return response.ok || response.status === 200;
     } catch (error) {
-        return false;
+        // Also try root path
+        try {
+            const response = await fetch(`http://localhost:${port}/`, {
+                method: 'GET',
+                timeout: 1000
+            });
+            return response.ok || response.status === 200;
+        } catch (e) {
+            return false;
+        }
     }
 }
 

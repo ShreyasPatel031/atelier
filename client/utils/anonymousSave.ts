@@ -6,6 +6,12 @@
 import { Timestamp } from 'firebase/firestore';
 import { generateNameWithFallback } from './naming';
 
+/**
+ * Prefix for embed pending architecture storage keys
+ * Used to store architecture data temporarily during embed-to-canvas transitions
+ */
+export const EMBED_PENDING_ARCH_PREFIX = 'embed_pending_arch_';
+
 export interface AnonymousArchitectureService {
   getArchitectureIdFromUrl(): string | null;
   saveAnonymousArchitecture(name: string, graph: any, userPrompt?: string): Promise<string>;

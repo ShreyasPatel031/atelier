@@ -26,8 +26,11 @@ import {
 import { RawGraph, LayoutGraph } from "../components/graph/types/index";
 import { ensureIds } from "../components/graph/utils/elk/ids";
 import { structuralHash } from "../components/graph/utils/elk/structuralHash";
-import { processLayoutedGraph } from "../components/graph/utils/toReactFlow";
-// Removed custom waypoint calculator import
+import { toReactFlowWithViewState } from "../core/renderer/ReactFlowAdapter";
+// Rendering is handled by client/core modules, not hooks
+import type { ViewState } from "../core/viewstate/ViewState";
+// triggerRestorationRender used only for restoration/resetCanvas, not user actions
+import { migrateModeDomainToViewState, syncViewStateLayoutWithGraph } from "../core/viewstate/modeHelpers";
 
 import {
   addNode, deleteNode, moveNode,
@@ -51,9 +54,10 @@ const elk = new ELK();
 /* -------------------------------------------------- */
 /* 🔹 2.  hook                                         */
 /* -------------------------------------------------- */
-export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTool: string = 'select') {
+export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTool: string = 'arrow') {
   /* 1) raw‐graph state */
-  const [rawGraph, setRawGraph] = useState<RawGraph>(initialRaw);
+  const [rawGraph, setRawGraphState] = useState<RawGraph>(initialRaw);
+  const rawGraphRef = useRef<RawGraph>(initialRaw);
   
   /* 2) layouted‐graph state */
   const [layoutGraph, setLayoutGraph] = useState<LayoutGraph|null>(null);
@@ -76,11 +80,21 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
   const [layoutVersion, incLayoutVersion] = useState(0);
   
   /* 4) view-state (authoritative geometry, prep for future phases) */
-  const viewStateRef = useRef<{ node: Record<string, { x: number; y: number; w: number; h: number }>; group: Record<string, { x: number; y: number; w: number; h: number }>; edge: Record<string, { waypoints?: Array<{ x: number; y: number }> }> }>({
+  const viewStateRef = useRef<ViewState>({
     node: {},
     group: {},
     edge: {},
   });
+  const lastElkReasonRef = useRef<string | null>(null);
+  const cloneViewState = (value: any) => {
+    if (!value) return value;
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch (error) {
+      console.warn('⚠️ [useElkToReactflow] Failed to clone viewState snapshot:', error);
+      return value;
+    }
+  };
   
   /* -------------------------------------------------- */
   /* 🔹 3. mutate helper (sync hash update)              */
@@ -105,8 +119,22 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
       rest = args.slice(2);
     }
     
-    setRawGraph(prev => {
+    setRawGraphState(prev => {
+      if (!prev) {
+        throw new Error(`Cannot mutate graph: graph state is null or undefined`);
+      }
       const next = fn(...rest, prev) as RawGraph;
+
+      let nextViewState = next?.viewState ? cloneViewState(next.viewState) : undefined;
+      if (!nextViewState && viewStateRef.current && (Object.keys(viewStateRef.current.node || {}).length || Object.keys(viewStateRef.current.group || {}).length)) {
+        nextViewState = cloneViewState(viewStateRef.current);
+      }
+
+      if (nextViewState) {
+        viewStateRef.current = nextViewState ?? { node: {}, group: {}, edge: {} };
+      }
+
+      const nextWithViewState = nextViewState ? { ...next, viewState: nextViewState } : next;
       
       // Store mutation context for the layout effect to use
       lastMutationRef.current = {
@@ -115,8 +143,8 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
         timestamp: Date.now()
       };
       
-      hashRef.current = structuralHash(next);
-      return next;
+      hashRef.current = structuralHash(nextWithViewState);
+      return nextWithViewState;
     });
   }, []);
   
@@ -132,24 +160,39 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
     return addNode(nodeName, parentId, graph, data);
   };
   
+  // groupNodes expects: (nodeIds, parentId, groupId, graph, style?)
+  // mutate calls: (nodeIds, parentId, groupId, style?, graph)
+  const groupNodesWrapper = (nodeIds: any[], parentId: string, groupId: string, style: any, graph: RawGraph) => {
+    // Filter out null/undefined/invalid node IDs
+    const validNodeIds = nodeIds.filter((id): id is string => {
+      if (!id || typeof id !== 'string') {
+        console.warn('[groupNodesWrapper] Filtering out invalid node ID:', id);
+        return false;
+      }
+      return true;
+    });
+    
+    if (validNodeIds.length === 0) {
+      throw new Error('Cannot create group: no valid node IDs provided');
+    }
+    
+    // Ensure groupId is valid
+    const validGroupId = groupId || `group-${Date.now()}`;
+    
+    return groupNodes(validNodeIds, parentId, validGroupId, graph, style);
+  };
+  
   // deleteNode expects: (nodeId, graph)
   // mutate calls: (nodeId, graph) - already correct
   
   // addEdge expects: (edgeId, sourceId, targetId, labelOrGraph?, sourceHandle?, targetHandle?, graph?)
   // mutate calls: (edgeId, sourceId, targetId, label?, sourceHandle?, targetHandle?, graph)
   // Create a wrapper that checks for duplicate edge IDs before calling addEdge
-  const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, label: any, sourceHandle: any, targetHandle: any, graph: RawGraph) => {
-    // Check if edge already exists BEFORE calling addEdge
-    // This prevents duplicate edge creation even if mutate is called multiple times
-    const exists = edgeIdExists(graph, edgeId);
-    
-    if (exists) {
-      // Edge already exists, return graph unchanged (idempotent)
+const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, label: any, sourceHandle: any, targetHandle: any, graph: RawGraph) => {
+    if (edgeIdExists(graph, edgeId)) {
       return graph;
     }
-    
-    const result = addEdge(edgeId, sourceId, targetId, label, sourceHandle, targetHandle, graph);
-    return result;
+    return addEdge(edgeId, sourceId, targetId, label, sourceHandle, targetHandle, graph);
   };
   
   /* -------------------------------------------------- */
@@ -162,7 +205,7 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
     handleMoveNode    : (...a: any[]) => mutate(moveNode,      ...a),
     handleAddEdge     : (...a: any[]) => mutate(addEdgeWrapper, ...a), // Use wrapper to prevent duplicates
     handleDeleteEdge  : (...a: any[]) => mutate(deleteEdge,    ...a),
-    handleGroupNodes  : (...a: any[]) => mutate(groupNodes,    ...a),
+    handleGroupNodes  : (...a: any[]) => mutate(groupNodesWrapper,    ...a),
     handleRemoveGroup : (...a: any[]) => mutate(removeGroup,   ...a),
     handleBatchUpdate : (...a: any[]) => mutate(batchUpdate,   ...a),
     // New option-aware variants (ignored for now)
@@ -207,155 +250,145 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
   );
   
   /* -------------------------------------------------- */
+  /* 🔹 2b. safe raw graph setter                        */
+  /* -------------------------------------------------- */
+  const setRawGraph = useCallback((
+    next: RawGraph | ((prev: RawGraph) => RawGraph),
+    overrideSource?: 'ai' | 'user' | 'free-structural'
+  ) => {
+    setRawGraphState(prev => {
+      let resolved = typeof next === 'function'
+        ? (next as (p: RawGraph) => RawGraph)(prev)
+        : next;
+
+      // FREE-STRUCTURAL: Orchestrator manages ViewState directly, don't touch it here
+      // This prevents race conditions where ViewState is cloned mid-update
+      if (overrideSource === 'free-structural') {
+        // Just update the graph, don't touch ViewState
+        // Orchestrator handles ViewState and rendering directly
+        console.log('[🔍 ELK-HOOK] setRawGraph - FREE mode, skipping ViewState handling', {
+          graphChildren: resolved.children?.length || 0,
+          viewStateNodeCount: Object.keys(viewStateRef.current?.node || {}).length,
+          viewStateNodeIds: Object.keys(viewStateRef.current?.node || {})
+        });
+      } else if (overrideSource !== 'ai') {
+        // CRITICAL: For AI-generated graphs, don't attach viewState even if it exists in ref
+        // This ensures ELK runs for AI architectures
+        if (resolved && typeof resolved === 'object' && 'viewState' in resolved && resolved.viewState) {
+          const incomingViewState = resolved.viewState;
+          const prevViewState = viewStateRef.current;
+          // CRITICAL BUG FIX: Don't reset to empty ViewState if clone fails!
+          // Fallback to existing ViewState to prevent corruption
+          viewStateRef.current = cloneViewState(incomingViewState) ?? prevViewState ?? { node: {}, group: {}, edge: {} };
+          
+          // Only log if ViewState changed significantly (for refresh debugging)
+          const prevNodeCount = Object.keys(prevViewState?.node || {}).length;
+          const newNodeCount = Object.keys(incomingViewState.node || {}).length;
+          // ViewState changed - no logging needed
+        } else if (viewStateRef.current && Object.keys(viewStateRef.current.node || {}).length > 0) {
+          // CRITICAL: Use deep copy to preserve nested modes (shallow copy loses them!)
+          const deepCopy = JSON.parse(JSON.stringify(resolved));
+          deepCopy.viewState = cloneViewState(viewStateRef.current);
+          resolved = deepCopy;
+          
+          console.log('[🔍 ELK-HOOK] setRawGraph - attached ViewState to graph:', {
+            graphChildren: resolved.children?.length || 0,
+            viewStateNodeCount: Object.keys(deepCopy.viewState?.node || {}).length,
+            viewStateNodeIds: Object.keys(deepCopy.viewState?.node || {})
+          });
+        }
+      } else {
+        // For AI graphs, ensure viewState is removed
+        if (resolved && typeof resolved === 'object' && 'viewState' in resolved) {
+          delete (resolved as any).viewState;
+        }
+      }
+
+      const viewStateNodeCount = resolved?.viewState?.node ? Object.keys(resolved.viewState.node).length : 0;
+      const viewStateGroupCount = resolved?.viewState?.group ? Object.keys(resolved.viewState.group).length : 0;
+      const hasViewStateGeometry = (viewStateNodeCount + viewStateGroupCount) > 0;
+
+      // If overrideSource is provided, use it (this is the authoritative source)
+      // Otherwise, infer from viewState: if viewState exists, it's user-authored; if not, it's AI-generated
+      const inferredSource = hasViewStateGeometry ? 'user' : 'ai';
+      const finalSource = overrideSource ?? inferredSource;
+
+
+      lastMutationRef.current = {
+        source: finalSource,
+        scopeId: 'external-setRawGraph',
+        timestamp: Date.now(),
+      };
+
+      hashRef.current = structuralHash(resolved);
+      
+      // FREE mode should NOT trigger any restoration rendering from this hook
+      // All rendering in FREE mode is handled by the Orchestrator directly
+      
+      return resolved;
+    });
+  }, []);
+
+  /* -------------------------------------------------- */
+  /* 🔹 4.5 ELK-only trigger (no orchestration)        */
+  /* -------------------------------------------------- */
+  const triggerRender = useCallback(() => {
+    // This trigger is ONLY for AI/LOCK mode that needs ELK
+    // FREE mode should NEVER use this trigger
+    incLayoutVersion(v => v + 1);
+  }, []);
+  
+  // Keep rawGraphRef in sync
+  useEffect(() => {
+    rawGraphRef.current = rawGraph;
+  }, [rawGraph]);
+
+  /* -------------------------------------------------- */
   /* 🔹 5. layout side-effect                           */
   /* -------------------------------------------------- */
   useEffect(() => {
     const mutation = lastMutationRef.current;
     const currentHash = hashRef.current;
-    
-    if (!rawGraph) return;
-    
-    // Skip processing if rawGraph hash hasn't changed
-    // Only process when the graph structure actually changes, not when selectedTool changes
-    if (currentHash === previousHashRef.current) {
+
+    if (!rawGraph) {
       return;
     }
+    
+    // For AI mutations, always run ELK even if hash hasn't changed (AI might generate same structure)
+    // For user mutations, skip if hash unchanged (prevents unnecessary ELK runs)
+    const isAIMutation = mutation?.source === 'ai';
+    const hashUnchanged = currentHash === previousHashRef.current;
+    
+    
+    if (!isAIMutation && hashUnchanged) {
+      return;
+    }
+    
     // Update ref to track current hash
+    const previousHash = previousHashRef.current;
     previousHashRef.current = currentHash;
     
-    // 🔥 POLICY GATE: Decide if ELK should run based on source and mode
-    const shouldRunELK = (() => {
-      if (!mutation) {
-        return true; // Initial load or unknown trigger
-      }
-      
-      if (mutation.source === 'ai') {
-        return true; // AI always triggers ELK
-      }
-      
-      if (mutation.source === 'user') {
-        return false; // User edits in FREE mode = no ELK
-      }
-      
-      return false;
-    })();
+    // **THIS HOOK IS ONLY FOR AI/LOCK MODE WITH ELK**
+    // FREE mode and restoration should NEVER reach this hook
     
-    
-    if (!shouldRunELK) {
-      // User drew a node in FREE mode - create ReactFlow nodes directly from domain + ViewState
-      try {
-        // Create ReactFlow nodes from domain graph children using ViewState positions
-        const rfNodes: Node[] = [];
-        const rfEdges: Edge[] = [];
-        
-        // Determine which node is newly created by finding the node ID that matches the mutation pattern
-        let newlyCreatedNodeId: string | null = null;
-        
-        if (mutation && Date.now() - mutation.timestamp < 100) {
-          // Extract timestamp from the node ID that was just created
-          const mutationTime = mutation.timestamp;
-          newlyCreatedNodeId = (rawGraph.children || []).find(node => {
-            // Node IDs are in format: user-node-{timestamp}
-            const idTimestamp = parseInt(node.id.split('-').pop() || '0');
-            return Math.abs(idTimestamp - mutationTime) < 10; // Allow small timing difference
-          })?.id || null;
-        }
-          
-
-        // Process nodes from domain graph
-        (rawGraph.children || []).forEach((domainNode: any) => {
-          const viewState = viewStateRef.current?.node?.[domainNode.id];
-          const position = viewState ? { x: viewState.x, y: viewState.y } : { x: 0, y: 0 };
-          
-          
-          // Always select newly created nodes (tool will switch to 'select' after creation)
-          const isNewlyCreated = domainNode.id === newlyCreatedNodeId;
-          const shouldSelect = isNewlyCreated;
-          
-          
-          const rfNode: Node = {
-            id: domainNode.id,
-            type: 'custom',
-            position,
-            data: {
-              label: domainNode.labels?.[0]?.text || domainNode.id,
-              width: 96, // Default node width
-              height: 96, // Default node height
-              isEditing: domainNode.data?.label === '', // Auto-edit if empty label
-              ...domainNode.data
-            },
-            zIndex: CANVAS_STYLES.zIndex.nodes,
-            selected: shouldSelect, // Only select if tool allows it
-            draggable: true
-          };
-          
-          
-          rfNodes.push(rfNode);
-        });
-        
-        // Process edges from domain graph
-        if (rawGraph.edges && rawGraph.edges.length > 0) {
-          rawGraph.edges.forEach((edge: any) => {
-            
-            // Create ReactFlow edge
-            edge.sources?.forEach((sourceId: string) => {
-              edge.targets?.forEach((targetId: string) => {
-                // Find source and target nodes to store node info for waypoint calculation
-                const sourceNode = rfNodes.find(n => n.id === sourceId);
-                const targetNode = rfNodes.find(n => n.id === targetId);
-                
-                const rfEdge: Edge = {
-                  id: edge.id,
-                  source: sourceId,
-                  target: targetId,
-                  sourceHandle: edge.data?.sourceHandle,
-                  targetHandle: edge.data?.targetHandle,
-                  type: 'step',
-                  zIndex: CANVAS_STYLES.zIndex.edges,
-                  data: edge.data || {}
-                };
-                rfEdges.push(rfEdge);
-              });
-            });
-          });
-        }
-        
-        setNodes(rfNodes);
-        // CRITICAL: Preserve existing edges when updating - merge with existing edges
-        // This prevents edges from being lost when onSelectionChange updates styling
-        setEdges((currentEdges) => {
-          // Create a map of edges from the graph (source of truth)
-          const graphEdgeMap = new Map(rfEdges.map(e => [e.id, e]));
-          
-          // Merge existing edges with graph edges, preserving styling
-          const existingEdgeMap = new Map(currentEdges.map(e => [e.id, e]));
-          const mergedEdges = rfEdges.map(newEdge => {
-            const existingEdge = existingEdgeMap.get(newEdge.id);
-            if (existingEdge) {
-              // Preserve styling from existing edge, but update source/target/handles
-              return {
-                ...existingEdge,
-                ...newEdge,
-                style: existingEdge.style, // Preserve styling
-              };
-            }
-            return newEdge;
-          });
-          
-          return mergedEdges;
-        });
-        
-        // Skip fitView for user-created nodes in FREE mode (they're placed at cursor)
-        shouldSkipFitViewRef.current = true;
-        
-        incLayoutVersion(v => v + 1);
-        
-      } catch (error) {
-        console.error('[FREE Mode] Failed to create ReactFlow elements:', error);
-      }
-      
+    if (mutation?.source === 'user' || mutation?.source === 'restore') {
+      // FREE mode or restoration - should not be here, return immediately
+      console.log('🔍 [ELK] FREE/restore mode detected - should not be in ELK hook, skipping entirely');
       return;
     }
+    
+    // Only AI-generated graphs without ViewState should reach here
+      const hasViewStateGeometry = 
+        (Object.keys(viewStateRef.current?.node || {}).length > 0) ||
+        (Object.keys(viewStateRef.current?.group || {}).length > 0);
+      
+    if (hasViewStateGeometry && !mutation) {
+      // ViewState exists on initial load - skip ELK
+      console.log('🔍 [ELK] Skipping - ViewState exists (FREE mode)');
+      return;
+    }
+    
+    console.log('🔍 [ELK] Running layout for AI-generated graph');
     
     /* cancel any in-flight run */
     abortRef.current?.abort();
@@ -366,6 +399,7 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
     
     (async () => {
       try {
+        
         // Clear any previous layout errors
         setLayoutError(null);
         
@@ -412,13 +446,28 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
           throw new Error("Graph validation failed - invalid structure detected");
         }
         
-        // 1) inject IDs + elkOptions onto a clone of rawGraph
+        // 1) Extract mode map from rawGraph BEFORE ELK (preserve mode field)
+        // Phase 4: Migrate and sync ViewState.layout with graph structure
+        if (!viewStateRef.current.layout || Object.keys(viewStateRef.current.layout).length === 0) {
+          console.log('[🔀 MODE MIGRATION] Migrating modes from Domain to ViewState');
+          viewStateRef.current = migrateModeDomainToViewState(rawGraph, viewStateRef.current);
+        } else {
+          // Sync to ensure all groups have modes (for newly created groups)
+          viewStateRef.current = syncViewStateLayoutWithGraph(rawGraph, viewStateRef.current);
+        }
+        
+        // 2) inject IDs + elkOptions onto a clone of rawGraph
         const prepared = ensureIds(structuredClone(rawGraph));
         
-        
-        // 2) run ELK
+        // 3) run ELK (mode no longer in ELK input/output - stays in ViewState)
         const layout = await elk.layout(prepared);
         
+        // Critical: Check if ELK returned zero positions - this indicates a layout failure
+        const zeroPosChildren = (layout.children || []).filter((c: any) => (c.x === 0 && c.y === 0));
+        if (zeroPosChildren.length > 0 && zeroPosChildren.length === (layout.children || []).length) {
+          // All nodes at 0,0 - ELK layout failed
+          throw new Error(`ELK layout failed: all ${zeroPosChildren.length} nodes positioned at (0,0). Graph structure may be invalid.`);
+        }
         
         /* stale result? – ignore */
         if (hashAtStart !== hashRef.current) return;
@@ -426,33 +475,138 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
         // 3) store for SVG & RF conversion
         setLayoutGraph(layout as LayoutGraph);
         
-        // 4) convert to ReactFlow nodes/edges
-        const { nodes: rfNodes, edges: rfEdges } =
-          processLayoutedGraph(layout, {
-            width      : NON_ROOT_DEFAULT_OPTIONS.width,
-            height     : 96, // Default node height since NON_ROOT_DEFAULT_OPTIONS.height was removed
-            groupWidth : NON_ROOT_DEFAULT_OPTIONS.width  * 3,
-            groupHeight: 96 * 3, // Use default height * 3
-            padding    : 10
-          });
+        // 4) Ensure ViewState exists - initialize from ELK output ONCE if empty
+        const currentViewState = viewStateRef.current;
+        const hasViewStateGeometry = 
+          (Object.keys(currentViewState?.node || {}).length > 0) ||
+          (Object.keys(currentViewState?.group || {}).length > 0);
         
+        if (!hasViewStateGeometry) {
+          // Initialize ViewState from ELK output ONCE
+          // This is the only time we populate ViewState from ELK
+          const nextNodeState: Record<string, { x: number; y: number; w: number; h: number }> = {};
+          const nextGroupState: Record<string, { x: number; y: number; w: number; h: number }> = {};
+          
+          // Helper to recursively extract geometry from ELK layout
+          const extractGeometry = (elkNode: any, parentX = 0, parentY = 0) => {
+            // Detect groups: has NON-EMPTY children OR has isGroup flag
+            // Note: Empty children array means leaf node, not a group
+            const hasRealChildren = Array.isArray(elkNode.children) && elkNode.children.length > 0;
+            const hasRealEdges = Array.isArray(elkNode.edges) && elkNode.edges.length > 0;
+            const isGroup = 
+              elkNode.data?.isGroup === true || 
+              hasRealChildren ||  // Groups have children with content
+              hasRealEdges;       // Groups have edges to contain
+            
+            // PROBLEM 2 FIX: ELK returns RELATIVE positions, must add parent absolute to get world absolute
+            const elkRelativeX = elkNode.x ?? 0;
+            const elkRelativeY = elkNode.y ?? 0;
+            const absoluteX = elkRelativeX + parentX;  // ✅ FIXED: ELK relative + parent absolute = world absolute
+            const absoluteY = elkRelativeY + parentY;  // ✅ FIXED: ELK relative + parent absolute = world absolute
+            
+            const width = elkNode.width ?? (isGroup ? NON_ROOT_DEFAULT_OPTIONS.width * 3 : NON_ROOT_DEFAULT_OPTIONS.width);
+            const height = elkNode.height ?? (isGroup ? 96 * 3 : 96);
+            
+            const geom = { 
+              x: absoluteX, 
+              y: absoluteY, 
+              w: width, 
+              h: height 
+            };
+            
+            // PROBLEM 2 DEBUGGING: Log ALL groups being written (including scope root children)
+            const isNested = parentX !== 0 || parentY !== 0;
+            if (isGroup) {
+              console.log('[🎯COORD] ELK-CONVERTER - WRITING group to ViewState:', {
+                nodeId: elkNode.id,
+                isScopeRootChild: !isNested,
+                isNested,
+                elkRelative: `${elkRelativeX},${elkRelativeY}`,
+                parentAbsolute: `${parentX},${parentY}`,
+                calculatedAbsolute: `${absoluteX},${absoluteY}`,
+                shouldBeAbsolute: isNested ? `${elkRelativeX + parentX},${elkRelativeY + parentY}` : `${elkRelativeX},${elkRelativeY}`,
+                problem2_detected: isNested && (Math.abs(absoluteX - (elkRelativeX + parentX)) > 1 || Math.abs(absoluteY - (elkRelativeY + parentY)) > 1)
+                  ? '⚠️ PROBLEM 2: ELK relative not added to parent absolute!'
+                  : 'OK',
+                writingToViewState: `${absoluteX},${absoluteY}`,
+              });
+            }
+            
+            if (isGroup) {
+              nextGroupState[elkNode.id] = geom;
+            } else {
+              nextNodeState[elkNode.id] = geom;
+            }
+            
+            // Recursively process children - pass this node's absolute position as parent
+            // Now that absoluteX/Y are correctly calculated, children will use correct parent absolute
+            if (elkNode.children) {
+              elkNode.children.forEach((child: any) => {
+                extractGeometry(child, absoluteX, absoluteY);
+              });
+            }
+          };
+          
+          // Extract geometry from ELK layout
+          if (layout.children) {
+            layout.children.forEach((child: any) => {
+              extractGeometry(child);
+            });
+          }
+          
+          viewStateRef.current = { 
+            node: nextNodeState, 
+            group: nextGroupState, 
+            edge: {} 
+          };
+          
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('🔍 [ViewState] Initialized from ELK output:', {
+              nodeCount: Object.keys(nextNodeState).length,
+              groupCount: Object.keys(nextGroupState).length
+            });
+          }
+        }
+        
+        // 5) Convert to ReactFlow using adapter (reads from ViewState, not ELK)
+        const dimensions = {
+          width: NON_ROOT_DEFAULT_OPTIONS.width,
+          height: 96,
+          groupWidth: NON_ROOT_DEFAULT_OPTIONS.width * 3,
+          groupHeight: 96 * 3,
+          padding: 10
+        };
+        
+        const { nodes: rfNodes, edges: rfEdges } = toReactFlowWithViewState(
+          layout,
+          dimensions,
+          viewStateRef.current,
+          { strictGeometry: true }
+        );
+        
+        // Critical: Check if ReactFlow nodes have zero positions after conversion
+        const zeroPosNodes = rfNodes.filter(n => n.position.x === 0 && n.position.y === 0);
+        if (zeroPosNodes.length > 0 && zeroPosNodes.length === rfNodes.length) {
+          // All nodes at 0,0 - conversion failed
+          throw new Error(`Position conversion failed: all ${zeroPosNodes.length} ReactFlow nodes positioned at (0,0). ELK layout may have failed.`);
+        }
+
+        // 🔍 Minimal debug: ReactFlow positions
+        console.log('🔍 [RF] Converted nodes (ViewState-first):', {
+          total: rfNodes.length,
+          withParent: rfNodes.filter(n => (n as any).parentId).length,
+          sample: rfNodes.slice(0, 3).map(n => ({
+            id: n.id,
+            pos: n.position,
+            parent: (n as any).parentId || 'none',
+            fromViewState: viewStateRef.current.node?.[n.id] || viewStateRef.current.group?.[n.id]
+          }))
+        });
 
         setNodes(rfNodes);
         setEdges(rfEdges);
-
-        // Populate viewStateRef from ELK output (no behavior change)
-        const nextNodeState: Record<string, { x: number; y: number; w: number; h: number }> = {};
-        const nextGroupState: Record<string, { x: number; y: number; w: number; h: number }> = {};
-        for (const n of rfNodes) {
-          const geom = { x: n.position.x, y: n.position.y, w: (n as any).width ?? 0, h: (n as any).height ?? 0 };
-          // Heuristic: treat nodes with type 'group' as groups; others as nodes
-          if ((n as any).type === 'group') {
-            nextGroupState[n.id] = geom;
-          } else {
-            nextNodeState[n.id] = geom;
-          }
-        }
-        viewStateRef.current = { node: nextNodeState, group: nextGroupState, edge: {} };
+        
+        // ViewState is now the source of truth - no backwards population needed
         incLayoutVersion(v => v + 1);
       } catch (e: any) {
         if (e.name !== "AbortError") {
@@ -475,9 +629,9 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
   /* 🔹 6. react-flow helpers                           */
   /* -------------------------------------------------- */
   // Snap-to-grid for interactive moves (dragging etc.)
-  // EXPERIMENT: When nodes are dragged, recalculate edge waypoints for FigJam-style routing
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
+      
       const GRID_SIZE = 16;
       const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
       const snapPos = (p: { x: number; y: number }) => ({ x: snap(p.x), y: snap(p.y) });
@@ -485,44 +639,162 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
       const snappedChanges = changes.map((ch) => {
         if (ch.type === 'position' && (ch as any).position) {
           const pos = (ch as any).position as { x: number; y: number };
-          return { ...ch, position: snapPos(pos) } as NodeChange;
+          const snapped = snapPos(pos);
+          return { ...ch, position: snapped } as NodeChange;
         }
         return ch;
       });
 
-      // Update ReactFlow nodes immediately
       setNodes((nodesState) => {
         const updated = applyNodeChanges(snappedChanges, nodesState);
+
+        const nextViewState = viewStateRef.current
+          ? {
+              node: { ...(viewStateRef.current.node || {}) },
+              group: { ...(viewStateRef.current.group || {}) },
+              edge: { ...(viewStateRef.current.edge || {}) },
+            }
+          : { node: {}, group: {}, edge: {} };
+
+        // CRITICAL FIX: Build a set of node IDs that actually had POSITION changes
+        // Only update ViewState for nodes that had position changes (user dragging)
+        // This prevents other nodes from being affected during drag operations
+        const positionChangedNodeIds = new Set<string>();
+        changes.forEach((ch) => {
+          // Only track position changes - not dimensions, selection, etc.
+          if (ch.type === 'position' && (ch as any).id) {
+            positionChangedNodeIds.add((ch as any).id);
+          }
+        });
         
-        // EXPERIMENT: When nodes are dragged, recalculate edge waypoints without triggering ELK
-        const positionChanges = changes.filter(ch => ch.type === 'position' && (ch as any).position);
-        if (positionChanges.length > 0) {
-          // Recalculate edge waypoints based on new node positions
-          setEdges((currentEdges) => {
-            return currentEdges.map((edge) => {
-              // Find source and target nodes
-              const sourceNode = updated.find(n => n.id === edge.source);
-              const targetNode = updated.find(n => n.id === edge.target);
-              
-              if (!sourceNode || !targetNode) return edge;
-              
-              // Store node info in edge data for StepEdge to use when recalculating waypoints
-              // StepEdge will recalculate waypoints using ReactFlow-provided handle positions (sourceX, sourceY, targetX, targetY)
-              
-              return {
-                ...edge,
-                data: {
-                  ...edge.data,
-                  // Store node info for waypoint recalculation in StepEdge
-                      // Removed node info storage
-                  // Mark as user-edited so we preserve manual waypoints
-                  _userEdited: true,
-                }
+        updated.forEach((node) => {
+          // CRITICAL: Only process nodes that had POSITION changes
+          // Skip nodes that weren't dragged - preserve their ViewState exactly
+          if (!positionChangedNodeIds.has(node.id)) {
+            return; // Skip - this node wasn't dragged
+          }
+          
+          // This node had a position change - process it
+          // Check if parent changed - if so, preserve existing ViewState position
+          const previousNode = nodesState.find(n => n.id === node.id);
+          const parentChanged = previousNode && (previousNode as any).parentId !== (node as any).parentId;
+          
+          // CRITICAL FIX: Don't update ViewState positions during user drags - let InteractiveCanvas 
+          // containment detection handle it. This prevents the position from being recalculated
+          // before containment logic can preserve the absolute coordinates.
+          let geometry;
+          const isChildNode = !!(node as any).parentId;
+          
+          // Handle position changes differently for root nodes vs child nodes
+          if (!parentChanged && !isChildNode) {
+            // ROOT NODE being dragged - skip ViewState update, let containment detection handle it
+            
+            // Preserve existing ViewState position during drag
+            const existingGeom = nextViewState.node[node.id] || nextViewState.group?.[node.id];
+            if (existingGeom) {
+              geometry = {
+                ...existingGeom,
+                w: existingGeom.w ?? (node.data as any)?.width ?? (node.style as any)?.width ?? 96,
+                h: existingGeom.h ?? (node.data as any)?.height ?? (node.style as any)?.height ?? 96,
               };
-            });
+            } else {
+              // Fallback for new nodes
+              geometry = {
+                x: node.position?.x ?? 0,
+                y: node.position?.y ?? 0,
+                w: (node.data as any)?.width ?? (node.style as any)?.width ?? 96,
+                h: (node.data as any)?.height ?? (node.style as any)?.height ?? 96,
+              };
+            }
+          } else if (!parentChanged && isChildNode) {
+            // CHILD NODE being dragged - convert relative position to absolute
+            let absoluteX = node.position?.x ?? 0;
+            let absoluteY = node.position?.y ?? 0;
+            
+            if ((node as any).parentId) {
+              const parentGeom = nextViewState.group?.[(node as any).parentId];
+              if (parentGeom) {
+                absoluteX += parentGeom.x;
+                absoluteY += parentGeom.y;
+              }
+            }
+            
+            const existingGeom = nextViewState.node[node.id];
+            geometry = {
+              x: absoluteX,
+              y: absoluteY,
+              w: existingGeom?.w ?? (node.data as any)?.width ?? (node.style as any)?.width ?? 96,
+              h: existingGeom?.h ?? (node.data as any)?.height ?? (node.style as any)?.height ?? 96,
+            };
+          } else {
+            // Not a position change OR parent changed - preserve existing ViewState position
+            const existingGeom = nextViewState.node[node.id] || nextViewState.group?.[node.id];
+            
+            if (existingGeom) {
+              // Preserve absolute position from ViewState
+              geometry = {
+                ...existingGeom,
+                w: existingGeom.w ?? (node.data as any)?.width ?? (node.style as any)?.width ?? 96,
+                h: existingGeom.h ?? (node.data as any)?.height ?? (node.style as any)?.height ?? 96,
+              };
+              
+              if (parentChanged) {
+              }
+            } else {
+              // New node - calculate absolute position
+              let absoluteX = node.position?.x ?? 0;
+              let absoluteY = node.position?.y ?? 0;
+              
+              if ((node as any).parentId) {
+                const parentGeom = nextViewState.group?.[(node as any).parentId];
+                if (parentGeom) {
+                  absoluteX += parentGeom.x;
+                  absoluteY += parentGeom.y;
+                }
+              }
+              
+              geometry = {
+                x: absoluteX,
+                y: absoluteY,
+                w: (node.data as any)?.width ?? (node.style as any)?.width ?? 96,
+                h: (node.data as any)?.height ?? (node.style as any)?.height ?? 96,
+              };
+            }
+          }
+
+          nextViewState.node[node.id] = geometry;
+
+          if (node.type === 'group') {
+            nextViewState.group[node.id] = geometry;
+          }
+        });
+
+        // DEBUG: Log ViewState update to trace position jumps
+        const prevViewState = viewStateRef.current;
+        viewStateRef.current = nextViewState;
+        
+        // Log any position changes for debugging
+        if (process.env.NODE_ENV !== 'production') {
+          Object.keys(nextViewState.node).forEach(nodeId => {
+            const prev = prevViewState?.node?.[nodeId];
+            const next = nextViewState.node[nodeId];
+            if (prev && (prev.x !== next.x || prev.y !== next.y)) {
+            }
           });
         }
-        
+
+        if (process.env.NODE_ENV !== 'production') {
+          const movedIds = snappedChanges
+            .filter((ch) => ch.type === 'position' && (ch as any).id)
+            .map((ch: any) => ch.id);
+          if (movedIds.length > 0) {
+            console.debug('[FREE Mode] Updated viewState from node move', {
+              movedIds,
+              snapshot: movedIds.slice(0, 3).map((id) => nextViewState.node[id]),
+            });
+          }
+        }
+
         return updated;
       });
     },
@@ -536,50 +808,51 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
   const pendingConnectionsRef = useRef<Set<string>>(new Set());
   // Track pending edge IDs to prevent duplicate edge creation
   const pendingEdgeIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).__elkState = {
+        rawGraph,
+        layoutGraph,
+        nodes,
+        edges,
+        viewStateRef,
+      };
+    }
+  }, [rawGraph, layoutGraph, nodes, edges]);
   
   const onConnect: OnConnect = useCallback(({ source, target, sourceHandle, targetHandle }: Connection) => {
     if (!source || !target) {
       return;
     }
-    
-    // Create a unique key for this connection attempt
+
     const connectionKey = `${source}:${sourceHandle || ''}->${target}:${targetHandle || ''}`;
-    
-    // Check if this connection is already pending
     if (pendingConnectionsRef.current.has(connectionKey)) {
       return;
     }
-    
-    // Mark as pending
+
     pendingConnectionsRef.current.add(connectionKey);
-    
-    // Generate unique edge ID with timestamp and counter to avoid collisions
+
     const counter = Date.now();
     const random = Math.random().toString(36).slice(2, 11);
     const id = `edge-${counter}-${random}`;
-    
-    // Check if this edge ID is already being created
+
     if (pendingEdgeIdsRef.current.has(id)) {
       pendingConnectionsRef.current.delete(connectionKey);
       return;
     }
-    
-    // Mark edge ID as pending
+
     pendingEdgeIdsRef.current.add(id);
-    
+
     try {
-      // Pass handle IDs to addEdge if they're connector handles
-      // Note: mutate automatically passes graph as the last parameter, so we pass: edgeId, sourceId, targetId, label?, sourceHandle?, targetHandle?
       handlers.handleAddEdge(id, source, target, undefined, sourceHandle || undefined, targetHandle || undefined);
     } catch (error) {
-      // If edge creation fails (e.g., duplicate), remove from pending
       console.error('❌ [onConnect] Failed to create edge:', error);
       pendingConnectionsRef.current.delete(connectionKey);
       pendingEdgeIdsRef.current.delete(id);
       throw error;
     }
-    
-    // Remove from pending after a short delay (edge should be created by then)
+
     setTimeout(() => {
       pendingConnectionsRef.current.delete(connectionKey);
       pendingEdgeIdsRef.current.delete(id);
@@ -592,7 +865,7 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
   return {
     rawGraph, layoutGraph, layoutError, nodes, edges, layoutVersion,
     setRawGraph, setNodes, setEdges,
-    viewStateRef,
+    viewStateRef, rawGraphRef,
     shouldSkipFitViewRef,  // Expose ref so InteractiveCanvas can check if fitView should be skipped
     ...handlers,
     onNodesChange, onEdgesChange, onConnect,

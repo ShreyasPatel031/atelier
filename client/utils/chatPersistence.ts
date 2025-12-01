@@ -13,6 +13,8 @@ export interface PersistedChatMessage {
 const CHAT_STORAGE_KEY = 'atelier_chat_messages';
 const CURRENT_CONVERSATION_KEY = 'atelier_current_conversation';
 const EMBED_TO_CANVAS_FLAG_KEY = 'atelier_embed_to_canvas';
+export const EMBED_PENDING_CHAT_KEY = 'atelier_embed_pending_chat';
+export const EMBED_CHAT_BROADCAST_CHANNEL = 'atelier_embed_chat_broadcast';
 
 /**
  * Mark that user is coming from embed view to canvas view (via Edit button)
@@ -189,4 +191,65 @@ export function startNewConversation(): void {
   } catch (error) {
     console.warn('Failed to start new conversation:', error);
   }
+}
+
+/**
+ * Normalize chat messages from various formats to PersistedChatMessage[]
+ */
+export function normalizeChatMessages(messages: any): PersistedChatMessage[] {
+  if (!messages || !Array.isArray(messages)) {
+    return [];
+  }
+  
+  return messages.map((msg: any) => {
+    if (typeof msg === 'string') {
+      // Simple string message - treat as user message
+      return {
+        id: crypto.randomUUID(),
+        content: msg,
+        timestamp: Date.now(),
+        sender: 'user' as const
+      };
+    }
+    
+    // Already in PersistedChatMessage format or similar
+    return {
+      id: msg.id || crypto.randomUUID(),
+      content: msg.content || msg.text || msg.message || String(msg),
+      timestamp: msg.timestamp || Date.now(),
+      sender: msg.sender === 'assistant' ? 'assistant' : 'user'
+    };
+  }).filter((msg: PersistedChatMessage) => msg.content && msg.content.trim().length > 0);
+}
+
+/**
+ * Merge two arrays of chat messages, avoiding duplicates
+ */
+export function mergeChatMessages(
+  existing: PersistedChatMessage[],
+  incoming: PersistedChatMessage[]
+): PersistedChatMessage[] {
+  if (!incoming || incoming.length === 0) {
+    return existing;
+  }
+  
+  if (!existing || existing.length === 0) {
+    return incoming;
+  }
+  
+  // Create a map of existing messages by ID to avoid duplicates
+  const existingMap = new Map<string, PersistedChatMessage>();
+  existing.forEach(msg => {
+    existingMap.set(msg.id, msg);
+  });
+  
+  // Add incoming messages that don't already exist
+  incoming.forEach(msg => {
+    if (!existingMap.has(msg.id)) {
+      existingMap.set(msg.id, msg);
+    }
+  });
+  
+  // Sort by timestamp
+  return Array.from(existingMap.values()).sort((a, b) => a.timestamp - b.timestamp);
 }

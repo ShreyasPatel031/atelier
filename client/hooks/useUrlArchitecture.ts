@@ -5,6 +5,10 @@
 
 import { useCallback, useRef } from 'react';
 import { anonymousArchitectureService, AnonymousArchitecture } from '../services/anonymousArchitectureService';
+import { EMBED_PENDING_ARCH_PREFIX } from '../utils/anonymousSave';
+import { isEmbedToCanvasTransition, getCurrentConversation, normalizeChatMessages, mergeChatMessages } from '../utils/chatPersistence';
+import { restoreCanvasSnapshot, LOCAL_CANVAS_SNAPSHOT_KEY } from '../utils/canvasPersistence';
+import { Timestamp } from 'firebase/firestore';
 
 interface UseUrlArchitectureProps {
   loadArchitecture: (architecture: AnonymousArchitecture, source: string) => void;
@@ -29,11 +33,36 @@ export function useUrlArchitecture({ loadArchitecture, config, currentUser }: Us
       return false;
     }
 
+    // CRITICAL: ALWAYS check localStorage FIRST before loading from URL
+    // This is the user's explicit requirement: localStorage has priority
+    if (typeof window !== 'undefined') {
+      try {
+        // Check if localStorage has been explicitly set (even if empty)
+        const stored = localStorage.getItem(LOCAL_CANVAS_SNAPSHOT_KEY) || sessionStorage.getItem(LOCAL_CANVAS_SNAPSHOT_KEY);
+        
+        console.log('[🔍 URL-ARCH] DEBUG localStorage check:', {
+          hasStoredData: !!stored,
+          storedLength: stored?.length || 0
+        });
+        
+        if (stored) {
+          // localStorage has been set (even if it's empty) - this means user has interacted with the app
+          // Don't load from URL - localStorage takes absolute priority
+          console.log('[🔄 URL-ARCH] localStorage exists (user has used the app) - skipping URL load entirely');
+          return false;
+        } else {
+          console.log('[🔄 URL-ARCH] No localStorage data - user has never used the app - proceeding with URL check');
+        }
+      } catch (error) {
+        console.warn('⚠️ [URL-ARCH] Error checking localStorage before URL load:', error);
+        // Continue with URL load if localStorage check fails
+      }
+    }
+
+    // Only proceed with URL loading if localStorage is empty or doesn't exist
     const urlArchId = anonymousArchitectureService.getArchitectureIdFromUrl();
-    // console.log('🔍 [URL-ARCH] Checking for URL architecture ID:', urlArchId);
-    
     if (urlArchId) {
-      console.log('🔄 [URL-ARCH] Loading shared architecture from URL');
+      console.log('[🔄 URL-ARCH] Loading from URL since localStorage is empty:', urlArchId);
       await loadSharedAnonymousArchitecture(urlArchId);
       return true;
     }
@@ -45,44 +74,177 @@ export function useUrlArchitecture({ loadArchitecture, config, currentUser }: Us
    * Load a shared anonymous architecture by ID
    */
   const loadSharedAnonymousArchitecture = useCallback(async (architectureId: string) => {
-    console.log('🔥 [LOAD-SHARED] Starting to load shared architecture:', architectureId);
     
     try {
-      const sharedArch = await anonymousArchitectureService.loadAnonymousArchitectureById(architectureId);
+      // CRITICAL: Check if localStorage has a snapshot for this architecture ID first
+      // If it does, skip loading from Firebase/URL - localStorage takes precedence (user's current state)
+      if (typeof window !== 'undefined') {
+        try {
+          const snapshot = restoreCanvasSnapshot();
+          if (snapshot && snapshot.selectedArchitectureId === architectureId) {
+            const hasContent = 
+              (snapshot.rawGraph?.children && snapshot.rawGraph.children.length > 0) ||
+              (snapshot.rawGraph?.edges && snapshot.rawGraph.edges.length > 0);
+            
+            if (hasContent) {
+              console.log('[🔄 URL-ARCH] Skipping URL load - localStorage snapshot exists for same architecture:', architectureId);
+              // Return early - let the localStorage restoration handle it
+              return true;
+            }
+          }
+        } catch (error) {
+          console.warn('⚠️ [LOAD-SHARED] Error checking localStorage snapshot:', error);
+          // Continue with normal load
+        }
+      }
+      
+      let sharedArch = null;
+      const isLocalFallback = architectureId.startsWith('local-');
+
+      if (!isLocalFallback) {
+        sharedArch = await anonymousArchitectureService.loadAnonymousArchitectureById(architectureId);
+      }
+
+      let fallbackData: any = null;
+      const fallbackSources: Array<'session' | 'local'> = [];
+
+      if (typeof window !== 'undefined') {
+        const storageKey = `${EMBED_PENDING_ARCH_PREFIX}${architectureId}`;
+        try {
+          const sessionPayload = window.sessionStorage?.getItem(storageKey);
+          if (sessionPayload) {
+            fallbackData = JSON.parse(sessionPayload);
+            fallbackSources.push('session');
+          }
+        } catch (error) {
+          console.warn('⚠️ [LOAD-SHARED] Failed to read sessionStorage fallback:', error);
+        }
+
+        if (!fallbackData) {
+          try {
+            const localPayload = window.localStorage?.getItem(storageKey);
+            if (localPayload) {
+              fallbackData = JSON.parse(localPayload);
+              fallbackSources.push('local');
+            }
+          } catch (error) {
+            console.warn('⚠️ [LOAD-SHARED] Failed to read localStorage fallback:', error);
+          }
+        }
+
+        if (!fallbackData && fallbackSources.length === 0) {
+          // If session payload existed but couldn't be parsed, still try local storage
+          try {
+            const localPayload = window.localStorage?.getItem(storageKey);
+            if (localPayload) {
+              fallbackData = JSON.parse(localPayload);
+              fallbackSources.push('local');
+            }
+          } catch (error) {
+            console.warn('⚠️ [LOAD-SHARED] Fallback localStorage parse error:', error);
+          }
+        }
+      }
+
+      if (!sharedArch && !fallbackData) {
+        console.warn('⚠️ [LOAD-SHARED] Shared architecture not found. Falling back to default architecture:', architectureId);
+        const defaultGraph = {
+          id: 'root',
+          children: [
+            {
+              id: 'quickstart_node',
+              labels: [{ text: 'Quickstart Node' }],
+              children: [],
+              edges: [],
+              data: { label: 'Quickstart Node', icon: 'browser_client' },
+            },
+          ],
+          edges: [],
+        };
+
+        sharedArch = {
+          id: architectureId,
+          name: 'Quickstart Architecture',
+          rawGraph: defaultGraph,
+          sessionId: 'default-fallback',
+          timestamp: Timestamp.now(),
+          isAnonymous: true,
+          userPrompt: '',
+          chatMessages: [],
+        } as AnonymousArchitecture;
+      }
+
+      if (!sharedArch && fallbackData?.rawGraph) {
+
+        sharedArch = {
+          id: architectureId,
+          name: fallbackData.name || 'Unsaved Architecture',
+          rawGraph: fallbackData.rawGraph,
+          sessionId: 'local-fallback',
+          timestamp: Timestamp.now(),
+          isAnonymous: true,
+          userPrompt: fallbackData.userPrompt || '',
+          chatMessages: fallbackData.chatMessages || [],
+          viewState: fallbackData.viewState || undefined,
+        } as AnonymousArchitecture;
+      } else if (sharedArch && fallbackData) {
+        const hasChatInDoc = Array.isArray((sharedArch as any).chatMessages) && (sharedArch as any).chatMessages.length > 0;
+        const fallbackChat = Array.isArray(fallbackData.chatMessages) ? fallbackData.chatMessages : [];
+        if (!hasChatInDoc && fallbackChat.length > 0) {
+          sharedArch = {
+            ...sharedArch,
+            chatMessages: fallbackChat,
+            userPrompt: sharedArch.userPrompt || fallbackData.userPrompt || sharedArch.userPrompt,
+            viewState: sharedArch.viewState || fallbackData.viewState || undefined,
+          } as AnonymousArchitecture;
+        }
+      }
+
+      if (fallbackSources.length && typeof window !== 'undefined') {
+        const storageKey = `${EMBED_PENDING_ARCH_PREFIX}${architectureId}`;
+        for (const source of fallbackSources) {
+          try {
+            if (source === 'session') {
+              window.sessionStorage?.removeItem(storageKey);
+            } else if (source === 'local') {
+              window.localStorage?.removeItem(storageKey);
+            }
+          } catch {}
+        }
+      }
       
       if (sharedArch && sharedArch.rawGraph) {
-        console.log('🔥 [LOAD-SHARED] ✅ Loaded shared architecture:', {
-          id: architectureId,
-          name: sharedArch.name,
-          nodeCount: sharedArch.rawGraph?.children?.length || 0,
-          hasChatMessages: !!(sharedArch as any).chatMessages?.length
-        });
         
         // ALWAYS set chat messages from architecture (even if empty) to clear any stale localStorage data
         try {
-          const archChatMessages = (sharedArch as any).chatMessages || [];
-          localStorage.setItem('atelier_current_conversation', JSON.stringify(archChatMessages));
-          if (archChatMessages.length > 0) {
-            console.log('💬 [LOAD-SHARED] Restored', archChatMessages.length, 'chat messages from architecture');
+          const transitionedFromEmbed = isEmbedToCanvasTransition();
+          const existingConversation = getCurrentConversation();
+          const normalizedArchMessages = normalizeChatMessages((sharedArch as any).chatMessages);
+          const mergedConversation = mergeChatMessages(existingConversation, normalizedArchMessages);
+
+          const existingCount = existingConversation.length;
+          const incomingCount = normalizedArchMessages?.length || 0;
+
+
+          if (mergedConversation && mergedConversation.length > 0) {
+            localStorage.setItem('atelier_current_conversation', JSON.stringify(mergedConversation));
+          } else if (existingCount > 0) {
           } else {
-            console.log('💬 [LOAD-SHARED] Cleared chat messages (architecture has no saved messages)');
+            localStorage.removeItem('atelier_current_conversation');
           }
         } catch (error) {
-          console.warn('Failed to restore/clear chat messages:', error);
+          console.warn('Failed to restore/merge chat messages:', error);
         }
         
         // Check if we're in auth mode (user is authenticated)
         const isAuthMode = config.requiresAuth || false;
-        console.log('🔥 [LOAD-SHARED] Auth mode:', isAuthMode);
         
         if (isAuthMode) {
           // In auth mode, we need to convert the anonymous architecture to a Firebase architecture
           // and set it as priority so it becomes the first tab
-          console.log('🔥 [LOAD-SHARED] 🔐 Processing URL architecture for authenticated user');
 
           // Check if user is authenticated
           if (!currentUserRef.current?.uid || !currentUserRef.current?.email) {
-            console.log('🔥 [LOAD-SHARED] ⚠️ User not authenticated yet - will process after sign-in');
             // Still load the architecture as anonymous for now
             loadArchitecture(sharedArch, 'url-shared-anonymous');
             return true;
@@ -103,28 +265,16 @@ export function useUrlArchitecture({ loadArchitecture, config, currentUser }: Us
             let userPrompt = sharedArch.userPrompt || '';
 
             if (!userPrompt) {
-              console.log('🔥 [LOAD-SHARED] ⚠️ No userPrompt in architecture, trying chat messages...');
               const persistedMessages = getChatMessages();
               const lastUserMessage = persistedMessages.filter(msg => msg.sender === 'user').pop();
               userPrompt = lastUserMessage?.content || (window as any).originalChatTextInput || (window as any).chatTextInput || '';
 
-              console.log('🔥 [LOAD-SHARED] 📝 Chat messages for naming:', persistedMessages);
-              console.log('🔥 [LOAD-SHARED] 🔍 Fallback debug info:', {
-                messageCount: persistedMessages.length,
-                lastUserMessage: lastUserMessage?.content,
-                windowOriginalChat: (window as any).originalChatTextInput,
-                windowChatText: (window as any).chatTextInput,
-                finalPrompt: userPrompt
-              });
             } else {
-              console.log('🔥 [LOAD-SHARED] ✅ Using userPrompt from architecture:', userPrompt);
             }
 
-            console.log('🔥 [LOAD-SHARED] 🏷️ Final user prompt for naming:', userPrompt || '(empty - will use graph components)');
 
             // Generate name using backend API (will use componentsHintFromGraph if userPrompt is empty)
             const baseChatName = await generateNameWithFallback(sharedArch.rawGraph, userPrompt);
-            console.log('🔥 [LOAD-SHARED] 🎯 Generated architecture name:', baseChatName);
             
             // Save to Firebase
             const savedArchId = await ArchitectureService.saveArchitecture({
@@ -137,11 +287,9 @@ export function useUrlArchitecture({ loadArchitecture, config, currentUser }: Us
               edges: []
             });
             
-            console.log('🔥 [LOAD-SHARED] 💾 Saved to Firebase with ID:', savedArchId);
             
             // Set as priority architecture so it appears as first tab
             localStorage.setItem('priority_architecture_id', savedArchId);
-            console.log('🔥 [LOAD-SHARED] 🏆 Set priority architecture ID:', savedArchId);
             
             // Create the architecture object for loading
             const firebaseArch = {
@@ -164,7 +312,6 @@ export function useUrlArchitecture({ loadArchitecture, config, currentUser }: Us
           }
         } else {
           // In canvas/embed mode, load directly as anonymous architecture
-          console.log('🔥 [LOAD-SHARED] 🌐 Loading as anonymous architecture (non-auth mode)');
           loadArchitecture(sharedArch, 'URL_SHARED');
         }
         

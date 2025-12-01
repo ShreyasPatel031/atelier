@@ -13,16 +13,22 @@ const SaveAuth: React.FC<SaveAuthProps> = ({ onSave, className = "", isCollapsed
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Fix hydration mismatch - only render client-specific content after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Listen for auth state changes
   useEffect(() => {
-    if (auth) {
+    if (auth && mounted) {
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         setUser(currentUser);
       });
       return () => unsubscribe();
     }
-  }, [onSave]);
+  }, [onSave, mounted]);
 
   const handleGoogleSignIn = async () => {
     if (!auth) {
@@ -109,22 +115,23 @@ const SaveAuth: React.FC<SaveAuthProps> = ({ onSave, className = "", isCollapsed
   }, [showDropdown]);
 
   return (
-    <div className={`relative save-auth-dropdown ${className}`}>
+    <div className={`relative save-auth-dropdown ${className}`} suppressHydrationWarning>
       <button
-        onClick={user ? () => setShowDropdown(!showDropdown) : handleGoogleSignIn}
-        disabled={isLoading}
+        onClick={mounted ? (user ? () => setShowDropdown(!showDropdown) : handleGoogleSignIn) : undefined}
+        disabled={!mounted || isLoading}
         className={`flex items-center gap-3 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 hover:shadow-md transition-all duration-200 ${
           isCollapsed ? 'w-10 h-10 justify-center' : 'w-full px-4 py-3 justify-start'
         } ${user 
           ? 'bg-white text-gray-700' 
           : 'bg-white text-gray-700'
-        } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        } ${!mounted || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         title={user ? `Profile (${user.email})` : "Sign in"}
+        suppressHydrationWarning
       >
-        {isLoading ? (
-          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0" />
+        {!mounted || isLoading ? (
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0" suppressHydrationWarning />
         ) : user ? (
-          <div className="relative w-4 h-4">
+          <div className="relative w-4 h-4" suppressHydrationWarning>
             {user.photoURL ? (
               <>
                 <img 
@@ -148,7 +155,7 @@ const SaveAuth: React.FC<SaveAuthProps> = ({ onSave, className = "", isCollapsed
           <UserIcon className="w-4 h-4 flex-shrink-0" />
         )}
         {!isCollapsed && (
-          <span className="font-medium truncate">
+          <span className="font-medium truncate" suppressHydrationWarning>
             {user ? user.displayName || user.email?.split('@')[0] || 'Profile' : 'Sign in'}
           </span>
         )}

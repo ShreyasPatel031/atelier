@@ -3,6 +3,23 @@ import React, { createContext, useContext, useMemo } from 'react';
 // Simplified view mode - just use path-based routing, no complex environment logic
 export type ViewMode = 'embed' | 'canvas' | 'auth';
 
+export interface LibavoidOptions {
+  shapeBufferDistance: number; // edge-to-node spacing
+  portEdgeSpacing: number; // spacing between edges at the same port (in pixels)
+  routingType: 'orthogonal' | 'polyline';
+  hateCrossings: boolean;
+  nudgeOrthSegments: boolean;
+  nudgeSharedPaths: boolean;
+  nudgeTouchingColinear: boolean;
+  segmentPenalty: number;
+  bendPenalty: number;
+  crossingPenalty: number;
+  sharedPathPenalty: number;
+  // idealNudgingDistance: The PRIMARY parameter for uniform spacing between parallel edges
+  // MUST match portEdgeSpacing for uniform spacing
+  idealNudgingDistance?: number;
+}
+
 export interface ViewModeConfig {
   mode: ViewMode;
   isEmbedded: boolean;
@@ -25,6 +42,9 @@ export interface ViewModeConfig {
   showChatPanel: boolean;
   showAgentIcon: boolean;
   showChatbox: boolean;
+
+  // Libavoid routing defaults (for FREE mode)
+  libavoidDefaults: LibavoidOptions;
 }
 
 const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbedded'>> = {
@@ -42,6 +62,20 @@ const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbed
     showChatPanel: false,
     showAgentIcon: false,
     showChatbox: true, // Only chatbox in embed
+    libavoidDefaults: {
+      shapeBufferDistance: 24,
+      portEdgeSpacing: 16,
+      routingType: 'orthogonal',
+      hateCrossings: true,
+      nudgeOrthSegments: false,
+      nudgeSharedPaths: true,
+      nudgeTouchingColinear: false,
+      segmentPenalty: 3,
+      bendPenalty: 10,
+      crossingPenalty: 100,
+      sharedPathPenalty: 100000,
+      idealNudgingDistance: 16, // MUST match portEdgeSpacing for uniform spacing
+    },
   },
   canvas: {
     requiresAuth: false,
@@ -57,6 +91,20 @@ const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbed
     showChatPanel: true, // Full chat panel
     showAgentIcon: true,
     showChatbox: false,
+    libavoidDefaults: {
+      shapeBufferDistance: 8, // Reduced from 24 - smaller spacing makes routing work better
+      portEdgeSpacing: 16,
+      routingType: 'orthogonal',
+      hateCrossings: true,
+      nudgeOrthSegments: false,
+      nudgeSharedPaths: true,
+      nudgeTouchingColinear: false,
+      segmentPenalty: 3,
+      bendPenalty: 10,
+      crossingPenalty: 100,
+      sharedPathPenalty: 100000,
+      idealNudgingDistance: 16, // MUST match portEdgeSpacing for uniform spacing
+    },
   },
   auth: {
     requiresAuth: true,
@@ -72,6 +120,20 @@ const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbed
     showChatPanel: true, // Full chat panel
     showAgentIcon: true,
     showChatbox: false,
+    libavoidDefaults: {
+      shapeBufferDistance: 24,
+      portEdgeSpacing: 16,
+      routingType: 'orthogonal',
+      hateCrossings: true,
+      nudgeOrthSegments: false,
+      nudgeSharedPaths: true,
+      nudgeTouchingColinear: false,
+      segmentPenalty: 3,
+      bendPenalty: 10,
+      crossingPenalty: 100,
+      sharedPathPenalty: 100000,
+      idealNudgingDistance: 16, // MUST match portEdgeSpacing for uniform spacing
+    },
   }
 };
 
@@ -79,6 +141,7 @@ interface ViewModeContextValue {
   config: ViewModeConfig;
   mode: ViewMode;
   isEmbedded: boolean;
+  libavoidOptions?: LibavoidOptions; // Runtime override for libavoid options
 }
 
 const ViewModeContext = createContext<ViewModeContextValue | null>(null);
