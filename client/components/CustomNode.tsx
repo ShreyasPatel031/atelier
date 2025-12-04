@@ -8,6 +8,7 @@ import SelectedNodeDots from './node/SelectedNodeDots';
 import ConnectorDots from './node/ConnectorDots';
 import NodeHandles from './node/NodeHandles';
 import { useNodeStyle } from '../contexts/NodeStyleContext';
+import { useNodeInteractions } from '../contexts/NodeInteractionContext';
 
 // NO HEURISTIC FALLBACKS - let semantic fallback service handle everything
 
@@ -25,14 +26,17 @@ interface CustomNodeProps {
   };
   id: string;
   selected?: boolean;
-  onLabelChange: (id: string, label: string) => void;
-  selectedTool?: 'select' | 'box' | 'connector' | 'group';
-  connectingFrom?: string | null;
-  connectingFromHandle?: string | null;
-  onConnectorDotClick?: (nodeId: string, handleId: string) => void;
 }
 
-const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected, onLabelChange, selectedTool = 'select', connectingFrom, connectingFromHandle, onConnectorDotClick }) => {
+const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
+  // Get interaction state from context (selectedTool, connectingFrom, etc.)
+  const nodeInteractions = useNodeInteractions();
+  
+  const selectedTool = nodeInteractions?.selectedTool || 'select';
+  const connectingFrom = nodeInteractions?.connectingFrom ?? null;
+  const connectingFromHandle = nodeInteractions?.connectingFromHandle ?? null;
+  const onConnectorDotClick = nodeInteractions?.handleConnectorDotClick;
+  const onLabelChange = nodeInteractions?.handleLabelChange || (() => {});
   const { leftHandles = [], rightHandles = [], topHandles = [], bottomHandles = [] } = data;
   const { settings } = useNodeStyle();
   

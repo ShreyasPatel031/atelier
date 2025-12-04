@@ -42,6 +42,7 @@ export class BatchRoutingCoordinator {
   private router: any = null;
   private avoidModule: any = null;
   private routerVersion: string = '';
+  private lastBatchSignature: string = '';
   
   // Edge registration tracking
   private pendingEdges: Map<string, EdgeRegistration> = new Map();
@@ -68,18 +69,55 @@ export class BatchRoutingCoordinator {
   
   /**
    * Initialize or reset the coordinator with a new router
+   * Simplified: No router version tracking - router is managed by StepEdge
    */
-  initialize(router: any, avoidModule: any, routerVersion: string): void {
-    // If router version changed, reset everything
-    if (this.routerVersion !== routerVersion) {
+  initialize(router: any, avoidModule: any, _routerVersion?: string): void {
+    // Only reset if router instance actually changed
+    if (this.router !== router) {
       this.reset();
       this.router = router;
       this.avoidModule = avoidModule;
-      this.routerVersion = routerVersion;
+      this.routerVersion = 'persistent'; // No version tracking - router persists
       this.batchStartTime = Date.now();
-      
-      console.log(`[BatchRoutingCoordinator] Initialized with router version: ${routerVersion}`);
     }
+  }
+  
+  /**
+   * Get the obstacle signature from the last processed batch
+   * Returns null if no batch has been processed yet
+   */
+  getLastBatchSignature(): string | null {
+    return this.lastBatchSignature || null;
+  }
+  
+  /**
+   * Set the obstacle signature for the current/last batch
+   * Called by StepEdge after successful initial routing
+   */
+  setLastBatchSignature(signature: string): void {
+    this.lastBatchSignature = signature;
+  }
+  
+  /**
+   * Force re-processing of all edges after obstacle positions change
+   * This is called when moveShape() updates obstacles but edges need new routes
+   * @param newSignature - The new obstacle signature to track
+   */
+  forceReprocess(newSignature?: string): void {
+    if (!this.router || !this.avoidModule) {
+      return;
+    }
+    
+    // Update the signature if provided
+    if (newSignature) {
+      this.lastBatchSignature = newSignature;
+    }
+    
+    // Clear the batch processed flag so edges can re-register
+    this.batchProcessed = false;
+    this.computedRoutes.clear();
+    this.pendingEdges.clear(); // Also clear pending edges so they re-register
+    this.batchStartTime = Date.now();
   }
   
   /**
@@ -113,6 +151,9 @@ export class BatchRoutingCoordinator {
     targetId: string,
     onRouteReady?: RouteReadyCallback
   ): void {
+    // Check if this is a NEW edge (not already computed)
+    const isNewEdge = !this.computedRoutes.has(id);
+    
     // Store the registration
     this.pendingEdges.set(id, {
       id,
@@ -129,7 +170,15 @@ export class BatchRoutingCoordinator {
       this.routeCallbacks.get(id)!.push(onRouteReady);
     }
     
-    console.log(`[BatchRoutingCoordinator] Edge registered: ${id} (${this.pendingEdges.size}/${this.expectedEdgeCount})`);
+    console.log(`[BatchRoutingCoordinator] Edge registered: ${id} (${this.pendingEdges.size}/${this.expectedEdgeCount}) isNew=${isNewEdge}`);
+    
+    // If this is a new edge and batch was already processed, reset for this new edge
+    // This ensures new edges get routed without triggering full re-route of existing edges
+    if (isNewEdge && this.batchProcessed) {
+      console.log(`[BatchRoutingCoordinator] New edge ${id} registered after batch complete - scheduling new batch`);
+      this.batchProcessed = false;
+      this.batchStartTime = Date.now();
+    }
     
     // Check if we should process
     this.checkAndProcess();
@@ -263,7 +312,7 @@ export class BatchRoutingCoordinator {
     processingInProgress: boolean;
   } {
     return {
-      routerVersion: this.routerVersion,
+      routerVersion: this.routerVersion || 'persistent', // No version tracking - router persists
       expectedEdgeCount: this.expectedEdgeCount,
       registeredEdgeCount: this.pendingEdges.size,
       batchProcessed: this.batchProcessed,

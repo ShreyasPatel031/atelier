@@ -1,0 +1,31 @@
+{
+  "job_id": "34e9e27c-4c1f-452a-b8aa-0c54d8c73942",
+  "repository_path": "/Users/shreyaspatel/Desktop/Code/openai-realtime-console-edit-figjam",
+  "repository_name": "openai-realtime-console-edit-figjam",
+  "output_directory": "/Users/shreyaspatel/Desktop/Code/openai-realtime-console-edit-figjam/docs",
+  "commit_hash": "",
+  "branch_name": null,
+  "timestamp_start": "2025-12-04T09:15:47.633753",
+  "timestamp_end": null,
+  "status": "running",
+  "error_message": null,
+  "files_generated": [],
+  "module_count": 0,
+  "generation_options": {
+    "create_branch": false,
+    "github_pages": false,
+    "no_cache": false,
+    "custom_output": null
+  },
+  "llm_config": {
+    "main_model": "gpt-4o",
+    "cluster_model": "gpt-4o",
+    "base_url": "https://api.openai.com/v1"
+  },
+  "statistics": {
+    "total_files_analyzed": 675,
+    "leaf_nodes": 148,
+    "max_depth": 0,
+    "total_tokens_used": 0
+  }
+}

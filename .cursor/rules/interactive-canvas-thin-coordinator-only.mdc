@@ -1,0 +1,135 @@
+---
+description: When adding features or interactions to InteractiveCanvas.tsx - it must remain a thin coordinator, no new logic
+alwaysApply: false
+---
+
+# InteractiveCanvas.tsx: Thin Coordinator Only
+
+## CRITICAL RULE
+
+**InteractiveCanvas.tsx is already too large. Do NOT add new logic or components here.**
+
+## What to Do Instead
+
+### ✅ CORRECT: Extract to Dedicated Modules
+
+```typescript
+// ✅ CORRECT: Extract to hooks
+// client/hooks/canvas/useMyNewFeature.ts
+export function useMyNewFeature() {
+  // All logic here
+  return { handler, state };
+}
+
+// Then in InteractiveCanvas.tsx:
+import { useMyNewFeature } from '../../hooks/canvas/useMyNewFeature';
+const { handler } = useMyNewFeature();
+```
+
+```typescript
+// ✅ CORRECT: Extract to utilities
+// client/utils/canvas/myNewInteraction.ts
+export function handleMyNewInteraction(params) {
+  // All logic here
+}
+
+// Then in InteractiveCanvas.tsx:
+import { handleMyNewInteraction } from '../../utils/canvas/myNewInteraction';
+onClick={() => handleMyNewInteraction(...)}
+```
+
+```typescript
+// ✅ CORRECT: Extract to services
+// client/services/myService.ts
+export class MyService {
+  handleAction() { /* logic */ }
+}
+
+// Then in InteractiveCanvas.tsx:
+import { myService } from '../../services/myService';
+myService.handleAction();
+```
+
+### ❌ WRONG: Adding Logic Directly
+
+```typescript
+// ❌ WRONG: Adding new handlers inline
+const handleNewFeature = useCallback(() => {
+  // 50+ lines of logic...
+}, [deps]);
+
+// ❌ WRONG: Adding new state management
+const [newState, setNewState] = useState();
+useEffect(() => {
+  // Complex side effects...
+}, [deps]);
+```
+
+## File Organization Pattern
+
+When adding new features:
+
+1. **Hooks** → `client/hooks/{domain}/` (e.g., `client/hooks/canvas/`)
+2. **Utilities** → `client/utils/{domain}/` (e.g., `client/utils/canvas/`)
+3. **Services** → `client/services/` (e.g., `client/services/canvasService.ts`)
+4. **Handlers** → `client/core/orchestration/handlers/` (for FREE mode operations)
+
+**If a domain folder doesn't exist, CREATE IT** rather than adding to root `hooks/utils`.
+
+## InteractiveCanvas's Role
+
+InteractiveCanvas.tsx should:
+
+✅ **Orchestrate** - Wire up hooks, services, and handlers  
+✅ **Render** - Return JSX, compose components  
+✅ **Delegate** - Call handlers/services, pass props  
+✅ **Coordinate** - Manage refs, expose APIs  
+
+InteractiveCanvas.tsx should NOT:
+
+❌ **Implement** - Business logic, state management  
+❌ **Calculate** - Complex computations, transformations  
+❌ **Process** - Data mutations, graph operations  
+❌ **Handle** - Event processing beyond simple delegation  
+
+## Examples from Codebase
+
+### ✅ GOOD: Delegation Pattern
+
+```typescript
+// InteractiveCanvas.tsx - GOOD
+import { placeNodeOnCanvas } from "../../utils/canvas/canvasInteractions";
+import { handleDeleteKey } from "../../utils/canvas/canvasDeleteInteractions";
+import { useCanvasEdgeInteractions } from "../../hooks/canvas/useCanvasEdgeInteractions";
+
+// Just wire it up
+onPaneClick={(e) => placeNodeOnCanvas(e, selectedTool, reactFlowRef, ...)}
+const { handleConnectStart } = useCanvasEdgeInteractions({...});
+```
+
+### ❌ BAD: Inline Implementation
+
+```typescript
+// InteractiveCanvas.tsx - BAD
+const handlePaneClick = useCallback((event) => {
+  // 100+ lines of coordinate conversion, node creation, ViewState updates...
+  const screenPoint = { x: event.clientX, y: event.clientY };
+  const projected = reactFlowRef.current.screenToFlowPosition(screenPoint);
+  // ... more logic
+}, [deps]);
+```
+
+## Migration Checklist
+
+When adding features:
+
+1. ✅ Create new file in appropriate domain folder
+2. ✅ Extract all logic to new module
+3. ✅ Import and call from InteractiveCanvas
+4. ✅ Keep InteractiveCanvas code < 10 lines per feature
+5. ✅ Test that feature works from extracted module
+
+## Current Size Warning
+
+**InteractiveCanvas.tsx is 4500+ lines** - adding more code will make it unmaintainable.  
+**Always extract** - even if it feels like "just a few lines."

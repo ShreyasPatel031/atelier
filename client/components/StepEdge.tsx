@@ -8,7 +8,7 @@ import { getBatchRoutingCoordinator } from '../lib/BatchRoutingCoordinator';
 
 const DEFAULT_NODE_WIDTH = 96;
 const DEFAULT_NODE_HEIGHT = 96;
-const DEFAULT_OBSTACLE_MARGIN = 8; // Reduced from 20 - smaller spacing makes routing work better
+const DEFAULT_OBSTACLE_MARGIN = 32; // 2 grid spaces (16px * 2 = 32px)
 
 const safeNumber = (value: unknown, fallback: number): number =>
   typeof value === 'number' && Number.isFinite(value) ? value : fallback;
@@ -107,17 +107,6 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
   } = props;
   const edgeData = data as any;
   
-  // Debug logging for edge-vertical
-  if (id === 'edge-vertical') {
-    console.log(`[StepEdge:${id}] 🔍 MOUNTED`, {
-      source, target,
-      hasStaticObstacleIds: !!edgeData?.staticObstacleIds,
-      obstacleCount: edgeData?.staticObstacleIds?.length,
-      hasRerouteKey: !!edgeData?.rerouteKey,
-      hasStaticObstacles: !!edgeData?.staticObstacles,
-      staticObstaclesCount: edgeData?.staticObstacles?.length
-    });
-  }
   
   const [computedBendPoints, setComputedBendPoints] = useState<Point[]>([]);
   const [debugInfo, setDebugInfo] = useState<any>(null);
@@ -142,6 +131,8 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
   const [optionsVersion, setOptionsVersion] = useState(0);
   const prevOptionsRef = React.useRef<string>('');
   const prevPortEdgeSpacingRef = React.useRef<number>(portEdgeSpacing);
+  // Track obstacle signature changes to trigger rerouting (but only once per change)
+  const prevObstacleSignatureRef = React.useRef<string>('');
   
   React.useEffect(() => {
     const currentOptionsStr = JSON.stringify(libavoidOptions);
@@ -153,11 +144,7 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
       prevPortEdgeSpacingRef.current = portEdgeSpacing;
       // Clear edge path to force re-render while routing
       setEdgePath(pointsToPath([{ x: sourceX, y: sourceY }, { x: targetX, y: targetY }]));
-      setOptionsVersion(v => {
-        const newVersion = v + 1;
-        console.log(`[StepEdge:${id}] 🔄 Options changed (options=${optionsChanged}, spacing=${spacingChanged}), incrementing optionsVersion to ${newVersion}, portEdgeSpacing=${portEdgeSpacing}`);
-        return newVersion;
-      });
+      setOptionsVersion(v => v + 1);
     }
   }, [libavoidOptions, portEdgeSpacing, id, sourceX, sourceY, targetX, targetY]);
 
@@ -196,15 +183,6 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
     const staticObstacles = Array.isArray(edgeData?.staticObstacles)
       ? edgeData.staticObstacles
       : [];
-
-    // Debug for edge-vertical
-    if (id === 'edge-vertical') {
-      console.log(`[StepEdge:${id}] 🔍 Resolving obstacles`, {
-        staticObstacleIdsCount: staticObstacleIds.length,
-        staticObstaclesCount: staticObstacles.length,
-        condensedNodesCount: condensedNodes.length
-      });
-    }
 
     let result: NodeRect[];
     
@@ -267,16 +245,22 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
     return result;
   }, [edgeData?.staticObstacleIds, edgeData?.staticObstacles, condensedNodes, id]);
 
+  // Snap position to 16px grid for stable obstacle signature
+  // This prevents rerouting on every intermediate position during drag
+  const GRID_SIZE = 16;
+  const snapToGrid = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
+  
   const obstacleSignature = useMemo(() => {
     if (!resolvedObstacleRects || resolvedObstacleRects.length === 0) {
       return 'empty';
     }
     return resolvedObstacleRects
       .map((node) => {
-        const x = Math.round(node.x);
-        const y = Math.round(node.y);
-        const w = Math.round(node.width);
-        const h = Math.round(node.height);
+        // Snap to grid to only reroute on grid snap positions
+        const x = snapToGrid(node.x);
+        const y = snapToGrid(node.y);
+        const w = snapToGrid(node.width);
+        const h = snapToGrid(node.height);
         return `${node.id}:${x}:${y}:${w}:${h}`;
       })
       .sort()
@@ -311,33 +295,36 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
         if (cancelled) return;
 
         // Use a shared router for all edges to enable proper pin sharing
-        // Reset router when optionsVersion or obstacle positions change
-        // Combine optionsVersion and obstacleSignature to create a unique router version
-        const routerVersion = `${optionsVersion}:${obstacleSignature}`;
+        // CRITICAL (Joint.js pattern): Router should only reset when OPTIONS change, NOT obstacle positions
+        // Obstacle position changes are handled via moveShape() to avoid router reset/abort errors
+        // VERSION 2: Force router reset to apply new callback/nudging settings
+        const routerVersion = `v2-${optionsVersion}`;
         
         // Router configuration helper - sets all parameters ONCE per router version
         // This matches Joint.js pattern: configure router once, then batch route all connections
         const configureRouter = (router: any, avoidModule: any, libavoidOptions: any, spacing: number) => {
-          // Enable nudging options
+          // DISABLE all nudging options to prevent ballooning
+          // When processTransaction() is called, nudging causes ALL edges to shift positions
+          // even if only one obstacle moved. This causes the "ballooning" bug.
         if (typeof avoidModule.nudgeOrthogonalSegmentsConnectedToShapes === 'number') {
-            router.setRoutingOption?.(avoidModule.nudgeOrthogonalSegmentsConnectedToShapes, libavoidOptions?.nudgeOrthSegments !== false);
+            router.setRoutingOption?.(avoidModule.nudgeOrthogonalSegmentsConnectedToShapes, false);
         }
         if (typeof avoidModule.nudgeSharedPathsWithCommonEndPoint === 'number') {
-          router.setRoutingOption?.(avoidModule.nudgeSharedPathsWithCommonEndPoint, !!libavoidOptions?.nudgeSharedPaths);
+          router.setRoutingOption?.(avoidModule.nudgeSharedPathsWithCommonEndPoint, false);
         }
         if (typeof avoidModule.nudgeOrthogonalTouchingColinearSegments === 'number') {
-          router.setRoutingOption?.(avoidModule.nudgeOrthogonalTouchingColinearSegments, !!libavoidOptions?.nudgeTouchingColinear);
+          router.setRoutingOption?.(avoidModule.nudgeOrthogonalTouchingColinearSegments, false);
         }
           
-          // Critical: Unifying nudging preprocessing - "unifies segments and centers them in free space"
-          // This is the key to proper edge spacing that Joint.js uses
+          // DISABLE: Unifying nudging preprocessing causes ballooning
+          // "unifies segments and centers them in free space" - this shifts ALL edges
           if (typeof avoidModule.performUnifyingNudgingPreprocessingStep === 'number') {
-            router.setRoutingOption?.(avoidModule.performUnifyingNudgingPreprocessingStep, true);
+            router.setRoutingOption?.(avoidModule.performUnifyingNudgingPreprocessingStep, false);
           }
           
-          // Enable additional spacing options if available
+          // DISABLE: Additional nudging causes ballooning
           if (typeof (avoidModule as any).improvingConnectorNudging === 'number') {
-            router.setRoutingOption?.((avoidModule as any).improvingConnectorNudging, true);
+            router.setRoutingOption?.((avoidModule as any).improvingConnectorNudging, false);
           }
           
           // Enable sideDirections to enforce side-constrained pins (critical for preventing overlap)
@@ -390,6 +377,12 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
           (newRouter as any).__pinIdMap = new Map<string, number>();
           (newRouter as any).__pinObjectMap = new Map<number, any>();
           (newRouter as any).__nextPinId = 1000;
+          // Initialize shapeRefs map for Joint.js-style moveShape() pattern
+          (newRouter as any).__shapeRefs = new Map<string, any>();
+          // Initialize connRefs map for Joint.js-style persistent connector pattern
+          (newRouter as any).__connRefs = new Map<string, any>();
+          // Initialize routes map for storing computed routes per edge
+          (newRouter as any).__routes = new Map<string, Point[]>();
           
           // Configure router ONCE when created - this is critical for Joint.js-style batch routing
           configureRouter(newRouter, avoidModule, libavoidOptions, spacing);
@@ -403,14 +396,11 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
         
         const router = register((window as any).__libavoidSharedRouter);
         
-        // Step 2: Get coordinator and ensure it's initialized (will be reused later in routing)
-        const coordinatorInstance = getBatchRoutingCoordinator();
-        if (!coordinatorInstance.getStatus().routerVersion || coordinatorInstance.getStatus().routerVersion !== routerVersion) {
-          coordinatorInstance.initialize(router, avoidModule, routerVersion);
-          coordinatorInstance.setExpectedEdgeCount(allEdges.length);
-        }
-        
-        // coordinatorInstance is now available for use in the routing section below
+        // Track obstacle signature changes
+        // NOTE: We do NOT call processTransaction() here because it causes global re-nudging
+        // which shifts positions of ALL edges even if they don't need to reroute.
+        // Using Joint.js pattern: persistent connRefs + moveShape() for obstacles.
+        prevObstacleSignatureRef.current = obstacleSignature;
 
         type ShapeInfo = {
           shape: any;
@@ -434,41 +424,66 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
 
         const obstacleRects: NodeRect[] = resolvedObstacleRects;
 
-        // DEBUG: Log obstacle registration
-        console.log(`[StepEdge:${id}] 🔍 OBSTACLES: ${obstacleRects.length} nodes to register as obstacles:`, 
-          obstacleRects.map(n => `${n.id}(${Math.round(n.x)},${Math.round(n.y)},${Math.round(n.width)}x${Math.round(n.height)})`).join(', '));
-
         // CRITICAL FIX: Skip routing if all obstacles are at origin (0,0)
         // This prevents routing with invalid positions before nodes are positioned
         const allAtOrigin = obstacleRects.length > 0 && obstacleRects.every(n => n.x === 0 && n.y === 0);
         if (allAtOrigin) {
-          console.log(`[StepEdge:${id}] ⏳ SKIPPING ROUTING - all obstacles at origin (0,0), waiting for valid positions`);
-          return;
+          return; // Skip routing with invalid positions
         }
 
         // CRITICAL: Register obstacles BEFORE creating connections
-        // Obstacles are registered synchronously, so they're guaranteed to be in router before connections
-        // IMPORTANT: Do NOT exclude source/target nodes - they need to be obstacles too!
-        // Only the pins on source/target should allow connections, the rest of the node should be an obstacle
+        // Joint.js pattern: Use moveShape() to update existing obstacles instead of recreating
+        // This prevents router resets and "router aborted" errors during node drag
+        const shapeRefs = (router as any).__shapeRefs as Map<string, any>;
+        
         obstacleRects.forEach((node) => {
           const width = safeNumber(node.width, DEFAULT_NODE_WIDTH);
           const height = safeNumber(node.height, DEFAULT_NODE_HEIGHT);
-          const topLeft = register(new avoidModule.Point(node.x, node.y));
-          const bottomRight = register(new avoidModule.Point(node.x + width, node.y + height));
-          const rectangle = register(new avoidModule.Rectangle(topLeft, bottomRight));
-          const shape = register(new avoidModule.ShapeRef(router, rectangle));
           
-          // Do NOT create default center pin - Joint.js pattern: only create side pins that are actually used
-          // This prevents libavoid from treating nodes as having "all-direction" connection points
-          // which can cause edges to merge into shared trunks
+          // Check if shape already exists for this node
+          const existingShape = shapeRefs.get(node.id);
           
-          shapeMap.set(node.id, {
-            shape,
-            origin: { x: node.x, y: node.y },
-            width,
-            height,
-          });
+          if (existingShape) {
+            // Joint.js pattern: Update existing shape position using moveShape()
+            // This avoids router reset and maintains all connections
+            try {
+              const topLeft = register(new avoidModule.Point(node.x, node.y));
+              const bottomRight = register(new avoidModule.Point(node.x + width, node.y + height));
+              const newRectangle = register(new avoidModule.Rectangle(topLeft, bottomRight));
+              router.moveShape(existingShape, newRectangle);
+            } catch (e) {
+              // If moveShape fails, ignore and use existing shape
+            }
+            
+            shapeMap.set(node.id, {
+              shape: existingShape,
+              origin: { x: node.x, y: node.y },
+              width,
+              height,
+            });
+          } else {
+            // Create new shape only if it doesn't exist
+            const topLeft = register(new avoidModule.Point(node.x, node.y));
+            const bottomRight = register(new avoidModule.Point(node.x + width, node.y + height));
+            const rectangle = register(new avoidModule.Rectangle(topLeft, bottomRight));
+            const shape = register(new avoidModule.ShapeRef(router, rectangle));
+            
+            // Store shape reference for future moveShape() calls
+            shapeRefs.set(node.id, shape);
+            
+            shapeMap.set(node.id, {
+              shape,
+              origin: { x: node.x, y: node.y },
+              width,
+              height,
+            });
+          }
         });
+        
+        // DO NOT call processTransaction() when obstacles move
+        // This causes ballooning where ALL edges get re-nudged
+        // Edges will only reroute when their endpoints change (new connections)
+        // or when the router is recreated (options change)
         
         // CRITICAL: Ensure obstacles are registered in router before proceeding
         // This is synchronous, so obstacles are guaranteed to be in router before connections
@@ -478,6 +493,7 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
         if (!(window as any).__portEdgeRegistry) {
           (window as any).__portEdgeRegistry = new Map<string, string[]>();
           (window as any).__portEdgeRegistryVersion = '';
+          (window as any).__portEdgeObstacleVersion = '';
           (window as any).__portEdgeRegistrationBarrier = {
             version: '',
             registeredEdges: new Set<string>(),
@@ -485,8 +501,10 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
           };
         }
         
-        // Clear registry when routerVersion changes (includes optionsVersion and obstacleSignature)
-        // This ensures port grouping is recalculated when nodes move or options change
+        // CRITICAL FIX: Only clear registry when routerVersion (libavoid options) changes
+        // DO NOT clear when obstacleSignature changes - port-to-edge grouping doesn't depend on obstacle positions!
+        // Port grouping only depends on: which edges exist and which handles they use
+        // Clearing on obstacle change causes the "ballooning" bug where unrelated edges change paths
         if ((window as any).__portEdgeRegistryVersion !== routerVersion) {
           (window as any).__portEdgeRegistry.clear();
           (window as any).__portEdgeRegistryVersion = routerVersion;
@@ -771,88 +789,122 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
         // Use the effective positions from port key calculation for consistency
         const srcEnd = createConnEndForNode(source, sourcePoint, effectiveSourcePosition, srcEdgeOffset);
         const dstEnd = createConnEndForNode(target, targetPoint, effectiveTargetPosition, tgtEdgeOffset);
-        const connection = register(new avoidModule.ConnRef(router));
+        
+        // Joint.js pattern: Reuse existing ConnRef if it exists, otherwise create new
+        const connRefs = (router as any).__connRefs as Map<string, any>;
+        
+        // Initialize routes cache on router if not exists
+        // This stores routes updated by callbacks - prevents polling displayRoute() for unchanged edges
+        if (!(router as any).__routesCache) {
+          (router as any).__routesCache = new Map<string, Point[]>();
+        }
+        const routesCache = (router as any).__routesCache as Map<string, Point[]>;
+        
+        let connection = connRefs.get(id);
+        const isNewConnection = !connection;
+        
+        if (!connection) {
+          // Create new ConnRef only if doesn't exist
+          // NOTE: Do NOT register for cleanup - connRefs must persist across renders
+          // to avoid re-creating connections which triggers processTransaction
+          connection = new avoidModule.ConnRef(router);
+          connRefs.set(id, connection);
+          
+          // NOTE: We don't use callbacks for route updates because libavoid
+          // calls callbacks for ALL connectors when ANY obstacle moves, not just affected ones.
+          // This causes "ballooning" where unrelated edges change their paths.
+          // Instead, we cache routes and only update them when endpoints change (new connections).
+        }
+        
+        // Always update endpoints (Joint.js pattern: update existing connRef)
         connection.setSourceEndpoint?.(srcEnd);
         connection.setDestEndpoint?.(dstEnd);
         
-        // Always force orthogonal routing (never polyline) to ensure pins are respected
-        const hasOrth = typeof avoidModule.ConnType_Orthogonal === 'number';
-        const routingType = hasOrth
-          ? avoidModule.ConnType_Orthogonal
-          : (avoidModule.ConnType_Orthogonal as number);
-        connection.setRoutingType?.(routingType);
-        
-        // Debug: Verify routing type is set correctly
-        if (id === 'edge-straight' || id.startsWith('edge-port-')) {
-          console.log(`[STRAIGHT-DEBUG:${id}] 🔧 ROUTING TYPE SET: ${routingType} (ConnType_Orthogonal=${avoidModule.ConnType_Orthogonal})`);
-        }
-        if (typeof connection.setHateCrossings === 'function') {
-          connection.setHateCrossings?.(!!libavoidOptions?.hateCrossings);
+        // Only set routing options on new connections
+        if (isNewConnection) {
+          // Always force orthogonal routing (never polyline) to ensure pins are respected
+          const hasOrth = typeof avoidModule.ConnType_Orthogonal === 'number';
+          const routingType = hasOrth
+            ? avoidModule.ConnType_Orthogonal
+            : (avoidModule.ConnType_Orthogonal as number);
+          connection.setRoutingType?.(routingType);
+          
+          if (typeof connection.setHateCrossings === 'function') {
+            connection.setHateCrossings?.(!!libavoidOptions?.hateCrossings);
+          }
         }
 
-        // Step 2: Register with batch routing coordinator instead of processing immediately
-        // This allows libavoid to see all edges together and properly nudge overlapping segments
-        // Reuse coordinatorInstance from above (already initialized)
-        
-        // Create callback to receive route when batch processing completes
-        const onRouteReady = (route: Point[]) => {
-          if (!cancelled) {
-            setCoordinatorPathPoints(route);
-            // State update will trigger re-render, which will call routeWithLibavoid again
-            // and this time the route will be available
-          }
-        };
-        coordinatorCallbackRef.current = onRouteReady;
-        
-        // Register edge with coordinator
-        coordinatorInstance.registerEdge(id, connection, source, target, onRouteReady);
-        
-        // Check if we already have a route from coordinator (either from state or coordinator cache)
-        let routeFromCoordinator = coordinatorPathPoints || coordinatorInstance.getRoute(id);
-        
-        // If route not ready, check if we should force process
-        if (!routeFromCoordinator || routeFromCoordinator.length === 0) {
-          const status = coordinatorInstance.getStatus();
-          if (status.registeredEdgeCount >= status.expectedEdgeCount && status.expectedEdgeCount > 0 && !status.batchProcessed) {
-            // All edges registered but batch not processed yet - force it
-            console.log(`[StepEdge:${id}] ⚠️ All edges registered but batch not processed, forcing...`);
-            coordinatorInstance.forceProcess();
-            routeFromCoordinator = coordinatorInstance.getRoute(id);
+        // Process transaction for new connections
+        // This is called once per new connection. The key is that we don't call it
+        // on obstacle changes (which would cause re-nudging of all edges).
+        if (isNewConnection) {
+          try {
+            router.processTransaction?.();
+          } catch (e) {
+            // Ignore errors
           }
         }
         
-        // If still no route, wait for batch processing
-        if (!routeFromCoordinator || routeFromCoordinator.length === 0) {
-          console.log(`[StepEdge:${id}] ⏳ Waiting for batch processing to complete...`);
-          return; // Exit early, will be called again when route is ready via callback
+        // Joint.js pattern: Use cached route if available (updated by callback)
+        // Only poll displayRoute() for new connections or if no cache exists
+        let pathPoints: Point[] = [];
+        const cachedRoute = routesCache.get(id);
+        
+        if (cachedRoute && cachedRoute.length >= 2 && !isNewConnection) {
+          // Use cached route - this prevents ballooning by not polling displayRoute()
+          // for edges that haven't changed
+          pathPoints = cachedRoute;
+        } else {
+          // New connection or no cache - extract route and cache it
+          try {
+            const route = connection.displayRoute?.();
+            if (route && typeof route.size === 'function' && route.size() > 0) {
+              for (let i = 0; i < route.size(); i++) {
+                const pt = route.get_ps?.(i);
+                if (pt && typeof pt.x === 'number' && typeof pt.y === 'number') {
+                  pathPoints.push({ x: pt.x, y: pt.y });
+                }
+              }
+              // Cache the initial route
+              if (pathPoints.length >= 2) {
+                routesCache.set(id, [...pathPoints]);
+              }
+            }
+          } catch (e) {
+            // Route extraction failed, will use fallback below
+          }
         }
         
-        // Use route from coordinator
-        const pathPoints = routeFromCoordinator;
-        
-        // Log that we've reached the diagnostic section - this confirms routing happened
-        console.log(`[DIAG:${id}] ✅ ROUTING COMPLETE (from coordinator) - pathPoints.length=${pathPoints.length}, source=${source}, target=${target}, routerVersion=${routerVersion}`);
-        
-        // CRITICAL FIX: If we got a routed path (more than 2 points), don't allow it to be overwritten by a straight line
-        // This prevents race conditions where a later routing with fewer obstacles overwrites a correct route
-        if (pathPoints.length > 2) {
-          console.log(`[StepEdge:${id}] 🎯 ROUTED PATH FOUND with ${pathPoints.length} points - marking as stable`);
-          (window as any).__stableEdgePaths = (window as any).__stableEdgePaths || {};
-          (window as any).__stableEdgePaths[id] = pathPoints;
-        } else if ((window as any).__stableEdgePaths?.[id]?.length > 2) {
-          // If we have a stable routed path and the new path is a straight line, use the stable path
-          console.log(`[StepEdge:${id}] ⚠️ IGNORING STRAIGHT LINE - using stable routed path with ${(window as any).__stableEdgePaths[id].length} points`);
-          pathPoints.length = 0;
-          pathPoints.push(...(window as any).__stableEdgePaths[id]);
+        // If no valid route, use simple L-shaped fallback (never leave empty)
+        if (pathPoints.length < 2) {
+          // Simple orthogonal fallback: source -> bend -> target
+          const midX = (sourcePoint.x + targetPoint.x) / 2;
+          const midY = (sourcePoint.y + targetPoint.y) / 2;
+          
+          // L-shaped path based on source direction
+          if (effectiveSourcePosition === Position.Right || effectiveSourcePosition === Position.Left) {
+            // Horizontal first, then vertical
+            pathPoints = [
+              sourcePoint,
+              { x: midX, y: sourcePoint.y },
+              { x: midX, y: targetPoint.y },
+              targetPoint
+            ];
+          } else {
+            // Vertical first, then horizontal
+            pathPoints = [
+              sourcePoint,
+              { x: sourcePoint.x, y: midY },
+              { x: targetPoint.x, y: midY },
+              targetPoint
+            ];
+          }
         }
         
-        // DIAGNOSTIC: Boundary sanity check for all edges
-        // Enable diagnostics for all edges by default (can be disabled via window.__enableEdgeDiagnostics = false)
-        const enableDiagnostics = typeof (window as any).__enableEdgeDiagnostics === 'boolean' 
-          ? (window as any).__enableEdgeDiagnostics 
-          : true; // Enable by default for all edges
+        // Route is now ready - pathPoints contains the valid route from libavoid or fallback
         
-        console.log(`[DIAG:${id}] 🔧 enableDiagnostics=${enableDiagnostics}, window.__enableEdgeDiagnostics=${typeof (window as any).__enableEdgeDiagnostics}`);
+        // Disable verbose diagnostics by default
+        const enableDiagnostics = (window as any).__enableEdgeDiagnostics === true;
         
         // Initialize diagnostics map if needed
         if (enableDiagnostics && !(window as any).__edgeDiagnostics) {

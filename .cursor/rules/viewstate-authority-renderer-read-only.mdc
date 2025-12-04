@@ -1,0 +1,230 @@
+---
+description: When rendering nodes/edges or reading geometry - Renderer must read ONLY from ViewState, never from Domain or ELK directly
+alwaysApply: false
+---
+
+# ViewState Authority: Renderer Reads Only from ViewState
+
+## CRITICAL RULE
+
+**Renderer MUST read geometry exclusively from ViewState. If geometry is missing, fail loudly in dev mode.**
+
+## What Renderer Should Do
+
+### ✅ CORRECT: Read from ViewState Only
+
+```typescript
+// ✅ CORRECT: Renderer reads geometry from ViewState
+import { toReactFlowWithViewState } from '../core/renderer/ReactFlowAdapter';
+
+const { nodes, edges } = toReactFlowWithViewState(
+  domainGraph,        // Structure only (for node types, edges, etc.)
+  dimensions,
+  viewStateRef.current, // ✅ Geometry source of truth
+  { strictGeometry: true } // Fail if geometry missing
+);
+```
+
+```typescript
+// ✅ CORRECT: Checking ViewState for geometry
+const nodeGeom = viewState.node[nodeId];
+if (!nodeGeom) {
+  if (process.env.NODE_ENV !== 'production') {
+    throw new Error(`Missing geometry for node ${nodeId} in ViewState`);
+  }
+  // Fail loudly in dev
+  console.error(`[Renderer] Missing geometry for node ${nodeId}`);
+  return null; // Don't render invalid node
+}
+```
+
+### ❌ WRONG: Reading from Domain or ELK
+
+```typescript
+// ❌ WRONG: Reading coordinates from Domain
+const node = {
+  position: { 
+    x: domainNode.x,  // NO - Domain has no coordinates
+    y: domainNode.y   // NO - Domain has no coordinates
+  }
+};
+```
+
+```typescript
+// ❌ WRONG: Reading from ELK output directly
+const node = {
+  position: {
+    x: elkNode.x,  // NO - ELK output should be in ViewState first
+    y: elkNode.y
+  }
+};
+```
+
+```typescript
+// ❌ WRONG: Fallback to ELK or Domain
+const nodeGeom = viewState.node[nodeId] || 
+                 elkNode.position ||      // NO fallback
+                 { x: 0, y: 0 };         // NO fallback
+```
+
+## ViewState Structure
+
+```typescript
+interface ViewState {
+  node: {
+    [nodeId: string]: {
+      x: number;  // Absolute world-space X
+      y: number;  // Absolute world-space Y
+      w: number;  // Width
+      h: number;  // Height
+    }
+  };
+  group: {
+    [groupId: string]: {
+      x: number;  // Absolute world-space X
+      y: number;  // Absolute world-space Y
+      w: number;  // Width
+      h: number;  // Height
+    }
+  };
+  edge: {
+    [edgeId: string]: {
+      waypoints?: Array<{ x: number; y: number }>;  // Absolute coordinates
+    }
+  };
+  layout?: {
+    [groupId: string]: {
+      mode: 'FREE' | 'LOCK';
+    }
+  };
+}
+```
+
+## Renderer Implementation
+
+### ✅ CORRECT: Strict Geometry Check
+
+```typescript
+// client/core/renderer/ReactFlowAdapter.ts
+export function toReactFlowWithViewState(
+  domainGraph: LayoutGraph,
+  dimensions: Dimensions,
+  viewState: ViewState,
+  options: { strictGeometry: boolean } = { strictGeometry: false }
+) {
+  const nodes: Node[] = [];
+  
+  function convertNode(domainNode: any, parentAbsolute: { x: number; y: number } = { x: 0, y: 0 }) {
+    const nodeId = domainNode.id;
+    
+    // ✅ CORRECT: Read geometry from ViewState only
+    const geom = viewState.node[nodeId];
+    
+    if (!geom) {
+      if (options.strictGeometry || process.env.NODE_ENV !== 'production') {
+        throw new Error(`[Renderer] Missing geometry for node ${nodeId} in ViewState`);
+      }
+      // In production, skip invalid node
+      return null;
+    }
+    
+    // ✅ CORRECT: Use ViewState geometry
+    const reactFlowNode: Node = {
+      id: nodeId,
+      position: {
+        // Calculate relative position for ReactFlow parentId system
+        x: geom.x - parentAbsolute.x,
+        y: geom.y - parentAbsolute.y
+      },
+      data: {
+        width: geom.w,
+        height: geom.h,
+        // ... other data from domainNode
+      }
+    };
+    
+    return reactFlowNode;
+  }
+  
+  // Convert domain nodes using ViewState geometry
+  // ...
+}
+```
+
+### ❌ WRONG: Fallback Patterns
+
+```typescript
+// ❌ WRONG: Fallback to ELK output
+const geom = viewState.node[nodeId] || {
+  x: elkNode.x || 0,  // NO - fail loudly instead
+  y: elkNode.y || 0
+};
+
+// ❌ WRONG: Fallback to defaults
+const geom = viewState.node[nodeId] || {
+  x: 0,  // NO - if geometry missing, fail
+  y: 0,
+  w: 96,
+  h: 96
+};
+
+// ❌ WRONG: Fallback to Domain
+const geom = viewState.node[nodeId] || domainNode.position || { x: 0, y: 0 };
+```
+
+## Geometry Flow
+
+### FREE Mode
+
+```
+User Action (drag, click, etc.)
+    ↓
+ViewState.write (user-provided absolute coordinates)
+    ↓
+Renderer.read (ViewState → ReactFlow)
+    ↓
+Visual output
+```
+
+### AI/LOCK Mode
+
+```
+AI/Layout Action
+    ↓
+Layout.run (ELK calculates geometry)
+    ↓
+ViewState.merge (ELK output stored in ViewState)
+    ↓
+Renderer.read (ViewState → ReactFlow)
+    ↓
+Visual output
+```
+
+## Key Principles
+
+1. **ViewState is single source of truth** - All geometry comes from ViewState
+2. **No fallbacks** - If geometry missing, fail loudly (especially in dev)
+3. **Domain has no coordinates** - Domain is pure structure
+4. **ELK output → ViewState → Renderer** - ELK never directly feeds renderer
+5. **Strict geometry mode** - In dev, throw errors for missing geometry
+
+## Files
+
+- `client/core/renderer/ReactFlowAdapter.ts` - Main renderer
+- `client/core/renderer/ViewStateToReactFlow.ts` - ViewState conversion
+- `client/core/viewstate/ViewState.ts` - ViewState type definitions
+- `client/core/viewstate/CoordinateService.ts` - Coordinate utilities
+
+## Common Mistakes
+
+❌ **Mistake**: Reading `x, y` from Domain graph  
+✅ **Fix**: Domain has no coordinates - read from ViewState
+
+❌ **Mistake**: Using ELK output directly in renderer  
+✅ **Fix**: ELK output must be merged into ViewState first
+
+❌ **Mistake**: Fallback to default coordinates when ViewState missing  
+✅ **Fix**: Fail loudly in dev, skip invalid nodes in production
+
+❌ **Mistake**: Calculating geometry in renderer  
+✅ **Fix**: Geometry should be in ViewState before rendering

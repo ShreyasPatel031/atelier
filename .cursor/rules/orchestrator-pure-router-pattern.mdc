@@ -1,0 +1,218 @@
+---
+description: When working with Orchestrator or adding new handlers - Orchestrator is pure router only, all business logic goes in handlers
+alwaysApply: false
+---
+
+# Orchestrator Pattern: Pure Router Only
+
+## CRITICAL RULE
+
+**Orchestrator.ts is a PURE FACADE - routing only, no implementation. All business logic goes in handlers.**
+
+## What Orchestrator Should Do
+
+### ✅ CORRECT: Pure Routing
+
+```typescript
+// ✅ CORRECT: Orchestrator routes to handlers
+export async function apply(intent: EditIntent): Promise<void> {
+  switch (intent.kind) {
+    case 'free-structural':
+      switch (intent.payload.action) {
+        case 'add-node':
+          return handlers.node.addNode(intent, refs);
+        case 'delete-node':
+          return handlers.node.deleteNode(intent, refs);
+        case 'move-node':
+          return handlers.node.moveNode(intent, refs);
+        // ... route to appropriate handler
+      }
+    case 'ai-lock-structural':
+      // Route to handlers that may trigger ELK
+      // ...
+  }
+}
+```
+
+### ❌ WRONG: Business Logic in Orchestrator
+
+```typescript
+// ❌ WRONG: Business logic in Orchestrator
+export async function apply(intent: EditIntent): Promise<void> {
+  if (intent.payload.action === 'add-node') {
+    // ❌ NO - Don't implement here
+    const newNode = { id: intent.payload.nodeId, ... };
+    refs.graphStateRef.current.children.push(newNode);
+    // ... more implementation
+  }
+}
+```
+
+## Handler Structure
+
+### ✅ CORRECT: Self-Contained Handlers
+
+```typescript
+// ✅ CORRECT: Handler in handlers/node/addNode.ts
+export async function addNode(intent: EditIntent, refs: StateRefs): Promise<void> {
+  const { nodeId, parentId, position, size, data } = intent.payload;
+  
+  // 1. Domain mutation (structure only)
+  refs.graphStateRef.current = mutations.addNode(
+    nodeId,
+    parentId,
+    refs.graphStateRef.current,
+    data
+  );
+  
+  // 2. ViewState write (geometry)
+  if (!refs.viewStateRef.current.node) {
+    refs.viewStateRef.current.node = {};
+  }
+  refs.viewStateRef.current.node[nodeId] = {
+    x: position.x,
+    y: position.y,
+    w: size.w,
+    h: size.h
+  };
+  
+  // 3. Render directly (FREE mode bypasses ELK hook)
+  renderDirect(refs);
+}
+```
+
+## Folder Structure
+
+```
+client/core/orchestration/
+├── Orchestrator.ts              # ✅ PURE FACADE - routing only
+├── Policy.ts                    # Layout decisions (FREE vs LOCK)
+├── types.ts                     # EditIntent, Source, EditKind
+├── ARCHITECTURE.md              # Blueprint documentation
+│
+├── state/
+│   └── StateRefs.ts            # Centralized refs (graphStateRef, viewStateRef, etc.)
+│
+├── handlers/                    # ✅ Business logic implementations
+│   ├── index.ts                # Re-exports all handlers
+│   │
+│   ├── node/
+│   │   ├── index.ts
+│   │   ├── addNode.ts          # FREE: add-node action
+│   │   ├── deleteNode.ts       # FREE: delete-node action
+│   │   └── moveNode.ts         # FREE: move-node (reparent)
+│   │
+│   ├── group/
+│   │   ├── index.ts
+│   │   ├── createGroup.ts      # FREE: create-wrapper-section
+│   │   ├── setGroupMode.ts     # FREE: set-group-mode (FREE/LOCK toggle)
+│   │   └── arrangeGroup.ts     # LOCK: arrange-group (triggers ELK)
+│   │
+│   ├── edge/
+│   │   ├── index.ts
+│   │   └── deleteEdge.ts       # FREE: delete-edge action
+│   │
+│   └── canvas/
+│       ├── index.ts
+│       └── resetCanvas.ts      # FREE: reset-canvas action
+│
+└── render/
+    └── Renderer.ts             # Coordinates setNodesRef/setEdgesRef calls
+```
+
+## Principles
+
+### 1. Orchestrator.ts = Pure Router
+
+- ❌ NO implementation details
+- ❌ NO business logic
+- ❌ NO domain mutations
+- ❌ NO ViewState writes
+- ✅ ONLY routes EditIntent to appropriate handler
+- ✅ ONLY imports handlers, not mutations/ViewState directly
+
+### 2. Handlers = Business Logic
+
+- ✅ Each handler is self-contained
+- ✅ Can be tested in isolation
+- ✅ Can change without affecting other handlers
+- ✅ Directly use StateRefs, not React state
+- ✅ Follow the flow: Domain → ViewState → Render
+
+### 3. Handler Responsibilities
+
+Each handler should:
+
+1. **Extract payload** - Get parameters from `intent.payload`
+2. **Domain mutation** - Update structure in `refs.graphStateRef.current`
+3. **ViewState write** - Update geometry in `refs.viewStateRef.current` (if needed)
+4. **Render** - Call `renderDirect(refs)` or trigger ELK (for LOCK mode)
+
+## Handler Pattern
+
+```typescript
+// Template for new handler
+// handlers/{category}/{actionName}.ts
+
+import type { EditIntent } from '../types';
+import type { StateRefs } from '../state/StateRefs';
+import { renderDirect } from '../render/Renderer';
+
+export async function actionName(intent: EditIntent, refs: StateRefs): Promise<void> {
+  // 1. Extract payload
+  const { param1, param2 } = intent.payload;
+  
+  // 2. Domain mutation (structure only, no coordinates)
+  refs.graphStateRef.current = mutations.someMutation(
+    param1,
+    param2,
+    refs.graphStateRef.current
+  );
+  
+  // 3. ViewState write (geometry - if needed)
+  if (intent.kind === 'free-structural') {
+    // Write geometry for FREE mode
+    refs.viewStateRef.current.node[nodeId] = { x, y, w, h };
+  }
+  
+  // 4. Render
+  if (intent.kind === 'free-structural') {
+    // FREE mode: render directly
+    renderDirect(refs);
+  } else if (intent.kind === 'ai-lock-structural') {
+    // LOCK mode: trigger ELK via setRawGraph
+    // (ELK hook will render after layout)
+    setRawGraph(refs.graphStateRef.current, 'ai');
+  }
+}
+```
+
+## Adding New Handlers
+
+1. ✅ Create file in `handlers/{category}/{actionName}.ts`
+2. ✅ Export function: `export async function actionName(intent, refs)`
+3. ✅ Follow handler pattern: Extract → Domain → ViewState → Render
+4. ✅ Add to `handlers/{category}/index.ts` re-exports
+5. ✅ Add routing case in `Orchestrator.ts` switch statement
+6. ✅ Test handler in isolation
+
+## Common Mistakes
+
+❌ **Mistake**: Adding business logic to Orchestrator.ts  
+✅ **Fix**: Extract to handler in `handlers/` folder
+
+❌ **Mistake**: Importing mutations directly in Orchestrator  
+✅ **Fix**: Handlers import mutations, Orchestrator only imports handlers
+
+❌ **Mistake**: Writing to ViewState in Orchestrator  
+✅ **Fix**: Handlers write to ViewState, Orchestrator only routes
+
+❌ **Mistake**: Handler calling other handlers directly  
+✅ **Fix**: Handlers should be independent, use Orchestrator.apply() if needed
+
+## Files
+
+- `client/core/orchestration/Orchestrator.ts` - Pure router (edit only for routing)
+- `client/core/orchestration/ARCHITECTURE.md` - Full architecture documentation
+- `client/core/orchestration/handlers/` - All business logic implementations
+- `client/core/orchestration/state/StateRefs.ts` - Centralized refs interface

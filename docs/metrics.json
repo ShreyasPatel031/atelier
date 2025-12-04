@@ -1,0 +1,30 @@
+{
+  "repo_name": "openai-realtime-console-edit-figjam",
+  "repo_path": "/Users/shreyaspatel/Desktop/Code/openai-realtime-console-edit-figjam",
+  "repo_size_mb": 362039.21484375,
+  "total_files": 0,
+  "total_code_files": 234,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 2.794543981552124,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 0.026530742645263672,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    }
+  },
+  "time_to_first_overview": null,
+  "first_overview_file": null,
+  "total_duration": 4.541399240493774,
+  "total_tokens": 0,
+  "total_files_created": 0,
+  "start_time": 1764819947.6339798,
+  "end_time": 1764819952.175379
+}

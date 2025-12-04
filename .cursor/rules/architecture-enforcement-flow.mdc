@@ -1,0 +1,185 @@
+---
+description: When implementing features that modify graph structure or layout - enforce the Orchestration → Domain → Layout → ViewState → Renderer flow
+alwaysApply: false
+---
+
+# Architecture Enforcement: Data Flow Rules
+
+## CRITICAL RULE
+
+**All graph modifications MUST follow this exact flow:**
+
+```
+INPUT → Orchestration → Domain → Layout → ViewState → Renderer → OUTPUT
+```
+
+## The Flow Explained
+
+### 1. Orchestration (Entry Point)
+
+**File**: `client/core/orchestration/Orchestrator.ts`
+
+- Pure routing only, no business logic
+- Routes `EditIntent` to appropriate handler
+- Determines if operation is FREE or LOCK/AI mode
+
+```typescript
+// ✅ CORRECT: All operations go through Orchestrator
+apply({
+  source: 'user',
+  kind: 'free-structural',
+  scopeId: 'root',
+  payload: { action: 'add-node', ... }
+});
+```
+
+### 2. Domain (Pure Structure)
+
+**Files**: `client/components/graph/mutations.ts`, `client/core/orchestration/handlers/*/`
+
+- Pure ELK JSON format (no coordinates)
+- Only structure: nodes, edges, children, labels
+- No x/y/width/height/position data
+
+```typescript
+// ✅ CORRECT: Domain mutation (structure only)
+const updatedGraph = addNode(nodeId, parentId, graph, { label: 'Node' });
+// Returns ELK graph with structure, no coordinates
+```
+
+```typescript
+// ❌ WRONG: Domain with coordinates
+const node = { id: 'node1', x: 100, y: 200 }; // NO coordinates in Domain
+```
+
+### 3. Layout (Geometry Calculation)
+
+**Files**: `client/core/layout/ScopedLayoutRunner.ts`, ELK
+
+- Only runs for AI/LOCK mode
+- Takes Domain structure → calculates positions
+- Returns geometry delta (x, y, w, h for nodes/groups)
+
+```typescript
+// ✅ CORRECT: Layout calculates geometry from structure
+const delta = await runScopeLayout(scope, domainGraph, viewState, options);
+// Returns: { node: { nodeId: { x, y, w, h } }, group: {...} }
+```
+
+### 4. ViewState (Geometry Storage)
+
+**Files**: `client/core/viewstate/ViewState.ts`, `client/core/viewstate/CoordinateService.ts`
+
+- Authoritative source for ALL geometry
+- Stores absolute coordinates only
+- NEVER stores relative coordinates
+- Merged with Layout output (for LOCK mode)
+
+```typescript
+// ✅ CORRECT: ViewState stores absolute coordinates
+viewStateRef.current.node[nodeId] = {
+  x: 100,  // Absolute world-space X
+  y: 200,  // Absolute world-space Y
+  w: 96,
+  h: 96
+};
+```
+
+### 5. Renderer (Visual Output)
+
+**Files**: `client/core/renderer/ReactFlowAdapter.ts`, `client/core/renderer/ViewStateToReactFlow.ts`
+
+- Reads ONLY from ViewState (never Domain, never ELK directly)
+- Converts ViewState geometry → ReactFlow nodes/edges
+- Calculates relative positions for ReactFlow's parentId system
+
+```typescript
+// ✅ CORRECT: Renderer reads from ViewState only
+const { nodes, edges } = toReactFlowWithViewState(
+  domainGraph,  // Structure only
+  dimensions,
+  viewStateRef.current,  // Geometry source of truth
+  { strictGeometry: true }
+);
+```
+
+```typescript
+// ❌ WRONG: Renderer reading from ELK or Domain
+const node = {
+  position: elkNode.x, elkNode.y  // NO - read from ViewState
+};
+```
+
+## Mode-Specific Flows
+
+### FREE Mode (No Layout Step)
+
+```
+User Action
+    ↓
+Orchestrator.apply({ kind: 'free-structural' })
+    ↓
+Handler (handlers/node/addNode.ts)
+    ↓
+1. Domain.mutate (structure)
+2. ViewState.write (geometry - user-provided absolute coords)
+3. Renderer.convert (ViewState → ReactFlow)
+    ↓
+ReactFlow updated directly
+```
+
+### AI/LOCK Mode (With Layout Step)
+
+```
+AI Action
+    ↓
+Orchestrator.apply({ kind: 'ai-lock-structural' })
+    ↓
+Handler
+    ↓
+1. Domain.mutate (structure)
+2. Layout.run (ELK calculates geometry)
+3. ViewState.merge (ELK output → ViewState)
+4. Renderer.convert (ViewState → ReactFlow)
+    ↓
+ReactFlow updated via ELK hook
+```
+
+## Key Invariants
+
+1. **ViewState is geometry source of truth** - Renderer reads exclusively from ViewState
+2. **No fallbacks** - If geometry missing, fail loudly in dev (no ELK fallbacks in FREE mode)
+3. **Domain never affects renderer directly** - All geometry flows: Domain → Layout → ViewState → Renderer
+4. **Orchestration coordinates** - Only orchestration writes to Domain/Layout/ViewState
+5. **Layout is optional** - Only for AI/LOCK mode, skipped in FREE mode
+
+## Violations to Watch For
+
+❌ **Direct ReactFlow manipulation** - `setNodes()` or `setEdges()` outside renderer  
+❌ **ELK in UI components** - Using ELK directly in InteractiveCanvas or components  
+❌ **Domain in renderer** - Reading coordinates from Domain graph  
+❌ **ELK fallbacks in FREE mode** - If geometry missing, fail loudly, don't use ELK  
+❌ **Orchestration logic in hooks** - Business logic should be in handlers, not hooks  
+❌ **Multiple rendering paths** - Should have single canonical path through renderer  
+
+## Architecture Check Script
+
+Run before committing:
+
+```bash
+npm run test:architecture
+```
+
+Checks for:
+- Direct ReactFlow manipulation (`setNodes`, `setEdges`)
+- ELK usage in UI components
+- Domain access in renderers
+- Orchestration logic in hooks
+- ELK fallbacks in FREE mode
+
+## Files
+
+- `docs/FIGJAM_REFACTOR.md` - Complete architecture diagram
+- `client/core/orchestration/ARCHITECTURE.md` - Orchestrator architecture
+- `scripts/check-architecture.sh` - Architecture validation script
+- `docs/FEATURE_DEVELOPMENT_TEMPLATE.md` - Pre-implementation checklist

@@ -1,0 +1,92 @@
+---
+description: When working with FREE mode user interactions - FREE mode must bypass useElkToReactflowGraphConverter entirely
+alwaysApply: false
+---
+
+# FREE Mode: Never Touch useElkToReactflowGraphConverter
+
+## CRITICAL RULE
+
+**FREE mode user interactions MUST NEVER go through `useElkToReactflowGraphConverter.ts`**
+
+## What FREE Mode Should Do
+
+### ✅ CORRECT: Use Orchestrator Pattern
+
+```typescript
+// ✅ CORRECT: Use Orchestrator for FREE mode
+import { apply } from '../../core/orchestration/Orchestrator';
+
+apply({
+  source: 'user',
+  kind: 'free-structural',
+  scopeId: 'root',
+  payload: {
+    action: 'add-node',
+    nodeId: id,
+    parentId: 'root',
+    position: { x, y },
+    size: { w, h },
+    data: { label: '' }
+  }
+});
+```
+
+### ❌ WRONG: Calling setRawGraph or useElkToReactflowGraphConverter
+
+```typescript
+// ❌ WRONG: Do NOT use setRawGraph for FREE mode
+setRawGraph(updatedGraph, 'user'); // NEVER for FREE mode
+
+// ❌ WRONG: Do NOT call handlers from useElkToReactflowGraphConverter
+handleAddNode(...); // NEVER for FREE mode user actions
+```
+
+## Data Flow for FREE Mode
+
+```
+User Action (click, drag, etc.)
+    ↓
+Orchestrator.apply({ kind: 'free-structural', ... })
+    ↓
+Handler (handlers/node/addNode.ts, etc.)
+    ↓
+1. ViewState.write (geometry - absolute coordinates)
+2. Domain.mutate (structure only, no coordinates)
+3. Render directly (setNodesRef/setEdgesRef)
+    ↓
+ReactFlow updated directly (bypasses ELK hook)
+```
+
+## Key Principles
+
+1. **FREE mode = NO ELK** - ELK is only for AI/LOCK mode layouts
+2. **Update refs directly** - `graphStateRef.current`, `viewStateRef.current`
+3. **Render directly** - `setNodesRef.current()`, `setEdgesRef.current()`
+4. **Never call setRawGraph** - This triggers ELK hook which is AI/LOCK only
+
+## When to Use Each System
+
+| Mode | System | Entry Point |
+|------|--------|-------------|
+| FREE mode user actions | Orchestrator → Handlers → Direct render | `apply({ kind: 'free-structural' })` |
+| AI/LOCK mode layouts | Orchestrator → Handlers → ELK → Hook | `apply({ kind: 'ai-lock-structural' })` → `setRawGraph('ai')` |
+
+## Refactoring Checklist
+
+If you see FREE mode code touching `useElkToReactflowGraphConverter`:
+
+1. ✅ Extract logic to a handler in `client/core/orchestration/handlers/`
+2. ✅ Route through `Orchestrator.apply({ kind: 'free-structural' })`
+3. ✅ Handler updates refs directly: `graphStateRef.current`, `viewStateRef.current`
+4. ✅ Handler renders directly: `setNodesRef.current()`, `setEdgesRef.current()`
+5. ✅ Remove `setRawGraph('user')` calls
+6. ✅ Remove `handleAddNode`, `handleDeleteNode`, etc. calls from InteractiveCanvas
+
+## Files That Should NOT Import useElkToReactflowGraphConverter
+
+- ❌ `client/components/ui/InteractiveCanvas.tsx` - Use Orchestrator instead
+- ❌ `client/utils/canvas/canvasInteractions.ts` - Use Orchestrator instead  
+- ❌ `client/core/drag/DragReparentHandler.ts` - Use Orchestrator instead
+- ✅ `client/hooks/useCanvasInitialization.ts` - Only for initialization
+- ✅ `client/hooks/useElkToReactflowGraphConverter.ts` - Only exports hook for AI mode

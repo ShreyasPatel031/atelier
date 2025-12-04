@@ -278,11 +278,10 @@ export function addNode(
   
   // Create new node: using data.label if provided, otherwise nodename
   const label = data?.label || nodename;
+  // Don't include empty children/edges arrays - only groups have children
   const newNode: ElkNode = {
     id: nodename,
     labels: [{ text: label }],
-    children: [],
-    edges: []
   };
   
   // Add data properties if provided (for future compatibility)

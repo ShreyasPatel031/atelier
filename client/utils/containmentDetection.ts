@@ -165,8 +165,9 @@ export function findContainingGroup(
     return null;
   }
 
-  // Find all group nodes
-  const groups = allNodes.filter(n => n.type === 'group');
+  // Find all group nodes - use 'draftGroup' type (we bypass ReactFlow's built-in 'group' type)
+  // See docs/FIGJAM_REFACTOR.md section 0.1 - we explicitly don't use ReactFlow's parent-child system
+  const groups = allNodes.filter(n => n.type === 'group' || n.type === 'draftGroup');
   
   for (const group of groups) {
     // Skip if node is the group itself
@@ -213,8 +214,10 @@ export function findFullyContainedNodes(
   if (!groupBounds) return [];
 
   // Find all non-group nodes that are not already children of this group
+  // Exclude both 'group' and 'draftGroup' types (we use 'draftGroup' to bypass ReactFlow's built-in group behavior)
   const regularNodes = allNodes.filter(n => 
     n.type !== 'group' && 
+    n.type !== 'draftGroup' &&
     n.id !== group.id && 
     n.parentId !== group.id
   );

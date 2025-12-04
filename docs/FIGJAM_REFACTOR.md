@@ -17,6 +17,36 @@
 * **No duplicate IDs** (nodes, edges, groups).
 * **Indistinguishable by origin:** Once saved, diagrams do not reveal whether AI or human created them. Only group modes (FREE/LOCK) persist.
 
+### 0.1) CRITICAL: No ReactFlow Parent-Child System
+
+**We explicitly DO NOT use ReactFlow's `parentId` or relative positioning.**
+
+| What we DON'T do | What we DO instead |
+|-----------------|-------------------|
+| Set `parentId` on ReactFlow nodes | Track parent-child in Domain graph only |
+| Use relative coordinates for children | ALL nodes use ABSOLUTE coordinates |
+| Let ReactFlow handle group drag | Manually update children's ViewState when group moves |
+| Convert between relative/absolute | Store only ABSOLUTE in ViewState |
+
+**Why:**
+1. ReactFlow's parent-child coordinate conversion is unreliable during drags
+2. Group drag behavior with `parentId` is inconsistent
+3. Reparenting during drag causes coordinate jumps
+4. We lose control over the exact positioning
+
+**Implementation:**
+- `ViewStateToReactFlow.ts`: Never sets `parentId`, always uses absolute positions
+- `toReactFlow.ts`: Uses type `'draftGroup'` not `'group'` for group nodes
+- `onNodesChange` in InteractiveCanvas: When a group moves, manually update all children by the same delta
+- `onNodeDragStop`: Stores absolute position to ViewState
+- Domain graph tracks the logical parent-child relationship for reparenting logic
+- `GroupDragHandler.ts`: Handles group drag with absolute coordinates
+
+**CRITICAL: Node Types**
+- Groups MUST use type `'draftGroup'`, NOT `'group'`
+- ReactFlow's built-in `'group'` type has special behavior that blocks dragging
+- `'draftGroup'` is our custom type that renders with `DraftGroupNode` but is fully draggable
+
 ---
 
 ## 1) Vocabulary (final)

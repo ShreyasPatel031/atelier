@@ -56,6 +56,8 @@ import { syncWithFirebase as syncWithFirebaseService } from "../../services/sync
 import { sanitizeStoredViewState, restoreNodeVisuals } from "../../utils/canvasLayout"
 import { createEmptyViewState } from "../../core/viewstate/ViewState"
 import { CoordinateService } from "../../core/viewstate/CoordinateService"
+import { handleGroupDrag, initializeDragTracking, clearDragTracking } from "../../core/drag/GroupDragHandler"
+import { handleDragReparent } from "../../core/drag/DragReparentHandler"
 import DraftGroupNode from "../node/DraftGroupNode"
 import StepEdge from "../StepEdge"
 import { runScopeLayout } from "../../core/layout/ScopedLayoutRunner"
@@ -86,6 +88,7 @@ import { setupWindowHelpers } from "../../utils/migrationTestHelpers"
  */
 import { placeNodeOnCanvas } from "../../utils/canvas/canvasInteractions"
 import { handleGroupToolPaneClick } from "../../utils/canvas/canvasGroupInteractions"
+import { createLibavoidFixtures } from "../../utils/canvas/libavoidTestFixtures"
 import { handleDeleteKey } from "../../utils/canvas/canvasDeleteInteractions"
 import { useCanvasPersistenceEffect } from "../../hooks/canvas/useCanvasPersistence"
 import NodeHoverPreview from "./NodeHoverPreview"
@@ -93,6 +96,7 @@ import GroupHoverPreview from "./GroupHoverPreview"
 import CanvasToolbar from "./CanvasToolbar"
 import { useCanvasEdgeInteractions } from "../../hooks/canvas/useCanvasEdgeInteractions"
 import { setModeInViewState, migrateModeDomainToViewState } from "../../core/viewstate/modeHelpers"
+import { useElkDebugger } from "../../hooks/canvas/useElkDebugger"
 
 import Chatbox from "./Chatbox"
 import { ApiEndpointProvider } from '../../contexts/ApiEndpointContext'
@@ -141,6 +145,7 @@ const SIMPLE_DEFAULT = addIconsToArchitecture(SIMPLE_DEFAULT_ARCHITECTURE);
 const nodeTypes = {
   custom: CustomNodeComponent,
   group: DraftGroupNode,
+  draftGroup: DraftGroupNode, // Used for groups to avoid ReactFlow's built-in group behavior
 };
 
 const edgeTypes = {
@@ -495,32 +500,25 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     };
 
     // Command to reset to empty
+    // Uses Orchestrator handler to bypass useElkToReactflowGraphConverter
     (window as any).resetCanvas = () => {
-      console.log('🔄 Resetting to empty root...');
-      
-      // CRITICAL: Clear ViewState FIRST before setting empty graph
+      // 1. Clear domain graph and ViewState via refs (bypasses ELK hook)
+      rawGraphRef.current = { id: 'root', children: [], edges: [] };
       viewStateRef.current = { node: {}, group: {}, edge: {} };
-      console.log('🗑️ Cleared ViewState');
       
-      // Set empty graph (this will trigger rendering with empty ViewState)
-      setRawGraph({ id: "root", children: [], edges: [] }, 'user');
+      // 2. Clear ReactFlow directly (bypasses ELK hook)
+      setNodes([]);
+      setEdges([]);
       
-      // CRITICAL: Clear ReactFlow's internal state to remove ghost nodes
-      setNodes([]); // OK: resetCanvas needs to clear ReactFlow internal state
-      setEdges([]); // OK: resetCanvas needs to clear ReactFlow internal state
-      console.log('🗑️ Cleared ReactFlow nodes and edges');
-      
-      // Reset viewport to center (access ref when called, not when defined)
+      // 3. Reset viewport to center
       setTimeout(() => {
         const rfInstance = (window as any).__reactFlowInstance || reactFlowRef?.current;
         if (rfInstance) {
           rfInstance.setCenter(0, 0, { zoom: 1 });
-          console.log('📍 Viewport reset to center');
         }
       }, 100);
       
-      // Save EMPTY snapshot to localStorage (this signals "user cleared the app")
-      // Don't remove localStorage entirely - that would allow URL loading
+      // 4. Save EMPTY snapshot to localStorage (this signals "user cleared the app")
       try {
         const emptySnapshot = {
           rawGraph: { id: "root", children: [], edges: [] },
@@ -531,13 +529,9 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         const serialized = JSON.stringify(emptySnapshot);
         localStorage.setItem(LOCAL_CANVAS_SNAPSHOT_KEY, serialized);
         sessionStorage.setItem(LOCAL_CANVAS_SNAPSHOT_KEY, serialized);
-        console.log('🗑️ Saved empty snapshot to localStorage (blocks URL loading)');
       } catch (e) {
         console.warn('Failed to save empty snapshot:', e);
       }
-      
-      console.log('✅ Canvas cleared - empty root loaded');
-      console.log('💡 localStorage priority ensures URL/Firebase won\'t override this');
     };
 
     // Legacy command for backward compatibility
@@ -549,147 +543,13 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       }
     };
 
-    // Command to load libavoid test fixtures (15 nodes, 8 edges - matches BtybA actual-canvas-test)
+    // Command to load libavoid test fixtures - logic extracted to utility
     (window as any).loadLibavoidFixtures = () => {
-      console.log('🧪 Loading libavoid canvas fixtures (15 nodes, 8 edges)...');
-      
-      // Clear existing state
-      viewStateRef.current = { node: {}, group: {}, edge: {} };
-      setNodes([]);
-      setEdges([]);
-      
-      // 15 nodes matching BtybA loadLibavoidFixtures
-      const scenarioNodes = [
-        // Horizontal test: edge routes around h-block
-        { id: 'libavoid-h-left', label: 'H-Left', x: 160, y: 200, width: 96, height: 96 },
-        { id: 'libavoid-h-block', label: 'H-Block', x: 320, y: 184, width: 96, height: 128 },
-        { id: 'libavoid-h-right', label: 'H-Right', x: 500, y: 200, width: 96, height: 96 },
-        // Vertical test: edge routes around v-block
-        { id: 'libavoid-v-top', label: 'V-Top', x: 640, y: 80, width: 96, height: 96 },
-        { id: 'libavoid-v-block', label: 'V-Block', x: 620, y: 216, width: 128, height: 96 },
-        { id: 'libavoid-v-bottom', label: 'V-Bottom', x: 640, y: 420, width: 96, height: 96 },
-        // Straight line test: no obstacle
-        { id: 'libavoid-straight-left', label: 'Straight-L', x: 160, y: 520, width: 96, height: 96 },
-        { id: 'libavoid-straight-right', label: 'Straight-R', x: 320, y: 520, width: 96, height: 96 },
-        // Diagonal test: edge routes around d-block
-        { id: 'libavoid-d-top-left', label: 'Diag-Top', x: 480, y: 520, width: 96, height: 96 },
-        { id: 'libavoid-d-block', label: 'Diag-Block', x: 600, y: 600, width: 96, height: 96 },
-        { id: 'libavoid-d-bottom-right', label: 'Diag-Bottom', x: 760, y: 760, width: 96, height: 96 },
-        // Port spacing test: multiple edges from/to same ports
-        { id: 'libavoid-port-source', label: 'Port-Source', x: 224, y: 656, width: 96, height: 96 },
-        { id: 'libavoid-port-middle1', label: 'Port-Mid1', x: 300, y: 280, width: 96, height: 96 },
-        { id: 'libavoid-port-middle2', label: 'Port-Mid2', x: 300, y: 360, width: 96, height: 96 },
-        { id: 'libavoid-port-target', label: 'Port-Target', x: 500, y: 320, width: 96, height: 96 },
-      ];
-
-      // 8 edges matching BtybA loadLibavoidFixtures
-      const scenarioEdges = [
-        { id: 'edge-horizontal', source: 'libavoid-h-left', target: 'libavoid-h-right' },
-        { id: 'edge-vertical', source: 'libavoid-v-top', target: 'libavoid-v-bottom' },
-        { id: 'edge-straight', source: 'libavoid-straight-left', target: 'libavoid-straight-right' },
-        { id: 'edge-diagonal', source: 'libavoid-d-top-left', target: 'libavoid-d-bottom-right' },
-        // Port spacing: two edges FROM same source
-        { id: 'edge-port-from-1', source: 'libavoid-port-source', target: 'libavoid-port-middle1' },
-        { id: 'edge-port-from-2', source: 'libavoid-port-source', target: 'libavoid-port-middle2' },
-        // Port spacing: two edges TO same target
-        { id: 'edge-port-to-1', source: 'libavoid-port-middle1', target: 'libavoid-port-target' },
-        { id: 'edge-port-to-2', source: 'libavoid-port-middle2', target: 'libavoid-port-target' },
-      ];
-
-      // Build the raw graph in ELK format
-      const testGraph = {
-        id: 'root',
-        mode: 'FREE' as const,
-        children: scenarioNodes.map(node => ({
-          id: node.id,
-          labels: [{ text: node.label }],
-          children: [],
-          edges: [],
-          data: { icon: 'default' }
-        })),
-        edges: scenarioEdges.map(edge => ({
-          id: edge.id,
-          sources: [edge.source],
-          targets: [edge.target],
-          labels: [{ text: edge.id }]
-        }))
-      };
-
-      // Initialize ViewState with node positions
-      scenarioNodes.forEach(node => {
-        viewStateRef.current.node[node.id] = {
-          x: node.x,
-          y: node.y,
-          w: node.width,
-          h: node.height
-        };
+      createLibavoidFixtures({
+        setNodes,
+        setEdges,
+        viewStateRef
       });
-
-      console.log('🧪 [LIBAVOID] ViewState initialized:', {
-        nodeCount: Object.keys(viewStateRef.current.node).length,
-        nodes: Object.keys(viewStateRef.current.node)
-      });
-
-      // In FREE mode, we need to set ReactFlow nodes directly (ELK is not used)
-      const rfNodes = scenarioNodes.map(node => ({
-        id: node.id,
-        type: 'custom',
-        position: { x: node.x, y: node.y },
-        data: { 
-          label: node.label,
-          width: node.width,
-          height: node.height,
-          icon: 'default'
-        },
-        style: { width: node.width, height: node.height }
-      }));
-
-      // Convert nodes to obstacle rectangles for libavoid routing
-      // CRITICAL: Pass staticObstacles to edges so libavoid knows about all nodes
-      const obstacleRects = scenarioNodes.map(node => ({
-        id: node.id,
-        x: node.x,
-        y: node.y,
-        width: node.width,
-        height: node.height
-      }));
-
-      const rfEdges = scenarioEdges.map(edge => ({
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        type: 'step',
-        data: {
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          // Pass all nodes as static obstacles for libavoid routing
-          staticObstacles: obstacleRects,
-          staticObstacleIds: scenarioNodes.map(n => n.id),
-          rerouteKey: Date.now() // Use rerouteKey (StepEdge watches this)
-        }
-      }));
-
-      // BYPASS REACTFLOW: Set nodes and edges directly, DO NOT call setRawGraph
-      // This completely bypasses ReactFlow's graph conversion system which overwrites edges
-      // We set nodes/edges directly with type='step' and obstacles, and keep them isolated
-      setNodes(rfNodes as any);
-      setEdges(rfEdges as any);
-      
-      // Store fixture edges in a ref for restoration if needed
-      const fixtureEdgesRef = { current: rfEdges };
-      (window as any).__libavoidFixtureEdges = fixtureEdgesRef;
-      
-      // DO NOT call setRawGraph - it triggers ReactFlow conversions that overwrite our edges
-      // We bypass the entire graph conversion system for fixtures
-      // The graph structure is stored in testGraph but we don't need to set it via setRawGraph
-      // since we're managing nodes/edges directly
-      
-      console.log('🧪 [LIBAVOID] Bypassed ReactFlow conversion - edges set directly with type=step');
-      console.log('🧪 [LIBAVOID] Loaded fixture with', testGraph.children.length, 'nodes and', testGraph.edges.length, 'edges');
-      
-      console.log('🧪 [LIBAVOID] Loaded fixture with', testGraph.children.length, 'nodes and', testGraph.edges.length, 'edges');
-      console.log('🧪 [LIBAVOID] ReactFlow nodes set directly for FREE mode');
-      console.log('🧪 [LIBAVOID] Tests: obstacle avoidance (h-block, v-block, d-block), port spacing (edge-port-from-*, edge-port-to-*)');
     };
 
     // Log help message
@@ -709,39 +569,25 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     };
   }, []);
 
-  // Auto-load libavoid test fixtures on startup (5-node obstacle test)
+  // Load libavoid test fixtures ONLY when explicitly requested via URL params
+  // Canvas stays clean by default - use ?testFixtures=1 or ?libavoidFixtures=1 to load fixtures
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const hasTestFixtures = params.get('testFixtures') === '1';
     const hasLibavoidFixtures = params.get('libavoidFixtures') === '1';
-    const isDev = process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost';
     
-    console.log('🧪 [DEBUG] Auto-load check:', {
-      url: window.location.href,
-      hasTestFixtures,
-      hasLibavoidFixtures,
-      isDev,
-      rawGraphExists: !!rawGraph,
-      rawGraphChildrenCount: rawGraph?.children?.length || 0
-    });
-    
-    // Auto-load if URL params present OR if in dev mode with empty canvas
-    const shouldAutoLoad = hasTestFixtures || hasLibavoidFixtures || 
-      (isDev && (!rawGraph || (rawGraph.children?.length || 0) === 0));
-    
-    if (shouldAutoLoad) {
-      console.log('🧪 [TEST] Auto-loading libavoid test fixtures...');
+    // Only load if URL params explicitly request it
+    if (hasTestFixtures || hasLibavoidFixtures) {
+      console.log('🧪 [LIBAVOID] URL param detected, loading fixtures...');
       // Small delay to ensure component is fully mounted and console commands are registered
       setTimeout(() => {
-        // Use the console command which handles ViewState setup correctly
         if ((window as any).loadLibavoidFixtures) {
+          console.log('🧪 [LIBAVOID] Calling loadLibavoidFixtures()...');
           (window as any).loadLibavoidFixtures();
         } else {
-          console.error('🧪 [TEST] loadLibavoidFixtures not available yet');
+          console.error('🧪 [LIBAVOID] ERROR: loadLibavoidFixtures function not found!');
         }
       }, 500);
-    } else {
-      console.log('🧪 [DEBUG] NOT auto-loading - conditions not met');
     }
   }, []);
   
@@ -1022,8 +868,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   // We pass BOTH staticObstacleIds AND staticObstacles with actual positions to ensure correct routing
   useEffect(() => {
     if (nodes.length === 0 || edges.length === 0) {
-      console.log('[AutoObstacleConfig] Skipping - nodes:', nodes.length, 'edges:', edges.length);
-      return;
+      return; // Skip silently - no obstacles to configure
     }
     
     console.log('[AutoObstacleConfig] Running for', edges.length, 'edges and', nodes.length, 'nodes');
@@ -1075,9 +920,10 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
             ...data,
             staticObstacleIds: allNodeIds,
             staticObstacles: allObstacles, // Include actual positions!
-            obstacleMargin: 8, // Reduced from 20 - smaller spacing makes routing work better
+            obstacleMargin: 32, // 2 grid spaces (16px * 2 = 32px)
             _obstacleSignature: obstacleSignature, // Track for change detection
-            rerouteKey: Date.now() // Force re-routing - this is the dependency StepEdge watches
+            // Use signature hash as rerouteKey - stable but changes when obstacles change
+            rerouteKey: obstacleSignature.length + obstacleSignature.charCodeAt(0)
           },
         };
       });
@@ -1230,6 +1076,14 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
     setSelectedTool(tool);
   }, [selectedTool, reactFlowRef, setNodes, selectedNodes, setSelectedNodes, setSelectedEdges, pendingGroupId]);
+
+  // Expose handleToolSelect on window for testing
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).handleToolSelect = handleToolSelect;
+      (window as any).__selectedTool = selectedTool;
+    }
+  }, [handleToolSelect, selectedTool]);
 
   // Listen for auth state changes (moved here after config is defined)
   useEffect(() => {
@@ -1703,16 +1557,15 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     // Don't reset if already on new-architecture (would clear user's work!)
     if (isNewArch && !wasNewArch) {
       console.log('🔄 [useEffect] Switching to new-architecture, resetting graph');
-      const emptyGraph = {
-        id: "root",
-        children: [],
-        edges: []
-      };
-      setRawGraph(emptyGraph);
+      // Bypass ELK hook - update refs directly
+      rawGraphRef.current = { id: 'root', children: [], edges: [] };
+      viewStateRef.current = { node: {}, group: {}, edge: {} };
+      setNodes([]);
+      setEdges([]);
     }
     
     previousArchitectureIdRef.current = selectedArchitectureId;
-  }, [selectedArchitectureId, setRawGraph]);
+  }, [selectedArchitectureId, setNodes, setEdges]);
 
   // Debug logging for graph state changes
   useEffect(() => {
@@ -2158,7 +2011,9 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       console.error('❌ [handleGraphChange] Failed to immediately persist viewstate:', error);
     }
 
-    markDirty();
+    if (markDirty && typeof markDirty === 'function') {
+      markDirty();
+    }
   }, [setRawGraph, rawGraph, getViewStateSnapshot, markDirty, selectedArchitectureId]);
 
   // Persist graph changes from Orchestrator (user-initiated structural changes)
@@ -2781,76 +2636,13 @@ Adapt these patterns to your specific requirements while maintaining the overall
   });
 
   
-  // ELK SVG view - always visible
-  const [elkSvgContent, setElkSvgContent] = useState<string>('');
-  const [isGeneratingSvg, setIsGeneratingSvg] = useState(false);
-  
-  // Generate SVG from domain graph - auto-update when graph changes
-  const generateElkSvg = useCallback(async () => {
-    if (!rawGraph) {
-      setElkSvgContent('');
-      return;
-    }
-    
-    setIsGeneratingSvg(true);
-    try {
-      // Create a deep copy of the graph
-      const graphCopy = JSON.parse(JSON.stringify(rawGraph));
-      
-      // Apply defaults and ensure IDs
-      const graphWithOptions = ensureIds(graphCopy);
-      
-      // Inject ViewState dimensions into graph before ELK layout
-      // This ensures debug viewer shows actual sizes, not defaults
-      const viewState = viewStateRef.current;
-      if (viewState) {
-        function injectViewStateDimensions(node: any): void {
-          const id = node.id;
-          const isGroup = !!(node.children && node.children.length > 0);
-          
-          // Get dimensions from ViewState
-          if (isGroup) {
-            const groupGeom = viewState.group?.[id];
-            if (groupGeom?.w && groupGeom?.h) {
-              node.width = groupGeom.w;
-              node.height = groupGeom.h;
-            }
-          } else {
-            const nodeGeom = viewState.node?.[id];
-            if (nodeGeom?.w && nodeGeom?.h) {
-              node.width = nodeGeom.w;
-              node.height = nodeGeom.h;
-            }
-          }
-          
-          // Recursively process children
-          if (node.children) {
-            node.children.forEach((child: any) => injectViewStateDimensions(child));
-          }
-        }
-        
-        injectViewStateDimensions(graphWithOptions);
-      }
-      
-      // Run ELK layout
-      const elk = new ELK();
-      const layoutedGraph = await elk.layout(graphWithOptions);
-      
-      // Generate SVG
-      const svgContent = generateSVG(layoutedGraph);
-      setElkSvgContent(svgContent);
-    } catch (error) {
-      console.error('Error generating ELK SVG:', error);
-      setElkSvgContent('<text x="20" y="20" fill="red">Error generating SVG</text>');
-    } finally {
-      setIsGeneratingSvg(false);
-    }
-  }, [rawGraph, viewStateRef]);
-  
-  // Auto-generate SVG when graph changes
-  useEffect(() => {
-    generateElkSvg();
-  }, [generateElkSvg]);
+  // ELK Debugger - extracted to dedicated hook per cursor rules
+  const { elkSvgContent, isGeneratingSvg, generateElkSvg } = useElkDebugger({
+    rawGraph,
+    rawGraphRef,
+    viewStateRef,
+    nodesLength: nodes.length
+  });
 
   const handleCreateWrapperAndArrange = useCallback(async (selectionIds: string[]) => {
     if (!rawGraph || !viewStateRef.current) {
@@ -2863,7 +2655,9 @@ Adapt these patterns to your specific requirements while maintaining the overall
       
       // Create wrapper section (domain mutation)
       const { graph: updatedGraph, wrapperId } = createWrapperSection(selectionIds, rawGraph);
-      setRawGraph(updatedGraph, 'user');
+      
+      // Update refs directly - bypasses ELK hook (ELK runs separately below)
+      rawGraphRef.current = updatedGraph;
       
       console.log('🟦 [WRAPPER] Created wrapper:', wrapperId);
       
@@ -2901,10 +2695,13 @@ Adapt these patterns to your specific requirements while maintaining the overall
         afterNodes: updatedViewState.node
       });
       
-      console.log('🟦 [WRAPPER] Layout complete, updating ReactFlow nodes');
+      console.log('🟦 [WRAPPER] Layout complete, rendering directly');
       
-      // Don't directly update ReactFlow - let Domain → ViewState → layout side-effect handle it
-      // The setRawGraph() call below will trigger proper synchronization
+      // Render directly - bypasses ELK hook (ELK already ran above)
+      const { convertViewStateToReactFlow } = await import('../../core/renderer/ViewStateToReactFlow');
+      const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, updatedViewState);
+      setNodes(nodes);
+      setEdges(edges);
       
       console.log('🟦 [WRAPPER] Wrapper creation and arrangement complete');
       
@@ -2948,27 +2745,33 @@ Adapt these patterns to your specific requirements while maintaining the overall
       
       if (!groupNode.children || groupNode.children.length === 0) {
         console.warn('🟦 [ARRANGE] Group has no children to arrange');
-        // Still update the graph to persist the mode change - use deep copy
+        // Still update the graph to persist the mode change - bypass ELK hook
         const updatedGraph = JSON.parse(JSON.stringify(rawGraph));
         const updatedGroupNode = findGroup(updatedGraph);
         if (updatedGroupNode) {
           updatedGroupNode.mode = newMode;
         }
         
-        setRawGraph(updatedGraph, 'user');
+        // FREE mode: Update refs directly (bypasses useElkToReactflowGraphConverter)
+        rawGraphRef.current = updatedGraph;
+        if (!viewStateRef.current.layout) viewStateRef.current.layout = {};
+        viewStateRef.current.layout[groupId] = { mode: newMode };
         return;
       }
       
       // Only run ELK if setting to LOCK (arranging)
       if (newMode !== 'LOCK') {
-        // Persist mode change with deep copy
+        // Persist mode change with deep copy - bypass ELK hook
         const updatedGraph = JSON.parse(JSON.stringify(rawGraph));
         const updatedGroupNode = findGroup(updatedGraph);
         if (updatedGroupNode) {
           updatedGroupNode.mode = newMode;
         }
         
-        setRawGraph(updatedGraph, 'user');
+        // FREE mode: Update refs directly (bypasses useElkToReactflowGraphConverter)
+        rawGraphRef.current = updatedGraph;
+        if (!viewStateRef.current.layout) viewStateRef.current.layout = {};
+        viewStateRef.current.layout[groupId] = { mode: newMode };
         return;
       }
       
@@ -3023,30 +2826,25 @@ Adapt these patterns to your specific requirements while maintaining the overall
         viewStateGroups: updatedViewState.group
       });
       
-      // Don't directly update ReactFlow - maintain Domain → ViewState → ReactFlow sync
-      // The setRawGraph() call below will trigger proper update via layout side-effect
-      
-      // ReactFlow positions are updated via ViewState → layout side-effect
-      // No need to force refresh - the setRawGraph() call below will trigger proper update
-      
-      // CRITICAL: Create a deep copy of rawGraph BEFORE setting mode
-      // This ensures we have a clean copy that we can mutate without affecting the original
+      // CRITICAL: Update refs directly - bypasses ELK hook (ELK already ran above)
       const updatedGraph = JSON.parse(JSON.stringify(rawGraph));
-      updatedGraph.viewState = updatedViewState;
       
-      // Phase 3: Write to ViewState only (no more Domain writes)
-      
-      // Write to ViewState.layout (primary location)
+      // Write mode to ViewState.layout (primary location)
       if (!updatedViewState.layout) {
         updatedViewState.layout = {};
       }
       updatedViewState.layout[groupId] = { mode: newMode };
       
-      // Update the graph with the ViewState that now includes layout
+      // Update refs
       updatedGraph.viewState = updatedViewState;
+      rawGraphRef.current = updatedGraph;
+      viewStateRef.current = updatedViewState;
       
-      setRawGraph(updatedGraph, 'user');
-      
+      // Render directly - bypasses ELK hook (ELK already ran above)
+      const { convertViewStateToReactFlow } = await import('../../core/renderer/ViewStateToReactFlow');
+      const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, updatedViewState);
+      setNodes(nodes);
+      setEdges(edges);
       
       console.log('🟦 [ARRANGE] Group arranged successfully, mode:', newMode);
     } catch (error) {
@@ -3061,6 +2859,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
     () => ({
       custom: CustomNodeComponent,
       group: DraftGroupNode,
+      draftGroup: DraftGroupNode, // Used for groups to avoid ReactFlow's built-in group behavior
     }),
     []
   );
@@ -3217,10 +3016,14 @@ const extractDimension = (value: number | string | undefined, fallback: number) 
 useEffect(() => {
   if (isHydratingRef.current) return;
   if (typeof window === "undefined") return;
-  if (!rawGraph) return;
+
+  // CRITICAL: Use rawGraphRef.current (source of truth for FREE mode) 
+  // instead of rawGraph React state which may be stale
+  const graphToSave = rawGraphRef.current || rawGraph;
+  if (!graphToSave) return;
 
   const hasContent =
-    (rawGraph.children && rawGraph.children.length > 0) ||
+    (graphToSave.children && graphToSave.children.length > 0) ||
     nodes.length > 0 ||
     edges.length > 0;
 
@@ -3232,7 +3035,7 @@ useEffect(() => {
     const viewStateSnapshot = getViewStateSnapshot();
     
     // CRITICAL: Use deep copy to preserve nested modes (shallow copy loses nested mutations)
-    const rawGraphCopy = JSON.parse(JSON.stringify(rawGraph));
+    const rawGraphCopy = JSON.parse(JSON.stringify(graphToSave));
     
     const payload = {
       rawGraph: viewStateSnapshot ? { ...rawGraphCopy, viewState: viewStateSnapshot } : rawGraphCopy,
@@ -3245,7 +3048,9 @@ useEffect(() => {
     const serialized = JSON.stringify(payload);
     localStorage.setItem(LOCAL_CANVAS_SNAPSHOT_KEY, serialized);
     sessionStorage.setItem(LOCAL_CANVAS_SNAPSHOT_KEY, serialized);
-    markDirty();
+    if (markDirty && typeof markDirty === 'function') {
+      markDirty();
+    }
   } catch (error) {
     console.warn("⚠️ Failed to persist local canvas snapshot:", error);
   }
@@ -3966,26 +3771,11 @@ useEffect(() => {
         <NodeHoverPreview reactFlowRef={reactFlowRef} visible={selectedTool === 'box' || pendingGroupId !== null} />
         <GroupHoverPreview reactFlowRef={reactFlowRef} visible={selectedTool === 'group'} />
         {/* ReactFlow container - only show when in ReactFlow mode */}
+        {/* NOTE: Node creation is handled in ReactFlow's onPaneClick, not here */}
         {useReactFlow && (
-          <div className="absolute inset-0 h-full w-full z-0 bg-gray-50"
-            onClick={(event) => {
-              const parentId = pendingGroupId;
-              placeNodeOnCanvas(
-                event.nativeEvent as MouseEvent,
-                selectedTool,
-                reactFlowRef,
-                viewStateRef,
-                (next) => {
-                  setSelectedTool(next);
-                  setPendingGroupId(null); // Reset after adding
-                },
-                parentId
-              );
-              // Reset pendingGroupId after handling
-              if (parentId) {
-                setPendingGroupId(null);
-              }
-            }}
+          <div 
+            className="absolute inset-0 z-0 bg-gray-50"
+            style={{ width: '100%', height: '100%', minHeight: '400px' }}
           >
             <NodeInteractionContext.Provider value={nodeInteractionValue}>
             <EdgeRoutingProvider 
@@ -3997,7 +3787,6 @@ useEffect(() => {
               nodes={nodes} 
               edges={edges}
               onNodesChange={(changes) => {
-                
                 onNodesChange(changes);
                 
                 // Track newly added nodes/groups to skip containment detection for them
@@ -4037,314 +3826,96 @@ useEffect(() => {
                         }
                         return true;
                       });
-                    const movedNodes = userDraggedNodeIds; // Use the same list for consistency
+                    const movedNodes = userDraggedNodeIds;
                     
+                    // All drag logic is in DragReparentHandler (isolated module)
+                    const currentGraph = rawGraphRef.current || rawGraph;
                     
-                    if (movedNodes.length > 0) {
-                      let updatedGraph = structuredClone(rawGraph);
-                      let graphUpdated = false;
-                      
-                      // Helper to find parent in domain graph
-                      const findParentInGraph = (graph: RawGraph, nodeId: string): string | null => {
-                        const findParent = (n: any, targetId: string, parentId: string | null = null): string | null => {
-                          if (n.id === targetId) return parentId;
-                          if (n.children) {
-                            for (const child of n.children) {
-                              const result = findParent(child, targetId, n.id);
-                              if (result !== null) return result;
-                            }
-                          }
-                          return null;
-                        };
-                        return findParent(graph, nodeId);
-                      };
-                      
-                      // Helper to find node in domain graph
-                      const findNodeInGraph = (graph: RawGraph, nodeId: string): any => {
-                        const find = (n: any, targetId: string): any => {
-                          if (n.id === targetId) return n;
-                          if (n.children) {
-                            for (const child of n.children) {
-                              const result = find(child, targetId);
-                              if (result) return result;
-                            }
-                          }
-                          return null;
-                        };
-                        return find(graph, nodeId);
-                      };
-                      
-                      // Helper to calculate absolute position from ReactFlow node position
-                      const calculateAbsolutePosition = (node: Node, allNodes: Node[]): { x: number; y: number } => {
-                        let x = node.position.x;
-                        let y = node.position.y;
-                        
-                        // If node has a parent, add parent's absolute position from ViewState
-                        if ((node as any).parentId) {
-                          const parentGeom = viewStateRef.current?.group?.[(node as any).parentId];
-                          if (parentGeom) {
-                            x += parentGeom.x;
-                            y += parentGeom.y;
-                          }
+                    const reparentResult = handleDragReparent({
+                      movedNodeIds: movedNodes,
+                      currentNodes,
+                      currentGraph: currentGraph || { id: 'root', children: [], edges: [] },
+                      viewStateRef,
+                      setNodes,
+                      setSelectedNodes,
+                      setSelectedNodeIds
+                    });
+                    
+                    // FREE MODE: Update ref directly, DO NOT call setRawGraph
+                    // setRawGraph goes through useElkToReactflowGraphConverter which we bypass for FREE mode
+                    if (reparentResult.graphUpdated && reparentResult.updatedGraph) {
+                      rawGraphRef.current = reparentResult.updatedGraph;
+                      // NO setRawGraph call - FREE mode bypasses the ELK hook entirely
+                    }
+                    
+                    // Handle group drag and update ReactFlow child positions
+                    const groupResults = handleGroupDrag(changes, currentNodes, viewStateRef, rawGraphRef);
+                    
+                    // Apply child position updates to ReactFlow
+                    const allChildPositions = groupResults.flatMap(r => r.childPositions);
+                    if (allChildPositions.length > 0) {
+                      setNodes((nodes) => nodes.map(n => {
+                        const update = allChildPositions.find(p => p.id === n.id);
+                        if (update) {
+                          return { ...n, position: { x: update.x, y: update.y } };
                         }
-                        
-                        return { x, y };
-                      };
-                      
-                      // Check each moved node for containment
-                      movedNodes.forEach((nodeId) => {
-                        const node = currentNodes.find(n => n.id === nodeId);
-                        if (!node) return;
-                        
-                        // Case 1: Regular node moved into or out of a group
-                        if (node.type !== 'group') {
-                          // Use ReactFlow position during drag (ViewState may be stale)
-                          const containingGroup = findContainingGroup(node, currentNodes, viewStateRef.current, true);
-                          const currentParentInGraph = findParentInGraph(updatedGraph, nodeId);
-                          
-                          // Determine new parent: if node is fully contained in a group, use that group; otherwise use root
-                          const newParentId = containingGroup ? containingGroup.id : 'root';
-                          
-                          // Check if parent changed (including moving out of a group)
-                          // currentParentInGraph could be a group ID or 'root' or null
-                          // newParentId is either a group ID or 'root'
-                          if (currentParentInGraph !== newParentId) {
-                            // CRITICAL: Preserve absolute position when moving nodes out of groups
-                            const viewStateBefore = viewStateRef.current;
-                            const absolutePosBefore = viewStateBefore?.node?.[nodeId] || viewStateBefore?.group?.[nodeId];
-                            
-                            
-                            // Update domain graph: move node to new parent
-                            try {
-                              
-                              updatedGraph = moveNode(nodeId, newParentId, updatedGraph);
-                              graphUpdated = true;
-                              
-                              // If node was moved INTO a group (not root), set that group to FREE mode in ViewState.layout
-                              // User is manually positioning, so disable auto-arrange (LOCK mode)
-                              if (newParentId !== 'root' && viewStateRef.current) {
-                                viewStateRef.current = setModeInViewState(viewStateRef.current, newParentId, 'FREE');
-                              }
-                              
-                              const newParentAfter = findParentInGraph(updatedGraph, nodeId);
-                              
-                              // CRITICAL: Update ReactFlow position and ViewState in a single batched update
-                              // This prevents flickering from multiple renders
-                              if (absolutePosBefore) {
-                                // Calculate the new ReactFlow position based on parent
-                                let newReactFlowPosition = { x: absolutePosBefore.x, y: absolutePosBefore.y };
-                                if (newParentId !== 'root') {
-                                  // Moving INTO group: Calculate relative position
-                                  const groupAbsolutePos = viewStateRef.current?.group?.[newParentId];
-                                  if (groupAbsolutePos) {
-                                    newReactFlowPosition = {
-                                      x: absolutePosBefore.x - groupAbsolutePos.x,
-                                      y: absolutePosBefore.y - groupAbsolutePos.y
-                                    };
-                                  }
-                                }
-                                
-                                // Batch all ReactFlow updates into a single setNodes call
-                                setNodes((prevNodes) => {
-                                  const updated = prevNodes.map((n) => {
-                                    if (n.id === nodeId) {
-                                      const updatedNode = { ...n };
-                                      
-                                      if (newParentId === 'root') {
-                                        // Moving OUT of group: Remove parentId
-                                        delete (updatedNode as any).parentId;
-                                        updatedNode.position = newReactFlowPosition;
-                                      } else {
-                                        // Moving INTO group: Set parentId and relative position
-                                        (updatedNode as any).parentId = newParentId;
-                                        updatedNode.position = newReactFlowPosition;
-                                      }
-                                      
-                                      return updatedNode;
-                                    }
-                                    
-                                    // Also handle selection in the same batch
-                                    if (containingGroup && n.id === containingGroup.id) {
-                                      return { ...n, selected: true };
-                                    }
-                                    if (containingGroup) {
-                                      return { ...n, selected: false };
-                                    }
-                                    
-                                    return n;
-                                  });
-                                  
-                                  return updated;
-                                });
-                                
-                                // Update selection state
-                                if (containingGroup) {
-                                  setSelectedNodes([containingGroup]);
-                                  setSelectedNodeIds([containingGroup.id]);
-                                }
-                                
-                                // Update ViewState immediately with preserved absolute position
-                                if (viewStateRef.current) {
-                                  const currentViewState = { ...viewStateRef.current };
-                                  if (!currentViewState.node) currentViewState.node = {};
-                                  
-                                  currentViewState.node[nodeId] = {
-                                    x: absolutePosBefore.x,
-                                    y: absolutePosBefore.y,
-                                    w: absolutePosBefore.w,
-                                    h: absolutePosBefore.h
-                                  };
-                                  
-                                  viewStateRef.current = currentViewState;
-                                }
-                              }
-                            } catch (error) {
-                              console.warn(`Failed to move node ${nodeId} from ${currentParentInGraph} to ${newParentId}:`, error);
-                            }
-                          }
-                          // ViewState will be updated in final pass below after all processing
-                        }
-                        // Case 2: Group moved around nodes or other groups
-                        else {
-                          const group = node;
-                          
-                          // First check if the group itself was moved into another group
-                          const containingGroup = findContainingGroup(group, currentNodes, viewStateRef.current);
-                          const currentParentInGraph = findParentInGraph(updatedGraph, nodeId);
-                          const newParentId = containingGroup ? containingGroup.id : 'root';
-                          
-                          if (currentParentInGraph !== newParentId) {
-                            
-                            // Update domain graph: move group to new parent
-                            try {
-                              updatedGraph = moveNode(nodeId, newParentId, updatedGraph);
-                              graphUpdated = true;
-                              
-                              console.log('✅ [GROUP-MOVE] Group moved successfully in domain graph:', {
-                                groupId: nodeId,
-                                newParent: newParentId
-                              });
-                              
-                              if (containingGroup) {
-                                // Select the containing group (not the moved group)
-                                setNodes((nds) =>
-                                  nds.map((n) =>
-                                    n.id === containingGroup.id ? { ...n, selected: true } : { ...n, selected: false }
-                                  )
-                                );
-                                setSelectedNodes([containingGroup]);
-                                setSelectedNodeIds([containingGroup.id]);
-                              }
-                            } catch (error) {
-                              console.error(`❌ [GROUP-MOVE] Failed to move group ${nodeId} from ${currentParentInGraph} to ${newParentId}:`, error);
-                            }
-                          } else {
-                            console.log('⏭️ [GROUP-MOVE] Group parent unchanged, skipping domain update:', {
-                              groupId: nodeId,
-                              parent: currentParentInGraph
-                            });
-                          }
-                          
-                          // Find nodes/groups fully contained in this group
-                          const containedNodes = findFullyContainedNodes(group, currentNodes);
-                          
-                          if (containedNodes.length > 0) {
-                            // Update domain graph: move each contained node/group into the group
-                            containedNodes.forEach((containedNode) => {
-                              try {
-                                updatedGraph = moveNode(containedNode.id, group.id, updatedGraph);
-                                graphUpdated = true;
-                              } catch (error) {
-                                console.warn(`Failed to move ${containedNode.id} into group ${group.id}:`, error);
-                              }
-                            });
-                            
-                            // Set group to FREE mode in ViewState.layout when nodes are moved into it (user is manually positioning)
-                            if (viewStateRef.current) {
-                              viewStateRef.current = setModeInViewState(viewStateRef.current, group.id, 'FREE');
-                            }
-                            
-                            // Select the contained nodes
-                            setNodes((nds) =>
-                              nds.map((n) =>
-                                containedNodes.some(cn => cn.id === n.id) ? { ...n, selected: true } : n
-                              )
-                            );
-                            setSelectedNodes(containedNodes);
-                            setSelectedNodeIds(containedNodes.map(n => n.id));
-                          }
-                        }
-                      });
-                      
-                      // CRITICAL: Update ViewState synchronously ONLY for nodes that were actually dragged by user
-                      // Do this BEFORE updating domain graph to prevent flickering
-                      // Only update nodes that were in the original position changes (user-initiated drags)
-                      // Don't recalculate positions for nodes that might have moved due to re-renders
-                      if (userDraggedNodeIds.length > 0 && viewStateRef.current) {
-                        const currentViewState = { ...viewStateRef.current };
-                        if (!currentViewState.node) currentViewState.node = {};
-                        
-                        // Create a Set for O(1) lookup
-                        const userDraggedSet = new Set(userDraggedNodeIds);
-                        
-                        // ONLY update ViewState for nodes that were actually dragged by the user
-                        userDraggedNodeIds.forEach((nodeId) => {
-                          const node = currentNodes.find(n => n.id === nodeId);
-                          if (!node) return;
-                          
-                          // Calculate absolute position from current ReactFlow position
-                          const absolutePos = calculateAbsolutePosition(node, currentNodes);
-                          const existingGeom = currentViewState.node[nodeId] || currentViewState.group?.[nodeId];
-                          
-                          // Only update if position actually changed (prevent unnecessary updates)
-                          if (existingGeom && existingGeom.x === absolutePos.x && existingGeom.y === absolutePos.y) {
-                            return; // Position unchanged, skip update
-                          }
-                          
-                          currentViewState.node[nodeId] = {
-                            x: absolutePos.x,
-                            y: absolutePos.y,
-                            w: existingGeom?.w || 96,
-                            h: existingGeom?.h || 96
-                          };
-                          
-                          if (node.type === 'group') {
-                            if (!currentViewState.group) currentViewState.group = {};
-                            currentViewState.group[nodeId] = currentViewState.node[nodeId];
-                          }
-                        });
-                        
-                        viewStateRef.current = currentViewState;
-                      }
-                      
-                      // Update domain graph if any changes were made
-                      // Update ref immediately so domain is correct for containment detection
-                      if (graphUpdated) {
-                        rawGraphRef.current = updatedGraph;
-                        
-                        // Debounce React state update to prevent flickering during drag
-                        // Only update React state after drag has been idle for 200ms
-                        pendingDomainUpdateRef.current = updatedGraph;
-                        
-                        // Clear existing timeout
-                        if (domainUpdateTimeoutRef.current) {
-                          clearTimeout(domainUpdateTimeoutRef.current);
-                        }
-                        
-                        // Set new timeout to update React state after drag ends
-                        domainUpdateTimeoutRef.current = setTimeout(() => {
-                          if (pendingDomainUpdateRef.current) {
-                            // Mark as 'user' source to preserve ViewState and skip ELK layout
-                            setRawGraph(pendingDomainUpdateRef.current, 'user');
-                            pendingDomainUpdateRef.current = null;
-                          }
-                        }, 200); // 200ms debounce - enough for drag to complete
-                      }
+                        return n;
+                      }));
                     }
                   });
                 }
               }}
               onEdgesChange={onEdgesChange}
+              onNodeDragStart={(event, node) => {
+                // Initialize tracking for groups so first frame of drag has correct delta
+                const isGroup = node.type === 'group' || node.type === 'draftGroup';
+                if (isGroup) {
+                  // Use ViewState position if available, otherwise use ReactFlow position
+                  const existingGeom = viewStateRef.current?.group?.[node.id];
+                  const position = existingGeom 
+                    ? { x: existingGeom.x, y: existingGeom.y }
+                    : node.position;
+                  initializeDragTracking(node.id, position);
+                }
+              }}
+              onNodeDragStop={(event, node) => {
+                // FREE MODE: Update ViewState on drag end (per FIGJAM_REFACTOR.md)
+                // NOTE: For groups, children are ALREADY updated DURING drag by handleGroupDrag
+                // This just finalizes the group position and clears tracking
+                const GRID_SIZE = 16;
+                const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
+                
+                // Get existing geometry for dimensions
+                const existingGeom = viewStateRef.current?.node?.[node.id] || 
+                                     viewStateRef.current?.group?.[node.id];
+                
+                const isGroup = node.type === 'group' || node.type === 'draftGroup';
+                
+                // Get absolute position - ReactFlow position is ALWAYS absolute during drag
+                const absoluteX = snap(node.position.x);
+                const absoluteY = snap(node.position.y);
+                
+                const geometry = {
+                  x: absoluteX,
+                  y: absoluteY,
+                  w: existingGeom?.w ?? (node.data as any)?.width ?? (node.style as any)?.width ?? 96,
+                  h: existingGeom?.h ?? (node.data as any)?.height ?? (node.style as any)?.height ?? 96,
+                };
+                
+                // Update ViewState directly
+                if (!viewStateRef.current) {
+                  viewStateRef.current = { node: {}, group: {}, edge: {} };
+                }
+                viewStateRef.current.node[node.id] = geometry;
+                
+                // For groups: finalize position and clear tracking
+                // NOTE: Children were ALREADY updated DURING drag by handleGroupDrag
+                // DO NOT recalculate delta here - handleGroupDrag already did it correctly
+                if (isGroup) {
+                  viewStateRef.current.group[node.id] = geometry;
+                  clearDragTracking(node.id);
+                }
+              }}
               onConnect={(connection: any) => {
                 console.log(`[InteractiveCanvas] ReactFlow onConnect called:`, connection);
                 
@@ -4459,8 +4030,21 @@ useEffect(() => {
                   return;
                 }
 
-                if ((event as any).target?.classList?.contains("react-flow__pane")) {
-                  // ... existing code ...
+                // Handle box tool - create node on pane click
+                if (selectedTool === 'box') {
+                  placeNodeOnCanvas(
+                    event.nativeEvent as MouseEvent,
+                    selectedTool,
+                    reactFlowRef,
+                    handleAddNode,
+                    viewStateRef,
+                    (next) => {
+                      setSelectedTool(next);
+                    },
+                    null,
+                    apply // Pass Orchestrator apply function
+                  );
+                  return;
                 }
               }}
               onInit={(instance) => {

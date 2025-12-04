@@ -63,12 +63,12 @@ const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbed
     showAgentIcon: false,
     showChatbox: true, // Only chatbox in embed
     libavoidDefaults: {
-      shapeBufferDistance: 24,
+      shapeBufferDistance: 32, // 2 grid spaces (16px * 2 = 32px)
       portEdgeSpacing: 16,
       routingType: 'orthogonal',
       hateCrossings: true,
       nudgeOrthSegments: false,
-      nudgeSharedPaths: true,
+      nudgeSharedPaths: false,
       nudgeTouchingColinear: false,
       segmentPenalty: 3,
       bendPenalty: 10,
@@ -92,12 +92,12 @@ const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbed
     showAgentIcon: true,
     showChatbox: false,
     libavoidDefaults: {
-      shapeBufferDistance: 8, // Reduced from 24 - smaller spacing makes routing work better
+      shapeBufferDistance: 32, // 2 grid spaces (16px * 2 = 32px)
       portEdgeSpacing: 16,
       routingType: 'orthogonal',
       hateCrossings: true,
       nudgeOrthSegments: false,
-      nudgeSharedPaths: true,
+      nudgeSharedPaths: false,
       nudgeTouchingColinear: false,
       segmentPenalty: 3,
       bendPenalty: 10,
@@ -121,12 +121,12 @@ const VIEW_MODE_CONFIGS: Record<ViewMode, Omit<ViewModeConfig, 'mode' | 'isEmbed
     showAgentIcon: true,
     showChatbox: false,
     libavoidDefaults: {
-      shapeBufferDistance: 24,
+      shapeBufferDistance: 32, // 2 grid spaces (16px * 2 = 32px)
       portEdgeSpacing: 16,
       routingType: 'orthogonal',
       hateCrossings: true,
       nudgeOrthSegments: false,
-      nudgeSharedPaths: true,
+      nudgeSharedPaths: false,
       nudgeTouchingColinear: false,
       segmentPenalty: 3,
       bendPenalty: 10,

@@ -15,14 +15,14 @@ function collectAllIds(graph: RawGraph): { nodeIds: Set<string>, groupIds: Set<s
 
   function traverse(node: any) {
     if (node.id) {
-      // Check if this is a group (has children array or isGroup flag)
-      const isGroup = node.type === 'group' || node.data?.isGroup || node.mode || Array.isArray(node.children);
+      // Check if this is a group - must have children WITH at least one element, not just an empty array
+      const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+      const isGroup = node.type === 'group' || node.data?.isGroup || node.mode || hasChildren;
       if (isGroup) {
         groupIds.add(node.id);
       } else {
         nodeIds.add(node.id);
       }
-      console.log(`[🧹 CLEANUP] traverse: ${node.id} isGroup=${isGroup}`);
     }
     
     if (node.children) {

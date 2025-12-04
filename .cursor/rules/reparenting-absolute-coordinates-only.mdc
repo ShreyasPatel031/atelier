@@ -1,0 +1,217 @@
+---
+description: When working with drag, reparenting, or coordinate systems - use absolute coordinates, bypass ReactFlow's parent-child system
+alwaysApply: false
+---
+
+# Reparenting Architecture: Absolute Coordinates Only
+
+## CRITICAL RULE
+
+**We explicitly DO NOT use ReactFlow's built-in parent-child coordinate conversion.**
+
+## What We DON'T Do
+
+❌ Rely on ReactFlow's `parentId` for coordinate conversion  
+❌ Let ReactFlow automatically update child positions  
+❌ Use ReactFlow's relative positioning system  
+❌ Trust ReactFlow's coordinate calculations  
+
+## What We DO Instead
+
+✅ Track parent-child relationships in **Domain Graph** (pure structure)  
+✅ Store **ABSOLUTE coordinates** in ViewState for ALL nodes (even children)  
+✅ Manually detect containment during drag using absolute coordinates  
+✅ Manually update Domain graph structure when reparenting happens  
+✅ Manually calculate and set ReactFlow relative positions for visual grouping  
+✅ Set `parentId` on ReactFlow nodes ONLY for visual grouping, NOT for coordinate conversion  
+
+## Coordinate System Rules
+
+### 1. ViewState Stores Absolute Coordinates Only
+
+```typescript
+// ✅ CORRECT: Always store absolute coordinates in ViewState
+viewStateRef.current.node[nodeId] = {
+  x: absoluteX,  // World-space absolute X
+  y: absoluteY,  // World-space absolute Y
+  w: width,
+  h: height
+};
+```
+
+```typescript
+// ❌ WRONG: Never store relative coordinates
+viewStateRef.current.node[nodeId] = {
+  x: relativeX,  // NO - relative to parent
+  y: relativeY,  // NO - relative to parent
+};
+```
+
+### 2. Containment Detection Uses Absolute Coordinates
+
+```typescript
+// ✅ CORRECT: Check containment using absolute coordinates
+const groupBounds = viewStateRef.current.group[groupId]; // Absolute
+const nodePos = viewStateRef.current.node[nodeId]; // Absolute
+
+if (nodePos.x >= groupBounds.x && 
+    nodePos.x + nodePos.w <= groupBounds.x + groupBounds.w) {
+  // Node is inside group (using absolute coordinates)
+}
+```
+
+### 3. ReactFlow parentId is Visual Only
+
+```typescript
+// ✅ CORRECT: Set parentId for visual grouping, but calculate position ourselves
+const reactFlowNode = {
+  id: nodeId,
+  parentId: groupId, // Visual grouping only
+  position: {
+    // Calculate relative position manually: absolute - parentAbsolute
+    x: nodeAbsoluteX - groupAbsoluteX,
+    y: nodeAbsoluteY - groupAbsoluteY
+  }
+};
+```
+
+```typescript
+// ❌ WRONG: Don't let ReactFlow calculate relative position
+const reactFlowNode = {
+  id: nodeId,
+  parentId: groupId,
+  position: nodeAbsolutePosition // NO - ReactFlow will convert this
+};
+```
+
+## Reparenting Flow
+
+### 1. Drag Stop (`onNodeDragStop`)
+
+```typescript
+// ✅ CORRECT: Reparenting flow
+onNodeDragStop={(event, node) => {
+  // 1. Get final ReactFlow position (absolute, even if parentId exists)
+  const absoluteX = node.position.x; // Already absolute in our system
+  const absoluteY = node.position.y;
+  
+  // 2. Check containment using absolute coordinates
+  const containingGroup = findContainingGroup(absoluteX, absoluteY, viewStateRef);
+  
+  // 3. Use Orchestrator for reparenting (FREE mode)
+  if (containingGroup) {
+    apply({
+      source: 'user',
+      kind: 'free-structural',
+      payload: {
+        action: 'move-node',
+        nodeId: node.id,
+        newParentId: containingGroup.id,
+        position: { x: absoluteX, y: absoluteY }
+      }
+    });
+  }
+  
+  // 4. Update ViewState with absolute coordinates
+  viewStateRef.current.node[node.id] = {
+    x: absoluteX,
+    y: absoluteY,
+    w: existing.w,
+    h: existing.h
+  };
+}}
+```
+
+### 2. Containment Detection
+
+```typescript
+// ✅ CORRECT: findContainingGroup uses absolute coordinates
+export function findContainingGroup(
+  absoluteX: number,
+  absoluteY: number,
+  viewStateRef: MutableRefObject<ViewState>
+): string | null {
+  // Check all groups using absolute bounds
+  for (const [groupId, groupBounds] of Object.entries(viewStateRef.current.group)) {
+    if (absoluteX >= groupBounds.x &&
+        absoluteY >= groupBounds.y &&
+        absoluteX <= groupBounds.x + groupBounds.w &&
+        absoluteY <= groupBounds.y + groupBounds.h) {
+      return groupId;
+    }
+  }
+  return null;
+}
+```
+
+### 3. Domain Update (via Orchestrator)
+
+```typescript
+// ✅ CORRECT: Domain mutation (structure only, no coordinates)
+// handlers/node/moveNode.ts
+export async function moveNode(intent: EditIntent, refs: StateRefs) {
+  const { nodeId, newParentId } = intent.payload;
+  
+  // Update Domain graph structure (pure ELK format, no coordinates)
+  refs.graphStateRef.current = moveNodeInGraph(
+    refs.graphStateRef.current,
+    nodeId,
+    newParentId
+  );
+  
+  // Position already in ViewState (absolute coordinates preserved)
+  // Just render
+  renderDirect(refs);
+}
+```
+
+### 4. Child Position Updates During Group Drag
+
+```typescript
+// ✅ CORRECT: Update children's absolute positions when group moves
+if (isGroup && deltaX !== 0 || deltaY !== 0) {
+  const groupNode = findNodeById(domainGraph, node.id);
+  if (groupNode?.children?.length) {
+    for (const child of groupNode.children) {
+      const childGeom = viewStateRef.current.node[child.id];
+      if (childGeom) {
+        // Update child's absolute position by same delta
+        viewStateRef.current.node[child.id] = {
+          ...childGeom,
+          x: childGeom.x + deltaX, // Absolute + delta = new absolute
+          y: childGeom.y + deltaY
+        };
+      }
+    }
+  }
+}
+```
+
+## Key Principles
+
+1. **ViewState = Absolute Coordinates Always** - Never relative, never parent-relative
+2. **ReactFlow parentId = Visual Only** - For grouping UI, not coordinate math
+3. **Manual Position Calculation** - We control `absolute - parentAbsolute = relative` math
+4. **Domain = Structure Only** - No coordinates in Domain graph
+5. **Bypass ReactFlow Coordinate System** - Don't trust ReactFlow's parent-child math
+
+## Files
+
+- `client/core/drag/DragReparentHandler.ts` - Handles reparenting logic
+- `client/utils/containmentDetection.ts` - Detects containment using absolute coords
+- `client/core/orchestration/handlers/node/moveNode.ts` - Domain mutation for reparenting
+- `client/core/drag/REPARENTING_ARCHITECTURE.md` - Full architectural spec
+
+## Common Mistakes
+
+❌ **Mistake**: Storing relative coordinates in ViewState  
+✅ **Fix**: Always store absolute, calculate relative for ReactFlow display only
+
+❌ **Mistake**: Using ReactFlow's parent-child coordinate conversion  
+✅ **Fix**: Calculate relative positions manually: `relative = absolute - parentAbsolute`
+
+❌ **Mistake**: Trusting ReactFlow position after setting parentId  
+✅ **Fix**: Always work with absolute coordinates, convert to relative only for ReactFlow
+
+❌ **Mistake**: Forgetting to update children when group moves  
+✅ **Fix**: Update all children's absolute positions by same delta as group

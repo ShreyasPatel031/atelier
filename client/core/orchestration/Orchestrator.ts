@@ -187,37 +187,33 @@ export async function apply(intent: EditIntent): Promise<void> {
           viewStateRef.current.group = {};
         }
         
-        const newNodeGeometry = {
-          x: payload.position?.x || payload.x || 100,
-          y: payload.position?.y || payload.y || 100,
-          w: payload.size?.w || (payload.data?.isGroup ? 288 : 96),
-          h: payload.size?.h || (payload.data?.isGroup ? 192 : 96),
-          };
-          
-        // CRITICAL: Use normalized ID for ViewState to match domain
-        // Import createNodeID to ensure ViewState keys match domain node IDs
-        const { createNodeID } = await import('../../types/graph');
-        const normalizedNodeId = createNodeID(payload.nodeId);
+        // STRICT: Position MUST be provided for FREE mode - no fallbacks
+        const x = payload.position?.x ?? payload.x;
+        const y = payload.position?.y ?? payload.y;
         
-        // Write to appropriate ViewState collection using normalized ID
-        if (payload.data?.isGroup) {
-          // Groups need both group and node entries for ReactFlow conversion
-          viewStateRef.current.group[normalizedNodeId] = newNodeGeometry;
-          viewStateRef.current.node[normalizedNodeId] = newNodeGeometry;
-        } else {
-          viewStateRef.current.node[normalizedNodeId] = newNodeGeometry;
+        if (x === undefined || y === undefined) {
+          throw new Error(`[Orchestrator] add-node requires position (x, y). Got: ${JSON.stringify({ x, y, payload })}`);
         }
         
-        console.log('[Orchestrator] BEFORE domain mutation - wrote ViewState geometry:', {
-          originalNodeId: payload.nodeId,
-          normalizedNodeId: normalizedNodeId,
-          isGroup: payload.data?.isGroup,
-          geometry: newNodeGeometry,
-          viewStateNodeCount: Object.keys(viewStateRef.current.node).length,
-          viewStateGroupCount: Object.keys(viewStateRef.current.group).length,
-          viewStateNodeIds: Object.keys(viewStateRef.current.node),
-          actualPayload: payload
-        });
+        const newNodeGeometry = {
+          x,
+          y,
+          w: payload.size?.w ?? (payload.data?.isGroup ? 288 : 96),
+          h: payload.size?.h ?? (payload.data?.isGroup ? 192 : 96),
+        };
+          
+        // STRICT: Use the SAME ID as domain graph (no normalization)
+        // Domain graph uses payload.nodeId directly, so ViewState must match
+        const nodeId = payload.nodeId;
+        
+        // Write to appropriate ViewState collection using same ID as domain
+        if (payload.data?.isGroup) {
+          // Groups need both group and node entries for ReactFlow conversion
+          viewStateRef.current.group[nodeId] = newNodeGeometry;
+          viewStateRef.current.node[nodeId] = newNodeGeometry;
+        } else {
+          viewStateRef.current.node[nodeId] = newNodeGeometry;
+        }
         
         // 1. Domain.mutate (add node structure)
         updatedGraph = addNode(
@@ -227,90 +223,26 @@ export async function apply(intent: EditIntent): Promise<void> {
           payload.data || {}
         );
         
-        // Update graph state (both ref and React state)
+        // Update graph ref only - do NOT touch React state for FREE mode
         graphStateRef.current = updatedGraph;
-        console.log('[Orchestrator] Updated graphStateRef.current:', {
-          nodeCount: updatedGraph.children?.length || 0,
-          nodeIds: updatedGraph.children?.map(n => n.id) || []
-        });
         
-        // CRITICAL: Update React state so getDomainGraph() returns correct data
-        // Use 'free-structural' source to tell ELK hook NOT to touch ViewState
-        // This prevents race conditions where ViewState is cloned mid-update
-        if (setGraphRef.current) {
-          setGraphRef.current(updatedGraph, 'free-structural');
-          console.log('[Orchestrator] Called setGraphRef.current with free-structural source');
-        } else {
-          console.error('[Orchestrator] setGraphRef.current is null - React state not updated!');
-        }
-        
-        // CRITICAL: Clean ViewState BEFORE any rendering to prevent stale entries
-        console.log('[Orchestrator] BEFORE cleanViewState:', {
-          viewStateNodeCount: Object.keys(viewStateRef.current.node).length,
-          viewStateNodeIds: Object.keys(viewStateRef.current.node),
-          domainNodeCount: updatedGraph.children?.length || 0,
-          domainNodeIds: updatedGraph.children?.map(n => n.id) || []
-        });
-        
+        // Clean ViewState to remove stale entries
         const { cleanViewState } = await import('../viewstate/ViewStateCleanup');
         const cleanedViewState = cleanViewState(updatedGraph, viewStateRef.current);
         
-        console.log('[Orchestrator] AFTER cleanViewState:', {
-          cleanedViewStateNodeCount: Object.keys(cleanedViewState.node).length,
-          cleanedViewStateNodeIds: Object.keys(cleanedViewState.node)
-        });
+        if (!cleanedViewState.node[nodeId]) {
+          throw new Error(`[Orchestrator] cleanViewState removed geometry for node ${nodeId}`);
+        }
         
         viewStateRef.current = cleanedViewState;
         
-        // Domain and ViewState updated - trigger FREE mode render directly
-        // Do NOT use renderTriggerRef (that's for ELK/AI mode)
-        console.log('[Orchestrator] Checking render refs:', {
-          hasSetNodesRef: !!setNodesRef.current,
-          hasSetEdgesRef: !!setEdgesRef.current
-        });
-        
+        // Render directly via setNodesRef/setEdgesRef (bypasses ELK)
         if (setNodesRef.current && setEdgesRef.current) {
-          // Use already cleaned ViewState for rendering
           const { convertViewStateToReactFlow } = await import('../renderer/ViewStateToReactFlow');
-          
-          try {
-            console.log('🔍 [Orchestrator] FREE mode - using universal converter:', {
-              domainChildren: updatedGraph.children?.length || 0,
-              domainChildIds: updatedGraph.children?.map((c: any) => c.id) || [],
-              viewStateNodeKeys: Object.keys(cleanedViewState.node || {}),
-              viewStateGroupKeys: Object.keys(cleanedViewState.group || {}),
-              viewStateNodeCount: Object.keys(cleanedViewState.node || {}).length
-            });
-            
-            // Use universal converter with cleaned ViewState
-            const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, cleanedViewState);
-            
-            console.log('[Orchestrator] About to call setNodesRef/setEdgesRef:', {
-              nodeCount: nodes.length,
-              edgeCount: edges.length,
-              nodeIds: nodes.map(n => n.id)
-            });
-            
-            setNodesRef.current(nodes);
-            setEdgesRef.current(edges);
-            
-            console.log('[Orchestrator] FREE mode rendered directly:', {
-              nodeCount: nodes.length,
-              domainChildren: updatedGraph.children?.length || 0,
-              viewStateNodes: Object.keys(cleanedViewState.node || {}).length
-            });
-          } catch (error) {
-            console.error('[Orchestrator] FREE mode render failed:', error);
-          }
+          const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, cleanedViewState);
+          setNodesRef.current(nodes);
+          setEdgesRef.current(edges);
         }
-        
-        console.log('[Orchestrator] ✅ Completed FREE structural add-node', {
-          nodeId: payload.nodeId,
-          parentId: payload.parentId,
-          graphNodeCount: updatedGraph?.children?.length || 0,
-          viewStateNodeCount: Object.keys(viewStateRef.current.node || {}).length,
-          hasPosition: !!viewStateRef.current.node?.[payload.nodeId]
-        });
         
       } else if (payload.action === 'delete-node') {
         // CRITICAL: Use the CURRENT graph state, not the stale updatedGraph
@@ -335,23 +267,10 @@ export async function apply(intent: EditIntent): Promise<void> {
         
         // 3. Update graph state ref AND React state
         // CRITICAL: Must update React state to prevent useEffect sync from overwriting our changes
-        // The useEffect in useElkToReactflowGraphConverter syncs rawGraphRef.current = rawGraph
-        // If we don't update rawGraph, the next render will overwrite our deletion!
+        // Update graph ref only - do NOT touch React state for FREE mode
         const clonedGraph = JSON.parse(JSON.stringify(updatedGraph));
         clonedGraph.viewState = cleanedViewState;
         graphStateRef.current = clonedGraph;
-        
-        // Update React state with 'free-structural' source to skip ViewState handling
-        if (setGraphRef.current) {
-          setGraphRef.current(clonedGraph, 'free-structural');
-        }
-        
-        console.log('[Orchestrator] ✅ Completed FREE structural delete-node', {
-          nodeId: payload.nodeId,
-          graphNodeCount: updatedGraph?.children?.length || 0,
-          viewStateNodeCount: Object.keys(cleanedViewState.node || {}).length,
-          deletedFromViewState: !cleanedViewState.node?.[payload.nodeId!]
-        });
         
         // 4. FREE mode: Direct render (same as add-node)
         if (setNodesRef.current && setEdgesRef.current) {

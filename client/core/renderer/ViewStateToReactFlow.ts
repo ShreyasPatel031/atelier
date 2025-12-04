@@ -3,6 +3,24 @@
  * Used by ALL scenarios: FREE mode, AI mode, LOCK mode
  * 
  * Write once, use everywhere - no duplication
+ * 
+ * ============================================================================
+ * ARCHITECTURAL DECISION: NO REACTFLOW PARENT-CHILD SYSTEM
+ * ============================================================================
+ * We explicitly DO NOT use ReactFlow's parentId or relative positioning.
+ * 
+ * Reasons:
+ * 1. ReactFlow's parent-child coordinate conversion is unreliable during drags
+ * 2. Group drag behavior is inconsistent with parentId
+ * 3. Reparenting during drag causes coordinate jumps
+ * 
+ * Our approach:
+ * - ALL nodes use ABSOLUTE coordinates from ViewState
+ * - NO parentId is set on any ReactFlow node
+ * - Group membership is tracked in Domain graph only
+ * - When a group moves, we manually update all children's ViewState positions
+ * - This gives us full control over drag behavior
+ * ============================================================================
  */
 
 import type { Node, Edge } from 'reactflow';
@@ -18,9 +36,11 @@ export interface ReactFlowOutput {
  * Convert Domain + ViewState → ReactFlow nodes/edges
  * Universal function used by all modes (FREE, AI, LOCK)
  * 
+ * CRITICAL: All positions are ABSOLUTE. No parentId. No relative coords.
+ * 
  * @param domainGraph - Domain structure (node IDs, hierarchy, data)
- * @param viewState - ViewState geometry (positions, sizes)
- * @returns ReactFlow nodes and edges
+ * @param viewState - ViewState geometry (ABSOLUTE positions, sizes)
+ * @returns ReactFlow nodes and edges (all with ABSOLUTE positions)
  */
 export function convertViewStateToReactFlow(
   domainGraph: RawGraph,
@@ -29,47 +49,51 @@ export function convertViewStateToReactFlow(
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  console.log('[🎯COORD] ViewState → ReactFlow (Universal)', {
+  console.log('[🎯COORD] ViewState → ReactFlow (Universal, ABSOLUTE coords)', {
     domainChildren: domainGraph.children?.length || 0,
     viewStateNodeKeys: Object.keys(viewState.node || {}),
     viewStateGroupKeys: Object.keys(viewState.group || {})
   });
 
-  // Process all domain nodes
+  // Process all domain nodes - NO parentId, all ABSOLUTE positions
   const processNode = (domainNode: any) => {
     const nodeId = domainNode.id;
     
-    // Standard group detection (same across all renderers)
+    // Standard group detection
+    const hasChildren = Array.isArray(domainNode.children) && domainNode.children.length > 0;
     const isGroup = 
       domainNode.data?.isGroup === true || 
-      Array.isArray(domainNode.children) ||
-      Array.isArray(domainNode.edges);
+      hasChildren ||
+      (Array.isArray(domainNode.edges) && domainNode.edges.length > 0);
 
-    // Read geometry from ViewState (same across all renderers)
+    // Read ABSOLUTE geometry from ViewState
     const geometry = isGroup
       ? viewState.group?.[nodeId]
       : viewState.node?.[nodeId];
 
     if (!geometry) {
-      console.warn(`[🎯COORD] Missing ViewState geometry for ${isGroup ? 'group' : 'node'} "${nodeId}" - skipping (this is expected for stale nodes)`);
-      return; // Skip nodes without ViewState - no fallbacks
+      console.warn(`[🎯COORD] Missing ViewState geometry for ${isGroup ? 'group' : 'node'} "${nodeId}" - skipping`);
+      return;
     }
 
-    console.log(`[🎯COORD] Converting ${nodeId}:`, {
-      isGroup,
-      position: `${geometry.x},${geometry.y}`,
-      size: `${geometry.w}×${geometry.h}`
-    });
+    // ABSOLUTE position - no conversion, no parentId
+    const position = { x: geometry.x, y: geometry.y };
 
-    // Create ReactFlow node
+    console.log(`[🎯COORD] Converting ${nodeId}: ABSOLUTE (${position.x},${position.y}), size ${geometry.w}×${geometry.h}`);
+    
+    // Use 'draftGroup' instead of 'group' to avoid ReactFlow's built-in group behavior
+    // The built-in 'group' type has special non-draggable behavior we don't want
     const reactFlowNode: Node = {
       id: nodeId,
-      type: isGroup ? 'group' : 'custom',
-      position: { x: geometry.x, y: geometry.y },
+      type: isGroup ? 'draftGroup' : 'custom',
+      position, // ABSOLUTE - never relative
+      draggable: true,
+      // NO parentId - we handle group membership ourselves
       data: {
         ...domainNode.data,
         width: geometry.w,
         height: geometry.h,
+        isGroup, // Pass flag for component to know it's a group
       },
       style: {
         width: geometry.w,
@@ -79,15 +103,19 @@ export function convertViewStateToReactFlow(
 
     nodes.push(reactFlowNode);
 
-    // Process children recursively
+    // Process children recursively (still no parentId passed)
     if (domainNode.children?.length > 0) {
-      domainNode.children.forEach(processNode);
+      for (const child of domainNode.children) {
+        processNode(child);
+      }
     }
   };
 
-  // Process root children
+  // Process all nodes from root
   if (domainGraph.children?.length > 0) {
-    domainGraph.children.forEach(processNode);
+    for (const child of domainGraph.children) {
+      processNode(child);
+    }
   }
 
   // Process edges

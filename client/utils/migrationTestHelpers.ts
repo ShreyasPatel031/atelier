@@ -175,12 +175,6 @@ export function setupWindowHelpers(getViewState: () => ViewState, getDomainGraph
       return report;
     };
     
-    console.log('✅ Migration test helpers loaded!');
-    console.log('Available commands:');
-    console.log('  - window.getViewState() - Get current ViewState');
-    console.log('  - window.getDomainGraph() - Get current Domain Graph');
-    console.log('  - window.checkModeAlignment() - Check if modes are in correct locations');
-    console.log('  - window.migrationReport() - Full migration report');
   }
 }
 

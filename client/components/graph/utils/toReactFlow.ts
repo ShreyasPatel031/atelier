@@ -46,9 +46,11 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
     const validParentId = parentId && parentId !== 'root' ? parentId : undefined;
 
 
+    // Use 'draftGroup' instead of 'group' to avoid ReactFlow's built-in group behavior
+    // which blocks dragging. See docs/FIGJAM_REFACTOR.md section 0.1
     nodes.push({
       id: node.id,
-      type: isGroupNode ? "group" : "custom",
+      type: isGroupNode ? "draftGroup" : "custom",
       position: validParentId ? snapPos({ x: node.x ?? 0, y: node.y ?? 0 }) : { x: absPos.x, y: absPos.y },
       ...(validParentId && { parentId: validParentId }),
       zIndex: isGroupNode ? CANVAS_STYLES.zIndex.groups : CANVAS_STYLES.zIndex.nodes,
@@ -107,11 +109,6 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
 
   // Start node creation from root's children (skip root itself)
   // Root represents the entire canvas and should not be rendered as a node
-  console.log('🏭 [toReactFlow] Creating nodes from elkGraph children:', {
-    rootId: elkGraph.id,
-    childrenCount: (elkGraph.children || []).length,
-    children: (elkGraph.children || []).map(c => ({ id: c.id, x: c.x, y: c.y, w: c.width, h: c.height }))
-  });
   
   (elkGraph.children || []).forEach((childNode: any) => {
     createNode(childNode);

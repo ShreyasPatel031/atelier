@@ -150,6 +150,7 @@ export function toReactFlowWithViewState(
       const result = {
         ...node,
         position,
+        draggable: true, // CRITICAL: Ensure all nodes (including groups) are draggable
         // Update data.position and dimensions
         data: {
           ...node.data,

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Joint.js Libavoid Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        #results { margin-top: 20px; padding: 10px; background: #f0f0f0; }
+        .pass { color: green; }
+        .fail { color: red; }
+        pre { background: white; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Joint.js Libavoid Node Drag Test</h1>
+    <p>Open this page, then open browser console and run the test.</p>
+    <div id="results"></div>
+    
+    <script>
+        // Test script to paste in console
+        const testScript = `
+(async function testJointJsNodeDrag() {
+    console.log('=== Joint.js Libavoid Node Drag Test ===\\n');
+    
+    await new Promise(r => setTimeout(r, 2000));
+    
+    const graph = window.__testGraph;
+    const router = window.__testRouter;
+    
+    if (!graph) {
+        console.error('❌ Graph not found. Make sure app.js exposes it.');
+        return;
+    }
+    
+    const nodes = graph.getElements();
+    const links = graph.getLinks();
+    
+    if (nodes.length < 2 || links.length === 0) {
+        console.log('⚠️  Need at least 2 nodes and 1 link. Using existing ones...');
+        if (nodes.length < 2 || links.length === 0) {
+            console.error('❌ Not enough nodes/links for test');
+            return;
+        }
+    }
+    
+    const testNode = nodes[0];
+    const testLink = links[0];
+    
+    const initialVertices = testLink.get('vertices') || [];
+    const initialRouter = testLink.get('router');
+    const initialPos = testNode.get('position');
+    
+    console.log('=== INITIAL STATE ===');
+    console.log('Node position:', initialPos);
+    console.log('Link vertices:', initialVertices.length);
+    console.log('Link router:', initialRouter ? initialRouter.name : 'null');
+    console.log('Path valid:', initialVertices.length > 0 || initialRouter !== null);
+    
+    if (initialVertices.length === 0 && !initialRouter) {
+        console.error('❌ Initial state invalid');
+        return;
+    }
+    
+    console.log('\\n=== DRAGGING NODE ===');
+    testNode.set('position', { x: initialPos.x + 200, y: initialPos.y + 100 });
+    
+    await new Promise(r => setTimeout(r, 1000));
+    
+    const finalVertices = testLink.get('vertices') || [];
+    const finalRouter = testLink.get('router');
+    
+    console.log('\\n=== FINAL STATE ===');
+    console.log('Link vertices:', finalVertices.length);
+    console.log('Link router:', finalRouter ? finalRouter.name : 'null');
+    console.log('Path valid:', finalVertices.length > 0 || finalRouter !== null);
+    
+    console.log('\\n=== TEST RESULT ===');
+    if (finalVertices.length > 0 || finalRouter !== null) {
+        console.log('✅ TEST PASSED: Edge path remains valid');
+        return true;
+    } else {
+        console.log('❌ TEST FAILED: Edge path is empty');
+        return false;
+    }
+})();
+`;
+        
+        document.getElementById('results').innerHTML = `
+            <h3>Test Script (paste in console):</h3>
+            <pre>${testScript}</pre>
+        `;
+    </script>
+</body>
+</html>
+

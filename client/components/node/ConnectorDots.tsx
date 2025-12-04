@@ -194,6 +194,9 @@ const ConnectorDots: React.FC<ConnectorDotsProps> = ({
               <>
                 {/* Visible green hover area - detects hover and shows blue dot */}
                 <div
+                  data-connector-dot="true"
+                  data-node-id={nodeId}
+                  data-handle-id={`connector-${key}-target`}
                   style={{
                     position: 'absolute',
                     left: (key === 'left' || key === 'right') ? dotPosition : '50%',
@@ -276,6 +279,9 @@ const ConnectorDots: React.FC<ConnectorDotsProps> = ({
                 
                 {/* Visual dot overlay - handles hover styling */}
                 <div
+                  data-connector-dot="true"
+                  data-node-id={nodeId}
+                  data-handle-id={`connector-${key}-target`}
                   style={{
                     position: 'absolute',
                     left: (key === 'left' || key === 'right') ? dotPosition : '50%',
