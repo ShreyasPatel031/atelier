@@ -19,6 +19,8 @@
 import type { Node, NodeChange } from 'reactflow';
 import type { ViewState } from '../viewstate/ViewState';
 import type { RawGraph } from '../../components/graph/types/index';
+import { emitObstaclesMoved } from '../events/routingEvents';
+import { batchUpdateObstaclesAndReroute } from '../../utils/canvas/routingUpdates';
 
 const GRID_SIZE = 16;
 const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
@@ -99,18 +101,54 @@ export function handleGroupDrag(
 ): GroupDragResult[] {
   const results: GroupDragResult[] = [];
   
-  // Filter to only position changes
+  // Filter to only position changes that are actively dragging
   const positionChanges = changes.filter(
-    (ch): ch is NodeChange & { type: 'position'; id: string; position: { x: number; y: number } } =>
+    (ch): ch is NodeChange & { type: 'position'; id: string; position: { x: number; y: number }; dragging?: boolean } =>
       ch.type === 'position' && 'position' in ch && ch.position !== undefined
   );
+  
+  // Track how often this is called (for testing/debugging)
+  if (typeof window !== 'undefined' && positionChanges.length > 0) {
+    (window as any).__groupDragCounter = ((window as any).__groupDragCounter || 0) + 1;
+  }
+  
+  // Collect routing updates for ALL nodes (including regular nodes during drag)
+  const allRoutingUpdates: Array<{ nodeId: string; geometry: { x: number; y: number; w: number; h: number } }> = [];
   
   for (const change of positionChanges) {
     const changedNode = currentNodes.find((n) => n.id === change.id);
     if (!changedNode) continue;
     
-    // Only handle groups - regular nodes are handled in onNodeDragStop
     const isGroup = changedNode.type === 'group' || changedNode.type === 'draftGroup';
+    
+    // Handle regular nodes - update ViewState and collect for routing
+    // Process ALL position changes (don't require dragging flag - it may not be set by ReactFlow)
+    if (!isGroup && viewStateRef.current) {
+      const absoluteX = snap(change.position.x);
+      const absoluteY = snap(change.position.y);
+      const existingGeom = viewStateRef.current.node?.[changedNode.id];
+      
+      // Only update if position actually changed (grid-snapped)
+      const currentGeom = viewStateRef.current.node?.[changedNode.id];
+      if (currentGeom && currentGeom.x === absoluteX && currentGeom.y === absoluteY) {
+        continue; // Skip if position didn't change
+      }
+      
+      const geometry = {
+        x: absoluteX,
+        y: absoluteY,
+        w: existingGeom?.w ?? (changedNode.width || 96),
+        h: existingGeom?.h ?? (changedNode.height || 96),
+      };
+      
+      if (!viewStateRef.current.node) viewStateRef.current.node = {};
+      viewStateRef.current.node[changedNode.id] = geometry;
+      
+      allRoutingUpdates.push({ nodeId: changedNode.id, geometry });
+      continue; // Skip group-specific logic for regular nodes
+    }
+    
+    // Skip non-groups for group-specific logic below
     if (!isGroup) continue;
     
     const existingGeom = viewStateRef.current?.group?.[changedNode.id];
@@ -207,6 +245,37 @@ export function handleGroupDrag(
     }
   }
   
+  // Emit obstacle moved event for edge routing updates
+  // Include both group results AND regular node updates
+  if (viewStateRef.current) {
+    const routingUpdates: Array<{ nodeId: string; geometry: { x: number; y: number; w: number; h: number } }> = [
+      ...allRoutingUpdates // Include regular node updates
+    ];
+    
+    for (const result of results) {
+      // Add the group itself
+      const groupGeom = viewStateRef.current.group?.[result.groupId];
+      if (groupGeom) {
+        routingUpdates.push({ nodeId: result.groupId, geometry: groupGeom });
+      }
+      
+      // Add all children
+      for (const childPos of result.childPositions) {
+        const childGeom = viewStateRef.current.node?.[childPos.id] || viewStateRef.current.group?.[childPos.id];
+        if (childGeom) {
+          routingUpdates.push({ nodeId: childPos.id, geometry: childGeom });
+        }
+      }
+    }
+    
+    if (routingUpdates.length > 0) {
+      // Call routing update directly (for immediate effect)
+      batchUpdateObstaclesAndReroute(routingUpdates);
+      // Also emit event (for subscribers/future extensibility)
+      emitObstaclesMoved(routingUpdates);
+    }
+  }
+  
   return results;
 }
 
@@ -219,5 +288,59 @@ export function hasGroupChanges(changes: NodeChange[], nodes: Node[]): boolean {
     const node = nodes.find((n) => n.id === (ch as any).id);
     return node?.type === 'group' || node?.type === 'draftGroup';
   });
+}
+
+/**
+ * Handle regular node position changes during drag
+ * Updates ViewState and triggers edge routing updates
+ * 
+ * Call this for ALL position changes, not just groups.
+ * Groups will be filtered out (handled by handleGroupDrag).
+ */
+export function handleNodeDragDuringDrag(
+  changes: NodeChange[],
+  currentNodes: Node[],
+  viewStateRef: { current: ViewState | null }
+): void {
+  // Filter to only position changes for non-group nodes
+  const positionChanges = changes.filter(
+    (ch): ch is NodeChange & { type: 'position'; id: string; position: { x: number; y: number }; dragging?: boolean } =>
+      ch.type === 'position' && 'position' in ch && ch.position !== undefined && (ch as any).dragging === true
+  );
+  
+  const routingUpdates: Array<{ nodeId: string; geometry: { x: number; y: number; w: number; h: number } }> = [];
+  
+  for (const change of positionChanges) {
+    const changedNode = currentNodes.find((n) => n.id === change.id);
+    if (!changedNode) continue;
+    
+    // Skip groups - they're handled by handleGroupDrag
+    const isGroup = changedNode.type === 'group' || changedNode.type === 'draftGroup';
+    if (isGroup) continue;
+    
+    const absoluteX = snap(change.position.x);
+    const absoluteY = snap(change.position.y);
+    
+    // Update ViewState during drag
+    if (viewStateRef.current) {
+      const existingGeom = viewStateRef.current.node?.[changedNode.id];
+      const geometry = {
+        x: absoluteX,
+        y: absoluteY,
+        w: existingGeom?.w ?? (changedNode.width || 96),
+        h: existingGeom?.h ?? (changedNode.height || 96),
+      };
+      
+      if (!viewStateRef.current.node) viewStateRef.current.node = {};
+      viewStateRef.current.node[changedNode.id] = geometry;
+      
+      routingUpdates.push({ nodeId: changedNode.id, geometry });
+    }
+  }
+  
+  // Emit obstacle moved event for edge routing updates
+  if (routingUpdates.length > 0) {
+    emitObstaclesMoved(routingUpdates);
+  }
 }
 

@@ -107,11 +107,22 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
   } = props;
   const edgeData = data as any;
   
+  // STEP 6: Check if ViewState already has computed waypoints
+  // If waypoints exist, use them directly (pure renderer pattern)
+  // This is the target state: routing happens outside StepEdge, StepEdge just renders
+  // Read from both edgeData (from ViewStateToReactFlow) AND directly from ViewState (from callbacks)
+  const viewStateWaypointsFromData: Point[] | undefined = edgeData?.waypoints;
+  
+  // Read directly from ViewState (updated by callbacks) - this is the Joint.js pattern
+  // We'll read this in the useEffect that updates the path, not here, to avoid stale closures
+  const hasViewStateWaypointsFromData = viewStateWaypointsFromData && viewStateWaypointsFromData.length >= 2;
   
   const [computedBendPoints, setComputedBendPoints] = useState<Point[]>([]);
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [edgePath, setEdgePath] = useState<string>(() =>
-    pointsToPath([{ x: sourceX, y: sourceY }, { x: targetX, y: targetY }])
+    hasViewStateWaypointsFromData 
+      ? pointsToPath(viewStateWaypointsFromData) 
+      : pointsToPath([{ x: sourceX, y: sourceY }, { x: targetX, y: targetY }])
   );
   const [routingStatus, setRoutingStatus] = useState<RoutingStatus>('ok');
   const [routingMessage, setRoutingMessage] = useState<string>('');
@@ -134,6 +145,73 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
   // Track obstacle signature changes to trigger rerouting (but only once per change)
   const prevObstacleSignatureRef = React.useRef<string>('');
   
+  // Force re-render when routing updates occur externally (from batchUpdateObstaclesAndReroute)
+  // This allows edges to reroute on each position change during drag
+  const [routingUpdateVersion, setRoutingUpdateVersion] = React.useState(0);
+  
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const handleRoutingUpdate = (event: CustomEvent) => {
+      // Force re-render by updating state
+      // This will cause the main useEffect to re-run and extract fresh routes
+      const version = (event.detail as any)?.version || 0;
+      setRoutingUpdateVersion(v => {
+        const newVersion = v + 1;
+        // Debug: Log when we receive routing update events
+        if (id === 'edge-straight' || id.startsWith('edge-')) {
+          console.log(`[StepEdge:${id}] Received routing-update event v${version}, updating to ${newVersion}`);
+        }
+        return newVersion;
+      });
+    };
+    
+    const handleWaypointsUpdated = (event: CustomEvent) => {
+      // When callback writes waypoints to ViewState, re-read them immediately
+      const { edgeId, waypoints } = (event.detail as any) || {};
+      if (edgeId === id && waypoints && waypoints.length >= 2) {
+        // Force re-render to read from ViewState
+        setRoutingUpdateVersion(v => v + 1);
+        console.log(`[StepEdge:${id}] 📍 Received waypoints-updated event, triggering re-render`);
+      }
+    };
+    
+    window.addEventListener('routing-update', handleRoutingUpdate as EventListener);
+    window.addEventListener('edge-waypoints-updated', handleWaypointsUpdated as EventListener);
+    return () => {
+      window.removeEventListener('routing-update', handleRoutingUpdate as EventListener);
+      window.removeEventListener('edge-waypoints-updated', handleWaypointsUpdated as EventListener);
+    };
+  }, [id]);
+  
+  // STEP 6: If ViewState waypoints change, use them immediately (pure renderer)
+  // This is the target state: routing is outside, StepEdge just renders
+  // When callbacks write to ViewState, this effect will pick up the new waypoints
+  React.useEffect(() => {
+    // First check edgeData waypoints (from ViewStateToReactFlow)
+    if (hasViewStateWaypointsFromData && viewStateWaypointsFromData) {
+      const newPath = pointsToPath(viewStateWaypointsFromData);
+      setEdgePath(newPath);
+      setRoutingStatus('ok');
+      return;
+    }
+    
+    // Then check ViewState directly (updated by callbacks during drag)
+    if (typeof window !== 'undefined') {
+      const elkState = (window as any).__elkState;
+      const waypointsFromViewState = elkState?.viewStateRef?.current?.edge?.[id]?.waypoints;
+      if (waypointsFromViewState && waypointsFromViewState.length >= 2) {
+        const newPath = pointsToPath(waypointsFromViewState);
+        const pathStr = waypointsFromViewState.map(p => `(${p.x.toFixed(1)},${p.y.toFixed(1)})`).join('→');
+        setEdgePath(newPath);
+        setRoutingStatus('ok');
+        // Debug: Log when we use ViewState waypoints from callbacks
+        console.log(`[StepEdge:${id}] 📍 Using ViewState waypoints from callback (${waypointsFromViewState.length} points): ${pathStr}`);
+        return;
+      }
+    }
+  }, [hasViewStateWaypointsFromData, viewStateWaypointsFromData, id, routingUpdateVersion]);
+  
   React.useEffect(() => {
     const currentOptionsStr = JSON.stringify(libavoidOptions);
     const optionsChanged = prevOptionsRef.current !== currentOptionsStr;
@@ -142,11 +220,13 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
     if (optionsChanged || spacingChanged) {
       prevOptionsRef.current = currentOptionsStr;
       prevPortEdgeSpacingRef.current = portEdgeSpacing;
-      // Clear edge path to force re-render while routing
-      setEdgePath(pointsToPath([{ x: sourceX, y: sourceY }, { x: targetX, y: targetY }]));
+      // Clear edge path to force re-render while routing (only if no ViewState waypoints)
+      if (!hasViewStateWaypointsFromData) {
+        setEdgePath(pointsToPath([{ x: sourceX, y: sourceY }, { x: targetX, y: targetY }]));
+      }
       setOptionsVersion(v => v + 1);
     }
-  }, [libavoidOptions, portEdgeSpacing, id, sourceX, sourceY, targetX, targetY]);
+  }, [libavoidOptions, portEdgeSpacing, id, sourceX, sourceY, targetX, targetY, hasViewStateWaypointsFromData]);
 
   const allNodes = useStore((state) => state?.nodes ?? []);
   const allEdges = useStore((state) => state?.edges ?? []);
@@ -191,11 +271,18 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
         const liveNode = condensedNodes.find((node) => node.id === obstacleId);
         const initialRect = staticObstacles.find((rect: any) => rect?.id === obstacleId);
         
-        // Use live position if available, otherwise fall back to initial position from staticObstacles
-        const x = liveNode && liveNode.x !== undefined
+        // Use live position if it exists AND is not at origin (0,0)
+        // Live position at origin likely means ReactFlow hasn't positioned the node yet
+        // In that case, fall back to the initial static position from fixtures
+        const liveHasValidPosition = liveNode && 
+          typeof liveNode.x === 'number' && 
+          typeof liveNode.y === 'number' &&
+          (liveNode.x !== 0 || liveNode.y !== 0);
+        
+        const x = liveHasValidPosition
           ? liveNode.x
           : safeNumber(initialRect?.x, 0);
-        const y = liveNode && liveNode.y !== undefined
+        const y = liveHasValidPosition
           ? liveNode.y
           : safeNumber(initialRect?.y, 0);
         const width = safeNumber(liveNode?.width ?? initialRect?.width, DEFAULT_NODE_WIDTH);
@@ -289,8 +376,7 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
 
     const routeWithLibavoid = async () => {
       try {
-        // Debug: Log all edge routing to see which edges are being routed
-        console.log(`[STRAIGHT-DEBUG:${id}] 🚀 ROUTING STARTED`);
+        // Debug logging disabled for normal operation
         avoidModule = await ensureAvoidInstance();
         if (cancelled) return;
 
@@ -817,10 +903,88 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
           connection = new avoidModule.ConnRef(router);
           connRefs.set(id, connection);
           
-          // NOTE: We don't use callbacks for route updates because libavoid
-          // calls callbacks for ALL connectors when ANY obstacle moves, not just affected ones.
-          // This causes "ballooning" where unrelated edges change their paths.
-          // Instead, we cache routes and only update them when endpoints change (new connections).
+          // STEP 1: Enable ConnRef callback (Joint.js pattern)
+          // Callback fires when libavoid routes this connector after processTransaction()
+          // This is THE mechanism for batch rerouting - callbacks fire for ALL affected edges
+          connection.setCallback((connRefPtr: any) => {
+            let callbackCount = 0;
+            try {
+              // Track callback invocations (for testing/debugging)
+              if (typeof window !== 'undefined') {
+                if (!(window as any).__connRefCallbackCount) {
+                  (window as any).__connRefCallbackCount = new Map<string, number>();
+                }
+                callbackCount = ((window as any).__connRefCallbackCount.get(id) || 0) + 1;
+                (window as any).__connRefCallbackCount.set(id, callbackCount);
+                
+                // Track ALL routes returned by callbacks for debugging
+                if (!(window as any).__callbackRouteHistory) {
+                  (window as any).__callbackRouteHistory = new Map<string, string[]>();
+                }
+              }
+              
+              // Extract route from the ConnRef
+              const route = connection.displayRoute?.();
+              if (route && typeof route.size === 'function' && route.size() > 0) {
+                const points: Point[] = [];
+                for (let i = 0; i < route.size(); i++) {
+                  const pt = route.get_ps?.(i);
+                  if (pt && typeof pt.x === 'number' && typeof pt.y === 'number') {
+                    points.push({ x: pt.x, y: pt.y });
+                  }
+                }
+                
+                if (points.length >= 2) {
+                  // Track route history for debugging
+                  if (typeof window !== 'undefined' && (window as any).__callbackRouteHistory) {
+                    const routeStr = points.map(p => `(${p.x.toFixed(0)},${p.y.toFixed(0)})`).join('→');
+                    const history = (window as any).__callbackRouteHistory.get(id) || [];
+                    history.push(routeStr);
+                    (window as any).__callbackRouteHistory.set(id, history);
+                  }
+                  
+                  // Update routes cache (for StepEdge to read)
+                  routesCache.set(id, [...points]);
+                  
+                  // Write to ViewState for persistence (Joint.js pattern)
+                  // ViewState is the source of truth - StepEdge reads from it
+                  try {
+                    const elkState = (window as any).__elkState;
+                    if (elkState?.viewStateRef?.current) {
+                      if (!elkState.viewStateRef.current.edge) {
+                        elkState.viewStateRef.current.edge = {};
+                      }
+                      elkState.viewStateRef.current.edge[id] = {
+                        ...elkState.viewStateRef.current.edge[id],
+                        waypoints: points
+                      };
+                      
+                      // Dispatch event to trigger StepEdge re-render (read from ViewState)
+                      // This ensures StepEdge picks up the new waypoints immediately
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('edge-waypoints-updated', {
+                          detail: { edgeId: id, waypoints: points }
+                        }));
+                      }
+                      
+                      // Debug: Log callback firing for ALL edges (to verify callbacks work)
+                      const pathStr = points.map(p => `(${p.x.toFixed(1)},${p.y.toFixed(1)})`).join('→');
+                      console.log(`[StepEdge:${id}] 🔔 Callback fired! Route updated with ${points.length} points (call #${callbackCount}): ${pathStr}`);
+                    }
+                  } catch (viewStateError) {
+                    // ViewState write failed - log but don't break routing
+                    console.warn(`[StepEdge:${id}] Failed to write waypoints to ViewState:`, viewStateError);
+                  }
+                }
+              }
+            } catch (e) {
+              // Callback error - ignore (don't break routing)
+              console.error(`[StepEdge:${id}] Callback error:`, e);
+            }
+          }, connection);
+          
+          // Debug: Log callback setup for all edges
+          console.log(`[StepEdge:${id}] ✅ ConnRef callback enabled (Joint.js pattern)`);
         }
         
         // Always update endpoints (Joint.js pattern: update existing connRef)
@@ -903,12 +1067,25 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
           }
         }
         
-        // Only extract fresh route if:
-        // 1. It's a new connection (no cached route)
-        // 2. The source or target node moved
-        // 3. A moved obstacle intersects the edge's bounding box
-        const needsFreshRoute = isNewConnection || !cachedRoute || 
-          sourceNodeMoved || targetNodeMoved || pathIntersectsMovedObstacle;
+        // Joint.js pattern: ALWAYS extract fresh route when ANY obstacle moves
+        // Don't try to be smart - libavoid callbacks handle this internally
+        // Any moved obstacle could affect routing through global optimization
+        const anyObstacleMoved = movedObstacles.length > 0;
+        
+        // CRITICAL: If routingUpdateVersion changed, it means processTransaction() was called externally
+        // (e.g., during drag). We MUST extract fresh routes even if obstacleSignature didn't change
+        // because ReactFlow's store might not have updated yet, but the router has.
+        const prevRoutingUpdateVersion = (router as any).__lastRoutingUpdateVersion || 0;
+        const routingWasUpdatedExternally = routingUpdateVersion > prevRoutingUpdateVersion;
+        if (routingWasUpdatedExternally) {
+          (router as any).__lastRoutingUpdateVersion = routingUpdateVersion;
+          // Debug: Log when we detect external routing update
+          if (id === 'edge-straight' || id.startsWith('edge-')) {
+            console.log(`[StepEdge:${id}] External routing update detected (v${routingUpdateVersion}), extracting fresh route`);
+          }
+        }
+        
+        const needsFreshRoute = isNewConnection || !cachedRoute || anyObstacleMoved || routingWasUpdatedExternally;
         
         if (needsFreshRoute) {
           try {
@@ -923,10 +1100,22 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
               // Cache the route
               if (pathPoints.length >= 2) {
                 routesCache.set(id, [...pathPoints]);
+                // Debug: Log route extraction
+                if (routingWasUpdatedExternally && (id === 'edge-straight' || id.startsWith('edge-'))) {
+                  console.log(`[StepEdge:${id}] Extracted route with ${pathPoints.length} points`);
+                }
+              }
+            } else if (routingWasUpdatedExternally) {
+              // Debug: Log if route extraction returned nothing
+              if (id === 'edge-straight' || id.startsWith('edge-')) {
+                console.log(`[StepEdge:${id}] Route extraction returned empty route`);
               }
             }
           } catch (e) {
             // Route extraction failed, will use fallback below
+            if (routingWasUpdatedExternally && (id === 'edge-straight' || id.startsWith('edge-'))) {
+              console.log(`[StepEdge:${id}] Route extraction failed:`, e);
+            }
           }
         } else if (cachedRoute && cachedRoute.length >= 2) {
           // Use cached route for unaffected edges (endpoints didn't move)
@@ -1126,9 +1315,9 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
           }
         }
         
-        // Debug logs for moving edges (straight and port edges)
-        const isMovingEdge = id === 'edge-straight' || id.startsWith('edge-port-');
-        console.log(`[STRAIGHT-DEBUG:${id}] 🔍 CHECKING: id="${id}", isMovingEdge=${isMovingEdge}, source=${source}, target=${target}`);
+        // Debug logs for horizontal edges and port edges
+        const isMovingEdge = id === 'edge-straight' || id.startsWith('edge-port-') || id === 'edge-horizontal' || id.includes('horizontal');
+        console.log(`[STRAIGHT-DEBUG:${id}] 🔍 CHECKING: id="${id}", isMovingEdge=${isMovingEdge}, source=${source}, target=${target}, pathPoints.length=${pathPoints.length}`);
         if (isMovingEdge) {
           const libavoidSegs = pathPoints.length - 1;
           console.log(`[STRAIGHT-DEBUG:${id}] 📍 LIBAVOID: ${pathPoints.length} points, ${libavoidSegs} segments`);
@@ -1416,6 +1605,7 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
     portEdgeSpacing, // Explicitly include to ensure re-routing when spacing changes
     nodeCount, // Re-route when nodes are added/removed (for port spacing)
     edgeCount, // Re-route when edges are added/removed (for port spacing)
+    routingUpdateVersion, // Re-run when external routing updates occur (during drag)
   ]);
 
   // Step 4: Check for routes when batch completes (deferred route application)

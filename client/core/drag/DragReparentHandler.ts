@@ -40,6 +40,7 @@ import { moveNode } from '../../components/graph/mutations';
 import { findContainingGroup, findFullyContainedNodes } from '../../utils/containmentDetection';
 import { setModeInViewState } from '../viewstate/modeHelpers';
 import { apply as orchestratorApply } from '../orchestration/Orchestrator';
+import { batchUpdateObstaclesAndReroute } from '../../utils/canvas/routingUpdates';
 
 export interface DragReparentResult {
   graphUpdated: boolean;
@@ -344,6 +345,28 @@ export function handleDragReparent(params: DragReparentParams): DragReparentResu
         if (!viewStateRef.current.node) viewStateRef.current.node = {};
         viewStateRef.current.node[nodeId] = geometry;
       }
+    }
+    
+    // ============================================================================
+    // CENTRALIZED ROUTING UPDATE (Joint.js pattern)
+    // After updating ViewState positions, update obstacles in libavoid router
+    // and process ALL routes at once. This ensures ALL affected edges reroute.
+    // ============================================================================
+    const routingUpdates = movedNodeIds
+      .map(nodeId => {
+        const node = currentNodes.find(n => n.id === nodeId);
+        if (!node) return null;
+        const isGroup = node.type === 'group' || node.type === 'draftGroup';
+        const geom = isGroup 
+          ? viewStateRef.current?.group?.[nodeId]
+          : viewStateRef.current?.node?.[nodeId];
+        if (!geom) return null;
+        return { nodeId, geometry: geom };
+      })
+      .filter((u): u is { nodeId: string; geometry: { x: number; y: number; w: number; h: number } } => u !== null);
+    
+    if (routingUpdates.length > 0) {
+      batchUpdateObstaclesAndReroute(routingUpdates);
     }
   }
 

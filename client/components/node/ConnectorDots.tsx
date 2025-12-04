@@ -157,8 +157,8 @@ const ConnectorDots: React.FC<ConnectorDotsProps> = ({
               style={{
                 left: (key === 'left' || key === 'right') ? dotPosition : '50%',
                 top: (key === 'top' || key === 'bottom') ? topPosition : '50%',
-                width: 0,
-                height: 0,
+                width: 1, // Minimal size so ReactFlow can find it
+                height: 1,
                 borderRadius: '50%',
                 backgroundColor: 'transparent',
                 border: 'none',
@@ -176,8 +176,8 @@ const ConnectorDots: React.FC<ConnectorDotsProps> = ({
               style={{
                 left: (key === 'left' || key === 'right') ? dotPosition : '50%',
                 top: (key === 'top' || key === 'bottom') ? topPosition : '50%',
-                width: 0, // Zero size - COMPLETELY DISABLED
-                height: 0,
+                width: 1, // Minimal size so ReactFlow can find it
+                height: 1,
                 borderRadius: '50%',
                 backgroundColor: 'transparent',
                 border: 'none',

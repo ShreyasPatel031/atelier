@@ -123,11 +123,20 @@ export function convertViewStateToReactFlow(
     domainGraph.edges.forEach((edge: any, index: number) => {
       const edgeId = edge.id || `edge-${index}`;
       
+      // Read waypoints from ViewState if available
+      const edgeViewState = viewState.edge?.[edgeId];
+      const waypoints = edgeViewState?.waypoints;
+      
       const reactFlowEdge: Edge = {
         id: edgeId,
         source: edge.sources?.[0] || edge.source,
         target: edge.targets?.[0] || edge.target,
         type: 'step', // Use 'step' for libavoid routing (StepEdge handles both 'step' and 'smoothstep')
+        data: {
+          ...edge.data,
+          // Pass waypoints from ViewState to edge.data for StepEdge to read
+          waypoints: waypoints && waypoints.length >= 2 ? waypoints : undefined,
+        },
       };
 
       edges.push(reactFlowEdge);

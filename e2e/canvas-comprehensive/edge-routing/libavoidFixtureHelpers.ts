@@ -31,6 +31,9 @@ export function getHandleIdsForFixtureEdge(
   const tgt = scenarioNodes.find(n => n.id === targetId);
   if (!src || !tgt) return { sourceHandle: undefined, targetHandle: undefined };
   
+  // HANDLE IDs must match ConnectorDots.tsx pattern: connector-{position}-{type}
+  // e.g., 'connector-right-source', 'connector-left-target'
+  
   // Special case: port spacing test - edges from port-source should use same port
   if (sourceId === 'libavoid-port-source') {
     // port-source (224, 656) -> port-middle1/2 (300, 280/360)
@@ -56,7 +59,8 @@ export function getHandleIdsForFixtureEdge(
   const dx = tgt.x - src.x;
   const dy = tgt.y - src.y;
   
-  // Determine direction and return handle IDs matching ConnectorDots/NodeHandles naming
+  // Determine direction and return handle IDs matching ConnectorDots.tsx naming
+  // Pattern: connector-{position}-{type}
   if (Math.abs(dx) > Math.abs(dy)) {
     // Horizontal - use right/left
     return dx >= 0 
