@@ -297,8 +297,7 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
         // Use a shared router for all edges to enable proper pin sharing
         // CRITICAL (Joint.js pattern): Router should only reset when OPTIONS change, NOT obstacle positions
         // Obstacle position changes are handled via moveShape() to avoid router reset/abort errors
-        // VERSION 2: Force router reset to apply new callback/nudging settings
-        const routerVersion = `v2-${optionsVersion}`;
+        const routerVersion = `${optionsVersion}`;
         
         // Router configuration helper - sets all parameters ONCE per router version
         // This matches Joint.js pattern: configure router once, then batch route all connections
@@ -480,10 +479,18 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
           }
         });
         
-        // DO NOT call processTransaction() when obstacles move
-        // This causes ballooning where ALL edges get re-nudged
-        // Edges will only reroute when their endpoints change (new connections)
-        // or when the router is recreated (options change)
+        // Call processTransaction() after obstacles move to trigger rerouting
+        // Nudging is DISABLED so this should NOT cause ballooning
+        // Only call once per obstacle change (not per edge)
+        const lastProcessedSignature = (router as any).__lastProcessedObstacleSignature || '';
+        if (lastProcessedSignature !== obstacleSignature) {
+          try {
+            router.processTransaction?.();
+            (router as any).__lastProcessedObstacleSignature = obstacleSignature;
+          } catch (e) {
+            // Ignore abort errors
+          }
+        }
         
         // CRITICAL: Ensure obstacles are registered in router before proceeding
         // This is synchronous, so obstacles are guaranteed to be in router before connections
@@ -845,17 +852,65 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
           }
         }
         
-        // Joint.js pattern: Use cached route if available (updated by callback)
-        // Only poll displayRoute() for new connections or if no cache exists
+        // Smart route extraction: only get fresh route if this edge is affected by obstacle changes
+        // This prevents ballooning where unrelated edges change when far-away obstacles move
         let pathPoints: Point[] = [];
         const cachedRoute = routesCache.get(id);
         
-        if (cachedRoute && cachedRoute.length >= 2 && !isNewConnection) {
-          // Use cached route - this prevents ballooning by not polling displayRoute()
-          // for edges that haven't changed
-          pathPoints = cachedRoute;
-        } else {
-          // New connection or no cache - extract route and cache it
+        // Track which nodes actually moved by comparing current position to cached position
+        // Initialize position cache on router
+        if (!(router as any).__nodePositionCache) {
+          (router as any).__nodePositionCache = new Map<string, { x: number; y: number }>();
+        }
+        const positionCache = (router as any).__nodePositionCache as Map<string, { x: number; y: number }>;
+        
+        // Find which obstacles moved
+        const movedObstacles: NodeRect[] = [];
+        obstacleRects.forEach(obstacle => {
+          const cachedPos = positionCache.get(obstacle.id);
+          if (!cachedPos || cachedPos.x !== obstacle.x || cachedPos.y !== obstacle.y) {
+            movedObstacles.push(obstacle);
+            positionCache.set(obstacle.id, { x: obstacle.x, y: obstacle.y });
+          }
+        });
+        
+        // Check if source or target node moved
+        const sourceNodeMoved = movedObstacles.some(o => o.id === source);
+        const targetNodeMoved = movedObstacles.some(o => o.id === target);
+        
+        // Check if any moved obstacle intersects with this edge's bounding box
+        let pathIntersectsMovedObstacle = false;
+        if (cachedRoute && cachedRoute.length >= 2 && movedObstacles.length > 0) {
+          // Calculate edge bounding box from cached route
+          const minX = Math.min(...cachedRoute.map(p => p.x));
+          const maxX = Math.max(...cachedRoute.map(p => p.x));
+          const minY = Math.min(...cachedRoute.map(p => p.y));
+          const maxY = Math.max(...cachedRoute.map(p => p.y));
+          
+          // Check if any moved obstacle intersects this bounding box (with margin)
+          // Use margin to catch edges near obstacles, not just through them
+          const margin = 32; // Same as shapeBufferDistance
+          for (const obstacle of movedObstacles) {
+            if (obstacle.id === source || obstacle.id === target) continue;
+            const oLeft = obstacle.x - margin;
+            const oRight = obstacle.x + obstacle.width + margin;
+            const oTop = obstacle.y - margin;
+            const oBottom = obstacle.y + obstacle.height + margin;
+            if (oLeft <= maxX && oRight >= minX && oTop <= maxY && oBottom >= minY) {
+              pathIntersectsMovedObstacle = true;
+              break;
+            }
+          }
+        }
+        
+        // Only extract fresh route if:
+        // 1. It's a new connection (no cached route)
+        // 2. The source or target node moved
+        // 3. A moved obstacle intersects the edge's bounding box
+        const needsFreshRoute = isNewConnection || !cachedRoute || 
+          sourceNodeMoved || targetNodeMoved || pathIntersectsMovedObstacle;
+        
+        if (needsFreshRoute) {
           try {
             const route = connection.displayRoute?.();
             if (route && typeof route.size === 'function' && route.size() > 0) {
@@ -865,7 +920,7 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
                   pathPoints.push({ x: pt.x, y: pt.y });
                 }
               }
-              // Cache the initial route
+              // Cache the route
               if (pathPoints.length >= 2) {
                 routesCache.set(id, [...pathPoints]);
               }
@@ -873,6 +928,9 @@ const StepEdge: React.FC<EdgeProps> = (props) => {
           } catch (e) {
             // Route extraction failed, will use fallback below
           }
+        } else if (cachedRoute && cachedRoute.length >= 2) {
+          // Use cached route for unaffected edges (endpoints didn't move)
+          pathPoints = cachedRoute;
         }
         
         // If no valid route, use simple L-shaped fallback (never leave empty)
