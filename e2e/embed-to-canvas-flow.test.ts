@@ -17,6 +17,7 @@ test.describe('Embed-to-Canvas Flow', () => {
   });
   
   test('Architecture and chat persist from embed to canvas', async ({ page, context }) => {
+    test.setTimeout(120000); // 2 minutes for API-based architecture generation
     console.log('📱 Loading embed mode...');
     await page.goto(`${BASE_URL}/embed`);
     await page.waitForLoadState('networkidle');
@@ -33,9 +34,10 @@ test.describe('Embed-to-Canvas Flow', () => {
     // Use force: true to bypass overlay interception (ELK debugger overlay)
     await page.locator('button[type="submit"]').first().click({ force: true });
 
-    await page.waitForTimeout(5000);
+    // Wait for architecture generation - nodes can take 30+ seconds to appear
     const nodes = page.locator('.react-flow__node');
-    await nodes.first().waitFor({ state: 'visible', timeout: 20000 });
+    // Increased timeout to 60s for API-based architecture generation
+    await nodes.first().waitFor({ state: 'visible', timeout: 60000 });
     
     const embedNodeCount = await nodes.count();
     console.log(`✅ Embed: ${embedNodeCount} nodes`);
