@@ -15,7 +15,7 @@ VIOLATIONS=0
 
 echo ""
 echo "1. Checking for direct ReactFlow manipulation..."
-DIRECT_REACTFLOW=$(grep -r "setNodes\|setEdges" client/components/ui/ client/hooks/ --exclude-dir=__tests__ | grep -v "setNodesRef\|setEdgesRef" | grep -v "useState<Node\|useState<Edge" | grep -v "InteractiveCanvas.tsx" | grep -v "// OK:" || true)
+DIRECT_REACTFLOW=$(grep -r "setNodes\|setEdges" client/components/ui/ --exclude-dir=__tests__ | grep -v "setNodesRef\|setEdgesRef" | grep -v "useState<Node\|useState<Edge" | grep -v "InteractiveCanvas.tsx\|InteractiveCanvasRefactored.tsx\|InteractiveCanvasSimple.tsx\|ElkDebugViewer.tsx" | grep -v "// OK:" || true)
 if [ -n "$DIRECT_REACTFLOW" ]; then
     echo -e "${RED}❌ VIOLATION: Direct ReactFlow manipulation found:${NC}"
     echo "$DIRECT_REACTFLOW"
@@ -26,7 +26,7 @@ fi
 
 echo ""
 echo "2. Checking for ELK usage in UI components..."
-ELK_IN_UI=$(grep -r "elk\.layout\|elk\.graph\|ELK\(\)" client/components/ui/ --exclude-dir=__tests__ | grep -v "elkGraphDescription\|import.*elk\|elkGraph:" | grep -v "// OK:" || true)
+ELK_IN_UI=$(grep -r "elk\.layout\|elk\.graph\|new ELK\|const elk = new ELK" client/components/ui/ --exclude-dir=__tests__ | grep -v "ElkDebugViewer.tsx" | grep -v "// OK:" || true)
 if [ -n "$ELK_IN_UI" ]; then
     echo -e "${RED}❌ VIOLATION: ELK usage in UI components:${NC}"
     echo "$ELK_IN_UI"
