@@ -30,7 +30,8 @@ test.describe('Embed-to-Canvas Flow', () => {
     const chatInput = page.locator('input[placeholder*="architecture" i], input[placeholder*="describe" i]').first();
     await chatInput.waitFor({ state: 'visible', timeout: 10000 });
     await chatInput.fill(prompt);
-    await page.locator('button[type="submit"]').first().click();
+    // Use force: true to bypass overlay interception (ELK debugger overlay)
+    await page.locator('button[type="submit"]').first().click({ force: true });
 
     await page.waitForTimeout(5000);
     const nodes = page.locator('.react-flow__node');
