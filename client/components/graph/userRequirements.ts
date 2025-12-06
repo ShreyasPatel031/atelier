@@ -102,92 +102,18 @@ ${currentTextInput}`;
      // Function call message tracking  
      const functionCallMessages = new Map<string, { messageId: string; content: string }>();
      
-     // DISABLED: StreamExecutor creation - using simple agent instead
-         /*
-         const streamExecutor = new StreamExecutor({
-       elkGraph: currentGraph,
-       apiEndpoint: undefined, // Use default
-       setElkGraph: (newGraph: any) => {
-
-         const setGraphFunction = (window as any).setElkGraph;
-         if (setGraphFunction && typeof setGraphFunction === 'function') {
-           setGraphFunction(newGraph);
-         }
-       },
-      addLine: (message: string) => {
-
-      },
-      appendToTextLine: () => {}, // Suppress verbose text logging
-      appendToReasoningLine: (text: string) => {
-        reasoningContent += text;
-        updateStreamingMessage(
-          reasoningMessageId,
-          reasoningContent,
-          true,
-          null
-        );
-      },
-      appendToArgsLine: (text: string, itemId: string) => {
-        if (!functionCallMessages.has(itemId)) {
-          functionCallMessages.set(itemId, {
-            messageId: addFunctionCallingMessage("Processing..."),
-            content: ""
-          });
-        }
-        
-        const callInfo = functionCallMessages.get(itemId)!;
-        callInfo.content += text;
-        
-        updateStreamingMessage(
-          callInfo.messageId,
-          callInfo.content,
-          true,
-          null
-        );
-      },
-      completeFunctionCall: (functionName: string, callId: string) => {
-
-          // Find and update the message to show completion
-          const callInfo = functionCallMessages.get(callId);
-          if (callInfo) {
-              updateStreamingMessage(callInfo.messageId, callInfo.content, true, functionName);
-          }
-          
-          // Remove the message from active function calls
-          functionCallMessages.delete(callId);
-          
-          // Graph is already updated by handleFunctionCall - no need to override it here
-      },
-      setBusy: (busy: boolean) => {
-
-      },
-      onComplete: () => {
-        const completeTime = performance.now();
-
-        
-        // Only add completion message if no active streaming
-        if (functionCallMessages.size === 0 && !reasoningMessageId) {
-          addProcessCompleteMessage();
-        }
-        
-        // Clear reasoning tracking
-        reasoningMessageId = null;
-        reasoningContent = "";
-        
-
-      }
-    });
-    */
-    
     const executorSetupTime = performance.now();
 
-    
-
-    
-    // DISABLED: Old broken StreamExecutor - using new simple agent instead
-    // await streamExecutor.execute();
-    
-
+    // Call the unified handleChatSubmit which handles the full AI generation flow
+    const handleChatSubmit = (window as any).handleChatSubmit;
+    if (handleChatSubmit && typeof handleChatSubmit === 'function') {
+      console.log('📞 Calling unified handleChatSubmit for architecture generation...');
+      await handleChatSubmit(currentTextInput.trim());
+      console.log('✅ handleChatSubmit completed');
+    } else {
+      console.error('❌ handleChatSubmit not available on window - InteractiveCanvas may not be mounted');
+      throw new Error('handleChatSubmit not available - canvas not ready');
+    }
     
   } catch (error) {
     console.error('❌ Error in process_user_requirements:', error);

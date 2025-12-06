@@ -75,7 +75,8 @@ export function toReactFlowWithViewState(
   // Override all node positions from ViewState (enforce contract)
   const nodes = elkNodes.map((node) => {
     const nodeId = node.id;
-    const isGroup = node.type === 'group';
+    // Check for both 'group' and 'draftGroup' types (draftGroup is used to bypass ReactFlow's built-in group behavior)
+    const isGroup = node.type === 'group' || node.type === 'draftGroup';
 
     if (strictGeometry && process.env.NODE_ENV !== 'production') {
       // Enforce: geometry must exist in ViewState
@@ -198,23 +199,31 @@ export function toReactFlowWithViewState(
     };
   });
 
-  // Override edge waypoints from ViewState if available
+  // Override edge waypoints from ViewState ONLY for FREE mode
+  // LOCK mode must always use ELK waypoints - no overrides!
   const edges = elkEdges.map((edge) => {
     const edgeId = edge.id;
+    const routingMode = edge.data?.routingMode || 'FREE';
     const edgeGeom = viewState.edge?.[edgeId];
 
+    // LOCK mode: ALWAYS use ELK waypoints - never override with ViewState
+    if (routingMode === 'LOCK') {
+      // Pass through ELK data untouched
+      return edge;
+    }
+
+    // FREE mode: Use ViewState waypoints if available (for manual routing)
     if (edgeGeom?.waypoints && Array.isArray(edgeGeom.waypoints)) {
-      // Use ViewState waypoints (manual routing in FREE mode)
       return {
         ...edge,
         data: {
           ...edge.data,
-          bendPoints: edgeGeom.waypoints,
+          waypoints: edgeGeom.waypoints, // Put in 'waypoints' not 'bendPoints' to avoid confusion
         },
       };
     }
 
-    // Use ELK waypoints (from processLayoutedGraph)
+    // No ViewState waypoints - use ELK (from processLayoutedGraph)
     return edge;
   });
 

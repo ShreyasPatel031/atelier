@@ -110,16 +110,16 @@ function handleNodeReparent(
   let graphUpdated = false;
   let reparented = false;
 
-    // Use ReactFlow position during drag (ViewState may be stale)
-    const containingGroup = findContainingGroup(node, currentNodes, viewStateRef.current, true);
-    const currentParentInGraph = findParentInGraph(updatedGraph, nodeId);
+  // Use ReactFlow position during drag (ViewState may be stale)
+  const containingGroup = findContainingGroup(node, currentNodes, viewStateRef.current, true);
+  const currentParentInGraph = findParentInGraph(updatedGraph, nodeId);
     
     // Normalize parent IDs: null means root
     const normalizedCurrentParent = currentParentInGraph || 'root';
-    
-    // Determine new parent: if node is fully contained in a group, use that group; otherwise use root
-    const newParentId = containingGroup ? containingGroup.id : 'root';
-    
+  
+  // Determine new parent: if node is fully contained in a group, use that group; otherwise use root
+  const newParentId = containingGroup ? containingGroup.id : 'root';
+  
     // Check if parent actually changed - skip if same
     if (normalizedCurrentParent === newParentId) {
       return { graphUpdated, updatedGraph, reparented };
@@ -152,12 +152,12 @@ function handleNodeReparent(
           console.warn(`[DragReparentHandler] Orchestrator move-node failed:`, error);
         }
       });
-      
+    
       // Update local graph ref for return value (Orchestrator updates graphStateRef)
-      try {
-        updatedGraph = moveNode(nodeId, newParentId, updatedGraph);
-        graphUpdated = true;
-        reparented = true;
+    try {
+      updatedGraph = moveNode(nodeId, newParentId, updatedGraph);
+      graphUpdated = true;
+      reparented = true;
       } catch (moveError: any) {
         // If moveNode fails with "already contains", parent is already correct - this is fine
         if (!moveError.message?.includes('already contains')) {
@@ -172,16 +172,16 @@ function handleNodeReparent(
       }
       
       // Update selection
-      if (containingGroup) {
-        setSelectedNodes([containingGroup]);
-        setSelectedNodeIds([containingGroup.id]);
-      }
+        if (containingGroup) {
+          setSelectedNodes([containingGroup]);
+          setSelectedNodeIds([containingGroup.id]);
+        }
     } catch (error: any) {
       // Only log if it's not a "already contains" error (which means parent is already correct)
       if (!error.message?.includes('already contains')) {
         console.warn(`[DragReparentHandler] Failed to move node ${nodeId}:`, error);
-      }
     }
+  }
 
   return { graphUpdated, updatedGraph, reparented };
 }
@@ -255,7 +255,7 @@ function handleGroupReparent(
       } catch (error: any) {
         // Only log if it's not a "already contains" error
         if (!error.message?.includes('already contains')) {
-          console.warn(`[DragReparentHandler] Failed to move ${containedNode.id} into group ${group.id}:`, error);
+        console.warn(`[DragReparentHandler] Failed to move ${containedNode.id} into group ${group.id}:`, error);
         }
       }
     });

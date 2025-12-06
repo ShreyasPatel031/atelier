@@ -146,3 +146,6 @@ test('should route edge around nested obstacles', async ({ page }) => {
 - The `checkPathAvoidsObstacle` function uses a 16px buffer (matching `shapeBufferDistance`)
 - Path analysis functions work with SVG path data (M/L commands)
 
+
+
+

@@ -26,6 +26,7 @@
 import type { Node, Edge } from 'reactflow';
 import type { RawGraph } from '../../components/graph/types/index';
 import type { ViewState } from '../viewstate/ViewState';
+import { CANVAS_STYLES } from '../../components/graph/styles/canvasStyles';
 
 export interface ReactFlowOutput {
   nodes: Node[];
@@ -80,7 +81,7 @@ export function convertViewStateToReactFlow(
     const position = { x: geometry.x, y: geometry.y };
 
     console.log(`[🎯COORD] Converting ${nodeId}: ABSOLUTE (${position.x},${position.y}), size ${geometry.w}×${geometry.h}`);
-    
+
     // Use 'draftGroup' instead of 'group' to avoid ReactFlow's built-in group behavior
     // The built-in 'group' type has special non-draggable behavior we don't want
     const reactFlowNode: Node = {
@@ -88,6 +89,7 @@ export function convertViewStateToReactFlow(
       type: isGroup ? 'draftGroup' : 'custom',
       position, // ABSOLUTE - never relative
       draggable: true,
+      zIndex: isGroup ? CANVAS_STYLES.zIndex.groups : CANVAS_STYLES.zIndex.nodes, // Explicit z-index from config
       // NO parentId - we handle group membership ourselves
       data: {
         ...domainNode.data,
@@ -132,6 +134,7 @@ export function convertViewStateToReactFlow(
         source: edge.sources?.[0] || edge.source,
         target: edge.targets?.[0] || edge.target,
         type: 'step', // Use 'step' for libavoid routing (StepEdge handles both 'step' and 'smoothstep')
+        zIndex: CANVAS_STYLES.zIndex.edges, // Explicit z-index from config (below nodes)
         data: {
           ...edge.data,
           // Pass waypoints from ViewState to edge.data for StepEdge to read

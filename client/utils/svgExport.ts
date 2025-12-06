@@ -41,19 +41,31 @@ export function generateSVG(layoutedGraph: any): string {
     
     // Collect edges at this level
     if (node.edges && Array.isArray(node.edges)) {
+      const edgeOffset = {
+        x: (node.id !== 'root' ? node.x : 0) + containerOffset.x,
+        y: (node.id !== 'root' ? node.y : 0) + containerOffset.y
+      };
+      
       for (const edge of node.edges) {
         collected.edges.push({
           ...edge,
           sections: edge.sections?.map((section: any) => ({
             ...section,
             startPoint: {
-              x: section.startPoint.x + (node.id !== 'root' ? node.x : 0) + containerOffset.x,
-              y: section.startPoint.y + (node.id !== 'root' ? node.y : 0) + containerOffset.y
+              x: section.startPoint.x + edgeOffset.x,
+              y: section.startPoint.y + edgeOffset.y
             },
             endPoint: {
-              x: section.endPoint.x + (node.id !== 'root' ? node.x : 0) + containerOffset.x,
-              y: section.endPoint.y + (node.id !== 'root' ? node.y : 0) + containerOffset.y
-            }
+              x: section.endPoint.x + edgeOffset.x,
+              y: section.endPoint.y + edgeOffset.y
+            },
+            // CRITICAL: Also convert bendPoints to absolute coordinates!
+            // Without this, bendPoints are relative while start/end are absolute,
+            // causing diagonal lines instead of proper orthogonal routing
+            bendPoints: section.bendPoints?.map((bp: any) => ({
+              x: bp.x + edgeOffset.x,
+              y: bp.y + edgeOffset.y
+            })) || []
           }))
         });
       }

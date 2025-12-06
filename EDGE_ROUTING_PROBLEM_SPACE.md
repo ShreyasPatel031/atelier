@@ -321,3 +321,6 @@ The edge path becomes empty because:
 4. Are edges re-registering properly after coordinator reset?
 5. Is there a timing issue with state updates?
 
+
+
+

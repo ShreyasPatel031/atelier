@@ -10,7 +10,7 @@ interface Mutations {
   deleteEdge: (edgeId: string, graph: any) => any;
   groupNodes: (nodeIds: string[], parentId: string, groupId: string, graph: any, style?: any, groupIconName?: string) => any;
   removeGroup: (groupId: string, graph: any) => any;
-  batchUpdate: (operations: any[], graph: any) => any;
+  batchUpdate: (operations: any[], graph: any, targetContainerId?: string) => any;
   process_user_requirements?: () => string;
 }
 
@@ -19,6 +19,145 @@ interface FunctionCallHelpers {
   setElkGraph: (g: any) => void;
   mutations: Mutations;
   safeSend: (e: ClientEvent) => void;
+  selectedNodeIds?: string[];  // IDs of currently selected nodes/groups
+}
+
+/**
+ * Get the next available group number by scanning existing groups in the graph.
+ * Returns numbers like 1, 2, 3... for group_1, group_2, group_3...
+ */
+function getNextGroupNumber(graph: any): number {
+  const existingNumbers: number[] = [];
+  
+  const collectGroupNumbers = (node: any) => {
+    if (node.id && node.id.startsWith('group_')) {
+      const numPart = node.id.substring(6); // Remove 'group_' prefix
+      const num = parseInt(numPart, 10);
+      if (!isNaN(num)) {
+        existingNumbers.push(num);
+      }
+    }
+    // Also check for groups with pattern like 'group-timestamp'
+    if (node.children) {
+      node.children.forEach(collectGroupNumbers);
+    }
+  };
+  
+  collectGroupNumbers(graph);
+  
+  // Find the next available number
+  if (existingNumbers.length === 0) return 1;
+  return Math.max(...existingNumbers) + 1;
+}
+
+/**
+ * Find if a selected node is a group (has children).
+ * Returns the group ID if found, null otherwise.
+ */
+function findSelectedGroup(graph: any, selectedNodeIds: string[]): string | null {
+  if (!selectedNodeIds || selectedNodeIds.length === 0) return null;
+  
+  const findNode = (node: any, targetId: string): any | null => {
+    if (node.id === targetId) return node;
+    if (node.children) {
+      for (const child of node.children) {
+        const found = findNode(child, targetId);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+  
+  // Check each selected node to see if it's a group
+  for (const nodeId of selectedNodeIds) {
+    const node = findNode(graph, nodeId);
+    if (node && node.children && node.children.length >= 0) {
+      // It's a group (has children array, even if empty)
+      // Also check if the node itself looks like a group (has 'group' in ID or is a draftGroup)
+      if (nodeId.includes('group') || node.children.length > 0) {
+        return nodeId;
+      }
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Determine the target container for AI drawing operations.
+ * - If a group is selected, use that group
+ * - Otherwise, create a new group (group_X where X is the next available number)
+ * 
+ * Returns: { containerId: string, needsCreation: boolean, groupIcon?: string }
+ */
+function determineTargetContainer(
+  graph: any, 
+  selectedNodeIds: string[]
+): { containerId: string; needsCreation: boolean; groupIcon: string } {
+  // Check if a group is selected
+  const selectedGroup = findSelectedGroup(graph, selectedNodeIds);
+  
+  if (selectedGroup) {
+    console.log(`🎯 [AI-TARGET] Using selected group: ${selectedGroup}`);
+    return { containerId: selectedGroup, needsCreation: false, groupIcon: 'gcp_system' };
+  }
+  
+  // No group selected, need to create a new one
+  const nextNum = getNextGroupNumber(graph);
+  const newGroupId = `group_${nextNum}`;
+  console.log(`🎯 [AI-TARGET] Creating new container group: ${newGroupId}`);
+  
+  return { containerId: newGroupId, needsCreation: true, groupIcon: 'gcp_system' };
+}
+
+/**
+ * Create an empty wrapper group in the graph.
+ * This is used when AI draws without a selected group.
+ */
+function createWrapperGroup(graph: any, groupId: string, groupIcon: string = 'gcp_system'): any {
+  // Ensure root has children array
+  if (!graph.children) {
+    graph.children = [];
+  }
+  
+  // Create the wrapper group
+  const wrapperGroup = {
+    id: groupId,
+    labels: [{ text: groupId.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) }], // "Group 1" from "group_1"
+    children: [],
+    edges: [],
+    data: {
+      groupIcon: groupIcon,
+      style: { fill: 'transparent', stroke: '#6B7280' }
+    }
+  };
+  
+  graph.children.push(wrapperGroup);
+  console.log(`✅ [AI-TARGET] Created wrapper group: ${groupId}`);
+  
+  return graph;
+}
+
+/**
+ * Rewrite operations to use the target container instead of "root".
+ * This ensures AI-generated content goes into the correct container.
+ */
+function rewriteOperationsParentId(operations: any[], targetContainerId: string): any[] {
+  return operations.map(op => {
+    // For add_node, replace parentId "root" with target container
+    if (op.name === 'add_node' && (op.parentId === 'root' || !op.parentId)) {
+      console.log(`📝 [REWRITE] add_node '${op.nodename}': parentId 'root' → '${targetContainerId}'`);
+      return { ...op, parentId: targetContainerId };
+    }
+    
+    // For group_nodes, replace parentId "root" with target container
+    if (op.name === 'group_nodes' && (op.parentId === 'root' || !op.parentId)) {
+      console.log(`📝 [REWRITE] group_nodes '${op.groupId}': parentId 'root' → '${targetContainerId}'`);
+      return { ...op, parentId: targetContainerId };
+    }
+    
+    return op;
+  });
 }
 
 // Extend Window interface for TypeScript
@@ -128,18 +267,22 @@ export function handleFunctionCall(
         if (!args.nodeIds || !Array.isArray(args.nodeIds) || args.nodeIds.length === 0) {
           throw new Error(`group_nodes requires 'nodeIds' as a non-empty array, got: ${JSON.stringify(args.nodeIds)}`);
         }
-        if (!args.parentId || typeof args.parentId !== 'string') {
+        // Default parentId to "root" if not provided (same as add_node)
+        const groupParentId = args.parentId || "root";
+        if (typeof groupParentId !== 'string') {
           throw new Error(`group_nodes requires 'parentId' as a string, got: ${JSON.stringify(args.parentId)}`);
         }
         if (!args.groupId || typeof args.groupId !== 'string') {
           throw new Error(`group_nodes requires 'groupId' as a string, got: ${JSON.stringify(args.groupId)}`);
         }
-        if (!args.groupIconName || typeof args.groupIconName !== 'string') {
+        // Default groupIconName to 'gcp_system' if not provided
+        const groupIconName = args.groupIconName || 'gcp_system';
+        if (typeof groupIconName !== 'string') {
           throw new Error(`group_nodes requires 'groupIconName' as a string for proper cloud provider styling, got: ${JSON.stringify(args.groupIconName)}`);
         }
         
-        updated = mutations.groupNodes(args.nodeIds, args.parentId, args.groupId, graphCopy, undefined, args.groupIconName);
-        console.log(`📦 Grouped nodes [${args.nodeIds.join(', ')}] into '${args.groupId}' under '${args.parentId}' with group icon: ${args.groupIconName}`);
+        updated = mutations.groupNodes(args.nodeIds, groupParentId, args.groupId, graphCopy, undefined, groupIconName);
+        console.log(`📦 Grouped nodes [${args.nodeIds.join(', ')}] into '${args.groupId}' under '${groupParentId}' with group icon: ${groupIconName}`);
         break;
         
       case "remove_group":
@@ -170,7 +313,7 @@ export function handleFunctionCall(
         }
         
         // Validate operations
-        args.operations.forEach((op, index) => {
+        args.operations.forEach((op: any, index: number) => {
           if (!op.name) {
             throw new Error(`Operation at index ${index} is missing required 'name' field`);
           }
@@ -184,7 +327,25 @@ export function handleFunctionCall(
           throw new Error(`Invalid graph state: graph must have an 'id' property`);
         }
         
-        updated = mutations.batchUpdate(args.operations, graphCopy);
+        // 🎯 CRITICAL: Determine target container for AI drawing
+        // AI should draw into either:
+        // 1. The selected group (if user has a group selected)
+        // 2. A new auto-created wrapper group (group_X where X is next available number)
+        // NEVER directly into "root" (which is now the entire canvas)
+        const selectedNodeIds = helpers.selectedNodeIds || [];
+        const { containerId: targetContainerId, needsCreation, groupIcon } = determineTargetContainer(graphCopy, selectedNodeIds);
+        
+        console.log(`🎯 [AI-TARGET] Target container: ${targetContainerId}, needs creation: ${needsCreation}`);
+        
+        // If we need to create a new wrapper group, do it first
+        if (needsCreation) {
+          graphCopy = createWrapperGroup(graphCopy, targetContainerId, groupIcon);
+        }
+        
+        // Rewrite operations to use target container instead of "root"
+        const rewrittenOperations = rewriteOperationsParentId(args.operations, targetContainerId);
+        
+        updated = mutations.batchUpdate(rewrittenOperations, graphCopy, targetContainerId);
 
         break;
         

@@ -13,10 +13,9 @@ interface NodeDimensions {
 }
 
 export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) {
-  // Snap-to-grid configuration (keep in sync with canvas grid)
-  const GRID_SIZE = 16;
-  const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
-  const snapPos = (p: { x: number; y: number }) => ({ x: snap(p.x), y: snap(p.y) });
+  // NO SNAPPING NEEDED - ELK output is already scaled to 16px grid
+  // All coordinates come from scaleElkOutput() which multiplies by GRID_SIZE
+  // This ensures perfect alignment between ELK Domain Graph and canvas
 
   // Calculate absolute positions for all nodes in the graph
   const absolutePositions = computeAbsolutePositions(elkGraph);
@@ -30,16 +29,15 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
 
   /* ---------- helper to create RF nodes -------------------------------- */
   const createNode = (node: any, parentAbsolutePosition = { x: 0, y: 0 }, parentId?: string) => {
-    const absPosRaw = absolutePositions[node.id];
-    const absPos = snapPos(absPosRaw);
+    // No snapping needed - ELK output is already grid-aligned
+    const absPos = absolutePositions[node.id];
     const isGroupNode = (node.children?.length ?? 0) > 0;
 
-    // Quantize node sizes to grid so both start and end land on grid
-    const quantizeSize = (v: number) => Math.max(GRID_SIZE, Math.round(v / GRID_SIZE) * GRID_SIZE);
-    const nodeWidth  = quantizeSize(node.width  || dimensions.width);
-    const nodeHeight = quantizeSize(node.height || dimensions.height);
-    const groupWidth  = quantizeSize(node.width  || dimensions.groupWidth);
-    const groupHeight = quantizeSize(node.height || dimensions.groupHeight);
+    // Use dimensions directly from ELK (already scaled to pixels)
+    const nodeWidth  = node.width  || dimensions.width;
+    const nodeHeight = node.height || dimensions.height;
+    const groupWidth  = node.width  || dimensions.groupWidth;
+    const groupHeight = node.height || dimensions.groupHeight;
 
     // Only set parentId if it's not root (root is skipped from rendering)
     // Nodes that would have root as parent become top-level (no parentId)
@@ -51,7 +49,8 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
     nodes.push({
       id: node.id,
       type: isGroupNode ? "draftGroup" : "custom",
-      position: validParentId ? snapPos({ x: node.x ?? 0, y: node.y ?? 0 }) : { x: absPos.x, y: absPos.y },
+      // Use ELK coordinates directly - already grid-aligned from scaleElkOutput
+      position: validParentId ? { x: node.x ?? 0, y: node.y ?? 0 } : { x: absPos.x, y: absPos.y },
       ...(validParentId && { parentId: validParentId }),
       zIndex: isGroupNode ? CANVAS_STYLES.zIndex.groups : CANVAS_STYLES.zIndex.nodes,
       selectable: true,
@@ -68,20 +67,21 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
         ...(node.data?.style && { style: node.data.style }),
         // Pass through groupIcon if it exists in the node data
         ...(node.data?.groupIcon && { groupIcon: node.data.groupIcon }),
+        // Handle deltas - no snapping needed, ELK already grid-aligned
         leftHandles: (edgeConnectionPoints[node.id]?.left ?? []).map(connectionPoint => {
-          const delta = snap(connectionPoint.y) - absPos.y;
+          const delta = connectionPoint.y - absPos.y;
           return delta;
         }),
         rightHandles: (edgeConnectionPoints[node.id]?.right ?? []).map(connectionPoint => {
-          const delta = snap(connectionPoint.y) - absPos.y;
+          const delta = connectionPoint.y - absPos.y;
           return delta;
         }),
         topHandles: (edgeConnectionPoints[node.id]?.top ?? []).map(connectionPoint => {
-          const delta = snap(connectionPoint.x) - absPos.x;
+          const delta = connectionPoint.x - absPos.x;
           return delta;
         }),
         bottomHandles: (edgeConnectionPoints[node.id]?.bottom ?? []).map(connectionPoint => {
-          const delta = snap(connectionPoint.x) - absPos.x;
+          const delta = connectionPoint.x - absPos.x;
           return delta;
         }),
         position: { x: absPos.x, y: absPos.y }
@@ -132,7 +132,7 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
   // Create a map of node types for quick lookups
   const nodeTypeMap = new Map(nodes.map(node => [node.id, node.type]));
 
-  const createEdge = (edge: any, containerAbs: { x: number; y: number }) => {
+  const createEdge = (edge: any, containerAbs: { x: number; y: number }, parentNode?: any) => {
     edge.sources?.forEach((sourceNodeId: string) =>
       edge.targets?.forEach((targetNodeId: string) => {
         const edgeId = edge.id || `${sourceNodeId}-${targetNodeId}-${Math.random().toString(36).substr(2, 9)}`;
@@ -207,6 +207,41 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
           
 
 
+          // Get parent group mode (LOCK = ELK routing, FREE = libavoid routing)
+          // Per FIGJAM_REFACTOR.md: AI edits default to LOCK mode
+          // If no parent mode is set, default to LOCK (for AI-generated graphs)
+          const parentGroupMode = parentNode?.mode === 'FREE' ? 'FREE' : 'LOCK';
+          
+          // CRITICAL: Also pass ELK's startPoint and endPoint in ABSOLUTE coordinates
+          // These are the actual edge attachment points computed by ELK, NOT ReactFlow handle positions
+          const elkSection = edge.sections?.[0];
+          
+          // CRITICAL FIX: Read bendPoints DIRECTLY from ELK section, not from absoluteBendPoints
+          // absoluteBendPoints is only set if the array has length, but we need to compute
+          // absolute coordinates for ALL bendPoints, including from edges we haven't processed yet
+          // The svgExport.ts works because it reads directly from section.bendPoints
+          const rawBendPoints = elkSection?.bendPoints || [];
+          const elkBendPoints = rawBendPoints.map((bp: any) => ({
+            x: containerAbs.x + bp.x,
+            y: containerAbs.y + bp.y
+          }));
+          
+          const elkStartPoint = elkSection?.startPoint 
+            ? { x: containerAbs.x + elkSection.startPoint.x, y: containerAbs.y + elkSection.startPoint.y }
+            : undefined;
+          const elkEndPoint = elkSection?.endPoint
+            ? { x: containerAbs.x + elkSection.endPoint.x, y: containerAbs.y + elkSection.endPoint.y }
+            : undefined;
+          
+          console.log(`[🔧 toReactFlow] Edge ${edgeId}: mode=${parentGroupMode}, rawBendPoints=${rawBendPoints.length}, elkBendPoints=${elkBendPoints.length}`, {
+            parentNodeId: parentNode?.id,
+            parentMode: parentNode?.mode,
+            rawBendPoints: rawBendPoints.map((p: any) => `${p.x?.toFixed(0)},${p.y?.toFixed(0)}`),
+            elkBendPoints: elkBendPoints.map((p: any) => `${p.x?.toFixed(0)},${p.y?.toFixed(0)}`),
+            elkStartPoint: elkStartPoint ? `${elkStartPoint.x?.toFixed(0)},${elkStartPoint.y?.toFixed(0)}` : 'none',
+            elkEndPoint: elkEndPoint ? `${elkEndPoint.x?.toFixed(0)},${elkEndPoint.y?.toFixed(0)}` : 'none'
+          });
+          
           edges.push({
             id: edgeId, 
             source: sourceNodeId, 
@@ -228,8 +263,17 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
             label: labelTxt,
             data: {
               labelText: labelTxt,
-              bendPoints: edge.absoluteBendPoints ?? [],
-              labelPos: labelPosAbs          // ← now absolute
+              bendPoints: elkBendPoints,
+              labelPos: labelPosAbs,          // ← now absolute
+              // Routing mode: LOCK uses ELK bendPoints, FREE uses libavoid
+              routingMode: parentGroupMode,
+              // ALWAYS pass ELK waypoints - StepEdge LOCK mode needs them
+              // CRITICAL: Always pass the array even if empty - StepEdge needs elkStartPoint/elkEndPoint
+              elkWaypoints: elkBendPoints,
+              // CRITICAL: Pass ELK's computed start/end points in ABSOLUTE coordinates
+              // These are the actual edge attachment points, not ReactFlow handle estimates
+              elkStartPoint,
+              elkEndPoint,
             },
             selected: false,
             hidden: false,
@@ -253,8 +297,10 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
 
   const processEdges = (node: any) => {
     const absRaw = absolutePositions[node.id];      // abs pos of this container
-    const abs = snapPos(absRaw);
-    (node.edges || []).forEach((e: any) => createEdge(e, abs));
+    // CRITICAL: Use RAW absolute position for edge coordinates, NOT snapped
+    // Snapping causes misalignment between ELK's computed edge positions and canvas rendering
+    // svgExport.ts uses raw coordinates and edges align perfectly - we must do the same
+    (node.edges || []).forEach((e: any) => createEdge(e, absRaw, node));
     (node.children || []).forEach(processEdges);
   };
   

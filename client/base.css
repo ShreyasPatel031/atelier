@@ -311,19 +311,54 @@ input::placeholder {
 }
 
 /* Z-index hierarchy - centrally managed from canvasStyles.ts */
-/* Groups should be below nodes so nodes appear on top when inside groups */
+/* From bottom to top: groups (1000) → nodes (2000) → edges (3000) */
+
+/* Groups should be the bottom layer */
 .react-flow__node[data-type="group"],
 .react-flow__node[data-id*="group"],
-.react-flow__node-group {
+.react-flow__node-group,
+.react-flow__node-draftGroup {
   z-index: 1000 !important; /* CANVAS_STYLES.zIndex.groups */
 }
 
 /* Regular nodes (not groups) should be above groups */
-.react-flow__node:not([data-type="group"]):not([data-id*="group"]):not(.react-flow__node-group) {
-  z-index: 4000 !important; /* CANVAS_STYLES.zIndex.nodes */
+.react-flow__node:not([data-type="group"]):not([data-id*="group"]):not(.react-flow__node-group):not(.react-flow__node-draftGroup) {
+  z-index: 3000 !important; /* CANVAS_STYLES.zIndex.nodes */
 }
 
 /* Selected nodes maintain same z-index as regular nodes */
-.react-flow__node.selected:not([data-type="group"]):not([data-id*="group"]):not(.react-flow__node-group) {
-  z-index: 4000 !important; /* CANVAS_STYLES.zIndex.selectedNodes */
+.react-flow__node.selected:not([data-type="group"]):not([data-id*="group"]):not(.react-flow__node-group):not(.react-flow__node-draftGroup) {
+  z-index: 3000 !important; /* CANVAS_STYLES.zIndex.selectedNodes */
+}
+
+/* Edges should be BELOW nodes */
+/* Target all edge-related elements with maximum specificity */
+.react-flow__edges,
+.react-flow__edges *,
+.react-flow__edge,
+.react-flow__edge *,
+.react-flow__edge path,
+.react-flow__edge svg,
+.react-flow__edge g {
+  z-index: 2000 !important; /* CANVAS_STYLES.zIndex.edges - below nodes (3000) */
+}
+
+.react-flow__edge.selected,
+.react-flow__edge.selected *,
+.react-flow__edge.selected path,
+.react-flow__edge.selected svg,
+.react-flow__edge.selected g {
+  z-index: 2000 !important; /* CANVAS_STYLES.zIndex.selectedEdges */
+}
+
+/* Override any inline styles ReactFlow might apply */
+.react-flow__edge[style*="z-index"],
+.react-flow__edge[style*="zIndex"] {
+  z-index: 2000 !important;
+}
+
+/* Ports (connector dots) must be above edges - force high z-index */
+/* Even though they're children of nodes (z-index 2000), we need them above edges (3000) */
+[data-connector-dot="true"] {
+  z-index: 6000 !important; /* CANVAS_STYLES.zIndex.nodeDots - above edges (3000) */
 }

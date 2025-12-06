@@ -64,3 +64,6 @@ link.set(linkAttributes, { avoidRouter: true }); // Always set something
 3. **Immediate validation** - Validate route immediately, apply fallback if invalid
 4. **Simplify coordinator** - Remove router version tracking
 
+
+
+

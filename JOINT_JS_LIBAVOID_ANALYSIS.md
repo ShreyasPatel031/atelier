@@ -256,3 +256,6 @@ link.set(linkAttributes, { avoidRouter: true }); // Always set something
    - Don't trigger router resets on obstacle changes
    - Just update obstacle positions
 
+
+
+

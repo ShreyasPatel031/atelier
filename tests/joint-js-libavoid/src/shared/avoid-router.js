@@ -161,17 +161,23 @@ export class AvoidRouter {
         const Avoid = AvoidLib.getInstance();
         const { shapeRefs, avoidRouter } = this;
         const shapeRect = this.getAvoidRectFromElement(element);
+        const bbox = element.getBBox();
+        
         if (shapeRefs[element.id]) {
             // Only update the position and size of the shape.
             const shapeRef = shapeRefs[element.id];
+            console.log(`[JOINT-SHAPE] Moving existing shape: ${element.id} to (${bbox.x},${bbox.y}) ${bbox.width}x${bbox.height}`);
             avoidRouter.moveShape(shapeRef, shapeRect);
             return;
         }
 
+        console.log(`[JOINT-SHAPE] Creating NEW shape: ${element.id} at (${bbox.x},${bbox.y}) ${bbox.width}x${bbox.height}`);
         const shapeRef = new Avoid.ShapeRef(avoidRouter, shapeRect);
 
         shapeRefs[element.id] = shapeRef;
 
+        // CENTER PIN: Created IMMEDIATELY with every shape, pinId=1, ConnDirAll
+        console.log(`[JOINT-PIN] Creating CENTER PIN for ${element.id}: pinId=${defaultPin}, pos=(0.5,0.5), dir=ConnDirAll, exclusive=false`);
         const centerPin = new Avoid.ShapeConnectionPin(
             shapeRef,
             defaultPin, // one central pin for each shape
@@ -195,11 +201,15 @@ export class AvoidRouter {
             Object.keys(portsPositions).forEach((portId) => {
                 const { x, y } = portsPositions[portId];
                 const side = rect.sideNearestToPoint({ x, y });
+                const pinId = this.getConnectionPinId(element.id, portId);
+                const normX = x / width;
+                const normY = y / height;
+                console.log(`[JOINT-PIN] Creating PORT PIN for ${element.id}:${portId}: pinId=${pinId}, norm=(${normX.toFixed(3)},${normY.toFixed(3)}), dir=${side}`);
                 const pin = new Avoid.ShapeConnectionPin(
                     shapeRef,
-                    this.getConnectionPinId(element.id, portId),
-                    x / width,
-                    y / height,
+                    pinId,
+                    normX,
+                    normY,
                     true,
                     // x, y, false, (support offset on ports)
                     0,
@@ -229,29 +239,42 @@ export class AvoidRouter {
         const { id: sourceId, port: sourcePortId = null } = link.source();
         const { id: targetId, port: targetPortId = null } = link.target();
 
+        console.log(`[JOINT-CONNECTOR] updateConnector: link=${link.id}, source=${sourceId}${sourcePortId ? ':' + sourcePortId : ''}, target=${targetId}${targetPortId ? ':' + targetPortId : ''}`);
+
         if (!sourceId || !targetId) {
             // It is possible to have a link without source or target in libavoid.
             // But we do not support it in this example.
+            console.log(`[JOINT-CONNECTOR] Deleting link ${link.id} - missing source or target`);
             this.deleteConnector(link);
             return null;
         }
 
         let connRef;
 
+        // KEY: If port exists, use port's pinId. Otherwise, use defaultPin (center pin).
+        const srcPinId = sourcePortId ? this.getConnectionPinId(sourceId, sourcePortId) : defaultPin;
+        const tgtPinId = targetPortId ? this.getConnectionPinId(targetId, targetPortId) : defaultPin;
+        
+        console.log(`[JOINT-CONNEND] Creating ConnEnd for link ${link.id}:`);
+        console.log(`  SRC: shape=${sourceId}, pinId=${srcPinId}${sourcePortId ? ' (port: ' + sourcePortId + ')' : ' (CENTER PIN)'}`);
+        console.log(`  TGT: shape=${targetId}, pinId=${tgtPinId}${targetPortId ? ' (port: ' + targetPortId + ')' : ' (CENTER PIN)'}`);
+
         const sourceConnEnd = new Avoid.ConnEnd(
             shapeRefs[sourceId],
-            sourcePortId ? this.getConnectionPinId(sourceId, sourcePortId) : defaultPin
+            srcPinId
         );
         const targetConnEnd = new Avoid.ConnEnd(
             shapeRefs[targetId],
-            targetPortId ? this.getConnectionPinId(targetId, targetPortId) : defaultPin
+            tgtPinId
         );
 
         if (edgeRefs[link.id]) {
             connRef = edgeRefs[link.id];
+            console.log(`[JOINT-CONNECTOR] Updating existing connRef for ${link.id}`);
         } else {
             connRef = new Avoid.ConnRef(this.avoidRouter);
             this.linksByPointer[connRef.g] = link;
+            console.log(`[JOINT-CONNECTOR] Created NEW connRef for ${link.id}`);
         }
 
         connRef.setSourceEndpoint(sourceConnEnd);
@@ -266,6 +289,7 @@ export class AvoidRouter {
         edgeRefs[link.id] = connRef;
 
         connRef.setCallback(this.avoidConnectorCallback, connRef);
+        console.log(`[JOINT-CONNECTOR] Callback set for ${link.id}`);
 
         // Custom vertices (checkpoints) are not supported yet.
         // const checkpoint1 = new Avoid.Checkpoint(
@@ -311,8 +335,18 @@ export class AvoidRouter {
         if (!connRef) return;
 
         const route = connRef.displayRoute();
+        const routeSize = route.size();
+        
+        // Log the route points
+        const routePoints = [];
+        for (let i = 0; i < routeSize; i++) {
+            const pt = route.get_ps(i);
+            routePoints.push(`(${pt.x.toFixed(1)},${pt.y.toFixed(1)})`);
+        }
+        console.log(`[JOINT-ROUTE] Link ${link.id}: ${routeSize} points: ${routePoints.join(' → ')}`);
+        
         const sourcePoint = new g.Point(route.get_ps(0));
-        const targetPoint = new g.Point(route.get_ps(route.size() - 1));
+        const targetPoint = new g.Point(route.get_ps(routeSize - 1));
 
         const { id: sourceId, port: sourcePortId = null } = link.source();
         const { id: targetId, port: targetPortId = null } = link.target();
@@ -392,9 +426,12 @@ export class AvoidRouter {
     // This method is used to route links
     routeAll() {
         const { graph, avoidRouter } = this;
+        console.log(`[JOINT-ROUTEALL] Starting routeAll with ${graph.getElements().length} elements and ${graph.getLinks().length} links`);
         graph.getElements().forEach((element) => this.updateShape(element));
         graph.getLinks().forEach((link) => this.updateConnector(link));
+        console.log(`[JOINT-ROUTEALL] Calling processTransaction...`);
         avoidRouter.processTransaction();
+        console.log(`[JOINT-ROUTEALL] processTransaction complete`);
     }
 
     // This method is used to reset the link to a straight line

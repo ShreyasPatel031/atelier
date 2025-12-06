@@ -285,8 +285,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
     border: '1px solid #e4e4e4', // Figma exact border color
     borderRadius: '8px', // Figma 8px radius
     padding: '0px',
-    // Width fixed, height auto-sizes to content
+    // Width fixed, height auto-sizes to content unless explicit height provided
     width: data.width || 96,
+    height: data.height, // Respect explicit height from ELK if provided
     minHeight: 96,
     boxSizing: 'border-box' as const,
     display: 'flex',
@@ -426,6 +427,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
       <ConnectorDots 
         nodeId={id} 
         nodeWidth={data.width || 96}
+        nodeHeight={data.height || 96}
         connectingFrom={connectingFrom}
         connectingFromHandle={connectingFromHandle}
         onHandleClick={onConnectorDotClick}

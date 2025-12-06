@@ -167,6 +167,7 @@ export function measureNodeLabel(text: string): { width: number; height: number;
 /**
  * Calculate the required dimensions for a node based on its label
  * FIXED: Variable HEIGHT based on text, consistent WIDTH
+ * Returns dimensions in PIXELS (for backwards compatibility)
  */
 export function calculateNodeDimensions(label: string): { width: number; height: number } {
   const textDims = measureNodeLabel(label);
@@ -197,6 +198,45 @@ export function calculateNodeDimensions(label: string): { width: number; height:
     const height = baseHeight + extraHeight;
     return { width, height };
   }
+}
+
+/**
+ * Calculate node dimensions in UNITS for ELK layout.
+ * All values are integers that will be multiplied by GRID_SIZE (16) after ELK.
+ * 
+ * Uses EVEN heights so node centers are at integer unit positions,
+ * which scale cleanly to integer pixel positions.
+ * 
+ * @returns dimensions in UNITS (not pixels)
+ */
+export function calculateNodeDimensionsInUnits(label: string): { width: number; height: number } {
+  const textDims = measureNodeLabel(label);
+  
+  // Node dimensions in UNITS
+  // Width: 6 units (will become 96px after × 16)
+  // Height: 6 units base + 1 unit per extra line (always even for clean centers)
+  const NODE_WIDTH_UNITS = 6;
+  const NODE_HEIGHT_BASE_UNITS = 6;  // Base height for 1 line
+  const HEIGHT_PER_EXTRA_LINE_UNITS = 1; // Each additional line adds 1 unit
+  
+  const width = NODE_WIDTH_UNITS;
+  
+  // Calculate height: base + extra lines
+  // Keep it even by rounding up if needed (ensures center is at integer unit)
+  const extraLines = Math.max(0, textDims.lines - 1);
+  let height = NODE_HEIGHT_BASE_UNITS + extraLines * HEIGHT_PER_EXTRA_LINE_UNITS;
+  
+  // Ensure height is even for clean centering
+  if (height % 2 !== 0) {
+    height += 1;
+  }
+  
+  // Debug specific labels
+  if (label === 'Cloud Storage' || label === 'BigQuery') {
+    console.log(`[📝 textMeasurement] "${label}": ${textDims.lines} lines → height=${height} units (${height * 16}px after scaling)`);
+  }
+  
+  return { width, height };
 }
 
 /**

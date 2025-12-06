@@ -4,6 +4,7 @@ import { Handle, Position } from 'reactflow';
 interface ConnectorDotsProps {
   nodeId: string;
   nodeWidth?: number;
+  nodeHeight?: number;
   connectingFrom?: string | null; // Track if a connection is being started
   connectingFromHandle?: string | null; // Track which handle is being connected from
   onHandleClick?: (nodeId: string, handleId: string) => void; // Callback when handle is clicked
@@ -13,6 +14,7 @@ interface ConnectorDotsProps {
 const ConnectorDots: React.FC<ConnectorDotsProps> = ({ 
   nodeId, 
   nodeWidth = 96,
+  nodeHeight = 96,
   connectingFrom,
   connectingFromHandle,
   onHandleClick,
@@ -111,21 +113,23 @@ const ConnectorDots: React.FC<ConnectorDotsProps> = ({
         const DOT_SIZE = 8; // 8px dots as per Figma
         const DOT_RADIUS = DOT_SIZE / 2; // 4px radius
         
-        // Calculate dot positions with CENTER on the border (half inside, half outside)
-        // Position dot centers exactly on the border edge
+        // Compensate for node border (assumed 1px) to align dots exactly with CENTER of border stroke (0.5px)
+        const BORDER_OFFSET = 1;
+        
+        // Calculate dot positions with CENTER on the border
         let dotPosition: string | number;
         if (key === 'top' || key === 'bottom') {
           dotPosition = '50%'; // Centered horizontally
         } else {
           dotPosition = key === 'left' 
-            ? 0 // Left border - center at border
-            : nodeWidth; // Right border - center at border
+            ? -BORDER_OFFSET // Left border (compensate for 0.5px border alignment relative to 1px padding origin)
+            : `calc(100% + ${BORDER_OFFSET}px)`; // Right border (compensate for 0.5px border alignment)
         }
         
         const topPosition = key === 'top' 
-          ? 0 // Top border - center at border
+          ? -BORDER_OFFSET // Top border (compensate for 0.5px border alignment)
           : key === 'bottom'
-          ? nodeWidth // Bottom border - center at border
+          ? `calc(100% + ${BORDER_OFFSET}px)` // Bottom border (compensate for 0.5px border alignment)
           : '50%'; // Centered vertically
         
         // Check if this is the selected handle
@@ -199,18 +203,18 @@ const ConnectorDots: React.FC<ConnectorDotsProps> = ({
                   data-handle-id={`connector-${key}-target`}
                   style={{
                     position: 'absolute',
-                    left: (key === 'left' || key === 'right') ? dotPosition : '50%',
-                    top: (key === 'top' || key === 'bottom') ? topPosition : '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 64, // Larger hover area
-                    height: 64,
+                left: (key === 'left' || key === 'right') ? dotPosition : '50%',
+                top: (key === 'top' || key === 'bottom') ? topPosition : '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 64, // Larger hover area
+                height: 64,
                     cursor: 'pointer', // ALWAYS pointer, never crosshair
-                    pointerEvents: 'auto', // Detect hover and clicks
-                    zIndex: 997,
-                    background: 'rgba(0, 255, 0, 0.25)', // Green hover area (visible)
-                    borderRadius: '8px', // Rounded corners
-                    opacity: isHovered ? 1 : 0.5 // More visible on hover
-                  }}
+                pointerEvents: 'auto', // Detect hover and clicks
+                zIndex: 5999, // Just below visual dot (6000)
+                background: 'rgba(0, 255, 0, 0.25)', // Green hover area (visible)
+                borderRadius: '8px', // Rounded corners
+                opacity: isHovered ? 1 : 0.5 // More visible on hover
+              }}
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
@@ -239,71 +243,71 @@ const ConnectorDots: React.FC<ConnectorDotsProps> = ({
                     e.stopPropagation();
                     e.preventDefault();
                   }}
-                  onMouseEnter={() => {
-                    // Clear any pending clear timeout
-                    if (clearHoverTimeoutRef.current) {
-                      clearTimeout(clearHoverTimeoutRef.current);
-                      clearHoverTimeoutRef.current = null;
-                    }
-                    // Set hover for this specific port
-                    setHoveredConnectorDot(key);
-                  }}
-                  onMouseLeave={(e) => {
-                    // Never clear hover if this is the selected handle or was just clicked
-                    if (isSelectedHandle || wasJustClicked) {
-                      return;
-                    }
-                    
-                    // Check if we're moving to another port on the same node
-                    const relatedTarget = e.relatedTarget as HTMLElement;
-                    const isMovingToAnotherPort = relatedTarget?.closest('[data-connector-dot]') && 
-                                                 relatedTarget.closest('[data-node-id]')?.getAttribute('data-node-id') === nodeId;
-                    
-                    // Don't clear if moving to another port on the same node
-                    if (!isMovingToAnotherPort) {
-                      // Use a small delay to handle quick movements
-                      if (clearHoverTimeoutRef.current) {
-                        clearTimeout(clearHoverTimeoutRef.current);
-                      }
-                      clearHoverTimeoutRef.current = setTimeout(() => {
-                        // Only clear if still not the selected handle and wasn't just clicked
-                        const stillSelected = isConnectingFromThisNode && connectingFromHandle === `connector-${key}-source`;
-                        const stillClicked = clickedPortRef.current === key;
-                        if (!stillSelected && !stillClicked) {
-                          setHoveredConnectorDot(null);
-                        }
-                      }, 50);
-                    }
-                  }}
-                />
+              onMouseEnter={() => {
+                // Clear any pending clear timeout
+                if (clearHoverTimeoutRef.current) {
+                  clearTimeout(clearHoverTimeoutRef.current);
+                  clearHoverTimeoutRef.current = null;
+                }
+                // Set hover for this specific port
+                setHoveredConnectorDot(key);
+              }}
+              onMouseLeave={(e) => {
+                // Never clear hover if this is the selected handle or was just clicked
+                if (isSelectedHandle || wasJustClicked) {
+                  return;
+                }
                 
-                {/* Visual dot overlay - handles hover styling */}
-                <div
+                // Check if we're moving to another port on the same node
+                const relatedTarget = e.relatedTarget as HTMLElement;
+                const isMovingToAnotherPort = relatedTarget?.closest('[data-connector-dot]') && 
+                                             relatedTarget.closest('[data-node-id]')?.getAttribute('data-node-id') === nodeId;
+                
+                // Don't clear if moving to another port on the same node
+                if (!isMovingToAnotherPort) {
+                  // Use a small delay to handle quick movements
+                  if (clearHoverTimeoutRef.current) {
+                    clearTimeout(clearHoverTimeoutRef.current);
+                  }
+                  clearHoverTimeoutRef.current = setTimeout(() => {
+                    // Only clear if still not the selected handle and wasn't just clicked
+                    const stillSelected = isConnectingFromThisNode && connectingFromHandle === `connector-${key}-source`;
+                    const stillClicked = clickedPortRef.current === key;
+                    if (!stillSelected && !stillClicked) {
+                      setHoveredConnectorDot(null);
+                    }
+                  }, 50);
+                }
+              }}
+            />
+                
+            {/* Visual dot overlay - handles hover styling */}
+            <div
                   data-connector-dot="true"
                   data-node-id={nodeId}
                   data-handle-id={`connector-${key}-target`}
-                  style={{
-                    position: 'absolute',
-                    left: (key === 'left' || key === 'right') ? dotPosition : '50%',
-                    top: (key === 'top' || key === 'bottom') ? topPosition : '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: DOT_SIZE,
-                    height: DOT_SIZE,
-                    borderRadius: '50%',
-                    backgroundColor,
-                    border: `1px solid ${borderColor}`,
+              style={{
+                position: 'absolute',
+                left: (key === 'left' || key === 'right') ? dotPosition : '50%',
+                top: (key === 'top' || key === 'bottom') ? topPosition : '50%',
+                transform: 'translate(-50%, -50%)',
+                width: DOT_SIZE,
+                height: DOT_SIZE,
+                borderRadius: '50%',
+                backgroundColor,
+                border: `1px solid ${borderColor}`,
                     cursor: 'pointer', // ALWAYS pointer, never crosshair
-                    pointerEvents: 'auto', // Made clickable so clicking directly on dot works
-                    zIndex: 1001, // Above everything
-                    transition: 'background-color 0.2s ease-out, border-color 0.2s ease-out'
-                  }}
+                pointerEvents: 'auto', // Made clickable so clicking directly on dot works
+                zIndex: 6000, // Above edges (3000) and edgeLabels (5000) - CANVAS_STYLES.zIndex.nodeDots
+                transition: 'background-color 0.2s ease-out, border-color 0.2s ease-out'
+              }}
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                     e.nativeEvent.stopImmediatePropagation();
                     handlePortClick(key, e);
                   }}
-                  onMouseDown={(e) => {
+              onMouseDown={(e) => {
                     // CRITICAL: Stop mousedown propagation to prevent ReactFlow node selection
                     e.stopPropagation();
                     e.preventDefault();
@@ -311,10 +315,10 @@ const ConnectorDots: React.FC<ConnectorDotsProps> = ({
                   }}
                   onMouseUp={(e) => {
                     // Also stop mouseup to be safe
-                    e.stopPropagation();
-                    e.preventDefault();
-                    e.nativeEvent.stopImmediatePropagation();
-                  }}
+                e.stopPropagation();
+                e.preventDefault();
+                e.nativeEvent.stopImmediatePropagation();
+              }}
                   onPointerDown={(e) => {
                     // Also stop pointer events
                     e.stopPropagation();

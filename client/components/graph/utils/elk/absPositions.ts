@@ -14,11 +14,19 @@ export function computeAbsolutePositions(root: any): AbsMap {
     const absX = (node.x ?? 0) + parentX;
     const absY = (node.y ?? 0) + parentY;
     
+    const width = node.width ?? NON_ROOT_DEFAULT_OPTIONS.width;
+    const height = node.height ?? (NON_ROOT_DEFAULT_OPTIONS.height || 96);  // Use grid-aligned fallback
+    
+    // Debug non-grid-aligned heights
+    if (height % 16 !== 0 && (node.id === 'cloud_storage' || node.id === 'bigquery')) {
+      console.error(`[❌ absPositions] ${node.id} has non-grid height: ${height}px (not divisible by 16)`);
+    }
+    
     map[node.id] = { 
       x: absX, 
       y: absY, 
-      width: node.width ?? NON_ROOT_DEFAULT_OPTIONS.width, 
-      height: node.height ?? 100  // Fallback height if not set
+      width, 
+      height
     };
     
     // Debug deeply nested positioning

@@ -169,6 +169,45 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   // Get ViewMode configuration
   const { config: viewModeConfig } = useViewMode();
   
+  // URL parameter to clear localStorage: ?reset=1
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('reset') === '1') {
+      console.log('🗑️ [RESET] Clearing ALL localStorage due to ?reset=1 parameter');
+      try {
+        // Clear all possible storage keys
+        localStorage.removeItem(LOCAL_CANVAS_SNAPSHOT_KEY);
+        sessionStorage.removeItem(LOCAL_CANVAS_SNAPSHOT_KEY);
+        localStorage.removeItem('atelier_current_conversation');
+        localStorage.removeItem('publicCanvasState');
+        localStorage.removeItem('publicCanvasSnapshot');
+        localStorage.removeItem('atelier_current_architecture_id');
+        localStorage.removeItem('atelier_chat_snapshot');
+        localStorage.removeItem('atelier_pending_arch');
+        
+        // Clear ALL atelier-related keys
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.startsWith('atelier_') || key.includes('canvas') || key.includes('architecture'))) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        console.log('✅ [RESET] Cleared', keysToRemove.length + 4, 'localStorage keys');
+        
+        // Remove the reset param and navigate
+        urlParams.delete('reset');
+        const newUrl = urlParams.toString() ? `${window.location.pathname}?${urlParams.toString()}` : window.location.pathname;
+        window.location.replace(newUrl);  // Use replace instead of reload for cleaner navigation
+      } catch (e) {
+        console.error('Failed to clear localStorage:', e);
+      }
+    }
+  }, []);
+  
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const hasOpener = (() => {
@@ -482,35 +521,75 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     (window as any).currentArchitectureId = targetArchitectureId;
   }, [selectedArchitectureId, agentLockedArchitectureId]);
   
-
+  
   // Console commands to toggle default architectures
   useEffect(() => {
     // Command to load simple default (serverless API)
+    // Uses source='ai' to trigger ELK layout
     (window as any).loadSimpleDefault = () => {
       console.log('✅ Loading simple default architecture (Serverless API)...');
-      setRawGraph(SIMPLE_DEFAULT);
+      
+      // 1. Clear ViewState so ELK computes fresh positions
+      viewStateRef.current = { node: {}, group: {}, edge: {} };
+      
+      // 2. Clear ReactFlow state to prevent stale renders
+      setNodes([]);
+      setEdges([]);
+      
+      // 3. Load architecture with source='ai' to trigger ELK layout
+      setRawGraph(SIMPLE_DEFAULT as any, 'ai');
+      
       console.log('🏗️ Simple default loaded: Client → API Gateway → Lambda → DynamoDB');
     };
 
     // Command to load complex default (full GCP example)
+    // Uses LOCK mode so edges are routed through ELK, not libavoid
     (window as any).loadComplexDefault = () => {
-      console.log('✅ Loading complex default architecture (GCP Full Example)...');
-      setRawGraph(DEFAULT_ARCHITECTURE);
-      console.log('🏗️ Complex default loaded with', DEFAULT_ARCHITECTURE.children?.length || 0, 'top-level components');
+      console.log('✅ Loading complex default architecture (GCP Full Example, LOCK mode)...');
+      
+      // 1. Clear ViewState AND localStorage so ELK computes fresh grid-aligned positions
+      viewStateRef.current = { node: {}, group: {}, edge: {} };
+      localStorage.removeItem('viewState');  // Clear old non-grid-aligned data
+      
+      // 2. Clear ReactFlow state to prevent stale renders
+      setNodes([]);
+      setEdges([]);
+      
+      // 3. Load architecture with source='ai' to trigger ELK layout
+      // Per FIGJAM_REFACTOR.md: AI edits always trigger ELK for their scope
+      setRawGraph(DEFAULT_ARCHITECTURE as any, 'ai');
+      
+      console.log('🏗️ Complex default loaded with', DEFAULT_ARCHITECTURE.children?.length || 0, 'top-level components (LOCK mode, ELK routing)');
+    };
+
+    
+    // Command to clear all localStorage and reload with fresh grid-aligned coordinates
+    (window as any).clearAndReload = () => {
+      console.log('🧹 Clearing localStorage and reloading with grid-aligned coordinates...');
+      localStorage.clear();
+      window.location.reload();
     };
 
     // Command to reset to empty
     // Uses Orchestrator handler to bypass useElkToReactflowGraphConverter
     (window as any).resetCanvas = () => {
-      // 1. Clear domain graph and ViewState via refs (bypasses ELK hook)
-      rawGraphRef.current = { id: 'root', children: [], edges: [] };
-      viewStateRef.current = { node: {}, group: {}, edge: {} };
+      console.log('🗑️ [RESET] Clearing canvas completely...');
       
-      // 2. Clear ReactFlow directly (bypasses ELK hook)
+      const emptyGraph = { id: 'root', children: [], edges: [] };
+      const emptyViewState = { node: {}, group: {}, edge: {} };
+      
+      // 1. Clear domain graph and ViewState via refs (bypasses ELK hook)
+      rawGraphRef.current = emptyGraph;
+      viewStateRef.current = emptyViewState;
+      
+      // 2. Also update React state to trigger re-render
+      setRawGraph(emptyGraph);
+      
+      // 3. Clear ReactFlow directly (bypasses ELK hook)
       setNodes([]);
       setEdges([]);
       
-      // 3. Reset viewport to center
+      // 4. Reset viewport to center
       setTimeout(() => {
         const rfInstance = (window as any).__reactFlowInstance || reactFlowRef?.current;
         if (rfInstance) {
@@ -518,17 +597,18 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         }
       }, 100);
       
-      // 4. Save EMPTY snapshot to localStorage (this signals "user cleared the app")
+      // 5. Save EMPTY snapshot to localStorage (this signals "user cleared the app")
       try {
         const emptySnapshot = {
-          rawGraph: { id: "root", children: [], edges: [] },
-          viewState: { node: {}, group: {}, edge: {} },
+          rawGraph: emptyGraph,
+          viewState: emptyViewState,
           selectedArchitectureId: 'new-architecture',
           timestamp: Date.now()
         };
         const serialized = JSON.stringify(emptySnapshot);
         localStorage.setItem(LOCAL_CANVAS_SNAPSHOT_KEY, serialized);
         sessionStorage.setItem(LOCAL_CANVAS_SNAPSHOT_KEY, serialized);
+        console.log('✅ [RESET] Canvas cleared and empty snapshot saved');
       } catch (e) {
         console.warn('Failed to save empty snapshot:', e);
       }
@@ -557,12 +637,14 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     console.log('  - loadLibavoidFixtures() → Load 5-node obstacle/batch routing test');
     console.log('  - loadSimpleDefault()    → Load simple serverless API architecture');
     console.log('  - loadComplexDefault()   → Load complex GCP test architecture');
+    console.log('  - clearAndReload()       → Clear localStorage and reload (fixes grid alignment)');
     console.log('  - resetCanvas()          → Reset to empty canvas');
 
     // Cleanup
     return () => {
       delete (window as any).loadSimpleDefault;
       delete (window as any).loadComplexDefault;
+      delete (window as any).clearAndReload;
       delete (window as any).resetCanvas;
       delete (window as any).toggleDefaultArchitecture;
       delete (window as any).loadLibavoidFixtures;
@@ -862,7 +944,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
   // rawGraphRef now comes from canvasGraphState (from useElkToReactflowGraphConverter)
   // No need to create a separate ref - this ensures Orchestrator and getDomainGraph() use the same ref
-
+  
   // AUTO-CONFIGURE OBSTACLES: Ensure all edges have staticObstacleIds AND staticObstacles for libavoid routing
   // This is CRITICAL - without this, libavoid doesn't know about obstacles and edges pass through nodes
   // We pass BOTH staticObstacleIds AND staticObstacles with actual positions to ensure correct routing
@@ -1683,29 +1765,29 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
           // If localStorage has the same architecture, ALWAYS use it (user's current state)
           if (isSameArchitecture && hasContent) {
             const storedAge = Date.now() - (parsed?.timestamp || 0);
-            // Still create the tab and select it, but don't overwrite the graph
-            const urlArch = {
-              id: architecture.id,
-              name: architecture.name,
-              timestamp: architecture.timestamp || new Date(),
-              rawGraph: architecture.rawGraph,
-              userPrompt: architecture.userPrompt || '',
-              firebaseId: architecture.firebaseId || architecture.id,
-              isFromFirebase: true,
-              viewState: architecture.viewState,
-              isFromUrl: true
-            };
-            setSavedArchitectures(prev => {
-              const exists = prev.some(arch => arch.id === architecture.id);
-              if (!exists) {
-                return [urlArch, ...prev];
-              }
-              return prev;
-            });
-            setSelectedArchitectureId(architecture.id);
-            return; // Exit early, don't overwrite the restored graph
+              // Still create the tab and select it, but don't overwrite the graph
+              const urlArch = {
+                id: architecture.id,
+                name: architecture.name,
+                timestamp: architecture.timestamp || new Date(),
+                rawGraph: architecture.rawGraph,
+                userPrompt: architecture.userPrompt || '',
+                firebaseId: architecture.firebaseId || architecture.id,
+                isFromFirebase: true,
+                viewState: architecture.viewState,
+                isFromUrl: true
+              };
+              setSavedArchitectures(prev => {
+                const exists = prev.some(arch => arch.id === architecture.id);
+                if (!exists) {
+                  return [urlArch, ...prev];
+                }
+                return prev;
+              });
+              setSelectedArchitectureId(architecture.id);
+              return; // Exit early, don't overwrite the restored graph
           } else {
-          }
+            }
         } else {
         }
       } catch (e) {
@@ -1975,6 +2057,9 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
             } else {
               groupNode.data = { label: groupName, isGroup: true };
             }
+            // Per FIGJAM_REFACTOR.md: AI edits default to LOCK mode
+            // LOCK mode = ELK routing, internal auto-layout on structural changes
+            groupNode.mode = 'LOCK';
           }
         } catch (error) {
           console.error('Failed to wrap AI diagram in group:', error);
@@ -2012,7 +2097,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     }
 
     if (markDirty && typeof markDirty === 'function') {
-      markDirty();
+    markDirty();
     }
   }, [setRawGraph, rawGraph, getViewStateSnapshot, markDirty, selectedArchitectureId]);
 
@@ -2312,18 +2397,11 @@ Adapt these patterns to your specific requirements while maintaining the overall
           // CRITICAL: Mark as 'ai' source so ELK runs for AI-generated architectures
         handleGraphChange(currentGraph, { source: 'ai' });
           
-          // Check for ELK layout errors from the hook
-          if (layoutError) {
-            batchErrors.push(`ELK Layout Error: ${layoutError}`);
-            console.error('🔥 ELK Layout Error detected:', layoutError);
-          }
-          
           // Include error feedback in tool outputs if there were errors
-          if (batchErrors.length > 0 || layoutError) {
+          if (batchErrors.length > 0) {
             toolOutputs.forEach(output => {
               const outputData = JSON.parse(output.output);
               outputData.errors = batchErrors;
-              if (layoutError) outputData.layout_error = layoutError;
               output.output = JSON.stringify(outputData);
             });
             errorCount += batchErrors.length;
@@ -2716,12 +2794,12 @@ Adapt these patterns to your specific requirements while maintaining the overall
     if (graph.children) {
       for (const child of graph.children) {
         const found = findNodeInGraph(child, targetId);
-        if (found) return found;
-      }
-    }
-    return null;
+            if (found) return found;
+          }
+        }
+        return null;
   }, []);
-
+      
   const handleArrangeGroup = useCallback(async (groupId: string) => {
     // Arrange the insides of the group using ELK, relative to group position
     if (!rawGraph || !viewStateRef.current) {
@@ -2825,7 +2903,7 @@ Adapt these patterns to your specific requirements while maintaining the overall
         viewStateNodes: updatedViewState.node,
         viewStateGroups: updatedViewState.group
       });
-      
+            
       // CRITICAL: Update refs directly - bypasses ELK hook (ELK already ran above)
       const updatedGraph = JSON.parse(JSON.stringify(rawGraph));
       
@@ -3049,7 +3127,7 @@ useEffect(() => {
     localStorage.setItem(LOCAL_CANVAS_SNAPSHOT_KEY, serialized);
     sessionStorage.setItem(LOCAL_CANVAS_SNAPSHOT_KEY, serialized);
     if (markDirty && typeof markDirty === 'function') {
-      markDirty();
+    markDirty();
     }
   } catch (error) {
     console.warn("⚠️ Failed to persist local canvas snapshot:", error);
@@ -3071,7 +3149,8 @@ useEffect(() => {
     elkGraph: rawGraph,
     setElkGraph: setRawGraph,
     elkGraphDescription,
-    agentInstruction
+    agentInstruction,
+    selectedNodeIds: selectedNodeIds || []  // Pass selected nodes for AI targeting
   });
 
   // Debug chat session state
@@ -3798,11 +3877,11 @@ useEffect(() => {
                     recentlyCreatedNodesRef.current.forEach((timestamp, id) => {
                       if (now - timestamp > 2000) {
                         recentlyCreatedNodesRef.current.delete(id);
-                      }
+                          }
                     });
-                  }
-                });
-                
+                        }
+                      });
+                      
                 // Check for containment after nodes are updated
                 
                 if (selectedTool !== 'box' && reactFlowRef.current) {
@@ -3835,7 +3914,7 @@ useEffect(() => {
                       movedNodeIds: movedNodes,
                       currentNodes,
                       currentGraph: currentGraph || { id: 'root', children: [], edges: [] },
-                      viewStateRef,
+                    viewStateRef,
                       setNodes,
                       setSelectedNodes,
                       setSelectedNodeIds
@@ -3951,9 +4030,9 @@ useEffect(() => {
                     shouldSkipFitViewRef,
                   });
 
-                  if (handled) {
+                    if (handled) {
                     return;
-                  }
+                    }
                 }
 
                 // Handle pendingGroupId (Plus button mode) - add node to specific group

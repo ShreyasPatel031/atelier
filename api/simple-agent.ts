@@ -2,35 +2,9 @@ import OpenAI from 'openai';
 import { 
   agentInstruction, 
   modelConfigs, 
-  timeoutConfigs 
+  timeoutConfigs,
+  leanSystemPrompt
 } from './agentConfig.lean.js';
-
-// LEAN SYSTEM PROMPT - moved inline to avoid import issues
-const leanSystemPrompt = `You are a technical architecture diagram assistant. Build complete architectures through batch_update calls.
-
-**CRITICAL RULES:**
-- CREATE ALL EDGES WITH DESCRIPTIVE LABELS (required)
-- Group related nodes using group_nodes with groupIconName
-- Continue building until complete architecture is done
-- Use exact icon names from the validated list (no custom names)
-- Format: batch_update({operations: [...]}) - never {graph: ...}
-
-**PATTERN:**
-1. Create nodes: add_node(nodename, parentId, {label, icon})
-2. Group nodes: group_nodes(nodeIds, parentId, groupId, groupIconName) 
-3. Add edges: add_edge(edgeId, sourceId, targetId, label)
-
-**EDGE LABELS:** Use action verbs like "calls", "sends", "queries", "processes", "stores", "routes", "validates", "monitors", "caches", "authenticates", "flows to", etc.
-
-**GROUP ICONS:** gcp_system (gray), gcp_logical_grouping_services_instances (blue), gcp_infrastructure_system (green), aws_vpc, azure_subscription_filled
-
-**CLOUD ICONS:** 
-- AWS: aws_lambda, aws_s3, aws_rds, aws_ec2, aws_api_gateway
-- GCP: gcp_cloud_functions, gcp_cloud_storage, gcp_cloud_sql, gcp_compute_engine, gcp_api_gateway  
-- Azure: azure_functions, azure_storage_accounts, azure_sql_database, azure_virtual_machines
-- Generic: api, database, gateway, browser_client, mobile_app, server, cache_redis, message_queue
-
-Complete the architecture in maximum 3 turns.`;
 
 console.log('🔍 DEBUG: leanSystemPrompt length:', leanSystemPrompt.length);
 

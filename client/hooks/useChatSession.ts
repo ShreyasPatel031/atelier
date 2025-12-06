@@ -24,6 +24,7 @@ interface UseChatSessionProps {
   setElkGraph?: (graph: any) => void;
   elkGraphDescription?: string;
   agentInstruction?: string;
+  selectedNodeIds?: string[];  // IDs of currently selected nodes/groups for AI targeting
   // For use with mutations
   addNode?: (nodeName: string, parentId: string, graph: any, data?: { label?: string; icon?: string }) => any;
   deleteNode?: (nodeId: string, graph: any) => any;
@@ -45,6 +46,7 @@ export const useChatSession = ({
   setElkGraph,
   elkGraphDescription,
   agentInstruction,
+  selectedNodeIds,
   addNode,
   deleteNode,
   moveNode,
@@ -196,12 +198,13 @@ export const useChatSession = ({
               batchUpdate: batchUpdate || (() => elkGraph),
               process_user_requirements: process_user_requirements
             },
-            safeSend: safeSendClientEvent
+            safeSend: safeSendClientEvent,
+            selectedNodeIds: selectedNodeIds || []  // Pass selected nodes for AI targeting
           });
         }
       });
     }
-  }, [isSessionActive, events, elkGraph, setElkGraph, addNode, deleteNode, moveNode, addEdge, deleteEdge, groupNodes, removeGroup, batchUpdate, process_user_requirements, safeSendClientEvent, triggerUpdate]);
+  }, [isSessionActive, events, elkGraph, setElkGraph, addNode, deleteNode, moveNode, addEdge, deleteEdge, groupNodes, removeGroup, batchUpdate, process_user_requirements, safeSendClientEvent, triggerUpdate, selectedNodeIds]);
 
   // Initialize session with tool definitions
   useEffect(() => {

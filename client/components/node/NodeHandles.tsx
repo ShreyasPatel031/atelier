@@ -15,10 +15,14 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
   topHandles = [],
   bottomHandles = []
 }) => {
+  // Compensate for 1px border because handles are positioned relative to padding box
+  // With translate(-50%, -50%), we target the exact outer boundary (0 or 100% + offset)
+  const BORDER_OFFSET = 1;
+
   return (
     <>
       {/* Left handles */}
-      {leftHandles.map((yPos: string, index: number) => (
+      {leftHandles.map((yPos: any, index: number) => (
         <React.Fragment key={`left-${index}`}>
           <Handle
             type="target"
@@ -27,7 +31,8 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
             style={{ 
               ...baseHandleStyle,
               position: 'absolute',
-              top: yPos
+              top: typeof yPos === 'number' ? yPos - BORDER_OFFSET : `calc(${yPos} - ${BORDER_OFFSET}px)`,
+              left: -BORDER_OFFSET
             }}
           />
           <Handle
@@ -37,7 +42,8 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
             style={{ 
               ...baseHandleStyle,
               position: 'absolute',
-              top: yPos,
+              top: typeof yPos === 'number' ? yPos - BORDER_OFFSET : `calc(${yPos} - ${BORDER_OFFSET}px)`,
+              left: -BORDER_OFFSET,
               opacity: 0 // Make it invisible but functional
             }}
           />
@@ -45,7 +51,7 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
       ))}
       
       {/* Right handles */}
-      {rightHandles.map((yPos: string, index: number) => (
+      {rightHandles.map((yPos: any, index: number) => (
         <React.Fragment key={`right-${index}`}>
           <Handle
             type="source"
@@ -53,7 +59,8 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
             id={`right-${index}-source`}
             style={{ 
               ...baseHandleStyle,
-              top: yPos
+              top: typeof yPos === 'number' ? yPos - BORDER_OFFSET : `calc(${yPos} - ${BORDER_OFFSET}px)`,
+              left: `calc(100% + ${BORDER_OFFSET}px)`
             }}
           />
           <Handle
@@ -62,7 +69,8 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
             id={`right-${index}-target`}
             style={{ 
               ...baseHandleStyle,
-              top: yPos,
+              top: typeof yPos === 'number' ? yPos - BORDER_OFFSET : `calc(${yPos} - ${BORDER_OFFSET}px)`,
+              left: `calc(100% + ${BORDER_OFFSET}px)`,
               opacity: 0 // Make it invisible but functional
             }}
           />
@@ -70,7 +78,7 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
       ))}
       
       {/* Top handles */}
-      {topHandles.map((xPos: string, index: number) => (
+      {topHandles.map((xPos: any, index: number) => (
         <React.Fragment key={`top-${index}`}>
           <Handle
             type="source"
@@ -78,7 +86,8 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
             id={`top-${index}-source`}
             style={{ 
               ...baseHandleStyle,
-              left: xPos
+              left: typeof xPos === 'number' ? xPos - BORDER_OFFSET : `calc(${xPos} - ${BORDER_OFFSET}px)`,
+              top: -BORDER_OFFSET
             }}
           />
           <Handle
@@ -87,7 +96,8 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
             id={`top-${index}-target`}
             style={{ 
               ...baseHandleStyle,
-              left: xPos,
+              left: typeof xPos === 'number' ? xPos - BORDER_OFFSET : `calc(${xPos} - ${BORDER_OFFSET}px)`,
+              top: -BORDER_OFFSET,
               opacity: 0 // Make it invisible but functional
             }}
           />
@@ -95,7 +105,7 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
       ))}
       
       {/* Bottom handles */}
-      {bottomHandles.map((xPos: string, index: number) => (
+      {bottomHandles.map((xPos: any, index: number) => (
         <React.Fragment key={`bottom-${index}`}>
           <Handle
             type="target"
@@ -103,7 +113,8 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
             id={`bottom-${index}-target`}
             style={{ 
               ...baseHandleStyle,
-              left: xPos
+              left: typeof xPos === 'number' ? xPos - BORDER_OFFSET : `calc(${xPos} - ${BORDER_OFFSET}px)`,
+              top: `calc(100% + ${BORDER_OFFSET}px)`
             }}
           />
           <Handle
@@ -112,7 +123,8 @@ const NodeHandles: React.FC<NodeHandlesProps> = ({
             id={`bottom-${index}-source`}
             style={{ 
               ...baseHandleStyle,
-              left: xPos,
+              left: typeof xPos === 'number' ? xPos - BORDER_OFFSET : `calc(${xPos} - ${BORDER_OFFSET}px)`,
+              top: `calc(100% + ${BORDER_OFFSET}px)`,
               opacity: 0 // Make it invisible but functional
             }}
           />

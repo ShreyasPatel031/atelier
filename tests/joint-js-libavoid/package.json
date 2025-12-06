@@ -19,10 +19,13 @@
     "build-web-worker": "USE_WEB_WORKERS=1 webpack"
   },
   "dependencies": {
-    "@joint/core": "workspace:^",
+    "@joint/core": "^4.2.1",
     "libavoid-js": "0.4.5"
   },
   "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "babel-loader": "^9.1.3",
     "copy-webpack-plugin": "5.1.1",
     "css-loader": "3.5.3",
     "file-loader": "6.0.0",

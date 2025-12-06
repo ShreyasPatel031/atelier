@@ -26,6 +26,7 @@ import {
 import { RawGraph, LayoutGraph } from "../components/graph/types/index";
 import { ensureIds } from "../components/graph/utils/elk/ids";
 import { structuralHash } from "../components/graph/utils/elk/structuralHash";
+import { scaleElkOutput } from "../components/graph/utils/elk/scaleElkOutput";
 import { toReactFlowWithViewState } from "../core/renderer/ReactFlowAdapter";
 // Rendering is handled by client/core modules, not hooks
 import type { ViewState } from "../core/viewstate/ViewState";
@@ -43,7 +44,10 @@ import {
 import { CANVAS_STYLES } from "../components/graph/styles/canvasStyles";
 
 import {
-  NON_ROOT_DEFAULT_OPTIONS   // ← 1️⃣ single source-of-truth sizes
+  NON_ROOT_DEFAULT_OPTIONS,  // ← 1️⃣ single source-of-truth sizes
+  NODE_WIDTH_UNITS,
+  NODE_HEIGHT_UNITS,
+  GRID_SIZE
 } from "../components/graph/utils/elk/elkOptions";
 
 /* -------------------------------------------------- */
@@ -68,7 +72,10 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
   /* refs that NEVER cause re-render */
   const hashRef = useRef<string>(structuralHash(initialRaw));
   const abortRef = useRef<AbortController | null>(null);
-  const lastMutationRef = useRef<{ source: 'ai' | 'user'; scopeId: string; timestamp: number } | null>(null);
+  // Source is runtime-only, never persisted. Per FIGJAM_REFACTOR.md:
+  // "source: ephemeral runtime context ('ai' | 'user'); not persisted"
+  // 'free-structural' is for FREE mode structural changes (no ELK needed)
+  const lastMutationRef = useRef<{ source: 'ai' | 'user' | 'free-structural'; scopeId: string; timestamp: number } | null>(null);
   const previousHashRef = useRef<string>(structuralHash(initialRaw));
   
   const shouldSkipFitViewRef = useRef<boolean>(false);
@@ -99,7 +106,7 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
   /* 🔹 3. mutate helper                                 */
   /* -------------------------------------------------- */
   type MutFn = (...a: any[]) => any;
-  type MutateOptions = { source?: 'ai' | 'user'; scopeId?: string };
+  type MutateOptions = { source?: 'ai' | 'user' | 'free-structural'; scopeId?: string };
   
   const mutate = useCallback((...args: any[]) => {
     let fn: MutFn;
@@ -117,12 +124,12 @@ export function useElkToReactflowGraphConverter(initialRaw: RawGraph, selectedTo
     
     // Read from ref, not React state
     const prev = rawGraphRef.current;
-    if (!prev) {
-      throw new Error(`Cannot mutate graph: graph state is null or undefined`);
-    }
+      if (!prev) {
+        throw new Error(`Cannot mutate graph: graph state is null or undefined`);
+      }
     
-    const next = fn(...rest, prev) as RawGraph;
-    
+      const next = fn(...rest, prev) as RawGraph;
+
     // Update ref immediately
     rawGraphRef.current = next;
     hashRef.current = structuralHash(next);
@@ -246,25 +253,25 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
     next: RawGraph | ((prev: RawGraph) => RawGraph),
     source?: 'ai' | 'user' | 'free-structural'
   ) => {
-    let resolved = typeof next === 'function'
+      let resolved = typeof next === 'function'
       ? (next as (p: RawGraph) => RawGraph)(rawGraphRef.current)
-      : next;
+        : next;
 
     // ONLY remove viewState for AI graphs to trigger ELK layout
     // For 'user' and 'free-structural' sources, preserve viewState
     if (source === 'ai' && resolved && typeof resolved === 'object' && 'viewState' in resolved) {
-      delete (resolved as any).viewState;
-    }
+          delete (resolved as any).viewState;
+        }
 
     rawGraphRef.current = resolved;
     hashRef.current = structuralHash(resolved);
-    
-    lastMutationRef.current = {
+
+      lastMutationRef.current = {
       source: source || 'user',  // Use actual source, default to 'user'
-      scopeId: 'external-setRawGraph',
-      timestamp: Date.now(),
-    };
-    
+        scopeId: 'external-setRawGraph',
+        timestamp: Date.now(),
+      };
+
     setRawGraphState(resolved);
   }, []);
 
@@ -288,7 +295,24 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
     const mutation = lastMutationRef.current;
     
     if (!rawGraph) return;
-    if (mutation?.source !== 'ai') return;
+    
+    // Per FIGJAM_REFACTOR.md: ELK runs when:
+    // 1. Source is 'ai' (AI mutations always trigger ELK for their scope)
+    // 2. Or, the graph has LOCK groups (structural changes inside LOCK trigger ELK)
+    // This ensures source-agnostic behavior - mode determines long-term behavior
+    const hasLockGroups = (() => {
+      const findLock = (node: any): boolean => {
+        if (node.mode === 'LOCK') return true;
+        if (node.children) {
+          return node.children.some((c: any) => findLock(c));
+        }
+        return false;
+      };
+      return findLock(rawGraph);
+    })();
+    
+    // Skip ELK if neither AI source nor LOCK groups exist
+    if (mutation?.source !== 'ai' && !hasLockGroups) return;
     
     const currentHash = hashRef.current;
     previousHashRef.current = currentHash;
@@ -359,10 +383,16 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
         }
         
         // 2) inject IDs + elkOptions onto a clone of rawGraph
+        // Node dimensions and spacing are now in UNITS (small integers)
         const prepared = ensureIds(structuredClone(rawGraph));
         
         // 3) run ELK (mode no longer in ELK input/output - stays in ViewState)
-        const layout = await elk.layout(prepared);
+        const layoutRaw = await elk.layout(prepared);
+        
+        // 4) Scale all coordinates by GRID_SIZE (16) to get pixel values
+        // ELK computed in units, now we convert to pixels
+        const layout = scaleElkOutput(layoutRaw);
+        console.log('[📐 ELK SCALE] Scaled ELK output by GRID_SIZE=16');
         
         // Critical: Check if ELK returned zero positions - this indicates a layout failure
         const zeroPosChildren = (layout.children || []).filter((c: any) => (c.x === 0 && c.y === 0));
@@ -377,17 +407,17 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
         // 3) store for SVG & RF conversion
         setLayoutGraph(layout as LayoutGraph);
         
-        // 4) Ensure ViewState exists - initialize from ELK output ONCE if empty
+        // 4) Ensure ViewState exists - populate geometry for ALL nodes from ELK
+        // CRITICAL: Always extract geometry for new nodes/groups created by AI
+        // Previously only initialized when empty - now always sync with ELK output
         const currentViewState = viewStateRef.current;
-        const hasViewStateGeometry = 
-          (Object.keys(currentViewState?.node || {}).length > 0) ||
-          (Object.keys(currentViewState?.group || {}).length > 0);
         
-        if (!hasViewStateGeometry) {
-          // Initialize ViewState from ELK output ONCE
-          // This is the only time we populate ViewState from ELK
-          const nextNodeState: Record<string, { x: number; y: number; w: number; h: number }> = {};
-          const nextGroupState: Record<string, { x: number; y: number; w: number; h: number }> = {};
+        // Start with existing ViewState geometry (preserve manually moved positions)
+        const nextNodeState: Record<string, { x: number; y: number; w: number; h: number }> = { ...currentViewState?.node };
+        const nextGroupState: Record<string, { x: number; y: number; w: number; h: number }> = { ...currentViewState?.group };
+        
+        {
+          // ALWAYS sync with ELK output to ensure new nodes/groups get geometry
           
           // Helper to recursively extract geometry from ELK layout
           const extractGeometry = (elkNode: any, parentX = 0, parentY = 0) => {
@@ -406,8 +436,8 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
             const absoluteX = elkRelativeX + parentX;  // ✅ FIXED: ELK relative + parent absolute = world absolute
             const absoluteY = elkRelativeY + parentY;  // ✅ FIXED: ELK relative + parent absolute = world absolute
             
-            const width = elkNode.width ?? (isGroup ? NON_ROOT_DEFAULT_OPTIONS.width * 3 : NON_ROOT_DEFAULT_OPTIONS.width);
-            const height = elkNode.height ?? (isGroup ? 96 * 3 : 96);
+            const width = elkNode.width ?? (isGroup ? NODE_WIDTH_UNITS * GRID_SIZE * 3 : NODE_WIDTH_UNITS * GRID_SIZE);
+            const height = elkNode.height ?? (isGroup ? NODE_HEIGHT_UNITS * GRID_SIZE * 3 : NODE_HEIGHT_UNITS * GRID_SIZE);
             
             const geom = { 
               x: absoluteX, 
@@ -434,10 +464,15 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
               });
             }
             
+            // Only add geometry for NEW nodes/groups - preserve existing positions (manually moved)
             if (isGroup) {
-              nextGroupState[elkNode.id] = geom;
+              if (!nextGroupState[elkNode.id]) {
+                nextGroupState[elkNode.id] = geom;
+              }
             } else {
-              nextNodeState[elkNode.id] = geom;
+              if (!nextNodeState[elkNode.id]) {
+                nextNodeState[elkNode.id] = geom;
+              }
             }
             
             // Recursively process children - pass this node's absolute position as parent
@@ -459,18 +494,21 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
           viewStateRef.current = { 
             node: nextNodeState, 
             group: nextGroupState, 
-            edge: {} 
+            edge: currentViewState?.edge || {} // Preserve existing edge waypoints
           };
           
         }
         
         // 5) Convert to ReactFlow using adapter (reads from ViewState, not ELK)
+        // Dimensions are in PIXELS (units × GRID_SIZE)
+        const nodeWidthPx = NODE_WIDTH_UNITS * GRID_SIZE;  // 6 × 16 = 96px
+        const nodeHeightPx = NODE_HEIGHT_UNITS * GRID_SIZE; // 6 × 16 = 96px
         const dimensions = {
-          width: NON_ROOT_DEFAULT_OPTIONS.width,
-          height: 96,
-          groupWidth: NON_ROOT_DEFAULT_OPTIONS.width * 3,
-          groupHeight: 96 * 3,
-          padding: 10
+          width: nodeWidthPx,
+          height: nodeHeightPx,
+          groupWidth: nodeWidthPx * 3,
+          groupHeight: nodeHeightPx * 3,
+          padding: GRID_SIZE  // 16px padding
         };
         
         const { nodes: rfNodes, edges: rfEdges } = toReactFlowWithViewState(

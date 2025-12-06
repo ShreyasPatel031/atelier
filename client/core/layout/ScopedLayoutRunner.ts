@@ -355,18 +355,55 @@ function extractGeometryFromLayout(
     }
 
     // Extract edge waypoints if available
+    // IMPORTANT: ELK sections contain startPoint, bendPoints (optional), and endPoint
+    // We must include ALL of them to get a complete path, otherwise the edge
+    // from source→firstBend or lastBend→target could be diagonal!
     if (node.edges) {
       if (!delta.edge) delta.edge = {};
       node.edges.forEach(edge => {
         if (edge.sections && edge.sections.length > 0) {
           const waypoints: Array<{ x: number; y: number }> = [];
           edge.sections.forEach(section => {
+            // Include startPoint (connection to source node)
+            if (section.startPoint) {
+              waypoints.push({ x: section.startPoint.x, y: section.startPoint.y });
+            }
+            // Include bendPoints (intermediate routing points)
             if (section.bendPoints) {
               waypoints.push(...section.bendPoints);
             }
+            // Include endPoint (connection to target node)
+            if (section.endPoint) {
+              waypoints.push({ x: section.endPoint.x, y: section.endPoint.y });
+            }
           });
-          if (waypoints.length > 0) {
+          
+          // Validate that waypoints are orthogonal (no diagonal segments)
+          // If ELK produces diagonal waypoints, we should NOT store them
+          // This forces StepEdge to use its orthogonal fallback
+          const isOrthogonal = (points: Array<{ x: number; y: number }>): boolean => {
+            if (points.length < 2) return true;
+            const tolerance = 1; // Allow for floating point errors
+            for (let i = 1; i < points.length; i++) {
+              const prev = points[i - 1];
+              const curr = points[i];
+              const xDiff = Math.abs(curr.x - prev.x);
+              const yDiff = Math.abs(curr.y - prev.y);
+              // Diagonal if both X and Y change significantly
+              if (xDiff > tolerance && yDiff > tolerance) {
+                console.log(`[ELK-LAYOUT] ⚠️ Edge ${edge.id} has diagonal segment at index ${i}: (${prev.x.toFixed(1)},${prev.y.toFixed(1)}) → (${curr.x.toFixed(1)},${curr.y.toFixed(1)}) - NOT storing, StepEdge will use fallback`);
+                return false;
+              }
+            }
+            return true;
+          };
+          
+          // Only store if we have at least 2 points (start and end) AND they're orthogonal
+          if (waypoints.length >= 2 && isOrthogonal(waypoints)) {
             delta.edge[edge.id] = { waypoints };
+          } else if (waypoints.length >= 2) {
+            // Waypoints exist but are diagonal - log and skip
+            console.log(`[ELK-LAYOUT] ⚠️ Edge ${edge.id} has diagonal waypoints, not storing in ViewState`);
           }
         }
       });

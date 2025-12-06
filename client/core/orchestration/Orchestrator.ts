@@ -239,9 +239,9 @@ export async function apply(intent: EditIntent): Promise<void> {
         // Render directly via setNodesRef/setEdgesRef (bypasses ELK)
         if (setNodesRef.current && setEdgesRef.current) {
           const { convertViewStateToReactFlow } = await import('../renderer/ViewStateToReactFlow');
-          const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, cleanedViewState);
-          setNodesRef.current(nodes);
-          setEdgesRef.current(edges);
+            const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, cleanedViewState);
+            setNodesRef.current(nodes);
+            setEdgesRef.current(edges);
         }
         
       } else if (payload.action === 'delete-node') {

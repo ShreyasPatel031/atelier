@@ -158,7 +158,7 @@ const SelectedNodeDots: React.FC<SelectedNodeDotsProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                zIndex: 1000,
+                zIndex: 5999, // Just below visual dot (6000) - above edges (3000)
                 borderRadius: '8px' // Rounded corners for better visibility
               }}
               onMouseEnter={() => {
@@ -247,7 +247,7 @@ const SelectedNodeDots: React.FC<SelectedNodeDotsProps> = ({
                 top: '50%',
                 transform: 'translate(-50%, -50%)',
                 pointerEvents: isExpanded ? 'auto' : 'none',
-                zIndex: isExpanded ? 2000 : 1
+                zIndex: 6000 // Above edges (3000) and edgeLabels (5000) - CANVAS_STYLES.zIndex.nodeDots
               }}
             >
               {/* Visual dot */}

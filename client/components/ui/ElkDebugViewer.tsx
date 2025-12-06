@@ -166,7 +166,7 @@ export const ElkDebugViewer: React.FC<ElkDebugViewerProps> = ({
       width: node.data?.width || node.width || 96,
       height: node.data?.height || node.height || 96,
       label: node.data?.label || node.id,
-      isContainer: node.type === 'group',
+      isContainer: node.type === 'group' || node.type === 'draftGroup',
     }));
 
     const edges = reactFlowEdges.map(edge => {
@@ -175,27 +175,43 @@ export const ElkDebugViewer: React.FC<ElkDebugViewerProps> = ({
       
       if (!sourceNode || !targetNode) return null;
 
-      // Get handle positions (estimate from node positions)
-      const sourceHandle = edge.sourceHandle || 'right-0-source';
-      const targetHandle = edge.targetHandle || 'left-0-target';
+      // CRITICAL: Use ELK's actual start/end points when available (in ABSOLUTE coordinates)
+      // These are computed by ELK and passed through from toReactFlow.ts
+      const elkStartPoint = edge.data?.elkStartPoint;
+      const elkEndPoint = edge.data?.elkEndPoint;
       
-      let sourceX = sourceNode.position.x + (sourceNode.data?.width || 96);
-      let sourceY = sourceNode.position.y + (sourceNode.data?.height || 96) / 2;
-      let targetX = targetNode.position.x;
-      let targetY = targetNode.position.y + (targetNode.data?.height || 96) / 2;
+      // Get waypoints/bendPoints from edge data
+      const waypoints = edge.data?.bendPoints || edge.data?.elkWaypoints || edge.data?.waypoints || [];
+      
+      // Use ELK start/end if available, otherwise estimate from node positions
+      let sourceX: number, sourceY: number, targetX: number, targetY: number;
+      
+      if (elkStartPoint && elkEndPoint) {
+        // Use ELK's computed points directly
+        sourceX = elkStartPoint.x;
+        sourceY = elkStartPoint.y;
+        targetX = elkEndPoint.x;
+        targetY = elkEndPoint.y;
+      } else {
+        // Fallback: estimate from node positions and handle info
+        const sourceHandle = edge.sourceHandle || 'right-0-source';
+        const targetHandle = edge.targetHandle || 'left-0-target';
+        
+        sourceX = sourceNode.position.x + (sourceNode.data?.width || 96);
+        sourceY = sourceNode.position.y + (sourceNode.data?.height || 96) / 2;
+        targetX = targetNode.position.x;
+        targetY = targetNode.position.y + (targetNode.data?.height || 96) / 2;
 
-      if (sourceHandle.includes('left')) sourceX = sourceNode.position.x;
-      if (sourceHandle.includes('right')) sourceX = sourceNode.position.x + (sourceNode.data?.width || 96);
-      if (sourceHandle.includes('top')) sourceY = sourceNode.position.y;
-      if (sourceHandle.includes('bottom')) sourceY = sourceNode.position.y + (sourceNode.data?.height || 96);
+        if (sourceHandle.includes('left')) sourceX = sourceNode.position.x;
+        if (sourceHandle.includes('right')) sourceX = sourceNode.position.x + (sourceNode.data?.width || 96);
+        if (sourceHandle.includes('top')) sourceY = sourceNode.position.y;
+        if (sourceHandle.includes('bottom')) sourceY = sourceNode.position.y + (sourceNode.data?.height || 96);
 
-      if (targetHandle.includes('left')) targetX = targetNode.position.x;
-      if (targetHandle.includes('right')) targetX = targetNode.position.x + (targetNode.data?.width || 96);
-      if (targetHandle.includes('top')) targetY = targetNode.position.y;
-      if (targetHandle.includes('bottom')) targetY = targetNode.position.y + (targetNode.data?.height || 96);
-
-      // Get waypoints from edge data
-      const waypoints = edge.data?.bendPoints || edge.data?.waypoints || [];
+        if (targetHandle.includes('left')) targetX = targetNode.position.x;
+        if (targetHandle.includes('right')) targetX = targetNode.position.x + (targetNode.data?.width || 96);
+        if (targetHandle.includes('top')) targetY = targetNode.position.y;
+        if (targetHandle.includes('bottom')) targetY = targetNode.position.y + (targetNode.data?.height || 96);
+      }
       
       return {
         id: edge.id,
@@ -435,14 +451,90 @@ export const ElkDebugViewer: React.FC<ElkDebugViewerProps> = ({
                   </marker>
                 </defs>
 
-                {/* Render edges */}
+                {/* 
+                  SVG render order: later elements are on top.
+                  Order: groups (bottom) → nodes → edges (top)
+                  This matches user expectation: edges should be visible above nodes
+                */}
+                
+                {/* 1. Render groups first (bottom layer) */}
+                {flattenedData.nodes.filter(n => n.isContainer).map((node) => (
+                  <g key={node.id}>
+                    <rect
+                      x={node.x}
+                      y={node.y}
+                      width={node.width}
+                      height={node.height}
+                      fill="#f0f4f8"
+                      stroke="#2d6bc4"
+                      strokeWidth="2"
+                      rx="5"
+                      ry="5"
+                      opacity="0.7"
+                    />
+                    <text
+                      x={node.x + node.width / 2}
+                      y={node.y + 15}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontSize="10"
+                      fill="#1e40af"
+                      fontWeight="bold"
+                    >
+                      {node.label.length > 15 ? node.label.substring(0, 12) + '...' : node.label}
+                    </text>
+                  </g>
+                ))}
+
+                {/* 2. Render nodes (middle layer) */}
+                {flattenedData.nodes.filter(n => !n.isContainer).map((node) => (
+                  <g key={node.id}>
+                    <rect
+                      x={node.x}
+                      y={node.y}
+                      width={node.width}
+                      height={node.height}
+                      fill="#d0e3ff"
+                      stroke="#2d6bc4"
+                      strokeWidth="2"
+                      rx="5"
+                      ry="5"
+                    />
+                    <text
+                      x={node.x + node.width / 2}
+                      y={node.y + node.height / 2}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontSize="11"
+                      fill="#1e40af"
+                      fontWeight="bold"
+                    >
+                      {node.label.length > 15 ? node.label.substring(0, 12) + '...' : node.label}
+                    </text>
+                    <text
+                      x={node.x + node.width / 2}
+                      y={node.y + node.height - 5}
+                      textAnchor="middle"
+                      dominantBaseline="baseline"
+                      fontSize="8"
+                      fill="#666"
+                    >
+                      ({node.id.substring(0, 8)})
+                    </text>
+                  </g>
+                ))}
+
+                {/* 3. Render edges last (top layer - visible above nodes) */}
                 {flattenedData.edges.map((edge) => {
                   return edge.sections.map((section, sectionIdx) => {
-                    const points = [
-                      `${section.startPoint.x},${section.startPoint.y}`,
-                      ...section.bendPoints.map(bp => `${bp.x},${bp.y}`),
-                      `${section.endPoint.x},${section.endPoint.y}`,
-                    ].join(' ');
+                    // Use ELK data directly - startPoint → bendPoints → endPoint
+                    const allPoints = [
+                      section.startPoint,
+                      ...section.bendPoints,
+                      section.endPoint
+                    ];
+                    
+                    const points = allPoints.map(p => `${p.x},${p.y}`).join(' ');
 
                     return (
                       <g key={`${edge.id}-${sectionIdx}`}>
@@ -497,44 +589,6 @@ export const ElkDebugViewer: React.FC<ElkDebugViewerProps> = ({
                     );
                   });
                 })}
-
-                {/* Render nodes */}
-                {flattenedData.nodes.map((node) => (
-                  <g key={node.id}>
-                    <rect
-                      x={node.x}
-                      y={node.y}
-                      width={node.width}
-                      height={node.height}
-                      fill={node.isContainer ? '#f0f4f8' : '#d0e3ff'}
-                      stroke="#2d6bc4"
-                      strokeWidth="2"
-                      rx="5"
-                      ry="5"
-                    />
-                    <text
-                      x={node.x + node.width / 2}
-                      y={node.y + node.height / 2}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fontSize="11"
-                      fill="#1e40af"
-                      fontWeight="bold"
-                    >
-                      {node.label.length > 15 ? node.label.substring(0, 12) + '...' : node.label}
-                    </text>
-                    <text
-                      x={node.x + node.width / 2}
-                      y={node.y + node.height - 5}
-                      textAnchor="middle"
-                      dominantBaseline="baseline"
-                      fontSize="8"
-                      fill="#666"
-                    >
-                      ({node.id.substring(0, 8)})
-                    </text>
-                  </g>
-                ))}
               </svg>
             </div>
 

@@ -64,7 +64,19 @@ export function buildNodeEdgePoints(graph: any, abs: AbsMap): EdgePointMap {
       const sec = e.sections?.[0];
       if (!sec) return;
 
-      const { x: ox, y: oy } = abs[container.id] ?? { x: 0, y: 0 };
+      const containerAbsPos = abs[container.id];
+      const { x: ox, y: oy } = containerAbsPos ?? { x: 0, y: 0 };
+      
+      // DEBUG: Log edge container assignment and offset calculation
+      console.log(`🔍 [EDGE-DEBUG] Edge "${e.id}" in container "${container.id}":`, {
+        containerFound: !!containerAbsPos,
+        containerOffset: { ox, oy },
+        sources: e.sources,
+        targets: e.targets,
+        elkStartPoint: sec.startPoint,
+        elkEndPoint: sec.endPoint,
+        elkBendPoints: sec.bendPoints
+      });
 
       if (e.sources?.[0] && sec.startPoint) {
         const sourceNodeId = e.sources[0];
@@ -122,52 +134,19 @@ export function buildNodeEdgePoints(graph: any, abs: AbsMap): EdgePointMap {
       }
 
       // bendPoints → store absolute coords next to the edge object for later
+      // CRITICAL: Use raw ELK bendPoints converted to absolute coordinates
+      // Do NOT modify the coordinates - ELK computed the correct orthogonal routing
       if (sec.bendPoints?.length) {
-        e.absoluteBendPoints = sec.bendPoints.map((p: any, index: number) => {
-          const absBendX = ox + p.x;
-          const absBendY = oy + p.y;
-          
-          // For first and last bendpoints in edges with multiple bendpoints
-          if (sec.bendPoints.length >= 2) {
-            if (index === 0 && e.sources && e.sources.length > 0) {
-              const sourceId = e.sources[0];
-              const sourceSide = map[sourceId]?.right[0]?.side || 'right';
-              const sourcePoint = map[sourceId]?.[sourceSide][0];
-              if (sourcePoint) {
-                return {
-                  index,
-                  x: absBendX,
-                  y: sourcePoint.y,
-                  originalX: p.x,
-                  originalY: p.y
-                };
-              }
-            }
-            
-            if (index === sec.bendPoints.length - 1 && e.targets && e.targets.length > 0) {
-              const targetId = e.targets[0];
-              const targetSide = map[targetId]?.left[0]?.side || 'left';
-              const targetPoint = map[targetId]?.[targetSide][0];
-              if (targetPoint) {
-                return {
-                  index,
-                  x: absBendX,
-                  y: targetPoint.y,
-                  originalX: p.x,
-                  originalY: p.y
-                };
-              }
-            }
-          }
-          
-          return {
-            index,
-            x: absBendX,
-            y: absBendY,
-            originalX: p.x,
-            originalY: p.y
-          };
-        });
+        e.absoluteBendPoints = sec.bendPoints.map((p: any, index: number) => ({
+          index,
+          x: ox + p.x,  // Convert to absolute by adding container offset
+          y: oy + p.y,
+          originalX: p.x,
+          originalY: p.y
+        }));
+        
+        // DEBUG: Log calculated absolute bend points
+        console.log(`📐 [EDGE-DEBUG] Edge "${e.id}" absoluteBendPoints:`, e.absoluteBendPoints);
       }
     });
 

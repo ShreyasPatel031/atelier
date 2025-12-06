@@ -39,10 +39,10 @@ export const CANVAS_STYLES = {
 
   // Z-index hierarchy (from highest to lowest)
   // 1. Dots (node handles) - always on top (CSS z-index within node)
-  // 2. Edge labels - above edges but below dots
-  // 3. Regular nodes - above edges so dots (inside nodes) are visible
-  // 4. Edges - above groups so they're visible when connecting nodes
-  // 5. Groups - lowest so edges connecting nodes within/across groups are visible
+  // 2. Edge labels - above edges
+  // 3. Edges - above nodes so edge paths are visible over node boxes
+  // 4. Regular nodes - above groups
+  // 5. Groups - lowest layer
   zIndex: {
     // Node dots/handles (highest priority - CSS z-index within node)
     nodeDots: 6000,
@@ -51,8 +51,8 @@ export const CANVAS_STYLES = {
     // Edge labels (second priority)
     edgeLabels: 5000,
     // Regular nodes (must be above edges so dots render on top)
-    nodes: 4000,
-    selectedNodes: 4000,
+    nodes: 3000,
+    selectedNodes: 3000,
     // Edges (above groups but below nodes)
     edges: 2000,
     selectedEdges: 2000,

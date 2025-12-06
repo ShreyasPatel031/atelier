@@ -609,7 +609,10 @@ export const groupNodes = (nodeIds: NodeID[], parentId: NodeID, groupId: NodeID,
     id: normalizedGroupId,
     labels: [{ text: groupId }],
     children: [],
-    edges: []
+    edges: [],
+    // CRITICAL: Set mode to LOCK for AI-created groups
+    // Per FIGJAM_REFACTOR.md: AI edits default to LOCK mode, edges use ELK routing
+    mode: 'LOCK' as const
   };
   
   // Add style data if provided
@@ -803,6 +806,13 @@ export const createWrapperSection = (
 
 /**
  * Batch update multiple operations at once
+ * 
+ * IMPORTANT: Operations are reordered to ensure correct LCG (Lowest Common Group) 
+ * calculation for edges. Order is:
+ * 1. add_node - create all nodes first
+ * 2. group_nodes - move nodes into groups 
+ * 3. add_edge - LAST, so findCommonAncestor finds correct group
+ * 4. Other operations (delete, move, etc.) maintain relative order
  */
 export const batchUpdate = (operations: Array<{
   name: string;
@@ -822,9 +832,23 @@ export const batchUpdate = (operations: Array<{
   // console.group(`[mutation] batchUpdate (${operations.length} operations)`);
   // console.time("batchUpdate");
   
+  // Reorder operations to ensure edges are added AFTER nodes are grouped
+  // This ensures findCommonAncestor finds the correct LCG for edges
+  const addNodeOps = operations.filter(op => op.name === 'add_node');
+  const groupNodeOps = operations.filter(op => op.name === 'group_nodes');
+  const addEdgeOps = operations.filter(op => op.name === 'add_edge');
+  const otherOps = operations.filter(op => 
+    !['add_node', 'group_nodes', 'add_edge'].includes(op.name)
+  );
+  
+  // Process in order: add_node → group_nodes → other → add_edge
+  const reorderedOperations = [...addNodeOps, ...groupNodeOps, ...otherOps, ...addEdgeOps];
+  
+  console.log(`📦 [batchUpdate] Reordered ${operations.length} operations: ${addNodeOps.length} add_node, ${groupNodeOps.length} group_nodes, ${otherOps.length} other, ${addEdgeOps.length} add_edge`);
+  
   let updatedGraph = { ...graph };
   
-  for (const operation of operations) {
+  for (const operation of reorderedOperations) {
     const { name, ...args } = operation;
     
     // console.log(`🔍 Processing batch operation '${name}' with args:`, args);
@@ -883,13 +907,15 @@ export const batchUpdate = (operations: Array<{
         if (!args.nodeIds || !Array.isArray(args.nodeIds) || args.nodeIds.length === 0) {
           throw new Error(`group_nodes requires 'nodeIds' as a non-empty array, got: ${JSON.stringify(args.nodeIds)}`);
         }
-        if (!args.parentId || typeof args.parentId !== 'string') {
+        // Default parentId to "root" if not provided (same as add_node)
+        const groupParentId = args.parentId || "root";
+        if (typeof groupParentId !== 'string') {
           throw new Error(`group_nodes requires 'parentId' as a string, got: ${JSON.stringify(args.parentId)}`);
         }
         if (!args.groupId || typeof args.groupId !== 'string') {
           throw new Error(`group_nodes requires 'groupId' as a string, got: ${JSON.stringify(args.groupId)}`);
         }
-        updatedGraph = groupNodes(args.nodeIds, args.parentId, args.groupId, updatedGraph, args.style || args.data?.style);
+        updatedGraph = groupNodes(args.nodeIds, groupParentId, args.groupId, updatedGraph, args.style || args.data?.style);
         break;
         
       case "remove_group":
