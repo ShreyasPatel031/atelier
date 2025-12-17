@@ -21,71 +21,71 @@ export const DEFAULT_ARCHITECTURE = {
       },
       "children": [
         {
-          "id": "external_clients",
+      "id": "external_clients",
           "labels": [{ "text": "External Clients" }],
           "mode": "LOCK",
           "data": { "isGroup": true },
-          "children": [
-            {
-              "id": "external_client",
-              "labels": [{ "text": "Browser Client" }],
-              "children": [],
-              "edges": [],
-              "data": { "icon": "browser_client" }
-            }
-          ],
-          "edges": []
-        },
+      "children": [
         {
-          "id": "gcp_env",
+          "id": "external_client",
+              "labels": [{ "text": "Browser Client" }],
+          "children": [],
+          "edges": [],
+          "data": { "icon": "browser_client" }
+        }
+      ],
+      "edges": []
+    },
+    {
+      "id": "gcp_env",
           "labels": [{ "text": "GCP Environment" }],
           "mode": "LOCK",
           "data": { "isGroup": true, "groupIcon": "gcp_logo" },
-          "children": [
-            {
-              "id": "api_gateway",
+      "children": [
+        {
+          "id": "api_gateway",
               "labels": [{ "text": "API Gateway" }],
               "mode": "LOCK",
               "data": { "isGroup": true },
-              "children": [
-                {
-                  "id": "cloud_lb",
+          "children": [
+            {
+              "id": "cloud_lb",
                   "labels": [{ "text": "Cloud Load Balancer" }],
-                  "children": [],
-                  "edges": [],
-                  "data": { "icon": "gcp_cloud_load_balancing" }
-                },
-                {
-                  "id": "cloud_armor",
-                  "labels": [{ "text": "Cloud Armor" }],
-                  "children": [],
-                  "edges": [],
-                  "data": { "icon": "gcp_cloud_armor" }
-                },
-                {
-                  "id": "cloud_cdn",
-                  "labels": [{ "text": "Cloud CDN" }],
-                  "children": [],
-                  "edges": [],
-                  "data": { "icon": "gcp_cloud_cdn" }
-                }
-              ],
-              "edges": [
-                {
-                  "id": "edge_cdn_lb",
-                  "sources": ["cloud_cdn"],
-                  "targets": ["cloud_lb"],
-                  "labels": [{ "text": "caches" }]
-                },
-                {
-                  "id": "edge_armor_lb",
-                  "sources": ["cloud_armor"],
-                  "targets": ["cloud_lb"],
-                  "labels": [{ "text": "protects" }]
-                }
-              ]
+              "children": [],
+              "edges": [],
+              "data": { "icon": "gcp_cloud_load_balancing" }
             },
             {
+              "id": "cloud_armor",
+                  "labels": [{ "text": "Cloud Armor" }],
+              "children": [],
+              "edges": [],
+              "data": { "icon": "gcp_cloud_armor" }
+            },
+            {
+              "id": "cloud_cdn",
+                  "labels": [{ "text": "Cloud CDN" }],
+              "children": [],
+              "edges": [],
+              "data": { "icon": "gcp_cloud_cdn" }
+            }
+          ],
+          "edges": [
+            {
+              "id": "edge_cdn_lb",
+              "sources": ["cloud_cdn"],
+              "targets": ["cloud_lb"],
+              "labels": [{ "text": "caches" }]
+            },
+            {
+              "id": "edge_armor_lb",
+              "sources": ["cloud_armor"],
+              "targets": ["cloud_lb"],
+              "labels": [{ "text": "protects" }]
+                }
+              ]
+        },
+        {
               "id": "compute_services",
               "labels": [{ "text": "Compute Services" }],
               "mode": "LOCK",
@@ -212,31 +212,31 @@ export const DEFAULT_ARCHITECTURE = {
               "children": [],
               "edges": [],
               "data": { "icon": "mobile_client" }
-            }
-          ],
-          "edges": []
         }
       ],
-      "edges": [
-        {
-          "id": "edge_client_lb",
-          "sources": ["external_client"],
-          "targets": ["cloud_lb"],
-          "labels": [{ "text": "requests" }]
-        },
-        {
+      "edges": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_client_lb",
+      "sources": ["external_client"],
+      "targets": ["cloud_lb"],
+      "labels": [{ "text": "requests" }]
+    },
+    {
           "id": "edge_web_gke",
-          "sources": ["web_client"],
+      "sources": ["web_client"],
           "targets": ["gke_cluster"],
-          "labels": [{ "text": "connects to" }]
-        },
-        {
+      "labels": [{ "text": "connects to" }]
+    },
+    {
           "id": "edge_mobile_gke",
-          "sources": ["mobile_client"],
+      "sources": ["mobile_client"],
           "targets": ["gke_cluster"],
-          "labels": [{ "text": "connects to" }]
-        }
-      ]
+      "labels": [{ "text": "connects to" }]
+    }
+  ]
     }
   ],
   "edges": []

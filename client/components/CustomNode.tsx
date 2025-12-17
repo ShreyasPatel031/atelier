@@ -9,6 +9,8 @@ import ConnectorDots from './node/ConnectorDots';
 import NodeHandles from './node/NodeHandles';
 import { useNodeStyle } from '../contexts/NodeStyleContext';
 import { useNodeInteractions } from '../contexts/NodeInteractionContext';
+import { NODE_WIDTH_PX, NODE_HEIGHT_BASE_PX, NODE_BORDER_RADIUS_PX, NODE_BORDER_COLOR } from '../utils/nodeConstants';
+import { CANVAS_STYLES } from './graph/styles/canvasStyles';
 
 // NO HEURISTIC FALLBACKS - let semantic fallback service handle everything
 
@@ -29,6 +31,24 @@ interface CustomNodeProps {
 }
 
 const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
+  // Force re-render when visual options change
+  const [visualOptionsVersion, setVisualOptionsVersion] = useState(0);
+  
+  useEffect(() => {
+    const handleVisualOptionsChange = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      console.log(`[CustomNode ${id}] visualOptionsChanged event received:`, detail);
+      setVisualOptionsVersion(prev => prev + 1);
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('visualOptionsChanged', handleVisualOptionsChange);
+      return () => {
+        window.removeEventListener('visualOptionsChanged', handleVisualOptionsChange);
+      };
+    }
+  }, [id]);
+  
   // Get interaction state from context (selectedTool, connectingFrom, etc.)
   const nodeInteractions = useNodeInteractions();
   
@@ -150,36 +170,97 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
     setFallbackAttempted(false);
 
     if (data.icon) {
-      // Try to load the specified icon
-      tryLoadIcon(data.icon)
-        .then((path) => {
-          setFinalIconSrc(path);
-          setIconLoaded(true);
-          setIconError(false);
-        })
-        .catch(() => {
-          // Icon failed to load - use semantic fallback service
-          setIconError(true);
-          if (!fallbackAttempted) {
-            setFallbackAttempted(true);
-            iconFallbackService.findFallbackIcon(data.icon)
-              .then(async (fallbackIcon) => {
-                if (fallbackIcon) {
-                  try {
-                    const fallbackPath = await tryLoadIcon(fallbackIcon);
-                    setFinalIconSrc(fallbackPath);
+      // Check if icon exists in iconLists first - if not, immediately use fallback
+      const prefixMatch = data.icon.match(/^(aws|gcp|azure)_(.+)$/);
+      let iconExistsInLists = false;
+      
+      if (prefixMatch) {
+        const [, provider, actualIconName] = prefixMatch;
+        const category = findIconCategory(provider, actualIconName);
+        iconExistsInLists = category !== null;
+      }
+      
+      // If icon is not in iconLists, immediately try fallback (always find closest match)
+      if (!iconExistsInLists && !fallbackAttempted) {
+        setFallbackAttempted(true);
+        iconFallbackService.findFallbackIcon(data.icon)
+          .then(async (fallbackIcon) => {
+            if (fallbackIcon) {
+              try {
+                const fallbackPath = await tryLoadIcon(fallbackIcon);
+                setFinalIconSrc(fallbackPath);
+                setIconLoaded(true);
+                setIconError(false);
+              } catch (error) {
+                // Fallback icon failed - try original as last resort
+                tryLoadIcon(data.icon)
+                  .then((path) => {
+                    setFinalIconSrc(path);
                     setIconLoaded(true);
                     setIconError(false);
-                  } catch (error) {
-                    // Silent fallback failure
-                  }
-                }
+                  })
+                  .catch(() => {
+                    setIconError(true);
+                  });
+              }
+            } else {
+              // No fallback found - try original
+              tryLoadIcon(data.icon)
+                .then((path) => {
+                  setFinalIconSrc(path);
+                  setIconLoaded(true);
+                  setIconError(false);
+                })
+                .catch(() => {
+                  setIconError(true);
+                });
+            }
+          })
+          .catch((error) => {
+            console.error(`💥 Semantic fallback error for ${data.icon}:`, error);
+            // Try original as fallback
+            tryLoadIcon(data.icon)
+              .then((path) => {
+                setFinalIconSrc(path);
+                setIconLoaded(true);
+                setIconError(false);
               })
-              .catch((error) => {
-                console.error(`💥 Semantic fallback error for ${data.icon}:`, error);
+              .catch(() => {
+                setIconError(true);
               });
-          }
-        });
+          });
+      } else {
+        // Icon exists in lists - try to load it
+        tryLoadIcon(data.icon)
+          .then((path) => {
+            setFinalIconSrc(path);
+            setIconLoaded(true);
+            setIconError(false);
+          })
+          .catch(() => {
+            // Icon failed to load - use semantic fallback service
+            setIconError(true);
+            if (!fallbackAttempted) {
+              setFallbackAttempted(true);
+              iconFallbackService.findFallbackIcon(data.icon)
+                .then(async (fallbackIcon) => {
+                  if (fallbackIcon) {
+                    try {
+                      const fallbackPath = await tryLoadIcon(fallbackIcon);
+                      setFinalIconSrc(fallbackPath);
+                      setIconLoaded(true);
+                      setIconError(false);
+                    } catch (error) {
+                      // Silent fallback failure
+                    }
+                  }
+                })
+                .catch((error) => {
+                  console.error(`💥 Semantic fallback error for ${data.icon}:`, error);
+                });
+            }
+          });
+      }
     } else {
       // No icon specified - try semantic fallback based on node ID
       setIconError(true);
@@ -215,24 +296,16 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
     setLabel(!data.label || data.label === 'Add text' ? '' : data.label);
   }, [data.label]);
 
-  // Auto-enter edit mode when node is selected, clear when deselected
+  // CRITICAL: DO NOT auto-enter edit mode on selection - this causes icon/text to move
+  // Only change cursor on selection, user must click to edit
+  // This prevents layout shifts that cause icon/text to jump around
   useEffect(() => {
-    if (selected && !isEditing) {
-      const timeSinceBlur = Date.now() - lastBlurTimeRef.current;
-      if (timeSinceBlur < 100) {
-        const timer = setTimeout(() => {
-          if (selected && !isEditing) {
-            setIsEditing(true);
-          }
-        }, 100 - timeSinceBlur);
-        return () => clearTimeout(timer);
-      } else {
-        setIsEditing(true);
-      }
-    } else if (!selected && isEditing) {
+    // Only clear editing state when node is deselected
+    if (!selected && isEditing) {
       // Clear editing state when node is deselected
       setIsEditing(false);
     }
+    // DO NOT auto-enter edit mode on selection - user must click to edit
   }, [selected, isEditing]);
 
   // Focus input when entering edit mode
@@ -240,9 +313,17 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
     if (isEditing && inputRef.current) {
       const timer = setTimeout(() => {
         if (inputRef.current) {
-          inputRef.current.focus();
-          // Auto-resize textarea to fit content
           const textarea = inputRef.current;
+          textarea.focus();
+          // Move cursor to end of text instead of start
+          const textLength = textarea.value.length;
+          // Use requestAnimationFrame to ensure focus is applied before setting selection
+          requestAnimationFrame(() => {
+            if (textarea) {
+              textarea.setSelectionRange(textLength, textLength);
+            }
+          });
+          // Auto-resize textarea to fit content
           textarea.style.height = 'auto';
           textarea.style.height = `${textarea.scrollHeight}px`;
         }
@@ -280,15 +361,31 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
     }
   };
 
+  // State declarations must come BEFORE useEffects that use them
+  const [nodeEl, setNodeEl] = useState<HTMLDivElement | null>(null);
+  const [nodeScale, setNodeScale] = useState<number>(1);
+  const [actualNodeWidth, setActualNodeWidth] = useState<number>(data.width || NODE_WIDTH_PX);
+  const [actualNodeHeight, setActualNodeHeight] = useState<number>(NODE_HEIGHT_BASE_PX);
+
+  // Get visual debug options if available
+  // Re-read CANVAS_STYLES when visualOptionsVersion changes to get updated values
+  // The visualOptionsVersion dependency ensures React re-renders when it changes
+  // Force dependency on visualOptionsVersion to ensure React detects changes
+  const _ = visualOptionsVersion; // Force dependency on visual options version
+  const currentNodeStyle = CANVAS_STYLES.nodes.default;
+  const nodeBgColor = currentNodeStyle.background || 'white';
+  
+  const nodeStrokeColor = currentNodeStyle.border || NODE_BORDER_COLOR;
+  
   const nodeStyle = {
-    background: 'white', // Always white from Figma
-    border: '1px solid #e4e4e4', // Figma exact border color
-    borderRadius: '8px', // Figma 8px radius
+    background: nodeBgColor, // Use visual debug option or default white
+    border: `1px solid ${nodeStrokeColor}`, // Use visual options stroke color
+    borderRadius: `${NODE_BORDER_RADIUS_PX}px`,
     padding: '0px',
     // Width fixed, height auto-sizes to content unless explicit height provided
-    width: data.width || 96,
+    width: data.width || NODE_WIDTH_PX,
     height: data.height, // Respect explicit height from ELK if provided
-    minHeight: 96,
+    minHeight: NODE_HEIGHT_BASE_PX,
     boxSizing: 'border-box' as const,
     display: 'flex',
     flexDirection: 'column' as const,
@@ -301,10 +398,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
     pointerEvents: 'all' as const
   };
 
-  const [nodeEl, setNodeEl] = useState<HTMLDivElement | null>(null);
-  const [nodeScale, setNodeScale] = useState<number>(1);
-  const [actualNodeWidth, setActualNodeWidth] = useState<number>(data.width || 96);
-  const [actualNodeHeight, setActualNodeHeight] = useState<number>(96);
   
   // Update actual node dimensions when data changes or node resizes
   useEffect(() => {
@@ -313,8 +406,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
     const updateDimensions = () => {
       // Get the computed style to get the actual CSS dimensions (accounting for inline styles)
       const computedStyle = window.getComputedStyle(nodeEl);
-      const width = parseFloat(computedStyle.width) || data.width || 96;
-      const height = parseFloat(computedStyle.height) || 96;
+      const width = parseFloat(computedStyle.width) || data.width || NODE_WIDTH_PX;
+      const height = parseFloat(computedStyle.height) || NODE_HEIGHT_BASE_PX;
       setActualNodeWidth(width);
       setActualNodeHeight(height);
     };
@@ -396,6 +489,10 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
             color: #e4e4e4;
             opacity: 1;
           }
+          @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+          }
         `}
       </style>
       <div 
@@ -426,8 +523,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
       {/* Connector mode dots - always render handles for ReactFlow, but only show visual dots when connector tool is active */}
       <ConnectorDots 
         nodeId={id} 
-        nodeWidth={data.width || 96}
-        nodeHeight={data.height || 96}
+        nodeWidth={data.width || NODE_WIDTH_PX}
+        nodeHeight={data.height || NODE_HEIGHT_BASE_PX}
         connectingFrom={connectingFrom}
         connectingFromHandle={connectingFromHandle}
         onHandleClick={onConnectorDotClick}
@@ -452,55 +549,53 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
         flex: 1,
         zIndex: 1, // Lower z-index than green hover areas (zIndex: 1000)
         pointerEvents: isEditing ? 'auto' : 'none', // Only interactive when editing
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        paddingLeft: `${settings.nodePaddingHorizontal}px`,
+        paddingRight: `${settings.nodePaddingHorizontal}px`,
       }}>
         {isEditing ? (
           <div 
             style={{
               width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: (!label || !label.trim()) && !(iconLoaded && finalIconSrc) ? 'center' : 'flex-start',
-            paddingTop: `${settings.nodePaddingVertical}px`,
-            paddingBottom: `${settings.nodePaddingVertical}px`,
-            paddingLeft: `${settings.nodePaddingHorizontal}px`,
-            paddingRight: `${settings.nodePaddingHorizontal}px`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center', // FIXED: Keep same as non-editing to prevent icon/text movement
               boxSizing: 'border-box',
               gap: iconLoaded && finalIconSrc && (label && label.trim()) ? `${settings.textPadding}px` : '0',
-          }}>
+            }}>
             {iconLoaded && finalIconSrc && (
               <img 
                 src={finalIconSrc}
-                  alt="" 
+                alt="" 
                 style={{ 
-                    width: `${settings.iconSize}px`,
-                    height: `${settings.iconSize}px`,
-                    objectFit: 'contain',
-                    flexShrink: 0
-                  }}
-                />
+                  width: `${settings.iconSize}px`,
+                  height: `${settings.iconSize}px`,
+                  objectFit: 'contain',
+                  flexShrink: 0
+                }}
+              />
             )}
             <textarea
               ref={inputRef}
-            value={label}
-            onChange={handleLabelChange}
-            onKeyDown={handleKeyDown}
+              value={label}
+              onChange={handleLabelChange}
+              onKeyDown={handleKeyDown}
               onBlur={() => {
                 lastBlurTimeRef.current = Date.now();
                 setIsEditing(false);
                 onLabelChange(id, label || '');
               }}
-              placeholder={selected || !label ? "Add text" : ""}
-            style={{
-              width: '100%',
+              placeholder={!label || !label.trim() ? "Add text" : ""}
+              style={{
+                width: '100%',
                 maxWidth: '100%',
                 minHeight: label ? 'auto' : '10px',
                 padding: '0',
                 boxSizing: 'border-box',
                 border: 'none',
                 borderRadius: '8px',
-              textAlign: 'center',
+                textAlign: 'center',
                 fontSize: '8px',
                 lineHeight: '10px',
                 fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
@@ -523,20 +618,15 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
             onClick={handleClick}
             style={{
               textAlign: 'center',
-              cursor: 'pointer',
+              cursor: selected ? 'text' : 'pointer',
               fontSize: '8px',
               lineHeight: '10px',
               fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
               fontWeight: 400,
-              color: '#000000',
               width: '100%',
-              paddingTop: `${settings.nodePaddingVertical}px`,
-              paddingBottom: `${settings.nodePaddingVertical}px`,
-              paddingLeft: `${settings.nodePaddingHorizontal}px`,
-              paddingRight: `${settings.nodePaddingHorizontal}px`,
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'flex-start',
+              justifyContent: 'center',
               alignItems: 'center',
               boxSizing: 'border-box',
               pointerEvents: 'auto',
@@ -558,9 +648,41 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
                 }}
               />
             )}
-            {label && label.trim() && (
-              <div style={{ width: '100%' }}>
+            {label && label.trim() ? (
+              <div style={{ width: '100%', color: '#000000', position: 'relative', display: 'inline-block' }}>
                 {label}
+                {/* Show blinking cursor when selected */}
+                {selected && (
+                  <span 
+                    style={{
+                      display: 'inline-block',
+                      width: '1px',
+                      height: '10px',
+                      backgroundColor: '#333',
+                      marginLeft: '1px',
+                      animation: 'blink 1s infinite',
+                      verticalAlign: 'baseline',
+                    }}
+                  />
+                )}
+              </div>
+            ) : (
+              <div style={{ width: '100%', color: '#e4e4e4', position: 'relative', display: 'inline-block' }}>
+                Add text
+                {/* Show blinking cursor when selected and no text */}
+                {selected && (
+                  <span 
+                    style={{
+                      display: 'inline-block',
+                      width: '1px',
+                      height: '10px',
+                      backgroundColor: '#e4e4e4',
+                      marginLeft: '1px',
+                      animation: 'blink 1s infinite',
+                      verticalAlign: 'baseline',
+                    }}
+                  />
+                )}
               </div>
             )}
           </div>

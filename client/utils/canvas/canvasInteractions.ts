@@ -10,7 +10,7 @@ export function placeNodeOnCanvas(
   reactFlowRef: MutableRefObject<ReactFlowInstance | null>,
   handleAddNode?: (id: string, position: { x: number; y: number }, parentId?: string) => void,
   viewStateRef?: MutableRefObject<any>,
-  onDone?: (nextTool: 'arrow' | 'hand' | 'box' | 'connector' | 'group') => void,
+  onDone?: (nextTool: 'arrow' | 'hand' | 'box' | 'connector' | 'group', nodeId?: string) => void,
   parentId?: string | null,
 ) {
   if (selectedTool !== 'box' && !parentId) {
@@ -55,6 +55,6 @@ export function placeNodeOnCanvas(
     console.error('[placeNodeOnCanvas] Orchestrator apply failed:', error);
   });
 
-  // Auto-switch to select tool after creating a node
-  onDone?.('arrow');
+  // Auto-switch to select tool after creating a node, pass nodeId for selection
+  onDone?.('arrow', id);
 }

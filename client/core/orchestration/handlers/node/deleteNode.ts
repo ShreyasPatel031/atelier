@@ -34,8 +34,37 @@ export async function deleteNode(intent: EditIntent, refs: StateRefs): Promise<v
     targetNodeExists: !!findNodeById(currentGraph, nodeId)
   });
 
+  // Log edges before deletion
+  const edgesBefore: any[] = [];
+  const collectEdgesBefore = (node: any) => {
+    if (node.edges && Array.isArray(node.edges)) {
+      edgesBefore.push(...node.edges.map((e: any) => ({ id: e.id, source: e.sources?.[0] || e.source, target: e.targets?.[0] || e.target })));
+    }
+    if (node.children) {
+      node.children.forEach((child: any) => collectEdgesBefore(child));
+    }
+  };
+  if (graphToDelete.edges) edgesBefore.push(...graphToDelete.edges.map((e: any) => ({ id: e.id, source: e.sources?.[0] || e.source, target: e.targets?.[0] || e.target })));
+  collectEdgesBefore(graphToDelete);
+  console.log('[deleteNode] Edges BEFORE deletion:', edgesBefore.length, edgesBefore.map(e => `${e.id}: ${e.source}→${e.target}`));
+
   // 1. Domain.mutate (delete node structure)
   const updatedGraph = domainDeleteNode(nodeId, graphToDelete);
+
+  // Log edges after deletion
+  const edgesAfter: any[] = [];
+  const collectEdgesAfter = (node: any) => {
+    if (node.edges && Array.isArray(node.edges)) {
+      edgesAfter.push(...node.edges.map((e: any) => ({ id: e.id, source: e.sources?.[0] || e.source, target: e.targets?.[0] || e.target })));
+    }
+    if (node.children) {
+      node.children.forEach((child: any) => collectEdgesAfter(child));
+    }
+  };
+  if (updatedGraph.edges) edgesAfter.push(...updatedGraph.edges.map((e: any) => ({ id: e.id, source: e.sources?.[0] || e.source, target: e.targets?.[0] || e.target })));
+  collectEdgesAfter(updatedGraph);
+  console.log('[deleteNode] Edges AFTER deletion:', edgesAfter.length, edgesAfter.map(e => `${e.id}: ${e.source}→${e.target}`));
+  console.log('[deleteNode] Removed edges:', edgesBefore.filter(eBefore => !edgesAfter.some(eAfter => eAfter.id === eBefore.id)).map(e => `${e.id}: ${e.source}→${e.target}`));
 
   // 2. Clean up ViewState using cleanViewState to remove ALL stale entries
   const { cleanViewState } = await import('../../../viewstate/ViewStateCleanup');
@@ -51,8 +80,9 @@ export async function deleteNode(intent: EditIntent, refs: StateRefs): Promise<v
   if (setNodesRef.current && setEdgesRef.current) {
     const { convertViewStateToReactFlow } = await import('../../../renderer/ViewStateToReactFlow');
     try {
-      const dimensions = { width: 96, height: 96, groupWidth: 200, groupHeight: 150, padding: 16 };
-      const { nodes, edges } = convertViewStateToReactFlow(clonedGraph, cleanedViewState, dimensions);
+      const { nodes, edges } = convertViewStateToReactFlow(clonedGraph, cleanedViewState);
+      
+      console.log('[deleteNode] ReactFlow edges after render:', edges.length, edges.map(e => `${e.id}: ${e.source}→${e.target}`));
 
       setNodesRef.current(nodes);
       setEdgesRef.current(edges);

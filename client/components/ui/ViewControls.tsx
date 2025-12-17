@@ -1,5 +1,5 @@
 import React from 'react';
-import { Save, Edit, Check, Download } from 'lucide-react';
+import { Save, Edit, Check, Download, Settings } from 'lucide-react';
 import { useViewMode } from '../../contexts/ViewModeContext';
 import SaveAuth from '../auth/SaveAuth';
 import { markEmbedToCanvasTransition } from '../../utils/chatPersistence';
@@ -19,6 +19,10 @@ interface ViewControlsProps {
   
   // Export props
   onExport?: () => void;
+  
+  // Debug props
+  showDebugButton?: boolean;
+  onDebugClick?: () => void;
 }
 
 const ViewControls: React.FC<ViewControlsProps> = ({
@@ -28,7 +32,9 @@ const ViewControls: React.FC<ViewControlsProps> = ({
   handleManualSave,
   handleSave,
   user,
-  onExport
+  onExport,
+  showDebugButton = false,
+  onDebugClick
 }) => {
   const { config } = useViewMode();
 
@@ -189,6 +195,18 @@ const ViewControls: React.FC<ViewControlsProps> = ({
           <span className="text-sm font-medium">Edit</span>
         </button>
       ) : null}
+      
+      {/* Debug Button - Only render if showDebugButton is explicitly true (not null/undefined) */}
+      {showDebugButton === true && onDebugClick && (
+        <button
+          onClick={onDebugClick}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:shadow-md transition-all duration-200"
+          title="Open Debug Panel"
+        >
+          <Settings className="w-4 h-4" />
+          <span className="text-sm font-medium">Debug</span>
+        </button>
+      )}
       
       {/* Profile/Auth - Show when allowed by view mode */}
       {config.showProfileSection && (

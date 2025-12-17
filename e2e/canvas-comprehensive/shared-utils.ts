@@ -111,7 +111,7 @@ export async function addNodeToCanvas(page: Page, x: number, y: number): Promise
     console.log('✅ "Generating..." disappeared');
   } catch (e) {
     console.log('⚠️ No "Generating..." found, continuing...');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(500); // Reduced from 2000 to 500ms
   }
   
   // Finish editing if node is in edit mode

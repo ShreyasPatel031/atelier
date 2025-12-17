@@ -25,6 +25,7 @@ import { findParentOfNode } from '../../components/graph/mutations';
 // Import domain mutations
 import { addNode, moveNode, groupNodes, deleteNode, deleteEdge } from '../../components/graph/mutations';
 import { adjustForReparent } from '../viewstate/adjust';
+import { initializeStateRefs } from './state/StateRefs';
 // No direct rendering - let useElkToReactflowGraphConverter handle ViewState changes
 
 // No helper functions needed - ViewState changes trigger automatic rendering via React hooks
@@ -48,24 +49,19 @@ export function initializeOrchestrator(
   setNodes?: (nodes: any[]) => void,
   setEdges?: (edges: any[]) => void
 ) {
-  console.log('[🔄 INIT] Orchestrator initialized synchronously (handles both FREE and AI/LOCK modes)');
-  
   graphStateRef = graphRef;
   viewStateRef = vsRef;
   renderTriggerRef.current = renderTrigger;
   setGraphRef.current = setGraph || null;
   setNodesRef.current = setNodes || null;
   setEdgesRef.current = setEdges || null;
+  
+  // Also initialize StateRefs for handlers (synchronously)
+  initializeStateRefs(graphRef, vsRef, renderTrigger, setGraph, setNodes, setEdges);
 
   // 🔧 FIX: If initialized with existing data, trigger immediate render
   // This fixes persistence - restored nodes should appear immediately
   if (graphRef.current?.children?.length > 0 && setNodes) {
-    console.log('[🔄 INIT] Found existing data - triggering immediate render:', {
-      graphChildren: graphRef.current.children.length,
-      viewStateNodes: Object.keys(vsRef.current?.node || {}).length,
-      viewStateGroups: Object.keys(vsRef.current?.group || {}).length
-    });
-
     // Use the same rendering logic as add-node action
     const domainStructure = graphRef.current;
     const dimensions = { width: 96, height: 96, groupWidth: 200, groupHeight: 150, padding: 16 };
@@ -78,12 +74,6 @@ export function initializeOrchestrator(
           vsRef.current,
           dimensions
         );
-
-        console.log('[🔄 INIT] Initial render complete:', {
-          nodes: nodes.length,
-          edges: edges.length,
-          nodeIds: nodes.map(n => n.id)
-        });
 
         if (setNodesRef.current) setNodesRef.current(nodes);
         if (setEdgesRef.current) setEdgesRef.current(edges);
@@ -104,11 +94,6 @@ export function triggerRestorationRender(graphRef: { current: RawGraph | null },
   const hasViewStateData = Object.keys(vsRef.current?.node || {}).length > 0 || Object.keys(vsRef.current?.group || {}).length > 0;
   
   if (hasGraphData && hasViewStateData) {
-    console.log('[🔄 RESTORATION] Triggering restoration render from setRawGraph:', {
-      graphChildren: graphRef.current?.children?.length || 0,
-      viewStateNodes: Object.keys(vsRef.current?.node || {}).length,
-    });
-
     const domainStructure = graphRef.current;
     const dimensions = { width: 96, height: 96, groupWidth: 200, groupHeight: 150, padding: 16 };
 
@@ -125,12 +110,6 @@ export function triggerRestorationRender(graphRef: { current: RawGraph | null },
           
           if (setNodesRef.current) setNodesRef.current(nodes);
           if (setEdgesRef.current) setEdgesRef.current(edges);
-
-          console.log('[🔄 RESTORATION] setRawGraph restoration render complete:', {
-            nodes: nodes.length,
-            edges: edges.length,
-            nodeIds: nodes.map(n => n.id),
-          });
         } catch (error) {
           console.error('[🔄 RESTORATION] setRawGraph restoration render failed:', error);
         }
@@ -169,20 +148,19 @@ export async function apply(intent: EditIntent): Promise<void> {
     case 'free-structural': {
       // FREE structural: Domain.mutate → ViewState.adjust → emit render
       const { payload } = intent;
-      let updatedGraph = graphStateRef.current;
       
       if (payload.action === 'add-node') {
         // 0. Write position to ViewState FIRST (before domain mutation)
         // CRITICAL: ALWAYS write geometry to ViewState BEFORE domain mutation
         // This ensures ViewState-first contract is maintained
         
-          // Ensure ViewState structure exists
-          if (!viewStateRef.current) {
-            viewStateRef.current = { node: {}, group: {}, edge: {} };
-          }
-          if (!viewStateRef.current.node) {
-            viewStateRef.current.node = {};
-          }
+        // Ensure ViewState structure exists
+        if (!viewStateRef.current) {
+          viewStateRef.current = { node: {}, group: {}, edge: {} };
+        }
+        if (!viewStateRef.current.node) {
+          viewStateRef.current.node = {};
+        }
         if (!viewStateRef.current.group) {
           viewStateRef.current.group = {};
         }
@@ -239,15 +217,16 @@ export async function apply(intent: EditIntent): Promise<void> {
         // Render directly via setNodesRef/setEdgesRef (bypasses ELK)
         if (setNodesRef.current && setEdgesRef.current) {
           const { convertViewStateToReactFlow } = await import('../renderer/ViewStateToReactFlow');
-            const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, cleanedViewState);
-            setNodesRef.current(nodes);
-            setEdgesRef.current(edges);
+          const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, cleanedViewState);
+          setNodesRef.current(nodes);
+          setEdgesRef.current(edges);
         }
-        
       } else if (payload.action === 'delete-node') {
-        // CRITICAL: Use the CURRENT graph state, not the stale updatedGraph
-        // The updatedGraph might be stale if multiple operations happened
-        const currentGraph = graphStateRef.current || updatedGraph;
+        // CRITICAL: Use the CURRENT graph state from ref
+        const currentGraph = graphStateRef.current;
+        if (!currentGraph) {
+          throw new Error('[Orchestrator] Graph state not available for delete-node');
+        }
         const graphToDelete = JSON.parse(JSON.stringify(currentGraph));
         
         console.log('[Orchestrator] DELETE-NODE - using current graph:', {
@@ -314,18 +293,65 @@ export async function apply(intent: EditIntent): Promise<void> {
         // CRITICAL: Clone graph first since deleteEdge might mutate in place
         const graphToDelete = JSON.parse(JSON.stringify(updatedGraph));
         
-        // 1. Domain.mutate (delete edge structure)
-        updatedGraph = deleteEdge(payload.edgeId!, graphToDelete);
+        // Check if edge exists before trying to delete it
+        // Edges may have been removed when their connected nodes were deleted
+        const edgeExists = (() => {
+          // Check root edges
+          if (graphToDelete.edges?.some((e: any) => e.id === payload.edgeId)) return true;
+          // Check edges in nodes recursively
+          const checkNode = (node: any): boolean => {
+            if (node.edges?.some((e: any) => e.id === payload.edgeId)) return true;
+            if (node.children) {
+              return node.children.some((child: any) => checkNode(child));
+            }
+            return false;
+          };
+          if (graphToDelete.children) {
+            return graphToDelete.children.some((child: any) => checkNode(child));
+          }
+          return false;
+        })();
         
-        // 2. Clean up ViewState (remove edge waypoints)
-        if (viewStateRef.current.edge?.[payload.edgeId!]) {
-          delete viewStateRef.current.edge[payload.edgeId!];
+        if (!edgeExists) {
+          console.warn(`[Orchestrator] Edge ${payload.edgeId} not found - may have been removed with node deletion`);
+          // Still clean up ViewState in case it exists there
+          if (viewStateRef.current.edge?.[payload.edgeId!]) {
+            delete viewStateRef.current.edge[payload.edgeId!];
+          }
+          // Edge already gone - still update graph ref and render to ensure UI is in sync
+          const clonedGraph = JSON.parse(JSON.stringify(updatedGraph));
+          graphStateRef.current = clonedGraph;
+        } else {
+          // 1. Domain.mutate (delete edge structure)
+          try {
+            updatedGraph = deleteEdge(payload.edgeId!, graphToDelete);
+          } catch (error) {
+            // Edge might have been deleted between check and deletion
+            if (error instanceof Error && error.message.includes('not found')) {
+              console.warn(`[Orchestrator] Edge ${payload.edgeId} not found during deletion - may have been removed concurrently`);
+              // Still clean up ViewState
+              if (viewStateRef.current.edge?.[payload.edgeId!]) {
+                delete viewStateRef.current.edge[payload.edgeId!];
+              }
+              // Use current graph state (edge already gone)
+              updatedGraph = graphStateRef.current || updatedGraph;
+            } else {
+              throw error; // Re-throw if it's a different error
+            }
+          }
+          
+          // 2. Clean up ViewState (remove edge waypoints)
+          if (viewStateRef.current.edge?.[payload.edgeId!]) {
+            delete viewStateRef.current.edge[payload.edgeId!];
+          }
+          
+          // Update graph state ref (NOT React state)
+          // CRITICAL: In FREE mode, we only update the ref, NOT call setRawGraph
+          const clonedGraph = JSON.parse(JSON.stringify(updatedGraph));
+          graphStateRef.current = clonedGraph;
         }
         
-        // Update graph state ref (NOT React state)
-        // CRITICAL: In FREE mode, we only update the ref, NOT call setRawGraph
-        const clonedGraph = JSON.parse(JSON.stringify(updatedGraph));
-        graphStateRef.current = clonedGraph;
+        // Always render to ensure UI is in sync (whether edge was deleted or already gone)
         
         // DO NOT call setGraphRef.current() - it causes double rendering
         // Render directly via setNodesRef/setEdgesRef
@@ -374,6 +400,109 @@ export async function apply(intent: EditIntent): Promise<void> {
           nodeId: payload.nodeId,
           oldParent: payload.oldParentId,
           newParent: payload.newParentId
+        });
+        
+      } else if (payload.action === 'unlock-scope-to-free') {
+        const { unlockScopeToFree } = await import('./handlers/mode/unlockScopeToFree');
+        const updatedViewState = unlockScopeToFree(
+          payload.scopeGroupId!,
+          graphStateRef.current!,
+          viewStateRef.current
+        );
+        viewStateRef.current = updatedViewState;
+        
+        // Update domain graph modes too (for consistency)
+        const scopeGroup = findNodeById(graphStateRef.current!, payload.scopeGroupId!);
+        if (scopeGroup) {
+          // Recursively set mode = 'FREE' in domain graph
+          const setModeRecursive = (node: any) => {
+            if (node.children && node.children.length > 0) {
+              node.mode = 'FREE';
+              node.children.forEach(setModeRecursive);
+            }
+          };
+          setModeRecursive(scopeGroup);
+          graphStateRef.current = JSON.parse(JSON.stringify(graphStateRef.current));
+        }
+        
+        // During drag, only update edges (not nodes) to avoid resetting positions
+        // This allows StepEdge to see routingMode changes and re-register with libavoid
+        if (setEdgesRef.current) {
+          const { convertViewStateToReactFlow } = await import('../renderer/ViewStateToReactFlow');
+          const { edges } = convertViewStateToReactFlow(graphStateRef.current!, updatedViewState);
+          
+          // Update edges only - this triggers StepEdge to re-register with libavoid
+          setEdgesRef.current(edges);
+          
+          // Only update nodes if NOT during drag (would reset positions)
+          if (payload.reason !== 'drag-start' && setNodesRef.current) {
+            const { nodes } = convertViewStateToReactFlow(graphStateRef.current!, updatedViewState);
+            
+            // CRITICAL: Preserve selection if specified
+            if (payload.preserveSelection && Array.isArray(payload.preserveSelection)) {
+              const preserveSet = new Set(payload.preserveSelection as string[]);
+              nodes.forEach(node => {
+                if (preserveSet.has(node.id)) {
+                  node.selected = true;
+                }
+              });
+            }
+            
+            setNodesRef.current(nodes);
+            reactFlowRef.current?.fitView({ padding: 0.1, duration: 0 });
+          }
+        }
+        
+        console.log('[Orchestrator] Completed unlock-scope-to-free', {
+          scopeGroupId: payload.scopeGroupId,
+          reason: payload.reason,
+          preservedSelection: payload.preserveSelection
+        });
+        
+        // CRITICAL: Dispatch routing-update event to trigger StepEdge to re-read from ViewState
+        // This ensures edges pick up the routingMode change and re-register with libavoid
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('routing-update', { 
+            detail: { scopeGroupId: payload.scopeGroupId, reason: 'unlock-scope-to-free' }
+          }));
+        }
+        
+        // Note: Live rerouting is handled by existing FREE mode code
+        // handleDragReparent and handleGroupDrag in onNodesChange already
+        // call batchUpdateObstaclesAndReroute during drag for live updates
+        
+      } else if (payload.action === 'lock-scope-and-descendants') {
+        const { lockScopeAndDescendants } = await import('./handlers/mode/lockScopeAndDescendants');
+        const updatedViewState = lockScopeAndDescendants(
+          payload.scopeGroupId!,
+          graphStateRef.current!,
+          viewStateRef.current
+        );
+        viewStateRef.current = updatedViewState;
+        
+        // Update domain graph modes
+        const scopeGroup = findNodeById(graphStateRef.current!, payload.scopeGroupId!);
+        if (scopeGroup) {
+          const setModeRecursive = (node: any) => {
+            if (node.children && node.children.length > 0) {
+              node.mode = 'LOCK';
+              node.children.forEach(setModeRecursive);
+            }
+          };
+          setModeRecursive(scopeGroup);
+          graphStateRef.current = JSON.parse(JSON.stringify(graphStateRef.current));
+        }
+        
+        // Trigger render (or let existing ELK path handle it)
+        if (setNodesRef.current && setEdgesRef.current) {
+          const { convertViewStateToReactFlow } = await import('../renderer/ViewStateToReactFlow');
+          const { nodes, edges } = convertViewStateToReactFlow(graphStateRef.current!, updatedViewState);
+          setNodesRef.current(nodes);
+          setEdgesRef.current(edges);
+        }
+        
+        console.log('[Orchestrator] Completed lock-scope-and-descendants', {
+          scopeGroupId: payload.scopeGroupId
         });
         
       } else {

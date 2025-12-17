@@ -66,17 +66,6 @@ export function buildNodeEdgePoints(graph: any, abs: AbsMap): EdgePointMap {
 
       const containerAbsPos = abs[container.id];
       const { x: ox, y: oy } = containerAbsPos ?? { x: 0, y: 0 };
-      
-      // DEBUG: Log edge container assignment and offset calculation
-      console.log(`🔍 [EDGE-DEBUG] Edge "${e.id}" in container "${container.id}":`, {
-        containerFound: !!containerAbsPos,
-        containerOffset: { ox, oy },
-        sources: e.sources,
-        targets: e.targets,
-        elkStartPoint: sec.startPoint,
-        elkEndPoint: sec.endPoint,
-        elkBendPoints: sec.bendPoints
-      });
 
       if (e.sources?.[0] && sec.startPoint) {
         const sourceNodeId = e.sources[0];
@@ -138,15 +127,12 @@ export function buildNodeEdgePoints(graph: any, abs: AbsMap): EdgePointMap {
       // Do NOT modify the coordinates - ELK computed the correct orthogonal routing
       if (sec.bendPoints?.length) {
         e.absoluteBendPoints = sec.bendPoints.map((p: any, index: number) => ({
-          index,
+                  index,
           x: ox + p.x,  // Convert to absolute by adding container offset
           y: oy + p.y,
-          originalX: p.x,
-          originalY: p.y
+                  originalX: p.x,
+                  originalY: p.y
         }));
-        
-        // DEBUG: Log calculated absolute bend points
-        console.log(`📐 [EDGE-DEBUG] Edge "${e.id}" absoluteBendPoints:`, e.absoluteBendPoints);
       }
     });
 

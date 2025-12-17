@@ -6,6 +6,7 @@ import { anonymousArchitectureService } from "../services/anonymousArchitectureS
 import { generateChatName } from "../utils/chatUtils";
 import { isEmbedToCanvasTransition, clearEmbedToCanvasFlag, getChatMessages } from "../utils/chatPersistence";
 import { RawGraph } from "../components/graph/types/index";
+import { convertFirebaseArch } from "../services/syncArchitectures";
 
 interface UseAuthListenerProps {
   config: {
@@ -44,19 +45,15 @@ export function useAuthListener({
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       
-      // Canvas mode: redirect to auth if user signs in, preserving architecture URL parameter
+      // REMOVED: Auto-redirect from canvas/embed to auth when user signs in
+      // Users should be able to freely navigate between /embed, /canvas, and /auth routes
+      // The route should be determined by the URL path, not by auth state
+      
+      // Canvas/Embed mode: Allow users to stay on current route even after signing in
+      // Just update the user state without redirecting
       if (!config.requiresAuth && currentUser) {
-        
-        // Preserve the architecture ID from the current URL
-        const currentParams = new URLSearchParams(window.location.search);
-        const archId = currentParams.get('arch');
-        
-        let authUrl = window.location.origin + '/auth';
-        if (archId) {
-          authUrl += `?arch=${archId}`;
-        }
-        
-        window.location.href = authUrl;
+        setUser(currentUser);
+        // Don't redirect - let users stay on /canvas or /embed if they want
         return;
       }
       
@@ -176,25 +173,62 @@ export function useAuthListener({
                 const validArchs = firebaseArchs.filter(arch => arch && arch.id && arch.name && arch.rawGraph);
                 
                 if (validArchs.length > 0) {
+                  // Convert Firebase architectures to ArchitectureTab format
+                  const convertedArchs = validArchs.map(arch => convertFirebaseArch(arch));
+                  
                   // Add to saved architectures, preserving "New Architecture" tab
                   setSavedArchitectures(prev => {
                     const existingArchs = prev.filter(arch => arch.id !== 'new-architecture');
-                    return [...existingArchs, ...validArchs];
+                    // Ensure "New Architecture" tab is always first
+                    const newArchTab = prev.find(arch => arch.id === 'new-architecture') || {
+                      id: 'new-architecture',
+                      name: 'New Architecture',
+                      timestamp: new Date(),
+                      rawGraph: { id: "root", children: [], edges: [] },
+                      isNew: true
+                    };
+                    return [newArchTab, ...convertedArchs];
                   });
                   
                   // Select the most recent architecture
-                  const mostRecent = validArchs.sort((a, b) => 
+                  const mostRecent = convertedArchs.sort((a, b) => 
                     new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
                   )[0];
                   
                   setSelectedArchitectureId(mostRecent.id);
                   setCurrentChatName(mostRecent.name);
-                  setRawGraph(mostRecent.rawGraph);
+                  
+                  // Load the architecture content onto canvas
+                  if (mostRecent.rawGraph) {
+                    setRawGraph(mostRecent.rawGraph);
+                    console.log('✅ [FIREBASE] Loaded architecture content:', {
+                      id: mostRecent.id,
+                      name: mostRecent.name,
+                      nodeCount: mostRecent.rawGraph?.children?.length || 0
+                    });
+                  }
                   
                   console.log('✅ [FIREBASE] Loaded user architectures:', {
-                    count: validArchs.length,
+                    count: convertedArchs.length,
                     selected: mostRecent.name
                   });
+                } else {
+                  // No architectures - ensure "New Architecture" tab exists
+                  setSavedArchitectures(prev => {
+                    const hasNewArch = prev.some(arch => arch.id === 'new-architecture');
+                    if (!hasNewArch) {
+                      return [{
+                        id: 'new-architecture',
+                        name: 'New Architecture',
+                        timestamp: new Date(),
+                        rawGraph: { id: "root", children: [], edges: [] },
+                        isNew: true
+                      }];
+                    }
+                    return prev;
+                  });
+                  setSelectedArchitectureId('new-architecture');
+                  setCurrentChatName('New Architecture');
                 }
                 
                 setHasInitialSync(true);

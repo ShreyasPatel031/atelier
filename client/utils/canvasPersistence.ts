@@ -9,6 +9,13 @@ export interface ViewStateGeometry {
   y: number;
   w: number;
   h: number;
+  // Port positions - stored as deltas from node top-left corner
+  ports?: {
+    leftHandles?: number[];   // Y offsets from top
+    rightHandles?: number[];  // Y offsets from top
+    topHandles?: number[];    // X offsets from left
+    bottomHandles?: number[]; // X offsets from left
+  };
 }
 
 export interface ViewState {
@@ -26,12 +33,13 @@ export interface CanvasSnapshot {
 }
 
 /**
- * Creates a snapshot of the current view state based on ReactFlow nodes
+ * Creates a snapshot of the current view state based on ReactFlow nodes and edges
  */
 export function createViewStateSnapshot(
   nodes: Node[],
   viewStateRef: React.MutableRefObject<ViewState | undefined>,
-  isHydratingRef: React.MutableRefObject<boolean>
+  isHydratingRef: React.MutableRefObject<boolean>,
+  edges?: any[] // ReactFlow edges
 ): ViewState {
   if (isHydratingRef.current && viewStateRef?.current) {
     try {
@@ -107,24 +115,90 @@ export function createViewStateSnapshot(
     const width = rawWidth ?? existingNodeView?.w ?? existingGroupView?.w ?? 96;
     const height = rawHeight ?? existingNodeView?.h ?? existingGroupView?.h ?? 96;
 
+    // Extract port positions from node.data if they exist
+    const ports = node.data?.leftHandles || node.data?.rightHandles || node.data?.topHandles || node.data?.bottomHandles
+      ? {
+          leftHandles: node.data?.leftHandles ? [...node.data.leftHandles] : undefined,
+          rightHandles: node.data?.rightHandles ? [...node.data.rightHandles] : undefined,
+          topHandles: node.data?.topHandles ? [...node.data.topHandles] : undefined,
+          bottomHandles: node.data?.bottomHandles ? [...node.data.bottomHandles] : undefined,
+        }
+      : undefined;
+
     snapshot.node = snapshot.node || {};
     snapshot.node[node.id] = {
       x: finalX,
       y: finalY,
       w: width,
       h: height,
+      ...(ports && { ports }),
     };
 
-    if (node.type === 'group') {
+    if (node.type === 'group' || node.type === 'draftGroup') {
       snapshot.group = snapshot.group || {};
       snapshot.group[node.id] = {
         x: finalX,
         y: finalY,
         w: rawWidth ?? existingGroupView?.w ?? width,
         h: rawHeight ?? existingGroupView?.h ?? height,
+        ...(ports && { ports }),
       };
     }
   });
+
+  // Process edges - save edge handles and waypoints to ViewState (same place as nodes/groups)
+  if (edges && edges.length > 0) {
+    edges.forEach((edge) => {
+      const edgeId = edge.id;
+      if (!edgeId) return;
+
+      // Get existing edge ViewState if any
+      const existingEdgeView = viewStateRef?.current?.edge?.[edgeId];
+
+      // Extract edge handles from ReactFlow edge (sourceHandle/targetHandle)
+      // These are CRITICAL for port persistence - edges must reconnect to correct ports on refresh
+      const sourceHandle = edge.sourceHandle;
+      const targetHandle = edge.targetHandle;
+
+      // CRITICAL: Extract ELK waypoints from edge.data for LOCK mode persistence
+      // Without this, edges lose ELK data on refresh and fall back to libavoid routing!
+      const edgeData = edge.data;
+      const routingMode = edgeData?.routingMode;
+      const elkStartPoint = edgeData?.elkStartPoint;
+      const elkEndPoint = edgeData?.elkEndPoint;
+      const elkWaypoints = edgeData?.elkWaypoints || edgeData?.bendPoints;
+      
+      
+      // Build waypoints array for LOCK mode edges (ELK routing)
+      // Format: [startPoint, ...bendPoints, endPoint]
+      let waypointsToSave = existingEdgeView?.waypoints;
+      if (routingMode === 'LOCK' && elkStartPoint && elkEndPoint) {
+        // Build complete waypoints array from ELK data
+        waypointsToSave = [
+          { x: elkStartPoint.x, y: elkStartPoint.y },
+          ...(elkWaypoints || []).map((p: any) => ({ x: p.x, y: p.y })),
+          { x: elkEndPoint.x, y: elkEndPoint.y }
+        ];
+      }
+
+      // CRITICAL: Always save edge state for ALL edges
+      // Previously, we only saved edges with handles, but ELK edges may not have handles set
+      // and we MUST save waypoints and routing mode to preserve ELK routing on refresh
+      snapshot.edge = snapshot.edge || {};
+      snapshot.edge[edgeId] = {
+        ...existingEdgeView,
+        // CRITICAL: Save handles so edges connect to correct ports on refresh
+        // Without these, edges default to top of nodes and routing breaks
+        ...(sourceHandle && { sourceHandle }),
+        ...(targetHandle && { targetHandle }),
+        // CRITICAL: Save routing mode so edges stay in LOCK mode after refresh
+        ...(routingMode && { routingMode }),
+        // CRITICAL: Save waypoints so ELK routing is preserved after refresh
+        // Without this, edges fall back to libavoid and look broken
+        ...(waypointsToSave && { waypoints: waypointsToSave }),
+      };
+    });
+  }
 
   return snapshot;
 }

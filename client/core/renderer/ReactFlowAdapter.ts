@@ -99,6 +99,9 @@ export function toReactFlowWithViewState(
     const geometry = isGroup
       ? viewState.group?.[nodeId]
       : viewState.node?.[nodeId];
+    
+    // Restore port positions from ViewState if they exist (preserve on refresh)
+    const restoredPorts = geometry?.ports;
 
     const parentId = (node as any).parentId;
     const parentChain = parentChainMap.get(nodeId) || [];
@@ -119,22 +122,8 @@ export function toReactFlowWithViewState(
           // Use CoordinateService for world → relative conversion
           position = CoordinateService.toRelativeFromWorld(worldPos, parentWorldPos);
           
-          // CRITICAL LOGGING: Always log nested groups to identify Problem 2
-          if (parentChain.length > 0) {
-            console.log('[🎯COORD] RENDERER - nested group rendering:', {
-            nodeId,
-            parentId,
-              nodeViewStateAbsolute: `${worldPos.x},${worldPos.y}`,
-              parentViewStateAbsolute: `${parentWorldPos.x},${parentWorldPos.y}`,
-              calculatedRelative: `${position.x},${position.y}`,
-              parentChain: parentChain.join(' → '),
-              calculation: `${worldPos.x} - ${parentWorldPos.x} = ${position.x}`,
-              note: 'If node absolute equals parent absolute, ViewState was written incorrectly by ELK',
-              problem2Check: Math.abs(worldPos.x - parentWorldPos.x) < 1 && Math.abs(worldPos.y - parentWorldPos.y) < 1
-                ? '⚠️ PROBLEM 2: Node absolute equals parent absolute - ELK wrote wrong absolute!'
-                : 'OK',
-          });
-          }
+          // Nested group rendering - coordinate conversion handled silently
+          // Removed excessive logging for nested group rendering
         } else {
           console.warn('[🎯COORD] RENDERER - missing parent geometry:', {
             nodeId,
@@ -148,6 +137,20 @@ export function toReactFlowWithViewState(
       const width = geometry.w ?? node.data?.width ?? (node.style as any)?.width ?? (isGroup ? 480 : 96);
       const height = geometry.h ?? node.data?.height ?? (node.style as any)?.height ?? (isGroup ? 320 : 96);
       
+      // Restore port positions from ViewState if they exist (preserve on refresh)
+      // Only override if ViewState has ports, otherwise keep ELK-calculated ports
+      const portData = restoredPorts ? {
+        ...(restoredPorts.leftHandles && { leftHandles: restoredPorts.leftHandles }),
+        ...(restoredPorts.rightHandles && { rightHandles: restoredPorts.rightHandles }),
+        ...(restoredPorts.topHandles && { topHandles: restoredPorts.topHandles }),
+        ...(restoredPorts.bottomHandles && { bottomHandles: restoredPorts.bottomHandles }),
+      } : {};
+      
+      // CRITICAL: Preserve mode property from ELK graph node (node.mode) or from previous data
+      // Mode comes from the ELK graph node, not from node.data
+      // Check both node.data.mode (from previous render) and node.mode (from ELK graph)
+      const nodeMode = (node as any).mode || node.data?.mode;
+      
       const result = {
         ...node,
         position,
@@ -158,6 +161,10 @@ export function toReactFlowWithViewState(
           width,
           height,
           position: { x: geometry.x, y: geometry.y }, // Keep absolute in data for reference
+          ...portData, // Restore port positions from ViewState
+          // CRITICAL: Preserve mode from ELK graph node (node.mode) or from previous data
+          // This ensures LOCK mode persists through ReactFlow adapter
+          ...(nodeMode && { mode: nodeMode }),
         },
         // Update style dimensions for groups
         style: isGroup ? {
@@ -199,23 +206,34 @@ export function toReactFlowWithViewState(
     };
   });
 
-  // Override edge waypoints from ViewState ONLY for FREE mode
-  // LOCK mode must always use ELK waypoints - no overrides!
+  // CRITICAL: Restore handles from ViewState for ALL modes (handles are always persisted)
+  // Waypoints are only restored for FREE mode (LOCK mode generates waypoints from ELK)
   const edges = elkEdges.map((edge) => {
     const edgeId = edge.id;
     const routingMode = edge.data?.routingMode || 'FREE';
     const edgeGeom = viewState.edge?.[edgeId];
 
-    // LOCK mode: ALWAYS use ELK waypoints - never override with ViewState
+    // CRITICAL: Always restore handles from ViewState (persisted port connections)
+    // Handles are required for correct port connections on refresh
+    const sourceHandle = edgeGeom?.sourceHandle || edge.sourceHandle;
+    const targetHandle = edgeGeom?.targetHandle || edge.targetHandle;
+
+    // LOCK mode: Use ELK waypoints (generated), but restore handles from ViewState
     if (routingMode === 'LOCK') {
-      // Pass through ELK data untouched
-      return edge;
+      return {
+        ...edge,
+        sourceHandle: sourceHandle,
+        targetHandle: targetHandle,
+        // Keep ELK waypoints for LOCK mode
+      };
     }
 
     // FREE mode: Use ViewState waypoints if available (for manual routing)
     if (edgeGeom?.waypoints && Array.isArray(edgeGeom.waypoints)) {
       return {
         ...edge,
+        sourceHandle: sourceHandle,
+        targetHandle: targetHandle,
         data: {
           ...edge.data,
           waypoints: edgeGeom.waypoints, // Put in 'waypoints' not 'bendPoints' to avoid confusion
@@ -223,8 +241,12 @@ export function toReactFlowWithViewState(
       };
     }
 
-    // No ViewState waypoints - use ELK (from processLayoutedGraph)
-    return edge;
+    // No ViewState waypoints - use ELK, but still restore handles
+    return {
+      ...edge,
+      sourceHandle: sourceHandle,
+      targetHandle: targetHandle,
+    };
   });
 
   return { nodes, edges };

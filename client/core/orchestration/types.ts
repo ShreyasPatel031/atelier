@@ -27,7 +27,7 @@ export interface EditIntent {
    * Optional payload for specific operations
    */
   payload?: {
-    action?: 'add-node' | 'move-node' | 'group-nodes' | 'delete-node' | 'delete-edge' | 'select-nodes' | 'deselect-all';
+    action?: 'add-node' | 'move-node' | 'group-nodes' | 'delete-node' | 'delete-edge' | 'select-nodes' | 'deselect-all' | 'unlock-scope-to-free' | 'lock-scope-and-descendants';
     nodeId?: string;
     nodeIds?: string[];  // For selection actions
     edgeId?: string;
@@ -37,6 +37,9 @@ export interface EditIntent {
     position?: { x: number; y: number };
     size?: { w: number; h: number };
     data?: any;
+    scopeGroupId?: string;  // For unlock/lock scope actions
+    reason?: 'move-node' | 'move-group'; // For debugging
+    preserveSelection?: string[]; // Node IDs to keep selected after operation
     [key: string]: unknown;
   };
 }

@@ -44,15 +44,54 @@ function collectAllIds(graph: RawGraph): { nodeIds: Set<string>, groupIds: Set<s
 }
 
 /**
+ * Collects all edge IDs from the domain graph
+ * Edges can be stored in:
+ * 1. domainGraph.edges (root level)
+ * 2. node.edges arrays (nested within nodes)
+ */
+function collectAllEdgeIds(graph: RawGraph): Set<string> {
+  const edgeIds = new Set<string>();
+
+  // Check root level edges
+  if (graph.edges && Array.isArray(graph.edges)) {
+    graph.edges.forEach((edge: any) => {
+      if (edge && edge.id) {
+        edgeIds.add(edge.id);
+      }
+    });
+  }
+
+  // Traverse all nodes to find nested edges
+  function traverse(node: any) {
+    if (node.edges && Array.isArray(node.edges)) {
+      node.edges.forEach((edge: any) => {
+        if (edge && edge.id) {
+          edgeIds.add(edge.id);
+        }
+      });
+    }
+    
+    if (node.children) {
+      node.children.forEach((child: any) => traverse(child));
+    }
+  }
+
+  traverse(graph);
+  return edgeIds;
+}
+
+/**
  * Cleans ViewState by removing entries that don't exist in the domain graph
- * This prevents "Missing ViewState geometry" warnings for stale nodes
+ * This prevents "Missing ViewState geometry" warnings for stale nodes and edges
  */
 export function cleanViewState(domainGraph: RawGraph, viewState: ViewState): ViewState {
   const { nodeIds, groupIds } = collectAllIds(domainGraph);
+  const edgeIds = collectAllEdgeIds(domainGraph);
   
   console.log('[🧹 CLEANUP] collectAllIds result:', {
     nodeIds: Array.from(nodeIds),
     groupIds: Array.from(groupIds),
+    edgeIds: Array.from(edgeIds),
     domainChildren: domainGraph.children?.length || 0,
     domainChildIds: domainGraph.children?.map(c => c.id) || []
   });
@@ -60,7 +99,7 @@ export function cleanViewState(domainGraph: RawGraph, viewState: ViewState): Vie
   const cleanedViewState: ViewState = {
     node: {},
     group: {},
-    edge: { ...viewState.edge } // Keep edges as-is for now
+    edge: {}
   };
 
   // Only keep ViewState entries for nodes that exist in domain
@@ -81,11 +120,22 @@ export function cleanViewState(domainGraph: RawGraph, viewState: ViewState): Vie
     }
   });
 
+  // Only keep ViewState entries for edges that exist in domain
+  // CRITICAL: This ensures edges deleted by purgeEdgesReferencing are also removed from ViewState
+  Object.entries(viewState.edge || {}).forEach(([edgeId, geometry]) => {
+    if (edgeIds.has(edgeId)) {
+      cleanedViewState.edge[edgeId] = geometry;
+    } else {
+      console.log(`[🧹 CLEANUP] Removing stale edge ViewState: ${edgeId}`);
+    }
+  });
+
   const removedNodes = Object.keys(viewState.node || {}).length - Object.keys(cleanedViewState.node).length;
   const removedGroups = Object.keys(viewState.group || {}).length - Object.keys(cleanedViewState.group).length;
+  const removedEdges = Object.keys(viewState.edge || {}).length - Object.keys(cleanedViewState.edge).length;
   
-  if (removedNodes > 0 || removedGroups > 0) {
-    console.log(`[🧹 CLEANUP] Cleaned ViewState: removed ${removedNodes} stale nodes, ${removedGroups} stale groups`);
+  if (removedNodes > 0 || removedGroups > 0 || removedEdges > 0) {
+    console.log(`[🧹 CLEANUP] Cleaned ViewState: removed ${removedNodes} stale nodes, ${removedGroups} stale groups, ${removedEdges} stale edges`);
   }
 
   return cleanedViewState;

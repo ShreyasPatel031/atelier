@@ -1,4 +1,66 @@
-<!-- 27a2163e-5d5e-48b8-980c-3c4c98b36f9e aa765f43-a88a-4dd8-aaa3-2ca551b32ada -->
+---
+name: FigJam FREE/LOCK Mode Implementation Plan
+overview: ""
+todos:
+  - id: b9183816-0a0f-4fe3-aa45-e3ec3a0ba039
+    content: "Phase 0.1: Add mode field to group creation in mutations.ts, default to FREE"
+    status: pending
+  - id: a1ea34e5-b724-43a3-bf5e-fa6806c1d2f4
+    content: "Phase 0.2: Build parent/ancestor indices (parentMap, pathToRoot, LCG helper)"
+    status: pending
+  - id: a117172b-49ff-41b5-930a-24e95d03e767
+    content: "Phase 0.3: Enforce ViewState-only rendering (✅ ReactFlowAdapter integrated, ViewState migrated to core/viewstate/)"
+    status: completed
+  - id: a09cbc7a-edf2-49bf-9b5e-22a8703b5a18
+    content: "Phase 1.1: Implement runScopeLayout() with anchoring (extract subtree, preserve top-left, write ViewState)"
+    status: pending
+  - id: ceaf86c5-db8f-4905-b04a-df8ecc4d0831
+    content: "Phase 1.2: Update ELK trigger policy (AI always ELK, user FREE skips, user LOCK triggers on highest locked ancestor)"
+    status: pending
+  - id: 6aba2fa4-8bc2-4055-8c35-44a418709f2a
+    content: "Phase 1.3: Root cannot be locked"
+    status: pending
+  - id: c34c4878-4c0a-4f91-8912-c449dfd63096
+    content: "Phase 2.1: Wrapper Section creation for multi-select auto-layout"
+    status: pending
+  - id: 010a180c-f810-475e-a730-1a1c4ae43768
+    content: "Phase 2.2: Adoption/ejection rules on move/resize (fully contained sections/nodes)"
+    status: pending
+  - id: f5812208-4749-4137-83d0-2bddc87611ed
+    content: "Phase 2.3: Rubber-band edges during drag (update visual positions in real-time)"
+    status: pending
+  - id: dde16c5d-2755-40a0-82b1-eeb2dbeeaa3e
+    content: "Phase 3.1: Gesture routing to highest locked ancestor"
+    status: pending
+  - id: e2215f73-bee8-4c4e-bfa9-5cde33eb86ca
+    content: "Phase 3.2: Block resize in LOCK mode"
+    status: pending
+  - id: 42f9535b-1d6a-4186-b58b-478276037fab
+    content: "Phase 3.3: Explicit drop target highlighting for LOCK reparent"
+    status: pending
+  - id: 6b13e7ba-3f8a-4fc5-ad01-fef800691ce2
+    content: "Phase 3.4: Arrange button behavior (already implemented - button toggles FREE/LOCK, turns blue when LOCK)"
+    status: completed
+  - id: 3cb0b075-3ec8-41f6-a2aa-457f7836afd1
+    content: "Phase 4.1: Spatial index for obstacle detection (grid or R-tree)"
+    status: pending
+  - id: bb1088d4-d21d-4a70-bcca-5475fb759b22
+    content: "Phase 4.2: Bump algorithm (right/down monotone, deterministic, rigid blocks)"
+    status: pending
+  - id: 574e07f9-ddd5-4766-ab28-be1cbfae0929
+    content: "Phase 5.1: Group mode toggle UI (FREE/LOCK button, disabled for root)"
+    status: pending
+  - id: 005c2df7-ac43-4d85-ad9c-652ab01138ec
+    content: "Phase 5.2: Persist mode in save/load (ensure mode field saved with groups)"
+    status: pending
+  - id: 07541b60-8af5-450f-8bf4-d93262b6ec72
+    content: "Phase 5.3: Remove source metadata (ensure source never persists, strip before save)"
+    status: pending
+  - id: 6adb3285-1e23-4814-94bb-8566226c044d
+    content: "Phase 6: Acceptance tests for all spec scenarios (FREE/LOCK behaviors, bump, indistinguishable origin)"
+    status: pending
+---
+
 # FigJam FREE/LOCK Mode Implementation Plan
 
 ## Authoritative Architecture (Target)
@@ -451,25 +513,3 @@ client/core/
     ├── types.ts
     └── __tests__/
 ```
-
-### To-dos
-
-- [ ] Phase 0.1: Add mode field to group creation in mutations.ts, default to FREE
-- [ ] Phase 0.2: Build parent/ancestor indices (parentMap, pathToRoot, LCG helper)
-- [x] Phase 0.3: Enforce ViewState-only rendering (✅ ReactFlowAdapter integrated, ViewState migrated to core/viewstate/)
-- [ ] Phase 1.1: Implement runScopeLayout() with anchoring (extract subtree, preserve top-left, write ViewState)
-- [ ] Phase 1.2: Update ELK trigger policy (AI always ELK, user FREE skips, user LOCK triggers on highest locked ancestor)
-- [ ] Phase 1.3: Root cannot be locked
-- [ ] Phase 2.1: Wrapper Section creation for multi-select auto-layout
-- [ ] Phase 2.2: Adoption/ejection rules on move/resize (fully contained sections/nodes)
-- [ ] Phase 2.3: Rubber-band edges during drag (update visual positions in real-time)
-- [ ] Phase 3.1: Gesture routing to highest locked ancestor
-- [ ] Phase 3.2: Block resize in LOCK mode
-- [ ] Phase 3.3: Explicit drop target highlighting for LOCK reparent
-- [x] Phase 3.4: Arrange button behavior (already implemented - button toggles FREE/LOCK, turns blue when LOCK)
-- [ ] Phase 4.1: Spatial index for obstacle detection (grid or R-tree)
-- [ ] Phase 4.2: Bump algorithm (right/down monotone, deterministic, rigid blocks)
-- [ ] Phase 5.1: Group mode toggle UI (FREE/LOCK button, disabled for root)
-- [ ] Phase 5.2: Persist mode in save/load (ensure mode field saved with groups)
-- [ ] Phase 5.3: Remove source metadata (ensure source never persists, strip before save)
-- [ ] Phase 6: Acceptance tests for all spec scenarios (FREE/LOCK behaviors, bump, indistinguishable origin)

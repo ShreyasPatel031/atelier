@@ -114,63 +114,94 @@ const SaveAuth: React.FC<SaveAuthProps> = ({ onSave, className = "", isCollapsed
     };
   }, [showDropdown]);
 
+  // During SSR and initial hydration, always render the same structure
+  // Only show user-specific content after mount to avoid hydration mismatch
+  const displayUser = mounted ? user : null;
+  const displayLoading = mounted ? isLoading : false;
+
+  // Always render the same button structure during SSR/hydration
+  // Use a consistent structure that matches server and client
+  const buttonContent = displayLoading ? (
+    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0" />
+  ) : displayUser ? (
+    <div className="relative w-4 h-4">
+      {displayUser.photoURL ? (
+        <>
+          <img 
+            src={displayUser.photoURL} 
+            alt="Profile" 
+            className="w-4 h-4 rounded-full flex-shrink-0"
+            onError={(e) => {
+              console.warn('Failed to load profile image, falling back to icon');
+              e.currentTarget.style.display = 'none';
+              const fallback = e.currentTarget.parentElement?.querySelector('.fallback-icon');
+              if (fallback) fallback.classList.remove('hidden');
+            }}
+          />
+          <UserIcon className="fallback-icon w-4 h-4 flex-shrink-0 hidden" />
+        </>
+      ) : (
+        <UserIcon className="w-4 h-4 flex-shrink-0" />
+      )}
+    </div>
+  ) : (
+    <UserIcon className="w-4 h-4 flex-shrink-0" />
+  );
+
+  const buttonText = !isCollapsed ? (
+    <span className="font-medium truncate">
+      {displayUser ? displayUser.displayName || displayUser.email?.split('@')[0] || 'Profile' : 'Sign in'}
+    </span>
+  ) : null;
+
+  // During SSR and initial hydration, render nothing or a minimal placeholder
+  // This prevents hydration mismatches by ensuring server and client render the same thing
+  if (!mounted) {
+    // Return a minimal placeholder that matches what will be rendered after mount
+    // Use suppressHydrationWarning to tell React this is intentional
+    return (
+      <div className={`relative save-auth-dropdown ${className}`} suppressHydrationWarning>
+        <button
+          disabled={true}
+          className={`flex items-center gap-3 rounded-lg shadow-lg border border-gray-200 bg-white text-gray-700 opacity-50 cursor-not-allowed ${
+            isCollapsed ? 'w-10 h-10 justify-center' : 'w-full px-4 py-3 justify-start'
+          }`}
+          title="Sign in"
+          suppressHydrationWarning
+        >
+          <UserIcon className="w-4 h-4 flex-shrink-0" suppressHydrationWarning />
+          {!isCollapsed && (
+            <span className="font-medium truncate" suppressHydrationWarning>Sign in</span>
+          )}
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className={`relative save-auth-dropdown ${className}`} suppressHydrationWarning>
+    <div className={`relative save-auth-dropdown ${className}`}>
       <button
-        onClick={mounted ? (user ? () => setShowDropdown(!showDropdown) : handleGoogleSignIn) : undefined}
-        disabled={!mounted || isLoading}
+        onClick={displayUser ? () => setShowDropdown(!showDropdown) : handleGoogleSignIn}
+        disabled={displayLoading}
         className={`flex items-center gap-3 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 hover:shadow-md transition-all duration-200 ${
           isCollapsed ? 'w-10 h-10 justify-center' : 'w-full px-4 py-3 justify-start'
-        } ${user 
-          ? 'bg-white text-gray-700' 
-          : 'bg-white text-gray-700'
-        } ${!mounted || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        title={user ? `Profile (${user.email})` : "Sign in"}
-        suppressHydrationWarning
+        } bg-white text-gray-700 ${displayLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        title={displayUser ? `Profile (${displayUser.email})` : "Sign in"}
       >
-        {!mounted || isLoading ? (
-          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0" suppressHydrationWarning />
-        ) : user ? (
-          <div className="relative w-4 h-4" suppressHydrationWarning>
-            {user.photoURL ? (
-              <>
-                <img 
-                  src={user.photoURL} 
-                  alt="Profile" 
-                  className="w-4 h-4 rounded-full flex-shrink-0"
-                  onError={(e) => {
-                    console.warn('Failed to load profile image, falling back to icon');
-                    e.currentTarget.style.display = 'none';
-                    const fallback = e.currentTarget.parentElement?.querySelector('.fallback-icon');
-                    if (fallback) fallback.classList.remove('hidden');
-                  }}
-                />
-                <UserIcon className="fallback-icon w-4 h-4 flex-shrink-0 hidden" />
-              </>
-            ) : (
-              <UserIcon className="w-4 h-4 flex-shrink-0" />
-            )}
-          </div>
-        ) : (
-          <UserIcon className="w-4 h-4 flex-shrink-0" />
-        )}
-        {!isCollapsed && (
-          <span className="font-medium truncate" suppressHydrationWarning>
-            {user ? user.displayName || user.email?.split('@')[0] || 'Profile' : 'Sign in'}
-          </span>
-        )}
+        {buttonContent}
+        {buttonText}
       </button>
 
       {/* Dropdown menu for authenticated user */}
-      {user && showDropdown && (
+      {displayUser && showDropdown && mounted && (
         <div className="absolute top-12 right-0 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
           <div className="p-4 border-b border-gray-100">
             <div className="flex items-center space-x-3">
               <div className="relative w-8 h-8">
-                {user.photoURL ? (
+                {displayUser?.photoURL ? (
                   <>
                     <img 
-                      src={user.photoURL} 
+                      src={displayUser.photoURL} 
                       alt="Profile" 
                       className="w-8 h-8 rounded-full"
                       onError={(e) => {
@@ -188,10 +219,10 @@ const SaveAuth: React.FC<SaveAuthProps> = ({ onSave, className = "", isCollapsed
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {user.displayName || 'User'}
+                  {displayUser?.displayName || 'User'}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  {user.email}
+                  {displayUser?.email}
                 </p>
               </div>
             </div>

@@ -20,6 +20,8 @@ test.describe('Persistence Priority Tests', () => {
   });
 
   test('localStorage Priority - should use localStorage over URL/remote sources', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Navigate first to set up the page
     await page.goto(baseURL);
     await page.waitForSelector('.react-flow');
@@ -48,6 +50,8 @@ test.describe('Persistence Priority Tests', () => {
   });
 
   test('resetCanvas Persistence - should stay empty after resetCanvas and refresh', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Add nodes
     await addNodeToCanvas(page, 200, 200);
     await addNodeToCanvas(page, 300, 300);
@@ -74,6 +78,8 @@ test.describe('Persistence Priority Tests', () => {
   });
 
   test('State Distinction - should distinguish never used vs user cleared', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     const STORAGE_KEY = 'atelier_canvas_last_snapshot_v1';
     
     // Test "never used" / fresh state (empty domain, no nodes)

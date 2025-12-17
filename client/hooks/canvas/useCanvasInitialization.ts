@@ -146,8 +146,9 @@ export function useCanvasInitialization(params: UseCanvasStateParams): UseCanvas
   }, [originalSetRawGraph]);
 
   // ViewState snapshot utility
-  const getViewStateSnapshot = useCallback(() => {
-    return createViewStateSnapshot(nodes, viewStateRef, { current: false }); // isHydratingRef placeholder
+  const getViewStateSnapshot = useCallback((edges?: any[]) => {
+    // edges is optional - if not provided, use empty array to avoid errors
+    return createViewStateSnapshot(nodes, viewStateRef, { current: false }, edges || []); // Pass edges for edge persistence
   }, [nodes, viewStateRef]);
 
   // Setup migration test helpers for browser console (dev only)

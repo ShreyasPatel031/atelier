@@ -392,7 +392,6 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
         // 4) Scale all coordinates by GRID_SIZE (16) to get pixel values
         // ELK computed in units, now we convert to pixels
         const layout = scaleElkOutput(layoutRaw);
-        console.log('[📐 ELK SCALE] Scaled ELK output by GRID_SIZE=16');
         
         // Critical: Check if ELK returned zero positions - this indicates a layout failure
         const zeroPosChildren = (layout.children || []).filter((c: any) => (c.x === 0 && c.y === 0));
@@ -410,11 +409,17 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
         // 4) Ensure ViewState exists - populate geometry for ALL nodes from ELK
         // CRITICAL: Always extract geometry for new nodes/groups created by AI
         // Previously only initialized when empty - now always sync with ELK output
-        const currentViewState = viewStateRef.current;
+        // CRITICAL: Read ViewState AFTER restore has completed (restore sets viewStateRef.current)
+        // This ensures we preserve restored positions, handles, and waypoints
+        const currentViewState = viewStateRef.current || { node: {}, group: {}, edge: {} };
         
-        // Start with existing ViewState geometry (preserve manually moved positions)
-        const nextNodeState: Record<string, { x: number; y: number; w: number; h: number }> = { ...currentViewState?.node };
-        const nextGroupState: Record<string, { x: number; y: number; w: number; h: number }> = { ...currentViewState?.group };
+        // Start with existing ViewState geometry (preserve manually moved positions AND restored positions)
+        // CRITICAL: Preserve ALL existing ViewState to prevent overwriting restored data
+        // Deep clone to ensure we don't mutate the original
+        const nextNodeState: Record<string, { x: number; y: number; w: number; h: number }> = 
+          currentViewState.node ? JSON.parse(JSON.stringify(currentViewState.node)) : {};
+        const nextGroupState: Record<string, { x: number; y: number; w: number; h: number }> = 
+          currentViewState.group ? JSON.parse(JSON.stringify(currentViewState.group)) : {};
         
         {
           // ALWAYS sync with ELK output to ensure new nodes/groups get geometry
@@ -446,24 +451,6 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
               h: height 
             };
             
-            // PROBLEM 2 DEBUGGING: Log ALL groups being written (including scope root children)
-            const isNested = parentX !== 0 || parentY !== 0;
-            if (isGroup) {
-              console.log('[🎯COORD] ELK-CONVERTER - WRITING group to ViewState:', {
-                nodeId: elkNode.id,
-                isScopeRootChild: !isNested,
-                isNested,
-                elkRelative: `${elkRelativeX},${elkRelativeY}`,
-                parentAbsolute: `${parentX},${parentY}`,
-                calculatedAbsolute: `${absoluteX},${absoluteY}`,
-                shouldBeAbsolute: isNested ? `${elkRelativeX + parentX},${elkRelativeY + parentY}` : `${elkRelativeX},${elkRelativeY}`,
-                problem2_detected: isNested && (Math.abs(absoluteX - (elkRelativeX + parentX)) > 1 || Math.abs(absoluteY - (elkRelativeY + parentY)) > 1)
-                  ? '⚠️ PROBLEM 2: ELK relative not added to parent absolute!'
-                  : 'OK',
-                writingToViewState: `${absoluteX},${absoluteY}`,
-              });
-            }
-            
             // Only add geometry for NEW nodes/groups - preserve existing positions (manually moved)
             if (isGroup) {
               if (!nextGroupState[elkNode.id]) {
@@ -491,10 +478,206 @@ const addEdgeWrapper = (edgeId: string, sourceId: string, targetId: string, labe
             });
           }
           
+          // CRITICAL FIX: Ensure ALL groups from rawGraph get geometry, even if ELK didn't position them
+          // This handles empty groups that ELK might skip
+          const ensureAllGroupsHaveGeometry = (node: any, parentX = 0, parentY = 0) => {
+            const nodeId = node.id;
+            // A node is a group if it has isGroup flag OR has a children property (even if empty)
+            // Empty children array means it's an empty group, not a leaf node
+            const isGroup = node.data?.isGroup === true || ('children' in node);
+            
+            // Only process groups, and only if they don't already have geometry
+            if (isGroup && !nextGroupState[nodeId]) {
+              // Try to find this group in the ELK layout to get its position
+              const findInLayout = (elkNode: any): any => {
+                if (elkNode.id === nodeId) return elkNode;
+                if (elkNode.children) {
+                  for (const child of elkNode.children) {
+                    const found = findInLayout(child);
+                    if (found) return found;
+                  }
+                }
+                return null;
+              };
+              
+              const elkGroup = findInLayout(layout);
+              
+              if (elkGroup) {
+                // Group was in ELK output - should have been processed above
+                // This shouldn't happen, but handle it gracefully
+                const absoluteX = (elkGroup.x ?? 0) + parentX;
+                const absoluteY = (elkGroup.y ?? 0) + parentY;
+                nextGroupState[nodeId] = {
+                  x: absoluteX,
+                  y: absoluteY,
+                  w: elkGroup.width ?? (NODE_WIDTH_UNITS * GRID_SIZE * 3),
+                  h: elkGroup.height ?? (NODE_HEIGHT_UNITS * GRID_SIZE * 3)
+                };
+              } else {
+                // Group was NOT in ELK output (likely empty) - create default geometry
+                // Use a default position relative to parent or at origin
+                const defaultX = parentX;
+                const defaultY = parentY;
+                nextGroupState[nodeId] = {
+                  x: defaultX,
+                  y: defaultY,
+                  w: NODE_WIDTH_UNITS * GRID_SIZE * 3,
+                  h: NODE_HEIGHT_UNITS * GRID_SIZE * 3
+                };
+              }
+            }
+            
+            // Recursively process children
+            if (node.children) {
+              const parentPos = nextGroupState[nodeId] 
+                ? { x: nextGroupState[nodeId].x, y: nextGroupState[nodeId].y }
+                : { x: parentX, y: parentY };
+              node.children.forEach((child: any) => ensureAllGroupsHaveGeometry(child, parentPos.x, parentPos.y));
+            }
+          };
+          
+          // Ensure all groups from rawGraph have geometry
+          if (rawGraph.children) {
+            rawGraph.children.forEach((child: any) => {
+              ensureAllGroupsHaveGeometry(child);
+            });
+          }
+          
+          // Extract edge waypoints from ELK layout output
+          // After scaleElkOutput, coordinates are in absolute pixels
+          // Top-level edges are already absolute, nested edges need parent offset
+          // CRITICAL: Preserve existing edge state (handles, waypoints from persistence)
+          // Only add NEW waypoints for edges that don't already have them
+          // Deep clone to ensure we don't mutate the original
+          const nextEdgeState: Record<string, any> = 
+            currentViewState.edge ? JSON.parse(JSON.stringify(currentViewState.edge)) : {};
+          
+          // Helper to extract waypoints from ELK edge sections
+          const extractWaypointsFromElkEdge = (edge: any, offsetX: number = 0, offsetY: number = 0): Array<{ x: number; y: number }> | null => {
+            if (!edge.sections || edge.sections.length === 0) return null;
+            
+            const waypoints: Array<{ x: number; y: number }> = [];
+            edge.sections.forEach((section: any) => {
+              // After scaleElkOutput, coordinates are in pixels
+              // Add offset for nested edges (top-level edges have offset 0,0)
+              if (section.startPoint) {
+                waypoints.push({ 
+                  x: section.startPoint.x + offsetX, 
+                  y: section.startPoint.y + offsetY 
+                });
+              }
+              if (section.bendPoints) {
+                waypoints.push(...section.bendPoints.map((bp: any) => ({
+                  x: bp.x + offsetX,
+                  y: bp.y + offsetY
+                })));
+              }
+              if (section.endPoint) {
+                waypoints.push({ 
+                  x: section.endPoint.x + offsetX, 
+                  y: section.endPoint.y + offsetY 
+                });
+              }
+            });
+            
+            // Validate orthogonal (no diagonal segments)
+            if (waypoints.length >= 2) {
+              const tolerance = 1;
+              for (let i = 1; i < waypoints.length; i++) {
+                const prev = waypoints[i - 1];
+                const curr = waypoints[i];
+                const xDiff = Math.abs(curr.x - prev.x);
+                const yDiff = Math.abs(curr.y - prev.y);
+                if (xDiff > tolerance && yDiff > tolerance) {
+                  // Diagonal segment - don't store
+                  return null;
+                }
+              }
+              return waypoints;
+            }
+            return null;
+          };
+          
+          // Extract waypoints from top-level edges (already absolute after scaleElkOutput)
+          // CRITICAL: Always preserve existing edge state (handles, waypoints from persistence)
+          // Only add waypoints if they don't exist - never overwrite handles
+          if (layout.edges && layout.edges.length > 0) {
+            layout.edges.forEach((edge: any) => {
+              const existingEdgeState = nextEdgeState[edge.id] || {};
+              // Only extract waypoints if edge doesn't already have valid waypoints
+              // Always preserve handles and other properties
+              if (!existingEdgeState.waypoints || existingEdgeState.waypoints.length < 2) {
+                const waypoints = extractWaypointsFromElkEdge(edge, 0, 0);
+                if (waypoints && waypoints.length >= 2) {
+                  nextEdgeState[edge.id] = {
+                    ...existingEdgeState, // Preserve handles, sourceHandle, targetHandle, etc.
+                    waypoints
+                  };
+                } else if (!nextEdgeState[edge.id]) {
+                  // Edge doesn't exist yet - create entry to preserve handles if they exist later
+                  nextEdgeState[edge.id] = { ...existingEdgeState };
+                }
+              }
+            });
+          }
+          
+          // Extract waypoints from nested edges (recursively)
+          // Nested edges need parent position offset since they're relative to parent
+          const extractFromNode = (node: any, parentAbsoluteX: number = 0, parentAbsoluteY: number = 0) => {
+            // Node's absolute position = parent absolute + node relative
+            const nodeAbsoluteX = (node.x || 0) + parentAbsoluteX;
+            const nodeAbsoluteY = (node.y || 0) + parentAbsoluteY;
+            
+            // Extract edges from this node (edges are relative to node, so add node position)
+            // CRITICAL: Always preserve existing edge state (handles, waypoints from persistence)
+            // Only add waypoints if they don't exist - never overwrite handles
+            if (node.edges && node.edges.length > 0) {
+              node.edges.forEach((edge: any) => {
+                const existingEdgeState = nextEdgeState[edge.id] || {};
+                // Only extract waypoints if edge doesn't already have valid waypoints
+                // Always preserve handles and other properties
+                if (!existingEdgeState.waypoints || existingEdgeState.waypoints.length < 2) {
+                  const waypoints = extractWaypointsFromElkEdge(edge, nodeAbsoluteX, nodeAbsoluteY);
+                  if (waypoints && waypoints.length >= 2) {
+                    nextEdgeState[edge.id] = {
+                      ...existingEdgeState, // Preserve handles, sourceHandle, targetHandle, etc.
+                      waypoints
+                    };
+                  } else if (!nextEdgeState[edge.id]) {
+                    // Edge doesn't exist yet - create entry to preserve handles if they exist later
+                    nextEdgeState[edge.id] = { ...existingEdgeState };
+                  }
+                }
+              });
+            }
+            
+            // Recursively process children
+            if (node.children) {
+              node.children.forEach((child: any) => {
+                extractFromNode(child, nodeAbsoluteX, nodeAbsoluteY);
+              });
+            }
+          };
+          
+          // Extract from all top-level children
+          if (layout.children) {
+            layout.children.forEach((child: any) => {
+              extractFromNode(child, 0, 0);
+            });
+          }
+          
+          // CRITICAL: Merge edge state instead of replacing it
+          // This ensures that edges saved by persistence useEffect are preserved
+          // even if waypoint extraction doesn't find waypoints yet
+          const mergedEdgeState = {
+            ...currentViewState.edge, // Preserve existing edges (from persistence)
+            ...nextEdgeState // Add/update edges with waypoints
+          };
+          
           viewStateRef.current = { 
             node: nextNodeState, 
             group: nextGroupState, 
-            edge: currentViewState?.edge || {} // Preserve existing edge waypoints
+            edge: mergedEdgeState // Merge instead of replace
           };
           
         }

@@ -194,23 +194,23 @@ export const ElkDebugViewer: React.FC<ElkDebugViewerProps> = ({
         targetY = elkEndPoint.y;
       } else {
         // Fallback: estimate from node positions and handle info
-        const sourceHandle = edge.sourceHandle || 'right-0-source';
-        const targetHandle = edge.targetHandle || 'left-0-target';
-        
+      const sourceHandle = edge.sourceHandle || 'right-0-source';
+      const targetHandle = edge.targetHandle || 'left-0-target';
+      
         sourceX = sourceNode.position.x + (sourceNode.data?.width || 96);
         sourceY = sourceNode.position.y + (sourceNode.data?.height || 96) / 2;
         targetX = targetNode.position.x;
         targetY = targetNode.position.y + (targetNode.data?.height || 96) / 2;
 
-        if (sourceHandle.includes('left')) sourceX = sourceNode.position.x;
-        if (sourceHandle.includes('right')) sourceX = sourceNode.position.x + (sourceNode.data?.width || 96);
-        if (sourceHandle.includes('top')) sourceY = sourceNode.position.y;
-        if (sourceHandle.includes('bottom')) sourceY = sourceNode.position.y + (sourceNode.data?.height || 96);
+      if (sourceHandle.includes('left')) sourceX = sourceNode.position.x;
+      if (sourceHandle.includes('right')) sourceX = sourceNode.position.x + (sourceNode.data?.width || 96);
+      if (sourceHandle.includes('top')) sourceY = sourceNode.position.y;
+      if (sourceHandle.includes('bottom')) sourceY = sourceNode.position.y + (sourceNode.data?.height || 96);
 
-        if (targetHandle.includes('left')) targetX = targetNode.position.x;
-        if (targetHandle.includes('right')) targetX = targetNode.position.x + (targetNode.data?.width || 96);
-        if (targetHandle.includes('top')) targetY = targetNode.position.y;
-        if (targetHandle.includes('bottom')) targetY = targetNode.position.y + (targetNode.data?.height || 96);
+      if (targetHandle.includes('left')) targetX = targetNode.position.x;
+      if (targetHandle.includes('right')) targetX = targetNode.position.x + (targetNode.data?.width || 96);
+      if (targetHandle.includes('top')) targetY = targetNode.position.y;
+      if (targetHandle.includes('bottom')) targetY = targetNode.position.y + (targetNode.data?.height || 96);
       }
       
       return {

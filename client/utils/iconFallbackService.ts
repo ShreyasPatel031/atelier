@@ -121,8 +121,36 @@ class IconFallbackService {
           // General icons don't have provider prefixes (aws_, gcp_, azure_)
           if (!iconName.match(/^(aws|gcp|azure)_/)) {
             const similarity = this.cosineSimilarity(searchEmbedding, iconEmbedding);
-            if (!globalBestMatch || similarity > globalBestMatch.similarity) {
-              globalBestMatch = { icon: iconName, similarity, provider: 'general' };
+            
+            // Determine provider: prioritize generic icons, default to general for non-prefixed icons
+            let actualProvider: string = 'general'; // Default to general for non-prefixed icons
+            let adjustedSimilarity = similarity;
+            
+            if (iconLists.generic.includes(iconName)) {
+              // If in generic list, always treat as general (even if also in provider lists)
+              actualProvider = 'general';
+              // CRITICAL: Boost similarity for generic icons to prefer them over provider icons
+              // This ensures that generic icons (like mobile_app) are preferred over provider icons
+              // (like console_mobile_application) when both are valid matches
+              adjustedSimilarity = similarity + 0.1; // Small boost to prefer generic icons
+            } else {
+              // If NOT in generic, check if it exists ONLY in a provider list
+              for (const provider of ['gcp', 'aws', 'azure'] as const) {
+                const providerIcons = iconLists[provider];
+                if (providerIcons) {
+                  const flatProviderIcons = Object.values(providerIcons).flat();
+                  if (flatProviderIcons.includes(iconName)) {
+                    // Found in provider list, but NOT in generic - mark as provider icon
+                    actualProvider = provider;
+                    break;
+                  }
+                }
+              }
+              // If not found in any iconLists, stays 'general' (default for non-prefixed icons)
+            }
+            
+            if (!globalBestMatch || adjustedSimilarity > globalBestMatch.similarity) {
+              globalBestMatch = { icon: iconName, similarity: adjustedSimilarity, provider: actualProvider };
             }
           }
         }
@@ -146,10 +174,22 @@ class IconFallbackService {
 
           // Compare against precomputed icon embeddings (no API calls)
           for (const icon of availableIcons) {
+            // CRITICAL: Skip icons that are in generic list - they should be treated as general icons,
+            // not provider icons, even if they also exist in provider lists
+            if (iconLists.generic.includes(icon)) {
+              continue; // Skip this icon - it's already handled as a general icon in the first pass
+            }
+            
             const iconEmbedding = this.precomputedData.embeddings[icon];
             if (iconEmbedding) {
               const similarity = this.cosineSimilarity(searchEmbedding, iconEmbedding);
-              if (!globalBestMatch || similarity > globalBestMatch.similarity) {
+              // CRITICAL: Only allow provider icons to override if current best match is NOT a general icon
+              // If we already have a general icon match, don't let provider icons override it
+              // This ensures general icons (like browser_client) stay as general icons
+              const shouldUpdate = !globalBestMatch || 
+                (globalBestMatch.provider !== 'general' && similarity > globalBestMatch.similarity);
+              
+              if (shouldUpdate) {
                 globalBestMatch = { icon, similarity, provider: currentProvider };
               }
             }
@@ -158,6 +198,68 @@ class IconFallbackService {
       }
 
       if (globalBestMatch) { // Always use best match, no matter how low similarity
+        // CRITICAL: If best match is a provider icon, check if there's a semantically similar generic icon
+        // This ensures that generic icons (like mobile_app) are preferred over provider icons
+        // (like console_mobile_application) for non-prefixed search terms
+        if (globalBestMatch.provider !== 'general' && !prefixMatch) {
+          // Extract keywords from missing icon name (e.g., "mobile_client" -> ["mobile", "client"])
+          const searchKeywords = missingIconName.toLowerCase().split(/[_-]/).filter(k => k.length > 2);
+          
+          // Check generic icons for semantic matches
+          for (const genericIcon of iconLists.generic) {
+            const genericKeywords = genericIcon.toLowerCase().split(/[_-]/).filter(k => k.length > 2);
+            
+            // Check if there's significant keyword overlap (e.g., "mobile_app" matches "mobile_client")
+            const matchingKeywords = searchKeywords.filter(keyword => 
+              genericKeywords.some(genKeyword => genKeyword.includes(keyword) || keyword.includes(genKeyword))
+            );
+            
+            // Prefer matches with the first keyword (primary semantic match)
+            const firstKeywordMatch = searchKeywords.length > 0 && 
+              genericKeywords.some(genKeyword => 
+                genKeyword.includes(searchKeywords[0]) || searchKeywords[0].includes(genKeyword)
+              );
+            
+            // If at least one significant keyword matches, consider this generic icon
+            // Prioritize matches that include the first keyword (primary semantic match)
+            if (matchingKeywords.length > 0 && genericIcon.length > 0) {
+              // Boost score for first keyword matches (e.g., "mobile" in "mobile_app" for "mobile_client")
+              const matchScore = firstKeywordMatch ? matchingKeywords.length + 2 : matchingKeywords.length;
+              const genericEmbedding = this.precomputedData.embeddings[genericIcon];
+              if (genericEmbedding) {
+                const genericSimilarity = this.cosineSimilarity(searchEmbedding, genericEmbedding);
+                // Prefer generic if similarity is reasonable (within 0.25 of provider match)
+                if (genericSimilarity >= globalBestMatch.similarity - 0.25) {
+                  globalBestMatch = { 
+                    icon: genericIcon, 
+                    similarity: genericSimilarity + 0.15, // Boost to prefer generic
+                    provider: 'general' 
+                  };
+                  break;
+                }
+              } else {
+                // Generic icon not in embeddings, but still prefer it if keywords strongly match
+                // Prioritize first keyword matches (e.g., "mobile" in "mobile_app" for "mobile_client")
+                const firstKeywordMatch = searchKeywords.length > 0 && 
+                  genericKeywords.some(genKeyword => 
+                    genKeyword.includes(searchKeywords[0]) || searchKeywords[0].includes(genKeyword)
+                  );
+                const significantMatch = firstKeywordMatch && matchingKeywords.length >= 1;
+                if (significantMatch) {
+                  // Use the generic icon even without embedding similarity
+                  // Higher similarity for first keyword matches
+                  globalBestMatch = { 
+                    icon: genericIcon, 
+                    similarity: 0.9, // High similarity to ensure it wins over provider icon
+                    provider: 'general' 
+                  };
+                  break;
+                }
+              }
+            }
+          }
+        }
+        
         // For general icons, don't add provider prefix
         const fallbackIcon = globalBestMatch.provider === 'general' 
           ? globalBestMatch.icon 

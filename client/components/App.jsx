@@ -25,8 +25,30 @@ function AppContent() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isAgentReady, setIsAgentReady] = useState(true); // Always ready
   
-  // Right panel collapse state
-  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false)
+  // Right panel collapse state with persistence
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(() => {
+    // Restore from localStorage on mount
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('atelier_chat_panel_collapsed');
+        return saved === 'true';
+      } catch (e) {
+        console.warn('Failed to restore chat panel state:', e);
+      }
+    }
+    return false;
+  });
+
+  // Persist chat panel state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atelier_chat_panel_collapsed', String(rightPanelCollapsed));
+      } catch (e) {
+        console.warn('Failed to save chat panel state:', e);
+      }
+    }
+  }, [rightPanelCollapsed]);
 
   const startSession = () => {
     // No-op since chat is always available

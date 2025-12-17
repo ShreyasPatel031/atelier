@@ -345,6 +345,93 @@ export class LibavoidRoutingService {
   }
 
   /**
+   * Update connection endpoints for edges connected to moved nodes
+   * CRITICAL: When nodes move, we must update the connection points, not just obstacles
+   * 
+   * @param movedNodeIds - IDs of nodes that moved
+   * @param nodePositions - Map of node ID to new position
+   */
+  updateConnectionEndpointsForMovedNodes(
+    movedNodeIds: Set<string>,
+    nodePositions: Map<string, { x: number; y: number; w: number; h: number }>
+  ): void {
+    if (!this.router || !this.avoidModule) return;
+    
+    // Find all edges connected to moved nodes
+    for (const [edgeId, conn] of this.connections) {
+      const sourcePosition = nodePositions.get(conn.source);
+      const targetPosition = nodePositions.get(conn.target);
+      
+      const sourceMoved = movedNodeIds.has(conn.source);
+      const targetMoved = movedNodeIds.has(conn.target);
+      
+      if (!sourceMoved && !targetMoved) continue;
+      
+      // Calculate new connection points based on new node positions
+      let newSourcePoint = conn.sourcePoint;
+      let newTargetPoint = conn.targetPoint;
+      
+      if (sourceMoved && sourcePosition) {
+        // Recalculate source point based on new node position and handle
+        newSourcePoint = this.calculateConnectionPoint(
+          sourcePosition,
+          conn.sourcePosition,
+          conn.srcEdgeOffset
+        );
+      }
+      
+      if (targetMoved && targetPosition) {
+        // Recalculate target point based on new node position and handle
+        newTargetPoint = this.calculateConnectionPoint(
+          targetPosition,
+          conn.targetPosition,
+          conn.tgtEdgeOffset
+        );
+      }
+      
+      // Update the connection endpoints
+      try {
+        const srcEnd = this.createConnEnd(conn.source, newSourcePoint, conn.sourcePosition, conn.srcEdgeOffset);
+        const dstEnd = this.createConnEnd(conn.target, newTargetPoint, conn.targetPosition, conn.tgtEdgeOffset);
+        
+        conn.connRef.setSourceEndpoint?.(srcEnd);
+        conn.connRef.setDestEndpoint?.(dstEnd);
+        
+        // Update stored points
+        conn.sourcePoint = newSourcePoint;
+        conn.targetPoint = newTargetPoint;
+      } catch (e) {
+        // Ignore errors
+      }
+    }
+  }
+  
+  /**
+   * Calculate connection point based on node position and handle direction
+   */
+  private calculateConnectionPoint(
+    nodeGeom: { x: number; y: number; w: number; h: number },
+    handlePosition: Position,
+    edgeOffset: number
+  ): Point {
+    const width = nodeGeom.w;
+    const height = nodeGeom.h;
+    
+    switch (handlePosition) {
+      case Position.Right:
+        return { x: nodeGeom.x + width, y: nodeGeom.y + height / 2 + edgeOffset };
+      case Position.Left:
+        return { x: nodeGeom.x, y: nodeGeom.y + height / 2 + edgeOffset };
+      case Position.Top:
+        return { x: nodeGeom.x + width / 2 + edgeOffset, y: nodeGeom.y };
+      case Position.Bottom:
+        return { x: nodeGeom.x + width / 2 + edgeOffset, y: nodeGeom.y + height };
+      default:
+        return { x: nodeGeom.x + width, y: nodeGeom.y + height / 2 + edgeOffset };
+    }
+  }
+
+  /**
    * Process transaction - triggers callbacks for ALL affected edges
    * This is THE method that makes "reroute ALL edges" work!
    */
@@ -386,13 +473,16 @@ export class LibavoidRoutingService {
       this.routesCache.set(edgeId, waypoints);
       
       // Write to ViewState
+      // CRITICAL: Preserve sourceHandle and targetHandle when writing waypoints
+      // These are set by unlockScopeToFree and must not be lost
       if (this.viewStateRef?.current) {
         if (!this.viewStateRef.current.edge) {
           this.viewStateRef.current.edge = {};
         }
+        const existingEdgeGeom = this.viewStateRef.current.edge[edgeId] || {};
         this.viewStateRef.current.edge[edgeId] = {
-          ...this.viewStateRef.current.edge[edgeId],
-          waypoints
+          ...existingEdgeGeom, // Preserve ALL existing fields (handles, routingMode, etc)
+          waypoints // Update waypoints
         };
       }
       

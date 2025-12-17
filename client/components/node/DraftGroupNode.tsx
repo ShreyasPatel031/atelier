@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { NodeProps, useReactFlow, Handle, Position } from 'reactflow';
 import { LayoutDashboard, LayoutPanelLeft, CirclePlus } from 'lucide-react';
 import { baseHandleStyle } from '../graph/handles';
@@ -27,6 +27,25 @@ interface DraftGroupNodeProps extends NodeProps<DraftGroupData> {
  */
 const DraftGroupNode: React.FC<DraftGroupNodeProps> = (props) => {
   const { data, selected, id, onAddNode } = props;
+  
+  // Force re-render when visual options change
+  const [visualOptionsVersion, setVisualOptionsVersion] = useState(0);
+  
+  useEffect(() => {
+    const handleVisualOptionsChange = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      console.log(`[DraftGroupNode ${id}] visualOptionsChanged event received:`, detail);
+      setVisualOptionsVersion(prev => prev + 1);
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('visualOptionsChanged', handleVisualOptionsChange);
+      return () => {
+        window.removeEventListener('visualOptionsChanged', handleVisualOptionsChange);
+      };
+    }
+  }, [id]);
+  
   const interactions = useNodeInteractions();
   const { setNodes, getNodes, screenToFlowPosition } = useReactFlow();
   const handleAddNodeToGroup = interactions?.handleAddNodeToGroup ?? onAddNode;
@@ -35,12 +54,51 @@ const DraftGroupNode: React.FC<DraftGroupNodeProps> = (props) => {
   
   // Phase 1: Read mode from ViewState first, fallback to data.mode 
   // TODO: Get ViewState from context/props when available
-  const mode = data.mode || 'FREE'; // Currently using Domain fallback
+  // CRITICAL: Always read mode directly from data.mode (don't cache it)
+  // This ensures it updates when data changes (e.g., after restore)
+  // Don't cache mode - read directly from data.mode everywhere
+  // const mode = data.mode || 'FREE'; // REMOVED - read directly from data.mode instead
   const [hoveredCorner, setHoveredCorner] = useState<'nw' | 'ne' | 'sw' | 'se' | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [arrangeButtonHovered, setArrangeButtonHovered] = useState(false);
-  const [arrangeButtonSelected, setArrangeButtonSelected] = useState(false);
+  // CRITICAL: Compute mode from data.mode on every render (don't cache)
+  // Always read fresh from data.mode to ensure it updates when ReactFlow passes new data
+  const currentModeFromData = data.mode || 'FREE';
+  const isLockFromData = currentModeFromData === 'LOCK';
+  
+  // Initialize arrange button as selected if mode is LOCK (AI-created groups default to LOCK)
+  const [arrangeButtonSelected, setArrangeButtonSelected] = useState(() => {
+    // Initialize from data.mode on first render
+    return (data.mode || 'FREE') === 'LOCK';
+  });
   const [plusButtonHovered, setPlusButtonHovered] = useState(false);
+  
+  // CRITICAL FIX: Update arrangeButtonSelected when data.mode changes (e.g., when AI creates a LOCK group or after restore)
+  // Watch data.mode directly to catch changes from restored graphs
+  // Use a ref to track previous mode to avoid unnecessary updates
+  const prevModeRef = useRef<string | undefined>(data.mode);
+  useEffect(() => {
+    // Only update if mode actually changed
+    const currentMode = data.mode || 'FREE';
+    if (prevModeRef.current !== currentMode) {
+      prevModeRef.current = currentMode;
+      const shouldBeSelected = currentMode === 'LOCK';
+      console.log('🟦 [DraftGroupNode] Mode changed, updating button state:', { 
+        oldMode: prevModeRef.current, 
+        newMode: currentMode, 
+        shouldBeSelected 
+      });
+      setArrangeButtonSelected(shouldBeSelected);
+    }
+  }, [data.mode]); // Watch data.mode directly - id is not needed in deps since it's not used in the effect
+  
+  
+  // CRITICAL: Compute button background color directly from data.mode on every render
+  // This ensures the style updates even if ReactFlow memoizes the component
+  // Read data.mode directly in the style computation to bypass any memoization
+  const arrangeButtonBgColor = ((data.mode || 'FREE') === 'LOCK' || arrangeButtonSelected)
+    ? '#4285F4'
+    : (arrangeButtonHovered ? '#F5F5F5' : 'transparent');
   const inputRef = useRef<HTMLInputElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const handleRefs = useRef<Record<'nw' | 'ne' | 'sw' | 'se', HTMLDivElement | null>>({
@@ -230,25 +288,51 @@ const DraftGroupNode: React.FC<DraftGroupNodeProps> = (props) => {
     zIndex: CANVAS_STYLES.zIndex.groups, // Use centralized z-index - groups should be below nodes
   };
 
-  // Calculate border color based on hover and selection state
+  // Re-read CANVAS_STYLES when visualOptionsVersion changes to get updated values
+  // Force dependency on visualOptionsVersion to ensure React detects changes
+  const _ = visualOptionsVersion; // Force dependency on visual options version
+  
+  // Getter is evaluated each time - this will call getGroupStyle() which reads from getVisualOptions()
+  // This MUST be called every render to get fresh values when visualOptionsVersion changes
+  const currentGroupStyle = CANVAS_STYLES.nodes.group;
+  
+  // Calculate border color based on hover and selection state, but use visual options as base
   const getBorderColor = () => {
     if (showSelection) return 'rgba(66, 133, 244, 0.5)'; // Blue border when selected (same as selection border div for consistency)
     if (isHovered) return '#D4D4DB'; // Hover color
-    return GRAY_BORDER; // Default color
+    return currentGroupStyle.border || GRAY_BORDER; // Use visual options stroke color
+  };
+
+  // Get background color and apply 100% opacity on hover
+  const getBackgroundColor = () => {
+    const baseBg = currentGroupStyle.background;
+    if (!isHovered) return baseBg;
+    
+    // On hover, set opacity to 100%
+    // If it's an rgba color, replace the opacity with 1.0
+    if (baseBg.startsWith('rgba')) {
+      return baseBg.replace(/rgba\(([^,]+),([^,]+),([^,]+),([^)]+)\)/, 'rgba($1,$2,$3,1.0)');
+    }
+    // If it's an rgb color, convert to rgba with 1.0 opacity
+    if (baseBg.startsWith('rgb(')) {
+      return baseBg.replace('rgb(', 'rgba(').replace(')', ',1.0)');
+    }
+    // For hex colors, return as-is (hex doesn't support opacity, so this should already be full opacity)
+    return baseBg;
   };
 
   const frameStyles: React.CSSProperties = {
     width: '100%',
     height: '100%',
-    background: '#FFFFFF',
-    // Always have a 1px border, just change the color (transparent when selected)
+    background: getBackgroundColor(), // Use visual options with 100% opacity on hover
+    // Always have a 1px border, just change the color (uses visual options when not selected/hovered)
     border: `1px solid ${getBorderColor()}`,
     borderRadius: '4px',
     position: 'relative',
     boxSizing: 'border-box',
     pointerEvents: 'auto',
-    // Smooth transition for border color changes
-    transition: 'border-color 0.15s ease-in-out',
+    // Smooth transition for border color and background color changes
+    transition: 'border-color 0.15s ease-in-out, background-color 0.15s ease-in-out',
   };
 
   const renderTopBar = () => (
@@ -406,12 +490,43 @@ const DraftGroupNode: React.FC<DraftGroupNodeProps> = (props) => {
         }}
       >
         <button
+        data-ui-element="true"
+        data-testid="arrange-button"
+        onMouseDown={(e) => {
+          // CRITICAL: Prevent ReactFlow from processing mousedown (used for selection)
+          e.stopPropagation();
+          if (e.nativeEvent && typeof e.nativeEvent.stopImmediatePropagation === 'function') {
+            e.nativeEvent.stopImmediatePropagation();
+          }
+          // Store target for handleSelectionChange to check
+          (window as any).lastClickTarget = e.target;
+        }}
         onClick={(e) => {
           e.stopPropagation();
+          // CRITICAL: Prevent ReactFlow from processing this click
+          if (e.nativeEvent && typeof e.nativeEvent.stopImmediatePropagation === 'function') {
+            e.nativeEvent.stopImmediatePropagation();
+          }
           e.preventDefault();
-          setArrangeButtonSelected(!arrangeButtonSelected);
+          // Store target for handleSelectionChange to check
+          (window as any).lastClickTarget = e.target;
+          const currentMode = data.mode || 'FREE';
+          console.log('🟦 [DraftGroupNode] Arrange button clicked for group:', id, {
+            handleArrangeGroupAvailable: !!handleArrangeGroup,
+            currentMode: currentMode
+          });
+          // OPTIMISTIC UPDATE: Toggle button state immediately for instant UI feedback
+          // The useEffect will sync with data.mode when it updates
+          const newMode = currentMode === 'FREE' ? 'LOCK' : 'FREE';
+          console.log('🟦 [DraftGroupNode] Optimistic button state update:', { currentMode, newMode, willBeSelected: newMode === 'LOCK' });
+          setArrangeButtonSelected(newMode === 'LOCK');
+          
           if (handleArrangeGroup) {
-            handleArrangeGroup(id);
+            console.log('🟦 [DraftGroupNode] Calling handleArrangeGroup for:', id, 'with current mode:', currentMode);
+            // Pass current mode to avoid reading stale state
+            handleArrangeGroup(id, currentMode);
+          } else {
+            console.error('🟦 [DraftGroupNode] handleArrangeGroup is undefined! Cannot arrange group:', id);
           }
         }}
         onMouseEnter={() => {
@@ -429,10 +544,12 @@ const DraftGroupNode: React.FC<DraftGroupNodeProps> = (props) => {
           padding: '4px',
           cursor: 'pointer',
           border: 'none',
-          background: (mode === 'LOCK' || arrangeButtonSelected) ? '#4285F4' : arrangeButtonHovered ? '#F5F5F5' : 'transparent',
+          // CRITICAL: Use computed bgColor which reads data.mode directly on every render
+          background: arrangeButtonBgColor,
+          backgroundColor: arrangeButtonBgColor,
           flexShrink: 0,
           position: 'relative',
-          zIndex: 10000, // Above the bar container
+          zIndex: 10000,
           pointerEvents: 'auto',
           borderRadius: '4px',
           transition: 'none'
@@ -460,7 +577,7 @@ const DraftGroupNode: React.FC<DraftGroupNodeProps> = (props) => {
               pointerEvents: 'none',
             }}
           >
-            <LayoutPanelLeft size={10} style={{ color: (mode === 'LOCK' || arrangeButtonSelected) ? '#FFFFFF' : '#515159' }} />
+            <LayoutPanelLeft size={10} style={{ color: ((data.mode || 'FREE') === 'LOCK' || arrangeButtonSelected) ? '#FFFFFF' : '#515159' }} />
           </div>
         </div>
       </button>
@@ -640,7 +757,8 @@ const DraftGroupNode: React.FC<DraftGroupNodeProps> = (props) => {
 
   const renderCornerHandles = () => {
     // CP1: Disable resize handles in LOCK mode
-    if (mode === 'LOCK') {
+    const currentMode = data.mode || 'FREE';
+    if (currentMode === 'LOCK') {
       return null; // No resize handles in LOCK mode
     }
 

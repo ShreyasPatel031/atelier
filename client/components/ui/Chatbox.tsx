@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { Input } from "./input"
 import { Button } from "./button"
 import { Send, Loader2 } from "lucide-react"
 import { cn } from "../../lib/utils"
@@ -12,7 +11,7 @@ import { saveChatMessage, saveChatboxInput, getChatboxInput, clearChatboxInput }
 const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProcessStart }) => {
   const [textInput, setTextInput] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // Example use cases
   const exampleUseCases = [
@@ -146,15 +145,35 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Enter alone submits, Shift+Enter creates new line
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e as any);
     }
+    // Shift+Enter is allowed to pass through naturally for new lines
   }
 
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`; // Max height ~6 lines
+    }
+  }, [textInput]);
+
+  // Stop event propagation to prevent ReactFlow from processing chatbox clicks
+  const handleChatboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Also stop on the native event to catch all cases
+    if (e.nativeEvent) {
+      e.nativeEvent.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+    }
+  };
+
   return (
-    <div className="w-full p-4">
+    <div className="w-full p-4" data-chatbox="true" onClick={handleChatboxClick} onMouseDown={handleChatboxClick}>
       {/* Example use cases pills - above the input */}
       <div className="mb-3 flex flex-wrap gap-2 justify-center">
         {exampleUseCases.map((example, index) => (
@@ -169,17 +188,27 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="w-full">
-        <div className="flex items-center gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-3 hover:shadow-md transition-shadow">
+      <form onSubmit={handleSubmit} className="w-full" onClick={handleChatboxClick} onMouseDown={handleChatboxClick}>
+        <div className="flex items-center gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-3 hover:shadow-md transition-shadow" onClick={handleChatboxClick} onMouseDown={handleChatboxClick}>
           {/* Input field */}
-          <Input
+          <textarea
             ref={inputRef}
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             placeholder="Describe your architecture requirements"
             disabled={isProcessing || isDisabled}
-            className="flex-grow border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-base placeholder:text-gray-400"
+            rows={1}
+            className={cn(
+              "flex-grow border-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none bg-transparent text-base placeholder:text-gray-400",
+              "resize-none overflow-hidden min-h-[2rem] max-h-[7.5rem] px-3 py-2 leading-6"
+            )}
+            style={{ 
+              height: 'auto',
+              maxHeight: '120px',
+              overflowY: 'auto'
+            }}
+            data-chat-input="true"
           />
           
           {/* Clear button (when there's text) */}

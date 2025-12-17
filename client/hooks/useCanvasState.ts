@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { Node, Edge } from 'reactflow';
 
 type Tool = 'select' | 'box' | 'connector' | 'group' | 'arrow' | 'hand';
@@ -37,6 +37,78 @@ export function useCanvasState(params?: any): any {
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
   const [useReactFlow, setUseReactFlow] = useState(true);
   const [showElkDebug, setShowElkDebug] = useState(false);
+  
+  // Initialize showElkDomainGraph from localStorage, default to true
+  const showElkDomainGraphInitialValue = (() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('atelier_showElkDomainGraph');
+        if (stored !== null) {
+          return JSON.parse(stored);
+        }
+      } catch (error) {
+        console.warn('Failed to load showElkDomainGraph from localStorage:', error);
+      }
+    }
+    return true; // Default to visible
+  })();
+  
+  const [showElkDomainGraph, setShowElkDomainGraph] = useState(showElkDomainGraphInitialValue);
+  const showElkDomainGraphInitializedRef = useRef(false);
+  
+  // Persist showElkDomainGraph to localStorage whenever it changes (but not on initial mount)
+  useEffect(() => {
+    if (!showElkDomainGraphInitializedRef.current) {
+      showElkDomainGraphInitializedRef.current = true;
+      return; // Skip saving on initial mount
+    }
+    
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atelier_showElkDomainGraph', JSON.stringify(showElkDomainGraph));
+      } catch (error) {
+        console.warn('Failed to save showElkDomainGraph to localStorage:', error);
+      }
+    }
+  }, [showElkDomainGraph]);
+  
+  // Initialize showDebugButton from localStorage, default to true
+  // Use null initially to prevent flash, then set from localStorage
+  const [showDebugButton, setShowDebugButton] = useState<boolean | null>(null);
+  const showDebugButtonInitializedRef = useRef(false);
+  
+  // Load initial value from localStorage on mount
+  useEffect(() => {
+    if (showDebugButton === null && typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('atelier_showDebugButton');
+        if (stored !== null) {
+          setShowDebugButton(JSON.parse(stored));
+        } else {
+          setShowDebugButton(true); // Default to visible if not set
+        }
+      } catch (error) {
+        console.warn('Failed to load showDebugButton from localStorage:', error);
+        setShowDebugButton(true); // Default to visible on error
+      }
+      showDebugButtonInitializedRef.current = true;
+    }
+  }, [showDebugButton]);
+  
+  // Persist showDebugButton to localStorage whenever it changes (but not on initial mount)
+  useEffect(() => {
+    if (!showDebugButtonInitializedRef.current || showDebugButton === null) {
+      return; // Skip saving on initial mount or if not initialized
+    }
+    
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('atelier_showDebugButton', JSON.stringify(showDebugButton));
+      } catch (error) {
+        console.warn('Failed to save showDebugButton to localStorage:', error);
+      }
+    }
+  }, [showDebugButton]);
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
   const [connectingFromHandle, setConnectingFromHandle] = useState<string | null>(null);
   const [connectionMousePos, setConnectionMousePos] = useState<{ x: number; y: number } | null>(null);
@@ -85,6 +157,8 @@ export function useCanvasState(params?: any): any {
     selectedNodeIds, setSelectedNodeIds,
     useReactFlow, setUseReactFlow,
     showElkDebug, setShowElkDebug,
+    showElkDomainGraph, setShowElkDomainGraph,
+    showDebugButton, setShowDebugButton,
     connectingFrom, setConnectingFrom,
     connectingFromHandle, setConnectingFromHandle,
     connectionMousePos, setConnectionMousePos,

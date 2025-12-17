@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getBaseUrl } from '../../../test-config.js';
+import { getBaseUrl } from '../../test-config.js';
 
 /**
  * Edge Routing Unit Tests

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 
 // Simplified view mode - just use path-based routing, no complex environment logic
 export type ViewMode = 'embed' | 'canvas' | 'auth';
@@ -177,6 +177,53 @@ interface ViewModeProviderProps {
 }
 
 export function ViewModeProvider({ children, fallbackMode = 'canvas' }: ViewModeProviderProps) {
+  // Track pathname changes to update view mode when user navigates between routes
+  const [pathname, setPathname] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.pathname;
+    }
+    return '/';
+  });
+
+  // Listen for pathname changes (navigation events)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const updatePathname = () => {
+      setPathname(window.location.pathname);
+    };
+
+    // Update on initial load
+    updatePathname();
+
+    // Listen for popstate (back/forward navigation)
+    window.addEventListener('popstate', updatePathname);
+
+    // Listen for pushstate/replacestate (programmatic navigation)
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function(...args) {
+      originalPushState.apply(history, args);
+      updatePathname();
+    };
+
+    history.replaceState = function(...args) {
+      originalReplaceState.apply(history, args);
+      updatePathname();
+    };
+
+    // Also check periodically in case navigation happens outside of these events
+    const interval = setInterval(updatePathname, 100);
+
+    return () => {
+      window.removeEventListener('popstate', updatePathname);
+      history.pushState = originalPushState;
+      history.replaceState = originalReplaceState;
+      clearInterval(interval);
+    };
+  }, []);
+
   const config = useMemo(() => {
     // Simple path-based routing - no environment complexity
     const getViewMode = (): { mode: ViewMode; isEmbedded: boolean } => {
@@ -190,7 +237,8 @@ export function ViewModeProvider({ children, fallbackMode = 'canvas' }: ViewMode
         return { mode: override, isEmbedded: false };
       }
       
-      const path = window.location.pathname;
+      // Use tracked pathname state
+      const path = pathname;
       
       // Simple path-based mode detection
       if (path === '/embed') {
@@ -228,7 +276,7 @@ export function ViewModeProvider({ children, fallbackMode = 'canvas' }: ViewMode
     };
     
     return fullConfig;
-  }, [fallbackMode]);
+  }, [fallbackMode, pathname]);
   
   const contextValue: ViewModeContextValue = {
     config,

@@ -25,16 +25,6 @@ import { GRID_SIZE } from "./elkOptions";
 export function scaleElkOutput(elkNode: any): any {
   if (!elkNode) return elkNode;
   
-  // Debug specific nodes - show positions AND dimensions
-  if (elkNode.id === 'cloud_storage' || elkNode.id === 'bigquery') {
-    console.log(`[📐 scaleElkOutput] ${elkNode.id} BEFORE scale (UNITS):`, {
-      x: elkNode.x,
-      y: elkNode.y,
-      width: elkNode.width,
-      height: elkNode.height
-    });
-  }
-  
   // Scale this node's position and dimensions
   const scaled: any = {
     ...elkNode,
@@ -43,23 +33,6 @@ export function scaleElkOutput(elkNode: any): any {
     width: elkNode.width != null ? elkNode.width * GRID_SIZE : elkNode.width,
     height: elkNode.height != null ? elkNode.height * GRID_SIZE : elkNode.height,
   };
-  
-  // Debug specific nodes after scaling
-  if (elkNode.id === 'cloud_storage' || elkNode.id === 'bigquery') {
-    const xAligned = scaled.x % 16 === 0;
-    const yAligned = scaled.y % 16 === 0;
-    const wAligned = scaled.width % 16 === 0;
-    const hAligned = scaled.height % 16 === 0;
-    console.log(`[📐 scaleElkOutput] ${elkNode.id} AFTER scale (PIXELS):`, {
-      x: scaled.x,
-      y: scaled.y,
-      width: scaled.width,
-      height: scaled.height,
-      gridAligned: (xAligned && yAligned && wAligned && hAligned) 
-        ? '✅ ALL ALIGNED' 
-        : `❌ x:${xAligned?'✓':'✗'} y:${yAligned?'✓':'✗'} w:${wAligned?'✓':'✗'} h:${hAligned?'✓':'✗'}`
-    });
-  }
   
   // Scale labels
   if (elkNode.labels && Array.isArray(elkNode.labels)) {

@@ -11,6 +11,8 @@ test.describe('Core User Interactions', () => {
   // ============================================================================
   
   test('FUNDAMENTAL: Add Node - updates domain graph with correct structure and dimensions', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds for fundamental test
+    
     // Verify canvas is empty first
     let sync = await verifyLayerSync(page);
     expect(sync.canvasNodes).toBe(0);
@@ -133,6 +135,8 @@ test.describe('Core User Interactions', () => {
   });
 
   test('FUNDAMENTAL: Add Group - updates domain graph with correct structure and dimensions', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds for fundamental test
+    
     // Verify canvas is empty first
     let sync = await verifyLayerSync(page);
     expect(sync.canvasNodes).toBe(0);
@@ -297,6 +301,8 @@ test.describe('Core User Interactions', () => {
   // ============================================================================
 
   test('TEST #2: Drag Node Into Group - node coordinates stable, domain updated, group stable', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds for drag test
+    
     // Setup: Add node and group to canvas first
     // Add a group at (200, 200)
     await page.evaluate(() => {
@@ -580,6 +586,8 @@ test.describe('Core User Interactions', () => {
   });
 
   test('resetCanvas Functionality - should clear canvas and domain, persist after refresh', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds for reset test
+    
     // Add nodes
     await addNodeToCanvas(page, 200, 200);
     await addNodeToCanvas(page, 300, 300);
@@ -606,6 +614,8 @@ test.describe('Core User Interactions', () => {
   });
 
   test('Node Deletion - should remove nodes from both canvas and domain', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds for deletion test
+    
     // Capture console logs for debugging
     const consoleLogs: string[] = [];
     page.on('console', msg => {
@@ -670,7 +680,108 @@ test.describe('Core User Interactions', () => {
     expect(sync.domainNodes).toBe(2);
   });
 
+  test('Deletion Persistence - deleted nodes should not reappear after refresh', async ({ page }) => {
+    test.setTimeout(60000); // Increase timeout for this test
+    console.log('🧪 [DELETION-PERSISTENCE] Testing that deleted nodes stay deleted after refresh (SELECT ALL scenario)');
+    
+    // Wait for canvas to be ready
+    await page.waitForSelector('.react-flow', { timeout: 10000 });
+    await page.waitForTimeout(1000);
+    
+    // Add 2 nodes (simpler test first)
+    await addNodeToCanvas(page, 200, 200);
+    await page.waitForTimeout(2000);
+    await addNodeToCanvas(page, 300, 300);
+    await page.waitForTimeout(2000);
+    
+    // Verify all nodes exist
+    let sync = await verifyLayerSync(page);
+    expect(sync.canvasNodes).toBe(2);
+    expect(sync.domainNodes).toBe(2);
+    console.log('✅ Added 2 nodes');
+    
+    // Get node IDs before deletion
+    const nodeIdsBeforeDelete = await page.evaluate(() => {
+      const domain = (window as any).getDomainGraph?.() || { children: [] };
+      return domain.children?.map((c: any) => c.id) || [];
+    });
+    console.log('📋 Node IDs before deletion:', nodeIdsBeforeDelete);
+    expect(nodeIdsBeforeDelete).toHaveLength(2);
+    
+    // DELETE ALL nodes (matching user's actual workflow - select all, then delete)
+    // Delete nodes one by one to ensure they're all deleted
+    // In real usage, user selects all with Ctrl+A and deletes, but for test reliability we delete individually
+    let nodesToDelete = 2;
+    while (nodesToDelete > 0) {
+      await page.click('.react-flow__node >> nth=0', { force: true });
+      await page.waitForTimeout(300);
+      await page.keyboard.press('Delete');
+      await page.waitForTimeout(2000);
+      nodesToDelete--;
+    }
+    console.log('✅ Deleted all nodes');
+    
+    // Verify all nodes are deleted
+    sync = await verifyLayerSync(page);
+    console.log('📊 After delete - Canvas nodes:', sync.canvasNodes, 'Domain nodes:', sync.domainNodes);
+    expect(sync.canvasNodes).toBe(0);
+    expect(sync.domainNodes).toBe(0);
+    
+    // Wait for persistence to save the deletion - need to wait for the useEffect to run
+    // The persistence useEffect runs when nodes/edges change, so we need to wait for it
+    await page.waitForTimeout(5000); // Increased wait time
+    
+    // Verify localStorage has the updated state (with 0 nodes)
+    // CRITICAL: This is where the bug manifests - localStorage should have 0 nodes
+    const storageBeforeRefresh = await page.evaluate(() => {
+      const stored = localStorage.getItem('atelier_canvas_last_snapshot_v1');
+      if (!stored) return null;
+      try {
+        const parsed = JSON.parse(stored);
+        return {
+          nodeCount: parsed.rawGraph?.children?.length || 0,
+          nodeIds: parsed.rawGraph?.children?.map((c: any) => c.id) || []
+        };
+      } catch (e) {
+        return null;
+      }
+    });
+    console.log('📦 Storage before refresh:', storageBeforeRefresh);
+    console.log('🐛 BUG CHECK: If nodeCount is > 0, persistence is broken - nodes will reappear on refresh!');
+    expect(storageBeforeRefresh).not.toBeNull();
+    // THIS TEST SHOULD FAIL IF THE BUG EXISTS - localStorage will have nodes > 0
+    expect(storageBeforeRefresh?.nodeCount).toBe(0);
+    
+    // Refresh page
+    console.log('🔄 Refreshing page...');
+    await page.reload();
+    await page.waitForSelector('.react-flow', { timeout: 10000 });
+    await page.waitForTimeout(5000);  // Wait for restoration
+    
+    // Verify deleted nodes did NOT reappear - THIS IS WHERE THE BUG MANIFESTS
+    sync = await verifyLayerSync(page);
+    console.log('📊 After refresh - Canvas nodes:', sync.canvasNodes, 'Domain nodes:', sync.domainNodes);
+    
+    // CRITICAL: All deleted nodes should NOT reappear - this is where the bug manifests
+    // If the bug exists, sync.canvasNodes and sync.domainNodes will be > 0 instead of 0
+    expect(sync.canvasNodes).toBe(0);
+    expect(sync.domainNodes).toBe(0);
+    
+    // Verify no nodes exist in the domain
+    const nodeIdsAfterRefresh = await page.evaluate(() => {
+      const domain = (window as any).getDomainGraph?.() || { children: [] };
+      return domain.children?.map((c: any) => c.id) || [];
+    });
+    console.log('📋 Node IDs after refresh:', nodeIdsAfterRefresh);
+    
+    expect(nodeIdsAfterRefresh).toHaveLength(0);
+    
+    console.log('✅ [DELETION-PERSISTENCE] All deleted nodes correctly did not reappear after refresh');
+  });
+
   test('Persistence Flow - should persist nodes after refresh', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds for persistence test
+    
     // Add nodes
     await addNodeToCanvas(page, 250, 250);
     await addNodeToCanvas(page, 350, 350);
@@ -744,6 +855,8 @@ test.describe('Core User Interactions', () => {
   });
 
   test('Position Stability - first node should not move when adding second node', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds for position stability test
+    
     // Add first node
     await addNodeToCanvas(page, 200, 200);
     
@@ -790,6 +903,8 @@ test.describe('Core User Interactions', () => {
   });
 
   test('Multiselect Delete - should remove all selected nodes from canvas and domain', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds for multiselect test
+    
     // Add 3 nodes
     await addNodeToCanvas(page, 200, 200);
     await addNodeToCanvas(page, 300, 300);

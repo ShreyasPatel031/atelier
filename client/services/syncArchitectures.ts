@@ -123,7 +123,7 @@ export async function syncWithFirebase(options: SyncArchitectureOptions): Promis
 /**
  * Convert Firebase architecture to local format with safe timestamp handling
  */
-function convertFirebaseArch(arch: any) {
+export function convertFirebaseArch(arch: any) {
   const safeTimestamp = safeTimestampConversion(arch.timestamp);
   const safeCreatedAt = safeTimestampConversion(arch.createdAt) || safeTimestamp;
   const safeLastModified = safeTimestampConversion(arch.lastModified) || safeTimestamp;
@@ -137,6 +137,8 @@ function convertFirebaseArch(arch: any) {
     lastModified: safeLastModified,
     rawGraph: arch.rawGraph,
     userPrompt: arch.userPrompt || '',
+    chatMessages: arch.chatMessages || [],
+    viewState: arch.viewState || undefined,
     isFromFirebase: true
   };
 }

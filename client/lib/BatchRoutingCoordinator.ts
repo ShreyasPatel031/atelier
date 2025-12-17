@@ -125,7 +125,6 @@ export class BatchRoutingCoordinator {
    */
   setExpectedEdgeCount(count: number): void {
     if (this.expectedEdgeCount !== count) {
-      console.log(`[BatchRoutingCoordinator] Expected edge count changed: ${this.expectedEdgeCount} -> ${count}`);
       this.expectedEdgeCount = count;
       
       // If we already have enough edges, trigger processing
@@ -170,12 +169,9 @@ export class BatchRoutingCoordinator {
       this.routeCallbacks.get(id)!.push(onRouteReady);
     }
     
-    console.log(`[BatchRoutingCoordinator] Edge registered: ${id} (${this.pendingEdges.size}/${this.expectedEdgeCount}) isNew=${isNewEdge}`);
-    
     // If this is a new edge and batch was already processed, reset for this new edge
     // This ensures new edges get routed without triggering full re-route of existing edges
     if (isNewEdge && this.batchProcessed) {
-      console.log(`[BatchRoutingCoordinator] New edge ${id} registered after batch complete - scheduling new batch`);
       this.batchProcessed = false;
       this.batchStartTime = Date.now();
     }
@@ -199,7 +195,6 @@ export class BatchRoutingCoordinator {
     if (pendingCount >= this.expectedEdgeCount && this.expectedEdgeCount > 0) {
       this.scheduleProcessing();
     } else if (waitTime > this.options.maxWaitTime && pendingCount > 0) {
-      console.log(`[BatchRoutingCoordinator] Max wait time exceeded (${waitTime}ms), processing ${pendingCount} edges`);
       this.processBatch();
     }
   }
@@ -228,8 +223,6 @@ export class BatchRoutingCoordinator {
     this.processingInProgress = true;
     const edgeIds = Array.from(this.pendingEdges.keys());
     
-    console.log(`[BatchRoutingCoordinator] 🚀 Processing batch: ${edgeIds.length} edges`);
-    
     try {
       // Call processTransaction ONCE for all edges
       this.router.processTransaction?.();
@@ -238,8 +231,6 @@ export class BatchRoutingCoordinator {
       for (const [id, registration] of Array.from(this.pendingEdges.entries())) {
         const route = this.extractRoute(registration.connection);
         this.computedRoutes.set(id, route);
-        
-        console.log(`[BatchRoutingCoordinator] Route computed for ${id}: ${route.length} points`);
         
         // Notify callbacks
         const callbacks = this.routeCallbacks.get(id) || [];
@@ -251,7 +242,6 @@ export class BatchRoutingCoordinator {
       this.batchProcessed = true;
       this.processingInProgress = false;
       
-      console.log(`[BatchRoutingCoordinator] ✅ Batch complete: ${edgeIds.length} edges processed`);
       this.options.onBatchComplete(edgeIds);
       
     } catch (error) {
@@ -335,8 +325,6 @@ export class BatchRoutingCoordinator {
     this.batchProcessed = false;
     this.processingInProgress = false;
     this.batchStartTime = Date.now();
-    
-    console.log(`[BatchRoutingCoordinator] Reset`);
   }
   
   /**
@@ -344,7 +332,6 @@ export class BatchRoutingCoordinator {
    */
   forceProcess(): void {
     if (!this.batchProcessed && this.pendingEdges.size > 0) {
-      console.log(`[BatchRoutingCoordinator] Force processing ${this.pendingEdges.size} edges`);
       this.processBatch();
     }
   }

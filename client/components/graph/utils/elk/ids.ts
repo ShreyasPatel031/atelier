@@ -15,7 +15,7 @@
  */
 
 // utils/elk/ids.ts
-import { ROOT_DEFAULT_OPTIONS, NON_ROOT_DEFAULT_OPTIONS, NODE_WIDTH_UNITS, NODE_HEIGHT_UNITS, HEIGHT_PER_LINE_UNITS } from "./elkOptions";
+import { getRootDefaultOptions, getNonRootDefaultOptions, NODE_WIDTH_UNITS, NODE_HEIGHT_UNITS, HEIGHT_PER_LINE_UNITS } from "./elkOptions";
 import { calculateNodeDimensionsInUnits } from "../../../../utils/textMeasurement";
 
 /**
@@ -29,12 +29,15 @@ export function ensureIds(root: any): any {
   function recurse(node: any, parentId: string) {
     if (!node) return;
 
-    // root vs non-root layout options
+    // root vs non-root layout options (get fresh options each time to support dynamic changes)
+    const ROOT_OPTIONS = getRootDefaultOptions();
+    const NON_ROOT_OPTIONS = getNonRootDefaultOptions();
+
     if (!parentId) {
       Object.assign(node, {
-        ...ROOT_DEFAULT_OPTIONS,
+        ...ROOT_OPTIONS,
         layoutOptions: {
-          ...ROOT_DEFAULT_OPTIONS.layoutOptions,
+          ...ROOT_OPTIONS.layoutOptions,
           ...(node.layoutOptions ?? {}),
         },
       });
@@ -51,17 +54,13 @@ export function ensureIds(root: any): any {
         const dimensions = calculateNodeDimensionsInUnits(labelText);
         node.height ??= dimensions.height;
         
-        // Debug specific nodes
-        if (node.id === 'cloud_storage' || node.id === 'bigquery') {
-          console.log(`[📏 ensureIds] ${node.id} "${labelText}": width=${dimensions.width} units, height=${dimensions.height} units`);
-        }
       } else {
         // Container node or leaf without label - use default height in UNITS
         node.height ??= NODE_HEIGHT_UNITS;
       }
       
       node.layoutOptions = {
-        ...NON_ROOT_DEFAULT_OPTIONS.layoutOptions,
+        ...NON_ROOT_OPTIONS.layoutOptions,
         ...(node.layoutOptions ?? {}),
       };
     }

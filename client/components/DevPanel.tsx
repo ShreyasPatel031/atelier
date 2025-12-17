@@ -1,9 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ElkGraph } from '../types/graph';
 import ELK from "elkjs/lib/elk.bundled.js";
 import { ensureIds } from './graph/utils/elk/ids';
 import { structuralHash } from './graph/utils/elk/structuralHash';
-import { ROOT_DEFAULT_OPTIONS, NON_ROOT_DEFAULT_OPTIONS } from './graph/utils/elk/elkOptions';
+import { ROOT_DEFAULT_OPTIONS, NON_ROOT_DEFAULT_OPTIONS, setElkSpacingGetter } from './graph/utils/elk/elkOptions';
+import { ElkDebugProvider, useElkDebug, type ElkSpacingOptions } from '../contexts/ElkDebugContext';
+import { VisualDebugProvider, useVisualDebug, type VisualOptions } from '../contexts/VisualDebugContext';
+import { setVisualOptionsGetter, setVisualOptionsDirect } from './graph/styles/canvasStyles';
 import { 
   addNode, 
   deleteNode, 
@@ -16,20 +19,110 @@ import {
 import { splitTextIntoLines } from '../utils/textMeasurement';
 
 interface DevPanelProps {
-  elkGraph: ElkGraph;
-  onGraphChange: (graph: ElkGraph) => void;
+  elkGraph?: ElkGraph;
+  rawGraph?: any;
+  setRawGraph?: (graph: any) => void;
+  onGraphChange?: (graph: ElkGraph) => void;
   onToggleVisMode?: (useReactFlow: boolean) => void;
   useReactFlow?: boolean;
   onSvgGenerated?: (svg: string) => void;
+  isSessionActive?: boolean;
+  sendTextMessage?: (text: string) => void;
+  onClose?: () => void;
+  showElkDomainGraph?: boolean;
+  setShowElkDomainGraph?: (show: boolean) => void;
+  onTriggerLayout?: () => void;
+  rightPanelCollapsed?: boolean; // Add prop to detect chat panel state
 }
 
-const DevPanel: React.FC<DevPanelProps> = ({ 
+// Inner component that uses the context
+const DevPanelContent: React.FC<Omit<DevPanelProps, 'onTriggerLayout'> & { onTriggerLayout: () => void }> = ({
   elkGraph, 
+  rawGraph,
   onGraphChange, 
   onToggleVisMode,
   useReactFlow = true,
-  onSvgGenerated
+  showElkDomainGraph,
+  setShowElkDomainGraph,
+  onSvgGenerated,
+  onClose,
+  onTriggerLayout,
+  rightPanelCollapsed = false
 }) => {
+  const { options, updateOptions, resetOptions } = useElkDebug();
+  const { options: visualOptions, updateOptions: updateVisualOptions, resetOptions: resetVisualOptions } = useVisualDebug();
+
+  // Wire up options to elkOptions.ts so ensureIds can access them
+  useEffect(() => {
+    setElkSpacingGetter(() => options);
+  }, [options]);
+
+  // Wire up visual options to canvasStyles.ts so components can access them
+  // Use a ref to store the latest visualOptions so the getter always reads current values
+  const visualOptionsRef = React.useRef(visualOptions);
+  
+  // Keep ref in sync with current visualOptions
+  React.useEffect(() => {
+    visualOptionsRef.current = visualOptions;
+  }, [visualOptions]);
+  
+  useEffect(() => {
+    // Create a getter function that reads from the ref (always current, not captured in closure)
+    // This ensures the getter always returns the latest values even if called later
+    setVisualOptionsGetter(() => {
+      const current = visualOptionsRef.current;
+      return {
+        groupColor: current.groupColor,
+        groupOpacity: current.groupOpacity,
+        groupStrokeColor: current.groupStrokeColor,
+        nodeColor: current.nodeColor,
+        nodeOpacity: current.nodeOpacity,
+        nodeStrokeColor: current.nodeStrokeColor,
+        edgeColor: current.edgeColor,
+        edgeOpacity: current.edgeOpacity,
+      };
+    });
+    
+    // Don't call setVisualOptionsDirect here - it would overwrite the getter we just set
+    // The getter already reads from the ref, which is kept in sync with visualOptions
+    // setVisualOptionsDirect is only for testing purposes
+    
+    // Also expose to window for edge type/marker access
+    if (typeof window !== 'undefined') {
+      (window as any).__visualDebugOptions = {
+        edgeType: visualOptions.edgeType,
+        edgeMarkerType: visualOptions.edgeMarkerType,
+      };
+      
+      // Trigger a custom event to force re-render of all components
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new CustomEvent('visualOptionsChanged', { 
+          detail: { ...visualOptions } 
+        }));
+        console.log('[DevPanel] Dispatched visualOptionsChanged event:', visualOptions);
+      });
+    }
+  }, [visualOptions]);
+
+  const handleSliderChange = (key: keyof ElkSpacingOptions, value: number) => {
+    updateOptions({ [key]: value });
+    // Auto-trigger layout recalculation when slider changes (debounced)
+    // Clear any cached layout data to force full recalculation
+    setTimeout(() => {
+      onTriggerLayout();
+    }, 300);
+  };
+
+  const handleReset = () => {
+    resetOptions();
+    setTimeout(() => {
+      onTriggerLayout();
+    }, 100);
+  };
+  // Use rawGraph if elkGraph is not provided
+  const graph = elkGraph || rawGraph || { id: "root", children: [], edges: [] };
+  
   const [nodeLabel, setNodeLabel] = useState('');
   const [parentId, setParentId] = useState('root');
   const [sourceId, setSourceId] = useState('');
@@ -776,15 +869,15 @@ const DevPanel: React.FC<DevPanelProps> = ({
       }
     };
     
-    extractIds(elkGraph);
+    extractIds(graph);
     return ids;
-  }, [elkGraph]);
+  }, [graph]);
   
   const handleAddNode = () => {
     if (!nodeLabel) return;
     
     // Create a deep copy of the graph
-    const updatedGraph = JSON.parse(JSON.stringify(elkGraph));
+    const updatedGraph = JSON.parse(JSON.stringify(graph));
     
     // Use the mutation function from the imported file
     const newNodeId = nodeLabel.toLowerCase().replace(/\s+/g, '_');
@@ -807,7 +900,7 @@ const DevPanel: React.FC<DevPanelProps> = ({
     const edgeId = `edge_${sourceId}_to_${targetId}`;
     
     // Create a deep copy of the graph
-    const updatedGraph = JSON.parse(JSON.stringify(elkGraph));
+    const updatedGraph = JSON.parse(JSON.stringify(graph));
     
     // Use the mutation function from the imported file
     const mutatedGraph = addEdge(edgeId, sourceId, targetId, updatedGraph);
@@ -829,7 +922,7 @@ const DevPanel: React.FC<DevPanelProps> = ({
       setIsGeneratingSvg(true);
       
       // Create a deep copy of the graph
-      const graphCopy = JSON.parse(JSON.stringify(elkGraph));
+      const graphCopy = JSON.parse(JSON.stringify(graph));
       
       // Apply defaults
       const graphWithOptions = ensureIds(graphCopy);
@@ -863,8 +956,8 @@ const DevPanel: React.FC<DevPanelProps> = ({
   
   // Auto-trigger SVG generation for testing (remove this after debugging)
   React.useEffect(() => {
-    if (elkGraph && elkGraph.children && elkGraph.children.length > 0) {
-      const hasGKENode = JSON.stringify(elkGraph).includes("GKE Gateway Controller");
+    if (graph && graph.children && graph.children.length > 0) {
+      const hasGKENode = JSON.stringify(graph).includes("GKE Gateway Controller");
       if (hasGKENode) {
         console.log('🔄 Auto-triggering SVG test for GKE Gateway Controller...');
         setTimeout(() => {
@@ -872,7 +965,7 @@ const DevPanel: React.FC<DevPanelProps> = ({
         }, 1000); // Reduced to 1 second
       }
     }
-  }, [elkGraph]);
+  }, [graph]);
   
   // Function to generate SVG string from layouted graph
   // Helper function to render multi-line text in SVG using the same logic as ELK
@@ -1104,7 +1197,7 @@ const DevPanel: React.FC<DevPanelProps> = ({
   
   // Export graph as JSON
   const handleExportJSON = () => {
-    const dataStr = JSON.stringify(elkGraph, null, 2);
+    const dataStr = JSON.stringify(graph, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
     
     const exportName = 'elk-graph-' + new Date().toISOString().slice(0, 10) + '.json';
@@ -1151,7 +1244,7 @@ const DevPanel: React.FC<DevPanelProps> = ({
     if (!nodeToDelete) return;
     
     // Create a deep copy of the graph
-    const updatedGraph = JSON.parse(JSON.stringify(elkGraph));
+    const updatedGraph = JSON.parse(JSON.stringify(graph));
     
     try {
       // Use the mutation function from the imported file
@@ -1171,7 +1264,7 @@ const DevPanel: React.FC<DevPanelProps> = ({
     if (!nodeToMove || !newParentId) return;
     
     // Create a deep copy of the graph
-    const updatedGraph = JSON.parse(JSON.stringify(elkGraph));
+    const updatedGraph = JSON.parse(JSON.stringify(graph));
     
     try {
       // Use the mutation function from the imported file
@@ -1192,7 +1285,7 @@ const DevPanel: React.FC<DevPanelProps> = ({
     if (!edgeToDelete) return;
     
     // Create a deep copy of the graph
-    const updatedGraph = JSON.parse(JSON.stringify(elkGraph));
+    const updatedGraph = JSON.parse(JSON.stringify(graph));
     
     try {
       // Use the mutation function from the imported file
@@ -1215,7 +1308,7 @@ const DevPanel: React.FC<DevPanelProps> = ({
     const groupId = groupLabel.toLowerCase().replace(/\s+/g, '_');
     
     // Create a deep copy of the graph
-    const updatedGraph = JSON.parse(JSON.stringify(elkGraph));
+    const updatedGraph = JSON.parse(JSON.stringify(graph));
     
     try {
       // Use the mutation function from the imported file
@@ -1237,7 +1330,7 @@ const DevPanel: React.FC<DevPanelProps> = ({
     if (!groupToRemove) return;
     
     // Create a deep copy of the graph
-    const updatedGraph = JSON.parse(JSON.stringify(elkGraph));
+    const updatedGraph = JSON.parse(JSON.stringify(graph));
     
     try {
       // Use the mutation function from the imported file
@@ -1267,9 +1360,44 @@ const DevPanel: React.FC<DevPanelProps> = ({
     transition: 'transform 0.2s'
   };
 
+  // Calculate right offset based on chat panel state
+  // Only offset if chat panel exists (check if it's visible in the DOM)
+  const rightOffset = React.useMemo(() => {
+    // Check if chat panel is visible in the DOM
+    const chatPanelExists = typeof window !== 'undefined' && document.querySelector('[data-chatbox="true"]');
+    
+    if (!chatPanelExists) {
+      // No chat panel - no offset needed
+      return '0';
+    }
+    
+    if (!rightPanelCollapsed) {
+      // Chat panel is expanded - offset by full width (24rem = 384px)
+      return '24rem';
+    } else {
+      // Chat panel is collapsed - offset by collapsed width (4.5rem = 72px)
+      return '4.5rem';
+    }
+  }, [rightPanelCollapsed]);
+
   return (
-    <div className="bg-white p-4 rounded-md shadow-lg border border-gray-200 w-64 h-[calc(100vh-2rem)] overflow-y-auto">
-      <h3 className="text-lg font-semibold mb-4 sticky top-0 bg-white pb-2">Dev Panel</h3>
+    <div className="fixed top-0 h-full w-96 bg-white shadow-xl border-l border-gray-200 z-[10006] overflow-y-auto flex flex-col"
+         style={{ 
+           right: rightOffset
+         }}>
+      <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Dev Panel</h3>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+            title="Close Debug Panel"
+          >
+            ×
+          </button>
+        )}
+      </div>
+      <div className="p-4 flex-1">
       
       {/* Add Node Form */}
       <div className="mb-4">
@@ -1571,6 +1699,385 @@ const DevPanel: React.FC<DevPanelProps> = ({
           >
             Load Default Architecture
           </button>
+          
+          {/* ELK Domain Graph Toggle */}
+          {setShowElkDomainGraph !== undefined && (
+            <label className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded text-sm cursor-pointer hover:bg-gray-200">
+              <input
+                type="checkbox"
+                checked={showElkDomainGraph ?? true}
+                onChange={(e) => setShowElkDomainGraph?.(e.target.checked)}
+                className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+              />
+              <span className="text-gray-700">Show ELK Domain Graph</span>
+            </label>
+          )}
+        </div>
+      </div>
+
+      {/* ELK Spacing Controls */}
+      <div className="mt-6 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-sm font-semibold">ELK Spacing (units)</h4>
+          <button
+            onClick={handleReset}
+            className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+          >
+            Reset
+          </button>
+        </div>
+        
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Edge-Node: {options.spacingEdgeNode} ({options.spacingEdgeNode * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingEdgeNode}
+              onChange={(e) => handleSliderChange('spacingEdgeNode', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Node-Node: {options.spacingNodeNode} ({options.spacingNodeNode * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingNodeNode}
+              onChange={(e) => handleSliderChange('spacingNodeNode', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Edge-Edge: {options.spacingEdgeEdge} ({options.spacingEdgeEdge * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingEdgeEdge}
+              onChange={(e) => handleSliderChange('spacingEdgeEdge', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Edge-Edge Between Layers: {options.spacingEdgeEdgeBetweenLayers} ({options.spacingEdgeEdgeBetweenLayers * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingEdgeEdgeBetweenLayers}
+              onChange={(e) => handleSliderChange('spacingEdgeEdgeBetweenLayers', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Node-Node Between Layers: {options.spacingNodeNodeBetweenLayers} ({options.spacingNodeNodeBetweenLayers * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingNodeNodeBetweenLayers}
+              onChange={(e) => handleSliderChange('spacingNodeNodeBetweenLayers', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Edge-Node Between Layers: {options.spacingEdgeNodeBetweenLayers} ({options.spacingEdgeNodeBetweenLayers * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingEdgeNodeBetweenLayers}
+              onChange={(e) => handleSliderChange('spacingEdgeNodeBetweenLayers', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          {/* Additional spacing parameters for vertical edge control */}
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <h5 className="text-xs font-semibold text-gray-500 mb-3">Additional Spacing (Y-direction)</h5>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Port-Port: {options.spacingPortPort} ({options.spacingPortPort * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingPortPort}
+              onChange={(e) => handleSliderChange('spacingPortPort', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Component-Component: {options.spacingComponentComponent} ({options.spacingComponentComponent * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingComponentComponent}
+              onChange={(e) => handleSliderChange('spacingComponentComponent', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Label-Label: {options.spacingLabelLabel} ({options.spacingLabelLabel * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingLabelLabel}
+              onChange={(e) => handleSliderChange('spacingLabelLabel', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Label-Node: {options.spacingLabelNode} ({options.spacingLabelNode * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingLabelNode}
+              onChange={(e) => handleSliderChange('spacingLabelNode', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1">
+              Edge-Label: {options.spacingEdgeLabel} ({options.spacingEdgeLabel * 16}px)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={options.spacingEdgeLabel}
+              onChange={(e) => handleSliderChange('spacingEdgeLabel', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Visual Controls */}
+      <div className="mt-6 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-sm font-semibold">Visual Controls</h4>
+          <button
+            onClick={resetVisualOptions}
+            className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+          >
+            Reset
+          </button>
+        </div>
+        
+        <div className="space-y-4">
+          {/* Group Color & Opacity */}
+          <div className="space-y-2">
+            <h5 className="text-xs font-medium text-gray-600">Group</h5>
+            <div>
+              <label className="block text-xs font-medium mb-1">
+                Color: {visualOptions.groupColor}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={visualOptions.groupColor}
+                  onChange={(e) => updateVisualOptions({ groupColor: e.target.value })}
+                  className="w-16 h-8 border rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={visualOptions.groupColor}
+                  onChange={(e) => updateVisualOptions({ groupColor: e.target.value })}
+                  className="flex-1 px-2 py-1 border rounded text-xs"
+                  placeholder="#f0f0f0"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">
+                Opacity: {visualOptions.groupOpacity.toFixed(2)}
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={visualOptions.groupOpacity}
+                onChange={(e) => updateVisualOptions({ groupOpacity: parseFloat(e.target.value) })}
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          {/* Node Color & Opacity */}
+          <div className="space-y-2">
+            <h5 className="text-xs font-medium text-gray-600">Node</h5>
+            <div>
+              <label className="block text-xs font-medium mb-1">
+                Color: {visualOptions.nodeColor}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={visualOptions.nodeColor}
+                  onChange={(e) => updateVisualOptions({ nodeColor: e.target.value })}
+                  className="w-16 h-8 border rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={visualOptions.nodeColor}
+                  onChange={(e) => updateVisualOptions({ nodeColor: e.target.value })}
+                  className="flex-1 px-2 py-1 border rounded text-xs"
+                  placeholder="#ffffff"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">
+                Opacity: {visualOptions.nodeOpacity.toFixed(2)}
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={visualOptions.nodeOpacity}
+                onChange={(e) => updateVisualOptions({ nodeOpacity: parseFloat(e.target.value) })}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">
+                Stroke: {visualOptions.nodeStrokeColor}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={visualOptions.nodeStrokeColor}
+                  onChange={(e) => updateVisualOptions({ nodeStrokeColor: e.target.value })}
+                  className="w-16 h-8 border rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={visualOptions.nodeStrokeColor}
+                  onChange={(e) => updateVisualOptions({ nodeStrokeColor: e.target.value })}
+                  className="flex-1 px-2 py-1 border rounded text-xs"
+                  placeholder="#e4e4e4"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Edge Color, Opacity & Type */}
+          <div className="space-y-2">
+            <h5 className="text-xs font-medium text-gray-600">Edge</h5>
+            <div>
+              <label className="block text-xs font-medium mb-1">
+                Color: {visualOptions.edgeColor}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={visualOptions.edgeColor}
+                  onChange={(e) => updateVisualOptions({ edgeColor: e.target.value })}
+                  className="w-16 h-8 border rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={visualOptions.edgeColor}
+                  onChange={(e) => updateVisualOptions({ edgeColor: e.target.value })}
+                  className="flex-1 px-2 py-1 border rounded text-xs"
+                  placeholder="#bbbbbb"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">
+                Opacity: {visualOptions.edgeOpacity.toFixed(2)}
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={visualOptions.edgeOpacity}
+                onChange={(e) => updateVisualOptions({ edgeOpacity: parseFloat(e.target.value) })}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">
+                Type: {visualOptions.edgeType}
+              </label>
+              <select
+                value={visualOptions.edgeType}
+                onChange={(e) => updateVisualOptions({ edgeType: e.target.value as VisualOptions['edgeType'] })}
+                className="w-full px-2 py-1 border rounded text-xs"
+              >
+                <option value="step">Step</option>
+                <option value="smoothstep">Smooth Step</option>
+                <option value="straight">Straight</option>
+                <option value="bezier">Bezier</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">
+                Marker Type: {visualOptions.edgeMarkerType}
+              </label>
+              <select
+                value={visualOptions.edgeMarkerType}
+                onChange={(e) => updateVisualOptions({ edgeMarkerType: e.target.value as VisualOptions['edgeMarkerType'] })}
+                className="w-full px-2 py-1 border rounded text-xs"
+              >
+                <option value="arrow">Arrow</option>
+                <option value="arrowclosed">Arrow Closed</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -1605,7 +2112,31 @@ const DevPanel: React.FC<DevPanelProps> = ({
           </div>
         </div>
       )}
+      </div>
     </div>
+  );
+};
+
+// Wrapper component that provides ElkDebugContext
+const DevPanel: React.FC<DevPanelProps> = (props) => {
+  const { onTriggerLayout, setRawGraph, rawGraph } = props;
+  
+  const handleTriggerLayout = () => {
+    if (onTriggerLayout) {
+      onTriggerLayout();
+    } else if (setRawGraph && rawGraph) {
+      // Fallback: trigger layout by updating graph
+      const syncedGraph = structuredClone(rawGraph);
+      setRawGraph(syncedGraph);
+    }
+  };
+
+  return (
+    <ElkDebugProvider onTriggerLayout={handleTriggerLayout}>
+      <VisualDebugProvider>
+        <DevPanelContent {...props} onTriggerLayout={handleTriggerLayout} />
+      </VisualDebugProvider>
+    </ElkDebugProvider>
   );
 };
 

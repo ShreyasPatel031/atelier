@@ -101,11 +101,16 @@ export function handleGroupDrag(
 ): GroupDragResult[] {
   const results: GroupDragResult[] = [];
   
+  // Debug: Log when called
+  console.log(`[handleGroupDrag] Called with ${changes.length} changes`);
+  
   // Filter to only position changes that are actively dragging
   const positionChanges = changes.filter(
     (ch): ch is NodeChange & { type: 'position'; id: string; position: { x: number; y: number }; dragging?: boolean } =>
       ch.type === 'position' && 'position' in ch && ch.position !== undefined
   );
+  
+  console.log(`[handleGroupDrag] ${positionChanges.length} position changes`);
   
   // Track how often this is called (for testing/debugging)
   if (typeof window !== 'undefined' && positionChanges.length > 0) {
@@ -152,8 +157,12 @@ export function handleGroupDrag(
     if (!isGroup) continue;
     
     const existingGeom = viewStateRef.current?.group?.[changedNode.id];
-    const absoluteX = snap(change.position.x);
-    const absoluteY = snap(change.position.y);
+    
+    // CRITICAL: Use positionAbsolute from the node (ReactFlow provides this during drag)
+    // change.position might be stale or relative
+    const nodePosition = (changedNode as any).positionAbsolute || changedNode.position;
+    const absoluteX = snap(nodePosition.x);
+    const absoluteY = snap(nodePosition.y);
     
     // Calculate delta from previous position
     // CRITICAL: Use our tracked previous position, NOT changedNode.position (which is already updated by ReactFlow)
@@ -201,6 +210,12 @@ export function handleGroupDrag(
       // Update children's absolute positions by the same delta
       if ((deltaX !== 0 || deltaY !== 0) && rawGraphRef.current) {
         const groupNode = findNodeById(rawGraphRef.current, changedNode.id);
+        
+        // Debug: Log for data_services group
+        if (changedNode.id === 'data_services') {
+          console.log(`[handleGroupDrag:data_services] delta=(${deltaX},${deltaY}), children:`, groupNode?.children?.map((c: any) => c.id));
+        }
+        
         if (groupNode?.children?.length) {
           for (const child of groupNode.children) {
             const childGeom = viewStateRef.current.node?.[child.id];
@@ -212,9 +227,21 @@ export function handleGroupDrag(
                 x: newX,
                 y: newY,
               };
+              
+              // Debug: Log for cloud_sql
+              if (child.id === 'cloud_sql') {
+                console.log(`[handleGroupDrag] Updating cloud_sql:`, {
+                  oldPos: { x: childGeom.x, y: childGeom.y },
+                  delta: { deltaX, deltaY },
+                  newPos: { x: newX, y: newY }
+                });
+              }
+              
               childrenUpdated.push(child.id);
               // Collect child positions for ReactFlow update
               childPositions.push({ id: child.id, x: newX, y: newY });
+            } else if (child.id === 'cloud_sql') {
+              console.log(`[handleGroupDrag] cloud_sql has NO childGeom in ViewState!`);
             }
             
             // Also update nested groups
@@ -273,6 +300,14 @@ export function handleGroupDrag(
       batchUpdateObstaclesAndReroute(routingUpdates);
       // Also emit event (for subscribers/future extensibility)
       emitObstaclesMoved(routingUpdates);
+      
+      // CRITICAL: Emit viewstate-updated event so StepEdge can re-read ViewState
+      // This is needed during LOCK→FREE transition when libavoid router isn't ready yet
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('viewstate-updated', { 
+          detail: { nodeIds: routingUpdates.map(u => u.nodeId) }
+        }));
+      }
     }
   }
   

@@ -3,11 +3,23 @@
  * This is needed to calculate dynamic node sizes based on label text
  */
 
+import { NODE_WIDTH_UNITS, GRID_SIZE } from '../components/graph/utils/elk/elkOptions';
+import {
+  NODE_PADDING_HORIZONTAL_PX as DEFAULT_NODE_PADDING_HORIZONTAL,
+  NODE_FONT_SIZE_PX as DEFAULT_FONT_SIZE,
+  NODE_LINE_HEIGHT_PX as DEFAULT_LINE_HEIGHT,
+  NODE_HEIGHT_BASE_UNITS,
+} from './nodeConstants';
+
+// Re-export for backwards compatibility
+export { DEFAULT_NODE_PADDING_HORIZONTAL, DEFAULT_FONT_SIZE, DEFAULT_LINE_HEIGHT };
+
 let measurementSvg: SVGSVGElement | null = null;
 let measurementText: SVGTextElement | null = null;
 
 /**
  * Initialize the measurement elements (called once)
+ * Font size can be updated dynamically via updateMeasurementFontSize
  */
 function initMeasurement() {
   if (typeof window === 'undefined') return; // SSR safety
@@ -23,13 +35,22 @@ function initMeasurement() {
     measurementSvg.style.visibility = 'hidden';
     
     measurementText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    // Apply the EXACT same font styles that will be used in React Flow nodes
-    measurementText.style.fontSize = '12px';
-    measurementText.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-    measurementText.style.fontWeight = 'normal'; // Match React Flow default
+    // Font styles will be updated dynamically to match actual rendering
+    measurementText.style.fontFamily = 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+    measurementText.style.fontWeight = '400';
     
     measurementSvg.appendChild(measurementText);
     document.body.appendChild(measurementSvg);
+  }
+}
+
+/**
+ * Update measurement font size to match actual rendering
+ */
+function updateMeasurementFontSize(fontSize: number) {
+  initMeasurement();
+  if (measurementText) {
+    measurementText.style.fontSize = `${fontSize}px`;
   }
 }
 
@@ -41,45 +62,31 @@ function initMeasurement() {
  * Split text into lines using word boundaries (no word breaking)
  * This is the SINGLE SOURCE OF TRUTH for text wrapping logic
  */
-export function splitTextIntoLines(text: string, maxLineWidth: number = 76): string[] {
+export function splitTextIntoLines(text: string, maxLineWidth: number = 76, fontSize: number = DEFAULT_FONT_SIZE): string[] {
   // For browser environment, use proper text measurement
   if (typeof window !== 'undefined') {
     initMeasurement();
+    updateMeasurementFontSize(fontSize);
     if (measurementText) {
       try {
         const words = text.split(' ');
         const lines: string[] = [];
         let currentLine = '';
         
-        // Special logging for GKE Gateway Controller
-        if (text === "GKE Gateway Controller") {
-          console.log(`🔍 [MEASUREMENT] Splitting "${text}" with maxWidth: ${maxLineWidth}px`);
-        }
-        
         for (const word of words) {
           const testLine = currentLine ? `${currentLine} ${word}` : word;
           measurementText.textContent = testLine;
           const testWidth = measurementText.getBBox().width;
-          
-          if (text === "GKE Gateway Controller") {
-            console.log(`  [MEASUREMENT] Testing: "${testLine}" -> ${testWidth}px (limit: ${maxLineWidth}px)`);
-          }
           
           if (testWidth <= maxLineWidth) {
             currentLine = testLine;
           } else {
             if (currentLine) {
               lines.push(currentLine);
-              if (text === "GKE Gateway Controller") {
-                console.log(`  [MEASUREMENT] ✅ Added line: "${currentLine}"`);
-              }
               currentLine = word;
             } else {
               // Single word is too long, but DON'T break it - keep as one line
               lines.push(word);
-              if (text === "GKE Gateway Controller") {
-                console.log(`  [MEASUREMENT] ⚠️ Long word: "${word}"`);
-              }
               currentLine = '';
             }
           }
@@ -87,13 +94,6 @@ export function splitTextIntoLines(text: string, maxLineWidth: number = 76): str
         
         if (currentLine) {
           lines.push(currentLine);
-          if (text === "GKE Gateway Controller") {
-            console.log(`  [MEASUREMENT] ✅ Final line: "${currentLine}"`);
-          }
-        }
-        
-        if (text === "GKE Gateway Controller") {
-          console.log(`🎯 [MEASUREMENT] Result: [${lines.join('", "')}] (${lines.length} lines)`);
         }
         return lines;
       } catch (error) {
@@ -130,12 +130,18 @@ export function splitTextIntoLines(text: string, maxLineWidth: number = 76): str
   return lines;
 }
 
-export function measureNodeLabel(text: string): { width: number; height: number; lines: number } {
-  const maxLineWidth = 76; // Reduced width to add horizontal padding (100px - 24px padding)
-  const lines = splitTextIntoLines(text, maxLineWidth);
+export function measureNodeLabel(
+  text: string,
+  nodeWidthPx: number = NODE_WIDTH_UNITS * GRID_SIZE,
+  paddingHorizontal: number = DEFAULT_NODE_PADDING_HORIZONTAL,
+  fontSize: number = DEFAULT_FONT_SIZE,
+  lineHeight: number = DEFAULT_LINE_HEIGHT
+): { width: number; height: number; lines: number } {
+  // Calculate available width dynamically: node width - padding on both sides
+  const maxLineWidth = nodeWidthPx - (paddingHorizontal * 2);
+  const lines = splitTextIntoLines(text, maxLineWidth, fontSize);
   
   // Measure the final dimensions
-  const lineHeight = 14;
   const totalHeight = lines.length * lineHeight;
   
   // Find the widest line for accurate width
@@ -144,6 +150,7 @@ export function measureNodeLabel(text: string): { width: number; height: number;
     initMeasurement();
     if (measurementText) {
       try {
+        updateMeasurementFontSize(fontSize);
         for (const line of lines) {
           measurementText.textContent = line;
           const lineWidth = measurementText.getBBox().width;
@@ -157,11 +164,13 @@ export function measureNodeLabel(text: string): { width: number; height: number;
     maxWidth = text.length * 7; // SSR fallback
   }
   
-  return {
+  const result = {
     width: Math.ceil(maxWidth),
     height: totalHeight,
     lines: lines.length
   };
+  
+  return result;
 }
 
 /**
@@ -209,31 +218,64 @@ export function calculateNodeDimensions(label: string): { width: number; height:
  * 
  * @returns dimensions in UNITS (not pixels)
  */
-export function calculateNodeDimensionsInUnits(label: string): { width: number; height: number } {
-  const textDims = measureNodeLabel(label);
+export function calculateNodeDimensionsInUnits(
+  label: string,
+  nodeWidthUnits: number = NODE_WIDTH_UNITS,
+  paddingHorizontal: number = DEFAULT_NODE_PADDING_HORIZONTAL,
+  fontSize: number = DEFAULT_FONT_SIZE,
+  lineHeight: number = DEFAULT_LINE_HEIGHT
+): { width: number; height: number } {
+  // Calculate node width in pixels for measurement
+  const nodeWidthPx = nodeWidthUnits * GRID_SIZE;
+  
+  // Measure label with dynamic settings
+  const textDims = measureNodeLabel(label, nodeWidthPx, paddingHorizontal, fontSize, lineHeight);
   
   // Node dimensions in UNITS
-  // Width: 6 units (will become 96px after × 16)
-  // Height: 6 units base + 1 unit per extra line (always even for clean centers)
-  const NODE_WIDTH_UNITS = 6;
-  const NODE_HEIGHT_BASE_UNITS = 6;  // Base height for 1 line
-  const HEIGHT_PER_EXTRA_LINE_UNITS = 1; // Each additional line adds 1 unit
+  // Width: uses provided units (defaults to NODE_WIDTH_UNITS)
+  // Height: Calculate exact height needed based on content, then round to grid
+  const width = nodeWidthUnits;
   
-  const width = NODE_WIDTH_UNITS;
+  // Calculate exact content height needed:
+  // Icon: 48px, Gap: 8px, Text: lineHeight × lines
+  // Single line: 48 + 8 + 10 = 66px content
+  // Two lines: 48 + 8 + 20 = 76px content
+  const ICON_SIZE_PX = 48;
+  const GAP_SIZE_PX = 8;
+  const contentHeightPx = ICON_SIZE_PX + (textDims.lines > 0 ? GAP_SIZE_PX : 0) + textDims.height;
   
-  // Calculate height: base + extra lines
-  // Keep it even by rounding up if needed (ensures center is at integer unit)
+  // For single-line nodes: use base height (96px = 6 units)
+  // This gives us: 96px total - 66px content = 30px padding (15px top + 15px bottom when centered)
+  // For two-line nodes: add exactly one line height (10px) to maintain same padding
+  // This gives us: 106px total - 76px content = 30px padding (15px top + 15px bottom when centered)
+  const baseHeightPx = NODE_HEIGHT_BASE_UNITS * GRID_SIZE; // 96px
   const extraLines = Math.max(0, textDims.lines - 1);
-  let height = NODE_HEIGHT_BASE_UNITS + extraLines * HEIGHT_PER_EXTRA_LINE_UNITS;
+  const extraHeightPx = extraLines * lineHeight; // Add exactly 10px per extra line
+  const totalHeightPx = baseHeightPx + extraHeightPx; // 96px for 1 line, 106px for 2 lines
   
-  // Ensure height is even for clean centering
+  // Convert to units: round to nearest (not ceil) to minimize extra space
+  // 106px / 16 = 6.625, rounds to 7 units = 112px (6px extra, which gets split 3px top + 3px bottom)
+  let height = Math.round(totalHeightPx / GRID_SIZE);
+  
+  // For padding consistency, allow odd heights if it means less extra space
+  // Single line: 96px = 6 units (even) ✓
+  // Two lines: 106px rounds to 7 units = 112px (odd, but only 6px extra = 3px per side)
+  // Making it even would be 8 units = 128px (22px extra = 11px per side) - too much!
+  // So we keep odd heights to maintain consistent padding
+  const finalHeightPx = height * GRID_SIZE;
+  const extraPx = finalHeightPx - totalHeightPx;
+  
+  // Only make even if it wouldn't add too much extra space (keep padding consistent)
+  // If making it even would add more than 8px extra, keep it odd
   if (height % 2 !== 0) {
-    height += 1;
-  }
-  
-  // Debug specific labels
-  if (label === 'Cloud Storage' || label === 'BigQuery') {
-    console.log(`[📝 textMeasurement] "${label}": ${textDims.lines} lines → height=${height} units (${height * 16}px after scaling)`);
+    const evenHeightPx = (height + 1) * GRID_SIZE;
+    const extraIfEven = evenHeightPx - totalHeightPx;
+    // If making even adds more than 8px extra padding per side, keep it odd
+    if (extraIfEven - extraPx > GRID_SIZE / 2) {
+      // Keep odd - padding consistency is more important than grid alignment
+    } else {
+      height += 1; // Make even for grid alignment
+    }
   }
   
   return { width, height };

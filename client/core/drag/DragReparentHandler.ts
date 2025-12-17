@@ -166,10 +166,8 @@ function handleNodeReparent(
         // Otherwise silently skip - parent is already correct
       }
       
-      // If node was moved INTO a group (not root), set that group to FREE mode
-      if (newParentId !== 'root' && viewStateRef.current) {
-        viewStateRef.current = setModeInViewState(viewStateRef.current, newParentId, 'FREE');
-      }
+      // Note: Mode unlocking is now handled in onNodeDragStop via unlock-scope-to-free action
+      // This keeps mode management centralized in handlers
       
       // Update selection
         if (containingGroup) {

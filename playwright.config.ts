@@ -11,6 +11,7 @@ export default defineConfig({
     timeout: 2000 // 2 seconds for individual expectations
   },
   fullyParallel: true, // Enable parallel execution across projects
+  workers: process.env.CI ? 4 : 6, // Default: 6 workers locally, 4 in CI (can be overridden per project)
   forbidOnly: !!process.env.CI,
   retries: 0, // No retries for faster feedback
   reporter: 'list',

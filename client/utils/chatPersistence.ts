@@ -98,27 +98,14 @@ export function getCurrentConversation(): PersistedChatMessage[] {
 }
 
 /**
- * Get all persisted chat messages (ONLY during embed-to-canvas/auth transitions)
+ * Get all persisted chat messages - always returns current conversation
+ * Chat messages should persist across page refreshes
  */
 export function getChatMessages(): PersistedChatMessage[] {
   const messages = getCurrentConversation();
-  const isTransition = isEmbedToCanvasTransition();
   
-  // console.log('💬 [CHAT-PERSISTENCE] getChatMessages called:', {
-  //   isEmbedToCanvas: isTransition,
-  //   messageCount: messages.length,
-  //   messages: messages.map(m => ({ sender: m.sender, content: m.content.substring(0, 50) + '...' }))
-  // });
-  
-  // ONLY return messages if user is coming from embed view (Edit button transition)
-  // Do NOT return messages for normal canvas/auth visits
-  if (isTransition) {
-    // console.log('💬 [CHAT-PERSISTENCE] Returning persisted messages from embed transition:', messages.length);
-    return messages;
-  } else {
-    // console.log('💬 [CHAT-PERSISTENCE] Not an embed transition - returning empty array');
-    return [];
-  }
+  // Always return messages - chat should persist across refreshes
+  return messages;
 }
 
 /**
@@ -187,7 +174,16 @@ export function clearChatboxInput(): void {
 export function startNewConversation(): void {
   try {
     localStorage.removeItem(CURRENT_CONVERSATION_KEY);
+    // Also clear saved chatbox input
+    clearChatboxInput();
     console.log('🆕 Started new conversation');
+    
+    // Dispatch custom event to notify chat components to refresh
+    // Storage events only fire for cross-window/tab changes, not same-window
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('chatCleared'));
+      console.log('💬 Dispatched chatCleared event from startNewConversation');
+    }
   } catch (error) {
     console.warn('Failed to start new conversation:', error);
   }

@@ -37,7 +37,20 @@ export function handleDeleteKey(
   const deletedNodeIds = selectedNodes.map(n => n.id);
   const graphBeforeDelete = JSON.parse(JSON.stringify(rawGraph));
 
-  console.log(`[DELETE] Starting sequential deletion of ${selectedNodes.length} nodes and ${selectedEdges.length} edges`);
+  // CRITICAL: Filter out edges that are connected to nodes being deleted
+  // When a node is deleted, its connected edges are automatically removed
+  // Trying to delete them explicitly causes "edge not found" errors
+  const nodesBeingDeleted = new Set(deletedNodeIds);
+  const edgesToDelete = selectedEdges.filter(edge => {
+    const isConnectedToDeletedNode = nodesBeingDeleted.has(edge.source) || nodesBeingDeleted.has(edge.target);
+    if (isConnectedToDeletedNode) {
+      console.log(`[DELETE] Skipping edge ${edge.id} - connected to node being deleted`);
+      return false;
+    }
+    return true;
+  });
+
+  console.log(`[DELETE] Starting sequential deletion of ${selectedNodes.length} nodes and ${edgesToDelete.length} edges (${selectedEdges.length - edgesToDelete.length} edges skipped - connected to deleted nodes)`);
 
   // Process deletions sequentially to avoid rendering race conditions
   (async () => {
@@ -62,8 +75,8 @@ export function handleDeleteKey(
         }
       }
 
-      // Delete edges sequentially
-      for (const edge of selectedEdges) {
+      // Delete edges sequentially (only edges not connected to deleted nodes)
+      for (const edge of edgesToDelete) {
         const intent: EditIntent = {
           source: 'user',
           kind: 'free-structural',
@@ -78,7 +91,13 @@ export function handleDeleteKey(
           await apply(intent);
           console.log(`[DELETE] ✅ Successfully deleted edge: ${edge.id}`);
         } catch (error) {
-          console.error(`❌ [DELETE] Error deleting edge ${edge.id}:`, error);
+          // If edge not found, it might have been deleted as part of node deletion
+          // Log as warning instead of error to reduce noise
+          if (error instanceof Error && error.message.includes('not found')) {
+            console.warn(`⚠️ [DELETE] Edge ${edge.id} not found (may have been removed with node)`);
+          } else {
+            console.error(`❌ [DELETE] Error deleting edge ${edge.id}:`, error);
+          }
         }
       }
 

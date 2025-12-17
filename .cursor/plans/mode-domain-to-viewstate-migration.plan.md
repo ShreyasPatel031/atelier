@@ -1,4 +1,8 @@
-<!-- mode-domain-to-viewstate-migration -->
+---
+name: "Mode Migration: Domain Graph → ViewState"
+overview: ""
+todos: []
+---
 
 # Mode Migration: Domain Graph → ViewState
 
@@ -253,5 +257,3 @@
 - ✅ All existing tests pass
 - ✅ Coordinate CP5 unblocked
 - ✅ FREE/LOCK Wave 1-3 unblocked
-
-

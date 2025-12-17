@@ -196,7 +196,7 @@ const ConnectorDots: React.FC<ConnectorDotsProps> = ({
             {/* Visual elements - only show when connector tool is active */}
             {showVisualDots && (
               <>
-                {/* Visible green hover area - detects hover and shows blue dot */}
+                {/* Transparent hover area - detects hover and shows blue dot */}
                 <div
                   data-connector-dot="true"
                   data-node-id={nodeId}
@@ -211,9 +211,9 @@ const ConnectorDots: React.FC<ConnectorDotsProps> = ({
                     cursor: 'pointer', // ALWAYS pointer, never crosshair
                 pointerEvents: 'auto', // Detect hover and clicks
                 zIndex: 5999, // Just below visual dot (6000)
-                background: 'rgba(0, 255, 0, 0.25)', // Green hover area (visible)
+                background: 'transparent', // Transparent hover area (optimized - no visual color)
                 borderRadius: '8px', // Rounded corners
-                opacity: isHovered ? 1 : 0.5 // More visible on hover
+                opacity: 1 // Always fully opaque for pointer events
               }}
                   onClick={(e) => {
                     e.stopPropagation();

@@ -143,7 +143,7 @@ const SelectedNodeDots: React.FC<SelectedNodeDotsProps> = ({
         
         return (
           <React.Fragment key={key}>
-            {/* Fixed proximity detection area (green) - actual hover area for expansion */}
+            {/* Fixed proximity detection area (transparent) - actual hover area for expansion */}
             <div
               style={{
                 position: 'absolute',
@@ -152,7 +152,7 @@ const SelectedNodeDots: React.FC<SelectedNodeDotsProps> = ({
                 transform: 'translate(-50%, -50%)',
                 width: 64, // Larger hover area
                 height: 64,
-                background: isExpanded ? 'rgba(0, 255, 0, 0.15)' : 'rgba(0, 255, 0, 0.25)', // More visible green
+                background: 'transparent', // Transparent hover area (optimized - no visual color)
                 pointerEvents: 'auto',
                 display: 'flex',
                 alignItems: 'center',

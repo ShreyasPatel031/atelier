@@ -361,4 +361,15 @@ input::placeholder {
 /* Even though they're children of nodes (z-index 2000), we need them above edges (3000) */
 [data-connector-dot="true"] {
   z-index: 6000 !important; /* CANVAS_STYLES.zIndex.nodeDots - above edges (3000) */
+
+/* Ensure ReactFlow selection overlay doesn't block UI elements */
+/* Selection overlay should only capture events within the canvas area, not UI panels */
+.react-flow__nodesselection {
+  pointer-events: auto !important;
+}
+
+/* Ensure chat and other UI panels are above ReactFlow selection overlay */
+.react-flow__nodesselection {
+  z-index: 5000 !important; /* Below UI panels (10005) but above canvas elements */
+}
 }

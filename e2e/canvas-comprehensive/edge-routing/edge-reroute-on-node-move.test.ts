@@ -23,10 +23,34 @@ test.describe('Edge Reroute on Node Move', () => {
     BASE_URL = await getBaseUrl();
   });
 
-  // FLAKY: Passes individually but fails in suite due to test parallelization issues
-  // TODO: Fix test isolation - likely state not being reset between tests
-  test.skip('should reroute edge during drag and maintain routing after deselection', async ({ page }) => {
+  /**
+   * FUNDAMENTAL TEST - DO NOT SKIP
+   * 
+   * This test verifies that edges rerender in real-time when nodes are dragged.
+   * This is a core requirement for FREE mode edge routing. Without this, edges
+   * appear "frozen" during drag and only update after drag ends, which breaks
+   * the user experience.
+   * 
+   * The test specifically checks:
+   * 1. Edge paths change DURING drag (not just after)
+   * 2. Libavoid callbacks fire during drag
+   * 3. ViewState waypoints update in real-time
+   * 
+   * If this test fails, it indicates that batchUpdateObstaclesAndReroute is
+   * not being called during drag, or StepEdge is not reading fresh waypoints.
+   */
+  test('should reroute edge during drag and maintain routing after deselection', async ({ page }) => {
     test.setTimeout(8000);
+    
+    // Capture console logs for debugging
+    const consoleLogs: string[] = [];
+    page.on('console', msg => {
+      const text = msg.text();
+      if (text.includes('[DEBUG') || text.includes('batchUpdateObstacles') || text.includes('routingUpdate')) {
+        consoleLogs.push(`[browser:${msg.type()}] ${text}`);
+        console.log(`[browser:${msg.type()}] ${text}`);
+      }
+    });
     
     await page.goto(`${BASE_URL}/canvas`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.react-flow__renderer', { timeout: 3000 });
@@ -97,6 +121,10 @@ test.describe('Edge Reroute on Node Move', () => {
     
     // Wait for edge to be created with early failure
     await waitForEdges(page, 1, 5000);
+    
+    // CRITICAL: Wait for routing to complete so edge is registered in connMetadata
+    // This ensures batchUpdateObstaclesAndReroute can find the edge during drag
+    await waitForRoutingComplete(page, '.react-flow__edge', 300, 5000);
     
     // Get initial edge path with early failure
     const initialPath = await waitForEdgePath(page, '.react-flow__edge', 5000);
@@ -213,6 +241,17 @@ test.describe('Edge Reroute on Node Move', () => {
     // Wait for final rerouting to complete (path stabilizes)
     const finalPath = await waitForRoutingComplete(page, '.react-flow__edge', 300, 3000);
 
+    // Get debug info from window before assertion
+    const debugInfo = await page.evaluate(() => {
+      return {
+        routingUpdateCounter: (window as any).__routingUpdateCounter || 0,
+        routingUpdateDebug: (window as any).__routingUpdateDebug || {},
+        routerExists: !!(window as any).__libavoidSharedRouter,
+        shapeRefsSize: ((window as any).__libavoidSharedRouter?.__shapeRefs as Map<any, any>)?.size || 0,
+      };
+    });
+    console.log('[TEST DEBUG] Routing update debug info:', JSON.stringify(debugInfo, null, 2));
+    
     // CRITICAL ASSERTION: Path MUST change DURING drag, not just after
     if (!pathChangedDuringDrag) {
       throw new Error(
@@ -220,7 +259,9 @@ test.describe('Edge Reroute on Node Move', () => {
         `Path before drag: "${pathBeforeDrag}", ` +
         `Path after drag: "${finalPath}". ` +
         `Path should change at multiple points during drag as the obstacle moves. ` +
-        `This indicates edge rerouting is not triggered during node drag, only after drag ends.`
+        `This indicates edge rerouting is not triggered during node drag, only after drag ends. ` +
+        `Debug info: routingUpdateCounter=${debugInfo.routingUpdateCounter}, routerExists=${debugInfo.routerExists}, shapeRefsSize=${debugInfo.shapeRefsSize}, ` +
+        `lastEarlyReturn=${JSON.stringify(debugInfo.routingUpdateDebug.lastEarlyReturn || {})}`
       );
     }
 

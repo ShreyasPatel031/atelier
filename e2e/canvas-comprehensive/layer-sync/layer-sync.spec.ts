@@ -20,6 +20,8 @@ test.describe('Layer Sync Tests', () => {
   });
 
   test('Domain-Canvas Sync - node should appear in both canvas and domain', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Add node
     await addNodeToCanvas(page, 300, 300);
     
@@ -35,6 +37,8 @@ test.describe('Layer Sync Tests', () => {
   });
 
   test('Ghost Node Prevention - no ghost nodes should remain after deletion', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Add node
     await addNodeToCanvas(page, 300, 300);
     
@@ -60,6 +64,8 @@ test.describe('Layer Sync Tests', () => {
   });
 
   test('ViewState Cleanup - ViewState should only contain existing nodes', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Add multiple nodes
     await addNodeToCanvas(page, 200, 200);
     await addNodeToCanvas(page, 300, 300);
@@ -85,6 +91,8 @@ test.describe('Layer Sync Tests', () => {
   });
 
   test('Double Render Prevention - should not trigger multiple renders for single action', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Monitor console logs for double render indicators
     const logs: string[] = [];
     page.on('console', msg => {

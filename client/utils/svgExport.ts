@@ -104,12 +104,7 @@ export function generateSVG(layoutedGraph: any): string {
     let icon = node.data?.icon;
     if (icon) {
       usedIcons.add(icon);
-      console.log('🔍 [SVG] Icon found in node:', icon);
     }
-  }
-  
-  if (usedIcons.size > 0) {
-    console.log('📦 [SVG] Used icons for embedding:', Array.from(usedIcons));
   }
   
   // Start building SVG
@@ -136,11 +131,6 @@ export function generateSVG(layoutedGraph: any): string {
     
     // Get icon from node data
     const icon = node.data?.icon;
-    
-    console.log(`🎨 [SVG] Rendering node: ${node.id}, container: ${isContainer}, icon: ${icon || 'none'}`, {
-      x, y, width, height,
-      hasIcon: !!node.data?.icon
-    });
     
     svg += `
       <rect x="${x}" y="${y}" width="${width}" height="${height}" 

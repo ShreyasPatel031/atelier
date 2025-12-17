@@ -49,9 +49,9 @@ config({ path: resolve(__dirname, "..", ".env") });
 import cors from 'cors';
 import multer from 'multer';
 // Import tools from catalog
-import { allTools } from "../api/toolCatalog.js";
+import { allTools } from "../api/toolCatalog.ts";
 import ConnectionManager from './connectionManager.js';
-import { modelConfigs } from '../api/agentConfig.ts';
+import { modelConfigs } from '../api/agentConfig.lean.ts';
 
 const app = express();
 const apiKey = process.env.OPENAI_API_KEY;
@@ -90,11 +90,11 @@ app.use(express.urlencoded({ extended: false, limit: '50mb' })); // for x-www-fo
 // REMINDER: Always create new API endpoints in /api/ directory, not here!
 // This ensures local development and Vercel production use identical logic.
 
-import streamHandler from '../api/stream.ts';
+// import streamHandler from '../api/stream.ts'; // Not currently used
 import embedHandler from '../api/embed.ts';
 import simpleAgentHandler from '../api/simple-agent.ts';
 import chatHandler from '../api/chat.js';
-app.post("/api/stream", upload.array('images', 5), streamHandler);
+// app.post("/api/stream", upload.array('images', 5), streamHandler); // Not currently used
 app.post("/api/embed", embedHandler);
 app.post("/api/simple-agent", simpleAgentHandler);
 app.post("/api/chat", chatHandler);

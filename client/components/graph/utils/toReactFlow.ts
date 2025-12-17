@@ -67,6 +67,8 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
         ...(node.data?.style && { style: node.data.style }),
         // Pass through groupIcon if it exists in the node data
         ...(node.data?.groupIcon && { groupIcon: node.data.groupIcon }),
+        // Pass through mode (LOCK/FREE) for groups - AI-created groups default to LOCK
+        ...(node.mode && { mode: node.mode }),
         // Handle deltas - no snapping needed, ELK already grid-aligned
         leftHandles: (edgeConnectionPoints[node.id]?.left ?? []).map(connectionPoint => {
           const delta = connectionPoint.y - absPos.y;
@@ -198,6 +200,12 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
         }
 
         if (sourceHandle && targetHandle) {
+          // CRITICAL: Write handles back to domain graph for persistence
+          // This ensures unlockScopeToFree can read handles from edge.data
+          // and handles persist through saves/restores
+          if (!edge.data) edge.data = {};
+          edge.data.sourceHandle = sourceHandle;
+          edge.data.targetHandle = targetHandle;
           /* ─────── turn label position into ABSOLUTE coordinates ─────── */
           const elkLbl      = edge.labels?.[0];
           const labelTxt    = elkLbl?.text ?? "";
@@ -233,32 +241,36 @@ export function processLayoutedGraph(elkGraph: any, dimensions: NodeDimensions) 
             ? { x: containerAbs.x + elkSection.endPoint.x, y: containerAbs.y + elkSection.endPoint.y }
             : undefined;
           
-          console.log(`[🔧 toReactFlow] Edge ${edgeId}: mode=${parentGroupMode}, rawBendPoints=${rawBendPoints.length}, elkBendPoints=${elkBendPoints.length}`, {
-            parentNodeId: parentNode?.id,
-            parentMode: parentNode?.mode,
-            rawBendPoints: rawBendPoints.map((p: any) => `${p.x?.toFixed(0)},${p.y?.toFixed(0)}`),
-            elkBendPoints: elkBendPoints.map((p: any) => `${p.x?.toFixed(0)},${p.y?.toFixed(0)}`),
-            elkStartPoint: elkStartPoint ? `${elkStartPoint.x?.toFixed(0)},${elkStartPoint.y?.toFixed(0)}` : 'none',
-            elkEndPoint: elkEndPoint ? `${elkEndPoint.x?.toFixed(0)},${elkEndPoint.y?.toFixed(0)}` : 'none'
-          });
+          // Get visual debug options for edge type and marker
+          const edgeType = (typeof window !== 'undefined' && (window as any).__visualDebugOptions?.edgeType) 
+            || (edge.sections?.[0]?.bendPoints?.length >= 2 ? "step" : "smoothstep");
+          const edgeMarkerType = (typeof window !== 'undefined' && (window as any).__visualDebugOptions?.edgeMarkerType) || 'arrowclosed';
+          
+          // Convert marker type string to MarkerType enum
+          const markerTypeMap: Record<string, any> = {
+            'arrow': MarkerType.Arrow,
+            'arrowclosed': MarkerType.ArrowClosed,
+            'none': undefined,
+          };
+          const markerType = markerTypeMap[edgeMarkerType];
           
           edges.push({
             id: edgeId, 
             source: sourceNodeId, 
             target: targetNodeId,
-            type: edge.sections?.[0]?.bendPoints?.length >= 2 ? "step" : "smoothstep",
+            type: edgeType as any, // Use visual debug option or default based on bend points
             zIndex: CANVAS_STYLES.zIndex.edges,
             sourceHandle: sourceHandle,
             targetHandle: targetHandle,
             selectable: true,
             focusable: true,
-            style: CANVAS_STYLES.edges.default,
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
+            style: CANVAS_STYLES.edges.default, // This will use visual debug color/opacity
+            markerEnd: markerType ? {
+              type: markerType,
               width: CANVAS_STYLES.edges.marker.width,
               height: CANVAS_STYLES.edges.marker.height,
-              color: CANVAS_STYLES.edges.marker.color
-            },
+              color: CANVAS_STYLES.edges.default.stroke,
+            } : undefined,
             /* put it in BOTH places so every consumer is happy */
             label: labelTxt,
             data: {

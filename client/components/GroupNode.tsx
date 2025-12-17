@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 import { Plus } from 'lucide-react';
 import { baseHandleStyle } from './graph/handles';
-import { getStyle } from './graph/styles';
+import { getStyle, STYLES } from './graph/styles';
 import { CANVAS_STYLES } from './graph/styles/canvasStyles';
 import { getGroupIconHex, allGroupIcons } from '../generated/groupIconColors';
 import { cn } from '../lib/utils';
@@ -34,6 +34,50 @@ interface GroupNodeProps {
 }
 
 const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable, onAddNode }) => {
+  // Force re-render when visual options change
+  const [visualOptionsVersion, setVisualOptionsVersion] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const frameRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const handleVisualOptionsChange = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      console.log(`[GroupNode ${id}] visualOptionsChanged event received:`, detail);
+      setVisualOptionsVersion(prev => prev + 1);
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('visualOptionsChanged', handleVisualOptionsChange);
+      return () => {
+        window.removeEventListener('visualOptionsChanged', handleVisualOptionsChange);
+      };
+    }
+  }, [id]);
+
+  // Attach hover listeners to ReactFlow wrapper
+  useEffect(() => {
+    if (frameRef.current) {
+      const reactFlowWrapper = frameRef.current.closest('.react-flow__node');
+      
+      if (reactFlowWrapper) {
+        const handleMouseEnter = () => {
+          setIsHovered(true);
+        };
+        const handleMouseLeave = () => {
+          setIsHovered(false);
+        };
+        
+        reactFlowWrapper.addEventListener('mouseenter', handleMouseEnter, true);
+        reactFlowWrapper.addEventListener('mouseleave', handleMouseLeave, true);
+        
+        return () => {
+          reactFlowWrapper.removeEventListener('mouseenter', handleMouseEnter, true);
+          reactFlowWrapper.removeEventListener('mouseleave', handleMouseLeave, true);
+        };
+      }
+    }
+  }, [id]);
+  
   const [iconLoaded, setIconLoaded] = useState(false);
   const [iconError, setIconError] = useState(false);
   const [finalIconSrc, setFinalIconSrc] = useState<string | undefined>(undefined);
@@ -273,9 +317,38 @@ const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable
   const cloudProvider = getCloudProvider();
   const fallbackColor = defaultColors[cloudProvider];
   
-  // If we have a group icon, use its color as the background
-  let customBgColor = resolvedStyle.bg || CANVAS_STYLES.nodes.group.background;
-  let customBorderColor = resolvedStyle.border || CANVAS_STYLES.nodes.group.border;
+  // Re-read CANVAS_STYLES when visualOptionsVersion changes to get updated values
+  // The visualOptionsVersion dependency ensures React re-renders when it changes
+  // Access the getter directly (getters are evaluated each time they're accessed)
+  // Reference visualOptionsVersion to ensure React detects the dependency and re-renders
+  const _ = visualOptionsVersion; // Force dependency on visual options version
+  
+  // Getter is evaluated each time - this will call getGroupStyle() which reads from getVisualOptions()
+  // This MUST be called every render to get fresh values when visualOptionsVersion changes
+  const currentGroupStyle = CANVAS_STYLES.nodes.group;
+  
+  // Debug logging to verify getter is being called with correct values
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[GroupNode ${id}] visualOptionsVersion: ${visualOptionsVersion}, background: ${currentGroupStyle.background}, groupColor: ${currentGroupStyle.background}`);
+  }
+  
+  // Visual debug options ALWAYS take precedence - they override resolvedStyle
+  // This ensures visual controls work for all groups
+  // getStyle() always returns a value (defaults to STYLES.GREY), so we need to check if data.style was actually set
+  // Only use resolvedStyle if it's an explicit custom style that's different from the default GREY
+  let customBgColorBase = currentGroupStyle.background; // Always start with visual debug options
+  let customBorderColor = currentGroupStyle.border;
+  
+  // Only override if data.style is explicitly set AND it's not the default GREY
+  // This allows per-group custom styling while still letting visual debug options work for all groups
+  const hasExplicitCustomStyle = data.style !== undefined && 
+                                  data.style !== null && 
+                                  resolvedStyle.bg !== STYLES.GREY.bg;
+  
+  if (hasExplicitCustomStyle) {
+    customBgColorBase = resolvedStyle.bg;
+    customBorderColor = resolvedStyle.border;
+  }
   
   if (groupIconHex && data.groupIcon) {
     // Find the group icon data to check if it's filled
@@ -289,6 +362,25 @@ const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable
       customBorderColor = groupIconHex;
     }
   }
+  
+  // On hover, set opacity to 100%
+  const getBackgroundColor = () => {
+    if (!isHovered) return customBgColorBase;
+    
+    // On hover, set opacity to 100%
+    // If it's an rgba color, replace the opacity with 1.0
+    if (customBgColorBase.startsWith('rgba')) {
+      return customBgColorBase.replace(/rgba\(([^,]+),([^,]+),([^,]+),([^)]+)\)/, 'rgba($1,$2,$3,1.0)');
+    }
+    // If it's an rgb color, convert to rgba with 1.0 opacity
+    if (customBgColorBase.startsWith('rgb(')) {
+      return customBgColorBase.replace('rgb(', 'rgba(').replace(')', ',1.0)');
+    }
+    // For hex colors, return as-is (hex doesn't support opacity, so this should already be full opacity)
+    return customBgColorBase;
+  };
+  
+  let customBgColor = getBackgroundColor();
   
   // Create a more saturated background color for the header based on the group's background
   const headerBgColor = customBgColor.replace(/rgba?\(([^)]+)\)/, (match, values) => {
@@ -317,8 +409,8 @@ const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable
 
   // Style for the outer container that ReactFlow adds
   const groupStyle = {
-    // Use custom styling if available
-    backgroundColor: customBgColor,
+    // Use visual debug options (which includes customBgColor that may have been overridden)
+    backgroundColor: customBgColor, // This will be 100% opacity on hover
     border: data.groupIcon 
       ? (selected ? `3px solid ${customBorderColor}` : `2px solid ${customBorderColor}`) 
       : (selected ? `2px dashed ${customBorderColor}` : `1px dashed ${customBorderColor}`),
@@ -335,6 +427,8 @@ const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable
     boxSizing: 'border-box' as const,
     // Override any internal borders that ReactFlow might add
     overflow: 'visible',
+    // Smooth transition for background color changes on hover
+    transition: 'background-color 0.15s ease-in-out',
     // Add grey border specifically for GCP groups
     ...(cloudProvider === 'gcp' && {
       border: selected ? `3px solid ${CANVAS_STYLES.nodes.group.border}` : `2px solid ${CANVAS_STYLES.nodes.group.border}`
@@ -342,7 +436,7 @@ const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable
   };
 
   return (
-    <div style={groupStyle} data-testid="react-flow-node">
+    <div ref={frameRef} style={groupStyle} data-testid="react-flow-node">
       {/* Left handles */}
       {data.leftHandles && data.leftHandles.map((yPos: string, index: number) => (
         <React.Fragment key={`left-${index}`}>

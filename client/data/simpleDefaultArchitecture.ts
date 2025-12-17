@@ -20,66 +20,66 @@ export const SIMPLE_DEFAULT_ARCHITECTURE = {
         "isGroup": true,
         "groupIcon": "aws_logo"
       },
-      "children": [
-        {
-          "id": "client",
-          "labels": [{ "text": "Client" }],
-          "children": [],
-          "edges": [],
-          "data": { "icon": "browser_client" }
-        },
-        {
-          "id": "aws_env",
-          "labels": [{ "text": "AWS Environment" }],
+  "children": [
+    {
+      "id": "client",
+      "labels": [{ "text": "Client" }],
+      "children": [],
+      "edges": [],
+      "data": { "icon": "browser_client" }
+    },
+    {
+      "id": "aws_env",
+      "labels": [{ "text": "AWS Environment" }],
           "mode": "LOCK",
           "data": { "isGroup": true, "groupIcon": "aws_logo" },
-          "children": [
-            {
-              "id": "api_gateway",
-              "labels": [{ "text": "API Gateway" }],
-              "children": [],
-              "edges": [],
-              "data": { "icon": "aws_api_gateway" }
-            },
-            {
-              "id": "lambda",
-              "labels": [{ "text": "Lambda Function" }],
-              "children": [],
-              "edges": [],
-              "data": { "icon": "aws_lambda" }
-            },
-            {
-              "id": "dynamodb",
-              "labels": [{ "text": "DynamoDB" }],
-              "children": [],
-              "edges": [],
-              "data": { "icon": "aws_dynamodb" }
-            }
-          ],
-          "edges": [
-            {
-              "id": "e_internal_gateway_lambda",
-              "sources": ["api_gateway"],
-              "targets": ["lambda"],
-              "labels": [{ "text": "invokes" }]
-            },
-            {
-              "id": "e_internal_lambda_db",
-              "sources": ["lambda"],
-              "targets": ["dynamodb"],
-              "labels": [{ "text": "queries" }]
-            }
-          ]
+      "children": [
+        {
+          "id": "api_gateway",
+          "labels": [{ "text": "API Gateway" }],
+          "children": [],
+          "edges": [],
+          "data": { "icon": "aws_api_gateway" }
+        },
+        {
+          "id": "lambda",
+          "labels": [{ "text": "Lambda Function" }],
+          "children": [],
+          "edges": [],
+          "data": { "icon": "aws_lambda" }
+        },
+        {
+          "id": "dynamodb",
+          "labels": [{ "text": "DynamoDB" }],
+          "children": [],
+          "edges": [],
+          "data": { "icon": "aws_dynamodb" }
         }
       ],
       "edges": [
         {
-          "id": "e_client_gateway",
-          "sources": ["client"],
-          "targets": ["api_gateway"],
-          "labels": [{ "text": "requests" }]
+          "id": "e_internal_gateway_lambda",
+          "sources": ["api_gateway"],
+          "targets": ["lambda"],
+          "labels": [{ "text": "invokes" }]
+        },
+        {
+          "id": "e_internal_lambda_db",
+          "sources": ["lambda"],
+          "targets": ["dynamodb"],
+          "labels": [{ "text": "queries" }]
         }
       ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_client_gateway",
+      "sources": ["client"],
+      "targets": ["api_gateway"],
+      "labels": [{ "text": "requests" }]
+    }
+  ]
     }
   ],
   "edges": []

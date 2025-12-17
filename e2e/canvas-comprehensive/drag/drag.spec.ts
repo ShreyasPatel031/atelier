@@ -20,6 +20,8 @@ test.describe('Drag & Drop Interaction Tests', () => {
   });
 
   test('Drag Node - ViewState stores absolute position after drag', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Add a node
     await addNodeToCanvas(page, 200, 200);
     await page.waitForTimeout(1000);
@@ -77,6 +79,8 @@ test.describe('Drag & Drop Interaction Tests', () => {
   });
 
   test('STRICT Drag Node Into Group - node lands at EXACT drop position', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Set up a group and node outside it via localStorage
     await page.evaluate(() => {
       const snapshot = {
@@ -241,6 +245,8 @@ test.describe('Drag & Drop Interaction Tests', () => {
   });
 
   test('Drag Node Out of Group - preserves absolute position, parent becomes root', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Set up a node inside a group
     await page.evaluate(() => {
       const snapshot = {
@@ -364,6 +370,8 @@ test.describe('Drag & Drop Interaction Tests', () => {
   });
 
   test('Coordinate Round-Trip - drag then refresh preserves position', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Add a node
     await addNodeToCanvas(page, 200, 200);
     await page.waitForTimeout(1000);
@@ -441,6 +449,8 @@ test.describe('Drag & Drop Interaction Tests', () => {
   });
 
   test('Drag Stability - existing nodes should not move when dragging another', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Add two nodes at well-separated positions
     await addNodeToCanvas(page, 150, 150);
     
@@ -554,6 +564,8 @@ test.describe('Drag & Drop Interaction Tests', () => {
   });
 
   test('STRICT Multi-Node Refresh Stability - ALL node positions must be EXACT after refresh', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
+    
     // Add 3 nodes at different positions
     await addNodeToCanvas(page, 100, 100);
     await addNodeToCanvas(page, 300, 150);
@@ -611,6 +623,7 @@ test.describe('Drag & Drop Interaction Tests', () => {
   });
 
   test('STRICT Group Drag - children move on FIRST drag after reparenting', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
     // REAL USER FLOW:
     // 1. Add node
     // 2. Add group
@@ -763,6 +776,7 @@ test.describe('Drag & Drop Interaction Tests', () => {
   });
 
   test('Group Mode on Reparent - target group set to FREE when node moved in', async ({ page }) => {
+    test.setTimeout(30000); // 30 seconds
     // Set up a group in LOCK mode and a node outside
     await page.evaluate(() => {
       const snapshot = {

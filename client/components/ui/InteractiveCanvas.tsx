@@ -25,7 +25,7 @@ import ReactFlow, {
 } from "reactflow"
 import "reactflow/dist/style.css"
 import { cn } from "../../lib/utils"
-import { markEmbedToCanvasTransition, isEmbedToCanvasTransition, clearEmbedToCanvasFlag, getChatMessages, getCurrentConversation, normalizeChatMessages, mergeChatMessages, saveChatMessage, EMBED_PENDING_CHAT_KEY, EMBED_CHAT_BROADCAST_CHANNEL, PersistedChatMessage } from "../../utils/chatPersistence"
+import { markEmbedToCanvasTransition, isEmbedToCanvasTransition, clearEmbedToCanvasFlag, getChatMessages, getCurrentConversation, normalizeChatMessages, mergeChatMessages, saveChatMessage, clearChatMessages, startNewConversation, EMBED_PENDING_CHAT_KEY, EMBED_CHAT_BROADCAST_CHANNEL, PersistedChatMessage } from "../../utils/chatPersistence"
 import ViewControls from "./ViewControls"
 
 // Import types from separate type definition files
@@ -58,6 +58,7 @@ import { createEmptyViewState } from "../../core/viewstate/ViewState"
 import { CoordinateService } from "../../core/viewstate/CoordinateService"
 import { handleGroupDrag, initializeDragTracking, clearDragTracking } from "../../core/drag/GroupDragHandler"
 import { handleDragReparent } from "../../core/drag/DragReparentHandler"
+import { batchUpdateObstaclesAndReroute } from "../../utils/canvas/routingUpdates"
 import DraftGroupNode from "../node/DraftGroupNode"
 import StepEdge from "../StepEdge"
 import { runScopeLayout } from "../../core/layout/ScopedLayoutRunner"
@@ -97,6 +98,8 @@ import CanvasToolbar from "./CanvasToolbar"
 import { useCanvasEdgeInteractions } from "../../hooks/canvas/useCanvasEdgeInteractions"
 import { setModeInViewState, migrateModeDomainToViewState } from "../../core/viewstate/modeHelpers"
 import { useElkDebugger } from "../../hooks/canvas/useElkDebugger"
+import { ElkDebugProvider } from "../../contexts/ElkDebugContext"
+import ElkDebugPanel from "../debug/ElkDebugPanel"
 
 import Chatbox from "./Chatbox"
 import { ApiEndpointProvider } from '../../contexts/ApiEndpointContext'
@@ -118,6 +121,7 @@ import { assertRawGraph } from "../../events/graphSchema"
 import { iconFallbackService } from "../../utils/iconFallbackService"
 import { useViewMode } from "../../contexts/ViewModeContext"
 import { onElkGraph, dispatchElkGraph } from "../../events/graphEvents"
+import DevPanel from "../DevPanel"
 // import toast, { Toaster } from 'react-hot-toast' // Removed toaster
 
 // Relaxed typing to avoid prop mismatch across layers
@@ -371,9 +375,9 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     };
   }, []);
   
-  // Clear chat localStorage on mount if NOT coming from embed
+  // Restore chat from opener or fallback storage if needed
+  // DO NOT clear chat on refresh - messages should persist
   useEffect(() => {
-    const transitionedFromEmbed = isEmbedToCanvasTransition();
     let currentCount = 0;
     try {
       const currentMessagesRaw = localStorage.getItem('atelier_current_conversation');
@@ -389,6 +393,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       console.warn('Failed to inspect chat messages on mount:', error);
     }
 
+    // Only try to restore from opener or fallback if we have no current conversation
     if (currentCount === 0) {
       try {
         if (typeof window !== 'undefined' && window.opener && window.opener !== window) {
@@ -401,14 +406,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
           if (openerConversation) {
             localStorage.setItem('atelier_current_conversation', openerConversation);
-            currentCount = (() => {
-              try {
-                const parsed = JSON.parse(openerConversation);
-                return Array.isArray(parsed) ? parsed.length : 0;
-              } catch {
-                return 0;
-              }
-            })();
+            console.log('💬 Restored chat from opener window');
           }
         }
       } catch (error) {
@@ -421,30 +419,18 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
           localStorage.getItem(EMBED_PENDING_CHAT_KEY);
         if (fallbackChat) {
           localStorage.setItem('atelier_current_conversation', fallbackChat);
-          currentCount = (() => {
-            try {
-              const parsed = JSON.parse(fallbackChat);
-              return Array.isArray(parsed) ? parsed.length : 0;
-            } catch {
-              return 0;
-            }
-          })();
           sessionStorage.removeItem(EMBED_PENDING_CHAT_KEY);
           localStorage.removeItem(EMBED_PENDING_CHAT_KEY);
+          console.log('💬 Restored chat from fallback storage');
         }
       } catch (error) {
         console.warn('Failed to restore embed chat snapshot:', error);
       }
     }
 
-    if (!transitionedFromEmbed && currentCount === 0) {
-      // User is visiting directly, not from embed, and no conversation exists - clear stale chat
-      try {
-        localStorage.removeItem('atelier_current_conversation');
-      } catch (error) {
-        console.warn('Failed to clear chat on mount:', error);
-      }
-    } else {
+    // Chat messages persist across refreshes - do NOT clear them
+    if (currentCount > 0) {
+      console.log('💬 Chat messages loaded on mount:', currentCount);
     }
   }, []); // Run once on mount
   
@@ -466,6 +452,8 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     isSaving, setIsSaving,
     saveSuccess, setSaveSuccess,
     realtimeSyncId, setRealtimeSyncId,
+    showElkDomainGraph, setShowElkDomainGraph,
+    showDebugButton, setShowDebugButton,
     isRealtimeSyncing, setIsRealtimeSyncing,
     isSyncing, setIsSyncing,
     currentChatName, setCurrentChatName,
@@ -521,6 +509,12 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     (window as any).currentArchitectureId = targetArchitectureId;
   }, [selectedArchitectureId, agentLockedArchitectureId]);
   
+  
+  // Store setShowDebugButton in a ref so it's always accessible
+  const setShowDebugButtonRef = useRef(setShowDebugButton);
+  useEffect(() => {
+    setShowDebugButtonRef.current = setShowDebugButton;
+  }, [setShowDebugButton]);
   
   // Console commands to toggle default architectures
   useEffect(() => {
@@ -589,7 +583,19 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       setNodes([]);
       setEdges([]);
       
-      // 4. Reset viewport to center
+      // 4. Clear chat history using utility function
+      clearChatMessages();
+      console.log('✅ [RESET] Chat history cleared');
+      
+      // Trigger custom event so chat component reloads (same-window updates)
+      window.dispatchEvent(new CustomEvent('chatCleared'));
+      
+      // 5. Clear global currentGraph for chat agent
+      (window as any).currentGraph = emptyGraph;
+      (window as any).selectedNodeIds = [];
+      (window as any).selectedEdgeIds = [];
+      
+      // 6. Reset viewport to center
       setTimeout(() => {
         const rfInstance = (window as any).__reactFlowInstance || reactFlowRef?.current;
         if (rfInstance) {
@@ -597,7 +603,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         }
       }, 100);
       
-      // 5. Save EMPTY snapshot to localStorage (this signals "user cleared the app")
+      // 7. Save EMPTY snapshot to localStorage (this signals "user cleared the app")
       try {
         const emptySnapshot = {
           rawGraph: emptyGraph,
@@ -632,6 +638,46 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       });
     };
 
+    // Command to toggle debug button visibility
+    (window as any).toggleDebug = () => {
+      if (!setShowDebugButtonRef.current) {
+        console.error('❌ toggleDebug: setShowDebugButton not available yet. Component may not be mounted.');
+        console.log('💡 Try refreshing the page or waiting a moment for the component to mount.');
+        return;
+      }
+      setShowDebugButtonRef.current((prev: boolean) => {
+        const newState = !prev;
+        console.log(`🔧 Debug button ${newState ? 'shown' : 'hidden'}`);
+        return newState;
+      });
+    };
+    
+    // Immediately verify and log that toggleDebug is available
+    if ((window as any).toggleDebug) {
+      console.log('✅ toggleDebug() function registered and available');
+      console.log('💡 You can now call toggleDebug() in the console');
+    } else {
+      console.error('❌ Failed to register toggleDebug() function');
+    }
+
+    // Command to test selection tracking
+    (window as any).testSelection = () => {
+      console.log('🧪 Testing selection tracking...');
+      console.log('📊 Current graph:', (window as any).currentGraph ? `${(window as any).currentGraph.children?.length || 0} nodes` : 'none');
+      console.log('🎯 Selected nodes (global):', (window as any).selectedNodeIds || []);
+      console.log('🎯 Selected edges (global):', (window as any).selectedEdgeIds || []);
+      console.log('📋 React state selectedNodeIds:', selectedNodeIds);
+      console.log('📋 React state selectedNodes:', selectedNodes?.map(n => n.id) || []);
+      console.log('📋 React state selectedEdges:', selectedEdges?.map(e => e.id) || []);
+      
+      if ((window as any).selectedNodeIds && (window as any).selectedNodeIds.length > 0) {
+        console.log('✅ Selections are tracked in global state');
+        console.log('📤 These will be sent to chat API when you send a message');
+      } else {
+        console.log('⚠️ No selections found - select a group/node first');
+      }
+    };
+
     // Log help message
     console.log('💡 Console commands available:');
     console.log('  - loadLibavoidFixtures() → Load 5-node obstacle/batch routing test');
@@ -639,8 +685,10 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     console.log('  - loadComplexDefault()   → Load complex GCP test architecture');
     console.log('  - clearAndReload()       → Clear localStorage and reload (fixes grid alignment)');
     console.log('  - resetCanvas()          → Reset to empty canvas');
+    console.log('  - toggleDebug()           → Toggle debug panel visibility');
+    console.log('  - testSelection()         → Test selection tracking (check if selections are being tracked)');
 
-    // Cleanup
+    // Cleanup - but DON'T delete toggleDebug to keep it available
     return () => {
       delete (window as any).loadSimpleDefault;
       delete (window as any).loadComplexDefault;
@@ -648,7 +696,31 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       delete (window as any).resetCanvas;
       delete (window as any).toggleDefaultArchitecture;
       delete (window as any).loadLibavoidFixtures;
+      // Keep toggleDebug and testSelection available - they use refs so they're safe
+      // delete (window as any).toggleDebug;
+      // delete (window as any).testSelection;
     };
+    // Empty dependency array - these functions use closures to access current state/refs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  // Additional safety: ensure toggleDebug is always available, even if useEffect hasn't run
+  useEffect(() => {
+    if (!(window as any).toggleDebug) {
+      console.warn('⚠️ toggleDebug not set by main useEffect, setting up fallback...');
+      (window as any).toggleDebug = () => {
+        if (!setShowDebugButtonRef.current) {
+          console.error('❌ toggleDebug: setShowDebugButton not available yet. Component may not be mounted.');
+          return;
+        }
+        setShowDebugButtonRef.current((prev: boolean) => {
+          const newState = !prev;
+          console.log(`🔧 Debug button ${newState ? 'shown' : 'hidden'}`);
+          return newState;
+        });
+      };
+      console.log('✅ toggleDebug() fallback registered');
+    }
   }, []);
 
   // Load libavoid test fixtures ONLY when explicitly requested via URL params
@@ -952,8 +1024,6 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     if (nodes.length === 0 || edges.length === 0) {
       return; // Skip silently - no obstacles to configure
     }
-    
-    console.log('[AutoObstacleConfig] Running for', edges.length, 'edges and', nodes.length, 'nodes');
 
     // Build obstacle rects from current node positions
     const allObstacles = nodes.map((node) => ({
@@ -988,12 +1058,6 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
         // Configure obstacles with positions
         updated = true;
-        console.log('[AutoObstacleConfig] Configuring obstacles for edge', edge.id, { 
-          nodeCount: allNodeIds.length, 
-          currentType: edge.type,
-          hasObstacles: !!edge.data?.staticObstacles,
-          obstacleCount: edge.data?.staticObstacles?.length
-        });
 
         return {
           ...edge,
@@ -1047,10 +1111,6 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       try {
         const snapshot = restoreCanvasSnapshot();
         if (snapshot && snapshot.rawGraph && snapshot.rawGraph.children?.length > 0) {
-          console.log('[🔄 INIT] Restoring from local snapshot before Orchestrator init:', {
-            nodes: snapshot.rawGraph.children?.length || 0,
-            hasViewState: !!snapshot.viewState
-          });
 
           // Set ViewState FIRST and apply mode migration if needed
           let viewStateSnapshot = snapshot.viewState || { node: {}, group: {}, edge: {} };
@@ -1066,9 +1126,66 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
           // Set domain graph directly in ref (bypass ELK hook)
           rawGraphRef.current = snapshot.rawGraph;
           
-          // CRITICAL FIX: Also update React state to prevent persistence from overwriting
-          // with empty graph. Use 'free-structural' source to skip ViewState handling.
-          setRawGraph(snapshot.rawGraph, 'free-structural');
+          // CRITICAL: Ensure mode is preserved for all groups in restored graph
+          // This function recursively preserves mode from the snapshot
+          const ensureModePreserved = (node: any) => {
+            // CRITICAL: If mode exists in snapshot, preserve it (don't override)
+            // Only set default if mode is completely missing
+            if (node.children && node.children.length > 0) {
+              // This is a group - preserve mode from snapshot
+              if (!node.mode) {
+                // Only set default if mode is truly missing
+                // Don't override existing mode from snapshot
+                node.mode = 'FREE'; // Default to FREE only if not in snapshot
+              } else {
+                // Mode exists in snapshot - log it for debugging
+                console.log(`🔒 [RESTORE] Preserving mode='${node.mode}' for group: ${node.id}`);
+              }
+            }
+            // Recursively check children
+            if (node.children) {
+              node.children.forEach((child: any) => ensureModePreserved(child));
+            }
+          };
+          
+          // Ensure all groups have their mode preserved from snapshot
+          if (snapshot.rawGraph.children) {
+            snapshot.rawGraph.children.forEach((child: any) => ensureModePreserved(child));
+          }
+          
+          // CRITICAL: Set global currentGraph for chat agent immediately on restore
+          (window as any).currentGraph = snapshot.rawGraph;
+          console.log('📊 Restored global currentGraph from snapshot:', snapshot.rawGraph ? `${snapshot.rawGraph.children?.length || 0} nodes` : 'none');
+          
+          // Log mode information for debugging
+          const groupsWithMode = snapshot.rawGraph.children?.filter((child: any) => child.mode).map((child: any) => ({
+            id: child.id,
+            label: child.labels?.[0]?.text || child.data?.label,
+            mode: child.mode
+          })) || [];
+          if (groupsWithMode.length > 0) {
+            console.log('🔒 Groups with mode preserved:', groupsWithMode);
+          }
+          
+          // CRITICAL FIX: Check if restored graph has LOCK groups - if so, trigger ELK
+          // Only top-level LCG should run ELK (ELK processes entire graph hierarchically)
+          const hasTopLevelLockGroup = snapshot.rawGraph.children?.some((child: any) => child.mode === 'LOCK');
+          
+          // CRITICAL: Set rawGraphRef BEFORE calling setRawGraph to ensure ViewState is available
+          // This ensures that when ELK runs, it can read the restored ViewState
+          rawGraphRef.current = snapshot.rawGraph;
+          
+          // If there are LOCK groups, use 'ai' source to trigger ELK layout
+          // This ensures edges are routed correctly on refresh
+          const restoreSource = hasTopLevelLockGroup ? 'ai' : 'free-structural';
+          
+          if (hasTopLevelLockGroup) {
+            console.log('🔒 [RESTORE] Detected LOCK groups - triggering ELK layout for top-level LCG');
+          }
+          
+          // Update React state - use 'ai' source if LOCK groups exist to trigger ELK
+          // CRITICAL: ViewState is already set in viewStateRef.current above, so ELK will preserve it
+          setRawGraph(snapshot.rawGraph, restoreSource);
 
           restoredFromSnapshotRef.current = true;
         }
@@ -1096,15 +1213,20 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       setEdges
     );
     
-    console.log('[🔄 CANVAS] Orchestrator initialized from InteractiveCanvas');
   }, [setRawGraph, setNodes, setEdges]); // Stable dependencies
 
   // Ref to store ReactFlow instance for auto-zoom functionality
   const reactFlowRef = useRef<any>(null);
   const embedChatChannelRef = useRef<BroadcastChannel | null>(null);
+  // Track fitView triggers: only on initial load and AI diagram generation
+  const hasFittedInitialLoadRef = useRef<boolean>(false);
+  const shouldFitViewForAIDiagramRef = useRef<boolean>(false);
+  const newlyCreatedAIGroupIdRef = useRef<string | null>(null); // Track newly created AI group to focus on
+  const previousNodeCountRef = useRef<number>(0);
   
   // Track recently created nodes/groups to skip containment detection
   const recentlyCreatedNodesRef = useRef<Map<string, number>>(new Map());
+  const unlockedDuringDragRef = useRef<Set<string>>(new Set());
   
   // Debounce domain graph updates during drag to prevent flickering
   const domainUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1196,27 +1318,16 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     if (auth) {
       const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
         
-        // Canvas mode: redirect to auth if user signs in, preserving architecture URL parameter
+        // REMOVED: Auto-redirect from canvas/embed to auth when user signs in
+        // Users should be able to freely navigate between /embed, /canvas, and /auth routes
+        // The route should be determined by the URL path, not by auth state
+        
+        // Canvas/Embed mode: Allow users to stay on current route even after signing in
+        // Just update the user state without redirecting
         if (!viewModeConfig.requiresAuth && currentUser) {
-          console.log('🔥 [CANVAS-TO-AUTH] User signing in from canvas mode');
-          console.log('🔥 [CANVAS-TO-AUTH] Current URL search:', window.location.search);
-          console.log('🔥 [CANVAS-TO-AUTH] Current rawGraph:', rawGraph);
-          console.log('🔥 [CANVAS-TO-AUTH] Current chat messages:', getChatMessages());
-          
-          // Preserve the architecture ID from the current URL
-          const currentParams = new URLSearchParams(window.location.search);
-          const archId = currentParams.get('arch');
-          
-          let authUrl = window.location.origin + '/auth';
-          if (archId) {
-            authUrl += `?arch=${archId}`;
-            console.log('🔥 [CANVAS-TO-AUTH] Preserving URL architecture ID:', archId);
-          } else {
-            console.log('🔥 [CANVAS-TO-AUTH] No URL architecture ID found - will rely on Firebase sync');
-          }
-          
-          console.log('🔥 [CANVAS-TO-AUTH] Redirecting to auth URL:', authUrl);
-          window.location.href = authUrl;
+          console.log('✅ [CANVAS/EMBED] User signed in - staying on current route:', window.location.pathname);
+          setUser(currentUser);
+          // Don't redirect - let users stay on /canvas or /embed if they want
           return;
         }
         
@@ -1338,7 +1449,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         // Save as new architecture
         const now = new Date();
         const chatMessages = normalizeChatMessages(getCurrentConversation()) ?? [];
-        const viewStateSnapshot = getViewStateSnapshot();
+        const viewStateSnapshot = getViewStateSnapshot(edges);
         const rawGraphWithViewState = viewStateSnapshot ? { ...rawGraph, viewState: viewStateSnapshot } : rawGraph;
         const docId = await ArchitectureService.saveArchitecture({
           name: newChatName,
@@ -1399,7 +1510,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
       // Update Firebase
       const chatMessages = normalizeChatMessages(getCurrentConversation()) ?? [];
-      const viewStateSnapshot = getViewStateSnapshot();
+      const viewStateSnapshot = getViewStateSnapshot(edges);
       const rawGraphWithViewState = viewStateSnapshot ? { ...rawGraph, viewState: viewStateSnapshot } : rawGraph;
       await ArchitectureService.updateArchitecture(firebaseId, {
         rawGraph: rawGraphWithViewState,
@@ -1486,7 +1597,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
           const architectureName = await generateNameWithFallback(rawGraph, effectivePrompt);
           
           // Save as anonymous architecture and get shareable ID
-          const viewStateSnapshot = getViewStateSnapshot();
+          const viewStateSnapshot = getViewStateSnapshot(edges);
           const rawGraphWithViewState = viewStateSnapshot ? { ...rawGraph, viewState: viewStateSnapshot } : rawGraph;
           const anonymousId = await ensureAnonymousSaved({
             rawGraph: rawGraphWithViewState,
@@ -1684,7 +1795,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       
       // Prepare the architecture data for saving with validation
       const chatMessages = normalizeChatMessages(getCurrentConversation()) ?? [];
-      const viewStateSnapshot = getViewStateSnapshot();
+      const viewStateSnapshot = getViewStateSnapshot(edges);
       const rawGraphWithViewState = viewStateSnapshot ? { ...rawGraph, viewState: viewStateSnapshot } : rawGraph;
       const architectureData = {
         name: architectureName, // No fallback - must be AI-generated
@@ -1765,29 +1876,29 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
           // If localStorage has the same architecture, ALWAYS use it (user's current state)
           if (isSameArchitecture && hasContent) {
             const storedAge = Date.now() - (parsed?.timestamp || 0);
-              // Still create the tab and select it, but don't overwrite the graph
-              const urlArch = {
-                id: architecture.id,
-                name: architecture.name,
-                timestamp: architecture.timestamp || new Date(),
-                rawGraph: architecture.rawGraph,
-                userPrompt: architecture.userPrompt || '',
-                firebaseId: architecture.firebaseId || architecture.id,
-                isFromFirebase: true,
-                viewState: architecture.viewState,
-                isFromUrl: true
-              };
-              setSavedArchitectures(prev => {
-                const exists = prev.some(arch => arch.id === architecture.id);
-                if (!exists) {
-                  return [urlArch, ...prev];
-                }
-                return prev;
-              });
-              setSelectedArchitectureId(architecture.id);
-              return; // Exit early, don't overwrite the restored graph
+            // Still create the tab and select it, but don't overwrite the graph
+            const urlArch = {
+              id: architecture.id,
+              name: architecture.name,
+              timestamp: architecture.timestamp || new Date(),
+              rawGraph: architecture.rawGraph,
+              userPrompt: architecture.userPrompt || '',
+              firebaseId: architecture.firebaseId || architecture.id,
+              isFromFirebase: true,
+              viewState: architecture.viewState,
+              isFromUrl: true
+            };
+            setSavedArchitectures(prev => {
+              const exists = prev.some(arch => arch.id === architecture.id);
+              if (!exists) {
+                return [urlArch, ...prev];
+              }
+              return prev;
+            });
+            setSelectedArchitectureId(architecture.id);
+            return; // Exit early, don't overwrite the restored graph
           } else {
-            }
+          }
         } else {
         }
       } catch (e) {
@@ -1844,6 +1955,10 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       setSelectedArchitectureId(architecture.id);
       setPendingArchitectureSelection(null);
       
+      // CRITICAL: Set global currentGraph for chat agent
+      (window as any).currentGraph = architecture.rawGraph;
+      console.log('📊 Set global currentGraph from URL architecture:', architecture.rawGraph ? `${architecture.rawGraph.children?.length || 0} nodes` : 'none');
+      
     } else {
       console.warn('⚠️ [URL-ARCH] Architecture has no rawGraph content');
     }
@@ -1861,7 +1976,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     // Save current architecture before switching (if it has content and is not the same architecture)
     if (selectedArchitectureId !== architectureId && rawGraph?.children && rawGraph.children.length > 0) {
       console.log('💾 Saving current architecture before switching:', selectedArchitectureId);
-      const viewStateSnapshot = getViewStateSnapshot();
+      const viewStateSnapshot = getViewStateSnapshot(edges);
       const rawGraphWithViewState = viewStateSnapshot ? { ...rawGraph, viewState: viewStateSnapshot } : rawGraph;
       setSavedArchitectures(prev => prev.map(arch => 
         arch.id === selectedArchitectureId 
@@ -1878,6 +1993,45 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       console.log('🎯 Updated agent target architecture ID to:', architectureId);
     } else {
       console.log('🔒 Agent is locked to architecture:', agentLockedArchitectureId, '- not retargeting');
+    }
+    
+    // Handle "New Architecture" case - clear everything and start fresh
+    if (architectureId === 'new-architecture') {
+      console.log('🆕 Selecting new architecture - clearing canvas and conversation');
+      
+      // Clear conversation FIRST (this dispatches chatCleared event)
+      startNewConversation();
+      
+      // Also explicitly dispatch the event to ensure it's caught
+      // Use a small delay to ensure localStorage is cleared first
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('chatCleared'));
+        console.log('💬 Dispatched chatCleared event (delayed)');
+      }, 10);
+      
+      // Reset canvas to empty graph
+      const emptyGraph = { id: "root", children: [], edges: [] };
+      setRawGraph(emptyGraph);
+      
+      // Reset view state
+      viewStateRef.current = { node: {}, group: {}, edge: {}, layout: {} };
+      
+      // Clear global chat input
+      (window as any).originalChatTextInput = '';
+      (window as any).chatTextInput = '';
+      (window as any).currentGraph = emptyGraph;
+      
+      // Dispatch empty graph to reset canvas
+      dispatchElkGraph({
+        elkGraph: assertRawGraph(emptyGraph, 'NewArchitecture'),
+        source: 'NewArchitecture',
+        reason: 'new-architecture',
+        viewState: { node: {}, group: {}, edge: {}, layout: {} },
+        targetArchitectureId: 'new-architecture'
+      });
+      
+      console.log('✅ New architecture selected - canvas and conversation cleared');
+      return;
     }
     
     // Load the architecture data from dynamic savedArchitectures
@@ -1917,6 +2071,11 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         ? { ...architecture.rawGraph, viewState: viewStateSnapshot }
         : architecture.rawGraph;
 
+      // CRITICAL: Set global currentGraph for chat agent BEFORE dispatching
+      // This ensures it's available even if onElkGraph handler hasn't run yet
+      (window as any).currentGraph = architecture.rawGraph;
+      console.log('📊 Set global currentGraph from selected architecture:', architecture.rawGraph ? `${architecture.rawGraph.children?.length || 0} nodes` : 'none');
+
       dispatchElkGraph({
         elkGraph: assertRawGraph(rawGraphWithViewState, 'ArchitectureSelector'),
         source: 'ArchitectureSelector',
@@ -1942,6 +2101,55 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     }
   }, [selectedArchitectureId, savedArchitectures, currentChatName]);
 
+  // Auto-trigger architecture loading when architectures are loaded and selectedArchitectureId changes
+  // This ensures architectures load on canvas when auto-selected from useAuthListener
+  const previousSelectedIdRef = useRef<string | null>(null);
+  const hasTriggeredSelectionRef = useRef<Set<string>>(new Set());
+  
+  useEffect(() => {
+    // Only trigger if selectedArchitectureId actually changed and architecture exists
+    if (selectedArchitectureId && selectedArchitectureId !== previousSelectedIdRef.current) {
+      const prevId = previousSelectedIdRef.current;
+      previousSelectedIdRef.current = selectedArchitectureId;
+      
+      // Skip if it's "new-architecture" (handled separately)
+      if (selectedArchitectureId === 'new-architecture') {
+        hasTriggeredSelectionRef.current.clear();
+        return;
+      }
+      
+      // Check if architecture exists and has rawGraph
+      const architecture = savedArchitectures.find(arch => arch.id === selectedArchitectureId);
+      if (architecture && architecture.rawGraph) {
+        // Check if we've already triggered selection for this architecture
+        // This prevents infinite loops when handleSelectArchitecture updates state
+        if (!hasTriggeredSelectionRef.current.has(selectedArchitectureId)) {
+          // Only trigger if the graph hasn't been loaded yet or is different
+          const currentGraphMatches = rawGraph && 
+            JSON.stringify(rawGraph) === JSON.stringify(architecture.rawGraph);
+          
+          if (!currentGraphMatches) {
+            hasTriggeredSelectionRef.current.add(selectedArchitectureId);
+            // Use a small delay to ensure state has settled
+            const timeoutId = setTimeout(() => {
+              handleSelectArchitecture(selectedArchitectureId);
+              // Clear the flag after a delay to allow re-selection if needed
+              setTimeout(() => {
+                hasTriggeredSelectionRef.current.delete(selectedArchitectureId);
+              }, 1000);
+            }, 100);
+            return () => clearTimeout(timeoutId);
+          }
+        }
+      }
+    }
+    
+    // Clear flags when selection changes to a different architecture
+    if (previousSelectedIdRef.current && previousSelectedIdRef.current !== selectedArchitectureId) {
+      hasTriggeredSelectionRef.current.delete(previousSelectedIdRef.current);
+    }
+  }, [selectedArchitectureId, savedArchitectures, handleSelectArchitecture, rawGraph]);
+
   // Handle canvas resize when sidebar state changes
   useEffect(() => {
     // Small delay to ensure sidebar animation has started
@@ -1949,17 +2157,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       if (reactFlowRef.current) {
         // Force React Flow to recalculate its dimensions
         window.dispatchEvent(new Event('resize'));
-        
-        // Then fit the view with animation
-        setTimeout(() => {
-          if (reactFlowRef.current) {
-            reactFlowRef.current.fitView({ 
-              padding: 0.1,
-              includeHiddenNodes: false,
-              duration: 300
-            });
-          }
-        }, 100);
+        // NOTE: fitView removed - canvas should not reset view on sidebar changes
       }
     }, 150);
 
@@ -2000,6 +2198,10 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     let finalGraph: RawGraph;
 
     if (options.source === 'ai') {
+      // Mark that we should fitView when this AI diagram is rendered
+      shouldFitViewForAIDiagramRef.current = true;
+      newlyCreatedAIGroupIdRef.current = null; // Reset before processing
+      
       const aiGraph = structuredClone(newGraph) as RawGraph & { viewState?: unknown };
       if ('viewState' in aiGraph) {
         delete (aiGraph as any).viewState;
@@ -2060,6 +2262,8 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
             // Per FIGJAM_REFACTOR.md: AI edits default to LOCK mode
             // LOCK mode = ELK routing, internal auto-layout on structural changes
             groupNode.mode = 'LOCK';
+            // Store the group ID so we can focus on it when fitting view
+            newlyCreatedAIGroupIdRef.current = groupNode.id;
           }
         } catch (error) {
           console.error('Failed to wrap AI diagram in group:', error);
@@ -2069,7 +2273,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
         finalGraph = aiGraph;
       }
             } else {
-      const viewStateSnapshot = getViewStateSnapshot();
+      const viewStateSnapshot = getViewStateSnapshot(edges);
       finalGraph = viewStateSnapshot ? { ...newGraph, viewState: viewStateSnapshot } : newGraph;
     }
     
@@ -2079,13 +2283,52 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
     // CRITICAL FIX: Immediately persist viewstate to localStorage after any graph change
     // This ensures that when page refreshes, the current state is preserved
     try {
-      const currentViewState = getViewStateSnapshot();
+      const currentViewState = getViewStateSnapshot(edges);
       
       if (currentViewState && selectedArchitectureId) {
-        saveCanvasSnapshot(finalGraph, currentViewState, selectedArchitectureId);
+        // CRITICAL: Ensure mode is preserved in the graph before saving
+        // Deep clone to avoid mutating the original
+        const graphToSave = JSON.parse(JSON.stringify(finalGraph));
+        
+        // Verify mode is present on groups (especially AI-created LOCK groups)
+        const verifyModes = (node: any) => {
+          if (node.children && node.children.length > 0) {
+            // This is a group - ensure mode is preserved
+            if (!node.mode && options.source === 'ai') {
+              // AI-created groups should be LOCK by default
+              node.mode = 'LOCK';
+              console.log(`🔒 [PERSIST] Set mode to LOCK for AI-created group: ${node.id}`);
+            }
+          }
+          if (node.children) {
+            node.children.forEach((child: any) => verifyModes(child));
+          }
+        };
+        
+        if (graphToSave.children) {
+          graphToSave.children.forEach((child: any) => verifyModes(child));
+        }
+        
+        saveCanvasSnapshot(graphToSave, currentViewState, selectedArchitectureId);
         
         // Log what was saved
-        const savedGroups = extractGroupIdsFromGraph(finalGraph);
+        const savedGroups = extractGroupIdsFromGraph(graphToSave);
+        // Helper to find node in graph (inline to avoid dependency issues)
+        const findNode = (graph: any, targetId: string): any => {
+          if (graph.id === targetId) return graph;
+          if (graph.children) {
+            for (const child of graph.children) {
+              const found = findNode(child, targetId);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+        const groupsWithMode = savedGroups.map((id: string) => {
+          const group = findNode(graphToSave, id);
+          return { id, mode: group?.mode || 'FREE' };
+        });
+        console.log('💾 [PERSIST] Saved groups with modes:', groupsWithMode);
       } else {
         console.warn('⚠️ [handleGraphChange] Cannot persist - missing viewstate or architectureId:', {
           hasViewState: !!currentViewState,
@@ -2527,45 +2770,143 @@ Adapt these patterns to your specific requirements while maintaining the overall
     }
   }, []);
 
-  // Unified auto-fit view: triggers on ANY graph state change
-  // BUT skip fitView for user-created nodes in FREE mode (they're placed at cursor)
+  // Fit view ONLY on initial load (when transitioning from 0 nodes to first nodes)
+  // This handles cases where nodes are restored from localStorage without ELK running
   useEffect(() => {
-    // Only trigger if we have content and ReactFlow is ready
-    if (nodes.length > 0 && reactFlowRef.current && layoutVersion > 0) {
-      // Check if ReactFlow instance is ready (getViewport might not exist yet)
+    const previousCount = previousNodeCountRef.current;
+    const currentCount = nodes.length;
+    
+    // Only trigger when transitioning from empty (0 nodes) to having nodes (>0)
+    // AND we haven't already fitted the initial load
+    const isInitialLoad = previousCount === 0 && currentCount > 0 && !hasFittedInitialLoadRef.current;
+    
+    // Update ref for next check
+    previousNodeCountRef.current = currentCount;
+    
+    if (isInitialLoad && reactFlowRef.current) {
       if (typeof reactFlowRef.current.getViewport !== 'function') {
         return; // ReactFlow not ready yet
       }
       
-      // Debug: Log viewport and node positions
-      const viewport = reactFlowRef.current.getViewport();
-      const nodePositions = nodes.slice(0, 5).map(n => ({ id: n.id, x: n.position.x, y: n.position.y }));
+      // Mark as fitted - this prevents any future triggers
+      hasFittedInitialLoadRef.current = true;
+      
       const minX = Math.min(...nodes.map(n => n.position.x));
       const minY = Math.min(...nodes.map(n => n.position.y));
       const maxX = Math.max(...nodes.map(n => n.position.x));
       const maxY = Math.max(...nodes.map(n => n.position.y));
-      
-      
-      // Check if we should skip fitView (for user mutations in FREE mode)
-      // BUT: Always run fitView if nodes are spread far apart (AI diagrams)
       const nodeSpread = Math.max(maxX - minX, maxY - minY);
-      const hasLargeSpread = nodeSpread > 2000; // Nodes spread over 2000px
-      const shouldForceFitView = hasLargeSpread || nodes.length > 10; // Force for AI diagrams
-      
-      if (shouldSkipFitViewRef?.current === true && !shouldForceFitView) {
-        shouldSkipFitViewRef.current = false; // Clear flag after checking
-        return;
-      }
-      
-      // Clear skip flag if we're forcing fitView
-      if (shouldForceFitView) {
-        shouldSkipFitViewRef.current = false;
-      }
+      const hasLargeSpread = nodeSpread > 2000;
       
       const timeoutId = setTimeout(() => {
-        const afterViewport = reactFlowRef.current?.getViewport();
+        if (hasLargeSpread && reactFlowRef.current) {
+          const centerX = (minX + maxX) / 2;
+          const centerY = (minY + maxY) / 2;
+          reactFlowRef.current.setCenter(centerX, centerY, { zoom: 0.5 });
+        }
+        manualFitView();
+      }, 300); // Slightly longer delay for initial load
+      return () => clearTimeout(timeoutId);
+    }
+  }, [nodes.length, manualFitView]); // Still depend on nodes.length to detect changes, but logic prevents re-triggering
+
+  // Fit view on AI diagram generation ONLY (when layoutVersion changes after AI graph change)
+  // NOT on user interactions - only when shouldFitViewForAIDiagramRef flag is explicitly set
+  useEffect(() => {
+    // CRITICAL: Only trigger if flag is set (set in handleGraphChange when source === 'ai')
+    // This ensures we never fitView on user interactions, even if layoutVersion changes
+    if (!shouldFitViewForAIDiagramRef.current) {
+      return; // Early exit - flag not set, this is not an AI diagram
+    }
+    
+    // Only proceed if we have content, ReactFlow is ready, and layoutVersion has changed
+    if (nodes.length > 0 && reactFlowRef.current && layoutVersion > 0) {
+      // Check if ReactFlow instance is ready
+      if (typeof reactFlowRef.current.getViewport !== 'function') {
+        return; // ReactFlow not ready yet
+      }
+      
+      // Clear AI diagram flag immediately to prevent re-triggering
+      shouldFitViewForAIDiagramRef.current = false;
+      
+      const timeoutId = setTimeout(() => {
+        if (!reactFlowRef.current) return;
         
-        // For large spreads, center on the middle of all nodes first
+        // If we have a newly created AI group, focus specifically on that group
+        if (newlyCreatedAIGroupIdRef.current) {
+          const groupNode = nodes.find(n => n.id === newlyCreatedAIGroupIdRef.current);
+          if (groupNode) {
+            // Get group bounds (including all children)
+            const groupNodes = nodes.filter(n => 
+              n.parentId === groupNode.id || n.id === groupNode.id
+            );
+            
+            if (groupNodes.length > 0) {
+              // Calculate bounds including node dimensions
+              let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+              
+              groupNodes.forEach(n => {
+                const width = (n.width as number) || (n.data?.width as number) || 96;
+                const height = (n.height as number) || (n.data?.height as number) || 96;
+                minX = Math.min(minX, n.position.x);
+                minY = Math.min(minY, n.position.y);
+                maxX = Math.max(maxX, n.position.x + width);
+                maxY = Math.max(maxY, n.position.y + height);
+              });
+              
+              // Center on the newly created group
+              const centerX = (minX + maxX) / 2;
+              const centerY = (minY + maxY) / 2;
+              
+              console.log('🎯 [AI-FITVIEW] Focusing on newly created AI group:', {
+                groupId: newlyCreatedAIGroupIdRef.current,
+                center: { x: centerX, y: centerY },
+                bounds: { minX, minY, maxX, maxY },
+                nodeCount: groupNodes.length
+              });
+              
+              // Calculate zoom to fit the group with padding
+              const groupWidth = maxX - minX;
+              const groupHeight = maxY - minY;
+              
+              // Estimate viewport size (ReactFlow doesn't expose this easily)
+              // Use typical browser viewport dimensions
+              const estimatedViewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+              const estimatedViewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+              
+              // Calculate zoom to fit group with 20% padding on all sides
+              const padding = 0.2;
+              const availableWidth = estimatedViewportWidth * (1 - padding * 2);
+              const availableHeight = estimatedViewportHeight * (1 - padding * 2);
+              
+              const zoomX = availableWidth / groupWidth;
+              const zoomY = availableHeight / groupHeight;
+              const targetZoom = Math.min(Math.max(zoomX, zoomY, 0.3), 1.5); // Clamp between 0.3 and 1.5
+              
+              // Center and zoom to the newly created group
+              reactFlowRef.current.setCenter(centerX, centerY, { 
+                zoom: targetZoom,
+                duration: 800 
+              });
+              
+              // Clear the ref after focusing
+              newlyCreatedAIGroupIdRef.current = null;
+              return;
+            }
+          }
+          // If group not found, fall through to fit all nodes
+          newlyCreatedAIGroupIdRef.current = null;
+        }
+        
+        // Fallback: fit all nodes if no specific group to focus on
+        const minX = Math.min(...nodes.map(n => n.position.x));
+        const minY = Math.min(...nodes.map(n => n.position.y));
+        const maxX = Math.max(...nodes.map(n => n.position.x));
+        const maxY = Math.max(...nodes.map(n => n.position.y));
+        const nodeSpread = Math.max(maxX - minX, maxY - minY);
+        const hasLargeSpread = nodeSpread > 2000; // Nodes spread over 2000px
+        
+        // For large spreads (AI diagrams), center on the middle of all nodes first
         if (hasLargeSpread && reactFlowRef.current) {
           const centerX = (minX + maxX) / 2;
           const centerY = (minY + maxY) / 2;
@@ -2573,14 +2914,14 @@ Adapt these patterns to your specific requirements while maintaining the overall
         }
         
         manualFitView();
-      }, 200); // Unified delay to ensure layout is complete
+      }, 200); // Delay to ensure layout is complete
       return () => clearTimeout(timeoutId);
     }
   }, [
-    // Trigger on ANY significant graph change:
-    nodes.length,           // When nodes are added/removed
-    edges.length,           // When edges are added/removed  
-    layoutVersion,          // When ELK layout completes (includes groups, moves, etc.)
+    // Only trigger on layoutVersion changes (ELK layout completion)
+    // Combined with shouldFitViewForAIDiagramRef flag check to only trigger for AI diagrams
+    layoutVersion,
+    nodes.length, // Also check nodes.length to ensure nodes are present
     manualFitView
   ]);
 
@@ -2794,83 +3135,250 @@ Adapt these patterns to your specific requirements while maintaining the overall
     if (graph.children) {
       for (const child of graph.children) {
         const found = findNodeInGraph(child, targetId);
-            if (found) return found;
-          }
-        }
-        return null;
+        if (found) return found;
+      }
+    }
+    return null;
   }, []);
-      
-  const handleArrangeGroup = useCallback(async (groupId: string) => {
+
+  const handleArrangeGroup = useCallback(async (groupId: string, currentModeFromButton?: 'FREE' | 'LOCK') => {
     // Arrange the insides of the group using ELK, relative to group position
-    if (!rawGraph || !viewStateRef.current) {
-      console.warn('🟦 [ARRANGE] Missing rawGraph or viewState');
+    console.log('🟦 [ARRANGE] handleArrangeGroup called for group:', groupId, 'with currentMode:', currentModeFromButton);
+    
+    // CRITICAL: Use rawGraphRef.current (source of truth) instead of rawGraph (might be stale)
+    const currentGraph = rawGraphRef.current || rawGraph;
+    if (!currentGraph || !viewStateRef.current) {
+      console.warn('🟦 [ARRANGE] Missing graph or viewState');
       return;
     }
     
     try {
+      // Normalize the group ID to match how it's stored in the graph
+      const normalizedGroupId = createNodeID(groupId);
+      console.log('🟦 [ARRANGE] Original ID:', groupId, '→ Normalized:', normalizedGroupId);
       
-      // Check if group exists in graph
-      const groupNode = findNodeInGraph(rawGraph, groupId);
-      if (!groupNode) {
-        console.error('🟦 [ARRANGE] Group not found in graph:', groupId);
-        return;
+      // Try to find the group in the graph (use ref, not state)
+      let groupNode = findNodeInGraph(currentGraph, groupId);
+      let finalGroupId = groupId;
+      
+      if (!groupNode && normalizedGroupId !== groupId) {
+        groupNode = findNodeInGraph(currentGraph, normalizedGroupId);
+        if (groupNode) {
+          finalGroupId = normalizedGroupId;
+          console.log('🟦 [ARRANGE] Found group using normalized ID');
+        }
       }
       
-      const currentMode = groupNode.mode || 'FREE';
+      // If group not found, still proceed - resolveElkScope will handle it
+      // The group might exist in ReactFlow but not yet in domain (race condition)
+      if (!groupNode) {
+        console.warn('🟦 [ARRANGE] Group not found in graph, but proceeding anyway - will run ELK on scope:', groupId);
+        // Use the original groupId - resolveElkScope will figure it out
+        finalGroupId = groupId;
+      }
+      
+      // CRITICAL FIX: Use mode passed from button if available (most reliable)
+      // Otherwise fallback to reading from ReactFlow or ViewState
+      let currentMode: 'FREE' | 'LOCK' = currentModeFromButton || 'FREE';
+      
+      if (!currentModeFromButton) {
+        // Fallback: Read from ReactFlow node data (data.mode) which is the source of truth
+        if (reactFlowRef.current) {
+          const reactFlowNodes = reactFlowRef.current.getNodes();
+          const groupReactFlowNode = reactFlowNodes.find(n => n.id === finalGroupId || n.id === groupId);
+          if (groupReactFlowNode?.data?.mode) {
+            currentMode = groupReactFlowNode.data.mode;
+            console.log(`🟦 [ARRANGE] Read mode from ReactFlow node data: ${currentMode}`);
+          }
+        }
+        
+        // Final fallback to ViewState if ReactFlow data not available
+        if (currentMode === 'FREE' && viewStateRef.current.layout?.[finalGroupId]?.mode) {
+          currentMode = viewStateRef.current.layout[finalGroupId].mode;
+          console.log(`🟦 [ARRANGE] Read mode from ViewState: ${currentMode}`);
+        }
+      } else {
+        console.log(`🟦 [ARRANGE] Using mode from button: ${currentMode}`);
+      }
       
       // Toggle mode: FREE -> LOCK, LOCK -> FREE
       const newMode = currentMode === 'FREE' ? 'LOCK' : 'FREE';
+      console.log(`🟦 [ARRANGE] Toggling mode: ${currentMode} → ${newMode} for group: ${finalGroupId}`);
       
-      if (!groupNode.children || groupNode.children.length === 0) {
-        console.warn('🟦 [ARRANGE] Group has no children to arrange');
-        // Still update the graph to persist the mode change - bypass ELK hook
-        const updatedGraph = JSON.parse(JSON.stringify(rawGraph));
-        const updatedGroupNode = findGroup(updatedGraph);
+      // Update mode in graph structure (if group exists)
+      // CRITICAL: Deep clone to avoid mutating the original graph
+      const updatedGraph = JSON.parse(JSON.stringify(currentGraph));
+      if (groupNode) {
+        const updatedGroupNode = findNodeInGraph(updatedGraph, finalGroupId);
         if (updatedGroupNode) {
-          updatedGroupNode.mode = newMode;
+          // CRITICAL: Ensure group structure is preserved (data.isGroup and children)
+          // Don't just set mode - ensure all group properties are preserved
+          if (!updatedGroupNode.data) {
+            updatedGroupNode.data = {};
+          }
+          updatedGroupNode.data.isGroup = true; // Ensure isGroup flag is set
+          // Ensure children array exists (it should, but be safe)
+          if (!Array.isArray(updatedGroupNode.children)) {
+            console.warn(`🟦 [ARRANGE] Group ${finalGroupId} missing children array! Restoring from original.`);
+            updatedGroupNode.children = groupNode.children || [];
+          }
+          console.log(`🟦 [ARRANGE] Updated group ${finalGroupId} mode to ${newMode} in domain graph`, {
+            hasIsGroup: updatedGroupNode.data.isGroup === true,
+            hasChildren: Array.isArray(updatedGroupNode.children) && updatedGroupNode.children.length > 0,
+            childrenCount: updatedGroupNode.children?.length || 0
+          });
+        } else {
+          console.warn(`🟦 [ARRANGE] Group ${finalGroupId} not found in updated graph!`);
         }
-        
-        // FREE mode: Update refs directly (bypasses useElkToReactflowGraphConverter)
+      }
+      
+      // Check if group has children (only if we found the group)
+      // CRITICAL: Even if group has no children, we still need to update ReactFlow for mode change
+      if (groupNode && (!groupNode.children || groupNode.children.length === 0)) {
+        console.warn('🟦 [ARRANGE] Group has no children to arrange, but still updating mode');
+        // Still update the mode change - need to update ReactFlow too!
         rawGraphRef.current = updatedGraph;
         if (!viewStateRef.current.layout) viewStateRef.current.layout = {};
-        viewStateRef.current.layout[groupId] = { mode: newMode };
+        viewStateRef.current.layout[finalGroupId] = { mode: newMode };
+        
+        // CRITICAL: Update ReactFlow nodes to reflect mode change even for empty groups
+        const viewStateWithNewMode = {
+          ...viewStateRef.current,
+          layout: {
+            ...viewStateRef.current.layout,
+            [finalGroupId]: { mode: newMode }
+          }
+        };
+        viewStateRef.current = viewStateWithNewMode;
+        
+        const { convertViewStateToReactFlow } = await import('../../core/renderer/ViewStateToReactFlow');
+        const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, viewStateWithNewMode);
+        
+        // CRITICAL: Preserve selection state of the group
+        const currentNodes = reactFlowRef.current?.getNodes() || [];
+        const currentlySelectedGroup = currentNodes.find(n => (n.id === finalGroupId || n.id === groupId) && n.selected);
+        const wasSelected = !!currentlySelectedGroup;
+        
+        // CRITICAL: Verify group is still a group
+        const groupNodeInResult = nodes.find(n => n.id === finalGroupId || n.id === groupId);
+        if (groupNodeInResult && groupNodeInResult.type !== 'draftGroup') {
+          console.error(`🟦 [ARRANGE] ⚠️ CRITICAL: Empty group ${finalGroupId} lost its group type! Type is: ${groupNodeInResult.type}, expected: draftGroup`);
+          groupNodeInResult.type = 'draftGroup';
+          groupNodeInResult.data = { ...groupNodeInResult.data, isGroup: true };
+        }
+        
+        // CRITICAL: Preserve selection state
+        if (wasSelected && groupNodeInResult) {
+          groupNodeInResult.selected = true;
+          console.log('🟦 [ARRANGE] Preserving group selection state');
+        }
+        
+        setNodes(nodes);
+        setEdges(edges);
+        setRawGraph(updatedGraph, 'user');
+        console.log('🟦 [ARRANGE] Empty group mode updated to:', newMode);
         return;
+      }
+      
+      // CRITICAL FIX: Update mode in ViewState.layout BEFORE any rendering
+      // This ensures the mode is available when converting to ReactFlow
+      if (!viewStateRef.current.layout) {
+        viewStateRef.current.layout = {};
+      }
+      
+      // NEW: Lock this group and all descendants when locking
+      let viewStateWithNewMode = viewStateRef.current;
+      if (newMode === 'LOCK') {
+        const { lockScopeAndDescendants } = await import('../../core/orchestration/handlers/mode/lockScopeAndDescendants');
+        viewStateWithNewMode = lockScopeAndDescendants(finalGroupId, updatedGraph, viewStateRef.current);
+        viewStateRef.current = viewStateWithNewMode;
+        
+        // Update domain graph modes recursively
+        const setModeRecursive = (node: any) => {
+          if (node.children && node.children.length > 0) {
+            node.mode = 'LOCK';
+            node.children.forEach(setModeRecursive);
+          }
+        };
+        const groupNodeForMode = findNodeInGraph(updatedGraph, finalGroupId);
+        if (groupNodeForMode) {
+          setModeRecursive(groupNodeForMode);
+        }
+      } else {
+        viewStateRef.current.layout[finalGroupId] = { mode: newMode };
+        viewStateWithNewMode = {
+          ...viewStateRef.current,
+          layout: {
+            ...viewStateRef.current.layout,
+            [finalGroupId]: { mode: newMode }
+          }
+        };
       }
       
       // Only run ELK if setting to LOCK (arranging)
       if (newMode !== 'LOCK') {
-        // Persist mode change with deep copy - bypass ELK hook
-        const updatedGraph = JSON.parse(JSON.stringify(rawGraph));
-        const updatedGroupNode = findGroup(updatedGraph);
-        if (updatedGroupNode) {
-          updatedGroupNode.mode = newMode;
-        }
-        
         // FREE mode: Update refs directly (bypasses useElkToReactflowGraphConverter)
         rawGraphRef.current = updatedGraph;
-        if (!viewStateRef.current.layout) viewStateRef.current.layout = {};
-        viewStateRef.current.layout[groupId] = { mode: newMode };
+        viewStateRef.current = viewStateWithNewMode;
+        
+        // CRITICAL: Update ReactFlow nodes directly to reflect mode change
+        // This ensures the button state updates immediately
+        const { convertViewStateToReactFlow } = await import('../../core/renderer/ViewStateToReactFlow');
+        const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, viewStateWithNewMode);
+        
+        // CRITICAL: Preserve selection state of the group
+        const currentNodes = reactFlowRef.current?.getNodes() || [];
+        const currentlySelectedGroup = currentNodes.find(n => (n.id === finalGroupId || n.id === groupId) && n.selected);
+        const wasSelected = !!currentlySelectedGroup;
+        
+        // CRITICAL: Verify mode is in the converted nodes before setting them
+        const groupNodeInResult = nodes.find(n => n.id === finalGroupId || n.id === groupId);
+        console.log('🟦 [ARRANGE] FREE mode - Converting to ReactFlow - group node mode:', {
+          groupId: finalGroupId,
+          nodeId: groupNodeInResult?.id,
+          modeInData: groupNodeInResult?.data?.mode,
+          modeInViewState: viewStateWithNewMode.layout?.[finalGroupId]?.mode,
+          expectedMode: newMode,
+          wasSelected
+        });
+        
+        // CRITICAL: Preserve selection state
+        if (wasSelected && groupNodeInResult) {
+          groupNodeInResult.selected = true;
+          console.log('🟦 [ARRANGE] Preserving group selection state for FREE mode');
+        }
+        
+        setNodes(nodes);
+        setEdges(edges);
+        
+        console.log('🟦 [ARRANGE] FREE mode set, ReactFlow nodes updated with mode:', newMode);
+        console.log('🟦 [ARRANGE] ViewState layout mode:', viewStateWithNewMode.layout[finalGroupId]);
         return;
       }
       
-      // Run ELK layout on resolved scope (LOCK gesture routing)
-      const elkScope = resolveElkScope(groupId, rawGraph);
+      // Run ELK layout on the group scope directly
+      // resolveElkScope will find the group or highest locked ancestor
+      const elkScope = resolveElkScope(finalGroupId, updatedGraph, viewStateWithNewMode);
       
       if (!elkScope) {
-        console.warn('🟦 [ARRANGE] No ELK scope resolved, skipping layout');
-        return;
+        console.warn('🟦 [ARRANGE] No ELK scope resolved, but running anyway on groupId:', finalGroupId);
+        // Still try to run ELK on the groupId directly
       }
       
+      const scopeToUse = elkScope || finalGroupId;
       console.log('[🎯COORD] handleArrangeGroup - starting ELK layout:', { 
-        originalGroup: groupId, 
-        resolvedScope: elkScope,
-        groupAbsolutePos: viewStateRef.current.group?.[groupId] 
-          ? `${viewStateRef.current.group[groupId].x},${viewStateRef.current.group[groupId].y}`
+        originalGroup: finalGroupId, 
+        resolvedScope: scopeToUse,
+        groupAbsolutePos: viewStateRef.current.group?.[finalGroupId] 
+          ? `${viewStateRef.current.group[finalGroupId].x},${viewStateRef.current.group[finalGroupId].y}`
           : 'none',
+        newMode,
+        graphHasGroup: !!groupNode
       });
       
-      // Use original rawGraph for ELK (before mode change)
-      const delta = await runScopeLayout(elkScope, rawGraph, viewStateRef.current, {});
+      // CRITICAL: Use updatedGraph (with mode set) and viewStateWithNewMode
+      // This ensures ELK runs on everything inside the group
+      const delta = await runScopeLayout(scopeToUse, updatedGraph, viewStateWithNewMode, {});
       
       console.log('[🎯COORD] handleArrangeGroup - ELK delta received (absolute positions):', {
         nodeCount: Object.keys(delta.node || {}).length,
@@ -2887,8 +3395,56 @@ Adapt these patterns to your specific requirements while maintaining the overall
       }
       
       // Merge delta into ViewState
-      const updatedViewState = mergeViewState(viewStateRef.current, delta);
+      const updatedViewState = mergeViewState(viewStateWithNewMode, delta);
+      
+      // CRITICAL: Ensure mode is preserved in merged ViewState
+      if (!updatedViewState.layout) {
+        updatedViewState.layout = {};
+      }
+      updatedViewState.layout[finalGroupId] = { mode: newMode };
+      
+      // CRITICAL: Double-check that scope group dimensions are preserved after merge
+      // This is a safeguard against mergeViewState overwriting with incorrect values
+      const originalScopeGeom = viewStateRef.current?.group?.[finalGroupId];
+      if (originalScopeGeom && updatedViewState.group?.[finalGroupId]) {
+        const mergedScopeGeom = updatedViewState.group[finalGroupId];
+        // If merged dimensions don't match original, force preserve original
+        if (mergedScopeGeom.w !== originalScopeGeom.w || mergedScopeGeom.h !== originalScopeGeom.h) {
+          console.warn(`[🔍 ELK-DEBUG] ⚠️ Scope group dimensions changed during merge! Preserving original:`, {
+            original: { w: originalScopeGeom.w, h: originalScopeGeom.h },
+            merged: { w: mergedScopeGeom.w, h: mergedScopeGeom.h },
+            fixing: true
+          });
+          updatedViewState.group[finalGroupId] = {
+            ...mergedScopeGeom,
+            w: originalScopeGeom.w,
+            h: originalScopeGeom.h
+          };
+        }
+        // Also preserve position if it changed
+        if (mergedScopeGeom.x !== originalScopeGeom.x || mergedScopeGeom.y !== originalScopeGeom.y) {
+          console.warn(`[🔍 ELK-DEBUG] ⚠️ Scope group position changed during merge! Preserving original:`, {
+            original: { x: originalScopeGeom.x, y: originalScopeGeom.y },
+            merged: { x: mergedScopeGeom.x, y: mergedScopeGeom.y },
+            fixing: true
+          });
+          updatedViewState.group[finalGroupId] = {
+            ...updatedViewState.group[finalGroupId],
+            x: originalScopeGeom.x,
+            y: originalScopeGeom.y
+          };
+        }
+      }
+      
       viewStateRef.current = updatedViewState;
+      
+      // CRITICAL: Verify mode is set correctly
+      console.log('🟦 [ARRANGE] Mode after merge:', {
+        groupId: finalGroupId,
+        modeInViewState: updatedViewState.layout?.[finalGroupId]?.mode,
+        expectedMode: newMode,
+        allLayoutModes: Object.entries(updatedViewState.layout || {}).map(([id, layout]: [string, any]) => ({ id, mode: layout.mode }))
+      });
       
       console.log('🟦 [ARRANGE] ViewState updated, updating ReactFlow nodes');
       console.log('🟦 [ARRANGE] Delta received:', {
@@ -2903,24 +3459,56 @@ Adapt these patterns to your specific requirements while maintaining the overall
         viewStateNodes: updatedViewState.node,
         viewStateGroups: updatedViewState.group
       });
-            
-      // CRITICAL: Update refs directly - bypasses ELK hook (ELK already ran above)
-      const updatedGraph = JSON.parse(JSON.stringify(rawGraph));
       
-      // Write mode to ViewState.layout (primary location)
+      // CRITICAL: Mode is already updated in ViewState.layout (done before ELK)
+      // Just ensure it's persisted in the updated ViewState
       if (!updatedViewState.layout) {
         updatedViewState.layout = {};
       }
-      updatedViewState.layout[groupId] = { mode: newMode };
+      updatedViewState.layout[finalGroupId] = { mode: newMode };
       
-      // Update refs
-      updatedGraph.viewState = updatedViewState;
+      // Update refs with mode change and ELK results
+      // Note: Don't write mode to domain graph - mode lives in ViewState.layout only
       rawGraphRef.current = updatedGraph;
       viewStateRef.current = updatedViewState;
       
       // Render directly - bypasses ELK hook (ELK already ran above)
       const { convertViewStateToReactFlow } = await import('../../core/renderer/ViewStateToReactFlow');
       const { nodes, edges } = convertViewStateToReactFlow(updatedGraph, updatedViewState);
+      
+      // CRITICAL: Preserve selection state of the group
+      const currentNodes = reactFlowRef.current?.getNodes() || [];
+      const currentlySelectedGroup = currentNodes.find(n => (n.id === finalGroupId || n.id === groupId) && n.selected);
+      const wasSelected = !!currentlySelectedGroup;
+      
+      // CRITICAL: Verify group is still a group (type should be 'draftGroup', not 'custom')
+      const groupNodeInResult = nodes.find(n => n.id === finalGroupId || n.id === groupId);
+      console.log('🟦 [ARRANGE] Converting to ReactFlow - group node verification:', {
+        groupId: finalGroupId,
+        nodeId: groupNodeInResult?.id,
+        type: groupNodeInResult?.type,
+        isGroup: groupNodeInResult?.data?.isGroup,
+        modeInData: groupNodeInResult?.data?.mode,
+        modeInViewState: updatedViewState.layout?.[finalGroupId]?.mode,
+        expectedMode: newMode,
+        expectedType: 'draftGroup',
+        wasSelected
+      });
+      
+      // CRITICAL: Verify the group is still recognized as a group
+      if (groupNodeInResult && groupNodeInResult.type !== 'draftGroup') {
+        console.error(`🟦 [ARRANGE] ⚠️ CRITICAL: Group ${finalGroupId} lost its group type! Type is: ${groupNodeInResult.type}, expected: draftGroup`);
+        // Force it to be a group
+        groupNodeInResult.type = 'draftGroup';
+        groupNodeInResult.data = { ...groupNodeInResult.data, isGroup: true };
+      }
+      
+      // CRITICAL: Preserve selection state
+      if (wasSelected && groupNodeInResult) {
+        groupNodeInResult.selected = true;
+        console.log('🟦 [ARRANGE] Preserving group selection state for LOCK mode');
+      }
+      
       setNodes(nodes);
       setEdges(edges);
       
@@ -3095,22 +3683,114 @@ useEffect(() => {
   if (isHydratingRef.current) return;
   if (typeof window === "undefined") return;
 
-  // CRITICAL: Use rawGraphRef.current (source of truth for FREE mode) 
-  // instead of rawGraph React state which may be stale
-  const graphToSave = rawGraphRef.current || rawGraph;
+  // CRITICAL: Always use rawGraphRef.current (source of truth for FREE mode) 
+  // instead of rawGraph React state which may be stale, especially after deletions
+  // FREE mode handlers update rawGraphRef.current directly, not React state
+  // CRITICAL: Re-read rawGraphRef.current to ensure we have the latest state (it may have been updated by Orchestrator)
+  const graphToSave = rawGraphRef.current;
   if (!graphToSave) return;
 
-  const hasContent =
-    (graphToSave.children && graphToSave.children.length > 0) ||
-    nodes.length > 0 ||
-    edges.length > 0;
-
-  if (!hasContent) {
+  // CRITICAL FIX: Ensure graph structure matches rendered nodes
+  // If nodes are empty but graph has children, the graph is stale (e.g., after deletion)
+  // Only save if the graph matches what's actually rendered, OR if we're explicitly clearing
+  // BUT: During ELK layout, nodes might not be rendered yet, so allow saving if graph has content
+  const graphNodeCount = graphToSave.children?.length || 0;
+  const renderedNodeCount = nodes.length;
+  
+  // DEBUG: Log graph state for deletion debugging
+  if (graphNodeCount === 0 && renderedNodeCount > 0) {
+    console.log('💾 [PERSISTENCE] Deletion detected - graph empty, nodes still rendering:', {
+      graphNodeCount,
+      renderedNodeCount,
+      graphChildren: graphToSave.children?.map((c: any) => c.id) || []
+    });
+  }
+  
+  // CRITICAL: Get latest edges directly from ReactFlow instance to ensure we have ELK data
+  // The `edges` dependency might be stale, so read fresh from ReactFlow
+  // Fallback to edges prop if ReactFlow instance isn't available yet
+  const latestEdges = (reactFlowRef.current && typeof reactFlowRef.current.getEdges === 'function')
+    ? reactFlowRef.current.getEdges()
+    : edges;
+  
+  // CRITICAL: Check if edges have ELK data - if they do, we MUST save even if node counts don't match
+  // This ensures ELK waypoints are persisted before the node count check blocks saving
+  const edgesWithElkData = latestEdges.filter((e: any) => {
+    const edgeData = e.data || {};
+    return edgeData.routingMode === 'LOCK' && edgeData.elkStartPoint && edgeData.elkEndPoint;
+  });
+  const hasEdgesWithElkData = edgesWithElkData.length > 0;
+  
+  // If there's a mismatch, don't save stale data
+  // Exception 1: Allow saving empty state (0 nodes, 0 graph children) for resetCanvas
+  // Exception 2: Allow saving if graph has content but nodes aren't rendered yet (ELK layout in progress)
+  // Exception 3: CRITICAL - Always save if edges have ELK data (must persist waypoints before they're lost!)
+  // Exception 4: CRITICAL - Allow saving when graph is empty but nodes might still be rendering (deletion in progress)
+  if (graphNodeCount !== renderedNodeCount && !hasEdgesWithElkData) {
+    // Graph and rendered nodes don't match
+    if (graphNodeCount === 0 && renderedNodeCount === 0) {
+      // Both are empty - this is valid (after resetCanvas or deletion)
+      // Continue to save empty state
+    } else if (graphNodeCount === 0 && renderedNodeCount > 0) {
+      // Graph is empty but nodes still rendering - deletion in progress
+      // CRITICAL: Save empty state to persist deletion (otherwise nodes will reappear on refresh)
+      console.log('💾 [PERSISTENCE] Graph is empty but nodes still rendering (deletion in progress) - saving empty state to persist deletion');
+    } else if (graphNodeCount > 0 && renderedNodeCount === 0) {
+      // Graph has content but nodes aren't rendered yet - likely ELK layout in progress
+      // Allow saving to prevent data loss during layout
+      console.log('⚠️ [PERSISTENCE] Graph has content but nodes not rendered yet (ELK layout in progress) - saving anyway');
+    } else {
+      // Mismatch - don't save stale data (unless edges have ELK data)
+      console.warn('⚠️ [PERSISTENCE] Skipping save - graph structure mismatch:', {
+        graphChildren: graphNodeCount,
+        renderedNodes: renderedNodeCount
+      });
     return;
+    }
+  }
+  
+  // CRITICAL: If edges have ELK data, log it for debugging
+  if (hasEdgesWithElkData) {
+    console.log(`💾 [PERSISTENCE] Saving ${edgesWithElkData.length} edges with ELK data to preserve waypoints`);
   }
 
+  const hasContent = nodes.length > 0 || latestEdges.length > 0;
+  
+  // If no content, we still save to persist the empty state (important for resetCanvas)
+  // But ensure the graph structure matches (already checked above)
+
   try {
-    const viewStateSnapshot = getViewStateSnapshot();
+    // CRITICAL: Only save if edges have ELK data OR if we have content
+    // This prevents saving empty/incomplete state during initial load
+    if (latestEdges.length > 0 && !hasEdgesWithElkData && latestEdges.length < 5) {
+      // Edges exist but don't have ELK data yet - might be mid-layout
+      // Only skip if we have very few edges (might be incomplete)
+      // If we have many edges, they might be in FREE mode (which is valid)
+      const edgesInFreeMode = latestEdges.filter((e: any) => e.data?.routingMode === 'FREE').length;
+      if (edgesInFreeMode === 0) {
+        // No FREE mode edges and no ELK data - likely still loading
+        console.log('⏳ [PERSISTENCE] Edges exist but no ELK data yet - waiting for ELK layout to complete');
+        return;
+      }
+    }
+    
+    // Use latest edges for snapshot (they have ELK data)
+    const viewStateSnapshot = getViewStateSnapshot(latestEdges);
+    
+    // Verify that edge data was actually saved
+    const savedEdgeCount = Object.keys(viewStateSnapshot?.edge || {}).length;
+    if (latestEdges.length > 0 && savedEdgeCount === 0) {
+      console.warn('⚠️ [PERSISTENCE] WARNING: Edges exist but none were saved to ViewState snapshot!', {
+        edgesCount: latestEdges.length,
+        edgesWithElkData: edgesWithElkData.length,
+        sampleEdge: latestEdges[0]?.id,
+        sampleEdgeData: latestEdges[0]?.data ? {
+          routingMode: latestEdges[0].data.routingMode,
+          hasElkStart: !!latestEdges[0].data.elkStartPoint,
+          hasElkEnd: !!latestEdges[0].data.elkEndPoint
+        } : 'no_data'
+      });
+    }
     
     // CRITICAL: Use deep copy to preserve nested modes (shallow copy loses nested mutations)
     const rawGraphCopy = JSON.parse(JSON.stringify(graphToSave));
@@ -3126,13 +3806,26 @@ useEffect(() => {
     const serialized = JSON.stringify(payload);
     localStorage.setItem(LOCAL_CANVAS_SNAPSHOT_KEY, serialized);
     sessionStorage.setItem(LOCAL_CANVAS_SNAPSHOT_KEY, serialized);
+    
+    // DEBUG: Log what we saved for deletion debugging
+    const savedNodeCount = graphToSave.children?.length || 0;
+    if (savedNodeCount === 0) {
+      console.log('✅ [PERSISTENCE] Saved empty state (0 nodes) to localStorage - deletion persisted');
+    } else {
+      console.log(`💾 [PERSISTENCE] Saved ${savedNodeCount} nodes to localStorage:`, graphToSave.children?.map((c: any) => c.id) || []);
+    }
+    
+    if (hasEdgesWithElkData) {
+      console.log(`✅ [PERSISTENCE] Saved ${savedEdgeCount} edges (${edgesWithElkData.length} with ELK data) to localStorage`);
+    }
+    
     if (markDirty && typeof markDirty === 'function') {
     markDirty();
     }
   } catch (error) {
     console.warn("⚠️ Failed to persist local canvas snapshot:", error);
   }
-}, [rawGraph, nodes, edges, getViewStateSnapshot, selectedArchitectureId, markDirty]);
+}, [nodes, edges, getViewStateSnapshot, selectedArchitectureId, markDirty]); // Removed rawGraph dependency - always use rawGraphRef.current
 
   
   const {
@@ -3220,7 +3913,7 @@ useEffect(() => {
       
       // Always update the architecture data in savedArchitectures for all tabs (including new-architecture)
       if (targetArchitectureId) {
-        const viewStateSnapshot = sanitizeStoredViewState(externalViewState || getViewStateSnapshot());
+        const viewStateSnapshot = sanitizeStoredViewState(externalViewState || getViewStateSnapshot(edges));
         const graphWithViewState = viewStateSnapshot ? { ...elkGraph, viewState: viewStateSnapshot } : elkGraph;
 
         setSavedArchitectures(prev => prev.map(arch => 
@@ -3228,6 +3921,41 @@ useEffect(() => {
             ? { ...arch, rawGraph: graphWithViewState, viewState: viewStateSnapshot, lastModified: new Date() }
             : arch
         ));
+      }
+      
+      // Update global currentGraph for chat agent - always keep it in sync
+      (window as any).currentGraph = elkGraph;
+      console.log('📊 Updated global currentGraph for chat agent:', elkGraph ? `${elkGraph.children?.length || 0} nodes` : 'none');
+      
+      // Also update global selections for chat agent context
+      (window as any).selectedNodeIds = selectedNodeIds || [];
+      (window as any).selectedEdgeIds = selectedEdges?.map(e => e.id) || [];
+      
+      // Select first group after agent draws (if going from empty to first architecture)
+      if (source === 'FunctionExecutor' && reason === 'agent-update' && shouldUpdateCanvas) {
+        const wasEmptyBefore = !rawGraph?.children?.length || rawGraph.children.length === 0;
+        const hasContentNow = elkGraph?.children?.length > 0;
+        
+        if (wasEmptyBefore && hasContentNow) {
+          // Find the first group (or first node if no groups)
+          const firstChild = elkGraph.children?.[0];
+          if (firstChild) {
+            // Check if it's a group (has children) or a node
+            const isGroup = firstChild.children && firstChild.children.length > 0;
+            if (isGroup) {
+              console.log('🎯 Selecting first drawn group:', firstChild.id);
+              // Select the first group
+              setTimeout(() => {
+                setSelectedNodeIds([firstChild.id]);
+                // Also update ReactFlow selection
+                setNodes((nds) => nds.map(n => ({
+                  ...n,
+                  selected: n.id === firstChild.id
+                })));
+              }, 100); // Small delay to ensure graph is rendered
+            }
+          }
+        }
       }
       
       // Create new named chat ONLY when going from empty to first architecture
@@ -3265,7 +3993,7 @@ useEffect(() => {
               console.log('🔄 Name collision detected, using unique name:', newChatName);
             }
             const chatMessages = normalizeChatMessages(getCurrentConversation()) ?? [];
-            const viewStateSnapshot = externalViewState || getViewStateSnapshot();
+            const viewStateSnapshot = externalViewState || getViewStateSnapshot(edges);
             const elkGraphWithViewState = viewStateSnapshot ? { ...elkGraph, viewState: viewStateSnapshot } : elkGraph;
             
             // Update the "New Architecture" tab in place
@@ -3588,10 +4316,96 @@ useEffect(() => {
       return;
     }
  
-    // Allow selection when using arrow tool, but prevent when actively using other tools
-    if (selectedTool === 'connector' || selectedTool === 'box') {
-      return;
+    // CRITICAL: Don't process selection if clicking on UI elements (chat, buttons, etc.)
+    // Check active element and recent click target - use capture phase to catch early
+    const activeElement = document.activeElement as HTMLElement;
+    const target = activeElement || (window as any).lastClickTarget;
+    
+    if (target) {
+      // Check if click is on chat box, chat input, or any UI element
+      // Check element itself first, then ancestors
+      const isUIClick = 
+                       // Check element directly
+                       (target.getAttribute && target.getAttribute('data-chatbox') === 'true') ||
+                       (target.getAttribute && target.getAttribute('data-chat-input') === 'true') ||
+                       (target.getAttribute && target.getAttribute('data-ui-element') === 'true') ||
+                       target.tagName === 'INPUT' || 
+                       target.tagName === 'TEXTAREA' || 
+                       target.tagName === 'BUTTON' ||
+                       // Check ancestors
+                       target.closest('[data-chatbox="true"]') ||
+                       target.closest('[data-chat-input="true"]') ||
+                       target.closest('[data-ui-element="true"]') ||
+                       target.closest('.chatbox') ||
+                       target.closest('[class*="Chatbox"]') ||
+                       target.closest('input[type="text"]') ||
+                       target.closest('textarea') ||
+                       target.closest('button:not(.react-flow__controls-button)') ||
+                       target.closest('[role="textbox"]') ||
+                       target.closest('[data-testid*="chat"]') ||
+                       target.closest('[class*="chat"]') ||
+                       target.closest('[id*="chat"]') ||
+                       // Check for RightPanelChat
+                       target.closest('[class*="RightPanelChat"]') ||
+                       // Check if it's an input/textarea/button (UI elements)
+                       (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') ||
+                       // Check for any element with high z-index (UI elements)
+                       (target.closest('[style*="z-index"]') && parseInt(getComputedStyle(target.closest('[style*="z-index"]') as HTMLElement)?.zIndex || '0') > 10000);
+      
+      if (isUIClick) {
+        console.log('🚫 Ignoring selection change - click on UI element:', target);
+        return; // Don't process selection change if clicking on UI
+      }
     }
+    
+    // Also check if the click originated from a UI element by checking event path
+    // This catches cases where ReactFlow processes the click before our checks
+    if (params.event?.target) {
+      const eventTarget = params.event.target as HTMLElement;
+      const isEventUIClick = 
+                            (eventTarget.getAttribute && eventTarget.getAttribute('data-chatbox') === 'true') ||
+                            (eventTarget.getAttribute && eventTarget.getAttribute('data-chat-input') === 'true') ||
+                            (eventTarget.getAttribute && eventTarget.getAttribute('data-ui-element') === 'true') ||
+                            eventTarget.tagName === 'INPUT' ||
+                            eventTarget.tagName === 'TEXTAREA' ||
+                            eventTarget.tagName === 'BUTTON' ||
+                            eventTarget.closest('[data-chatbox="true"]') ||
+                            eventTarget.closest('[data-chat-input="true"]') ||
+                            eventTarget.closest('[data-ui-element="true"]') ||
+                            eventTarget.closest('.chatbox') ||
+                            eventTarget.closest('[class*="Chatbox"]') ||
+                            eventTarget.closest('[class*="RightPanelChat"]') ||
+                            eventTarget.closest('[class*="chat"]') ||
+                            eventTarget.closest('[id*="chat"]');
+      
+      if (isEventUIClick) {
+        console.log('🚫 Ignoring selection change - event target is UI element:', eventTarget);
+      return;
+      }
+    }
+    
+    // Additional check: if we have selected nodes and the click is on chatbox area, prevent deselection
+    if (selectedNodes.length > 0) {
+      // Check if click is anywhere in the chatbox container area
+      const chatboxElement = document.querySelector('[data-chatbox="true"]');
+      if (chatboxElement && (target?.closest === chatboxElement || target === chatboxElement || chatboxElement.contains(target as Node))) {
+        console.log('🚫 Preventing deselection - click in chatbox area while nodes are selected');
+        return; // Don't process selection change - keep current selection
+      }
+    }
+ 
+    // Allow selection when using arrow tool
+    // Also allow when box tool is active (for auto-selection of newly added nodes)
+    // Only prevent when connector tool is actively connecting
+    if (selectedTool === 'connector' && (params.nodes?.length > 0 || params.edges?.length > 0)) {
+      return; // Prevent selection during active connection
+    }
+ 
+    // Update global selections for chat agent context
+    const nodeIds = params.nodes?.map((n: any) => n.id) || [];
+    const edgeIds = params.edges?.map((e: any) => e.id) || [];
+    (window as any).selectedNodeIds = nodeIds;
+    (window as any).selectedEdgeIds = edgeIds;
  
     // Domain and ReactFlow MUST be perfectly synchronized - no validation needed
     const newSelectedNodes = params.nodes || [];
@@ -3614,7 +4428,11 @@ useEffect(() => {
       const prevStr = prev.sort().join(',');
       const newStr = newSelectedNodes.map((n: Node) => n.id).sort().join(',');
       if (prevStr === newStr) return prev; // Prevent unnecessary updates
-      return newSelectedNodes.map((n: Node) => n.id);
+      const newIds = newSelectedNodes.map((n: Node) => n.id);
+      // Update global selections for chat agent context
+      (window as any).selectedNodeIds = newIds;
+      (window as any).selectedEdgeIds = newSelectedEdges.map((e: Edge) => e.id);
+      return newIds;
     });
 
     if (newSelectedNodes.length === 0 && newSelectedEdges.length === 0) {
@@ -3629,6 +4447,17 @@ useEffect(() => {
   // REMOVED: Problematic edge visibility effect that caused flicker during node movement
   // The centralized z-index configuration now handles edge layering properly
 
+  // Track all clicks globally to detect UI element clicks
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      (window as any).lastClickTarget = e.target;
+    };
+    document.addEventListener('click', handleGlobalClick, true); // Use capture phase
+    return () => {
+      document.removeEventListener('click', handleGlobalClick, true);
+    };
+  }, []);
+
   // Add mousedown handler to pane for immediate deselection (not waiting for mouse up)
   useEffect(() => {
     if (!reactFlowRef.current) return;
@@ -3637,6 +4466,9 @@ useEffect(() => {
     if (!pane) return;
     
     const handlePaneMouseDown = (e: MouseEvent) => {
+      // Store click target for selection change handler
+      (window as any).lastClickTarget = e.target;
+      
       // Only deselect if clicking on pane (not on a node or edge)
       const target = e.target as HTMLElement;
       if (target && target.closest('.react-flow__node')) {
@@ -3644,6 +4476,39 @@ useEffect(() => {
       }
       if (target && target.closest('.react-flow__edge')) {
         return; // Don't deselect if clicking on an edge
+      }
+      
+      // CRITICAL: Don't deselect if clicking on UI elements (chat, buttons, etc.)
+      // Check element directly first, then ancestors
+      const isUIClick = 
+                       // Check element directly
+                       (target.getAttribute && target.getAttribute('data-chatbox') === 'true') ||
+                       (target.getAttribute && target.getAttribute('data-chat-input') === 'true') ||
+                       (target.getAttribute && target.getAttribute('data-ui-element') === 'true') ||
+                       target.tagName === 'INPUT' || 
+                       target.tagName === 'TEXTAREA' || 
+                       target.tagName === 'BUTTON' ||
+                       // Check ancestors
+                       target.closest('[data-chatbox="true"]') ||
+                       target.closest('[data-chat-input="true"]') ||
+                       target.closest('[data-ui-element="true"]') ||
+                       target.closest('.chatbox') ||
+                       target.closest('input[type="text"]') ||
+                       target.closest('textarea') ||
+                       target.closest('button:not(.react-flow__controls-button)') ||
+                       target.closest('[role="textbox"]') ||
+                       target.closest('[data-testid*="chat"]') ||
+                       target.closest('[class*="chat"]') ||
+                       target.closest('[id*="chat"]') ||
+                       target.closest('[class*="RightPanelChat"]') ||
+                       // Check if it's an input/textarea/button (UI elements)
+                       (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') ||
+                       // Check for any element with high z-index (UI elements)
+                       (target.closest('[style*="z-index"]') && parseInt(getComputedStyle(target.closest('[style*="z-index"]') as HTMLElement)?.zIndex || '0') > 10000);
+      
+      if (isUIClick) {
+        console.log('🚫 Ignoring pane click - click on UI element');
+        return; // Don't deselect if clicking on UI
       }
       
       // Deselect immediately on mouse down when in arrow mode
@@ -3866,6 +4731,12 @@ useEffect(() => {
               nodes={nodes} 
               edges={edges}
               onNodesChange={(changes) => {
+                // Debug: Log when onNodesChange is called
+                const hasCloudSqlChange = changes.some((ch: any) => ch.id === 'cloud_sql');
+                if (hasCloudSqlChange) {
+                  console.log('[onNodesChange] Called with cloud_sql change:', changes.filter((ch: any) => ch.id === 'cloud_sql'));
+                }
+                
                 onNodesChange(changes);
                 
                 // Track newly added nodes/groups to skip containment detection for them
@@ -3877,16 +4748,172 @@ useEffect(() => {
                     recentlyCreatedNodesRef.current.forEach((timestamp, id) => {
                       if (now - timestamp > 2000) {
                         recentlyCreatedNodesRef.current.delete(id);
-                          }
+                      }
                     });
+                  }
+                });
+                
+                // FUNDAMENTAL: Update edge routing DURING drag for real-time rerouting
+                // This ensures edges rerender immediately when nodes move, not just after drag ends
+                // Use position comparison approach: compare current ReactFlow node positions with ViewState
+                // This is more reliable than filtering changes since ReactFlow's change structure can vary
+                if (reactFlowRef.current && viewStateRef.current) {
+                  const currentNodes = reactFlowRef.current.getNodes();
+                  const GRID_SIZE = 16;
+                  const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
+                  
+                  const routingUpdates: Array<{ nodeId: string; geometry: { x: number; y: number; w: number; h: number } }> = [];
+                  
+                  // Debug: Check if cloud_sql is in currentNodes
+                  const hasCloudSql = currentNodes.some(n => n.id === 'cloud_sql');
+                  if (!hasCloudSql) {
+                    console.log('[onNodesChange] cloud_sql NOT in currentNodes!');
+                  }
+                  
+                  // Find groups that are being dragged (have position changes)
+                  const draggedGroupIds = new Set<string>();
+                  for (const change of changes) {
+                    if (change.type === 'position' && 'id' in change) {
+                      const node = currentNodes.find(n => n.id === change.id);
+                      if (node && (node.type === 'group' || node.type === 'draftGroup')) {
+                        draggedGroupIds.add(change.id);
+                      }
+                    }
+                  }
+                  
+                  // Find all children of dragged groups (to skip in main loop)
+                  const childrenOfDraggedGroups = new Set<string>();
+                  if (draggedGroupIds.size > 0 && rawGraphRef.current) {
+                    const findChildren = (node: any, isDescendant: boolean) => {
+                      if (isDescendant) {
+                        childrenOfDraggedGroups.add(node.id);
+                      }
+                      if (node.children) {
+                        for (const child of node.children) {
+                          findChildren(child, isDescendant || draggedGroupIds.has(node.id));
                         }
-                      });
+                      }
+                    };
+                    findChildren(rawGraphRef.current, false);
+                  }
+                  
+                  for (const node of currentNodes) {
+                    // Skip children of dragged groups - handleGroupDrag will handle them
+                    // This prevents feedback loop: main loop updates → handleGroupDrag adds delta → double movement
+                    if (childrenOfDraggedGroups.has(node.id)) {
+                      continue;
+                    }
+                    
+                    // Skip recently created nodes (being positioned initially)
+                    const createdTime = recentlyCreatedNodesRef.current.get(node.id);
+                    if (createdTime && (now - createdTime) < 100) {
+                      if (node.id === 'cloud_sql') {
+                        console.log(`[onNodesChange] Skipping cloud_sql - recently created (age=${now - createdTime}ms)`);
+                      }
+                      continue;
+                    }
+                    
+                    if (node.id === 'cloud_sql') {
+                      console.log(`[onNodesChange] Processing cloud_sql`);
+                    }
+                    
+                    const isGroup = node.type === 'group' || node.type === 'draftGroup';
+                    // Use positionAbsolute for absolute coordinates (works for both top-level and nested nodes)
+                    // CRITICAL: If positionAbsolute is undefined, compute it from position + parent position
+                    let absoluteX: number;
+                    let absoluteY: number;
+                    
+                    if ((node as any).positionAbsolute) {
+                      absoluteX = snap((node as any).positionAbsolute.x);
+                      absoluteY = snap((node as any).positionAbsolute.y);
+                    } else if (node.parentNode) {
+                      // Compute absolute position from relative position + parent position
+                      const parentNode = currentNodes.find(n => n.id === node.parentNode);
+                      const parentAbsPos = (parentNode as any)?.positionAbsolute || parentNode?.position || { x: 0, y: 0 };
+                      absoluteX = snap(parentAbsPos.x + node.position.x);
+                      absoluteY = snap(parentAbsPos.y + node.position.y);
+                    } else {
+                      // Top-level node without positionAbsolute - use position as absolute
+                      absoluteX = snap(node.position.x);
+                      absoluteY = snap(node.position.y);
+                    }
+                    
+                    // Get current geometry from ViewState
+                    const existingGeom = isGroup 
+                      ? viewStateRef.current.group?.[node.id]
+                      : viewStateRef.current.node?.[node.id];
+                    
+                    // Debug: Log for cloud_sql
+                    if (node.id === 'cloud_sql') {
+                      console.log(`[onNodesChange:cloud_sql] existingGeom:`, existingGeom, `computed:`, { absoluteX, absoluteY });
+                    }
+                    
+                    // Skip if position hasn't changed (within grid snapping tolerance)
+                    if (existingGeom && existingGeom.x === absoluteX && existingGeom.y === absoluteY) {
+                      if (node.id === 'cloud_sql') {
+                        console.log(`[onNodesChange:cloud_sql] SKIPPED - position unchanged`);
+                      }
+                      continue;
+                    }
+                    
+                    const geometry = {
+                      x: absoluteX,
+                      y: absoluteY,
+                      w: existingGeom?.w ?? (node.width || 96),
+                      h: existingGeom?.h ?? (node.height || 96),
+                    };
+                    
+                    // Update ViewState immediately (source of truth)
+                    if (isGroup) {
+                      if (!viewStateRef.current.group) viewStateRef.current.group = {};
+                      viewStateRef.current.group[node.id] = geometry;
+                    } else {
+                      if (!viewStateRef.current.node) viewStateRef.current.node = {};
+                      viewStateRef.current.node[node.id] = geometry;
+                    }
+                    
+                    // Debug: Log updates for cloud_sql
+                    if (node.id === 'cloud_sql') {
+                      console.log(`[onNodesChange] Updating cloud_sql ViewState:`, geometry);
+                    }
+                    
+                    routingUpdates.push({ nodeId: node.id, geometry });
+                  }
+                  
+                  // Trigger routing update immediately for real-time edge rerouting
+                  // Skip if handleGroupDrag will handle it (to avoid duplicate updates)
+                  const hasGroups = routingUpdates.some(u => {
+                    const node = currentNodes.find(n => n.id === u.nodeId);
+                    return node && (node.type === 'group' || node.type === 'draftGroup');
+                  });
+                  
+                  // Only handle regular nodes here; groups are handled by handleGroupDrag below
+                  const regularNodeUpdates = routingUpdates.filter(u => {
+                    const node = currentNodes.find(n => n.id === u.nodeId);
+                    return node && node.type !== 'group' && node.type !== 'draftGroup';
+                  });
+                  
+                  if (regularNodeUpdates.length > 0) {
+                    batchUpdateObstaclesAndReroute(regularNodeUpdates);
+                    // Dispatch event so StepEdge can re-read ViewState
+                    if (typeof window !== 'undefined') {
+                      window.dispatchEvent(new CustomEvent('viewstate-updated', { 
+                        detail: { nodeIds: regularNodeUpdates.map(u => u.nodeId) }
+                      }));
+                    }
+                  }
+                }
                       
                 // Check for containment after nodes are updated
+                
+                // Debug: Log condition check
+                const conditionMet = selectedTool !== 'box' && reactFlowRef.current;
+                console.log(`[onNodesChange] Containment check condition: selectedTool=${selectedTool}, hasReactFlowRef=${!!reactFlowRef.current}, conditionMet=${conditionMet}`);
                 
                 if (selectedTool !== 'box' && reactFlowRef.current) {
                   // Use requestAnimationFrame to check after ReactFlow has updated
                   requestAnimationFrame(() => {
+                    console.log(`[onNodesChange] Inside requestAnimationFrame callback`);
                     const currentNodes = reactFlowRef.current?.getNodes() || [];
                     // Track which nodes were actually dragged by the user (from position changes)
                     const userDraggedNodeIds = changes
@@ -3927,18 +4954,111 @@ useEffect(() => {
                       // NO setRawGraph call - FREE mode bypasses the ELK hook entirely
                     }
                     
-                    // Handle group drag and update ReactFlow child positions
+                    // Check if any LOCK mode groups are being dragged - unlock on FIRST drag frame
+                    // Don't require dragging flag - ReactFlow may not always set it
+                    const positionChanges = changes.filter(ch => ch.type === 'position' && 'position' in ch);
+                    
+                    // Debug: Log position changes for groups
+                    const groupChanges = positionChanges.filter(ch => {
+                      const node = currentNodes.find(n => n.id === (ch as any).id);
+                      return node && (node.type === 'group' || node.type === 'draftGroup');
+                    });
+                    
+                    const draggedLockGroups = positionChanges
+                      .map(ch => currentNodes.find(n => n.id === (ch as any).id))
+                      .filter(node => 
+                        node &&
+                        (node.type === 'group' || node.type === 'draftGroup') &&
+                        node.data?.mode === 'LOCK'
+                      ) as Node[];
+                    
+                    // Unlock LOCK mode groups on drag start (first frame)
+                    if (draggedLockGroups.length > 0) {
+                      (async () => {
+                        for (const group of draggedLockGroups) {
+                          // Skip if already unlocked during this drag
+                          if (unlockedDuringDragRef.current.has(group.id)) {
+                            continue;
+                          }
+                          
+                          try {
+                            const { findHighestContainingGroup } = await import('../../core/orchestration/handlers/mode/domainUtils');
+                            const highestGroupId = findHighestContainingGroup(currentGraph, group.id);
+                            
+                            if (highestGroupId && !unlockedDuringDragRef.current.has(highestGroupId)) {
+                              unlockedDuringDragRef.current.add(highestGroupId);
+                              
+                              // Get current selection before unlock
+                              const currentSelection = reactFlowRef.current?.getNodes().filter(n => n.selected).map(n => n.id) || [];
+                              // Trigger unlock - this will update ViewState and set routingMode=FREE
+                              await apply({
+                                kind: 'free-structural',
+                                source: 'user',
+                                payload: {
+                                  action: 'unlock-scope-to-free',
+                                  scopeGroupId: highestGroupId,
+                                  reason: 'drag-start',
+                                  preserveSelection: currentSelection
+                                }
+                              });
+                            }
+                          } catch (error) {
+                            console.error(`[🔄 UNLOCK] Error unlocking group ${group.id}:`, error);
+                          }
+                        }
+                      })();
+                    }
+                    
+                    // Handle group drag - updates ViewState for children
                     const groupResults = handleGroupDrag(changes, currentNodes, viewStateRef, rawGraphRef);
                     
-                    // Apply child position updates to ReactFlow
-                    const allChildPositions = groupResults.flatMap(r => r.childPositions);
-                    if (allChildPositions.length > 0) {
-                      setNodes((nodes) => nodes.map(n => {
-                        const update = allChildPositions.find(p => p.id === n.id);
-                        if (update) {
-                          return { ...n, position: { x: update.x, y: update.y } };
-                        }
-                        return n;
+                    // Track children that were updated by handleGroupDrag
+                    // These are already correctly positioned in ViewState - don't update again
+                    const childrenUpdatedByDrag = new Set<string>();
+                    const nodesToUpdate: Array<{ id: string; position: { x: number; y: number } }> = [];
+                    
+                    for (const result of groupResults) {
+                      for (const childPos of result.childPositions) {
+                        childrenUpdatedByDrag.add(childPos.id);
+                        // CRITICAL: Update ReactFlow nodes so they actually move visually
+                        nodesToUpdate.push({ id: childPos.id, position: { x: childPos.x, y: childPos.y } });
+                      }
+                    }
+                    
+                    // CRITICAL: Actually update ReactFlow nodes with new positions
+                    // This is what makes nodes visually move when groups are dragged
+                    if (nodesToUpdate.length > 0 && setNodes) {
+                      // CRITICAL: Mark these nodes as updated BEFORE calling setNodes
+                      // This prevents the next onNodesChange from updating them again
+                      const updatedNodeIds = new Set(nodesToUpdate.map(u => u.id));
+                      (window as any).__childrenUpdatedByGroupDrag = new Set([
+                        ...(childrenUpdatedByDrag),
+                        ...updatedNodeIds
+                      ]);
+                      
+                      setNodes((nds) => {
+                        return nds.map((node) => {
+                          const update = nodesToUpdate.find((u) => u.id === node.id);
+                          if (update) {
+                            return {
+                              ...node,
+                              position: update.position,
+                              // CRITICAL: Also update positionAbsolute for ReactFlow's internal calculations
+                              positionAbsolute: update.position,
+                            };
+                          }
+                          return node;
+                        });
+                      });
+                    } else {
+                      // Store on window so the main onNodesChange loop can skip these
+                      (window as any).__childrenUpdatedByGroupDrag = childrenUpdatedByDrag;
+                    }
+                    
+                    // Dispatch event so edges can re-route with new child positions
+                    if (typeof window !== 'undefined') {
+                      window.dispatchEvent(new CustomEvent('viewstate-updated', {
+                        detail: { source: 'group-drag' }
                       }));
                     }
                   });
@@ -3985,15 +5105,63 @@ useEffect(() => {
                 if (!viewStateRef.current) {
                   viewStateRef.current = { node: {}, group: {}, edge: {} };
                 }
-                viewStateRef.current.node[node.id] = geometry;
                 
                 // For groups: finalize position and clear tracking
                 // NOTE: Children were ALREADY updated DURING drag by handleGroupDrag
                 // DO NOT recalculate delta here - handleGroupDrag already did it correctly
                 if (isGroup) {
+                  if (!viewStateRef.current.group) {
+                    viewStateRef.current.group = {};
+                  }
                   viewStateRef.current.group[node.id] = geometry;
+                  // Remove from node if it was there
+                  if (viewStateRef.current.node?.[node.id]) {
+                    delete viewStateRef.current.node[node.id];
+                  }
                   clearDragTracking(node.id);
+                          } else {
+                  if (!viewStateRef.current.node) {
+                    viewStateRef.current.node = {};
+                  }
+                  viewStateRef.current.node[node.id] = geometry;
                 }
+                
+                // Clear unlock tracking on drag end
+                unlockedDuringDragRef.current.clear();
+                
+                // CRITICAL: Trigger final reroute after drag ends
+                // This ensures edges route to final node positions
+                // Use requestAnimationFrame to ensure StepEdge has re-rendered with new routingMode
+                // before we trigger reroute (edges need to be registered with libavoid first)
+                requestAnimationFrame(() => {
+                  setTimeout(async () => {
+                    const { batchUpdateObstaclesAndReroute } = await import('../../utils/canvas/routingUpdates');
+                    
+                    // Collect ALL node geometries for final reroute
+                    const allUpdates: Array<{ nodeId: string; geometry: { x: number; y: number; w: number; h: number } }> = [];
+                    
+                    if (viewStateRef.current) {
+                      // Add all nodes
+                      for (const [nodeId, geom] of Object.entries(viewStateRef.current.node || {})) {
+                        allUpdates.push({
+                          nodeId,
+                          geometry: { x: geom.x, y: geom.y, w: geom.w || 96, h: geom.h || 96 }
+                        });
+                      }
+                      // Add all groups
+                      for (const [groupId, geom] of Object.entries(viewStateRef.current.group || {})) {
+                        allUpdates.push({
+                          nodeId: groupId,
+                          geometry: { x: geom.x, y: geom.y, w: geom.w || 480, h: geom.h || 320 }
+                        });
+                      }
+                    }
+                    
+                    if (allUpdates.length > 0) {
+                      batchUpdateObstaclesAndReroute(allUpdates);
+                    }
+                  }, 50); // Small delay to ensure React has re-rendered StepEdge with new routingMode
+                });
               }}
               onConnect={(connection: any) => {
                 console.log(`[InteractiveCanvas] ReactFlow onConnect called:`, connection);
@@ -4015,6 +5183,39 @@ useEffect(() => {
                     targetClassList: (event?.target as Element)?.className,
                   });
                 }
+                
+                // CRITICAL: Don't handle pane clicks if clicking on UI elements (chatbox, etc.)
+                const target = event?.target as HTMLElement;
+                if (target) {
+                  // Check element directly first, then ancestors
+                  const isUIClick = 
+                                   // Check element directly
+                                   (target.getAttribute && target.getAttribute('data-chatbox') === 'true') ||
+                                   (target.getAttribute && target.getAttribute('data-chat-input') === 'true') ||
+                                   target.tagName === 'INPUT' || 
+                                   target.tagName === 'TEXTAREA' || 
+                                   target.tagName === 'BUTTON' ||
+                                   // Check ancestors
+                                   target.closest('[data-chatbox="true"]') ||
+                                   target.closest('[data-chat-input="true"]') ||
+                                   target.closest('.chatbox') ||
+                                   target.closest('input[type="text"]') ||
+                                   target.closest('textarea') ||
+                                   target.closest('button:not(.react-flow__controls-button)') ||
+                                   target.closest('[role="textbox"]') ||
+                                   target.closest('[data-testid*="chat"]') ||
+                                   target.closest('[class*="chat"]') ||
+                                   target.closest('[id*="chat"]') ||
+                                   target.closest('[class*="RightPanelChat"]') ||
+                                   target.closest('[class*="Chatbox"]') ||
+                                   (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON');
+                  
+                  if (isUIClick) {
+                    console.log('🚫 Ignoring pane click - click on UI element (chatbox, etc.)');
+                    return; // Don't process pane click if clicking on UI
+                  }
+                }
+                
                 if (selectedTool === 'group') {
                   const handled = handleGroupToolPaneClick({
                     event,
@@ -4030,9 +5231,9 @@ useEffect(() => {
                     shouldSkipFitViewRef,
                   });
 
-                    if (handled) {
+                  if (handled) {
                     return;
-                    }
+                  }
                 }
 
                 // Handle pendingGroupId (Plus button mode) - add node to specific group
@@ -4046,12 +5247,6 @@ useEffect(() => {
                     ? (rf as any).screenToFlowPosition(screenPoint)
                     : rf.project(screenPoint);
                   
-                  console.log('[🎯COORD] InteractiveCanvas - screen to world (group):', {
-                    screen: `${screenPoint.x},${screenPoint.y}`,
-                    world: `${projected.x},${projected.y}`,
-                    pendingGroupId,
-                  });
-                  
                   // Use CoordinateService to snap to grid
                   const snappedCenter = CoordinateService.snapPoint(projected);
                   const NODE_SIZE = 96;
@@ -4059,25 +5254,12 @@ useEffect(() => {
                   const topLeft = { x: snappedCenter.x - half, y: snappedCenter.y - half };
                   const id = `user-node-${Date.now()}`;
 
-                  console.log('[🎯COORD] InteractiveCanvas - final position (group):', {
-                    nodeId: id,
-                    snappedCenter: `${snappedCenter.x},${snappedCenter.y}`,
-                    topLeft: `${topLeft.x},${topLeft.y}`,
-                    parentId: pendingGroupId,
-                  });
-
                   // Write position to ViewState first (before domain mutation)
                   try {
                     if (viewStateRef && viewStateRef.current) {
                       const vs = viewStateRef.current;
                       vs.node = vs.node || {};
                       vs.node[id] = { x: topLeft.x, y: topLeft.y, w: NODE_SIZE, h: NODE_SIZE };
-                      
-                      console.log('[🎯COORD] InteractiveCanvas - wrote to ViewState (group):', {
-                        nodeId: id,
-                        viewStatePosition: `${topLeft.x},${topLeft.y}`,
-                        size: `${NODE_SIZE}x${NODE_SIZE}`,
-                      });
                     }
                   } catch (error) {
                     console.error(`[InteractiveCanvas] Error writing to viewState:`, error);
@@ -4111,14 +5293,42 @@ useEffect(() => {
 
                 // Handle box tool - create node on pane click
                 if (selectedTool === 'box') {
+                  // Create the node (this will set selected: true in addNode handler)
                   placeNodeOnCanvas(
                     event.nativeEvent as MouseEvent,
                     selectedTool,
                     reactFlowRef,
                     handleAddNode,
                     viewStateRef,
-                    (next) => {
+                    async (next, nodeId) => {
+                      if (!nodeId) return;
+                      
+                      // Switch tool to arrow first
                       setSelectedTool(next);
+                      
+                      // Wait for ReactFlow to render the node, then manually select it
+                      // This ensures both ReactFlow state AND our React state are updated
+                      // Increase delay to ensure node is fully rendered before selection
+                      await new Promise(resolve => setTimeout(resolve, 200));
+                      
+                      if (reactFlowRef.current) {
+                        // Use ReactFlow's setNodes to ensure selection is recognized
+                        reactFlowRef.current.setNodes((nds) => {
+                          return nds.map(node => 
+                            node.id === nodeId 
+                              ? { ...node, selected: true }
+                              : { ...node, selected: false }
+                          );
+                        });
+                        
+                        // Manually trigger selection change to update our React state
+                        // This ensures selectedNodes state is updated so dots appear
+                        const nodes = reactFlowRef.current.getNodes();
+                        const newNode = nodes.find(n => n.id === nodeId);
+                        if (newNode) {
+                          handleSelectionChange({ nodes: [{ ...newNode, selected: true }], edges: [] });
+                        }
+                      }
                     },
                     null,
                     apply // Pass Orchestrator apply function
@@ -4215,7 +5425,7 @@ useEffect(() => {
       
       {/* ChatBox at the bottom - Conditionally shown based on ViewMode config */}
       {viewModeConfig.showChatbox && (
-        <div className="flex-none min-h-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg z-10">
+        <div className="flex-none min-h-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg z-[10005] relative" style={{ pointerEvents: 'auto' }} data-chatbox="true">
           <Chatbox 
             onSubmit={handleChatSubmit}
             onProcessStart={() => {
@@ -4259,8 +5469,40 @@ useEffect(() => {
           setRawGraph={setRawGraph}
           isSessionActive={isSessionActive}
           sendTextMessage={sendTextMessage}
+          showElkDomainGraph={showElkDomainGraph}
+          setShowElkDomainGraph={setShowElkDomainGraph}
+          rightPanelCollapsed={rightPanelCollapsed}
+          onTriggerLayout={() => {
+            // Force full ELK layout recalculation by:
+            // 1. Clearing ViewState geometry so ELK recalculates all positions
+            // 2. Using source='ai' to ensure ELK runs (even without LOCK groups)
+            // 3. Creating a new graph reference to trigger the layout effect
+            viewStateRef.current = { node: {}, group: {}, edge: {} };
+            const syncedGraph = structuredClone(rawGraph);
+            // Add a tiny timestamp to force structural hash change
+            (syncedGraph as any)._layoutTrigger = Date.now();
+            setRawGraph(syncedGraph, 'ai');
+          }}
         />
       )}
+
+      {/* ELK Debug Panel */}
+      <ElkDebugProvider onTriggerLayout={() => {
+        // Force full ELK layout recalculation by:
+        // 1. Clearing ViewState geometry so ELK recalculates all positions
+        // 2. Using source='ai' to ensure ELK runs (even without LOCK groups)
+        // 3. Creating a new graph reference to trigger the layout effect
+        viewStateRef.current = { node: {}, group: {}, edge: {} };
+        const syncedGraph = structuredClone(rawGraph);
+        // Add a tiny timestamp to force structural hash change
+        (syncedGraph as any)._layoutTrigger = Date.now();
+        setRawGraph(syncedGraph, 'ai');
+      }}>
+        <ElkDebugPanel
+          isVisible={showElkDebug || false}
+          onClose={() => setShowElkDebug(false)}
+        />
+      </ElkDebugProvider>
       
       {/* Share Overlay for Embedded Version */}
       <ShareOverlay
@@ -4288,8 +5530,9 @@ useEffect(() => {
       />
 
 
-      {/* ELK SVG View - Always Visible */}
-      <div className="fixed bottom-4 right-4 w-96 h-96 bg-white border border-gray-300 rounded-lg shadow-xl z-[10001] flex flex-col overflow-hidden">
+      {/* ELK SVG View - Toggleable */}
+      {showElkDomainGraph && (
+      <div className="fixed bottom-4 right-4 w-96 h-96 bg-white border border-gray-300 rounded-lg shadow-xl flex flex-col overflow-hidden" style={{ zIndex: 99999, pointerEvents: 'auto', position: 'fixed' }}>
         <div className="flex items-center justify-between p-2 border-b border-gray-200 bg-gray-50">
           <h3 className="text-sm font-semibold text-gray-900">ELK Domain Graph</h3>
           <button
@@ -4313,6 +5556,7 @@ useEffect(() => {
           )}
         </div>
       </div>
+      )}
 
       {/* Notification Overlay - Matching Share Dialog Design */}
       <NotificationModal
@@ -4361,6 +5605,8 @@ useEffect(() => {
           handleSave={handleSave}
           user={user} 
           onExport={handleExportPNG}
+          showDebugButton={showDebugButton}
+          onDebugClick={() => setShowDev(true)}
           viewStateRef={viewStateRef}
         />
       </div>
