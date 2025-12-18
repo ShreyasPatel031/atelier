@@ -364,7 +364,7 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
               if (parsed.type === 'diagram_creation') {
                 // #region agent log
                 const diagramCreationId = `${Date.now()}_${Math.random().toString(36).substring(7)}`;
-                fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:354',message:'Diagram creation message received',data:{diagramCreationId,message:parsed.message?.substring(0,100),requirements:parsed.requirements?.substring(0,100),isDiagramGenerating,processedTriggerIdsSize:processedTriggerIds.current.size,processedTriggerIdsArray:Array.from(processedTriggerIds.current)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:364',message:'Frontend: diagram_creation message received',data:{diagramCreationId,message:parsed.message?.substring(0,100),requirements:parsed.requirements?.substring(0,100),requirementsFull:parsed.requirements,isDiagramGenerating,processedTriggerIdsSize:processedTriggerIds.current.size,processedTriggerIdsArray:Array.from(processedTriggerIds.current)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
                 // #endregion
                 
                 // #region agent log
@@ -418,6 +418,9 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                 // Set loading state for diagram generation
                 setIsDiagramGenerating(true)
                 console.log('🔄 Set diagram generation loading state to true')
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:419',message:'Frontend: Set isDiagramGenerating=true',data:{diagramCreationId,requirementsHash,isDiagramGeneratingBefore:false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                // #endregion
                 
                 // Set global state (needed for naming and other functions)
                 ;(window as any).originalChatTextInput = parsed.requirements
@@ -430,7 +433,7 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                 console.log('📞 Calling architecture agent (respecting chat agent decision)...')
                 
                 // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:400',message:'About to call handleChatSubmit',data:{diagramCreationId,requirementsHash,requirements:parsed.requirements?.substring(0,100)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:430',message:'Frontend: About to call handleChatSubmit',data:{diagramCreationId,requirementsHash,requirements:parsed.requirements?.substring(0,100),requirementsFull:parsed.requirements},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
                 // #endregion
                 
                 try {
@@ -438,11 +441,11 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                   if (handleChatSubmit && typeof handleChatSubmit === 'function') {
                     console.log('✅ Found handleChatSubmit function, calling it...')
                     // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:406',message:'Calling handleChatSubmit',data:{diagramCreationId,requirementsHash},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                    fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:437',message:'Frontend: Calling handleChatSubmit',data:{diagramCreationId,requirementsHash},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
                     // #endregion
                     await handleChatSubmit(parsed.requirements)
                     // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:409',message:'handleChatSubmit completed',data:{diagramCreationId,requirementsHash},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+                    fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:443',message:'Frontend: handleChatSubmit completed',data:{diagramCreationId,requirementsHash},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
                     // #endregion
                     console.log('✅ Architecture agent completed successfully')
                   } else {

@@ -726,7 +726,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
   // Load libavoid test fixtures ONLY when explicitly requested via URL params
   // Canvas stays clean by default - use ?testFixtures=1 or ?libavoidFixtures=1 to load fixtures
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(window.location.search);
     const hasTestFixtures = params.get('testFixtures') === '1';
     const hasLibavoidFixtures = params.get('libavoidFixtures') === '1';
     
@@ -1016,7 +1016,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
 
   // rawGraphRef now comes from canvasGraphState (from useElkToReactflowGraphConverter)
   // No need to create a separate ref - this ensures Orchestrator and getDomainGraph() use the same ref
-  
+
   // AUTO-CONFIGURE OBSTACLES: Ensure all edges have staticObstacleIds AND staticObstacles for libavoid routing
   // This is CRITICAL - without this, libavoid doesn't know about obstacles and edges pass through nodes
   // We pass BOTH staticObstacleIds AND staticObstacles with actual positions to ensure correct routing
@@ -2685,6 +2685,10 @@ Adapt these patterns to your specific requirements while maintaining the overall
           updateStreamingMessage(completionMessage, `✅ Architecture generation completed - agent has no more work to do`, true, 'completion');
           
           // Fire completion events to update ProcessingStatusIcon and re-enable chatbox
+          // #region agent log
+          const completionId = `${Date.now()}_${Math.random().toString(36).substring(7)}`;
+          fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'InteractiveCanvas.tsx:2697',message:'Firing completion events - natural completion',data:{completionId,selectedArchitectureId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+          // #endregion
           window.dispatchEvent(new CustomEvent('allProcessingComplete'));
           window.dispatchEvent(new CustomEvent('processingComplete'));
           

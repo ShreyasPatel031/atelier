@@ -643,6 +643,23 @@ ${selectionContext}
       console.log('  - selectedEdgeIds:', selectedEdgeIds, 'length:', selectedEdgeIds?.length);
     }
     
+    // Determine tool choice value before creating the request
+    // Force create_architecture_diagram if questions answered or limit reached
+    // Force ask_clarifying_question ONLY if no questions asked yet AND no answers received
+    // Non-deterministic: Let LLM decide based on context and prompt guidance
+    // Only force create if there's an unanswered question (wait for answer)
+    const toolChoiceValue = agentContext.conversation.hasUnansweredQuestion 
+      ? "auto"  // Wait for user to answer
+      : "auto";  // Let LLM decide based on prompt guidance
+    
+    // #region agent log
+    console.log('🔍 TOOL CHOICE DEBUG (Non-deterministic):');
+    console.log('  - hasUnansweredQuestion:', agentContext.conversation.hasUnansweredQuestion);
+    console.log('  - toolChoiceValue:', toolChoiceValue);
+    console.log('  - Context provided, LLM will decide based on prompt');
+    fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api/chat.js:683',message:'Tool choice decision (non-deterministic)',data:{hasUnansweredQuestion:agentContext.conversation.hasUnansweredQuestion,toolChoiceValue,canvasIsEmpty:agentContext.canvas.isEmpty,hasImages:agentContext.images.hasImages,hasSelection:agentContext.selection.hasSelection,totalQuestionsAsked:agentContext.conversation.totalQuestionsAsked,questionsAnswered:agentContext.conversation.questionsAnswered,currentGraphChildren:currentGraph?.children?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    
     // Create chat completion with streaming and tools
     const stream = await openai.chat.completions.create({
       model: modelToUse,
@@ -658,21 +675,6 @@ ${selectionContext}
       max_tokens: 1024,
       // CRITICAL: Disable parallel tool calls to ensure only ONE tool call is made
       parallel_tool_calls: false,
-      // Force create_architecture_diagram if questions answered or limit reached
-      // Force ask_clarifying_question ONLY if no questions asked yet AND no answers received
-      // Non-deterministic: Let LLM decide based on context and prompt guidance
-      // Only force create if there's an unanswered question (wait for answer)
-      const toolChoiceValue = agentContext.conversation.hasUnansweredQuestion 
-        ? "auto"  // Wait for user to answer
-        : "auto";  // Let LLM decide based on prompt guidance
-      
-      // #region agent log
-      console.log('🔍 TOOL CHOICE DEBUG (Non-deterministic):');
-      console.log('  - hasUnansweredQuestion:', agentContext.conversation.hasUnansweredQuestion);
-      console.log('  - toolChoiceValue:', toolChoiceValue);
-      console.log('  - Context provided, LLM will decide based on prompt');
-      fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api/chat.js:683',message:'Tool choice decision (non-deterministic)',data:{hasUnansweredQuestion:agentContext.conversation.hasUnansweredQuestion,toolChoiceValue,canvasIsEmpty:agentContext.canvas.isEmpty,hasImages:agentContext.images.hasImages,hasSelection:agentContext.selection.hasSelection,totalQuestionsAsked:agentContext.conversation.totalQuestionsAsked,questionsAnswered:agentContext.conversation.questionsAnswered,currentGraphChildren:currentGraph?.children?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       tool_choice: toolChoiceValue,
       tools: [
         {

@@ -78,10 +78,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
       // Clear the saved input since message was submitted
       clearChatboxInput();
       
-      // Optional: call onSubmit for any parent component compatibility
-      if (onSubmit) {
-        onSubmit(example);
-      }
+      // DO NOT call onSubmit here - process_user_requirements already calls handleChatSubmit internally
+      // Calling onSubmit here would cause duplicate architecture generation
       
     } catch (error) {
       console.error('Failed to process example:', error);
@@ -121,6 +119,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
         });
         
         // Call process_user_requirements to trigger the architecture generation
+        // NOTE: process_user_requirements internally calls handleChatSubmit, so we should NOT
+        // also call onSubmit here, as that would cause duplicate architecture generation
         process_user_requirements();
         console.log('✅ Chatbox: process_user_requirements called');
         
@@ -129,10 +129,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onSubmit, isDisabled = false, onProce
         // Clear the saved input since message was submitted
         clearChatboxInput();
         
-        // Optional: call onSubmit for any parent component compatibility
-        if (onSubmit) {
-          onSubmit(messageText);
-        }
+        // DO NOT call onSubmit here - process_user_requirements already calls handleChatSubmit internally
+        // Calling onSubmit here would cause duplicate architecture generation
         
       } catch (error) {
         console.error('Failed to process input:', error);
