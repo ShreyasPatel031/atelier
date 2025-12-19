@@ -445,24 +445,45 @@ ${JSON.stringify(currentGraph, null, 2)}`
       });
     };
     
-    // Helper: Check if there's an unanswered question (sequential tracking)
+    // Helper: Check if there's an unanswered question (check ALL questions, not just the last one)
     const hasUnansweredQuestion = (messages) => {
-      const lastAssistant = messages.filter(m => m.role === 'assistant').pop();
-      if (!lastAssistant) return false;
+      // Find all question messages (any type of question)
+      const allQuestions = messages.filter((m, idx) => {
+        const isQuestion = m.role === 'assistant' && (
+          m.type === 'question' || 
+          m.type === 'radio-question' || 
+          m.type === 'checkbox-question' ||
+          (m.content && (m.content.includes('?') || m.content.includes('Question')))
+        );
+        return isQuestion;
+      });
       
-      if (lastAssistant.type === 'question') {
-        const lastUser = messages.filter(m => m.role === 'user').pop();
-        if (!lastUser) return true;
-        
-        if (lastUser.content?.toLowerCase().startsWith('selected:')) {
-          return false;
-        }
-        
-        const questionIndex = messages.findIndex(m => m.id === lastAssistant.id);
-        const lastUserIndex = messages.findIndex(m => m.id === lastUser.id);
-        return questionIndex > lastUserIndex;
+      if (allQuestions.length === 0) {
+        return false;
       }
       
+      // For each question, check if there's an answer after it
+      // A question is unanswered if there's no answer message that comes AFTER it in the messages array
+      for (const question of allQuestions) {
+        const questionIndex = messages.findIndex(m => m.id === question.id);
+        if (questionIndex === -1) continue;
+        
+        // Find the last answer that comes after this question
+        let hasAnswerAfter = false;
+        for (let i = questionIndex + 1; i < messages.length; i++) {
+          const msg = messages[i];
+          if (msg.role === 'user' && msg.content?.toLowerCase().startsWith('selected:')) {
+            hasAnswerAfter = true;
+            break;
+          }
+        }
+        
+        if (!hasAnswerAfter) {
+          return true; // Found at least one unanswered question
+        }
+      }
+      
+      // All questions have been answered
       return false;
     };
     
@@ -481,7 +502,14 @@ ${JSON.stringify(currentGraph, null, 2)}`
       
       for (let i = lastAnswerIndex + 1; i < messages.length; i++) {
         const msg = messages[i];
-        if (msg.role === 'assistant' && msg.type === 'question') {
+        const isQuestion = msg.role === 'assistant' && (
+          msg.type === 'question' || 
+          msg.type === 'radio-question' || 
+          msg.type === 'checkbox-question' ||
+          msg.content?.includes('?') ||
+          msg.content?.includes('Question')
+        );
+        if (isQuestion) {
           sequenceCount++;
         }
       }
@@ -518,7 +546,15 @@ ${JSON.stringify(currentGraph, null, 2)}`
         messageCount: messages.length,
         hasUnansweredQuestion: hasUnansweredQuestion(messages),
         currentQuestionCount: getCurrentQuestionSequence(messages),
-        totalQuestionsAsked: messages.filter(m => m.type === 'question').length,
+        totalQuestionsAsked: messages.filter(m => 
+          m.role === 'assistant' && (
+            m.type === 'question' || 
+            m.type === 'radio-question' || 
+            m.type === 'checkbox-question' ||
+            m.content?.includes('?') ||
+            m.content?.includes('Question')
+          )
+        ).length,
         questionsAnswered: messages.filter(m => 
           m.role === 'user' && m.content?.toLowerCase().startsWith('selected:')
         ).length,
@@ -603,7 +639,7 @@ ${selectionContext}
 
 - **If images provided:** Create architecture from the image (don't ask questions)
 
-- **If there's an unanswered question:** Wait for the user to answer before asking another or creating a diagram
+- **CRITICAL: If there's ANY unanswered question:** DO NOT ask new questions. Wait for ALL unanswered questions to be answered before asking another question or creating a diagram. Check the conversation - if ANY question exists without a corresponding "Selected:" answer after it, you MUST wait.
 
 - **When to ask a clarifying question:**
   - The user's request is vague or ambiguous and you need information to create an accurate design
@@ -681,7 +717,7 @@ ${selectionContext}
           type: "function",
           function: {
             name: "ask_clarifying_question",
-            description: "Ask ONE clarifying question when the user's request is vague or ambiguous (e.g., 'make llm assessor', 'create a payment system', 'build a chat app') and you need information to create an accurate design. For vague new design requests, asking a question FIRST improves accuracy. Ask questions that enable more accurate design communication. Wait for the user to answer before asking another. DO NOT use if there's an unanswered question pending.",
+            description: "Ask ONE clarifying question when the user's request is vague or ambiguous (e.g., 'make llm assessor', 'create a payment system', 'build a chat app') and you need information to create an accurate design. For vague new design requests, asking a question FIRST improves accuracy. Ask questions that enable more accurate design communication. Wait for the user to answer before asking another. CRITICAL: DO NOT use this tool if there's ANY unanswered question in the conversation - check all previous assistant messages to ensure ALL questions have been answered with 'Selected:' responses before asking a new question.",
             parameters: {
               type: "object",
               properties: {
@@ -814,8 +850,13 @@ ${selectionContext}
     // Process all tool calls
     let questionProcessed = false;
     let diagramMessageSent = false; // Track if we've sent diagram creation message
+    let questionCountInThisResponse = 0; // Track how many questions are being asked in this single response
     
     if (toolCallDetected && toolCallsByIndex.size > 0) {
+      // Count how many ask_clarifying_question calls are in this response
+      const questionToolCalls = Array.from(toolCallsByIndex.values()).filter(tc => tc.name === 'ask_clarifying_question');
+      questionCountInThisResponse = questionToolCalls.length;
+      
       console.log('🛠️ Processing tool calls...');
       console.log('🔍 Found', toolCallsByIndex.size, 'tool call(s)');
       console.log('🔍 Tool call details:', Array.from(toolCallsByIndex.entries()).map(([i, tc]) => ({index: i, name: tc.name, argsLength: tc.arguments.length})));
