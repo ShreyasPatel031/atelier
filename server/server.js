@@ -94,9 +94,11 @@ app.use(express.urlencoded({ extended: false, limit: '50mb' })); // for x-www-fo
 import embedHandler from '../api/embed.ts';
 import simpleAgentHandler from '../api/simple-agent.ts';
 import chatHandler from '../api/chat.js';
+import githubRepoHandler from '../api/github-repo.js';
 // app.post("/api/stream", upload.array('images', 5), streamHandler); // Not currently used
 app.post("/api/embed", embedHandler);
 app.post("/api/simple-agent", simpleAgentHandler);
+app.post("/api/github-repo", githubRepoHandler);
 app.post("/api/chat", chatHandler);
 
 // Chat naming - uses same sophisticated AI logic as production

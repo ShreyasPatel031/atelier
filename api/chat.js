@@ -78,6 +78,7 @@ export default async function handler(req, res) {
     const images = Array.isArray(req.body.images) ? req.body.images : [];
     const selectedNodeIds = Array.isArray(req.body.selectedNodeIds) ? req.body.selectedNodeIds : [];
     const selectedEdgeIds = Array.isArray(req.body.selectedEdgeIds) ? req.body.selectedEdgeIds : [];
+    const githubRepo = req.body.githubRepo || null;
     console.log('📨 Received messages:', messages);
     console.log('📊 Received current graph:', currentGraph ? `${currentGraph.children?.length || 0} nodes` : 'none');
     console.log('📸 Received images:', images ? `${images.length} images` : 'none');
@@ -570,6 +571,12 @@ ${JSON.stringify(currentGraph, null, 2)}`
         count: images?.length || 0,
         hasImages: (images?.length || 0) > 0,
         shouldCreateFromImage: (images?.length || 0) > 0
+      },
+      githubRepo: {
+        hasRepo: !!githubRepo && !!githubRepo.url,
+        repoUrl: githubRepo?.url || null,
+        repoAnalysis: githubRepo?.analysis || null,
+        shouldCreateFromRepo: !!githubRepo && !!githubRepo.url && !!githubRepo.analysis
       }
     };
     
@@ -633,11 +640,20 @@ ${JSON.stringify(agentContext.conversation.conversationSummary, null, 2)}
    - **User provided image(s). Create architecture from the image.**
    ` : ''}
 
+5. GITHUB REPOSITORY:
+   - Has repository: ${agentContext.githubRepo.hasRepo}
+   ${agentContext.githubRepo.shouldCreateFromRepo ? `
+   - **User provided GitHub repository: ${agentContext.githubRepo.repoUrl}**
+   - **Repository Analysis:**
+${agentContext.githubRepo.repoAnalysis ? agentContext.githubRepo.repoAnalysis.summary.substring(0, 5000) : 'Analyzing repository...'}
+   ` : ''}
+
 ${selectionContext}
 
 **GUIDELINES:**
 
 - **If images provided:** Create architecture from the image (don't ask questions)
+- **If GitHub repository provided:** Create architecture diagram from the repository structure (don't ask questions). Analyze the codebase structure, dependencies, and key components to create a comprehensive architecture diagram.
 
 - **CRITICAL: If there's ANY unanswered question:** DO NOT ask new questions. Wait for ALL unanswered questions to be answered before asking another question or creating a diagram. Check the conversation - if ANY question exists without a corresponding "Selected:" answer after it, you MUST wait.
 

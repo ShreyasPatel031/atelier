@@ -209,7 +209,7 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
     setPastedImages(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  const callOpenAI = async (userMessage: string, images?: string[]) => {
+  const callOpenAI = async (userMessage: string, images?: string[], githubRepo?: any) => {
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:211',message:'callOpenAI called',data:{userMessage:userMessage.substring(0,100),hasImages:!!images,imagesCount:images?.length||0,isDiagramGenerating},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
     // #endregion
@@ -255,7 +255,8 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
       currentGraph: safeCurrentGraph, // Always send valid graph object
       images: Array.isArray(images) ? images : [],
       selectedNodeIds: selectedNodeIdsFromGlobal,
-      selectedEdgeIds: selectedEdgeIdsFromGlobal
+      selectedEdgeIds: selectedEdgeIdsFromGlobal,
+      githubRepo: githubRepo || null
     };
     
     // DEBUG: Log full request body
@@ -588,8 +589,35 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
 
     console.log('🚀 Calling OpenAI with message:', messageText)
     console.log('📸 Images being sent:', pastedImages.length > 0 ? pastedImages.length : 'none')
+    
+    // Check for GitHub repo URL in the message
+    let githubRepoData = null;
     try {
-      await callOpenAI(messageText, pastedImages.length > 0 ? pastedImages : undefined)
+      const { extractGitHubRepoUrl, extractBranchFromUrl, analyzeGitHubRepo } = await import('../../utils/githubRepoDetector');
+      const repoUrl = extractGitHubRepoUrl(messageText);
+      if (repoUrl) {
+        console.log('🔍 GitHub repo detected:', repoUrl);
+        const branch = extractBranchFromUrl(messageText);
+        console.log('🌿 Branch:', branch || 'default');
+        try {
+          const analysis = await analyzeGitHubRepo(repoUrl, branch);
+          githubRepoData = {
+            url: repoUrl,
+            branch: branch || analysis.branch || null,
+            analysis: analysis.analysis
+          };
+          console.log('✅ GitHub repo analyzed successfully');
+        } catch (error) {
+          console.error('❌ Failed to analyze GitHub repo:', error);
+          // Continue without repo data - the chat API will handle it
+        }
+      }
+    } catch (error) {
+      console.error('Error loading GitHub repo detector:', error);
+    }
+    
+    try {
+      await callOpenAI(messageText, pastedImages.length > 0 ? pastedImages : undefined, githubRepoData)
     } finally {
       console.log('🏁 OpenAI call completed')
       setIsLoading(false)
