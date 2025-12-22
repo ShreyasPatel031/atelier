@@ -401,8 +401,16 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                 console.log('🚀 Agent decided to create diagram:', parsed.message)
                 console.log('🔍 Requirements:', parsed.requirements)
                 
+                // Check if this is a Mermaid diagram from codebase tool
+                const hasMermaidDiagram = parsed.mermaid_diagram && typeof parsed.mermaid_diagram === 'string';
+                if (hasMermaidDiagram) {
+                  console.log('📊 Mermaid diagram detected from codebase tool');
+                  console.log('📊 Mermaid diagram length:', parsed.mermaid_diagram.length);
+                  console.log('📊 Mermaid diagram preview:', parsed.mermaid_diagram.substring(0, 200));
+                }
+                
                 // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:378',message:'Processing diagram creation - before state update',data:{diagramCreationId,requirementsHash,isDiagramGeneratingBefore:isDiagramGenerating},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:378',message:'Processing diagram creation - before state update',data:{diagramCreationId,requirementsHash,isDiagramGeneratingBefore:isDiagramGenerating,hasMermaidDiagram},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
                 // #endregion
                 
                 // Also add the message to the chat UI
@@ -422,28 +430,41 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                 fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:419',message:'Frontend: Set isDiagramGenerating=true',data:{diagramCreationId,requirementsHash,isDiagramGeneratingBefore:false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
                 // #endregion
                 
+                // Prepare message for diagram agent
+                // If we have a diagram from codebase tool, pass it to the agent to parse
+                // The agent will parse any diagram format based on prompt instructions
+                const messageForDiagramAgent = hasMermaidDiagram 
+                  ? `Convert this diagram to a canvas architecture diagram:\n\n\`\`\`mermaid\n${parsed.mermaid_diagram}\n\`\`\``
+                  : parsed.requirements;
+                
                 // Set global state (needed for naming and other functions)
-                ;(window as any).originalChatTextInput = parsed.requirements
-                ;(window as any).chatTextInput = parsed.requirements
+                ;(window as any).originalChatTextInput = messageForDiagramAgent
+                ;(window as any).chatTextInput = messageForDiagramAgent
                 ;(window as any).selectedImages = []
                 console.log('✅ Set global state for diagram generation')
+                if (hasMermaidDiagram) {
+                  console.log('📊 Passing Mermaid diagram to diagram agent');
+                }
                 
                 // Call architecture agent to actually create the diagram
                 // This respects the agent's decision - the chat agent decided to create, now we execute
                 console.log('📞 Calling architecture agent (respecting chat agent decision)...')
                 
                 // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:430',message:'Frontend: About to call handleChatSubmit',data:{diagramCreationId,requirementsHash,requirements:parsed.requirements?.substring(0,100),requirementsFull:parsed.requirements},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:430',message:'Frontend: About to call handleChatSubmit',data:{diagramCreationId,requirementsHash,hasMermaidDiagram,messageLength:messageForDiagramAgent.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
                 // #endregion
                 
                 try {
                   const handleChatSubmit = (window as any).handleChatSubmit
                   if (handleChatSubmit && typeof handleChatSubmit === 'function') {
                     console.log('✅ Found handleChatSubmit function, calling it...')
+                    if (hasMermaidDiagram) {
+                      console.log('📊 Calling with Mermaid diagram (length:', parsed.mermaid_diagram.length, ')');
+                    }
                     // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:437',message:'Frontend: Calling handleChatSubmit',data:{diagramCreationId,requirementsHash},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                    fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:437',message:'Frontend: Calling handleChatSubmit',data:{diagramCreationId,requirementsHash,hasMermaidDiagram},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
                     // #endregion
-                    await handleChatSubmit(parsed.requirements)
+                    await handleChatSubmit(messageForDiagramAgent)
                     // #region agent log
                     fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RightPanelChat.tsx:443',message:'Frontend: handleChatSubmit completed',data:{diagramCreationId,requirementsHash},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
                     // #endregion

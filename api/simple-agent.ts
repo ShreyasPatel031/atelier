@@ -36,16 +36,16 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Message required for new conversation' });
   }
 
-  // Agent mode determined
-  if (!isToolOutputContinuation) {
-    console.log('🤖 AGENT: Received user message:', message);
-    console.log('🔄 AGENT: Conversation history length:', conversationHistory.length);
-    console.log('📊 AGENT: Current graph state:', currentGraph ? `${currentGraph.children?.length || 0} nodes` : 'empty');
-    console.log('🏗️ AGENT: Reference architecture received:', referenceArchitecture ? referenceArchitecture.substring(0, 100) + '...' : 'NONE');
-  } else {
-    console.log('🔧 AGENT: Tool output continuation with response ID:', previousResponseId);
-    console.log('🔧 AGENT: Tool outputs count:', toolOutputs?.length || 0);
-  }
+    // Agent mode determined
+    if (!isToolOutputContinuation) {
+      console.log('🤖 AGENT: Received user message:', message);
+      console.log('🔄 AGENT: Conversation history length:', conversationHistory.length);
+      console.log('📊 AGENT: Current graph state:', currentGraph ? `${currentGraph.children?.length || 0} nodes` : 'empty');
+      console.log('🏗️ AGENT: Reference architecture received:', referenceArchitecture ? referenceArchitecture.substring(0, 100) + '...' : 'NONE');
+    } else {
+      console.log('🔧 AGENT: Tool output continuation with response ID:', previousResponseId);
+      console.log('🔧 AGENT: Tool outputs count:', toolOutputs?.length || 0);
+    }
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,

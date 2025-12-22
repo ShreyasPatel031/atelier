@@ -68,6 +68,31 @@ const scenarios = [
     message: "build a serverless API with Lambda and DynamoDB",
     expected: "CREATE_DIAGRAM",
     reason: "specific enough, no question needed"
+  },
+  // Codebase tool scenarios - agent should call codebase tool for repository URLs
+  {
+    name: "GitHub repository URL",
+    message: "https://github.com/ShreyasPatel031/openai-realtime-elkjs-tool",
+    expected: "CALL_CODEBASE",
+    reason: "repository URL should trigger codebase tool"
+  },
+  {
+    name: "GitHub URL with context",
+    message: "analyze this codebase: https://github.com/user/repo",
+    expected: "CALL_CODEBASE",
+    reason: "repository URL in message should trigger codebase tool"
+  },
+  {
+    name: "GitLab repository URL",
+    message: "https://gitlab.com/group/project",
+    expected: "CALL_CODEBASE",
+    reason: "GitLab URL should trigger codebase tool"
+  },
+  {
+    name: "Bitbucket repository URL",
+    message: "https://bitbucket.org/workspace/repo",
+    expected: "CALL_CODEBASE",
+    reason: "Bitbucket URL should trigger codebase tool"
   }
 ];
 
@@ -159,7 +184,13 @@ async function clearChatHistory(page: any) {
   console.log('🧹 Cleared chat history');
 }
 
+// Global state to track codebase tool calls across function calls
+let codebaseToolDetectedInConsole = false;
+
 async function sendMessage(page: any, chatInput: any, message: string) {
+  // Reset codebase detection for this message
+  codebaseToolDetectedInConsole = false;
+  
   // Set up error and console logging
   const errors: string[] = [];
   const consoleMessages: string[] = [];
@@ -167,6 +198,10 @@ async function sendMessage(page: any, chatInput: any, message: string) {
   page.on('console', msg => {
     const text = msg.text();
     consoleMessages.push(text);
+    
+    // Don't detect from console logs - they're unreliable (server logs aren't in browser console)
+    // Detection happens via SSE stream response body parsing only
+    
     if (msg.type() === 'error') {
       errors.push(text);
       console.log(`❌ Console error: ${text}`);
@@ -258,8 +293,69 @@ async function sendMessage(page: any, chatInput: any, message: string) {
   await page.waitForTimeout(3000);
 }
 
-async function waitForResponse(page: any, timeout: number = 60000): Promise<'QUESTION' | 'DIAGRAM' | 'UNKNOWN'> {
-  console.log('⏳ Waiting for response (question or diagram)...');
+async function waitForResponse(page: any, timeout: number = 60000): Promise<'QUESTION' | 'DIAGRAM' | 'CODEBASE' | 'UNKNOWN'> {
+  console.log('⏳ Waiting for response (question, diagram, or codebase tool call)...');
+  
+  // Monitor network requests for ALL tool calls in SSE stream - show what's actually being called
+  let codebaseToolCalled = false;
+  let diagramToolCalled = false;
+  let questionToolCalled = false;
+  const toolCallListener = (response: any) => {
+    if (response.url().includes('/api/chat')) {
+      // For SSE streams, we need to read the response body
+      response.text().then((body: string) => {
+        // Parse SSE format: data: {...} - detect ALL tool_calls
+        const lines = body.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.substring(6).trim();
+            if (dataStr && dataStr !== '[DONE]') {
+              try {
+                const data = JSON.parse(dataStr);
+                
+                // Detect tool_calls in OpenAI response format
+                if (data.choices?.[0]?.delta?.tool_calls) {
+                  for (const toolCall of data.choices[0].delta.tool_calls) {
+                    const toolName = toolCall.function?.name;
+                    if (toolName) {
+                      console.log(`🔧 TOOL CALL DETECTED (delta): ${toolName}`);
+                      if (toolName === 'codebase') {
+                        codebaseToolCalled = true;
+                      } else if (toolName === 'create_architecture_diagram') {
+                        diagramToolCalled = true;
+                      } else if (toolName === 'ask_clarifying_question') {
+                        questionToolCalled = true;
+                      }
+                    }
+                  }
+                }
+                
+                // Check for accumulated tool calls in message
+                if (data.choices?.[0]?.message?.tool_calls) {
+                  for (const toolCall of data.choices[0].message.tool_calls) {
+                    const toolName = toolCall.function?.name;
+                    if (toolName) {
+                      console.log(`🔧 TOOL CALL DETECTED (message): ${toolName}`);
+                      if (toolName === 'codebase') {
+                        codebaseToolCalled = true;
+                      } else if (toolName === 'create_architecture_diagram') {
+                        diagramToolCalled = true;
+                      } else if (toolName === 'ask_clarifying_question') {
+                        questionToolCalled = true;
+                      }
+                    }
+                  }
+                }
+              } catch (e) {
+                // Not JSON - skip to avoid false positives
+              }
+            }
+          }
+        }
+      }).catch(() => {});
+    }
+  };
+  page.on('response', toolCallListener);
   
   // Wait for streaming to complete - look for assistant messages to appear
   // The chat messages are in a scrollable container
@@ -279,11 +375,18 @@ async function waitForResponse(page: any, timeout: number = 60000): Promise<'QUE
   // Wait a bit more for content to fully render
   await page.waitForTimeout(5000);
   
-  // Monitor for question or diagram creation message
+  // Monitor for question, diagram creation, or codebase tool call
   const startTime = Date.now();
   let lastCheck = '';
   
   while (Date.now() - startTime < timeout) {
+    // Check for codebase tool call first (highest priority)
+    if (codebaseToolCalled) {
+      console.log('✅ Codebase tool call detected!');
+      page.removeListener('response', toolCallListener);
+      return 'CODEBASE';
+    }
+    
     // Get text from the chat panel specifically (not entire page)
     // The chat messages are in a scrollable div
     const chatPanel = page.locator('[class*="chat"], [data-testid*="chat"]').first();
@@ -293,15 +396,26 @@ async function waitForResponse(page: any, timeout: number = 60000): Promise<'QUE
     const pageText = await page.textContent('body').catch(() => '') || '';
     const combinedText = chatPanelText + ' ' + pageText;
     
+    // Don't check text for codebase - only rely on actual tool_calls detection from SSE stream
+    
+    // Check for diagram tool call
+    if (diagramToolCalled) {
+      console.log('✅ Diagram tool call detected!');
+      page.removeListener('response', toolCallListener);
+      return 'DIAGRAM';
+    }
+    
     // Check for "Generating architecture..." - this is a strong indicator of diagram creation
     if (/Generating architecture/i.test(combinedText)) {
       console.log('✅ Diagram creation detected via "Generating architecture" text!');
+      page.removeListener('response', toolCallListener);
       return 'DIAGRAM';
     }
     
     // Check for "Creating architecture diagram" text
     if (/Creating architecture diagram/i.test(combinedText)) {
       console.log('✅ Diagram creation detected via "Creating architecture diagram" text!');
+      page.removeListener('response', toolCallListener);
       return 'DIAGRAM';
     }
     
@@ -327,7 +441,9 @@ async function waitForResponse(page: any, timeout: number = 60000): Promise<'QUE
       }
       
       if (optionButtonFound || radioInputs > 0) {
-        console.log('✅ Question detected via QuestionBlock with options!');
+        const questionText = await questionHeader.first().textContent().catch(() => '');
+        console.log(`✅ Question detected via QuestionBlock: "${questionText?.substring(0, 100)}"`);
+        page.removeListener('response', toolCallListener);
         return 'QUESTION';
       }
     }
@@ -343,6 +459,7 @@ async function waitForResponse(page: any, timeout: number = 60000): Promise<'QUE
         const questionMatch = combinedText.match(/[?][\s\S]{0,200}[ABCD]\./);
         if (questionMatch) {
           console.log('✅ Question detected via text pattern with options!');
+          page.removeListener('response', toolCallListener);
           return 'QUESTION';
         }
       }
@@ -352,6 +469,7 @@ async function waitForResponse(page: any, timeout: number = 60000): Promise<'QUE
     const radioInputs = await page.locator('input[type="radio"]').count();
     if (radioInputs > 0) {
       console.log('✅ Question detected via radio inputs!');
+      page.removeListener('response', codebaseToolListener);
       return 'QUESTION';
     }
     
@@ -362,6 +480,7 @@ async function waitForResponse(page: any, timeout: number = 60000): Promise<'QUE
       const buttonText = await allButtons.nth(i).textContent().catch(() => '');
       if (/^[ABCD]\./.test(buttonText || '')) {
         console.log('✅ Question detected via option buttons!');
+        page.removeListener('response', codebaseToolListener);
         return 'QUESTION';
       }
     }
@@ -385,6 +504,13 @@ async function waitForResponse(page: any, timeout: number = 60000): Promise<'QUE
   console.log('   Chat panel text:', finalChatText.substring(0, 500));
   console.log('   Page text snippet:', finalPageText.substring(0, 500));
   
+  // Log summary of what tools were called
+  console.log('\n📊 TOOL CALL SUMMARY:');
+  console.log(`   Codebase tool called: ${codebaseToolCalled}`);
+  console.log(`   Diagram tool called: ${diagramToolCalled}`);
+  console.log(`   Question tool called: ${questionToolCalled}`);
+  
+  page.removeListener('response', toolCallListener);
   return 'UNKNOWN';
 }
 
@@ -456,6 +582,7 @@ test.describe('Question Behavior UI Tests', () => {
       // Map actual to expected format
       const actualFormatted = actual === 'QUESTION' ? 'ASK_QUESTION' : 
                              actual === 'DIAGRAM' ? 'CREATE_DIAGRAM' : 
+                             actual === 'CODEBASE' ? 'CALL_CODEBASE' :
                              'UNKNOWN';
       
       const match = actualFormatted === scenario.expected;

@@ -55,12 +55,13 @@ import { modelConfigs } from '../api/agentConfig.lean.ts';
 
 const app = express();
 const apiKey = process.env.OPENAI_API_KEY;
-const connectionManager = ConnectionManager.getInstance();
 
 if (!apiKey) {
   console.error("OPENAI_API_KEY is not set in .env file");
   process.exit(1);
 }
+
+const connectionManager = ConnectionManager.getInstance();
 
 // Configure multer for handling image uploads
 const upload = multer({
@@ -98,6 +99,7 @@ import chatHandler from '../api/chat.js';
 app.post("/api/embed", embedHandler);
 app.post("/api/simple-agent", simpleAgentHandler);
 app.post("/api/chat", chatHandler);
+// Note: /api/deepwiki endpoint not needed - chat.js calls getMermaidDiagramFromDeepWiki directly
 
 // Chat naming - uses same sophisticated AI logic as production
 const generateChatNameHandler = (await import('../api/generateChatName.ts')).default;

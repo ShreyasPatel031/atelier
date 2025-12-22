@@ -1,11 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
+import { join } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Dynamic port configuration
 const BASE_PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 const BASE_URL = process.env.E2E_BASE_URL || `http://localhost:${BASE_PORT}`;
+const DEEPWIKI_SCRIPT = join(__dirname, 'scripts', 'start-deepwiki-backend.sh');
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: './', // Allow tests in multiple directories
   timeout: 8000, // 8 seconds max per test
   expect: {
     timeout: 2000 // 2 seconds for individual expectations
@@ -74,10 +81,28 @@ export default defineConfig({
       workers: 1,
     },
   ],
-  webServer: {
-    command: 'npm run dev',
-    port: BASE_PORT,
-    reuseExistingServer: !process.env.CI,
-    timeout: 30000
-  }
+  webServer: [
+    {
+      command: 'npm run dev',
+      port: BASE_PORT,
+      reuseExistingServer: true, // Always reuse existing server
+      timeout: 30000
+    },
+    {
+      command: `bash "${DEEPWIKI_SCRIPT}"`,
+      port: 8001,
+      reuseExistingServer: true,
+      timeout: 120000, // 2 minutes - Python backend may take longer to start (dependencies, etc.)
+      stdout: 'pipe',
+      stderr: 'pipe',
+      cwd: __dirname, // Set working directory
+      env: {
+        ...process.env,
+        PYTHONPATH: '/Users/shreyaspatel/Desktop/Code/deepwiki-open:' + (process.env.PYTHONPATH || ''),
+        // Ensure OPENAI_API_KEY is passed to the Python backend
+        // The script will load it from .env, but we also pass it explicitly as fallback
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || ''
+      }
+    }
+  ]
 });
