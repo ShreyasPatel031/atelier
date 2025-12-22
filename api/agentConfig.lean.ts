@@ -20,9 +20,9 @@ export const leanSystemPrompt = `You are a technical architecture diagram assist
   3. Create nodes and edges that represent the architecture shown in the diagram
   
 - For Mermaid diagrams (if present):
-  * Nodes: `A[label]`, `B[Label]`, `C` → create node with nodename="A", label="label"
-  * Edges: `A --> B`, `A -->|label| B` → create edge from A to B with label
-  * Subgraphs: `subgraph GroupName` → use group_nodes to group nodes inside
+  * Nodes: A[label], B[Label], C → create node with nodename="A", label="label"
+  * Edges: A --> B, A -->|label| B → create edge from A to B with label
+  * Subgraphs: subgraph GroupName → use group_nodes to group nodes inside
   
 - For other diagram formats: Parse according to their syntax and convert to nodes/edges
 - Extract ALL nodes and edges from the diagram
