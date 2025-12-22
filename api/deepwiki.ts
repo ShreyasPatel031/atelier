@@ -53,10 +53,42 @@ function extractMermaidDiagram(response: string): string | null {
 }
 
 /**
+ * Parse GitHub URL to extract base repo URL (strips /tree/branch paths)
+ * Handles URLs like:
+ * - https://github.com/user/repo
+ * - https://github.com/user/repo/tree/branch
+ * - https://github.com/user/repo/tree/branch/path
+ * 
+ * Note: Currently strips branch paths and uses default branch.
+ * Branch support can be added later if backend supports it.
+ */
+function parseGitHubUrl(url: string): string {
+  // Remove trailing slashes
+  url = url.trim().replace(/\/+$/, '');
+  
+  // Match GitHub URL patterns and extract base repo (strip /tree/branch)
+  const treeMatch = url.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)/);
+  if (treeMatch) {
+    const [, owner, repo] = treeMatch;
+    return `https://github.com/${owner}/${repo}`;
+  }
+  
+  // If it doesn't match, return as-is (might be GitLab/Bitbucket)
+  return url;
+}
+
+/**
  * Call DeepWiki backend to get Mermaid diagram for a codebase URL
  */
 export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<string> {
   console.log('🔍 [DEEPWIKI] getMermaidDiagramFromDeepWiki called with:', repoUrl);
+  
+  // Parse GitHub URL to extract base repo (strips /tree/branch paths)
+  const baseRepoUrl = parseGitHubUrl(repoUrl);
+  if (baseRepoUrl !== repoUrl) {
+    console.log('🔍 [DEEPWIKI] Parsed URL - stripped branch/path:', repoUrl, '->', baseRepoUrl);
+  }
+  
   console.log('🔍 [DEEPWIKI] WebSocket URL:', PYTHON_WS_URL);
   
   return new Promise((resolve, reject) => {
@@ -68,7 +100,8 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
       message: 'Creating WebSocket connection',
       data: {
         wsUrl: PYTHON_WS_URL,
-        repoUrl: repoUrl
+        originalRepoUrl: repoUrl,
+        parsedRepoUrl: baseRepoUrl
       },
       timestamp: Date.now(),
       sessionId: 'debug-session',
@@ -85,9 +118,13 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
     const ws = new WebSocket(PYTHON_WS_URL);
     console.log('🔍 [DEEPWIKI] WebSocket object created');
 
+    let isResolved = false; // Flag to prevent double resolution
     const timeoutId = setTimeout(() => {
-      ws.close();
-      reject(new Error('WebSocket timeout after 180 seconds'));
+      if (!isResolved) {
+        isResolved = true;
+        ws.close();
+        reject(new Error('WebSocket timeout after 180 seconds'));
+      }
     }, REQUEST_TIMEOUT);
 
     ws.on('open', () => {
@@ -99,7 +136,8 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
         location: 'api/deepwiki.ts:65',
         message: 'DeepWiki WebSocket opened, sending request',
         data: {
-          repoUrl: repoUrl,
+          originalRepoUrl: repoUrl,
+          parsedRepoUrl: baseRepoUrl,
           wsUrl: PYTHON_WS_URL
         },
         timestamp: Date.now(),
@@ -111,7 +149,7 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
       // #endregion
 
       const request = {
-        repo_url: repoUrl,
+        repo_url: baseRepoUrl,
         type: 'github',
         messages: [
           {
@@ -124,6 +162,7 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
         language: 'en'
       };
 
+      console.log('🔍 [DEEPWIKI] Sending request:', JSON.stringify(request, null, 2));
       ws.send(JSON.stringify(request));
     });
 
@@ -161,25 +200,49 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
       // Check for end markers
       if (message === '[DONE]') {
         clearTimeout(timeoutId);
-        ws.close();
-        return;
+        // Process response before closing
+        if (!isResolved && responseText) {
+          const diagram = extractMermaidDiagram(responseText);
+          if (diagram) {
+            isResolved = true;
+            ws.close();
+            resolve(diagram);
+            return;
+          } else {
+            isResolved = true;
+            ws.close();
+            reject(new Error('Failed to extract Mermaid diagram from response'));
+            return;
+          }
+        } else if (!isResolved) {
+          isResolved = true;
+          ws.close();
+          reject(new Error('Backend returned [DONE] but no response text was received'));
+          return;
+        }
       }
 
       if (message === '[ERROR]') {
         clearTimeout(timeoutId);
-        ws.close();
-        reject(new Error('Backend returned [ERROR]'));
+        if (!isResolved) {
+          isResolved = true;
+          ws.close();
+          reject(new Error('Backend returned [ERROR]'));
+        }
         return;
       }
 
-      // Accumulate response
-      responseText += message;
+      // Accumulate response (skip [DONE] and [ERROR] markers)
+      if (message !== '[DONE]' && message !== '[ERROR]') {
+        responseText += message;
+      }
     });
 
     ws.on('close', () => {
       clearTimeout(timeoutId);
 
-      if (responseText) {
+      // Only process if not already resolved (handles case where connection closes without [DONE])
+      if (!isResolved && responseText) {
         // #region agent log
         const logPath = '/Users/shreyaspatel/Desktop/Code/system-design/.cursor/debug.log';
         const logEntry = JSON.stringify({
@@ -217,6 +280,7 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
           }) + '\n';
           fs.appendFile(logPath, logEntry2, () => {});
           // #endregion
+          isResolved = true;
           resolve(diagram);
         } else {
           // #region agent log
@@ -239,11 +303,12 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
           }) + '\n';
           fs.appendFile(logPath, logEntry3, () => {});
           // #endregion
+          isResolved = true;
           reject(new Error('Failed to extract Mermaid diagram from response'));
         }
-      } else {
-      // #region agent log
-      const logPath = '/Users/shreyaspatel/Desktop/Code/system-design/.cursor/debug.log';
+      } else if (!isResolved) {
+        // #region agent log
+        const logPath = '/Users/shreyaspatel/Desktop/Code/system-design/.cursor/debug.log';
         const logEntry = JSON.stringify({
           location: 'api/deepwiki.ts:170',
           message: 'No response text received from DeepWiki',
@@ -257,6 +322,7 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
         }) + '\n';
         fs.appendFile(logPath, logEntry, () => {});
         // #endregion
+        isResolved = true;
         reject(new Error('No response received from Python backend'));
       }
     });
@@ -294,4 +360,5 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
     });
   });
 }
+
 

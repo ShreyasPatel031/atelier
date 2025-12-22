@@ -178,8 +178,8 @@ test.describe('GitHub Codebase to Mermaid Diagram', () => {
       }
     });
     
-    // Send GitHub URL with context (same as passing test case)
-    const githubUrl = 'https://github.com/ShreyasPatel031/openai-realtime-elkjs-tool';
+    // Send GitHub URL with context (using the failing URL to reproduce the issue)
+    const githubUrl = 'https://github.com/ShreyasPatel031/openai-realtime-elkjs-tool/tree/edge-routing';
     const githubUrlWithContext = `analyze this codebase: ${githubUrl}`;
     await chatInput.fill(githubUrlWithContext);
     console.log(`📝 Entered GitHub URL with context: ${githubUrlWithContext}`);
@@ -451,3 +451,4 @@ test.describe('GitHub Codebase to Mermaid Diagram', () => {
     console.log('✅ Verified: Actual Mermaid diagram from codebase was rendered on canvas');
   });
 });
+
