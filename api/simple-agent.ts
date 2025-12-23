@@ -5,6 +5,7 @@ import {
   timeoutConfigs,
   leanSystemPrompt
 } from './agentConfig.lean.js';
+import { availableRegularIcons } from './generated/dynamicAgentResources.js';
 
 console.log('🔍 DEBUG: leanSystemPrompt length:', leanSystemPrompt.length);
 
@@ -69,11 +70,17 @@ export default async function handler(req: any, res: any) {
 CURRENT GRAPH: ${currentGraph.children?.length || 0} nodes, ${currentGraph.edges?.length || 0} edges
 ${currentGraph.children?.length ? `EXISTING: ${getAllNodeIds(currentGraph).filter(id => id !== 'root').slice(0, 10).join(', ')}${getAllNodeIds(currentGraph).length > 10 ? '...' : ''}` : 'Empty graph'}` : 'Empty graph';
 
-    // LEAN system prompt - no massive examples or icon lists
+    // Dynamically include all generic icons in the prompt
+    const allGenericIcons = availableRegularIcons?.generic || [];
+    const genericIconsList = allGenericIcons.length > 0 ? allGenericIcons.join(', ') : 'No generic icons available';
+
+    // LEAN system prompt - dynamically includes all generic icons
     const baseMessages = [
       {
         role: 'system',
         content: `${leanSystemPrompt}
+
+AVAILABLE GENERIC ICONS (${allGenericIcons.length} total): ${genericIconsList}
 
 ${graphStateDescription}
 
@@ -204,6 +211,21 @@ ${referenceArchitecture ? `Reference: ${referenceArchitecture.substring(0, 300)}
         parsedArgs = typeof call.arguments === 'string' ? JSON.parse(call.arguments) : call.arguments;
       } catch (error) {
         console.error(`❌ AGENT: Failed to parse arguments for call ${index + 1}:`, error);
+        console.error(`❌ AGENT: Raw arguments string (first 500 chars):`, call.arguments?.substring?.(0, 500));
+        console.error(`❌ AGENT: Raw arguments string length:`, call.arguments?.length);
+        console.error(`❌ AGENT: Error position:`, error.message);
+        
+        // Try to find and fix common JSON issues
+        if (typeof call.arguments === 'string') {
+          // Try to fix unterminated strings by finding the position
+          const errorMatch = error.message.match(/position (\d+)/);
+          if (errorMatch) {
+            const errorPos = parseInt(errorMatch[1]);
+            console.error(`❌ AGENT: Error at position ${errorPos}`);
+            console.error(`❌ AGENT: Context around error:`, call.arguments.substring(Math.max(0, errorPos - 50), Math.min(call.arguments.length, errorPos + 50)));
+          }
+        }
+        
         throw new Error(`Invalid function call arguments: ${error.message}`);
       }
 

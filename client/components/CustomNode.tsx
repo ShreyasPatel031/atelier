@@ -170,11 +170,17 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
     setFallbackAttempted(false);
 
     if (data.icon) {
-      // Check if icon exists in iconLists first - if not, immediately use fallback
+      // Check if icon exists in iconLists first - GENERIC icons checked FIRST
       const prefixMatch = data.icon.match(/^(aws|gcp|azure)_(.+)$/);
       let iconExistsInLists = false;
       
-      if (prefixMatch) {
+      // ALWAYS check generic icons FIRST (even if there's a prefix)
+      // This ensures generic/Lucide icons are prioritized over provider icons
+      const iconNameToCheck = prefixMatch ? prefixMatch[2] : data.icon;
+      if (iconLists.generic.includes(iconNameToCheck)) {
+        iconExistsInLists = true;
+      } else if (prefixMatch) {
+        // If not in generic and has prefix, check provider icons
         const [, provider, actualIconName] = prefixMatch;
         const category = findIconCategory(provider, actualIconName);
         iconExistsInLists = category !== null;

@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "dev": "node scripts/ensure-embeddable-build.mjs && node --loader ts-node/esm server/server.js --dev",
+    "dev": "node scripts/ensure-embeddable-build.mjs && npm run start:deepwiki & node --loader ts-node/esm server/server.js --dev",
     "dev:unified": "npm run dev",
     "start": "node server/server.js",
     "build": "npm run precompute-embeddings && npm run precompute-icon-embeddings && npm run generate-icons && npm run generate-dynamic-lists && vite build && npm run build:embeddable",

@@ -8,6 +8,10 @@ export default {
   root: join(dirname(path), "client"),
   server: {
     port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+    hmr: {
+      // Use a dedicated port for HMR WebSocket to avoid conflicts
+      port: 24678,
+    },
   },
   build: {
     outDir: '../dist',

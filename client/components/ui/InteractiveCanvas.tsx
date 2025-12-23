@@ -211,6 +211,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({
       }
     }
   }, []);
+
   
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -2685,10 +2686,6 @@ Adapt these patterns to your specific requirements while maintaining the overall
           updateStreamingMessage(completionMessage, `✅ Architecture generation completed - agent has no more work to do`, true, 'completion');
           
           // Fire completion events to update ProcessingStatusIcon and re-enable chatbox
-          // #region agent log
-          const completionId = `${Date.now()}_${Math.random().toString(36).substring(7)}`;
-          fetch('http://127.0.0.1:7242/ingest/cc01c551-14ba-42f2-8fd9-8753b66b462f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'InteractiveCanvas.tsx:2697',message:'Firing completion events - natural completion',data:{completionId,selectedArchitectureId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-          // #endregion
           window.dispatchEvent(new CustomEvent('allProcessingComplete'));
           window.dispatchEvent(new CustomEvent('processingComplete'));
           

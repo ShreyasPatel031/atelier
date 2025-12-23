@@ -78,4 +78,46 @@ test.describe('Icon Display Validation', () => {
     
     console.log('✅ Semantic fallback service check completed');
   });
+
+  test('should verify Lucide icons are available in generic icon list', async ({ page }) => {
+    // Navigate to canvas
+    await page.goto('http://localhost:3000/canvas');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+    
+    // Check if generic icons include Lucide icons
+    const genericIcons = await page.evaluate(async () => {
+      try {
+        // Import iconLists dynamically
+        const module = await import('/generated/iconLists.ts');
+        return module.iconLists?.generic || [];
+      } catch (e) {
+        // Fallback: try to read from the generated file
+        const response = await fetch('/generated/iconLists.ts');
+        const text = await response.text();
+        const match = text.match(/generic:\s*\[(.*?)\]/s);
+        if (match) {
+          return match[1]
+            .split(',')
+            .map(s => s.trim().replace(/['"]/g, ''))
+            .filter(Boolean);
+        }
+        return [];
+      }
+    });
+    
+    console.log(`Found ${genericIcons.length} generic icons`);
+    console.log('Sample generic icons:', genericIcons.slice(0, 10));
+    
+    // Verify we have some Lucide icons (user, home, settings, etc.)
+    const lucideIcons = ['user', 'home', 'settings', 'database', 'server', 'cloud', 'lock', 'key', 'shield', 'globe'];
+    const foundLucideIcons = lucideIcons.filter(icon => genericIcons.includes(icon));
+    
+    console.log(`Found ${foundLucideIcons.length} of ${lucideIcons.length} test Lucide icons:`, foundLucideIcons);
+    
+    expect(genericIcons.length).toBeGreaterThan(0);
+    expect(foundLucideIcons.length).toBeGreaterThan(0);
+    
+    console.log('✅ Lucide icons are available in generic icon list');
+  });
 });

@@ -26,7 +26,8 @@ export const leanSystemPrompt = `You are a technical architecture diagram assist
   
 - For other diagram formats: Parse according to their syntax and convert to nodes/edges
 - Extract ALL nodes and edges from the diagram
-- Use appropriate icons based on node labels: api, database, server, gateway, browser_client, mobile_app, cache_redis, message_queue
+- Use appropriate icons based on node labels from the available icon set
+- Choose semantically appropriate icons - use generic icons (no prefix) for all concepts, provider icons (aws_, gcp_, azure_) only for specific cloud services
 - Do NOT ask questions - immediately parse and create the diagram using batch_update
 
 **PATTERN:**
@@ -38,11 +39,11 @@ export const leanSystemPrompt = `You are a technical architecture diagram assist
 
 **GROUP ICONS:** gcp_system (gray), gcp_logical_grouping_services_instances (blue), gcp_infrastructure_system (green), aws_vpc, azure_subscription_filled
 
-**CLOUD ICONS:** 
-- AWS: aws_lambda, aws_s3, aws_rds, aws_ec2, aws_api_gateway
-- GCP: gcp_cloud_functions, gcp_cloud_storage, gcp_cloud_sql, gcp_compute_engine, gcp_api_gateway  
-- Azure: azure_functions, azure_storage_accounts, azure_sql_database, azure_virtual_machines
-- Generic: api, database, gateway, browser_client, mobile_app, server, cache_redis, message_queue
+**ICONS:** 
+- AWS (with prefix): aws_lambda, aws_s3, aws_rds, aws_ec2, aws_api_gateway, etc.
+- GCP (with prefix): gcp_cloud_functions, gcp_cloud_storage, gcp_cloud_sql, gcp_compute_engine, gcp_api_gateway, etc.
+- Azure (with prefix): azure_functions, azure_storage_accounts, azure_sql_database, azure_virtual_machines, etc.
+- Generic (no prefix): Use semantically appropriate icons from the generic icon set
 
 Complete the architecture in maximum 3 turns.`;
 
@@ -52,7 +53,7 @@ export const modelConfigs = {
     model: "gpt-4.1" as const,
     temperature: 0.1,
     top_p: 1,
-    max_tokens: 1024,
+    max_tokens: 4096, // Increased from 1024 to handle large Mermaid diagrams with many operations
     tool_choice: "auto" as const,
     parallel_tool_calls: false,
     stream: true

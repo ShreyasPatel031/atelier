@@ -112,6 +112,38 @@ const GroupNode: React.FC<GroupNodeProps> = ({ data, id, selected, isConnectable
     // Check if icon has provider prefix (e.g., 'gcp_cloud_monitoring')
     const prefixMatch = iconName.match(/^(aws|gcp|azure)_(.+)$/);
 
+    // ALWAYS check generic icons FIRST (regardless of prefix)
+    // This ensures generic/Lucide icons are prioritized over provider icons
+    const iconNameToCheck = prefixMatch ? prefixMatch[2] : iconName;
+    if (iconLists.generic.includes(iconNameToCheck)) {
+      const generalIconPaths = [
+        `/assets/canvas/${iconNameToCheck}.png`,
+        `/assets/canvas/${iconNameToCheck}.svg`
+      ];
+      
+      for (const iconPath of generalIconPaths) {
+        try {
+          const fullIconUrl = buildAssetUrl(iconPath, apiEndpoint);
+          const response = await fetch(fullIconUrl);
+          
+          if (response.ok && !response.headers.get('content-type')?.includes('text/html')) {
+            const img = new Image();
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = fullIconUrl;
+            });
+            
+            // Cache the successfully loaded icon
+            iconCacheService.cacheIcon(iconName, fullIconUrl);
+            return fullIconUrl;
+          }
+        } catch (error) {
+          // Try next path
+        }
+      }
+    }
+
     if (prefixMatch) {
       const [, provider, actualIconName] = prefixMatch;
       // Find the correct category for this icon

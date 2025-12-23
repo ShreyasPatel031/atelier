@@ -175,3 +175,5 @@ testDeepWikiBackend(repoUrl)
     console.error('\n❌ Test failed:', error.message);
     process.exit(1);
   });
+
+

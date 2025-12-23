@@ -130,7 +130,20 @@ async function precomputeIconEmbeddings() {
     
     for (const [provider, categories] of Object.entries(iconLists)) {
       if (provider === 'generic' || provider === 'all') {
-        // Skip generic and all arrays
+        // Process generic icons separately (including Lucide icons from canvas directory)
+        if (provider === 'generic' && Array.isArray(categories)) {
+          console.log(`📋 Processing ${categories.length} generic icons (including Lucide icons)...`);
+          categories.forEach(icon => {
+            allIcons.push({
+              provider: 'general',
+              category: 'general',
+              name: icon,
+              fullName: icon, // Generic icons don't have provider prefix
+              searchText: icon.replace(/_/g, ' ').replace(/-/g, ' ') // Convert underscores and hyphens to spaces
+            });
+          });
+          console.log(`✅ Added ${categories.length} generic icons to embedding list`);
+        }
         continue;
       }
       
@@ -157,7 +170,7 @@ async function precomputeIconEmbeddings() {
       }
     }
     
-    console.log(`🔍 Found ${allIcons.length} total icons across all providers`);
+    console.log(`🔍 Found ${allIcons.length} total icons (${allIcons.filter(i => i.provider !== 'general').length} provider icons + ${allIcons.filter(i => i.provider === 'general').length} generic icons)`);
     
     // Generate embeddings for all icons
     const embeddings = {};

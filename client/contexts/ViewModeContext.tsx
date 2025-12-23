@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
+import React, { createContext, useContext, useMemo, useState, useEffect, useRef } from 'react';
+import { auth } from '../lib/firebase';
 
 // Simplified view mode - just use path-based routing, no complex environment logic
 export type ViewMode = 'embed' | 'canvas' | 'auth';
@@ -185,12 +186,23 @@ export function ViewModeProvider({ children, fallbackMode = 'canvas' }: ViewMode
     return '/';
   });
 
+  // Use ref to track current pathname to avoid closure stale value issue
+  const pathnameRef = useRef(pathname);
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
+
   // Listen for pathname changes (navigation events)
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const updatePathname = () => {
-      setPathname(window.location.pathname);
+      const currentPath = window.location.pathname;
+      // Only update state if pathname actually changed to prevent unnecessary re-renders
+      // Use ref to get current value (not stale closure value)
+      if (currentPath !== pathnameRef.current) {
+        setPathname(currentPath);
+      }
     };
 
     // Update on initial load
@@ -213,17 +225,16 @@ export function ViewModeProvider({ children, fallbackMode = 'canvas' }: ViewMode
       updatePathname();
     };
 
-    // Also check periodically in case navigation happens outside of these events
-    const interval = setInterval(updatePathname, 100);
-
     return () => {
       window.removeEventListener('popstate', updatePathname);
       history.pushState = originalPushState;
       history.replaceState = originalReplaceState;
-      clearInterval(interval);
     };
   }, []);
 
+  // Use ref to cache previous config to prevent unnecessary object recreation
+  const prevConfigRef = useRef<ViewModeConfig | null>(null);
+  
   const config = useMemo(() => {
     // Simple path-based routing - no environment complexity
     const getViewMode = (): { mode: ViewMode; isEmbedded: boolean } => {
@@ -251,9 +262,8 @@ export function ViewModeProvider({ children, fallbackMode = 'canvas' }: ViewMode
       }
       
       // Default: root path (/) - determine mode based on auth state
-      // Check if user is authenticated (Firebase auth)
+      // Check if user is authenticated (Firebase auth) - using ESM import at top of file
       try {
-        const { auth } = require('../lib/firebase');
         if (auth && auth.currentUser) {
           // User is authenticated - use auth mode
           return { mode: 'auth', isEmbedded: false };
@@ -275,15 +285,24 @@ export function ViewModeProvider({ children, fallbackMode = 'canvas' }: ViewMode
       ...baseConfig
     };
     
+    // Return cached config if values haven't changed to prevent unnecessary re-renders
+    if (prevConfigRef.current && 
+        prevConfigRef.current.mode === fullConfig.mode && 
+        prevConfigRef.current.isEmbedded === fullConfig.isEmbedded) {
+      return prevConfigRef.current;
+    }
+    
+    prevConfigRef.current = fullConfig;
     return fullConfig;
   }, [fallbackMode, pathname]);
   
-  const contextValue: ViewModeContextValue = {
+  // Memoize contextValue to prevent unnecessary re-renders of all consumers
+  const contextValue: ViewModeContextValue = useMemo(() => ({
     config,
     mode: config.mode,
     isEmbedded: config.isEmbedded
-  };
-  
+  }), [config]);
+
   return (
     <ViewModeContext.Provider value={contextValue}>
       {children}
