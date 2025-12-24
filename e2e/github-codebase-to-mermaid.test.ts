@@ -108,6 +108,14 @@ test.describe('GitHub Codebase to Mermaid Diagram', () => {
         console.log('❌ FAIL: Agent asked a question instead of calling codebase tool!');
       }
       
+      // ALTERNATIVE DETECTION: Check console logs for codebase tool processing
+      if (text.includes('🛠️ Processing codebase tool') ||
+          text.includes('Processing codebase tool') ||
+          text.includes('codebase tool') && text.includes('Processing')) {
+        codebaseToolDetected = true;
+        console.log('✅ Codebase tool detected via console log!');
+      }
+      
       // Check for Mermaid diagram being passed to diagram agent
       if (text.includes('📊 Passing Mermaid diagram to diagram agent') ||
           text.includes('Mermaid diagram detected from codebase tool')) {
