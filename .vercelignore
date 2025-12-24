@@ -10,4 +10,9 @@ logs/
 *.log
 server/
 dist/
-build/ 
+build/
+# Large generated files (exceed Vercel's 100MB limit)
+client/generated/precomputed-icon-embeddings.json
+public/precomputed-icon-embeddings.json
+dist/embeddable/precomputed-icon-embeddings.json
+**/precomputed-icon-embeddings.json 
