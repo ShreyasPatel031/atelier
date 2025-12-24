@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useMemo, useState, useEffect, useRef } from 'react';
-import { auth } from '../lib/firebase';
 
 // Simplified view mode - just use path-based routing, no complex environment logic
 export type ViewMode = 'embed' | 'canvas' | 'auth';
@@ -261,18 +260,9 @@ export function ViewModeProvider({ children, fallbackMode = 'canvas' }: ViewMode
         return { mode: 'auth', isEmbedded: false };
       }
       
-      // Default: root path (/) - determine mode based on auth state
-      // Check if user is authenticated (Firebase auth) - using ESM import at top of file
-      try {
-        if (auth && auth.currentUser) {
-          // User is authenticated - use auth mode
-          return { mode: 'auth', isEmbedded: false };
-        }
-      } catch (error) {
-        // Firebase not available or error - fall back to canvas
-      }
-      
-      // Not authenticated - use canvas for root path
+      // Default: root path (/) - use canvas mode
+      // Note: Auth check removed to avoid SSR hydration issues
+      // Auth-based routing can be handled via useEffect after hydration if needed
       return { mode: 'canvas', isEmbedded: false };
     };
     
