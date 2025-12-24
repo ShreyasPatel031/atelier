@@ -431,11 +431,35 @@ const RightPanelChat: React.FC<RightPanelChatProps> = ({
                 // #endregion
                 
                 // Prepare message for diagram agent
-                // If we have a diagram from codebase tool, pass it to the agent to parse
-                // The agent will parse any diagram format based on prompt instructions
-                const messageForDiagramAgent = hasMermaidDiagram 
-                  ? `Convert this diagram to a canvas architecture diagram:\n\n\`\`\`mermaid\n${parsed.mermaid_diagram}\n\`\`\``
-                  : parsed.requirements;
+                // New format: system instruction + user message + canvas state + selected node/group + reference diagram
+                let messageForDiagramAgent = parsed.requirements;
+                
+                if (hasMermaidDiagram) {
+                  // Get current graph state and selected node/group
+                  // Prefer expandNode from backend message (more reliable), fallback to global selection
+                  const currentGraphFromGlobal = (window as any).currentGraph || safeCurrentGraph;
+                  const selectedNodeId = parsed.expandNode || (selectedNodeIdsFromGlobal.length > 0 ? selectedNodeIdsFromGlobal[0] : null);
+                  const originalUserMessage = parsed.requirements || parsed.message || '';
+                  
+                  // Construct new message format
+                  messageForDiagramAgent = `<general system instruction: the codebase agent has sent this diagram as reference>
+
+<user message>
+${originalUserMessage}
+
+<current canvas state>
+${JSON.stringify(currentGraphFromGlobal || { id: "root", children: [], edges: [] }, null, 2)}
+
+${selectedNodeId ? `<selectednode>
+${selectedNodeId}
+</selectednode>` : ''}
+
+<reference diagram>
+\`\`\`mermaid
+${parsed.mermaid_diagram}
+\`\`\`
+</reference diagram>`;
+                }
                 
                 // Set global state (needed for naming and other functions)
                 ;(window as any).originalChatTextInput = messageForDiagramAgent

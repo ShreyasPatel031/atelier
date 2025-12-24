@@ -1,14 +1,6 @@
 import OpenAI from 'openai';
-import { writeFile, appendFile } from 'fs/promises';
-import { join } from 'path';
-
-const DEBUG_LOG_PATH = join(process.cwd(), '.cursor', 'debug.log');
 
 export default async function handler(req, res) {
-  // #region agent log
-  const logEntry = JSON.stringify({location:'api/chat.js:4',message:'Backend: Handler entry',data:{method:req.method,url:req.url,hasBody:!!req.body,bodyType:typeof req.body,contentType:req.headers['content-type']},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})+'\n';
-  appendFile(DEBUG_LOG_PATH, logEntry).catch(()=>{});
-  // #endregion
   console.log('🚀 Chat API called:', req.method, req.url);
   
   // Handle CORS preflight
@@ -40,10 +32,6 @@ export default async function handler(req, res) {
     }
 
     console.log('✅ API key found');
-    // #region agent log
-    const logEntry2 = JSON.stringify({location:'api/chat.js:42',message:'Backend: Before body validation',data:{bodyExists:!!req.body,bodyType:typeof req.body,bodyIsObject:typeof req.body==='object'&&req.body!==null,bodyKeys:req.body?Object.keys(req.body):null,bodyStringPreview:req.body?JSON.stringify(req.body).substring(0,200):null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})+'\n';
-    appendFile(DEBUG_LOG_PATH, logEntry2).catch(()=>{});
-    // #endregion
     
     // Safely destructure with null check
     if (!req.body || typeof req.body !== 'object') {
@@ -59,12 +47,6 @@ export default async function handler(req, res) {
     const images = Array.isArray(req.body.images) ? req.body.images : [];
     const selectedNodeIds = Array.isArray(req.body.selectedNodeIds) ? req.body.selectedNodeIds : [];
     const selectedEdgeIds = Array.isArray(req.body.selectedEdgeIds) ? req.body.selectedEdgeIds : [];
-    
-    // #region agent log
-    const lastUserMessage = messages?.filter(m => m.role === 'user').pop()?.content || '';
-    const logEntry4 = JSON.stringify({location:'api/chat.js:87',message:'User message analysis',data:{lastUserMessage:lastUserMessage.substring(0,200),messageCount:messages?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})+'\n';
-    appendFile(DEBUG_LOG_PATH, logEntry4).catch(()=>{});
-    // #endregion
 
     if (!messages || !Array.isArray(messages)) {
       res.status(400).json({ error: 'Messages array is required' });
@@ -105,10 +87,21 @@ export default async function handler(req, res) {
       return searchInChildren(graph.children);
     };
 
-    // Build selection context (simplified for brevity)
+    // Build selection context with detailed information about selected elements
     let selectionContext = '';
     if (selectedNodeIds.length > 0 || selectedEdgeIds.length > 0) {
-      selectionContext = `USER SELECTION: ${selectedNodeIds.length} nodes, ${selectedEdgeIds.length} edges selected.`;
+      const selectedNodeDetails = selectedNodeIds.map(nodeId => {
+        const node = findNodeById(currentGraph, nodeId);
+        if (node) {
+          const label = node.data?.label || node.labels?.[0]?.text || nodeId;
+          const type = node.children ? 'group' : 'node';
+          return `${type} "${label}" (ID: ${nodeId})`;
+        }
+        return `node (ID: ${nodeId})`;
+      }).join(', ');
+      
+      selectionContext = `USER SELECTION: ${selectedNodeIds.length} node(s)/group(s) selected: ${selectedNodeDetails}. ${selectedEdgeIds.length} edge(s) selected.`;
+      selectionContext += `\n\n**CRITICAL: When user says "organize this", "modify this", "reorganize this group", "arrange this", or similar modification commands with a selection, they are referring to the SELECTED canvas element(s). DO NOT ask questions - immediately call create_architecture_diagram to modify the selected element(s).**`;
     }
 
     // Build current graph state description
@@ -178,17 +171,22 @@ export default async function handler(req, res) {
 - **Reasoning:** The user wants to visualize an existing codebase.
 - **Examples:** "https://github.com/user/repo", "analyze https://gitlab.com/project"
 
-**LANE 2: EXPLICIT DESCRIPTION OR IMAGE (Medium Priority)**
-- **Trigger:** Input describes a system architecture using specific technologies (e.g., "Express", "PostgreSQL", "Redis", "OAuth2", "Lambda", "DynamoDB", "React", "AWS Lambda") OR input includes an image.
+**LANE 2: EXPLICIT DESCRIPTION, IMAGE, OR MODIFICATION WITH SELECTION (Medium Priority)**
+- **Trigger:** 
+  - Input describes a system architecture using specific technologies (e.g., "Express", "PostgreSQL", "Redis", "OAuth2", "Lambda", "DynamoDB", "React", "AWS Lambda") OR
+  - Input includes an image OR
+  - **CRITICAL: If "Has Selection: true" AND the input contains ANY of these words: "organize", "reorganize", "arrange", "modify", "edit", "change", "update", "improve", "refine", "clean up", "better", "this group", "this node", "selected" → You MUST call \`create_architecture_diagram\`. DO NOT ask questions.**
 - **Action:** You MUST call the \`create_architecture_diagram\` tool.
-- **Reasoning:** The user has provided enough detail to draw a diagram.
-- **Examples:** "create a REST API with Express and Redis", "add authentication using OAuth2", "build serverless API with Lambda and DynamoDB"
+- **Reasoning:** The user has provided enough detail to draw a diagram, OR they want to modify selected canvas elements.
+- **Examples:** "create a REST API with Express and Redis", "add authentication using OAuth2", "build serverless API with Lambda and DynamoDB", "organize this group", "reorganize this", "modify the selected node", "organize the group I have selected on canvas"
 
 **LANE 3: VAGUE / AMBIGUOUS (Lowest Priority)**
 - **Trigger:** Input is high-level, vague, or lacks specific technologies (e.g., "build a chat app", "design a system", "make llm assessor").
 - **Action:** You MUST call the \`ask_clarifying_question\` tool.
 - **Reasoning:** You need more specific requirements before you can draw.
-- **Exceptions:** If Lane 1 or Lane 2 apply, IGNORE Lane 3. "analyze https://github.com/vague/repo" is Lane 1, not Lane 3.
+- **Exceptions:** 
+  - If Lane 1 or Lane 2 apply, IGNORE Lane 3. "analyze https://github.com/vague/repo" is Lane 1, not Lane 3.
+  - **If user has a selection AND says modification commands (organize, modify, etc.), this is Lane 2, NOT Lane 3.**
 
 **STRICT PROHIBITIONS:**
 - NEVER use \`create_architecture_diagram\` if a repository URL is present.
@@ -200,6 +198,8 @@ export default async function handler(req, res) {
 - Has Selection: ${agentContext.selection.hasSelection}
 - Has Images: ${agentContext.images.hasImages}
 - Unanswered Question: ${agentContext.conversation.hasUnansweredQuestion}
+
+${selectionContext}
 
 If there is an unanswered question, wait for the user. Otherwise, ROUTE NOW.`;
 
@@ -228,7 +228,7 @@ If there is an unanswered question, wait for the user. Otherwise, ROUTE NOW.`;
           type: "function",
           function: {
             name: "create_architecture_diagram",
-            description: "Call this if the message describes a system with specific technologies (Express, PostgreSQL, Redis, OAuth2, Lambda, DynamoDB). DO NOT call if message contains github.com, gitlab.com, or bitbucket.org.",
+            description: "Call this if: (1) the message describes a system with specific technologies (Express, PostgreSQL, Redis, OAuth2, Lambda, DynamoDB), OR (2) **CRITICAL: If Has Selection is true AND the message contains ANY of: organize, reorganize, arrange, modify, edit, change, update, improve, refine, clean up, better, 'this group', 'this node', 'selected' → You MUST call this tool immediately. DO NOT ask questions.** DO NOT call if message contains github.com, gitlab.com, or bitbucket.org.",
             parameters: {
               type: "object",
               properties: {
@@ -249,7 +249,7 @@ If there is an unanswered question, wait for the user. Otherwise, ROUTE NOW.`;
           type: "function",
           function: {
             name: "ask_clarifying_question",
-            description: "EXECUTE LANE 3: Call this tool IF AND ONLY IF the input is vague, ambiguous, or lacks specific technologies. DO NOT call if a URL is present.",
+            description: "EXECUTE LANE 3: Call this tool IF AND ONLY IF the input is vague, ambiguous, or lacks specific technologies. **CRITICAL: DO NOT call this if Has Selection is true AND the message contains modification commands (organize, reorganize, arrange, modify, edit, change, update, improve, refine, clean up, better, 'this group', 'this node', 'selected').** DO NOT call if a URL is present.",
             parameters: {
               type: "object",
               properties: {
@@ -344,9 +344,62 @@ If there is an unanswered question, wait for the user. Otherwise, ROUTE NOW.`;
                 
                 if (!args.repo_url) throw new Error("Missing repo_url");
 
+                // Check if we should use drilldown mode (selected node/group + existing diagram)
+                let drilldownNode = null;
+                let previousDiagram = null;
+                let nodePath = null;
+                let expandNodeId = null; // Store the selected node/group ID for expansion
+                
+                const hasExistingDiagram = currentGraph && currentGraph.children && currentGraph.children.length > 0;
+                const hasSelection = selectedNodeIds && selectedNodeIds.length > 0;
+                
+                // Check if user message explicitly requests expansion (not just organization/modification)
+                const lastUserMessage = messages?.filter(m => m.role === 'user').pop()?.content || '';
+                const userMessageLower = lastUserMessage.toLowerCase();
+                const isExplicitExpansionRequest = /(expand|drill down|zoom in|show details|show more|dive into|go deeper|break down)/i.test(lastUserMessage);
+                const isModificationRequest = /(organize|reorganize|arrange|modify|edit|change|update|improve|refine|clean up)/i.test(lastUserMessage);
+                
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/2c91d607-2790-4bbf-a7ab-0b4d8e1cfe86',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api/chat.js:347',message:'Checking for expansion mode',data:{hasExistingDiagram,hasSelection,selectedNodeIdsCount:selectedNodeIds?.length||0,selectedNodeIds:selectedNodeIds,currentGraphChildrenCount:currentGraph?.children?.length||0,lastUserMessage:lastUserMessage.substring(0,100),isExplicitExpansionRequest,isModificationRequest},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                // #endregion
+                
+                // Only use expansion mode if:
+                // 1. There's an existing diagram AND selection
+                // 2. User explicitly requests expansion (not just modification/organization)
+                // 3. User message contains a GitHub URL (indicating they want to expand with new codebase analysis)
+                const shouldUseExpansion = hasExistingDiagram && 
+                                          hasSelection && 
+                                          (isExplicitExpansionRequest || args.repo_url) && 
+                                          !isModificationRequest;
+                
+                if (shouldUseExpansion) {
+                    // Get the first selected node/group (can be either a node or a group)
+                    expandNodeId = selectedNodeIds[0];
+                    const selectedNode = findNodeById(currentGraph, expandNodeId);
+                    
+                    if (selectedNode) {
+                        // Extract label from node/group data (works for both nodes and groups)
+                        drilldownNode = selectedNode.data?.label || selectedNode.labels?.[0]?.text || expandNodeId;
+                        console.log('🔍 [DEEPWIKI] Drilldown mode: Selected node/group:', drilldownNode, '(ID:', expandNodeId, ')');
+                        
+                        // Note: We don't have the previous Mermaid diagram stored, but the backend
+                        // can work with just the drilldownNode parameter for context
+                        // If we had the previous diagram, we would pass it here:
+                        // previousDiagram = storedPreviousMermaidDiagram;
+                    } else {
+                        console.warn('⚠️ [DEEPWIKI] Selected node not found in graph:', expandNodeId);
+                    }
+                } else {
+                }
+
                 try {
                     const { getMermaidDiagramFromDeepWiki } = await import('./deepwiki.ts');
-                    const mermaidDiagram = await getMermaidDiagramFromDeepWiki(args.repo_url);
+                    const mermaidDiagram = await getMermaidDiagramFromDeepWiki(
+                        args.repo_url,
+                        drilldownNode,
+                        previousDiagram,
+                        nodePath
+                    );
                     
                     console.log('✅ MERMAID DIAGRAM RECEIVED FROM DEEPWIKI:');
                     console.log('==========================================');
@@ -354,12 +407,18 @@ If there is an unanswered question, wait for the user. Otherwise, ROUTE NOW.`;
                     console.log('==========================================');
                     console.log('📊 Mermaid diagram length:', mermaidDiagram.length);
                     
+                    // Get the original user message for context
+                    const lastUserMessage = messages?.filter(m => m.role === 'user').pop()?.content || '';
+                    
                     const diagramMsg = {
                         type: "diagram_creation",
-                        message: "Generating architecture from repository...",
-                        requirements: "Convert Mermaid to Canvas",
+                        message: expandNodeId 
+                            ? `Expanding ${drilldownNode || expandNodeId} with detailed architecture...`
+                            : "Generating architecture from repository...",
+                        requirements: lastUserMessage || "Convert Mermaid to Canvas", // Include original user message
                         architecture_type: "codebase_architecture",
-                        mermaid_diagram: mermaidDiagram
+                        mermaid_diagram: mermaidDiagram,
+                        expandNode: expandNodeId || null  // Pass the selected node/group ID (works for both nodes and groups)
                     };
                     res.write(`data: ${JSON.stringify(diagramMsg)}\n\n`);
                     console.log('✅ Sent Codebase Diagram Message with Mermaid diagram');
@@ -367,10 +426,12 @@ If there is an unanswered question, wait for the user. Otherwise, ROUTE NOW.`;
 
                 } catch (err) {
                     console.error('❌ DeepWiki Error:', err.message);
+                    console.error('❌ DeepWiki Error stack:', err.stack);
+                    
                     // Fallback to error message or basic diagram
                     const errorMsg = {
                         type: "error",
-                        message: `Analysis failed: ${err.message}. Is the backend running?`
+                        message: `Analysis failed: ${err.message || 'Unknown error'}. Is the backend running?`
                     };
                     res.write(`data: ${JSON.stringify(errorMsg)}\n\n`);
                 }

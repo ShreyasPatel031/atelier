@@ -9,25 +9,95 @@ const REQUEST_TIMEOUT = 180000; // 3 minutes
  * Extract Mermaid diagram from response text
  */
 function extractMermaidDiagram(response: string): string | null {
+  const logPath = '/Users/shreyaspatel/Desktop/Code/system-design/.cursor/debug.log';
+  
+  // #region agent log
+  const logEntry = JSON.stringify({
+    location: 'api/deepwiki.ts:extractMermaidDiagram:entry',
+    message: 'extractMermaidDiagram called',
+    data: {
+      responseLength: response ? response.length : 0,
+      responseType: typeof response,
+      responseIsNull: response === null,
+      responseIsUndefined: response === undefined,
+      responsePreview: response ? response.substring(0, 500) : null
+    },
+    timestamp: Date.now(),
+    sessionId: 'debug-session',
+    runId: 'run1',
+    hypothesisId: 'E'
+  }) + '\n';
+  fs.appendFileSync(logPath, logEntry);
+  // #endregion
+  
   if (!response || typeof response !== 'string') {
+    // #region agent log
+    const logEntry2 = JSON.stringify({
+      location: 'api/deepwiki.ts:extractMermaidDiagram:earlyReturn',
+      message: 'Early return - invalid response',
+      data: { response: response, type: typeof response },
+      timestamp: Date.now(),
+      sessionId: 'debug-session',
+      runId: 'run1',
+      hypothesisId: 'E'
+    }) + '\n';
+    fs.appendFileSync(logPath, logEntry2);
+    // #endregion
     return null;
   }
 
   // Look for ```mermaid blocks
   const mermaidMatch = response.match(/```mermaid\s*\n([\s\S]*?)\n```/);
   if (mermaidMatch) {
+    // #region agent log
+    const logEntry3 = JSON.stringify({
+      location: 'api/deepwiki.ts:extractMermaidDiagram:match1',
+      message: 'Found mermaid block with newlines',
+      data: { extractedLength: mermaidMatch[1].trim().length },
+      timestamp: Date.now(),
+      sessionId: 'debug-session',
+      runId: 'run1',
+      hypothesisId: 'E'
+    }) + '\n';
+    fs.appendFileSync(logPath, logEntry3);
+    // #endregion
     return mermaidMatch[1].trim();
   }
 
   // Try without newlines
   const mermaidMatch2 = response.match(/```mermaid([\s\S]*?)```/);
   if (mermaidMatch2) {
+    // #region agent log
+    const logEntry4 = JSON.stringify({
+      location: 'api/deepwiki.ts:extractMermaidDiagram:match2',
+      message: 'Found mermaid block without newlines',
+      data: { extractedLength: mermaidMatch2[1].trim().length },
+      timestamp: Date.now(),
+      sessionId: 'debug-session',
+      runId: 'run1',
+      hypothesisId: 'E'
+    }) + '\n';
+    fs.appendFileSync(logPath, logEntry4);
+    // #endregion
     return mermaidMatch2[1].trim();
   }
 
   // If response looks like mermaid content directly
   const trimmed = response.trim();
-  if (/^(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/.test(trimmed)) {
+  const startsWithGraph = /^(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/.test(trimmed);
+  if (startsWithGraph) {
+    // #region agent log
+    const logEntry5 = JSON.stringify({
+      location: 'api/deepwiki.ts:extractMermaidDiagram:match3',
+      message: 'Found direct mermaid content',
+      data: { extractedLength: trimmed.length },
+      timestamp: Date.now(),
+      sessionId: 'debug-session',
+      runId: 'run1',
+      hypothesisId: 'E'
+    }) + '\n';
+    fs.appendFileSync(logPath, logEntry5);
+    // #endregion
     return trimmed;
   }
 
@@ -46,8 +116,38 @@ function extractMermaidDiagram(response: string): string | null {
   }
 
   if (diagramLines.length > 0) {
+    // #region agent log
+    const logEntry6 = JSON.stringify({
+      location: 'api/deepwiki.ts:extractMermaidDiagram:match4',
+      message: 'Found mermaid content in lines',
+      data: { diagramLinesCount: diagramLines.length },
+      timestamp: Date.now(),
+      sessionId: 'debug-session',
+      runId: 'run1',
+      hypothesisId: 'E'
+    }) + '\n';
+    fs.appendFileSync(logPath, logEntry6);
+    // #endregion
     return diagramLines.join('\n');
   }
+
+  // #region agent log
+  const logEntry7 = JSON.stringify({
+    location: 'api/deepwiki.ts:extractMermaidDiagram:noMatch',
+    message: 'No mermaid diagram found - all patterns failed',
+    data: {
+      responseLength: response.length,
+      responsePreview: response.substring(0, 1000),
+      hasMermaidBlock: response.includes('```mermaid'),
+      hasGraphKeyword: /(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/.test(response)
+    },
+    timestamp: Date.now(),
+    sessionId: 'debug-session',
+    runId: 'run1',
+    hypothesisId: 'E'
+  }) + '\n';
+  fs.appendFileSync(logPath, logEntry7);
+  // #endregion
 
   return null;
 }
@@ -79,8 +179,17 @@ function parseGitHubUrl(url: string): string {
 
 /**
  * Call DeepWiki backend to get Mermaid diagram for a codebase URL
+ * @param repoUrl - The repository URL to analyze
+ * @param drilldownNode - Optional: Name/label of the node to drill into (for drill-down mode)
+ * @param previousDiagram - Optional: Previous Mermaid diagram for context (for drill-down mode)
+ * @param nodePath - Optional: File path hint for the drilldown node
  */
-export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<string> {
+export async function getMermaidDiagramFromDeepWiki(
+  repoUrl: string,
+  drilldownNode?: string | null,
+  previousDiagram?: string | null,
+  nodePath?: string | null
+): Promise<string> {
   console.log('🔍 [DEEPWIKI] getMermaidDiagramFromDeepWiki called with:', repoUrl);
   
   // Parse GitHub URL to extract base repo (strips /tree/branch paths)
@@ -148,19 +257,34 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
       fs.appendFile(logPath, logEntry, () => {});
       // #endregion
 
-      const request = {
+      // Build the request with optional drilldown parameters
+      const request: any = {
         repo_url: baseRepoUrl,
         type: 'github',
         messages: [
           {
             role: 'user',
-            content: 'Analyze the codebase architecture and generate a comprehensive Mermaid.js diagram showing main components, relationships, architecture patterns, entry points, and external dependencies. Return ONLY the mermaid code block.'
+            content: drilldownNode
+              ? `The user clicked on "${drilldownNode}" and wants to see a DETAILED ZOOM-IN view. Show INTERNAL details of "${drilldownNode}" (its subcomponents, functions, modules), maintain context of how "${drilldownNode}" fits into the overall architecture, and focus primarily on "${drilldownNode}" but show how it connects to the rest. Return ONLY the mermaid code block.`
+              : 'Analyze the codebase architecture and generate a comprehensive Mermaid.js diagram showing main components, relationships, architecture patterns, entry points, and external dependencies. Return ONLY the mermaid code block.'
           }
         ],
         provider: process.env.PROVIDER || 'openai',
         model: process.env.MODEL || 'gpt-4o',
         language: 'en'
       };
+
+      // Add drilldown/expand parameters if provided
+      // Note: Python backend uses 'expandNode' parameter for drilldown functionality
+      if (drilldownNode) {
+        request.expandNode = drilldownNode;
+        // Enhanced query for better contextual embeddings in expand mode
+        request.enhancedQuery = drilldownNode 
+          ? `${drilldownNode} internal structure implementation${nodePath ? ` in ${nodePath} directory` : ''}`
+          : undefined;
+      }
+      // Note: previousDiagram is not directly supported by Python backend WebSocket API
+      // The backend uses expandNode + enhancedQuery for drilldown context
 
       console.log('🔍 [DEEPWIKI] Sending request:', JSON.stringify(request, null, 2));
       ws.send(JSON.stringify(request));
@@ -174,47 +298,235 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
       // #region agent log
       const logPath = '/Users/shreyaspatel/Desktop/Code/system-design/.cursor/debug.log';
       const logEntry = JSON.stringify({
-        location: 'api/deepwiki.ts:87',
+        location: 'api/deepwiki.ts:195',
         message: 'DeepWiki WebSocket message received',
         data: {
           messageLength: message.length,
-          messagePreview: message.substring(0, 200),
+          messageFull: message, // Full message for debugging
+          messagePreview: message.substring(0, 500),
           isMetrics: message.startsWith('[METRICS_START]'),
           isDone: message === '[DONE]',
           isError: message === '[ERROR]',
-          accumulatedLength: responseText.length
+          looksLikeError: /^(Error|ERROR|Exception|Traceback|Failed)/i.test(message.trim()),
+          accumulatedLengthBefore: responseText.length,
+          accumulatedPreview: responseText.substring(0, 500)
         },
         timestamp: Date.now(),
         sessionId: 'debug-session',
         runId: 'run1',
-        hypothesisId: 'F'
+        hypothesisId: 'A'
       }) + '\n';
       fs.appendFile(logPath, logEntry, () => {});
       // #endregion
       
       // Skip metrics messages
       if (message.startsWith('[METRICS_START]')) {
+        // #region agent log
+        const logEntry2 = JSON.stringify({
+          location: 'api/deepwiki.ts:220',
+          message: 'Skipping metrics message',
+          data: { message: message.substring(0, 200) },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'A'
+        }) + '\n';
+        fs.appendFile(logPath, logEntry2, () => {});
+        // #endregion
+        return;
+      }
+      
+      // Check if message looks like an error (starts with Error, Exception, etc.)
+      // IMPORTANT: Only treat as error if it's NOT part of a Mermaid diagram
+      // Check both the current message AND accumulated responseText to avoid false positives
+      const messageTrimmed = message.trim();
+      const accumulatedTrimmed = responseText.trim();
+      
+      // Check what the accumulated text would look like WITH this message
+      const wouldBeAccumulated = (responseText + message).trim();
+      
+      const looksLikeError = /^(Error|ERROR|Exception|Traceback|Failed|\[Errno)/i.test(messageTrimmed);
+      
+      // Only treat as error if:
+      // 1. Message starts with error pattern
+      // 2. NOT part of Mermaid diagram (check both current accumulated AND what it would be with this message)
+      // 3. The accumulated text (with this message) doesn't contain Mermaid diagram markers
+      const isInMermaidContext = accumulatedTrimmed.includes('```mermaid') || 
+                                  /(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/i.test(accumulatedTrimmed) ||
+                                  wouldBeAccumulated.includes('```mermaid') ||
+                                  /(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/i.test(wouldBeAccumulated) ||
+                                  message.includes('```mermaid') ||
+                                  /(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/i.test(message);
+      
+      // Check if this is a standalone error message (not part of diagram content)
+      // Error messages from backend are usually:
+      // - Complete sentences/phrases (not just "Error" alone)
+      // - Don't appear in the middle of a Mermaid diagram
+      // - Are substantial (more than just a single word)
+      const isStandaloneError = looksLikeError && 
+                                 !isInMermaidContext && 
+                                 // Only treat as error if message is substantial OR it's a complete error phrase
+                                 (messageTrimmed.length > 20 || 
+                                  messageTrimmed.match(/^(Error|ERROR|Exception|Traceback|Failed|\[Errno)[^a-zA-Z]/i) !== null ||
+                                  /^(Error|ERROR|Exception|Traceback|Failed|\[Errno)\s+(preparing|during|in|with|occurred)/i.test(messageTrimmed));
+      
+      if (isStandaloneError) {
+        // #region agent log
+        const logEntryError = JSON.stringify({
+          location: 'api/deepwiki.ts:235',
+          message: 'Detected error message from backend',
+          data: {
+            errorMessage: message,
+            messageLength: message.length,
+            accumulatedLength: responseText.length,
+            isInMermaidContext: false,
+            messageTrimmed: messageTrimmed
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'C'
+        }) + '\n';
+        fs.appendFile(logPath, logEntryError, () => {});
+        // #endregion
+        
+        clearTimeout(timeoutId);
+        if (!isResolved) {
+          isResolved = true;
+          ws.close();
+          
+          // #region agent log
+          const logEntry = JSON.stringify({
+            location: 'api/deepwiki.ts:errorDetection',
+            message: 'Rejecting with backend error',
+            data: {
+              errorMessage: message.trim(),
+              messageLength: message.length,
+              repoUrl: repoUrl
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'C'
+          }) + '\n';
+          fs.appendFileSync(logPath, logEntry);
+          // #endregion
+          
+          reject(new Error(`Backend error: ${message.trim()}`));
+        }
         return;
       }
 
       // Check for end markers
       if (message === '[DONE]') {
+        // #region agent log
+        const logEntry3 = JSON.stringify({
+          location: 'api/deepwiki.ts:228',
+          message: '[DONE] marker received',
+          data: {
+            responseTextLength: responseText.length,
+            responseTextFull: responseText, // Full response for debugging
+            responseTextPreview: responseText.substring(0, 1000),
+            responseTextEnd: responseText.substring(Math.max(0, responseText.length - 500)),
+            hasMermaidBlock: responseText.includes('```mermaid'),
+            hasGraphKeyword: /(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/.test(responseText),
+            isResolved: isResolved
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'B'
+        }) + '\n';
+        fs.appendFile(logPath, logEntry3, () => {});
+        // #endregion
+        
         clearTimeout(timeoutId);
         // Process response before closing
         if (!isResolved && responseText) {
+          // #region agent log
+          const logEntry4 = JSON.stringify({
+            location: 'api/deepwiki.ts:250',
+            message: 'Attempting to extract Mermaid diagram',
+            data: {
+              responseTextLength: responseText.length,
+              responseTextSample: responseText.substring(0, 500)
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'E'
+          }) + '\n';
+          fs.appendFile(logPath, logEntry4, () => {});
+          // #endregion
+          
           const diagram = extractMermaidDiagram(responseText);
+          
+          // #region agent log
+          const logEntry5 = JSON.stringify({
+            location: 'api/deepwiki.ts:262',
+            message: 'Mermaid extraction result',
+            data: {
+              extracted: diagram !== null,
+              diagramLength: diagram ? diagram.length : 0,
+              diagramPreview: diagram ? diagram.substring(0, 200) : null
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'E'
+          }) + '\n';
+          fs.appendFile(logPath, logEntry5, () => {});
+          // #endregion
+          
           if (diagram) {
             isResolved = true;
             ws.close();
             resolve(diagram);
             return;
           } else {
+            // #region agent log
+            const logEntry6 = JSON.stringify({
+              location: 'api/deepwiki.ts:280',
+              message: 'Extraction failed - analyzing why',
+              data: {
+                responseText: responseText,
+                responseLength: responseText.length,
+                extractionAttempts: {
+                  mermaidBlockMatch: responseText.match(/```mermaid[\s\S]*?```/) !== null,
+                  mermaidBlockNoNewline: responseText.match(/```mermaid([\s\S]*?)```/) !== null,
+                  startsWithGraph: /^(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/.test(responseText.trim()),
+                  hasGraphKeyword: /(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/.test(responseText)
+                }
+              },
+              timestamp: Date.now(),
+              sessionId: 'debug-session',
+              runId: 'run1',
+              hypothesisId: 'E'
+            }) + '\n';
+            fs.appendFile(logPath, logEntry6, () => {});
+            // #endregion
             isResolved = true;
             ws.close();
             reject(new Error('Failed to extract Mermaid diagram from response'));
             return;
           }
         } else if (!isResolved) {
+          // #region agent log
+          const logEntry7 = JSON.stringify({
+            location: 'api/deepwiki.ts:305',
+            message: '[DONE] received but responseText is empty',
+            data: {
+              responseTextLength: responseText.length,
+              responseText: responseText,
+              isResolved: isResolved
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'B'
+          }) + '\n';
+          fs.appendFile(logPath, logEntry7, () => {});
+          // #endregion
           isResolved = true;
           ws.close();
           reject(new Error('Backend returned [DONE] but no response text was received'));
@@ -223,6 +535,21 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
       }
 
       if (message === '[ERROR]') {
+        // #region agent log
+        const logEntry8 = JSON.stringify({
+          location: 'api/deepwiki.ts:323',
+          message: '[ERROR] marker received',
+          data: {
+            responseTextLength: responseText.length,
+            responseText: responseText.substring(0, 500)
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'C'
+        }) + '\n';
+        fs.appendFile(logPath, logEntry8, () => {});
+        // #endregion
         clearTimeout(timeoutId);
         if (!isResolved) {
           isResolved = true;
@@ -234,41 +561,110 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
 
       // Accumulate response (skip [DONE] and [ERROR] markers)
       if (message !== '[DONE]' && message !== '[ERROR]') {
+        const beforeLength = responseText.length;
         responseText += message;
-      }
-    });
-
-    ws.on('close', () => {
-      clearTimeout(timeoutId);
-
-      // Only process if not already resolved (handles case where connection closes without [DONE])
-      if (!isResolved && responseText) {
+        const afterLength = responseText.length;
+        
         // #region agent log
-        const logPath = '/Users/shreyaspatel/Desktop/Code/system-design/.cursor/debug.log';
-        const logEntry = JSON.stringify({
-          location: 'api/deepwiki.ts:113',
-          message: 'DeepWiki response received',
+        const logEntry9 = JSON.stringify({
+          location: 'api/deepwiki.ts:347',
+          message: 'Accumulating message into responseText',
           data: {
-            responseLength: responseText.length,
-            responsePreview: responseText.substring(0, 500),
-            responseEnd: responseText.substring(Math.max(0, responseText.length - 200)),
-            hasMermaidBlock: responseText.includes('```mermaid'),
-            hasGraphKeyword: /(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/.test(responseText)
+            messageLength: message.length,
+            beforeLength: beforeLength,
+            afterLength: afterLength,
+            expectedLength: beforeLength + message.length,
+            matches: afterLength === (beforeLength + message.length),
+            accumulatedPreview: responseText.substring(0, 500)
           },
           timestamp: Date.now(),
           sessionId: 'debug-session',
           runId: 'run1',
-          hypothesisId: 'F'
+          hypothesisId: 'A'
         }) + '\n';
-        fs.appendFile(logPath, logEntry, () => {});
+        fs.appendFile(logPath, logEntry9, () => {});
         // #endregion
+      }
+    });
+
+    ws.on('close', (code: number, reason: Buffer) => {
+      clearTimeout(timeoutId);
+      
+      // #region agent log
+      const logPath = '/Users/shreyaspatel/Desktop/Code/system-design/.cursor/debug.log';
+      const logEntryClose = JSON.stringify({
+        location: 'api/deepwiki.ts:close',
+        message: 'WebSocket closed',
+        data: {
+          closeCode: code,
+          closeReason: reason ? reason.toString() : null,
+          isResolved: isResolved,
+          responseTextLength: responseText.length,
+          responseTextPreview: responseText.substring(0, 500)
+        },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'D'
+      }) + '\n';
+      fs.appendFileSync(logPath, logEntryClose);
+      // #endregion
+
+      // Only process if not already resolved (handles case where connection closes without [DONE])
+      if (!isResolved && responseText) {
+        // Check if responseText looks like an error before trying to extract diagram
+        const trimmedResponse = responseText.trim();
+        const looksLikeError = /^(Error|ERROR|Exception|Traceback|Failed|\[Errno)/i.test(trimmedResponse);
+        
+        // #region agent log
+        const logEntry = JSON.stringify({
+          location: 'api/deepwiki.ts:380',
+          message: 'Processing responseText on close (no [DONE] received)',
+          data: {
+            responseLength: responseText.length,
+            responseFull: responseText, // Full response for debugging
+            responsePreview: responseText.substring(0, 1000),
+            responseEnd: responseText.substring(Math.max(0, responseText.length - 500)),
+            hasMermaidBlock: responseText.includes('```mermaid'),
+            hasGraphKeyword: /(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/.test(responseText),
+            looksLikeError: looksLikeError
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'D'
+        }) + '\n';
+        fs.appendFileSync(logPath, logEntry);
+        // #endregion
+        
+        // If response looks like an error, reject immediately
+        if (looksLikeError && !responseText.includes('```mermaid') && !/(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram)/i.test(responseText)) {
+          // #region agent log
+          const logEntryError = JSON.stringify({
+            location: 'api/deepwiki.ts:405',
+            message: 'ResponseText is an error message, rejecting',
+            data: {
+              errorMessage: responseText,
+              responseLength: responseText.length
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'C'
+          }) + '\n';
+          fs.appendFileSync(logPath, logEntryError);
+          // #endregion
+          isResolved = true;
+          reject(new Error(`Backend error: ${trimmedResponse}`));
+          return;
+        }
 
         const diagram = extractMermaidDiagram(responseText);
         if (diagram) {
           // #region agent log
           const logEntry2 = JSON.stringify({
-            location: 'api/deepwiki.ts:140',
-            message: 'Mermaid diagram extracted successfully',
+            location: 'api/deepwiki.ts:402',
+            message: 'Mermaid diagram extracted successfully from close handler',
             data: {
               diagramLength: diagram.length,
               diagramPreview: diagram.substring(0, 200)
@@ -276,17 +672,17 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
             timestamp: Date.now(),
             sessionId: 'debug-session',
             runId: 'run1',
-            hypothesisId: 'F'
+            hypothesisId: 'D'
           }) + '\n';
-          fs.appendFile(logPath, logEntry2, () => {});
+          fs.appendFileSync(logPath, logEntry2);
           // #endregion
           isResolved = true;
           resolve(diagram);
         } else {
           // #region agent log
           const logEntry3 = JSON.stringify({
-            location: 'api/deepwiki.ts:150',
-            message: 'Failed to extract Mermaid diagram',
+            location: 'api/deepwiki.ts:416',
+            message: 'Failed to extract Mermaid diagram from close handler',
             data: {
               responseText: responseText,
               responseLength: responseText.length,
@@ -299,28 +695,30 @@ export async function getMermaidDiagramFromDeepWiki(repoUrl: string): Promise<st
             timestamp: Date.now(),
             sessionId: 'debug-session',
             runId: 'run1',
-            hypothesisId: 'F'
+            hypothesisId: 'D'
           }) + '\n';
-          fs.appendFile(logPath, logEntry3, () => {});
+          fs.appendFileSync(logPath, logEntry3);
           // #endregion
           isResolved = true;
           reject(new Error('Failed to extract Mermaid diagram from response'));
         }
       } else if (!isResolved) {
         // #region agent log
-        const logPath = '/Users/shreyaspatel/Desktop/Code/system-design/.cursor/debug.log';
-        const logEntry = JSON.stringify({
-          location: 'api/deepwiki.ts:170',
-          message: 'No response text received from DeepWiki',
+        const logEntry4 = JSON.stringify({
+          location: 'api/deepwiki.ts:437',
+          message: 'WebSocket closed but no responseText received',
           data: {
-            responseTextEmpty: true
+            responseTextEmpty: true,
+            responseTextLength: responseText.length,
+            isResolved: isResolved,
+            closeCode: code
           },
           timestamp: Date.now(),
           sessionId: 'debug-session',
           runId: 'run1',
-          hypothesisId: 'F'
+          hypothesisId: 'D'
         }) + '\n';
-        fs.appendFile(logPath, logEntry, () => {});
+        fs.appendFileSync(logPath, logEntry4);
         // #endregion
         isResolved = true;
         reject(new Error('No response received from Python backend'));

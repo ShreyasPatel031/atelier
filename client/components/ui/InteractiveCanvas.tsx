@@ -4407,7 +4407,7 @@ useEffect(() => {
     const edgeIds = params.edges?.map((e: any) => e.id) || [];
     (window as any).selectedNodeIds = nodeIds;
     (window as any).selectedEdgeIds = edgeIds;
- 
+    
     // Domain and ReactFlow MUST be perfectly synchronized - no validation needed
     const newSelectedNodes = params.nodes || [];
     const newSelectedEdges = params.edges || [];
