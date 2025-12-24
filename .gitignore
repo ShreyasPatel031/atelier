@@ -27,3 +27,7 @@ coverage/
  
 .vercel
 .env.vercel
+
+# Large generated files (exceed GitHub's 100MB limit)
+client/generated/precomputed-icon-embeddings.json
+public/precomputed-icon-embeddings.json
