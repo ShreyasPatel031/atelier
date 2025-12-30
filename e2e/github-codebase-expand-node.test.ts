@@ -735,3 +735,4 @@ test.describe('GitHub Codebase Diagram Expansion', () => {
     console.log('✅ Verified: Selected node was expanded instead of replacing the entire diagram');
   });
 });
+
