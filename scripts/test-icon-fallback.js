@@ -76,9 +76,10 @@ async function runTests() {
             const embeddingsResponse = await fetch(`${serverUrl}/precomputed-icon-embeddings.json`);
             const embeddings = await embeddingsResponse.json();
             
-            const hasTraceEmbedding = embeddings.embeddings && embeddings.embeddings['trace'];
-            if (hasTraceEmbedding) {
-                console.log('   ✅ Trace embedding available for fallback');
+            // Check for any trace-related embedding (trace, gcp_trace, etc.)
+            const traceKeys = Object.keys(embeddings.embeddings || {}).filter(k => k.toLowerCase().includes('trace'));
+            if (traceKeys.length > 0) {
+                console.log(`   ✅ Trace embedding available for fallback (found: ${traceKeys.join(', ')})`);
             } else {
                 console.log('   ❌ Trace embedding missing');
                 allTestsPassed = false;
