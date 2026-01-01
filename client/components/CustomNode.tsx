@@ -60,8 +60,8 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
   const { leftHandles = [], rightHandles = [], topHandles = [], bottomHandles = [] } = data;
   const { settings } = useNodeStyle();
   
-  const [isEditing, setIsEditing] = useState(data.isEditing || (!data.label || data.label === 'Add text'));
-  const [label, setLabel] = useState(!data.label || data.label === 'Add text' ? '' : data.label);
+  const [isEditing, setIsEditing] = useState(data.isEditing || (!data.label || data.label === 'Add Node'));
+  const [label, setLabel] = useState(!data.label || data.label === 'Add Node' ? '' : data.label);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastBlurTimeRef = useRef<number>(0);
   const [iconLoaded, setIconLoaded] = useState(false);
@@ -299,7 +299,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
 
   // keep local label in sync
   useEffect(() => {
-    setLabel(!data.label || data.label === 'Add text' ? '' : data.label);
+    setLabel(!data.label || data.label === 'Add Node' ? '' : data.label);
   }, [data.label]);
 
   // CRITICAL: DO NOT auto-enter edit mode on selection - this causes icon/text to move
@@ -592,7 +592,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
                 setIsEditing(false);
                 onLabelChange(id, label || '');
               }}
-              placeholder={!label || !label.trim() ? "Add text" : ""}
+              placeholder={!label || !label.trim() ? "Add Node" : ""}
               style={{
                 width: '100%',
                 maxWidth: '100%',
@@ -674,7 +674,7 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
               </div>
             ) : (
               <div style={{ width: '100%', color: '#e4e4e4', position: 'relative', display: 'inline-block' }}>
-                Add text
+                Add Node
                 {/* Show blinking cursor when selected and no text */}
                 {selected && (
                   <span 

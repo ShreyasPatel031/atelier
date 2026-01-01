@@ -287,10 +287,10 @@ input::placeholder {
   box-shadow: none !important;
 }
 
-/* DEBUG: Force resize handle hover areas to be green - override everything */
+/* Resize handle hover areas - transparent and not visible */
 [data-resize-handle="true"] {
-  background: rgba(0, 255, 0, 0.3) !important; /* Reduced opacity */
-  border: 2px solid rgba(0, 200, 0, 0.6) !important; /* Reduced opacity */
+  background: transparent !important;
+  border: none !important;
 }
 
 /* Ensure resize handle inner rectangles are white and have no border */

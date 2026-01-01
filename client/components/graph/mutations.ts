@@ -312,9 +312,11 @@ export const addNode = (
   }
   
   // Create the new node - using createNodeID to maintain ID creation consistency
+  // If label is explicitly provided (even if empty), use it. Otherwise fall back to nodeName
+  const nodeLabel = data?.label !== undefined ? data.label : nodeName;
   const newNode: ElkGraphNode = {
     id: normalizedId,
-    labels: [{ text: data?.label || nodeName }],
+    labels: [{ text: nodeLabel }],
     children: []
   };
   

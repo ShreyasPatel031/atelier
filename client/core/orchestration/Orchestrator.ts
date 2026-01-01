@@ -194,10 +194,15 @@ export async function apply(intent: EditIntent): Promise<void> {
         }
         
         // 1. Domain.mutate (add node structure)
-        updatedGraph = addNode(
+        // CRITICAL: Use current graph state from ref
+        const currentGraph = graphStateRef.current;
+        if (!currentGraph) {
+          throw new Error('[Orchestrator] Graph state not available for add-node');
+        }
+        const updatedGraph = addNode(
           payload.nodeId,
           payload.parentId,
-          updatedGraph,
+          currentGraph,
           payload.data || {}
         );
         
@@ -290,8 +295,13 @@ export async function apply(intent: EditIntent): Promise<void> {
         });
         
       } else if (payload.action === 'delete-edge') {
+        // CRITICAL: Use the CURRENT graph state from ref
+        const currentGraph = graphStateRef.current;
+        if (!currentGraph) {
+          throw new Error('[Orchestrator] Graph state not available for delete-edge');
+        }
         // CRITICAL: Clone graph first since deleteEdge might mutate in place
-        const graphToDelete = JSON.parse(JSON.stringify(updatedGraph));
+        const graphToDelete = JSON.parse(JSON.stringify(currentGraph));
         
         // Check if edge exists before trying to delete it
         // Edges may have been removed when their connected nodes were deleted
@@ -312,6 +322,7 @@ export async function apply(intent: EditIntent): Promise<void> {
           return false;
         })();
         
+        let clonedGraph: RawGraph;
         if (!edgeExists) {
           console.warn(`[Orchestrator] Edge ${payload.edgeId} not found - may have been removed with node deletion`);
           // Still clean up ViewState in case it exists there
@@ -319,10 +330,11 @@ export async function apply(intent: EditIntent): Promise<void> {
             delete viewStateRef.current.edge[payload.edgeId!];
           }
           // Edge already gone - still update graph ref and render to ensure UI is in sync
-          const clonedGraph = JSON.parse(JSON.stringify(updatedGraph));
+          clonedGraph = JSON.parse(JSON.stringify(currentGraph));
           graphStateRef.current = clonedGraph;
         } else {
           // 1. Domain.mutate (delete edge structure)
+          let updatedGraph: RawGraph;
           try {
             updatedGraph = deleteEdge(payload.edgeId!, graphToDelete);
           } catch (error) {
@@ -334,7 +346,7 @@ export async function apply(intent: EditIntent): Promise<void> {
                 delete viewStateRef.current.edge[payload.edgeId!];
               }
               // Use current graph state (edge already gone)
-              updatedGraph = graphStateRef.current || updatedGraph;
+              updatedGraph = graphStateRef.current || currentGraph;
             } else {
               throw error; // Re-throw if it's a different error
             }
@@ -347,7 +359,7 @@ export async function apply(intent: EditIntent): Promise<void> {
           
           // Update graph state ref (NOT React state)
           // CRITICAL: In FREE mode, we only update the ref, NOT call setRawGraph
-          const clonedGraph = JSON.parse(JSON.stringify(updatedGraph));
+          clonedGraph = JSON.parse(JSON.stringify(updatedGraph));
           graphStateRef.current = clonedGraph;
         }
         
@@ -367,11 +379,16 @@ export async function apply(intent: EditIntent): Promise<void> {
         });
         
       } else if (payload.action === 'move-node') {
+        // CRITICAL: Use the CURRENT graph state from ref
+        const currentGraph = graphStateRef.current;
+        if (!currentGraph) {
+          throw new Error('[Orchestrator] Graph state not available for move-node');
+        }
         // 1. Domain.mutate (reparent node)
-        updatedGraph = moveNode(
+        const updatedGraph = moveNode(
           payload.nodeId!,
           payload.newParentId!,
-          updatedGraph
+          currentGraph
         );
         
         // Update graph state

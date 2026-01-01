@@ -90,9 +90,13 @@ export function convertViewStateToReactFlow(
     // Extract label from domainNode.labels (ELK format) or domainNode.data.label
     // CRITICAL: Labels are stored in domainNode.labels array in ELK format: [{ text: "Label" }]
     // But ReactFlow expects data.label as a string
+    // If label is explicitly empty string, preserve it (don't fall back to nodeId)
     const labelFromLabels = domainNode.labels?.[0]?.text;
     const labelFromData = domainNode.data?.label;
-    const nodeLabel = labelFromData || labelFromLabels || (nodeId === 'root' ? '' : nodeId);
+    // Only fall back to nodeId if label is truly undefined/null, not if it's empty string
+    const nodeLabel = labelFromData !== undefined ? labelFromData 
+      : (labelFromLabels !== undefined ? labelFromLabels 
+      : (nodeId === 'root' ? '' : nodeId));
 
     // Use 'draftGroup' instead of 'group' to avoid ReactFlow's built-in group behavior
     // The built-in 'group' type has special non-draggable behavior we don't want
