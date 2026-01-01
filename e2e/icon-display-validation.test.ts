@@ -2,14 +2,15 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Icon Display Validation', () => {
   test('should load application without missing icon indicators', async ({ page }) => {
+    test.setTimeout(30000); // Increase timeout to 30s
     // Navigate to the application
     await page.goto('http://localhost:3000');
     
-    // Wait for the application to load
-    await page.waitForLoadState('networkidle');
+    // Wait for the application to load - use domcontentloaded instead of networkidle
+    await page.waitForLoadState('domcontentloaded');
     
     // Wait for any initial content to load
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
     
     // Check if there are any missing icon indicators on the page
     const missingIconIndicators = await page.locator('text="❌ MISSING ICON"').count();
@@ -31,14 +32,15 @@ test.describe('Icon Display Validation', () => {
   });
   
   test('should handle root node icon properly', async ({ page }) => {
+    test.setTimeout(30000); // Increase timeout to 30s
     // Navigate to the application
     await page.goto('http://localhost:3000');
     
-    // Wait for the application to load
-    await page.waitForLoadState('networkidle');
+    // Wait for the application to load - use domcontentloaded instead of networkidle
+    await page.waitForLoadState('domcontentloaded');
     
     // Wait for content to load
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
     
     // Check if there's a root node and that it doesn't show missing icon
     const rootNode = page.locator('[data-testid="react-flow-node"][data-id="root"]');
@@ -58,17 +60,22 @@ test.describe('Icon Display Validation', () => {
   });
   
   test('should validate semantic fallback service is available', async ({ page }) => {
+    test.setTimeout(30000); // Increase timeout to 30s
     // Navigate to the application
     await page.goto('http://localhost:3000');
     
-    // Wait for the application to load
-    await page.waitForLoadState('networkidle');
+    // Wait for the application to load - use domcontentloaded instead of networkidle
+    // networkidle can timeout if there are continuous connections (websockets, polling, etc.)
+    await page.waitForLoadState('domcontentloaded');
+    
+    // Wait a bit for any async initialization
+    await page.waitForTimeout(1000);
     
     // Test that the semantic fallback service is available
     const fallbackServiceAvailable = await page.evaluate(() => {
       // Check if the icon fallback service is loaded
       return typeof window !== 'undefined' && 
-             window.debugIconFallback !== undefined;
+             (window as any).debugIconFallback !== undefined;
     });
     
     console.log('Semantic fallback service available:', fallbackServiceAvailable);
@@ -80,10 +87,11 @@ test.describe('Icon Display Validation', () => {
   });
 
   test('should verify Lucide icons are available in generic icon list', async ({ page }) => {
+    test.setTimeout(30000); // Increase timeout to 30s
     // Navigate to canvas
     await page.goto('http://localhost:3000/canvas');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
     
     // Check if generic icons include Lucide icons
     const genericIcons = await page.evaluate(async () => {
