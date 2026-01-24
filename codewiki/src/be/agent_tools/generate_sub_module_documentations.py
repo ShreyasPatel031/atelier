@@ -62,12 +62,29 @@ def _auto_split_by_directory(
 
 async def generate_sub_module_documentation(
     ctx: RunContext[CodeWikiDeps],
-    sub_module_specs: dict[str, list[str]]
+    sub_module_specs: dict[str, dict]
 ) -> str:
     """Generate detailed description of a given sub-module specs to the sub-agents
 
     Args:
-        sub_module_specs: The specs of the sub-modules to generate documentation for. E.g. {"sub_module_1": ["core_component_1.1", "core_component_1.2"], "sub_module_2": ["core_component_2.1", "core_component_2.2"], ...}
+        sub_module_specs: The specs of the sub-modules to generate documentation for. Each entry must include:
+            - title: Short 2-4 word title for the module (shown on hover)
+            - description: 1-2 sentence description (shown on hover)  
+            - components: List of component IDs belonging to this module
+            
+        Example format:
+        {
+            "user_auth": {
+                "title": "User Authentication",
+                "description": "Handles user login, logout, and session management.",
+                "components": ["auth.login", "auth.logout", "auth.session"]
+            },
+            "database_layer": {
+                "title": "Database Layer", 
+                "description": "Manages database connections and query execution.",
+                "components": ["db.connection", "db.query"]
+            }
+        }
     """
 
     deps = ctx.deps
@@ -80,10 +97,36 @@ async def generate_sub_module_documentation(
     value = deps.module_tree
     for key in deps.path_to_current_module:
         value = value[key]["children"]
-    for sub_module_name, core_component_ids in sub_module_specs.items():
-        value[sub_module_name] = {"components": core_component_ids, "children": {}}
     
-    for sub_module_name, core_component_ids in sub_module_specs.items():
+    # Parse specs - support both old format (list) and new format (dict with title/description)
+    parsed_specs = {}
+    for sub_module_name, spec in sub_module_specs.items():
+        if isinstance(spec, list):
+            # Old format: just component list
+            parsed_specs[sub_module_name] = {
+                "title": sub_module_name.replace("_", " ").title(),
+                "description": f"Documentation for {sub_module_name} module.",
+                "components": spec
+            }
+        else:
+            # New format: dict with title, description, components
+            parsed_specs[sub_module_name] = {
+                "title": spec.get("title", sub_module_name.replace("_", " ").title()),
+                "description": spec.get("description", f"Documentation for {sub_module_name} module."),
+                "components": spec.get("components", [])
+            }
+    
+    # Add to module tree with title and description
+    for sub_module_name, spec in parsed_specs.items():
+        value[sub_module_name] = {
+            "title": spec["title"],
+            "description": spec["description"],
+            "components": spec["components"], 
+            "children": {}
+        }
+    
+    for sub_module_name, spec in parsed_specs.items():
+        core_component_ids = spec["components"]
 
         # Create visual indentation for nested modules
         indent = "  " * deps.current_depth

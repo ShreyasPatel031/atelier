@@ -20,8 +20,19 @@ Generate documentation following this structure:
    - Link to other module documentation instead of duplicating information
 
 2. **Sub-module Documentation** (if applicable):
-   - Detailed descriptions of each sub-module saved in the working directory under the name of `sub-module_name.md`
-   - Core components and their responsibilities
+   - Use `generate_sub_module_documentation` with the NEW FORMAT including title and description:
+   ```
+   {{
+       "sub_module_name": {{
+           "title": "2-4 Word Title",
+           "description": "One or two sentence description shown on hover.",
+           "components": ["component.id.1", "component.id.2"]
+       }}
+   }}
+   ```
+   - title: Short 2-4 word summary (e.g., "User Authentication", "Database Layer")
+   - description: 1-2 sentences explaining what the module does (shown on hover in viewer)
+   - components: List of component IDs belonging to this sub-module
 
 3. **Visual Documentation**:
    - Mermaid architecture diagrams showing module relationships and dependencies
@@ -80,10 +91,38 @@ The click statement filename MUST match the sub-module name exactly:
 <WORKFLOW>
 1. Analyze the provided code components and module structure, explore the not given dependencies between the components if needed
 2. Create the main `{module_name}.md` file with overview and architecture in working directory
-3. Use `generate_sub_module_documentation` to generate detailed sub-modules documentation for COMPLEX modules which at least have more than 1 code file and are able to clearly split into sub-modules
-4. Include relevant Mermaid diagrams throughout the documentation
-5. After all sub-modules are documented, adjust `{module_name}.md` with ONLY ONE STEP to ensure all generated files including sub-modules documentation are properly cross-refered
+3. Use `generate_sub_module_documentation` with the NEW FORMAT to generate sub-modules:
+   ```
+   generate_sub_module_documentation({{
+       "auth_module": {{
+           "title": "Authentication System",
+           "description": "Handles user authentication, login, logout and session management.",
+           "components": ["auth.login", "auth.session", "auth.logout"]
+       }},
+       "database_layer": {{
+           "title": "Database Access",
+           "description": "Manages database connections, queries, and data persistence.",
+           "components": ["db.connection", "db.query", "db.models"]
+       }}
+   }})
+   ```
+4. Include Mermaid diagrams with nodes for EACH sub-module you create
+5. After all sub-modules are documented, adjust `{module_name}.md` to ensure all generated files are properly cross-referenced
 </WORKFLOW>
+
+<DIAGRAM_REQUIREMENTS>
+CRITICAL: Your Mermaid diagram MUST include a node for EACH sub-module you create.
+If you create sub-modules "auth_module" and "database_layer", your diagram MUST contain:
+```mermaid
+graph TD
+    auth_module[Authentication System]
+    database_layer[Database Access]
+    ...
+    click auth_module "auth_module.md"
+    click database_layer "database_layer.md"
+```
+The validation will FAIL if any sub-module is missing from the diagram.
+</DIAGRAM_REQUIREMENTS>
 
 <AVAILABLE_TOOLS>
 - `str_replace_editor`: File system operations for creating and editing documentation files
