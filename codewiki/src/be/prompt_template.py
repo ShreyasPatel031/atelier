@@ -112,16 +112,24 @@ The click statement filename MUST match the sub-module name exactly:
 
 <DIAGRAM_REQUIREMENTS>
 CRITICAL: Your Mermaid diagram MUST include a node for EACH sub-module you create.
-If you create sub-modules "auth_module" and "database_layer", your diagram MUST contain:
+
+MANDATORY STEPS:
+1. AFTER calling generate_sub_module_documentation, you MUST update your {module_name}.md file
+2. The updated diagram MUST include ALL sub-modules you created as nodes
+3. Each sub-module node MUST have a click statement linking to its .md file
+
+Example: If you created sub-modules "auth_module" and "database_layer":
 ```mermaid
 graph TD
     auth_module[Authentication System]
     database_layer[Database Access]
-    ...
+    auth_module --> database_layer
     click auth_module "auth_module.md"
     click database_layer "database_layer.md"
 ```
-The validation will FAIL if any sub-module is missing from the diagram.
+
+FAILURE TO INCLUDE ALL SUB-MODULES IN THE DIAGRAM WILL CAUSE VALIDATION ERRORS.
+After creating sub-modules, always verify your diagram contains every sub-module name.
 </DIAGRAM_REQUIREMENTS>
 
 <AVAILABLE_TOOLS>
