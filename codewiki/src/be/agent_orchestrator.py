@@ -247,6 +247,80 @@ class AgentOrchestrator:
         logger.info(f"[AUTO-SPLIT] Created {len(sub_modules)} sub-modules")
         return sub_modules
     
+    def _extract_module_metadata(self, md_path: str) -> tuple:
+        """
+        Extract title and description from a generated markdown file.
+        
+        Returns:
+            (title, description) tuple
+        """
+        import re
+        
+        with open(md_path, 'r') as f:
+            content = f.read()
+        
+        # Extract title from first # heading
+        title_match = re.search(r'^#\s+(.+?)(?:\s+Module)?(?:\s+Documentation)?\s*$', content, re.MULTILINE)
+        if title_match:
+            title = title_match.group(1).strip()
+            # Limit to 4-5 words
+            words = title.split()[:5]
+            title = ' '.join(words)
+        else:
+            # Fallback: use module name from filename
+            title = os.path.basename(md_path).replace('.md', '').replace('_', ' ').title()
+        
+        # Extract description - find first paragraph that's not a heading or code
+        # Skip past title and any ##/### headings, find actual text content
+        lines = content.split('\n')
+        description_lines = []
+        in_code_block = False
+        past_title = False
+        
+        for line in lines:
+            # Track code blocks
+            if line.strip().startswith('```'):
+                in_code_block = not in_code_block
+                continue
+            
+            if in_code_block:
+                continue
+            
+            # Skip title (first #)
+            if not past_title and line.startswith('# '):
+                past_title = True
+                continue
+            
+            # Skip other headings
+            if line.startswith('#'):
+                continue
+            
+            # Skip empty lines at start
+            if not description_lines and not line.strip():
+                continue
+            
+            # Found actual content
+            if line.strip():
+                description_lines.append(line.strip())
+                # Get 1-2 sentences (roughly 2 lines max)
+                if len(description_lines) >= 2:
+                    break
+            elif description_lines:
+                # Empty line after content = end of paragraph
+                break
+        
+        if description_lines:
+            description = ' '.join(description_lines)
+            # Take first 2 sentences
+            sentences = re.split(r'(?<=[.!?])\s+', description)
+            description = ' '.join(sentences[:2])
+            if len(description) > 200:
+                description = description[:197] + '...'
+        else:
+            description = f"Documentation for the {title} module."
+        
+        return title, description
+    
     async def _generate_parent_overview(self, module_name: str, sub_modules: Dict[str, Any],
                                         working_dir: str, deps: 'CodeWikiDeps') -> None:
         """
@@ -556,6 +630,21 @@ class AgentOrchestrator:
                     logger.info(f"[STAGE 4.6] Token usage (estimated) - Prompt: {stats.prompt_tokens:,}, Completion: ~2000")
             except Exception as track_err:
                 logger.debug(f"[STAGE 4.6] Token tracking failed (non-critical): {track_err}")
+            
+            # Extract title/description from generated markdown for top-level modules
+            # Top-level modules have module_path of length 1 (e.g., ['operator'])
+            if len(module_path) <= 1:
+                # This is a top-level module - extract metadata from its markdown
+                md_path = os.path.join(working_dir, f"{module_name}.md")
+                if os.path.exists(md_path):
+                    try:
+                        title, description = self._extract_module_metadata(md_path)
+                        if module_name in deps.module_tree:
+                            deps.module_tree[module_name]["title"] = title
+                            deps.module_tree[module_name]["description"] = description
+                            logger.info(f"[STAGE 4.6] Extracted metadata for top-level module: title='{title}'")
+                    except Exception as meta_err:
+                        logger.warning(f"[STAGE 4.6] Failed to extract metadata: {meta_err}")
             
             # Save updated module tree
             save_start = time.time()
