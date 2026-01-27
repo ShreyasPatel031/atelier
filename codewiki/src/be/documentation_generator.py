@@ -389,6 +389,9 @@ This is a quick overview generated from the module structure. Detailed documenta
             final_module_tree = await self.generate_parent_module_docs(
                 [], working_dir
             )
+            
+            # POST-PROCESSING: Extract diagrams from ALL markdown files into module_tree
+            self._extract_all_diagrams(working_dir, module_tree_path)
         else:
             # No modules in tree - this should be rare after the clustering fixes
             # Create a fallback single-module structure to ensure downstream processing works
@@ -428,8 +431,63 @@ This is a quick overview generated from the module structure. Detailed documenta
             if os.path.exists(repo_overview_path):
                 os.rename(repo_overview_path, os.path.join(working_dir, OVERVIEW_FILENAME))
                 logger.info(f"[STAGE 3] Renamed {repo_name}.md to overview.md")
+            
+            # POST-PROCESSING: Extract diagrams from ALL markdown files into module_tree
+            self._extract_all_diagrams(working_dir, module_tree_path)
         
         return working_dir
+    
+    def _extract_all_diagrams(self, docs_dir: str, module_tree_path: str) -> None:
+        """
+        Post-process: Extract DIAGRAM_JSON from all markdown files and store in module_tree.
+        This ensures recursive diagram extraction for all modules, not just top-level.
+        """
+        import re
+        import json
+        from pathlib import Path
+        
+        logger.info("[STAGE 3.5] Post-processing: Extracting diagrams from all markdown files")
+        
+        # Load current module_tree
+        module_tree = file_manager.load_json(module_tree_path)
+        
+        # Find all markdown files
+        md_files = list(Path(docs_dir).glob("*.md"))
+        diagrams_found = 0
+        
+        for md_file in md_files:
+            module_name = md_file.stem  # filename without extension
+            if module_name in ['overview', 'README']:
+                continue
+            
+            content = md_file.read_text()
+            
+            # Extract DIAGRAM_JSON
+            pattern = r'<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->'
+            match = re.search(pattern, content)
+            if match:
+                try:
+                    diagram = json.loads(match.group(1))
+                    # Find and update the module in tree (recursive search)
+                    if self._apply_diagram_to_tree(module_tree, module_name, diagram):
+                        diagrams_found += 1
+                except json.JSONDecodeError as e:
+                    logger.warning(f"[STAGE 3.5] Invalid DIAGRAM_JSON in {md_file.name}: {e}")
+        
+        # Save updated tree
+        file_manager.save_json(module_tree, module_tree_path)
+        logger.info(f"[STAGE 3.5] Extracted {diagrams_found} diagrams from markdown files")
+    
+    def _apply_diagram_to_tree(self, tree: Dict, module_name: str, diagram: Dict) -> bool:
+        """Recursively find module by name and apply diagram. Returns True if found."""
+        for name, data in tree.items():
+            if name == module_name:
+                data["diagram"] = diagram
+                return True
+            if "children" in data and data["children"]:
+                if self._apply_diagram_to_tree(data["children"], module_name, diagram):
+                    return True
+        return False
 
     async def generate_parent_module_docs(self, module_path: List[str], 
                                         working_dir: str) -> Dict[str, Any]:
