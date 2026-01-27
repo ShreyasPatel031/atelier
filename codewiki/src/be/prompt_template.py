@@ -143,7 +143,7 @@ Node types:
 RULES:
 1. EVERY sub-module you create MUST appear as a node with type="module"
 2. The node "id" MUST match the sub-module name exactly
-3. The "link" MUST be "{sub_module_name}.md"
+3. The "link" MUST be "{{sub_module_name}}.md"
 4. Include edges showing dependencies between nodes
 
 After the DIAGRAM_JSON block, also include the Mermaid version for backwards compatibility:

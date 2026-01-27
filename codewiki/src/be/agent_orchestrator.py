@@ -3,7 +3,7 @@ from pydantic_ai import Agent
 import logging
 import os
 import time
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 # Configure logging and monitoring
 
