@@ -1,0 +1,251 @@
+{
+  "started": "2026-01-26T11:16:32.341147",
+  "repos": [
+    {
+      "repo": "flask",
+      "exit_code": 0,
+      "duration_seconds": 999.6752359867096,
+      "duration_human": "16m 39s",
+      "output_lines": 2555,
+      "errors": [
+        "[11:28:08] ERROR    [STAGE 4.6] Agent execution FAILED after 206.2s",
+        "[11:28:08] ERROR    [STAGE 4.6] Module: flask_json",
+        "[11:28:08] ERROR    [STAGE 4.6] Component count: 12",
+        "[11:28:08] ERROR    [STAGE 4.6] Prompt tokens: 4169",
+        "[11:28:08] ERROR    [STAGE 4.6] Error type: AssertionError",
+        "[11:28:08] ERROR    [STAGE 4.6] Error message: (1, 0, 1)",
+        "[11:28:08] ERROR    [STAGE 4.6] Full traceback:",
+        "AssertionError: (1, 0, 1)",
+        "[11:28:08] ERROR    [STAGE 4: AGENT MODULE PROCESSING] FAILED in 206.2s for module: flask_json",
+        "[11:28:08] ERROR    [STAGE 3] \u2717 Failed to process module flask_json after 206.2s: AssertionError: (1, 0, 1)",
+        "[11:28:08] ERROR    [STAGE 3] Traceback: Traceback (most recent call last):",
+        "AssertionError: (1, 0, 1)",
+        "[11:30:40] ERROR    [STAGE 4.6] Agent execution FAILED after 28.6s",
+        "[11:30:40] ERROR    [STAGE 4.6] Module: flask_sessions",
+        "[11:30:40] ERROR    [STAGE 4.6] Component count: 5",
+        "[11:30:40] ERROR    [STAGE 4.6] Prompt tokens: 3487",
+        "[11:30:40] ERROR    [STAGE 4.6] Error type: AssertionError",
+        "[11:30:40] ERROR    [STAGE 4.6] Error message: (1, 0, 1)",
+        "[11:30:40] ERROR    [STAGE 4.6] Full traceback:",
+        "AssertionError: (1, 0, 1)"
+      ],
+      "warnings": [
+        "[11:17:16] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:17:31] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:17:37] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:17:43] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:17:55] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:18:05] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:18:11] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:18:22] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:18:32] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:18:39] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:18:51] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:18:56] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:19:07] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:19:16] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:19:24] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:19:38] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:19:52] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:20:07] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:20:19] WARNING  Using mermaid-py to validate mermaid diagrams",
+        "[11:20:30] WARNING  Using mermaid-py to validate mermaid diagrams"
+      ],
+      "files_generated": 60,
+      "modules_count": 48,
+      "validation": {
+        "validation_ran": true,
+        "exit_code": 1,
+        "duration_seconds": 0.07747173309326172,
+        "error_count": 2,
+        "warning_count": 1,
+        "issues": [
+          {
+            "type": "error",
+            "message": "\u274c FAILED - Errors: 4, Warnings: 12"
+          },
+          {
+            "type": "error",
+            "message": "\ud83d\udd34 ERRORS:"
+          },
+          {
+            "type": "warning",
+            "message": "\ud83d\udfe1 WARNINGS:"
+          }
+        ]
+      }
+    },
+    {
+      "repo": "fastapi",
+      "exit_code": 0,
+      "duration_seconds": 453.66070199012756,
+      "duration_human": "7m 33s",
+      "output_lines": 948,
+      "errors": [],
+      "warnings": [
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'BaseConfig' in module 'fastapi_compat' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Module 'fastapi_compat': 1 invalid sub leaf nodes filtered out, 0 valid",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'FastAPI' in module 'fastapi_applications' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Module 'fastapi_applications': 1 invalid sub leaf nodes filtered out, 0 valid",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'UploadFile' in module 'fastapi_datastructures' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Module 'fastapi_datastructures': 1 invalid sub leaf nodes filtered out, 0 valid",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'AsyncExitStackMiddleware' in module 'fastapi_middleware' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Module 'fastapi_middleware': 1 invalid sub leaf nodes filtered out, 0 valid",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'MediaType' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'Link' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'ServerVariable' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'Info' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'Components' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'OAuthFlowPassword' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'OAuthFlowClientCredentials' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'Contact' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'EmailStr' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'Operation' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'Header' in module 'fastapi_openapi' - not found in components",
+        "[11:33:52] WARNING  [STAGE 2] Skipping invalid sub leaf node 'OAuth2' in module 'fastapi_openapi' - not found in components"
+      ],
+      "files_generated": 24,
+      "modules_count": 28,
+      "validation": {
+        "validation_ran": true,
+        "exit_code": 0,
+        "duration_seconds": 0.07442212104797363,
+        "error_count": 0,
+        "warning_count": 1,
+        "issues": [
+          {
+            "type": "warning",
+            "message": "\ud83d\udfe1 WARNINGS:"
+          }
+        ]
+      }
+    },
+    {
+      "repo": "httpx",
+      "exit_code": -1,
+      "duration_seconds": 1800.042321920395,
+      "duration_human": "30m 0s",
+      "output_lines": 1,
+      "errors": [],
+      "warnings": [],
+      "files_generated": 46,
+      "modules_count": 81,
+      "validation": {
+        "validation_ran": true,
+        "exit_code": 1,
+        "duration_seconds": 0.08946514129638672,
+        "error_count": 2,
+        "warning_count": 1,
+        "issues": [
+          {
+            "type": "error",
+            "message": "\u274c FAILED - Errors: 29, Warnings: 5"
+          },
+          {
+            "type": "error",
+            "message": "\ud83d\udd34 ERRORS:"
+          },
+          {
+            "type": "warning",
+            "message": "\ud83d\udfe1 WARNINGS:"
+          }
+        ]
+      }
+    },
+    {
+      "repo": "rich",
+      "exit_code": -1,
+      "duration_seconds": 1800.0489337444305,
+      "duration_human": "30m 0s",
+      "output_lines": 1,
+      "errors": [],
+      "warnings": [],
+      "files_generated": 87,
+      "modules_count": 109,
+      "validation": {
+        "validation_ran": true,
+        "exit_code": 1,
+        "duration_seconds": 0.08770513534545898,
+        "error_count": 2,
+        "warning_count": 1,
+        "issues": [
+          {
+            "type": "error",
+            "message": "\u274c FAILED - Errors: 61, Warnings: 35"
+          },
+          {
+            "type": "error",
+            "message": "\ud83d\udd34 ERRORS:"
+          },
+          {
+            "type": "warning",
+            "message": "\ud83d\udfe1 WARNINGS:"
+          }
+        ]
+      }
+    },
+    {
+      "repo": "typer",
+      "exit_code": 0,
+      "duration_seconds": 407.11955666542053,
+      "duration_human": "6m 47s",
+      "output_lines": 813,
+      "errors": [],
+      "warnings": [
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'BashComplete' in module 'typer_completion' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'PowerShellComplete' in module 'typer_completion' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'ZshComplete' in module 'typer_completion' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'FishComplete' in module 'typer_completion' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'Shells' in module 'typer_completion' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Module 'typer_completion': 5 invalid sub leaf nodes filtered out, 0 valid",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'TyperChoice' in module 'typer_types' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Module 'typer_types': 1 invalid sub leaf nodes filtered out, 0 valid",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'State' in module 'typer_cli' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'TyperCLIGroup' in module 'typer_cli' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Module 'typer_cli': 2 invalid sub leaf nodes filtered out, 0 valid",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'TyperOption' in module 'typer_core' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'TyperArgument' in module 'typer_core' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'TyperGroup' in module 'typer_core' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'TyperCommand' in module 'typer_core' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Module 'typer_core': 4 invalid sub leaf nodes filtered out, 0 valid",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'Typer' in module 'typer_main' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Module 'typer_main': 1 invalid sub leaf nodes filtered out, 0 valid",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'TyperPath' in module 'typer_models' - not found in components",
+        "[12:41:09] WARNING  [STAGE 2] Skipping invalid sub leaf node 'Context' in module 'typer_models' - not found in components"
+      ],
+      "files_generated": 31,
+      "modules_count": 32,
+      "validation": {
+        "validation_ran": true,
+        "exit_code": 1,
+        "duration_seconds": 0.0791313648223877,
+        "error_count": 2,
+        "warning_count": 1,
+        "issues": [
+          {
+            "type": "error",
+            "message": "\u274c FAILED - Errors: 2, Warnings: 7"
+          },
+          {
+            "type": "error",
+            "message": "\ud83d\udd34 ERRORS:"
+          },
+          {
+            "type": "warning",
+            "message": "\ud83d\udfe1 WARNINGS:"
+          }
+        ]
+      }
+    }
+  ],
+  "completed": "2026-01-26T12:47:42.719829",
+  "summary": {
+    "total_repos": 5,
+    "successful_repos": 3,
+    "total_time_seconds": 5460.546750307083,
+    "total_time_human": "91m 0s",
+    "total_files_generated": 248,
+    "total_generation_errors": 20,
+    "total_validation_errors": 8
+  }
+}
