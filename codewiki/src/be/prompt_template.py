@@ -106,54 +106,61 @@ The click statement filename MUST match the sub-module name exactly:
        }}
    }})
    ```
-4. Include Mermaid diagrams with nodes for EACH sub-module you create
+4. Include DIAGRAM_JSON with nodes for EACH sub-module you create
 5. After all sub-modules are documented, adjust `{module_name}.md` to ensure all generated files are properly cross-referenced
+6. FINAL CHECK: Verify your DIAGRAM_JSON has a node for every sub-module key you passed to generate_sub_module_documentation
 </WORKFLOW>
 
 <DIAGRAM_REQUIREMENTS>
-CRITICAL: Your diagram MUST include a node for EACH sub-module you create.
+⚠️ CRITICAL VALIDATION RULE: Your diagram MUST include EVERY sub-module you create as a node.
+Missing nodes will cause validation failures and break the documentation viewer.
 
-MANDATORY: Output a structured diagram JSON block in your markdown file BEFORE the Mermaid diagram.
-The JSON will be parsed and stored separately for the viewer.
+STEP-BY-STEP PROCESS:
+1. Call generate_sub_module_documentation with your sub-modules
+2. IMMEDIATELY after, update your {module_name}.md with a DIAGRAM_JSON block
+3. The diagram MUST list ALL sub-module names you just created as nodes
+4. Double-check: count your sub-modules, count your diagram nodes - they MUST match
 
-Format - add this block in your {module_name}.md file:
+MANDATORY FORMAT - add this block in your {module_name}.md file:
 ```
 <!-- DIAGRAM_JSON
 {{
     "direction": "TD",
     "nodes": [
         {{"id": "auth_module", "label": "Authentication System", "type": "module", "link": "auth_module.md"}},
-        {{"id": "database_layer", "label": "Database Access", "type": "module", "link": "database_layer.md"}},
-        {{"id": "external_api", "label": "External API", "type": "external", "link": null}}
+        {{"id": "database_layer", "label": "Database Access", "type": "module", "link": "database_layer.md"}}
     ],
     "edges": [
-        {{"source": "auth_module", "target": "database_layer"}},
-        {{"source": "auth_module", "target": "external_api", "label": "API calls"}}
+        {{"source": "auth_module", "target": "database_layer"}}
     ],
     "groups": []
 }}
 -->
 ```
 
+VALIDATION CHECKLIST (verify before finishing):
+✅ Every key in generate_sub_module_documentation appears as a node id
+✅ Node "id" matches sub-module name EXACTLY (lowercase_with_underscores)
+✅ Node "type" is "module" for all sub-modules you created
+✅ Node "link" is "{{sub_module_name}}.md"
+
+EXAMPLE: If you called:
+generate_sub_module_documentation({{"handler": ..., "config": ..., "utils": ...}})
+
+Your diagram MUST have nodes: handler, config, utils (all three!)
+
 Node types:
-- "module": Sub-module with documentation (clickable, blue in viewer)
-- "component": Internal component (not clickable)
-- "external": External dependency (grayed out)
+- "module": Sub-module with documentation (REQUIRED for all sub-modules)
+- "external": External dependency outside this module
 
-RULES:
-1. EVERY sub-module you create MUST appear as a node with type="module"
-2. The node "id" MUST match the sub-module name exactly
-3. The "link" MUST be "{{sub_module_name}}.md"
-4. Include edges showing dependencies between nodes
-
-After the DIAGRAM_JSON block, also include the Mermaid version for backwards compatibility:
+After DIAGRAM_JSON, include Mermaid for backwards compatibility:
 ```mermaid
 graph TD
-    auth_module[Authentication System]
-    database_layer[Database Access]
-    auth_module --> database_layer
-    click auth_module "auth_module.md"
-    click database_layer "database_layer.md"
+    handler[Handler] --> config[Config]
+    handler --> utils[Utils]
+    click handler "handler.md"
+    click config "config.md"
+    click utils "utils.md"
 ```
 </DIAGRAM_REQUIREMENTS>
 
