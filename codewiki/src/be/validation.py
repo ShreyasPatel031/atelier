@@ -171,28 +171,39 @@ def validate_module_tree(
             # 3. Validate diagram if module has children
             children = module_data.get('children', {})
             if children:
-                diagram = extract_mermaid_from_markdown(content)
-                
-                if not diagram:
-                    result.add(module_name, "EMPTY_DIAGRAM", 
-                              f"Module '{module_name}' has {len(children)} children but no diagram")
-                else:
-                    # Validate Mermaid syntax
-                    validate_mermaid_syntax(diagram, module_name, result)
-                    
-                    # Check that all children appear in diagram
-                    diagram_nodes = extract_diagram_nodes(diagram)
+                # First check for structured diagram in module_tree
+                structured_diagram = module_data.get('diagram')
+                if structured_diagram:
+                    # Validate structured diagram - check all children are nodes
+                    node_ids = {n.get('id', '').lower() for n in structured_diagram.get('nodes', [])}
                     for child_name in children.keys():
-                        # Normalize names for comparison
-                        child_lower = child_name.lower().replace('_', '')
-                        found = any(
-                            child_lower in node.replace('_', '') or 
-                            node.replace('_', '') in child_lower
-                            for node in diagram_nodes
-                        )
-                        if not found:
+                        if child_name.lower() not in node_ids:
                             result.add(module_name, "MISSING_CHILD_NODE", 
-                                      f"Child '{child_name}' not found in diagram nodes")
+                                      f"Child '{child_name}' not found in structured diagram nodes")
+                else:
+                    # Fallback to Mermaid validation
+                    diagram = extract_mermaid_from_markdown(content)
+                    
+                    if not diagram:
+                        result.add(module_name, "EMPTY_DIAGRAM", 
+                                  f"Module '{module_name}' has {len(children)} children but no diagram")
+                    else:
+                        # Validate Mermaid syntax
+                        validate_mermaid_syntax(diagram, module_name, result)
+                        
+                        # Check that all children appear in diagram
+                        diagram_nodes = extract_diagram_nodes(diagram)
+                        for child_name in children.keys():
+                            # Normalize names for comparison
+                            child_lower = child_name.lower().replace('_', '')
+                            found = any(
+                                child_lower in node.replace('_', '') or 
+                                node.replace('_', '') in child_lower
+                                for node in diagram_nodes
+                            )
+                            if not found:
+                                result.add(module_name, "MISSING_CHILD_NODE", 
+                                          f"Child '{child_name}' not found in diagram nodes")
         
         # Recurse into children
         children = module_data.get('children', {})

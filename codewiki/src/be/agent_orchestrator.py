@@ -267,17 +267,45 @@ class AgentOrchestrator:
                         # Only overwrite if source has a value
                         target[key][field] = field_val
     
-    def _extract_module_metadata(self, md_path: str) -> tuple:
+    def _extract_diagram_json(self, content: str) -> Optional[Dict]:
         """
-        Extract title and description from a generated markdown file.
+        Extract structured diagram JSON from markdown content.
+        
+        Looks for:
+        <!-- DIAGRAM_JSON
+        { ... }
+        -->
         
         Returns:
-            (title, description) tuple
+            Parsed diagram dict or None if not found
+        """
+        import re
+        import json
+        
+        pattern = r'<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->'
+        match = re.search(pattern, content)
+        if match:
+            try:
+                return json.loads(match.group(1))
+            except json.JSONDecodeError as e:
+                logger.warning(f"Failed to parse DIAGRAM_JSON: {e}")
+                return None
+        return None
+    
+    def _extract_module_metadata(self, md_path: str) -> tuple:
+        """
+        Extract title, description, and diagram from a generated markdown file.
+        
+        Returns:
+            (title, description, diagram) tuple where diagram is dict or None
         """
         import re
         
         with open(md_path, 'r') as f:
             content = f.read()
+        
+        # Extract diagram JSON first
+        diagram = self._extract_diagram_json(content)
         
         # Extract title from first # heading
         title_match = re.search(r'^#\s+(.+?)(?:\s+Module)?(?:\s+Documentation)?\s*$', content, re.MULTILINE)
@@ -339,7 +367,7 @@ class AgentOrchestrator:
         else:
             description = f"Documentation for the {title} module."
         
-        return title, description
+        return title, description, diagram
     
     async def _generate_parent_overview(self, module_name: str, sub_modules: Dict[str, Any],
                                         working_dir: str, deps: 'CodeWikiDeps') -> None:
@@ -661,17 +689,19 @@ class AgentOrchestrator:
             except Exception as track_err:
                 logger.debug(f"[STAGE 4.6] Token tracking failed (non-critical): {track_err}")
             
-            # Extract title/description from generated markdown for top-level modules
+            # Extract title/description/diagram from generated markdown for top-level modules
             # Top-level modules have module_path of length 1 (e.g., ['operator'])
             extracted_title = None
             extracted_desc = None
+            extracted_diagram = None
             if len(module_path) <= 1:
                 # This is a top-level module - extract metadata from its markdown
                 md_path = os.path.join(working_dir, f"{module_name}.md")
                 if os.path.exists(md_path):
                     try:
-                        extracted_title, extracted_desc = self._extract_module_metadata(md_path)
-                        logger.info(f"[STAGE 4.6] Extracted metadata for top-level module: title='{extracted_title}'")
+                        extracted_title, extracted_desc, extracted_diagram = self._extract_module_metadata(md_path)
+                        logger.info(f"[STAGE 4.6] Extracted metadata for top-level module: title='{extracted_title}'"
+                                   f", diagram={'yes' if extracted_diagram else 'no'}")
                     except Exception as meta_err:
                         logger.warning(f"[STAGE 4.6] Failed to extract metadata: {meta_err}")
             
@@ -683,16 +713,20 @@ class AgentOrchestrator:
                     current_tree = file_manager.load_json(module_tree_path)
                     # Merge our changes
                     self._merge_module_tree(current_tree, deps.module_tree)
-                    # Apply extracted metadata
+                    # Apply extracted metadata (title, description, diagram)
                     if extracted_title and module_name in current_tree:
                         current_tree[module_name]["title"] = extracted_title
                         current_tree[module_name]["description"] = extracted_desc
+                        if extracted_diagram:
+                            current_tree[module_name]["diagram"] = extracted_diagram
                     file_manager.save_json(current_tree, module_tree_path)
                     deps.module_tree = current_tree
             else:
                 if extracted_title and module_name in deps.module_tree:
                     deps.module_tree[module_name]["title"] = extracted_title
                     deps.module_tree[module_name]["description"] = extracted_desc
+                    if extracted_diagram:
+                        deps.module_tree[module_name]["diagram"] = extracted_diagram
                 file_manager.save_json(deps.module_tree, module_tree_path)
             save_duration = time.time() - save_start
             

@@ -111,14 +111,42 @@ The click statement filename MUST match the sub-module name exactly:
 </WORKFLOW>
 
 <DIAGRAM_REQUIREMENTS>
-CRITICAL: Your Mermaid diagram MUST include a node for EACH sub-module you create.
+CRITICAL: Your diagram MUST include a node for EACH sub-module you create.
 
-MANDATORY STEPS:
-1. AFTER calling generate_sub_module_documentation, you MUST update your {module_name}.md file
-2. The updated diagram MUST include ALL sub-modules you created as nodes
-3. Each sub-module node MUST have a click statement linking to its .md file
+MANDATORY: Output a structured diagram JSON block in your markdown file BEFORE the Mermaid diagram.
+The JSON will be parsed and stored separately for the viewer.
 
-Example: If you created sub-modules "auth_module" and "database_layer":
+Format - add this block in your {module_name}.md file:
+```
+<!-- DIAGRAM_JSON
+{{
+    "direction": "TD",
+    "nodes": [
+        {{"id": "auth_module", "label": "Authentication System", "type": "module", "link": "auth_module.md"}},
+        {{"id": "database_layer", "label": "Database Access", "type": "module", "link": "database_layer.md"}},
+        {{"id": "external_api", "label": "External API", "type": "external", "link": null}}
+    ],
+    "edges": [
+        {{"source": "auth_module", "target": "database_layer"}},
+        {{"source": "auth_module", "target": "external_api", "label": "API calls"}}
+    ],
+    "groups": []
+}}
+-->
+```
+
+Node types:
+- "module": Sub-module with documentation (clickable, blue in viewer)
+- "component": Internal component (not clickable)
+- "external": External dependency (grayed out)
+
+RULES:
+1. EVERY sub-module you create MUST appear as a node with type="module"
+2. The node "id" MUST match the sub-module name exactly
+3. The "link" MUST be "{sub_module_name}.md"
+4. Include edges showing dependencies between nodes
+
+After the DIAGRAM_JSON block, also include the Mermaid version for backwards compatibility:
 ```mermaid
 graph TD
     auth_module[Authentication System]
@@ -127,9 +155,6 @@ graph TD
     click auth_module "auth_module.md"
     click database_layer "database_layer.md"
 ```
-
-FAILURE TO INCLUDE ALL SUB-MODULES IN THE DIAGRAM WILL CAUSE VALIDATION ERRORS.
-After creating sub-modules, always verify your diagram contains every sub-module name.
 </DIAGRAM_REQUIREMENTS>
 
 <AVAILABLE_TOOLS>
