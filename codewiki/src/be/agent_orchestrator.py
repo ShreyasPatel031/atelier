@@ -247,6 +247,26 @@ class AgentOrchestrator:
         logger.info(f"[AUTO-SPLIT] Created {len(sub_modules)} sub-modules")
         return sub_modules
     
+    def _merge_module_tree(self, target: Dict[str, Any], source: Dict[str, Any]) -> None:
+        """
+        Merge source module tree into target, preserving all fields.
+        Used during parallel processing to merge concurrent updates.
+        """
+        for key, value in source.items():
+            if key not in target:
+                target[key] = value
+            elif isinstance(value, dict) and isinstance(target[key], dict):
+                # Merge dict fields
+                for field, field_val in value.items():
+                    if field == "children" and isinstance(field_val, dict):
+                        # Recursively merge children
+                        if "children" not in target[key]:
+                            target[key]["children"] = {}
+                        self._merge_module_tree(target[key]["children"], field_val)
+                    elif field_val is not None:
+                        # Only overwrite if source has a value
+                        target[key][field] = field_val
+    
     def _extract_module_metadata(self, md_path: str) -> tuple:
         """
         Extract title and description from a generated markdown file.
@@ -352,7 +372,8 @@ class AgentOrchestrator:
         logger.info(f"[AUTO-SPLIT] Generated parent overview: {docs_path}")
     
     async def process_module(self, module_name: str, components: Dict[str, Node], 
-                           core_component_ids: List[str], module_path: List[str], working_dir: str) -> Dict[str, Any]:
+                           core_component_ids: List[str], module_path: List[str], working_dir: str,
+                           module_tree_lock=None) -> Dict[str, Any]:
         """Process a single module and generate its documentation."""
         module_start = time.time()
         logger.info(f"[STAGE 4: AGENT MODULE PROCESSING] Starting module: {module_name}")
@@ -544,8 +565,16 @@ class AgentOrchestrator:
                 logger.error(f"[STAGE 4.5.5] BUG: Module '{module_name}' not found in tree at path {module_path}")
                 logger.error(f"[STAGE 4.5.5] Available keys in target: {list(target.keys())[:10]}")
             
-            # Save updated module tree
-            file_manager.save_json(deps.module_tree, module_tree_path)
+            # Save updated module tree (with lock if provided)
+            if module_tree_lock:
+                async with module_tree_lock:
+                    # Reload to get latest, merge our changes, save
+                    current_tree = file_manager.load_json(module_tree_path)
+                    self._merge_module_tree(current_tree, deps.module_tree)
+                    file_manager.save_json(current_tree, module_tree_path)
+                    deps.module_tree = current_tree
+            else:
+                file_manager.save_json(deps.module_tree, module_tree_path)
             
             # Recursively process each sub-module
             for sub_name, sub_info in sub_modules.items():
@@ -557,7 +586,8 @@ class AgentOrchestrator:
                     components, 
                     sub_components, 
                     new_module_path, 
-                    working_dir
+                    working_dir,
+                    module_tree_lock=module_tree_lock
                 )
             
             # After processing sub-modules, generate parent overview
@@ -633,22 +663,37 @@ class AgentOrchestrator:
             
             # Extract title/description from generated markdown for top-level modules
             # Top-level modules have module_path of length 1 (e.g., ['operator'])
+            extracted_title = None
+            extracted_desc = None
             if len(module_path) <= 1:
                 # This is a top-level module - extract metadata from its markdown
                 md_path = os.path.join(working_dir, f"{module_name}.md")
                 if os.path.exists(md_path):
                     try:
-                        title, description = self._extract_module_metadata(md_path)
-                        if module_name in deps.module_tree:
-                            deps.module_tree[module_name]["title"] = title
-                            deps.module_tree[module_name]["description"] = description
-                            logger.info(f"[STAGE 4.6] Extracted metadata for top-level module: title='{title}'")
+                        extracted_title, extracted_desc = self._extract_module_metadata(md_path)
+                        logger.info(f"[STAGE 4.6] Extracted metadata for top-level module: title='{extracted_title}'")
                     except Exception as meta_err:
                         logger.warning(f"[STAGE 4.6] Failed to extract metadata: {meta_err}")
             
-            # Save updated module tree
+            # Save updated module tree (with lock if provided for parallel safety)
             save_start = time.time()
-            file_manager.save_json(deps.module_tree, module_tree_path)
+            if module_tree_lock:
+                async with module_tree_lock:
+                    # Reload to get latest changes from other parallel tasks
+                    current_tree = file_manager.load_json(module_tree_path)
+                    # Merge our changes
+                    self._merge_module_tree(current_tree, deps.module_tree)
+                    # Apply extracted metadata
+                    if extracted_title and module_name in current_tree:
+                        current_tree[module_name]["title"] = extracted_title
+                        current_tree[module_name]["description"] = extracted_desc
+                    file_manager.save_json(current_tree, module_tree_path)
+                    deps.module_tree = current_tree
+            else:
+                if extracted_title and module_name in deps.module_tree:
+                    deps.module_tree[module_name]["title"] = extracted_title
+                    deps.module_tree[module_name]["description"] = extracted_desc
+                file_manager.save_json(deps.module_tree, module_tree_path)
             save_duration = time.time() - save_start
             
             module_duration = time.time() - module_start

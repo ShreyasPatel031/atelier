@@ -265,6 +265,9 @@ This is a quick overview generated from the module structure. Detailed documenta
                 logger.info(f"[STAGE 3] 🚀 PARALLEL MODE: {len(batches)} depth levels, {total_modules} total modules")
                 logger.info(f"[STAGE 3] Max concurrent: {max_concurrent}")
                 
+                # Shared lock for module_tree file access to prevent race conditions
+                module_tree_lock = asyncio.Lock()
+                
                 processed_count = 0
                 for batch_idx, batch in enumerate(batches):
                     batch_start = time.time()
@@ -274,33 +277,36 @@ This is a quick overview generated from the module structure. Detailed documenta
                     # Create semaphore to limit concurrent tasks
                     semaphore = asyncio.Semaphore(max_concurrent)
                     
-                    async def process_single_module(module_path, module_name, module_info):
+                    async def process_single_module(module_path, module_name, module_info, lock):
                         async with semaphore:
                             module_key = "/".join(module_path)
                             module_start = time.time()
                             
                             if module_key in processed_modules:
-                                return ("skipped", module_key, 0)
+                                return ("skipped", module_key, 0, None)
                             
                             try:
                                 if self.is_leaf_module(module_info):
                                     logger.info(f"[STAGE 3] 📄 Processing leaf: {module_key}")
-                                    await self.agent_orchestrator.process_module(
-                                        module_name, components, module_info.get("components", []), module_path, working_dir
+                                    # Pass the lock to process_module for thread-safe file access
+                                    result_tree = await self.agent_orchestrator.process_module(
+                                        module_name, components, module_info.get("components", []), module_path, working_dir,
+                                        module_tree_lock=lock
                                     )
                                 else:
                                     logger.info(f"[STAGE 3] 📁 Processing parent: {module_key}")
                                     await self.generate_parent_module_docs(module_path, working_dir)
+                                    result_tree = None
                                 
                                 duration = time.time() - module_start
-                                return ("success", module_key, duration)
+                                return ("success", module_key, duration, result_tree)
                             except Exception as e:
                                 duration = time.time() - module_start
                                 logger.error(f"[STAGE 3] ✗ Failed {module_key}: {e}")
                                 return ("failed", module_key, duration, str(e))
                     
                     # Run all modules in this batch in parallel
-                    tasks = [process_single_module(path, name, info) for path, name, info in batch]
+                    tasks = [process_single_module(path, name, info, module_tree_lock) for path, name, info in batch]
                     results = await asyncio.gather(*tasks, return_exceptions=True)
                     
                     # Process results
