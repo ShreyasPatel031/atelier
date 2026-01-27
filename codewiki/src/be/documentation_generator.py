@@ -255,7 +255,7 @@ This is a quick overview generated from the module structure. Detailed documenta
         
         # Check for parallel mode (can be disabled via config if needed)
         use_parallel = getattr(self.config, 'parallel_processing', True)
-        max_concurrent = getattr(self.config, 'max_concurrent_modules', 5)  # Increase if you have higher Gemini RPM quota
+        max_concurrent = getattr(self.config, 'max_concurrent_modules', 10)  # High concurrency with paid API
 
         if len(module_tree) > 0:
             if use_parallel:
