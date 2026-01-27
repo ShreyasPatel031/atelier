@@ -91,6 +91,36 @@ class DocumentationGenerator:
         
         collect_modules(module_tree, parent_path)
         return processing_order
+    
+    def get_parallel_processing_order(self, module_tree: Dict[str, Any]) -> List[List[tuple[List[str], str, Dict]]]:
+        """
+        Get processing order grouped by depth for parallel execution.
+        Returns: List of batches, where each batch contains modules that can run in parallel.
+        Batches are ordered from deepest (leaves) to shallowest (roots).
+        """
+        from collections import defaultdict
+        
+        depth_groups = defaultdict(list)
+        
+        def collect_by_depth(tree: Dict[str, Any], path: List[str], depth: int):
+            for module_name, module_info in tree.items():
+                current_path = path + [module_name]
+                depth_groups[depth].append((current_path, module_name, module_info))
+                
+                # Recurse into children
+                if module_info.get("children") and isinstance(module_info["children"], dict):
+                    collect_by_depth(module_info["children"], current_path, depth + 1)
+        
+        collect_by_depth(module_tree, [], 0)
+        
+        # Return batches from deepest to shallowest (leaves first, then parents)
+        max_depth = max(depth_groups.keys()) if depth_groups else 0
+        batches = []
+        for depth in range(max_depth, -1, -1):
+            if depth in depth_groups:
+                batches.append(depth_groups[depth])
+        
+        return batches
 
     def is_leaf_module(self, module_info: Dict[str, Any]) -> bool:
         """Check if a module is a leaf module (has no children or empty children)."""
@@ -215,61 +245,132 @@ This is a quick overview generated from the module structure. Detailed documenta
         logger.info(f"[STAGE 3] Processing order preview: {[name for _, name in processing_order[:5]]}{'...' if len(processing_order) > 5 else ''}")
 
         
-        # Process modules in dependency order
+        # Process modules in dependency order WITH PARALLELIZATION
+        import asyncio
+        
         final_module_tree = module_tree
         processed_modules = set()
         failed_modules = []
         successful_modules = []
+        
+        # Check for parallel mode (can be disabled via config if needed)
+        use_parallel = getattr(self.config, 'parallel_processing', True)
+        max_concurrent = getattr(self.config, 'max_concurrent_modules', 5)
 
         if len(module_tree) > 0:
-            logger.info(f"[STAGE 3] Starting module processing for {len(processing_order)} modules...")
-            for idx, (module_path, module_name) in enumerate(processing_order, 1):
-                module_key = "/".join(module_path)
-                logger.info(f"[STAGE 3] [{idx}/{len(processing_order)}] Processing module: {module_key}")
-                module_start = time.time()
+            if use_parallel:
+                # PARALLEL PROCESSING: Group by depth, process each depth level in parallel
+                batches = self.get_parallel_processing_order(first_module_tree)
+                total_modules = sum(len(batch) for batch in batches)
+                logger.info(f"[STAGE 3] 🚀 PARALLEL MODE: {len(batches)} depth levels, {total_modules} total modules")
+                logger.info(f"[STAGE 3] Max concurrent: {max_concurrent}")
                 
-                try:
-                    # Get the module info from the tree
-                    module_info = module_tree
-                    for path_part in module_path:
-                        if path_part not in module_info:
-                            logger.error(f"[STAGE 3] Module path part '{path_part}' not found in module tree")
-                            raise KeyError(f"Module path part '{path_part}' not found")
-                        module_info = module_info[path_part]
-                        if path_part != module_path[-1]:  # Not the last part
-                            module_info = module_info.get("children", {})
+                processed_count = 0
+                for batch_idx, batch in enumerate(batches):
+                    batch_start = time.time()
+                    depth = len(batches) - batch_idx - 1  # Reverse since we go deepest first
+                    logger.info(f"[STAGE 3] === Batch {batch_idx + 1}/{len(batches)} (depth {depth}): {len(batch)} modules ===")
                     
-                    # Skip if already processed
-                    if module_key in processed_modules:
-                        logger.info(f"[STAGE 3] Module {module_key} already processed, skipping")
+                    # Create semaphore to limit concurrent tasks
+                    semaphore = asyncio.Semaphore(max_concurrent)
+                    
+                    async def process_single_module(module_path, module_name, module_info):
+                        async with semaphore:
+                            module_key = "/".join(module_path)
+                            module_start = time.time()
+                            
+                            if module_key in processed_modules:
+                                return ("skipped", module_key, 0)
+                            
+                            try:
+                                if self.is_leaf_module(module_info):
+                                    logger.info(f"[STAGE 3] 📄 Processing leaf: {module_key}")
+                                    await self.agent_orchestrator.process_module(
+                                        module_name, components, module_info.get("components", []), module_path, working_dir
+                                    )
+                                else:
+                                    logger.info(f"[STAGE 3] 📁 Processing parent: {module_key}")
+                                    await self.generate_parent_module_docs(module_path, working_dir)
+                                
+                                duration = time.time() - module_start
+                                return ("success", module_key, duration)
+                            except Exception as e:
+                                duration = time.time() - module_start
+                                logger.error(f"[STAGE 3] ✗ Failed {module_key}: {e}")
+                                return ("failed", module_key, duration, str(e))
+                    
+                    # Run all modules in this batch in parallel
+                    tasks = [process_single_module(path, name, info) for path, name, info in batch]
+                    results = await asyncio.gather(*tasks, return_exceptions=True)
+                    
+                    # Process results
+                    for result in results:
+                        if isinstance(result, Exception):
+                            failed_modules.append(("unknown", str(result)))
+                        elif result[0] == "success":
+                            processed_modules.add(result[1])
+                            successful_modules.append(result[1])
+                            processed_count += 1
+                        elif result[0] == "failed":
+                            failed_modules.append((result[1], result[3]))
+                            processed_count += 1
+                    
+                    batch_duration = time.time() - batch_start
+                    logger.info(f"[STAGE 3] Batch {batch_idx + 1} complete in {batch_duration:.1f}s ({processed_count}/{total_modules} done)")
+                
+                # Reload module tree after parallel processing
+                final_module_tree = file_manager.load_json(module_tree_path)
+            
+            else:
+                # SEQUENTIAL PROCESSING (original behavior)
+                logger.info(f"[STAGE 3] Starting SEQUENTIAL module processing for {len(processing_order)} modules...")
+                for idx, (module_path, module_name) in enumerate(processing_order, 1):
+                    module_key = "/".join(module_path)
+                    logger.info(f"[STAGE 3] [{idx}/{len(processing_order)}] Processing module: {module_key}")
+                    module_start = time.time()
+                    
+                    try:
+                        # Get the module info from the tree
+                        module_info = module_tree
+                        for path_part in module_path:
+                            if path_part not in module_info:
+                                logger.error(f"[STAGE 3] Module path part '{path_part}' not found in module tree")
+                                raise KeyError(f"Module path part '{path_part}' not found")
+                            module_info = module_info[path_part]
+                            if path_part != module_path[-1]:  # Not the last part
+                                module_info = module_info.get("children", {})
+                        
+                        # Skip if already processed
+                        if module_key in processed_modules:
+                            logger.info(f"[STAGE 3] Module {module_key} already processed, skipping")
+                            continue
+                        
+                        # Process the module
+                        if self.is_leaf_module(module_info):
+                            logger.info(f"[STAGE 3] 📄 Processing leaf module: {module_key}")
+                            logger.info(f"[STAGE 3]   - Components: {len(module_info.get('components', []))}")
+                            final_module_tree = await self.agent_orchestrator.process_module(
+                                module_name, components, module_info["components"], module_path, working_dir
+                            )
+                        else:
+                            logger.info(f"[STAGE 3] 📁 Processing parent module: {module_key}")
+                            logger.info(f"[STAGE 3]   - Children: {len(module_info.get('children', {}))}")
+                            final_module_tree = await self.generate_parent_module_docs(
+                                module_path, working_dir
+                            )
+                        
+                        processed_modules.add(module_key)
+                        successful_modules.append(module_key)
+                        module_duration = time.time() - module_start
+                        logger.info(f"[STAGE 3] ✓ Module {module_key} processed successfully in {module_duration:.1f}s")
+                        
+                    except Exception as e:
+                        module_duration = time.time() - module_start
+                        logger.error(f"[STAGE 3] ✗ Failed to process module {module_key} after {module_duration:.1f}s: {type(e).__name__}: {str(e)}")
+                        failed_modules.append((module_key, str(e)))
+                        import traceback
+                        logger.error(f"[STAGE 3] Traceback: {traceback.format_exc()}")
                         continue
-                    
-                    # Process the module
-                    if self.is_leaf_module(module_info):
-                        logger.info(f"[STAGE 3] 📄 Processing leaf module: {module_key}")
-                        logger.info(f"[STAGE 3]   - Components: {len(module_info.get('components', []))}")
-                        final_module_tree = await self.agent_orchestrator.process_module(
-                            module_name, components, module_info["components"], module_path, working_dir
-                        )
-                    else:
-                        logger.info(f"[STAGE 3] 📁 Processing parent module: {module_key}")
-                        logger.info(f"[STAGE 3]   - Children: {len(module_info.get('children', {}))}")
-                        final_module_tree = await self.generate_parent_module_docs(
-                            module_path, working_dir
-                        )
-                    
-                    processed_modules.add(module_key)
-                    successful_modules.append(module_key)
-                    module_duration = time.time() - module_start
-                    logger.info(f"[STAGE 3] ✓ Module {module_key} processed successfully in {module_duration:.1f}s")
-                    
-                except Exception as e:
-                    module_duration = time.time() - module_start
-                    logger.error(f"[STAGE 3] ✗ Failed to process module {module_key} after {module_duration:.1f}s: {type(e).__name__}: {str(e)}")
-                    failed_modules.append((module_key, str(e)))
-                    import traceback
-                    logger.error(f"[STAGE 3] Traceback: {traceback.format_exc()}")
-                    continue
             
             logger.info(f"[STAGE 3] Module processing complete:")
             logger.info(f"[STAGE 3]   - Successful: {len(successful_modules)}")
