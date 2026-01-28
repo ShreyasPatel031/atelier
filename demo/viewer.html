@@ -6,6 +6,7 @@
     <title>CodeWiki Viewer</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11.9.0/dist/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
+    <script src="./viewer-debug.js"></script>
     <style>
         * {
             margin: 0;
@@ -85,13 +86,14 @@
         }
 
         .diagram-pane {
-            width: 50%;
+            flex: 1;
             border-right: 1px solid #e2e8f0;
             overflow: hidden;
             background: #ffffff;
             position: relative;
             display: flex;
             flex-direction: column;
+            transition: all 0.3s ease;
         }
         
         .zoom-controls {
@@ -167,10 +169,97 @@
         }
 
         .doc-pane {
-            width: 50%;
+            width: 0;
+            min-width: 0;
+            overflow: hidden;
+            padding: 0;
+            background: #ffffff;
+            transition: width 0.3s ease, padding 0.3s ease, min-width 0.3s ease;
+        }
+
+        .doc-pane.open {
+            width: 40%;
+            min-width: 300px;
             overflow: auto;
             padding: 20px 30px;
-            background: #ffffff;
+        }
+
+        /* Tooltip for hover */
+        .module-tooltip {
+            position: fixed;
+            background: #1e293b;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            max-width: 320px;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+        }
+
+        .module-tooltip .tooltip-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #60a5fa;
+        }
+
+        .module-tooltip .tooltip-desc {
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        /* Node type styling */
+        .node-module rect,
+        .node-module circle,
+        .node-module polygon {
+            stroke: #2563eb !important;
+            stroke-width: 2px !important;
+            cursor: pointer !important;
+        }
+
+        .node-component rect,
+        .node-component circle,
+        .node-component polygon {
+            stroke: #6b7280 !important;
+            fill: #f3f4f6 !important;
+        }
+
+        .node-external rect,
+        .node-external circle,
+        .node-external polygon {
+            stroke: #9ca3af !important;
+            fill: #f9fafb !important;
+            stroke-dasharray: 4 2 !important;
+        }
+
+        /* Panel toggle button */
+        .panel-toggle {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 48px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 12px;
+            z-index: 10;
+            transition: background 0.15s;
+        }
+
+        .panel-toggle:hover {
+            background: #e2e8f0;
+            color: #334155;
         }
 
         .doc-content {
@@ -419,13 +508,20 @@
             .container {
                 flex-direction: column;
             }
-            .diagram-pane, .doc-pane {
-                width: 100%;
-                height: 50%;
-            }
             .diagram-pane {
+                width: 100%;
+                height: 100%;
                 border-right: none;
                 border-bottom: 1px solid #e2e8f0;
+            }
+            .doc-pane {
+                width: 100%;
+                height: 0;
+                min-height: 0;
+            }
+            .doc-pane.open {
+                height: 50%;
+                min-height: 200px;
             }
         }
     </style>
@@ -437,8 +533,14 @@
         <a href="#" class="repo-link" id="repoLink" target="_blank" style="display: none;">🔗 View Repository</a>
     </div>
             
+    <div class="module-tooltip" id="moduleTooltip">
+        <div class="tooltip-title"></div>
+        <div class="tooltip-desc"></div>
+    </div>
+    
     <div class="container">
         <div class="diagram-pane">
+            <button class="panel-toggle" id="panelToggle" onclick="toggleDocPanel()" title="Toggle documentation panel">›</button>
             <div class="breadcrumb" id="breadcrumb">
                 <span class="breadcrumb-item">
                     <span class="breadcrumb-current" id="breadcrumbRoot">Loading...</span>
@@ -490,6 +592,165 @@
         let currentModuleId = 'overview';
         let selectedModuleId = null;  // Currently selected module
         let selectionPath = [];       // Breadcrumb path: [{id, name}, ...]
+        let docPanelOpen = false;     // Track panel state
+        let moduleMetadata = {};      // Store title/description for tooltips
+        
+        // ============================================================
+        // PANEL TOGGLE & TOOLTIPS
+        // ============================================================
+        
+        function toggleDocPanel(forceOpen = null) {
+            docPanelOpen = forceOpen !== null ? forceOpen : !docPanelOpen;
+            const panel = document.querySelector('.doc-pane');
+            const toggle = document.getElementById('panelToggle');
+            
+            if (docPanelOpen) {
+                panel.classList.add('open');
+                toggle.textContent = '‹';
+                toggle.title = 'Close documentation panel';
+            } else {
+                panel.classList.remove('open');
+                toggle.textContent = '›';
+                toggle.title = 'Open documentation panel';
+            }
+        }
+        
+        function showTooltip(event, metadata) {
+            if (!metadata || !metadata.title) return;
+            
+            const tooltip = document.getElementById('moduleTooltip');
+            tooltip.querySelector('.tooltip-title').textContent = metadata.title;
+            tooltip.querySelector('.tooltip-desc').textContent = metadata.description || '';
+            
+            // Position near cursor
+            const x = event.clientX + 15;
+            const y = event.clientY + 15;
+            
+            // Keep tooltip in viewport
+            const maxX = window.innerWidth - 340;
+            const maxY = window.innerHeight - 100;
+            
+            tooltip.style.left = Math.min(x, maxX) + 'px';
+            tooltip.style.top = Math.min(y, maxY) + 'px';
+            tooltip.style.display = 'block';
+        }
+        
+        function hideTooltip() {
+            const tooltip = document.getElementById('moduleTooltip');
+            tooltip.style.display = 'none';
+        }
+        
+        // Convert structured diagram to Mermaid code
+        function convertDiagramToMermaid(diagram) {
+            if (!diagram || !diagram.nodes) return '';
+            
+            // Escape special characters in labels for Mermaid
+            function escapeLabel(label) {
+                if (!label) return '';
+                return label
+                    .replace(/\(/g, '#40;')  // Escape (
+                    .replace(/\)/g, '#41;')  // Escape )
+                    .replace(/\[/g, '#91;')  // Escape [
+                    .replace(/\]/g, '#93;')  // Escape ]
+                    .replace(/\{/g, '#123;') // Escape {
+                    .replace(/\}/g, '#125;') // Escape }
+                    .replace(/"/g, '#quot;'); // Escape "
+            }
+            
+            let code = `graph ${diagram.direction || 'TD'}\n`;
+            
+            // Add groups/subgraphs first
+            if (diagram.groups && diagram.groups.length > 0) {
+                for (const group of diagram.groups) {
+                    code += `    subgraph ${group.id}["${escapeLabel(group.label)}"]\n`;
+                    for (const nodeId of group.nodes) {
+                        const node = diagram.nodes.find(n => n.id === nodeId);
+                        if (node) {
+                            code += `        ${node.id}["${escapeLabel(node.label)}"]\n`;
+                        }
+                    }
+                    code += `    end\n`;
+                }
+            }
+            
+            // Add nodes not in groups
+            const groupedNodeIds = new Set();
+            if (diagram.groups) {
+                diagram.groups.forEach(g => g.nodes.forEach(n => groupedNodeIds.add(n)));
+            }
+            
+            for (const node of diagram.nodes) {
+                if (!groupedNodeIds.has(node.id)) {
+                    code += `    ${node.id}["${escapeLabel(node.label)}"]\n`;
+                }
+            }
+            
+            // Add edges
+            for (const edge of diagram.edges || []) {
+                const label = edge.label ? `|${escapeLabel(edge.label)}|` : '';
+                code += `    ${edge.source} -->${label} ${edge.target}\n`;
+            }
+            
+            return code;
+        }
+        
+        // Build metadata lookup from module tree (recursive)
+        function buildModuleMetadata(tree, prefix = '') {
+            for (const [key, data] of Object.entries(tree)) {
+                // Store metadata for this module
+                moduleMetadata[key] = {
+                    title: data.title || formatModuleName(key),
+                    description: data.description || ''
+                };
+                
+                // Also store for diagram nodes if diagram exists
+                if (data.diagram && data.diagram.nodes) {
+                    for (const node of data.diagram.nodes) {
+                        if (!moduleMetadata[node.id]) {
+                            // Try to find child with this ID
+                            const childData = data.children?.[node.id];
+                            moduleMetadata[node.id] = {
+                                title: childData?.title || node.label,
+                                description: childData?.description || ''
+                            };
+                        }
+                    }
+                }
+                
+                // Recurse into children
+                if (data.children) {
+                    buildModuleMetadata(data.children, key + '/');
+                }
+            }
+        }
+        
+        // Style nodes based on type from diagram data
+        function styleNodesFromDiagram(diagram) {
+            if (!diagram || !diagram.nodes) return;
+            
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            
+            for (const node of diagram.nodes) {
+                // Find the SVG node element
+                const nodeEl = svg.querySelector(`[id*="${node.id}"]`);
+                if (nodeEl) {
+                    const gNode = nodeEl.closest('.node') || nodeEl;
+                    gNode.classList.add(`node-${node.type}`);
+                    
+                    // Add hover listeners for tooltips
+                    if (moduleMetadata[node.id]) {
+                        gNode.addEventListener('mouseenter', (e) => {
+                            showTooltip(e, moduleMetadata[node.id]);
+                        });
+                        gNode.addEventListener('mousemove', (e) => {
+                            showTooltip(e, moduleMetadata[node.id]);
+                        });
+                        gNode.addEventListener('mouseleave', hideTooltip);
+                    }
+                }
+            }
+        }
         
         // Initialize mermaid
         mermaid.initialize({
@@ -530,6 +791,18 @@
                 
                 // Load module tree
                 MODULE_TREE = await loadFile('module_tree.json') || {};
+                
+                // Build metadata for tooltips
+                buildModuleMetadata(MODULE_TREE);
+                
+                // Track metadata issues for reliability (Agent 3 hook)
+                for (const [key, data] of Object.entries(MODULE_TREE)) {
+                    if (!data.title || !data.description) {
+                        if (window.trackMetadataIssue) {
+                            window.trackMetadataIssue(key, 'missing_metadata');
+                        }
+                    }
+                }
                 
                 // Load overview.md
                 const overviewMd = await loadFile('overview.md');
@@ -605,6 +878,38 @@
             
             let sanitized = diagram;
             
+            // Fix 0: Escape parentheses inside node labels - they break Mermaid parsing
+            // Pattern: nodeId["Label with (parens)"] -> nodeId["Label with #40;parens#41;"]
+            sanitized = sanitized.replace(/\["([^"]+)"\]/g, (match, label) => {
+                const escaped = label
+                    .replace(/\(/g, '#40;')
+                    .replace(/\)/g, '#41;')
+                    .replace(/\[/g, '#91;')
+                    .replace(/\]/g, '#93;')
+                    .replace(/\{/g, '#123;')
+                    .replace(/\}/g, '#125;');
+                return `["${escaped}"]`;
+            });
+            
+            // Also escape in unquoted labels: nodeId[Label with (parens)]
+            sanitized = sanitized.replace(/\[([^\]"]+)\]/g, (match, label) => {
+                // Skip if already escaped or if it's a special Mermaid syntax
+                if (label.includes('#40;') || label.startsWith('-') || label.includes('|')) {
+                    return match;
+                }
+                if (/[\(\)\[\]\{\}]/.test(label)) {
+                    const escaped = label
+                        .replace(/\(/g, '#40;')
+                        .replace(/\)/g, '#41;')
+                        .replace(/\[/g, '#91;')
+                        .replace(/\]/g, '#93;')
+                        .replace(/\{/g, '#123;')
+                        .replace(/\}/g, '#125;');
+                    return `["${escaped}"]`;
+                }
+                return match;
+            });
+            
             // Fix 1: Edge labels like |1. Something| get misinterpreted as markdown list
             // Remove the number prefix from edge labels to prevent markdown interpretation
             sanitized = sanitized.replace(/\|(\d+)\.\s*([^|]+)\|/g, (match, num, text) => {
@@ -640,6 +945,12 @@
         }
         
         function generateModuleDiagram(key, data) {
+            // FIRST: Check for structured diagram object (new format from VIEWER_MIGRATION)
+            if (data.diagram && typeof data.diagram === 'object' && data.diagram.nodes) {
+                return convertDiagramToMermaid(data.diagram);
+            }
+            
+            // FALLBACK: Generate from children if no structured diagram
             if (!data.children || Object.keys(data.children).length === 0) {
                 return '';
             }
@@ -817,6 +1128,10 @@
                     setTimeout(() => processNodes(links, moduleId), 100);
                 } catch (err2) {
                     container.innerHTML = `<div class="error">Error rendering diagram.<br>${err2.message}</div>`;
+                    // Track mermaid error for reliability (Agent 3 hook)
+                    if (window.trackMermaidError) {
+                        window.trackMermaidError(err2.message, code.substring(0, 500));
+                    }
                 }
             }
         }
@@ -1014,6 +1329,22 @@
                 // Check if target exists in moduleData
                 if (targetModule && moduleData[targetModule]) {
                     makeNodeClickable(node, nodeId, targetModule);
+                } else if (nodeId && !nodeId.endsWith('_collapse')) {
+                    // Track broken link for reliability (Agent 3 hook)
+                    if (window.trackBrokenLink) {
+                        window.trackBrokenLink(nodeId, { contextModuleId, nodeText });
+                    }
+                }
+                
+                // Add hover tooltips if metadata exists
+                if (moduleMetadata[nodeId]) {
+                    node.addEventListener('mouseenter', (e) => {
+                        showTooltip(e, moduleMetadata[nodeId]);
+                    });
+                    node.addEventListener('mousemove', (e) => {
+                        showTooltip(e, moduleMetadata[nodeId]);
+                    });
+                    node.addEventListener('mouseleave', hideTooltip);
                 }
             });
         }
@@ -1031,6 +1362,10 @@
                 
                 if (capturedNodeId && capturedTargetModule && moduleData[capturedTargetModule]) {
                     const targetModuleData = moduleData[capturedTargetModule];
+                    
+                    // Open the doc panel on click
+                    toggleDocPanel(true);
+                    
                     if (targetModuleData.diagram && targetModuleData.diagram.trim()) {
                         if (!expandedNodes.has(capturedNodeId)) {
                             expandNodeInline(capturedNodeId, capturedTargetModule);

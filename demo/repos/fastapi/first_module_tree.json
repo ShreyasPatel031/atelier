@@ -1,0 +1,106 @@
+{
+    "applications_module": {
+        "path": "fastapi/applications.py",
+        "components": [
+            "FastAPI"
+        ],
+        "children": {}
+    },
+    "datastructures_module": {
+        "path": "fastapi/datastructures.py",
+        "components": [
+            "UploadFile"
+        ],
+        "children": {}
+    },
+    "middleware_module": {
+        "path": "fastapi/middleware/asyncexitstack.py",
+        "components": [
+            "AsyncExitStackMiddleware"
+        ],
+        "children": {}
+    },
+    "openapi_models_module": {
+        "path": "fastapi/openapi/models.py",
+        "components": [
+            "XML",
+            "OAuthFlowAuthorizationCode",
+            "Example",
+            "Tag",
+            "MediaType",
+            "Info",
+            "Operation",
+            "Contact",
+            "HTTPBearer",
+            "License",
+            "SecuritySchemeType",
+            "OpenIdConnect",
+            "ServerVariable",
+            "APIKeyIn",
+            "OAuthFlowPassword",
+            "Components",
+            "Header",
+            "OAuthFlowClientCredentials",
+            "Reference",
+            "OAuth2",
+            "OAuthFlowImplicit",
+            "Discriminator",
+            "ParameterInType",
+            "Server",
+            "PathItem",
+            "RequestBody",
+            "Schema",
+            "ExternalDocumentation",
+            "EmailStr",
+            "Link",
+            "OAuthFlows",
+            "Encoding"
+        ],
+        "children": {}
+    },
+    "params_module": {
+        "path": "fastapi/params.py",
+        "components": [
+            "ParamTypes"
+        ],
+        "children": {}
+    },
+    "responses_module": {
+        "path": "fastapi/responses.py",
+        "components": [
+            "UJSONResponse"
+        ],
+        "children": {}
+    },
+    "routing_module": {
+        "path": "fastapi/routing.py",
+        "components": [
+            "APIRoute"
+        ],
+        "children": {}
+    },
+    "security_module": {
+        "path": "fastapi/security/",
+        "components": [
+            "APIKeyCookie",
+            "APIKeyQuery",
+            "APIKeyHeader",
+            "SecurityBase",
+            "HTTPDigest",
+            "HTTPBearer",
+            "HTTPBasic",
+            "OAuth2PasswordBearer",
+            "OAuth2PasswordRequestFormStrict",
+            "OAuth2AuthorizationCodeBearer",
+            "OpenIdConnect"
+        ],
+        "children": {}
+    },
+    "compat_module": {
+        "path": "fastapi/_compat/v2.py",
+        "components": [
+            "BaseConfig"
+        ],
+        "children": {}
+    }
+}
