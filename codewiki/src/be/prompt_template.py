@@ -85,13 +85,21 @@ When you call `generate_sub_module_documentation`, use names like:
 The click statement filename MUST match the sub-module name exactly:
 - If sub-module is named `ops_informer`, click must be: `click ops_informer "ops_informer.md"`
 - NEVER use different naming conventions between module name and filename
+
+**CRITICAL: NEVER create a sub-module with the same name as the current module!**
+- If you are documenting module `informer_manager`, do NOT create a sub-module called `informer_manager`
+- This creates infinite nesting and wastes resources
+- Instead, name sub-modules based on their actual function (e.g., `event_handlers`, `watchers`, `cache`)
 </CRITICAL_NAMING_RULES>
 </DOCUMENTATION_STRUCTURE>
 
 <WORKFLOW>
-1. Analyze the provided code components and module structure, explore the not given dependencies between the components if needed
-2. Create the main `{module_name}.md` file with overview and architecture in working directory
-3. Use `generate_sub_module_documentation` with the NEW FORMAT to generate sub-modules:
+1. Analyze the provided code components and module structure
+
+2. **MANDATORY: Create sub-modules using `generate_sub_module_documentation`**
+   - If you have 3+ components, you MUST create at least 2 sub-modules
+   - Group related components together based on functionality
+   - Use the NEW FORMAT with title and description:
    ```
    generate_sub_module_documentation({{
        "auth_module": {{
@@ -106,9 +114,15 @@ The click statement filename MUST match the sub-module name exactly:
        }}
    }})
    ```
-4. Include DIAGRAM_JSON with nodes for EACH sub-module you create
-5. After all sub-modules are documented, adjust `{module_name}.md` to ensure all generated files are properly cross-referenced
-6. FINAL CHECK: Verify your DIAGRAM_JSON has a node for every sub-module key you passed to generate_sub_module_documentation
+
+3. Create the main `{module_name}.md` file with:
+   - Overview and architecture
+   - DIAGRAM_JSON with a node for EACH sub-module you created
+   - Cross-references to sub-module documentation files
+
+4. FINAL CHECK: Verify your DIAGRAM_JSON has a node for every sub-module key you passed to generate_sub_module_documentation
+
+**CRITICAL: You MUST call generate_sub_module_documentation if you have 3+ components. Do NOT skip this step!**
 </WORKFLOW>
 
 <DIAGRAM_REQUIREMENTS>
@@ -185,34 +199,61 @@ Create a comprehensive documentation that helps developers and maintainers under
 
 <DOCUMENTATION_REQUIREMENTS>
 Generate documentation following the following requirements:
-1. Structure: Brief introduction → comprehensive documentation with Mermaid diagrams
+1. Structure: Brief introduction → comprehensive documentation with diagrams
 2. Diagrams: Use ONLY "graph TD" or "flowchart TD" for architecture diagrams. DO NOT use classDiagram or sequenceDiagram.
 3. References: Link to other module documentation instead of duplicating information
 
-<ARCHITECTURE_DIAGRAM_EXAMPLE>
-CORRECT - Architecture diagram with clickable nodes:
+**MANDATORY: Every module MUST have a DIAGRAM_JSON block!**
 
+For leaf modules (no sub-modules), the diagram should show:
+- Internal components/functions as nodes
+- Dependencies on other modules as external nodes
+- Relationships between components
+
+<DIAGRAM_JSON_FORMAT>
+You MUST include this block in your markdown file:
+
+<!-- DIAGRAM_JSON
+{{
+    "direction": "TD",
+    "nodes": [
+        {{"id": "main_handler", "label": "Main Handler", "type": "component", "link": null}},
+        {{"id": "utils", "label": "Utility Functions", "type": "component", "link": null}},
+        {{"id": "config", "label": "Config Module", "type": "external", "link": "config.md"}}
+    ],
+    "edges": [
+        {{"source": "main_handler", "target": "utils"}},
+        {{"source": "main_handler", "target": "config"}}
+    ],
+    "groups": []
+}}
+-->
+
+Node types:
+- "component": Internal component of this module (not clickable)
+- "external": External dependency (links to other module docs)
+</DIAGRAM_JSON_FORMAT>
+
+After DIAGRAM_JSON, also include the Mermaid version:
 ```mermaid
 graph TD
-    main[Main Component]
-    helper[Helper Utils]
-    config[Configuration]
-    
-    main --> helper
-    main --> config
-    
-    click helper "helper_utils.md" "View Helper Module"
-    click config "configuration.md" "View Config Module"
+    main_handler[Main Handler]
+    utils[Utility Functions]
+    config[Config Module]
+    main_handler --> utils
+    main_handler --> config
 ```
-
-Use "click nodeId 'filename.md' 'tooltip'" to make nodes navigable to other documentation files.
-</ARCHITECTURE_DIAGRAM_EXAMPLE>
+</DOCUMENTATION_REQUIREMENTS>
 
 <CRITICAL_NAMING_RULES>
 All module names and file references MUST use consistent lowercase_with_underscores naming:
 - Module names: `user_auth`, `database_handler` (NOT `UserAuth`, `userAuth`)
 - File references in click statements must match module names exactly + .md
 - Example: If module is `api_handler`, click must be: `click api_handler "api_handler.md"`
+
+**CRITICAL: NEVER create a sub-module with the same name as the current module!**
+- If documenting `handler`, do NOT create sub-module called `handler`
+- Name sub-modules based on their actual function instead
 </CRITICAL_NAMING_RULES>
 </DOCUMENTATION_REQUIREMENTS>
 

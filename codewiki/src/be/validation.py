@@ -135,12 +135,20 @@ def validate_module_tree(
     tree: Dict, 
     docs_path: Path, 
     result: ValidationResult,
-    parent_name: str = ""
+    parent_name: str = "",
+    immediate_parent: str = ""
 ):
     """Recursively validate module tree structure."""
     
     for module_name, module_data in tree.items():
         full_name = f"{parent_name}.{module_name}" if parent_name else module_name
+        
+        # Skip "echo" modules - child has same name as parent (LLM artifact)
+        if module_name == immediate_parent:
+            children = module_data.get('children', {})
+            if children:
+                validate_module_tree(children, docs_path, result, full_name, module_name)
+            continue
         
         # 1. Check metadata (title, description)
         if 'title' not in module_data or not module_data.get('title'):
@@ -168,47 +176,36 @@ def validate_module_tree(
                 result.add(module_name, "EMPTY_DOCUMENTATION", 
                           "Documentation file too small", Severity.WARNING)
             
-            # 3. Validate diagram if module has children
+            # 3. Validate diagram - EVERY module must have a diagram
             children = module_data.get('children', {})
-            if children:
-                # First check for structured diagram in module_tree
-                structured_diagram = module_data.get('diagram')
-                if structured_diagram:
-                    # Validate structured diagram - check all children are nodes
-                    node_ids = {n.get('id', '').lower() for n in structured_diagram.get('nodes', [])}
-                    for child_name in children.keys():
-                        if child_name.lower() not in node_ids:
-                            result.add(module_name, "MISSING_CHILD_NODE", 
-                                      f"Child '{child_name}' not found in structured diagram nodes")
+            structured_diagram = module_data.get('diagram')
+            
+            if not structured_diagram:
+                if children:
+                    result.add(module_name, "MISSING_STRUCTURED_DIAGRAM", 
+                              f"Parent module has {len(children)} children but no 'diagram' JSON")
                 else:
-                    # Fallback to Mermaid validation
-                    diagram = extract_mermaid_from_markdown(content)
-                    
-                    if not diagram:
-                        result.add(module_name, "EMPTY_DIAGRAM", 
-                                  f"Module '{module_name}' has {len(children)} children but no diagram")
-                    else:
-                        # Validate Mermaid syntax
-                        validate_mermaid_syntax(diagram, module_name, result)
-                        
-                        # Check that all children appear in diagram
-                        diagram_nodes = extract_diagram_nodes(diagram)
+                    result.add(module_name, "MISSING_LEAF_DIAGRAM", 
+                              "Leaf module missing 'diagram' JSON (should show components/dependencies)")
+            else:
+                # Validate structured diagram has required fields
+                if 'nodes' not in structured_diagram:
+                    result.add(module_name, "INVALID_DIAGRAM", "Diagram missing 'nodes' array")
+                elif 'edges' not in structured_diagram:
+                    result.add(module_name, "INVALID_DIAGRAM", "Diagram missing 'edges' array")
+                else:
+                    # For parent modules, check all children are nodes
+                    if children:
+                        node_ids = {n.get('id', '').lower() for n in structured_diagram.get('nodes', [])}
                         for child_name in children.keys():
-                            # Normalize names for comparison
-                            child_lower = child_name.lower().replace('_', '')
-                            found = any(
-                                child_lower in node.replace('_', '') or 
-                                node.replace('_', '') in child_lower
-                                for node in diagram_nodes
-                            )
-                            if not found:
+                            if child_name.lower() not in node_ids:
                                 result.add(module_name, "MISSING_CHILD_NODE", 
                                           f"Child '{child_name}' not found in diagram nodes")
         
         # Recurse into children
         children = module_data.get('children', {})
         if children:
-            validate_module_tree(children, docs_path, result, full_name)
+            validate_module_tree(children, docs_path, result, full_name, module_name)
 
 
 # ============================================================

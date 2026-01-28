@@ -90,6 +90,19 @@ async def generate_sub_module_documentation(
     deps = ctx.deps
     previous_module_name = deps.current_module_name
     
+    # VALIDATION: Reject sub-modules with same name as parent (prevents infinite nesting)
+    filtered_specs = {}
+    for sub_module_name, spec in sub_module_specs.items():
+        if sub_module_name == previous_module_name:
+            logger.warning(f"Rejecting sub-module '{sub_module_name}' - same name as parent module. This would create infinite nesting.")
+            continue
+        filtered_specs[sub_module_name] = spec
+    
+    if not filtered_specs:
+        return f"No valid sub-modules to create (all rejected due to duplicate naming with parent '{previous_module_name}')"
+    
+    sub_module_specs = filtered_specs
+    
     # Create fallback models from config
     fallback_models = create_fallback_models(deps.config)
 
