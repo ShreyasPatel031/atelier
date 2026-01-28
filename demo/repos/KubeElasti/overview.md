@@ -1,30 +1,18 @@
-KubeElasti is a Kubernetes-native autoscaling solution designed to manage and dynamically scale applications based on custom resource definitions and real-time traffic. It comprises an operator that orchestrates the lifecycle and scaling of services within Kubernetes, and a resolver that acts as an intelligent reverse proxy, handling traffic, applying throttling, and informing scaling decisions. The repository aims to provide a robust and flexible framework for efficient resource utilization and maintaining service availability under varying loads.
+The KubeElasti repository provides a Kubernetes-native autoscaling solution designed to manage the lifecycle and dynamic scaling of services. It leverages custom resource definitions (CRDs) to allow users to define flexible scaling policies. The system comprises an `operator` to enforce these policies within the Kubernetes cluster, a `resolver` component to handle incoming traffic, apply throttling, and trigger scaling events (especially for services that need to scale from zero replicas), and a `pkg` module that offers foundational utilities and shared logic across the entire system.
 
 ### Architecture Overview
 
-The KubeElasti repository is structured around three core modules: the `Operator`, the `Resolver`, and a shared `Pkg` (package) module.
-
-The **Operator Module** is responsible for defining and managing `ElastiService` custom resources, acting as the control plane for autoscaling within Kubernetes. It watches for changes to these resources and reconciles the desired state.
-
-The **Resolver Module** functions as an intelligent reverse proxy and traffic manager. It routes incoming requests to appropriate backend services, implements load balancing, throttling, and communicates with the Operator to influence scaling decisions based on real-time load.
-
-The **Pkg Module** provides common utilities, configurations, and shared data structures used by both the Operator and Resolver, ensuring consistency and reusability across the system.
+The KubeElasti repository is structured around three main modules: `Operator`, `Resolver`, and `Pkg`. The `Resolver` handles incoming requests and communicates with the `Operator` to initiate scaling actions. Both the `Operator` and `Resolver` rely on the `Pkg` module for shared functionalities like Kubernetes helpers, scaling logic, and configuration management.
 
 ```mermaid
 graph TD
-    kubeelasti[KubeElasti System]
+    operator[Operator]
+    resolver[Resolver]
+    pkg[Pkg]
 
-    operator[Operator Module]
-    resolver[Resolver Module]
-    pkg[Pkg Module]
-
-    kubeelasti --> operator
-    kubeelasti --> resolver
-    kubeelasti --> pkg
-
-    resolver -- communicates with --> operator
-    operator -- uses --> pkg
-    resolver -- uses --> pkg
+    resolver --> operator
+    operator --> pkg
+    resolver --> pkg
 
     click operator "operator.md" "View Operator Module Documentation"
     click resolver "resolver.md" "View Resolver Module Documentation"

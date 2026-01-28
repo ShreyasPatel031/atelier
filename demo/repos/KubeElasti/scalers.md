@@ -1,97 +1,34 @@
 # Scalers Module Documentation
 
 ## Introduction
-
-The `scalers` module, part of the `pkg.scaling` package, defines the interfaces and concrete implementations for various scaling mechanisms within the system. It provides the foundational elements for determining when and how to scale resources, integrating with external monitoring systems like Prometheus.
+The `scalers` module, part of `pkg.scaling`, defines and implements various scaling mechanisms within the system. It provides the core abstractions for determining when and how to scale resources based on metrics and other criteria. This module is crucial for the dynamic adjustment of resources, enabling efficient handling of varying workloads.
 
 ## Architecture Overview
+The `scalers` module is designed to be extensible, allowing for different types of scalers to be integrated. At its core is a generic `Scaler` interface that all concrete scaler implementations must adhere to. This module currently includes an implementation for Prometheus-based scaling.
 
-The `scalers` module integrates with the `scale_handler` module to provide a flexible and extensible scaling solution. It defines a generic `Scaler` interface, allowing for different scaling strategies to be implemented and utilized. The `prometheus_scaler` is a concrete implementation that leverages Prometheus metrics for scaling decisions.
-
+<!-- DIAGRAM_JSON
+{
+    "direction": "TD",
+    "nodes": [
+        {"id": "scaler_interface", "label": "Scaler Interface", "type": "module", "link": "scaler_interface.md"},
+        {"id": "prometheus_implementation", "label": "Prometheus Scaler Implementation", "type": "module", "link": "prometheus_implementation.md"}
+    ],
+    "edges": [
+        {"source": "prometheus_implementation", "target": "scaler_interface"}
+    ],
+    "groups": []
+}
+-->
 ```mermaid
 graph TD
-    pkg[pkg Module]
-    scaling[scaling Module]
-    scalers[scalers Module]
-    scale_handler[scale_handler Module]
+    prometheus_implementation[Prometheus Scaler Implementation] --> scaler_interface[Scaler Interface]
 
-    pkg --> scaling
-    scaling --> scalers
-    scaling --> scale_handler
-    scalers -.-> scale_handler
-
-    click pkg "pkg.md" "View pkg Module"
-    click scaling "scaling.md" "View scaling Module"
-    click scalers "scalers.md" "View scalers Module"
-    click scale_handler "scale_handler.md" "View scale_handler Module"
+    click prometheus_implementation "prometheus_implementation.md" "View Prometheus Scaler Implementation"
+    click scaler_interface "scaler_interface.md" "View Scaler Interface"
 ```
 
-## Core Components
+## High-level Functionality
 
-This section details the core components within the `scalers` module.
+*   **[Scaler Interface](scaler_interface.md)**: This sub-module defines the `Scaler` interface, which outlines the fundamental operations required for any scaling mechanism, such as checking health and determining scale-to-zero or scale-from-zero conditions. It serves as a contract for all scaler implementations.
 
-### Scaler Interface
-
-`pkg.scaling.scalers.scaler.Scaler`
-
-This interface defines the contract for any scaling mechanism. Implementations of this interface are responsible for determining the health of a service and making decisions about scaling up or down, including scaling to and from zero instances.
-
-```go
-type Scaler interface {
-        IsHealthy(ctx context.Context) (bool, error)
-        ShouldScaleToZero(ctx context.Context) (bool, error)
-        ShouldScaleFromZero(ctx context.Context) (bool, error)
-        Close(ctx context.Context) error
-}
-```
-
-**Responsibilities:**
-*   **`IsHealthy`**: Checks the current health status of the service managed by the scaler.
-*   **`ShouldScaleToZero`**: Determines if the service should be scaled down to zero instances, typically when there's no traffic or demand.
-*   **`ShouldScaleFromZero`**: Determines if the service should be scaled up from zero instances, typically when demand requires resources.
-*   **`Close`**: Handles any cleanup or resource release when the scaler is no longer needed.
-
-### Prometheus Metadata
-
-`pkg.scaling.scalers.prometheus_scaler.prometheusMetadata`
-
-This structure defines the configuration parameters required for the Prometheus scaler. It specifies how to connect to a Prometheus server, the query to execute, and the threshold for scaling decisions.
-
-```go
-type prometheusMetadata struct {
-        ServerAddress string            `json:"serverAddress"`
-        Query         string            `json:"query"`  Threshold     float64           `json:"threshold,string"`
-        UptimeFilter  string            `json:"uptimeFilter"`
-        Headers       map[string]string `json:"headers"`
-}
-```
-
-**Fields:**
-*   **`ServerAddress`**: The address of the Prometheus server.
-*   **`Query`**: The PromQL query to execute for metric retrieval.
-*   **`Threshold`**: The value that the query result is compared against to make scaling decisions.
-*   **`UptimeFilter`**: An optional filter for uptime metrics.
-*   **`Headers`**: Custom HTTP headers to be sent with Prometheus requests.
-
-### Prometheus Scaler
-
-`pkg.scaling.scalers.prometheus_scaler.prometheusScaler`
-
-This is a concrete implementation of the `Scaler` interface that uses Prometheus metrics to drive scaling decisions. It utilizes the `prometheusMetadata` for its configuration and interacts with a Prometheus server to gather relevant data.
-
-```go
-type prometheusScaler struct {
-        httpClient           *http.Client
-        metadata             *prometheusMetadata
-        cooldownPeriod       time.Duration
-        defaultServerAddress string
-        defaultHeaders       map[string]string
-}
-```
-
-**Responsibilities:**
-*   Implements the `Scaler` interface using Prometheus metrics.
-*   Manages HTTP communication with the Prometheus server.
-*   Applies a cooldown period to prevent rapid, successive scaling actions.
-*   Uses `prometheusMetadata` to configure its operation, including the query and threshold.
-
+*   **[Prometheus Scaler Implementation](prometheus_implementation.md)**: This sub-module provides a concrete implementation of the `Scaler` interface, leveraging Prometheus metrics to make dynamic scaling decisions based on configured queries and thresholds. It includes components for managing Prometheus-specific metadata and handling HTTP requests to the Prometheus server.

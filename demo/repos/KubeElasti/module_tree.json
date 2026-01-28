@@ -2,273 +2,2234 @@
     "operator": {
         "path": "operator",
         "components": [
-            "operator.internal.crddirectory.directory.CRDDetails",
-            "operator.api.v1alpha1.elastiservice_types.ElastiServiceStatus",
-            "operator.internal.informer.informer.RequestWatch",
             "operator.api.v1alpha1.elastiservice_types.ScaleTargetRef",
-            "operator.api.v1alpha1.elastiservice_types.AutoscalerSpec",
             "operator.api.v1alpha1.elastiservice_types.ScaleTrigger",
-            "operator.api.v1alpha1.elastiservice_types.ElastiService",
-            "operator.api.v1alpha1.elastiservice_types.ElastiServiceList",
-            "operator.internal.controller.opsInformer.updateObjInfo",
             "operator.internal.crddirectory.directory.Directory",
-            "operator.internal.informer.informer.KeyParams",
-            "operator.api.v1alpha1.elastiservice_types.ElastiServiceSpec",
             "operator.internal.elastiserver.elastiServer.Server",
-            "operator.internal.controller.elastiservice_controller.ElastiServiceReconciler"
+            "operator.api.v1alpha1.elastiservice_types.ElastiServiceSpec",
+            "operator.internal.informer.informer.RequestWatch",
+            "operator.api.v1alpha1.elastiservice_types.ElastiService",
+            "operator.api.v1alpha1.elastiservice_types.AutoscalerSpec",
+            "operator.internal.controller.opsInformer.updateObjInfo",
+            "operator.api.v1alpha1.elastiservice_types.ElastiServiceStatus",
+            "operator.internal.crddirectory.directory.CRDDetails",
+            "operator.internal.controller.elastiservice_controller.ElastiServiceReconciler",
+            "operator.internal.informer.informer.KeyParams",
+            "operator.api.v1alpha1.elastiservice_types.ElastiServiceList"
         ],
         "children": {
-            "operator_api": {
+            "elastiserver": {
+                "title": "ElastiServer",
+                "description": "Provides an internal server to receive events from the Resolver module, triggering scale-up operations for services at zero replicas.",
                 "components": [
-                    "operator.api.v1alpha1.elastiservice_types.ElastiServiceStatus",
-                    "operator.api.v1alpha1.elastiservice_types.ScaleTargetRef",
-                    "operator.api.v1alpha1.elastiservice_types.AutoscalerSpec",
-                    "operator.api.v1alpha1.elastiservice_types.ScaleTrigger",
-                    "operator.api.v1alpha1.elastiservice_types.ElastiService",
-                    "operator.api.v1alpha1.elastiservice_types.ElastiServiceList",
-                    "operator.api.v1alpha1.elastiservice_types.ElastiServiceSpec"
+                    "operator.internal.elastiserver.elastiServer.Server"
+                ],
+                "children": {}
+            },
+            "crd_directory": {
+                "title": "CRD Directory",
+                "description": "Manages a directory of ElastiService CRDs, storing their specifications and statuses for quick lookup and management.",
+                "components": [
+                    "operator.internal.crddirectory.directory.Directory",
+                    "operator.internal.crddirectory.directory.CRDDetails"
                 ],
                 "children": {
-                    "crddirectory": {
+                    "crd_data_structures": {
+                        "title": "CRD Data Structures",
+                        "description": "Defines the core data structures used to manage Custom Resource Definitions (CRDs), including the directory for ElastiServices and their detailed specifications and statuses.",
                         "components": [
-                            "operator.internal.crddirectory.directory.CRDDetails",
-                            "operator.internal.crddirectory.directory.Directory"
-                        ],
-                        "children": {}
-                    },
-                    "controller": {
-                        "components": [
-                            "operator.internal.controller.opsInformer.updateObjInfo",
-                            "operator.internal.controller.elastiservice_controller.ElastiServiceReconciler"
+                            "operator.internal.crddirectory.directory.Directory",
+                            "operator.internal.crddirectory.directory.CRDDetails"
                         ],
                         "children": {
-                            "elastiservice_controller": {
+                            "crd_elements": {
+                                "title": "CRD Elements",
+                                "description": "Defines the core data structures for managing Custom Resource Definitions (CRDs) within the operator.",
                                 "components": [
-                                    "operator.internal.controller.elastiservice_controller.ElastiServiceReconciler"
+                                    "operator.internal.crddirectory.directory.Directory",
+                                    "operator.internal.crddirectory.directory.CRDDetails"
                                 ],
-                                "children": {}
-                            },
-                            "ops_informer": {
-                                "components": [
-                                    "operator.internal.controller.opsInformer.updateObjInfo"
-                                ],
-                                "children": {}
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "Directory",
+                                            "label": "Directory",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "CRDDetails",
+                                            "label": "CRDDetails",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "crd_definitions",
+                                            "label": "crd_definitions",
+                                            "type": "external",
+                                            "link": "crd_definitions.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "Directory",
+                                            "target": "CRDDetails"
+                                        },
+                                        {
+                                            "source": "CRDDetails",
+                                            "target": "crd_definitions"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
                             }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "crd_elements",
+                                    "label": "CRD Elements",
+                                    "type": "module",
+                                    "link": "crd_elements.md"
+                                }
+                            ],
+                            "edges": [],
+                            "groups": []
                         }
-                    },
-                    "elastiserver": {
-                        "components": [
-                            "operator.internal.elastiserver.elastiServer.Server"
-                        ],
-                        "children": {}
-                    },
-                    "informer": {
-                        "components": [
-                            "operator.internal.informer.informer.RequestWatch",
-                            "operator.internal.informer.informer.KeyParams"
-                        ],
-                        "children": {}
                     }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "crd_data_structures",
+                            "label": "CRD Data Structures",
+                            "type": "module",
+                            "link": "crd_data_structures.md"
+                        }
+                    ],
+                    "edges": [],
+                    "groups": []
                 }
             },
-            "operator_crddirectory": {
+            "crd_definitions": {
+                "title": "CRD Definitions",
+                "description": "Defines the Custom Resource Definitions (CRDs) for ElastiService, including specifications for scaling targets, triggers, and autoscalers.",
                 "components": [
-                    "operator.internal.crddirectory.directory.CRDDetails",
-                    "operator.internal.crddirectory.directory.Directory"
+                    "operator.api.v1alpha1.elastiservice_types.ScaleTargetRef",
+                    "operator.api.v1alpha1.elastiservice_types.ScaleTrigger",
+                    "operator.api.v1alpha1.elastiservice_types.ElastiServiceSpec",
+                    "operator.api.v1alpha1.elastiservice_types.ElastiService",
+                    "operator.api.v1alpha1.elastiservice_types.AutoscalerSpec",
+                    "operator.api.v1alpha1.elastiservice_types.ElastiServiceStatus",
+                    "operator.api.v1alpha1.elastiservice_types.ElastiServiceList"
                 ],
-                "children": {}
+                "children": {
+                    "elastiservice_core": {
+                        "title": "ElastiService Core Types",
+                        "description": "Defines the core Custom Resource Definition (CRD) for ElastiService, including its specification, status, and list type.",
+                        "components": [
+                            "operator.api.v1alpha1.elastiservice_types.ElastiService",
+                            "operator.api.v1alpha1.elastiservice_types.ElastiServiceSpec",
+                            "operator.api.v1alpha1.elastiservice_types.ElastiServiceStatus",
+                            "operator.api.v1alpha1.elastiservice_types.ElastiServiceList"
+                        ],
+                        "children": {
+                            "elastiservice_definitions": {
+                                "title": "ElastiService Resource Definitions",
+                                "description": "Defines the core ElastiService custom resource and its list representation for Kubernetes.",
+                                "components": [
+                                    "operator.api.v1alpha1.elastiservice_types.ElastiService",
+                                    "operator.api.v1alpha1.elastiservice_types.ElastiServiceList"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "elastiservice",
+                                            "label": "ElastiService",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "elastiservice_list",
+                                            "label": "ElastiServiceList",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "elastiservice_spec",
+                                            "label": "ElastiServiceSpec",
+                                            "type": "external",
+                                            "link": "elastiservice_details.md"
+                                        },
+                                        {
+                                            "id": "elastiservice_status",
+                                            "label": "ElastiServiceStatus",
+                                            "type": "external",
+                                            "link": "elastiservice_details.md"
+                                        },
+                                        {
+                                            "id": "k8s_typemeta",
+                                            "label": "metav1.TypeMeta",
+                                            "type": "external",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "k8s_objectmeta",
+                                            "label": "metav1.ObjectMeta",
+                                            "type": "external",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "k8s_listmeta",
+                                            "label": "metav1.ListMeta",
+                                            "type": "external",
+                                            "link": null
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "elastiservice",
+                                            "target": "k8s_typemeta"
+                                        },
+                                        {
+                                            "source": "elastiservice",
+                                            "target": "k8s_objectmeta"
+                                        },
+                                        {
+                                            "source": "elastiservice",
+                                            "target": "elastiservice_spec"
+                                        },
+                                        {
+                                            "source": "elastiservice",
+                                            "target": "elastiservice_status"
+                                        },
+                                        {
+                                            "source": "elastiservice_list",
+                                            "target": "k8s_typemeta"
+                                        },
+                                        {
+                                            "source": "elastiservice_list",
+                                            "target": "k8s_listmeta"
+                                        },
+                                        {
+                                            "source": "elastiservice_list",
+                                            "target": "elastiservice"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            },
+                            "elastiservice_details": {
+                                "title": "ElastiService Configuration and Status",
+                                "description": "Describes the desired state (Spec) and observed state (Status) of an ElastiService resource.",
+                                "components": [
+                                    "operator.api.v1alpha1.elastiservice_types.ElastiServiceSpec",
+                                    "operator.api.v1alpha1.elastiservice_types.ElastiServiceStatus"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "elastiservice_spec_node",
+                                            "label": "ElastiServiceSpec",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "elastiservice_status_node",
+                                            "label": "ElastiServiceStatus",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "scale_target_ref_ext",
+                                            "label": "ScaleTargetRef",
+                                            "type": "external",
+                                            "link": "scaling_definitions.md"
+                                        },
+                                        {
+                                            "id": "scale_trigger_ext",
+                                            "label": "ScaleTrigger",
+                                            "type": "external",
+                                            "link": "scaling_definitions.md"
+                                        },
+                                        {
+                                            "id": "autoscaler_spec_ext",
+                                            "label": "AutoscalerSpec",
+                                            "type": "external",
+                                            "link": "scaling_definitions.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "elastiservice_spec_node",
+                                            "target": "scale_target_ref_ext"
+                                        },
+                                        {
+                                            "source": "elastiservice_spec_node",
+                                            "target": "scale_trigger_ext"
+                                        },
+                                        {
+                                            "source": "elastiservice_spec_node",
+                                            "target": "autoscaler_spec_ext"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "elastiservice_definitions",
+                                    "label": "ElastiService Resource Definitions",
+                                    "type": "module",
+                                    "link": "elastiservice_definitions.md"
+                                },
+                                {
+                                    "id": "elastiservice_details",
+                                    "label": "ElastiService Configuration and Status",
+                                    "type": "module",
+                                    "link": "elastiservice_details.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "elastiservice_definitions",
+                                    "target": "elastiservice_details"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    },
+                    "scaling_definitions": {
+                        "title": "Scaling Definitions",
+                        "description": "Specifies the components related to scaling behavior, such as target references, triggers, and autoscaler configurations.",
+                        "components": [
+                            "operator.api.v1alpha1.elastiservice_types.ScaleTargetRef",
+                            "operator.api.v1alpha1.elastiservice_types.ScaleTrigger",
+                            "operator.api.v1alpha1.elastiservice_types.AutoscalerSpec"
+                        ],
+                        "children": {
+                            "scale_target_reference": {
+                                "title": "Scale Target Reference",
+                                "description": "Defines the target resource for scaling, specifying its API version, kind, and name.",
+                                "components": [
+                                    "operator.api.v1alpha1.elastiservice_types.ScaleTargetRef"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "scale_target_ref_component",
+                                            "label": "ScaleTargetRef",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "scaling_definitions",
+                                            "label": "Scaling Definitions",
+                                            "type": "external",
+                                            "link": "scaling_definitions.md"
+                                        },
+                                        {
+                                            "id": "autoscaler_specifications",
+                                            "label": "Autoscaler Specifications",
+                                            "type": "external",
+                                            "link": "autoscaler_specifications.md"
+                                        },
+                                        {
+                                            "id": "scale_triggers",
+                                            "label": "Scale Triggers",
+                                            "type": "external",
+                                            "link": "scale_triggers.md"
+                                        },
+                                        {
+                                            "id": "elastiservice_details",
+                                            "label": "ElastiService Details",
+                                            "type": "external",
+                                            "link": "elastiservice_details.md"
+                                        },
+                                        {
+                                            "id": "controller_logic",
+                                            "label": "Controller Logic",
+                                            "type": "external",
+                                            "link": "controller_logic.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "scaling_definitions",
+                                            "target": "scale_target_ref_component"
+                                        },
+                                        {
+                                            "source": "scale_target_ref_component",
+                                            "target": "autoscaler_specifications"
+                                        },
+                                        {
+                                            "source": "scale_target_ref_component",
+                                            "target": "scale_triggers"
+                                        },
+                                        {
+                                            "source": "elastiservice_details",
+                                            "target": "scale_target_ref_component"
+                                        },
+                                        {
+                                            "source": "controller_logic",
+                                            "target": "scale_target_ref_component"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            },
+                            "autoscaler_specifications": {
+                                "title": "Autoscaler Specifications",
+                                "description": "Outlines the type and name of the autoscaler to be used for managing resource scaling.",
+                                "components": [
+                                    "operator.api.v1alpha1.elastiservice_types.AutoscalerSpec"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "autoscaler_spec",
+                                            "label": "AutoscalerSpec",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "scaling_definitions",
+                                            "label": "Scaling Definitions",
+                                            "type": "external",
+                                            "link": "scaling_definitions.md"
+                                        },
+                                        {
+                                            "id": "elastiservice_details",
+                                            "label": "ElastiService Details",
+                                            "type": "external",
+                                            "link": "elastiservice_details.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "scaling_definitions",
+                                            "target": "autoscaler_spec"
+                                        },
+                                        {
+                                            "source": "elastiservice_details",
+                                            "target": "autoscaler_spec"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            },
+                            "scale_triggers": {
+                                "title": "Scale Triggers",
+                                "description": "Specifies the conditions or events that initiate a scaling action, including the trigger type and associated metadata.",
+                                "components": [
+                                    "operator.api.v1alpha1.elastiservice_types.ScaleTrigger"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "scale_trigger",
+                                            "label": "ScaleTrigger",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "scaling_definitions",
+                                            "label": "Scaling Definitions",
+                                            "type": "external",
+                                            "link": "scaling_definitions.md"
+                                        },
+                                        {
+                                            "id": "autoscaler_specifications",
+                                            "label": "Autoscaler Specifications",
+                                            "type": "external",
+                                            "link": "autoscaler_specifications.md"
+                                        },
+                                        {
+                                            "id": "elastiservice_details",
+                                            "label": "ElastiService Details",
+                                            "type": "external",
+                                            "link": "elastiservice_details.md"
+                                        },
+                                        {
+                                            "id": "prometheus_scaler",
+                                            "label": "Prometheus Scaler",
+                                            "type": "external",
+                                            "link": "prometheus_scaler.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "autoscaler_specifications",
+                                            "target": "scale_trigger"
+                                        },
+                                        {
+                                            "source": "scale_trigger",
+                                            "target": "prometheus_scaler"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "scale_target_reference",
+                                    "label": "Scale Target Reference",
+                                    "type": "module",
+                                    "link": "scale_target_reference.md"
+                                },
+                                {
+                                    "id": "scale_triggers",
+                                    "label": "Scale Triggers",
+                                    "type": "module",
+                                    "link": "scale_triggers.md"
+                                },
+                                {
+                                    "id": "autoscaler_specifications",
+                                    "label": "Autoscaler Specifications",
+                                    "type": "module",
+                                    "link": "autoscaler_specifications.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "scaling_definitions",
+                                    "target": "scale_target_reference"
+                                },
+                                {
+                                    "source": "scaling_definitions",
+                                    "target": "scale_triggers"
+                                },
+                                {
+                                    "source": "scaling_definitions",
+                                    "target": "autoscaler_specifications"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "elastiservice_core",
+                            "label": "ElastiService Core Types",
+                            "type": "module",
+                            "link": "elastiservice_core.md"
+                        },
+                        {
+                            "id": "scaling_definitions",
+                            "label": "Scaling Definitions",
+                            "type": "module",
+                            "link": "scaling_definitions.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "elastiservice_core",
+                            "target": "scaling_definitions",
+                            "label": "includes"
+                        }
+                    ],
+                    "groups": []
+                }
             },
-            "operator_informer": {
-                "components": [
-                    "operator.internal.informer.informer.RequestWatch",
-                    "operator.internal.informer.informer.KeyParams"
-                ],
-                "children": {}
-            },
-            "operator_controller": {
+            "controller_logic": {
+                "title": "Controller Logic",
+                "description": "Implements the core reconciliation logic for ElastiService resources, managing scaling, status updates, and overall resource lifecycle within Kubernetes.",
                 "components": [
                     "operator.internal.controller.opsInformer.updateObjInfo",
                     "operator.internal.controller.elastiservice_controller.ElastiServiceReconciler"
                 ],
                 "children": {
-                    "elastiservice_controller": {
+                    "reconciler": {
+                        "title": "ElastiService Reconciler",
+                        "description": "Manages the reconciliation loop for ElastiService custom resources, ensuring the desired state matches the actual state in the Kubernetes cluster.",
                         "components": [
                             "operator.internal.controller.elastiservice_controller.ElastiServiceReconciler"
                         ],
-                        "children": {}
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "reconciler_component",
+                                    "label": "ElastiServiceReconciler",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "switch_mode_func",
+                                    "label": "SwitchModeFunc",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "k8s_client",
+                                    "label": "Kubernetes Client",
+                                    "type": "external",
+                                    "link": null
+                                },
+                                {
+                                    "id": "k8s_scheme",
+                                    "label": "Kubernetes Runtime Scheme",
+                                    "type": "external",
+                                    "link": null
+                                },
+                                {
+                                    "id": "zap_logger",
+                                    "label": "Zap Logger",
+                                    "type": "external",
+                                    "link": null
+                                },
+                                {
+                                    "id": "informer_manager",
+                                    "label": "Informer Manager",
+                                    "type": "external",
+                                    "link": "informer_manager.md"
+                                },
+                                {
+                                    "id": "scale_handler",
+                                    "label": "ScaleHandler",
+                                    "type": "external",
+                                    "link": "pkg.md"
+                                },
+                                {
+                                    "id": "crd_definitions",
+                                    "label": "CRD Definitions",
+                                    "type": "external",
+                                    "link": "crd_definitions.md"
+                                },
+                                {
+                                    "id": "object_updater",
+                                    "label": "Object Updater",
+                                    "type": "external",
+                                    "link": "object_updater.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "reconciler_component",
+                                    "target": "k8s_client"
+                                },
+                                {
+                                    "source": "reconciler_component",
+                                    "target": "k8s_scheme"
+                                },
+                                {
+                                    "source": "reconciler_component",
+                                    "target": "zap_logger"
+                                },
+                                {
+                                    "source": "reconciler_component",
+                                    "target": "informer_manager"
+                                },
+                                {
+                                    "source": "reconciler_component",
+                                    "target": "scale_handler"
+                                },
+                                {
+                                    "source": "reconciler_component",
+                                    "target": "crd_definitions"
+                                },
+                                {
+                                    "source": "reconciler_component",
+                                    "target": "object_updater"
+                                },
+                                {
+                                    "source": "reconciler_component",
+                                    "target": "switch_mode_func"
+                                }
+                            ],
+                            "groups": []
+                        }
                     },
-                    "ops_informer": {
+                    "object_updater": {
+                        "title": "Object Update Information",
+                        "description": "Defines the structure for storing essential information about an object during an update operation, including replica counts and selectors.",
                         "components": [
                             "operator.internal.controller.opsInformer.updateObjInfo"
                         ],
-                        "children": {}
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "update_obj_info",
+                                    "label": "updateObjInfo",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "reconciler",
+                                    "label": "Reconciler",
+                                    "type": "external",
+                                    "link": "reconciler.md"
+                                },
+                                {
+                                    "id": "elastiservice_core",
+                                    "label": "ElastiService Core",
+                                    "type": "external",
+                                    "link": "elastiservice_core.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "reconciler",
+                                    "target": "update_obj_info",
+                                    "label": "uses"
+                                },
+                                {
+                                    "source": "update_obj_info",
+                                    "target": "elastiservice_core",
+                                    "label": "derives data from"
+                                }
+                            ],
+                            "groups": []
+                        }
                     }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "reconciler",
+                            "label": "ElastiService Reconciler",
+                            "type": "module",
+                            "link": "reconciler.md"
+                        },
+                        {
+                            "id": "object_updater",
+                            "label": "Object Update Information",
+                            "type": "module",
+                            "link": "object_updater.md"
+                        },
+                        {
+                            "id": "informer_manager",
+                            "label": "Informer Manager",
+                            "type": "module",
+                            "link": "informer_manager.md"
+                        },
+                        {
+                            "id": "crd_definitions",
+                            "label": "CRD Definitions",
+                            "type": "module",
+                            "link": "crd_definitions.md"
+                        },
+                        {
+                            "id": "elastiserver",
+                            "label": "ElastiServer",
+                            "type": "module",
+                            "link": "elastiserver.md"
+                        },
+                        {
+                            "id": "pkg",
+                            "label": "Package Utilities",
+                            "type": "module",
+                            "link": "pkg.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "reconciler",
+                            "target": "informer_manager"
+                        },
+                        {
+                            "source": "reconciler",
+                            "target": "crd_definitions"
+                        },
+                        {
+                            "source": "reconciler",
+                            "target": "elastiserver"
+                        },
+                        {
+                            "source": "reconciler",
+                            "target": "pkg"
+                        },
+                        {
+                            "source": "reconciler",
+                            "target": "object_updater"
+                        }
+                    ],
+                    "groups": []
                 }
             },
-            "operator_elastiserver": {
+            "informer_manager": {
+                "title": "Informer Manager",
+                "description": "Handles the lifecycle of Kubernetes informers to watch for changes in resources and facilitates event-driven operations within the operator.",
                 "components": [
-                    "operator.internal.elastiserver.elastiServer.Server"
+                    "operator.internal.informer.informer.RequestWatch",
+                    "operator.internal.informer.informer.KeyParams"
                 ],
-                "children": {}
+                "children": {
+                    "resource_identification": {
+                        "title": "Resource Identification",
+                        "description": "Provides parameters for uniquely identifying Kubernetes resources by namespace, CRD, type, and name.",
+                        "components": [
+                            "operator.internal.informer.informer.KeyParams"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "key_params_struct",
+                                    "label": "KeyParams Struct",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "informer_manager_module",
+                                    "label": "Informer Manager",
+                                    "type": "external",
+                                    "link": "informer_manager.md"
+                                },
+                                {
+                                    "id": "crd_definitions_module",
+                                    "label": "CRD Definitions",
+                                    "type": "external",
+                                    "link": "crd_definitions.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "informer_manager_module",
+                                    "target": "key_params_struct"
+                                },
+                                {
+                                    "source": "key_params_struct",
+                                    "target": "crd_definitions_module"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    },
+                    "watcher_requests": {
+                        "title": "Watcher Requests",
+                        "description": "Defines the structure for requests to watch Kubernetes resources, including resource details and event handlers.",
+                        "components": [
+                            "operator.internal.informer.informer.RequestWatch"
+                        ],
+                        "children": {}
+                    }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "watcher_requests",
+                            "label": "Watcher Requests",
+                            "type": "module",
+                            "link": "watcher_requests.md"
+                        },
+                        {
+                            "id": "resource_identification",
+                            "label": "Resource Identification",
+                            "type": "module",
+                            "link": "resource_identification.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "watcher_requests",
+                            "target": "resource_identification"
+                        }
+                    ],
+                    "groups": []
+                }
             }
+        },
+        "title": "Operator",
+        "description": "The `operator` module is the core component responsible for managing the lifecycle and scaling of Kubernetes resources based on custom `ElastiService` definitions. It implements the Kubernetes oper...",
+        "diagram": {
+            "direction": "TD",
+            "nodes": [
+                {
+                    "id": "crd_definitions",
+                    "label": "CRD Definitions",
+                    "type": "module",
+                    "link": "crd_definitions.md"
+                },
+                {
+                    "id": "crd_directory",
+                    "label": "CRD Directory",
+                    "type": "module",
+                    "link": "crd_directory.md"
+                },
+                {
+                    "id": "informer_manager",
+                    "label": "Informer Manager",
+                    "type": "module",
+                    "link": "informer_manager.md"
+                },
+                {
+                    "id": "controller_logic",
+                    "label": "Controller Logic",
+                    "type": "module",
+                    "link": "controller_logic.md"
+                },
+                {
+                    "id": "elastiserver",
+                    "label": "ElastiServer",
+                    "type": "module",
+                    "link": "elastiserver.md"
+                }
+            ],
+            "edges": [
+                {
+                    "source": "crd_definitions",
+                    "target": "crd_directory"
+                },
+                {
+                    "source": "crd_definitions",
+                    "target": "informer_manager"
+                },
+                {
+                    "source": "crd_definitions",
+                    "target": "controller_logic"
+                },
+                {
+                    "source": "informer_manager",
+                    "target": "controller_logic"
+                },
+                {
+                    "source": "elastiserver",
+                    "target": "controller_logic"
+                }
+            ],
+            "groups": []
         }
     },
     "resolver": {
         "path": "resolver",
         "components": [
-            "resolver.internal.handler.writer.responseWriter",
-            "resolver.cmd.main.config",
+            "resolver.internal.throttler.semaphore.semaphore",
             "resolver.internal.handler.handler.Response",
-            "resolver.internal.handler.handler.QueueStatusResponse",
-            "resolver.internal.operator.RPCClient.Client",
+            "resolver.internal.throttler.breaker.Breaker",
             "resolver.internal.throttler.breaker.BreakerParams",
             "resolver.internal.handler.handler.bufferPool",
-            "resolver.internal.hostmanager.hostManager.HostManager",
+            "resolver.internal.handler.handler.QueueStatusResponse",
+            "resolver.internal.handler.writer.responseWriter",
             "resolver.internal.throttler.throttler.Params",
+            "resolver.internal.hostmanager.hostManager.HostManager",
+            "resolver.internal.operator.RPCClient.Client",
             "resolver.internal.handler.handler.HostManager",
-            "resolver.internal.throttler.semaphore.semaphore",
-            "resolver.internal.throttler.breaker.Breaker"
+            "resolver.cmd.main.config"
         ],
         "children": {
-            "operator": {
+            "request_handling": {
+                "title": "Request Handling",
+                "description": "Processes incoming HTTP requests, manages response generation, and handles queue status.",
                 "components": [
-                    "resolver.internal.operator.RPCClient.Client"
-                ],
-                "children": {}
-            },
-            "throttler": {
-                "components": [
-                    "resolver.internal.throttler.breaker.BreakerParams",
-                    "resolver.internal.throttler.throttler.Params",
-                    "resolver.internal.throttler.semaphore.semaphore",
-                    "resolver.internal.throttler.breaker.Breaker"
+                    "resolver.internal.handler.handler.Response",
+                    "resolver.internal.handler.handler.bufferPool",
+                    "resolver.internal.handler.handler.QueueStatusResponse",
+                    "resolver.internal.handler.handler.HostManager",
+                    "resolver.internal.handler.writer.responseWriter"
                 ],
                 "children": {
-                    "semaphore": {
+                    "internal_request_processing": {
+                        "title": "Internal Request Processing",
+                        "description": "Manages internal components for processing HTTP requests, including buffer pooling and custom response writing.",
                         "components": [
-                            "resolver.internal.throttler.semaphore.semaphore"
+                            "resolver.internal.handler.handler.bufferPool",
+                            "resolver.internal.handler.writer.responseWriter",
+                            "resolver.internal.handler.handler.HostManager"
                         ],
-                        "children": {}
+                        "children": {
+                            "host_manager_interface": {
+                                "title": "Host Manager Interface",
+                                "description": "Defines the interface for managing backend hosts, including host retrieval and traffic control.",
+                                "components": [
+                                    "resolver.internal.handler.handler.HostManager"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "HostManagerInterface",
+                                            "label": "HostManager Interface",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "request_handling",
+                                            "label": "Request Handling Module",
+                                            "type": "external",
+                                            "link": "request_handling.md"
+                                        },
+                                        {
+                                            "id": "host_management",
+                                            "label": "Host Management Module",
+                                            "type": "external",
+                                            "link": "host_management.md"
+                                        },
+                                        {
+                                            "id": "pkg_messages",
+                                            "label": "Messages Package",
+                                            "type": "external",
+                                            "link": "pkg.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "request_handling",
+                                            "target": "HostManagerInterface",
+                                            "label": "uses"
+                                        },
+                                        {
+                                            "source": "host_management",
+                                            "target": "HostManagerInterface",
+                                            "label": "implements"
+                                        },
+                                        {
+                                            "source": "HostManagerInterface",
+                                            "target": "pkg_messages",
+                                            "label": "returns Host"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            },
+                            "response_writing": {
+                                "title": "Response Writing",
+                                "description": "Handles the writing of HTTP responses, capturing status codes and body content for further processing.",
+                                "components": [
+                                    "resolver.internal.handler.writer.responseWriter"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "response_writer_comp",
+                                            "label": "responseWriter Component",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "request_buffering",
+                                            "label": "Request Buffering Module",
+                                            "type": "external",
+                                            "link": "request_buffering.md"
+                                        },
+                                        {
+                                            "id": "response_data_models",
+                                            "label": "Response Data Models Module",
+                                            "type": "external",
+                                            "link": "response_data_models.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "request_buffering",
+                                            "target": "response_writer_comp"
+                                        },
+                                        {
+                                            "source": "response_writer_comp",
+                                            "target": "response_data_models"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            },
+                            "request_buffering": {
+                                "title": "Request Buffering",
+                                "description": "Manages a pool of buffers for efficient handling of HTTP request and response bodies.",
+                                "components": [
+                                    "resolver.internal.handler.handler.bufferPool"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "buffer_pool",
+                                            "label": "bufferPool",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "response_writing",
+                                            "label": "Response Writing",
+                                            "type": "external",
+                                            "link": "response_writing.md"
+                                        },
+                                        {
+                                            "id": "host_manager_interface",
+                                            "label": "Host Manager Interface",
+                                            "type": "external",
+                                            "link": "host_manager_interface.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "response_writing",
+                                            "target": "buffer_pool"
+                                        },
+                                        {
+                                            "source": "host_manager_interface",
+                                            "target": "buffer_pool"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "request_handling",
+                                    "label": "Request Handling",
+                                    "type": "module",
+                                    "link": "request_handling.md"
+                                },
+                                {
+                                    "id": "request_buffering",
+                                    "label": "Request Buffering",
+                                    "type": "module",
+                                    "link": "request_buffering.md"
+                                },
+                                {
+                                    "id": "response_writing",
+                                    "label": "Response Writing",
+                                    "type": "module",
+                                    "link": "response_writing.md"
+                                },
+                                {
+                                    "id": "host_manager_interface",
+                                    "label": "Host Manager Interface",
+                                    "type": "module",
+                                    "link": "host_manager_interface.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "request_handling",
+                                    "target": "request_buffering"
+                                },
+                                {
+                                    "source": "request_handling",
+                                    "target": "response_writing"
+                                },
+                                {
+                                    "source": "request_handling",
+                                    "target": "host_manager_interface"
+                                }
+                            ],
+                            "groups": []
+                        }
                     },
-                    "breaker": {
+                    "response_data_models": {
+                        "title": "Response Data Models",
+                        "description": "Defines the data structures used for API responses, including general messages and queue status.",
                         "components": [
-                            "resolver.internal.throttler.breaker.BreakerParams",
-                            "resolver.internal.throttler.breaker.Breaker"
+                            "resolver.internal.handler.handler.Response",
+                            "resolver.internal.handler.handler.QueueStatusResponse"
                         ],
-                        "children": {}
+                        "children": {
+                            "response_message": {
+                                "title": "Response Message",
+                                "description": "Defines the structure for standard API responses, typically containing a message string.",
+                                "components": [
+                                    "resolver.internal.handler.handler.Response"
+                                ],
+                                "children": {}
+                            },
+                            "queue_status": {
+                                "title": "Queue Status",
+                                "description": "Defines the structure for reporting the status of an internal processing queue.",
+                                "components": [
+                                    "resolver.internal.handler.handler.QueueStatusResponse"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "queue_status_response",
+                                            "label": "QueueStatusResponse",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "response_data_models",
+                                            "label": "Response Data Models Module",
+                                            "type": "external",
+                                            "link": "response_data_models.md"
+                                        },
+                                        {
+                                            "id": "request_handling",
+                                            "label": "Request Handling Module",
+                                            "type": "external",
+                                            "link": "request_handling.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "response_data_models",
+                                            "target": "queue_status_response"
+                                        },
+                                        {
+                                            "source": "request_handling",
+                                            "target": "queue_status_response"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "response_data_models",
+                                    "label": "Response Data Models",
+                                    "type": "module"
+                                },
+                                {
+                                    "id": "response_message",
+                                    "label": "Response Message",
+                                    "type": "module",
+                                    "link": "response_message.md"
+                                },
+                                {
+                                    "id": "queue_status",
+                                    "label": "Queue Status",
+                                    "type": "module",
+                                    "link": "queue_status.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "response_data_models",
+                                    "target": "response_message"
+                                },
+                                {
+                                    "source": "response_data_models",
+                                    "target": "queue_status"
+                                }
+                            ],
+                            "groups": []
+                        }
                     }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "internal_request_processing",
+                            "label": "Internal Request Processing",
+                            "type": "module",
+                            "link": "internal_request_processing.md"
+                        },
+                        {
+                            "id": "response_data_models",
+                            "label": "Response Data Models",
+                            "type": "module",
+                            "link": "response_data_models.md"
+                        },
+                        {
+                            "id": "host_management",
+                            "label": "Host Management",
+                            "type": "module",
+                            "link": "host_management.md"
+                        },
+                        {
+                            "id": "throttling",
+                            "label": "Throttling",
+                            "type": "module",
+                            "link": "throttling.md"
+                        },
+                        {
+                            "id": "operator_communication",
+                            "label": "Operator Communication",
+                            "type": "module",
+                            "link": "operator_communication.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "internal_request_processing",
+                            "target": "response_data_models"
+                        },
+                        {
+                            "source": "internal_request_processing",
+                            "target": "host_management"
+                        },
+                        {
+                            "source": "internal_request_processing",
+                            "target": "throttling"
+                        },
+                        {
+                            "source": "internal_request_processing",
+                            "target": "operator_communication"
+                        }
+                    ],
+                    "groups": []
                 }
             },
-            "handler": {
-                "components": [
-                    "resolver.internal.handler.writer.responseWriter",
-                    "resolver.internal.handler.handler.Response",
-                    "resolver.internal.handler.handler.QueueStatusResponse",
-                    "resolver.internal.handler.handler.bufferPool",
-                    "resolver.internal.handler.handler.HostManager"
-                ],
-                "children": {}
-            },
-            "hostmanager": {
+            "host_management": {
+                "title": "Host Management",
+                "description": "Responsible for managing host information, retrieving hosts for requests, and controlling traffic.",
                 "components": [
                     "resolver.internal.hostmanager.hostManager.HostManager"
                 ],
                 "children": {}
+            },
+            "configuration": {
+                "title": "Module Configuration",
+                "description": "Defines and manages the configuration parameters for the resolver module's operation.",
+                "components": [
+                    "resolver.cmd.main.config"
+                ],
+                "children": {},
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "resolver_config",
+                            "label": "resolver.cmd.main.config",
+                            "type": "component",
+                            "link": null
+                        },
+                        {
+                            "id": "request_handling",
+                            "label": "Request Handling",
+                            "type": "external",
+                            "link": "request_handling.md"
+                        },
+                        {
+                            "id": "throttling",
+                            "label": "Throttling",
+                            "type": "external",
+                            "link": "throttling.md"
+                        },
+                        {
+                            "id": "host_management",
+                            "label": "Host Management",
+                            "type": "external",
+                            "link": "host_management.md"
+                        },
+                        {
+                            "id": "operator_communication",
+                            "label": "Operator Communication",
+                            "type": "external",
+                            "link": "operator_communication.md"
+                        },
+                        {
+                            "id": "pkg_config",
+                            "label": "pkg.config",
+                            "type": "external",
+                            "link": "pkg_config.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "resolver_config",
+                            "target": "request_handling"
+                        },
+                        {
+                            "source": "resolver_config",
+                            "target": "throttling"
+                        },
+                        {
+                            "source": "resolver_config",
+                            "target": "host_management"
+                        },
+                        {
+                            "source": "resolver_config",
+                            "target": "operator_communication"
+                        },
+                        {
+                            "source": "resolver_config",
+                            "target": "pkg_config"
+                        }
+                    ],
+                    "groups": []
+                }
+            },
+            "throttling": {
+                "title": "Request Throttling",
+                "description": "Manages request concurrency, queue depth, and circuit breaking to prevent system overload.",
+                "components": [
+                    "resolver.internal.throttler.semaphore.semaphore",
+                    "resolver.internal.throttler.breaker.Breaker",
+                    "resolver.internal.throttler.breaker.BreakerParams",
+                    "resolver.internal.throttler.throttler.Params"
+                ],
+                "children": {
+                    "throttler_parameters": {
+                        "title": "Throttler Configuration Parameters",
+                        "description": "Defines the configuration parameters for the overall Throttler, including queue retry durations and concurrency settings.",
+                        "components": [
+                            "resolver.internal.throttler.throttler.Params"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "params",
+                                    "label": "Params Struct",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "throttler_module",
+                                    "label": "Throttling Module",
+                                    "type": "external",
+                                    "link": "throttling.md"
+                                },
+                                {
+                                    "id": "k8s_helper_ops",
+                                    "label": "K8sHelper Ops",
+                                    "type": "external",
+                                    "link": "pkg.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "params",
+                                    "target": "throttler_module",
+                                    "label": "configures"
+                                },
+                                {
+                                    "source": "params",
+                                    "target": "k8s_helper_ops",
+                                    "label": "uses"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    },
+                    "circuit_breaker": {
+                        "title": "Circuit Breaker",
+                        "description": "Provides a circuit breaker pattern to prevent cascading failures, integrating with the semaphore for concurrency control.",
+                        "components": [
+                            "resolver.internal.throttler.breaker.Breaker",
+                            "resolver.internal.throttler.breaker.BreakerParams"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "resolver",
+                                    "label": "Resolver",
+                                    "type": "module",
+                                    "link": "resolver.md"
+                                },
+                                {
+                                    "id": "throttling",
+                                    "label": "Throttling",
+                                    "type": "module",
+                                    "link": "throttling.md"
+                                },
+                                {
+                                    "id": "throttler_parameters",
+                                    "label": "Throttler Parameters",
+                                    "type": "module",
+                                    "link": "throttler_parameters.md"
+                                },
+                                {
+                                    "id": "circuit_breaker",
+                                    "label": "Circuit Breaker",
+                                    "type": "module",
+                                    "link": "circuit_breaker.md"
+                                },
+                                {
+                                    "id": "semaphore_mechanism",
+                                    "label": "Semaphore Mechanism",
+                                    "type": "module",
+                                    "link": "semaphore_mechanism.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "resolver",
+                                    "target": "throttling"
+                                },
+                                {
+                                    "source": "throttling",
+                                    "target": "throttler_parameters"
+                                },
+                                {
+                                    "source": "throttling",
+                                    "target": "circuit_breaker"
+                                },
+                                {
+                                    "source": "throttling",
+                                    "target": "semaphore_mechanism"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    },
+                    "semaphore_mechanism": {
+                        "title": "Semaphore Mechanism",
+                        "description": "Implements a basic semaphore to control concurrent access to resources using an atomic counter and a channel.",
+                        "components": [
+                            "resolver.internal.throttler.semaphore.semaphore"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "semaphore_struct",
+                                    "label": "Semaphore Struct",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "throttling",
+                                    "label": "Throttling Module",
+                                    "type": "external",
+                                    "link": "throttling.md"
+                                },
+                                {
+                                    "id": "circuit_breaker",
+                                    "label": "Circuit Breaker Module",
+                                    "type": "external",
+                                    "link": "circuit_breaker.md"
+                                },
+                                {
+                                    "id": "throttler_parameters",
+                                    "label": "Throttler Parameters Module",
+                                    "type": "external",
+                                    "link": "throttler_parameters.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "semaphore_struct",
+                                    "target": "throttling",
+                                    "label": "Part of"
+                                },
+                                {
+                                    "source": "semaphore_struct",
+                                    "target": "circuit_breaker",
+                                    "label": "Coordinates with"
+                                },
+                                {
+                                    "source": "semaphore_struct",
+                                    "target": "throttler_parameters",
+                                    "label": "Configured by"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "circuit_breaker",
+                            "label": "Circuit Breaker",
+                            "type": "module",
+                            "link": "circuit_breaker.md"
+                        },
+                        {
+                            "id": "semaphore_mechanism",
+                            "label": "Semaphore Mechanism",
+                            "type": "module",
+                            "link": "semaphore_mechanism.md"
+                        },
+                        {
+                            "id": "throttler_parameters",
+                            "label": "Throttler Configuration Parameters",
+                            "type": "module",
+                            "link": "throttler_parameters.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "circuit_breaker",
+                            "target": "semaphore_mechanism"
+                        },
+                        {
+                            "source": "throttler_parameters",
+                            "target": "circuit_breaker"
+                        }
+                    ],
+                    "groups": []
+                }
+            },
+            "operator_communication": {
+                "title": "Operator Communication",
+                "description": "Handles RPC communication with the operator module to send request information and receive instructions.",
+                "components": [
+                    "resolver.internal.operator.RPCClient.Client"
+                ],
+                "children": {},
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "rpc_client",
+                            "label": "RPCClient.Client",
+                            "type": "component",
+                            "link": null
+                        },
+                        {
+                            "id": "operator",
+                            "label": "Operator Module",
+                            "type": "external",
+                            "link": "operator.md"
+                        },
+                        {
+                            "id": "logger",
+                            "label": "Logger (pkg.logger)",
+                            "type": "external",
+                            "link": "pkg.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "rpc_client",
+                            "target": "operator"
+                        },
+                        {
+                            "source": "rpc_client",
+                            "target": "logger"
+                        }
+                    ],
+                    "groups": []
+                }
             }
+        },
+        "title": "Resolver",
+        "description": "The `resolver` module is a critical component responsible for handling incoming HTTP requests, applying throttling mechanisms, managing host-specific traffic, and communicating with the `operator` ...",
+        "diagram": {
+            "direction": "TD",
+            "nodes": [
+                {
+                    "id": "request_handling",
+                    "label": "Request Handling",
+                    "type": "module",
+                    "link": "request_handling.md"
+                },
+                {
+                    "id": "throttling",
+                    "label": "Request Throttling",
+                    "type": "module",
+                    "link": "throttling.md"
+                },
+                {
+                    "id": "host_management",
+                    "label": "Host Management",
+                    "type": "module",
+                    "link": "host_management.md"
+                },
+                {
+                    "id": "operator_communication",
+                    "label": "Operator Communication",
+                    "type": "module",
+                    "link": "operator_communication.md"
+                },
+                {
+                    "id": "configuration",
+                    "label": "Module Configuration",
+                    "type": "module",
+                    "link": "configuration.md"
+                }
+            ],
+            "edges": [
+                {
+                    "source": "configuration",
+                    "target": "request_handling"
+                },
+                {
+                    "source": "configuration",
+                    "target": "throttling"
+                },
+                {
+                    "source": "configuration",
+                    "target": "host_management"
+                },
+                {
+                    "source": "configuration",
+                    "target": "operator_communication"
+                },
+                {
+                    "source": "request_handling",
+                    "target": "throttling"
+                },
+                {
+                    "source": "request_handling",
+                    "target": "host_management"
+                },
+                {
+                    "source": "request_handling",
+                    "target": "operator_communication"
+                }
+            ],
+            "groups": []
         }
     },
     "pkg": {
         "path": "pkg",
         "components": [
-            "pkg.config.config.Config",
-            "pkg.scaling.scale_handler.ScaleHandler",
-            "pkg.messages.host.Host",
-            "pkg.k8shelper.ops.Ops",
-            "pkg.scaling.scalers.scaler.Scaler",
-            "pkg.logger.logger.CustomCore",
             "pkg.scaling.scalers.prometheus_scaler.prometheusMetadata",
-            "pkg.messages.operator.RequestCount",
+            "pkg.k8shelper.ops.Ops",
+            "pkg.scaling.scale_handler.ScaleHandler",
+            "pkg.scaling.scalers.scaler.Scaler",
             "pkg.config.config.ResolverConfig",
-            "pkg.scaling.scalers.prometheus_scaler.prometheusScaler"
+            "pkg.scaling.scalers.prometheus_scaler.prometheusScaler",
+            "pkg.messages.operator.RequestCount",
+            "pkg.config.config.Config",
+            "pkg.messages.host.Host",
+            "pkg.logger.logger.CustomCore"
         ],
         "children": {
-            "config": {
+            "messages": {
+                "title": "Inter-Module Messages",
+                "description": "Defines data structures used for communication between different components and modules, such as request counts and host information.",
                 "components": [
-                    "pkg.config.config.Config",
-                    "pkg.config.config.ResolverConfig"
+                    "pkg.messages.operator.RequestCount",
+                    "pkg.messages.host.Host"
                 ],
-                "children": {}
+                "children": {
+                    "operator_go": {
+                        "title": "Operator Go",
+                        "description": "Documentation for operator_go module.",
+                        "components": [
+                            "pkg.messages.operator.RequestCount"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "request_count",
+                                    "label": "RequestCount Struct",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "operator_module",
+                                    "label": "Operator Module",
+                                    "type": "external",
+                                    "link": "operator.md"
+                                },
+                                {
+                                    "id": "resolver_module",
+                                    "label": "Resolver Module",
+                                    "type": "external",
+                                    "link": "resolver.md"
+                                },
+                                {
+                                    "id": "scaling_module",
+                                    "label": "Scaling Module",
+                                    "type": "external",
+                                    "link": "scaling.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "resolver_module",
+                                    "target": "request_count",
+                                    "label": "sends"
+                                },
+                                {
+                                    "source": "request_count",
+                                    "target": "operator_module",
+                                    "label": "consumed by"
+                                },
+                                {
+                                    "source": "operator_module",
+                                    "target": "scaling_module",
+                                    "label": "informs"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    },
+                    "host_go": {
+                        "title": "Host Go",
+                        "description": "Documentation for host_go module.",
+                        "components": [
+                            "pkg.messages.host.Host"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "host_struct",
+                                    "label": "Host Struct",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "operator_module",
+                                    "label": "Operator Module",
+                                    "type": "external",
+                                    "link": "operator.md"
+                                },
+                                {
+                                    "id": "resolver_module",
+                                    "label": "Resolver Module",
+                                    "type": "external",
+                                    "link": "resolver.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "operator_module",
+                                    "target": "host_struct"
+                                },
+                                {
+                                    "source": "resolver_module",
+                                    "target": "host_struct"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    }
+                }
             },
             "scaling": {
+                "title": "Scaling Logic",
+                "description": "Manages horizontal scaling operations, including defining scaler interfaces and implementing specific scalers like Prometheus.",
                 "components": [
-                    "pkg.scaling.scale_handler.ScaleHandler",
-                    "pkg.scaling.scalers.scaler.Scaler",
                     "pkg.scaling.scalers.prometheus_scaler.prometheusMetadata",
-                    "pkg.scaling.scalers.prometheus_scaler.prometheusScaler"
+                    "pkg.scaling.scalers.prometheus_scaler.prometheusScaler",
+                    "pkg.scaling.scale_handler.ScaleHandler",
+                    "pkg.scaling.scalers.scaler.Scaler"
                 ],
                 "children": {
                     "scale_handler": {
+                        "title": "Scaling Request Handler",
+                        "description": "Manages the execution of scaling operations by interacting with the Kubernetes API.",
                         "components": [
                             "pkg.scaling.scale_handler.ScaleHandler"
                         ],
                         "children": {}
                     },
                     "scalers": {
+                        "title": "Scaling Mechanism Implementations",
+                        "description": "Defines interfaces and implementations for various scaling mechanisms, including Prometheus-based scaling.",
                         "components": [
-                            "pkg.scaling.scalers.scaler.Scaler",
                             "pkg.scaling.scalers.prometheus_scaler.prometheusMetadata",
-                            "pkg.scaling.scalers.prometheus_scaler.prometheusScaler"
+                            "pkg.scaling.scalers.prometheus_scaler.prometheusScaler",
+                            "pkg.scaling.scalers.scaler.Scaler"
                         ],
                         "children": {
-                            "scaler_go": {
-                                "components": [
-                                    "pkg.scaling.scalers.scaler.Scaler"
-                                ],
-                                "children": {}
-                            },
-                            "prometheus_scaler_go": {
+                            "prometheus_implementation": {
+                                "title": "Prometheus Scaler Implementation",
+                                "description": "Provides a concrete implementation of the Scaler interface using Prometheus metrics for scaling decisions.",
                                 "components": [
                                     "pkg.scaling.scalers.prometheus_scaler.prometheusMetadata",
                                     "pkg.scaling.scalers.prometheus_scaler.prometheusScaler"
                                 ],
-                                "children": {}
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "prometheus_metadata",
+                                            "label": "prometheusMetadata",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "prometheus_scaler",
+                                            "label": "prometheusScaler",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "scaler_interface",
+                                            "label": "Scaler Interface",
+                                            "type": "external",
+                                            "link": "scaler_interface.md"
+                                        },
+                                        {
+                                            "id": "scale_handler",
+                                            "label": "Scale Handler",
+                                            "type": "external",
+                                            "link": "scale_handler.md"
+                                        },
+                                        {
+                                            "id": "config",
+                                            "label": "Config Module",
+                                            "type": "external",
+                                            "link": "configuration.md"
+                                        },
+                                        {
+                                            "id": "logger",
+                                            "label": "Logger Module",
+                                            "type": "external",
+                                            "link": "logging.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "prometheus_scaler",
+                                            "target": "prometheus_metadata"
+                                        },
+                                        {
+                                            "source": "prometheus_scaler",
+                                            "target": "scaler_interface",
+                                            "label": "implements"
+                                        },
+                                        {
+                                            "source": "scale_handler",
+                                            "target": "prometheus_scaler",
+                                            "label": "uses"
+                                        },
+                                        {
+                                            "source": "prometheus_scaler",
+                                            "target": "config",
+                                            "label": "uses"
+                                        },
+                                        {
+                                            "source": "prometheus_scaler",
+                                            "target": "logger",
+                                            "label": "uses"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            },
+                            "scaler_interface": {
+                                "title": "Scaler Interface",
+                                "description": "Defines the common interface for all scaling operations, allowing for different scaler implementations.",
+                                "components": [
+                                    "pkg.scaling.scalers.scaler.Scaler"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "scaler_interface",
+                                            "label": "Scaler Interface",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "scale_handler",
+                                            "label": "Scale Handler",
+                                            "type": "external",
+                                            "link": "scale_handler.md"
+                                        },
+                                        {
+                                            "id": "prometheus_implementation",
+                                            "label": "Prometheus Scaler Implementation",
+                                            "type": "external",
+                                            "link": "prometheus_implementation.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "scale_handler",
+                                            "target": "scaler_interface"
+                                        },
+                                        {
+                                            "source": "prometheus_implementation",
+                                            "target": "scaler_interface",
+                                            "label": "Implements"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
                             }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "scaler_interface",
+                                    "label": "Scaler Interface",
+                                    "type": "module",
+                                    "link": "scaler_interface.md"
+                                },
+                                {
+                                    "id": "prometheus_implementation",
+                                    "label": "Prometheus Scaler Implementation",
+                                    "type": "module",
+                                    "link": "prometheus_implementation.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "prometheus_implementation",
+                                    "target": "scaler_interface"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "scale_handler",
+                            "label": "Scaling Request Handler",
+                            "type": "module",
+                            "link": "scale_handler.md"
+                        },
+                        {
+                            "id": "scalers",
+                            "label": "Scaling Mechanism Implementations",
+                            "type": "module",
+                            "link": "scalers.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "scale_handler",
+                            "target": "scalers"
+                        }
+                    ],
+                    "groups": []
+                }
+            },
+            "configuration": {
+                "title": "Module Configuration",
+                "description": "Defines configuration structures for the module, including general settings and resolver-specific configurations.",
+                "components": [
+                    "pkg.config.config.ResolverConfig",
+                    "pkg.config.config.Config"
+                ],
+                "children": {
+                    "config_structures": {
+                        "title": "Configuration Structures",
+                        "description": "Defines the core configuration structures used throughout the system, including general settings and resolver-specific configurations.",
+                        "components": [
+                            "pkg.config.config.ResolverConfig",
+                            "pkg.config.config.Config"
+                        ],
+                        "children": {
+                            "configuration_definitions": {
+                                "title": "Configuration Definitions",
+                                "description": "Defines the core configuration structures for the resolver and general application settings.",
+                                "components": [
+                                    "pkg.config.config.ResolverConfig",
+                                    "pkg.config.config.Config"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "config_struct",
+                                            "label": "Config",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "resolver_config_struct",
+                                            "label": "ResolverConfig",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "resolver_module",
+                                            "label": "Resolver Module",
+                                            "type": "external",
+                                            "link": "resolver.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "resolver_config_struct",
+                                            "target": "config_struct",
+                                            "label": "inherits"
+                                        },
+                                        {
+                                            "source": "resolver_module",
+                                            "target": "resolver_config_struct",
+                                            "label": "uses"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "configuration_definitions",
+                                    "label": "Configuration Definitions",
+                                    "type": "module",
+                                    "link": "configuration_definitions.md"
+                                }
+                            ],
+                            "edges": [],
+                            "groups": []
                         }
                     }
                 }
             },
-            "messages": {
-                "components": [
-                    "pkg.messages.host.Host",
-                    "pkg.messages.operator.RequestCount"
-                ],
-                "children": {
-                    "host_go": {
-                        "components": [
-                            "pkg.messages.host.Host"
-                        ],
-                        "children": {}
-                    },
-                    "operator_go": {
-                        "components": [
-                            "pkg.messages.operator.RequestCount"
-                        ],
-                        "children": {}
-                    }
-                }
-            },
-            "k8shelper": {
-                "components": [
-                    "pkg.k8shelper.ops.Ops"
-                ],
-                "children": {}
-            },
-            "logger": {
+            "logging": {
+                "title": "Custom Logging",
+                "description": "Implements custom logging functionalities, extending standard logging frameworks.",
                 "components": [
                     "pkg.logger.logger.CustomCore"
                 ],
-                "children": {}
+                "children": {},
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "custom_core",
+                            "label": "CustomCore",
+                            "type": "component",
+                            "link": null
+                        },
+                        {
+                            "id": "zapcore",
+                            "label": "zapcore.Core (external library)",
+                            "type": "external",
+                            "link": null
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "custom_core",
+                            "target": "zapcore"
+                        }
+                    ],
+                    "groups": []
+                }
+            },
+            "k8s_helper": {
+                "title": "Kubernetes Helper",
+                "description": "Provides utility functions and clients for interacting with the Kubernetes API.",
+                "components": [
+                    "pkg.k8shelper.ops.Ops"
+                ],
+                "children": {},
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "ops_component",
+                            "label": "Ops Structure",
+                            "type": "component",
+                            "link": null
+                        },
+                        {
+                            "id": "kubernetes_clientset",
+                            "label": "Kubernetes Clientset",
+                            "type": "external",
+                            "link": "https://pkg.go.dev/k8s.io/client-go/kubernetes"
+                        },
+                        {
+                            "id": "dynamic_client",
+                            "label": "Dynamic Client",
+                            "type": "external",
+                            "link": "https://pkg.go.dev/k8s.io/client-go/dynamic"
+                        },
+                        {
+                            "id": "logging_module",
+                            "label": "Logging Module",
+                            "type": "external",
+                            "link": "logging.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "ops_component",
+                            "target": "kubernetes_clientset"
+                        },
+                        {
+                            "source": "ops_component",
+                            "target": "dynamic_client"
+                        },
+                        {
+                            "source": "ops_component",
+                            "target": "logging_module"
+                        }
+                    ],
+                    "groups": []
+                }
             }
+        },
+        "title": "Pkg",
+        "description": "The `pkg` module serves as a foundational library within the system, encapsulating core functionalities related to Kubernetes interactions, scaling mechanisms, configuration management, inter-modul...",
+        "diagram": {
+            "direction": "TD",
+            "nodes": [
+                {
+                    "id": "scaling",
+                    "label": "Scaling Logic",
+                    "type": "module",
+                    "link": "scaling.md"
+                },
+                {
+                    "id": "k8s_helper",
+                    "label": "Kubernetes Helper",
+                    "type": "module",
+                    "link": "k8s_helper.md"
+                },
+                {
+                    "id": "configuration",
+                    "label": "Module Configuration",
+                    "type": "module",
+                    "link": "configuration.md"
+                },
+                {
+                    "id": "messages",
+                    "label": "Inter-Module Messages",
+                    "type": "module",
+                    "link": "messages.md"
+                },
+                {
+                    "id": "logging",
+                    "label": "Custom Logging",
+                    "type": "module",
+                    "link": "logging.md"
+                }
+            ],
+            "edges": [
+                {
+                    "source": "scaling",
+                    "target": "k8s_helper"
+                },
+                {
+                    "source": "scaling",
+                    "target": "configuration"
+                },
+                {
+                    "source": "messages",
+                    "target": "configuration"
+                },
+                {
+                    "source": "k8s_helper",
+                    "target": "logging"
+                }
+            ],
+            "groups": []
         }
     }
 }
