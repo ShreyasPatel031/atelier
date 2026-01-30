@@ -401,17 +401,41 @@ def call_llm(
         
         logger.error(f"[LLM] LLM call FAILED after {llm_duration:.1f}s: {error_type}: {error_msg}")
         
-        # Detect specific error types
+        # Categorize and track error in generation tracker
+        categorized_error = "unknown"
         if "429" in error_msg or "rate limit" in error_msg.lower() or "RateLimitError" in error_type:
             logger.error(f"[LLM] RATE LIMIT DETECTED!")
+            categorized_error = "rate_limit"
         elif "context_length_exceeded" in error_msg.lower() or "context length" in error_msg.lower():
             logger.error(f"[LLM] CONTEXT LENGTH EXCEEDED!")
             logger.error(f"[LLM]   - Prompt tokens: {prompt_tokens_estimated:,}")
             logger.error(f"[LLM]   - Max context: 128,000 (gpt-4o)")
+            categorized_error = "context_length_exceeded"
         elif "401" in error_msg or "authentication" in error_msg.lower():
             logger.error(f"[LLM] AUTHENTICATION ERROR!")
+            categorized_error = "auth_error"
         elif "timeout" in error_msg.lower():
             logger.error(f"[LLM] TIMEOUT ERROR!")
+            categorized_error = "timeout"
+        elif "500" in error_msg or "502" in error_msg or "503" in error_msg:
+            categorized_error = "api_error"
+        
+        # Track in generation tracker for comprehensive reporting
+        try:
+            from codewiki.src.be.generation_tracker import get_generation_tracker
+            gen_tracker = get_generation_tracker()
+            gen_tracker.track_llm_call(
+                module_name="unknown",  # Will be set by caller context
+                success=False,
+                prompt_tokens=prompt_tokens_estimated,
+                completion_tokens=0,
+                duration_s=llm_duration,
+                model=model,
+                error_type=categorized_error,
+                error_message=error_msg[:200]
+            )
+        except Exception:
+            pass  # Non-critical
         
         import traceback
         logger.error(f"[LLM] Traceback: {traceback.format_exc()}")

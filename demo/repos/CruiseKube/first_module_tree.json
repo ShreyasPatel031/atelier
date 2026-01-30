@@ -1,0 +1,201 @@
+{
+    "database_adapters": {
+        "path": "pkg/adapters/database",
+        "components": [
+            "pkg.adapters.database.clients.clients.ClientFactory",
+            "pkg.adapters.database.clients.clients.FactoryConfig",
+            "pkg.adapters.database.clients.postgres.PostgreSQLClientFactory",
+            "pkg.adapters.database.clients.sqlite.SQLiteClientFactory",
+            "pkg.adapters.database.database.GormDB",
+            "pkg.adapters.database.database.DatabaseConfig",
+            "pkg.adapters.database.models.OOMEvent",
+            "pkg.adapters.database.models.Stats"
+        ],
+        "children": {}
+    },
+    "metrics_provider_prometheus": {
+        "path": "pkg/adapters/metricsProvider/prometheus",
+        "components": [
+            "pkg.adapters.metricsProvider.prometheus.prometheus.PrometheusProvider",
+            "pkg.adapters.metricsProvider.prometheus.prometheus.PrometheusClientConfig",
+            "pkg.adapters.metricsProvider.prometheus.promql.QueryResult",
+            "pkg.adapters.metricsProvider.prometheus.promql.namespaceResult",
+            "pkg.adapters.metricsProvider.prometheus.promql.ParallelQueryRequest",
+            "pkg.adapters.metricsProvider.prometheus.utils.BearerTokenRoundTripper"
+        ],
+        "children": {}
+    },
+    "recommender_client": {
+        "path": "pkg/client",
+        "components": [
+            "pkg.client.recommender_service_client.RecommenderServiceClient",
+            "pkg.client.recommender_service_client.ClustersResponse",
+            "pkg.client.recommender_service_client.PrometheusProxyRequest",
+            "pkg.client.recommender_service_client.HealthResponse",
+            "pkg.client.recommender_service_client.ClusterInfo",
+            "pkg.client.recommender_service_client.RootResponse",
+            "pkg.client.recommender_service_client.ClientConfig"
+        ],
+        "children": {}
+    },
+    "cluster_management": {
+        "path": "pkg/cluster",
+        "components": [
+            "pkg.cluster.manager.ClusterClients",
+            "pkg.cluster.manager.Manager",
+            "pkg.cluster.manager.PrometheusConnectionInfo",
+            "pkg.cluster.singleClusterManager.SingleClusterManager"
+        ],
+        "children": {}
+    },
+    "cluster_scheduler": {
+        "path": "pkg/cluster",
+        "components": [
+            "pkg.cluster.scheduler.Scheduler",
+            "pkg.cluster.scheduler.taskEntry"
+        ],
+        "children": {}
+    },
+    "configuration": {
+        "path": "pkg/config",
+        "components": [
+            "pkg.config.config.ServerConfig",
+            "pkg.config.config.BasicAuthConfig",
+            "pkg.config.config.TelemetryConfig",
+            "pkg.config.config.DatabaseConfig",
+            "pkg.config.config.ControllerConfig",
+            "pkg.config.config.URLConfig",
+            "pkg.config.config.LocalDeps",
+            "pkg.config.config.InClusterDeps",
+            "pkg.config.config.MetricsConfig",
+            "pkg.config.config.RecommendationSettings",
+            "pkg.config.config.Config",
+            "pkg.config.config.Dependencies",
+            "pkg.config.config.WebhookConfig",
+            "pkg.config.taskConfig.TaskConfig"
+        ],
+        "children": {}
+    },
+    "api_handlers": {
+        "path": "pkg/handlers",
+        "components": [
+            "pkg.handlers.taskTrigger.TaskTriggerResponse"
+        ],
+        "children": {}
+    },
+    "oom_event_processing": {
+        "path": "pkg/oom",
+        "components": [
+            "pkg.oom.observer.Info",
+            "pkg.oom.observer.Observer",
+            "pkg.oom.processor.Processor"
+        ],
+        "children": {}
+    },
+    "application_ports": {
+        "path": "pkg/ports",
+        "components": [
+            "pkg.ports.database.Database"
+        ],
+        "children": {}
+    },
+    "data_storage_repository": {
+        "path": "pkg/repository/storage",
+        "components": [
+            "pkg.repository.storage.storage.Storage"
+        ],
+        "children": {}
+    },
+    "task_core": {
+        "path": "pkg/task",
+        "components": [
+            "pkg.task.task.Task"
+        ],
+        "children": {}
+    },
+    "task_implementations": {
+        "path": "pkg/task",
+        "components": [
+            "pkg.task.taskApplyRecommendation.ApplyRecommendationTask",
+            "pkg.task.taskApplyRecommendation.ApplyRecommendationMetadata",
+            "pkg.task.taskApplyRecommendation.RecommendationResult",
+            "pkg.task.taskApplyRecommendation.ApplyRecommendationTaskConfig",
+            "pkg.task.taskCleanupOOMEvents.CleanupOOMEventsTask",
+            "pkg.task.taskCleanupOOMEvents.CleanupOOMEventsMetadata",
+            "pkg.task.taskCleanupOOMEvents.CleanupOOMEventsTaskConfig",
+            "pkg.task.taskCreateStats.CreateStatsMetadata",
+            "pkg.task.taskCreateStats.CreateStatsTask",
+            "pkg.task.taskCreateStats.CreateStatsTaskConfig",
+            "pkg.task.taskFetchMetrics.FetchMetricsTaskConfig",
+            "pkg.task.taskFetchMetrics.FetchMetricsTask",
+            "pkg.task.taskModifyEqualCPUResources.ModifyEqualCPUResourcesTask",
+            "pkg.task.taskModifyEqualCPUResources.ModifyEqualCPUResourcesTaskConfig",
+            "pkg.task.taskModifyEqualCPUResources.containerModification",
+            "pkg.task.taskNodeLoadMonitoring.NodeLoadMonitoringTaskConfig",
+            "pkg.task.taskNodeLoadMonitoring.NodeLoadMonitoringTask"
+        ],
+        "children": {}
+    },
+    "task_utilities": {
+        "path": "pkg/task/utils",
+        "components": [
+            "pkg.task.utils.metrics.ContainerMetrics",
+            "pkg.task.utils.metrics.PSIAdjustedUsage",
+            "pkg.task.utils.metrics.WorkloadMetrics",
+            "pkg.task.utils.node_stats.PodInfo",
+            "pkg.task.utils.node_stats.ContainerResources",
+            "pkg.task.utils.node_stats.NodeResourceInfo",
+            "pkg.task.utils.timeseries_prediction.TimeSeriesRequest",
+            "pkg.task.utils.types.WorkloadPrediction",
+            "pkg.task.utils.types.SimplePredictionResponse",
+            "pkg.task.utils.types.WorkloadInfo",
+            "pkg.task.utils.types.NodeOptimizationData",
+            "pkg.task.utils.types.SimpleTimeSeriesRequest",
+            "pkg.task.utils.types.PredictionStatsResponse",
+            "pkg.task.utils.types.NonOptimizablePodInfo",
+            "pkg.task.utils.types.PodMetrics",
+            "pkg.task.utils.types.WorkloadLabelSelectorList",
+            "pkg.task.utils.types.PodKey",
+            "pkg.task.utils.types.OptimizationStrategy",
+            "pkg.task.utils.types.PodContainerRecommendation",
+            "pkg.task.utils.types.OptimizationResult",
+            "pkg.task.utils.types.WorkloadContainerKey",
+            "pkg.task.utils.types.ThrottledWorkload",
+            "pkg.task.utils.types.ContainerKey",
+            "pkg.task.utils.types.SimpleTimeSeriesData",
+            "pkg.task.utils.workload_handler.DaemonSetWrapper",
+            "pkg.task.utils.workload_handler.StatefulSetWrapper",
+            "pkg.task.utils.workload_handler.WorkloadObject",
+            "pkg.task.utils.workload_handler.DeploymentWrapper"
+        ],
+        "children": {}
+    },
+    "data_types": {
+        "path": "pkg/types",
+        "components": [
+            "pkg.types.stats.StatsResponse",
+            "pkg.types.stats.WorkloadConstraints",
+            "pkg.types.stats.MLPercentilesCPUPSIAdjusted",
+            "pkg.types.stats.PSIAdjustedUsageStats",
+            "pkg.types.stats.MemoryStats",
+            "pkg.types.stats.Overrides",
+            "pkg.types.stats.CPU7DayStats",
+            "pkg.types.stats.WorkloadStat",
+            "pkg.types.stats.MLPercentilesCPU",
+            "pkg.types.stats.OOMEvent",
+            "pkg.types.stats.MLPercentilesMemory",
+            "pkg.types.stats.OriginalContainerResources",
+            "pkg.types.stats.CPUStats",
+            "pkg.types.stats.SimplePrediction",
+            "pkg.types.stats.Memory7DayStats",
+            "pkg.types.stats.ContainerStats",
+            "pkg.types.workloads.RecommendationAnalysisResponse",
+            "pkg.types.workloads.WorkloadAnalysisItem",
+            "pkg.types.workloads.KillswitchResponse",
+            "pkg.types.workloads.RecommendationSummary",
+            "pkg.types.workloads.RecommendationAnalysisItem",
+            "pkg.types.workloads.WorkloadOverrideInfo"
+        ],
+        "children": {}
+    }
+}

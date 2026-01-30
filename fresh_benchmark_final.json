@@ -1,0 +1,103 @@
+{
+  "timestamp": "2026-01-30T13:18:32.963176",
+  "results": [
+    {
+      "repo": "werkzeug",
+      "passed": true,
+      "modules": 138,
+      "errors": 0,
+      "warnings": 0,
+      "md_files": 143,
+      "size_mb": 6
+    },
+    {
+      "repo": "jinja",
+      "passed": true,
+      "modules": 1,
+      "errors": 0,
+      "warnings": 0,
+      "md_files": 101,
+      "size_mb": 3
+    },
+    {
+      "repo": "starlette",
+      "passed": true,
+      "modules": 115,
+      "errors": 0,
+      "warnings": 0,
+      "md_files": 109,
+      "size_mb": 5
+    },
+    {
+      "repo": "sqlmodel",
+      "passed": true,
+      "modules": 20,
+      "errors": 0,
+      "warnings": 0,
+      "md_files": 21,
+      "size_mb": 9
+    },
+    {
+      "repo": "fastapi",
+      "passed": true,
+      "modules": 40,
+      "errors": 0,
+      "warnings": 0,
+      "md_files": 41,
+      "size_mb": 25
+    },
+    {
+      "repo": "typer",
+      "passed": true,
+      "modules": 43,
+      "errors": 0,
+      "warnings": 0,
+      "md_files": 44,
+      "size_mb": 5
+    },
+    {
+      "repo": "rich",
+      "passed": true,
+      "modules": 196,
+      "errors": 0,
+      "warnings": 0,
+      "md_files": 208,
+      "size_mb": 37
+    },
+    {
+      "repo": "requests",
+      "passed": true,
+      "modules": 28,
+      "errors": 0,
+      "warnings": 0,
+      "md_files": 30,
+      "size_mb": 9
+    },
+    {
+      "repo": "pydantic",
+      "passed": true,
+      "modules": 40,
+      "errors": 0,
+      "warnings": 0,
+      "md_files": 87,
+      "size_mb": 16
+    },
+    {
+      "repo": "click",
+      "passed": true,
+      "modules": 68,
+      "errors": 0,
+      "warnings": 0,
+      "md_files": 71,
+      "size_mb": 3
+    }
+  ],
+  "summary": {
+    "passed": 10,
+    "total": 10,
+    "pass_rate": "100%",
+    "total_modules": 689,
+    "total_errors": 0,
+    "total_warnings": 0
+  }
+}

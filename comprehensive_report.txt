@@ -1,0 +1,200 @@
+/Users/shreyaspatel/atelier/codewiki/src/be/llm_services.py:33: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+Found 10 repos to analyze...
+Analyzing openai-realtime...
+Analyzing typer...
+Analyzing flask-new...
+Analyzing KubeElasti...
+Analyzing httpx...
+Analyzing fastapi...
+Analyzing rich...
+Analyzing flask...
+Analyzing go...
+Analyzing next.js...
+
+====================================================================================================
+                     CODEWIKI COMPREHENSIVE ANALYSIS REPORT
+                     Agent 3 (Reliability) - Extended Metrics
+====================================================================================================
+
+## Summary Table
+
+Repo            Size(MB)   Files    Modules    Diagram%   Errors   Warns    Time(s)    Cost($)    Status    
+----------------------------------------------------------------------------------------------------
+openai-realtime 0.0        0        21         100.0      0        1        N/A        N/A        passed    
+typer           5.0        638      36         97.2       1        7        160.3      $0.72      failed    
+flask-new       4.0        82       34         14.7       32       5        N/A        N/A        failed    
+KubeElasti      5.0        45       49         85.7       7        3        293.3      $0.98      failed    
+httpx           5.0        60       80         91.2       9        11       255.1      $1.60      failed    
+fastapi         25.0       1253     47         89.4       5        9        357.7      $0.94      failed    
+rich            36.0       212      205        87.8       34       53       375.9      $4.10      failed    
+flask           3.0        82       8          0.0        25       0        N/A        N/A        failed    
+go              217.0      11191    1          0.0        4        0        N/A        N/A        failed    
+next.js         2617.0     20176    5          0.0        16       0        N/A        N/A        failed    
+----------------------------------------------------------------------------------------------------
+TOTAL                               486                   133      89      
+
+
+## Error Breakdown by Type
+
+Error Code                          Count      % of Total     
+------------------------------------------------------------
+MISSING_DOCUMENTATION               49         36.8%
+MISSING_LEAF_DIAGRAM                25         18.8%
+MISSING_TITLE                       20         15.0%
+MISSING_DESCRIPTION                 20         15.0%
+MISSING_STRUCTURED_DIAGRAM          14         10.5%
+MISSING_OVERVIEW                    4          3.0%
+MISSING_CHILD_NODE                  1          0.8%
+
+
+## Warning Breakdown by Type
+
+Warning Code                        Count      % of Total     
+------------------------------------------------------------
+DESCRIPTION_TOO_LONG                89         100.0%
+
+
+## Detailed Per-Repository Metrics
+
+
+### openai-realtime
+  - Repo Size: 0.0 MB
+  - Source Files: 0
+  - Doc Files: 22
+  - Total Modules: 21
+  - Diagram Coverage: 100.0%
+  - Title Coverage: 100.0%
+  - Description Coverage: 100.0%
+  - Validation Time: 3 ms
+  - Errors: 0
+  - Warnings: 1
+
+### typer
+  - Repo Size: 5.0 MB
+  - Source Files: 638
+  - Doc Files: 36
+  - Total Modules: 36
+  - Diagram Coverage: 97.2%
+  - Title Coverage: 100.0%
+  - Description Coverage: 100.0%
+  - Validation Time: 5 ms
+  - Errors: 1
+  - Warnings: 7
+  - Generation Time: 160.3s
+  - Estimated Cost: $0.72
+
+### flask-new
+  - Repo Size: 4.0 MB
+  - Source Files: 82
+  - Doc Files: 45
+  - Total Modules: 34
+  - Diagram Coverage: 14.7%
+  - Title Coverage: 97.1%
+  - Description Coverage: 97.1%
+  - Validation Time: 3 ms
+  - Errors: 32
+  - Warnings: 5
+
+### KubeElasti
+  - Repo Size: 5.0 MB
+  - Source Files: 45
+  - Doc Files: 44
+  - Total Modules: 49
+  - Diagram Coverage: 85.7%
+  - Title Coverage: 100.0%
+  - Description Coverage: 100.0%
+  - Validation Time: 6 ms
+  - Errors: 7
+  - Warnings: 3
+  - Generation Time: 293.3s
+  - Estimated Cost: $0.98
+
+### httpx
+  - Repo Size: 5.0 MB
+  - Source Files: 60
+  - Doc Files: 75
+  - Total Modules: 80
+  - Diagram Coverage: 91.2%
+  - Title Coverage: 98.8%
+  - Description Coverage: 98.8%
+  - Validation Time: 8 ms
+  - Errors: 9
+  - Warnings: 11
+  - Generation Time: 255.1s
+  - Estimated Cost: $1.60
+
+### fastapi
+  - Repo Size: 25.0 MB
+  - Source Files: 1253
+  - Doc Files: 43
+  - Total Modules: 47
+  - Diagram Coverage: 89.4%
+  - Title Coverage: 100.0%
+  - Description Coverage: 100.0%
+  - Validation Time: 6 ms
+  - Errors: 5
+  - Warnings: 9
+  - Generation Time: 357.7s
+  - Estimated Cost: $0.94
+
+### rich
+  - Repo Size: 36.0 MB
+  - Source Files: 212
+  - Doc Files: 192
+  - Total Modules: 205
+  - Diagram Coverage: 87.8%
+  - Title Coverage: 98.0%
+  - Description Coverage: 98.0%
+  - Validation Time: 21 ms
+  - Errors: 34
+  - Warnings: 53
+  - Generation Time: 375.9s
+  - Estimated Cost: $4.10
+
+### flask
+  - Repo Size: 3.0 MB
+  - Source Files: 82
+  - Doc Files: 1
+  - Total Modules: 8
+  - Diagram Coverage: 0.0%
+  - Title Coverage: 0.0%
+  - Description Coverage: 0.0%
+  - Validation Time: 0 ms
+  - Errors: 25
+  - Warnings: 0
+
+### go
+  - Repo Size: 217.0 MB
+  - Source Files: 11191
+  - Doc Files: 0
+  - Total Modules: 1
+  - Diagram Coverage: 0.0%
+  - Title Coverage: 0.0%
+  - Description Coverage: 0.0%
+  - Validation Time: 0 ms
+  - Errors: 4
+  - Warnings: 0
+
+### next.js
+  - Repo Size: 2617.0 MB
+  - Source Files: 20176
+  - Doc Files: 0
+  - Total Modules: 5
+  - Diagram Coverage: 0.0%
+  - Title Coverage: 0.0%
+  - Description Coverage: 0.0%
+  - Validation Time: 0 ms
+  - Errors: 16
+  - Warnings: 0
+
+====================================================================================================
+
+JSON report saved to: /Users/shreyaspatel/atelier/comprehensive_analysis.json

@@ -1,0 +1,40 @@
+{
+    "generation_info": {
+        "timestamp": "2026-01-30T03:52:49.980735",
+        "main_model": "gemini-2.5-flash",
+        "generator_version": "1.0.0",
+        "repo_path": "/Users/shreyaspatel/CodeWiki/test_repos/openai-realtime",
+        "commit_id": null
+    },
+    "statistics": {
+        "total_components": 17,
+        "leaf_nodes": 17,
+        "max_depth": 10
+    },
+    "files_generated": [
+        "overview.md",
+        "module_tree.json",
+        "first_module_tree.json",
+        "event_dispatching.md",
+        "session_control_management.md",
+        "basic_ui_elements.md",
+        "session_state_views.md",
+        "event_transport_and_logging.md",
+        "session_core.md",
+        "ui_and_tools.md",
+        "tool_panel_component.md",
+        "tool_panel.md",
+        "main.md",
+        "application_session_integration.md",
+        "session_lifecycle.md",
+        "event_display_components.md",
+        "core_ui_components.md",
+        "event_and_messaging.md",
+        "session_ui_controls.md",
+        "page_rendering.md",
+        "event_logging_and_display.md",
+        "event_creation.md",
+        "session_management.md",
+        "function_call_output_display.md"
+    ]
+}

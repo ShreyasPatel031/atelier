@@ -593,6 +593,16 @@ This is a quick overview generated from the module structure. Detailed documenta
     
     async def run(self) -> None:
         """Run the complete documentation generation process using dynamic programming."""
+        # Initialize generation tracker
+        try:
+            from codewiki.src.be.generation_tracker import get_generation_tracker, reset_generation_tracker
+            reset_generation_tracker()
+            gen_tracker = get_generation_tracker()
+            repo_name = os.path.basename(os.path.normpath(self.config.repo_path))
+            gen_tracker.start_generation(repo_name)
+        except Exception as e:
+            logger.warning(f"[STAGE 0] Failed to initialize generation tracker: {e}")
+        
         try:
             # Build dependency graph
             components, leaf_nodes = self.graph_builder.build_dependency_graph()
@@ -696,6 +706,18 @@ This is a quick overview generated from the module structure. Detailed documenta
             # Create documentation metadata
             self.create_documentation_metadata(working_dir, components, len(leaf_nodes))
             
+            # POST-PROCESSING: Sync files with module tree
+            # This ensures all modules in tree have corresponding .md files
+            try:
+                from codewiki.src.be.doc_file_sync import run_full_sync
+                sync_result = run_full_sync(working_dir, components)
+                if sync_result['files_created'] > 0:
+                    logger.info(f"[STAGE 4.5] Doc sync created {sync_result['files_created']} missing files")
+                if sync_result['diagrams_updated'] > 0:
+                    logger.info(f"[STAGE 4.5] Doc sync updated {sync_result['diagrams_updated']} diagram references")
+            except Exception as sync_err:
+                logger.warning(f"[STAGE 4.5] Doc sync failed (non-critical): {sync_err}")
+            
             logger.debug(f"Documentation generation completed successfully using dynamic programming!")
             logger.debug(f"Processing order: leaf modules → parent modules → repository overview")
             logger.debug(f"Documentation saved to: {working_dir}")
@@ -704,7 +726,33 @@ This is a quick overview generated from the module structure. Detailed documenta
             tracker.set_stage("Complete")
             logger.info("\n" + tracker.get_summary())
             
+            # Complete generation tracking and save report
+            try:
+                from codewiki.src.be.generation_tracker import get_generation_tracker
+                gen_tracker = get_generation_tracker()
+                gen_tracker.complete_generation(working_dir)
+                
+                # Save generation report
+                report_path = os.path.join(working_dir, "generation_report.json")
+                gen_tracker.save_report(report_path)
+                
+                # Print summary
+                gen_tracker.print_report()
+            except Exception as track_err:
+                logger.warning(f"[STAGE 5] Failed to save generation report: {track_err}")
+            
         except Exception as e:
             logger.error(f"Documentation generation failed: {str(e)}")
             logger.error(f"Traceback: {traceback.format_exc()}")
+            
+            # Track failure in generation tracker
+            try:
+                from codewiki.src.be.generation_tracker import get_generation_tracker
+                gen_tracker = get_generation_tracker()
+                gen_tracker.track_error("root", type(e).__name__, str(e)[:500])
+                gen_tracker.complete_generation(self.config.docs_dir if hasattr(self.config, 'docs_dir') else None)
+                gen_tracker.print_report()
+            except Exception:
+                pass
+            
             raise

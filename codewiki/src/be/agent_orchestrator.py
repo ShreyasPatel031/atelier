@@ -431,6 +431,16 @@ class AgentOrchestrator:
         """Process a single module and generate its documentation."""
         module_start = time.time()
         logger.info(f"[STAGE 4: AGENT MODULE PROCESSING] Starting module: {module_name}")
+        
+        # Track module start in generation tracker
+        try:
+            from codewiki.src.be.generation_tracker import get_generation_tracker
+            from codewiki.src.be.utils import count_module_tokens
+            gen_tracker = get_generation_tracker()
+            prompt_tokens_est = count_module_tokens(core_component_ids, components)
+            gen_tracker.track_module_start(module_name, len(core_component_ids), prompt_tokens_est)
+        except Exception:
+            pass  # Non-critical
         logger.info(f"[STAGE 4] Module path: {'.'.join(module_path) if module_path else 'root'}")
         logger.info(f"[STAGE 4] Core component IDs: {len(core_component_ids)}")
         logger.info(f"[STAGE 4] Total components: {len(components)}")
@@ -754,6 +764,23 @@ class AgentOrchestrator:
             logger.info(f"[STAGE 4.6] Module tree saved in {save_duration:.3f}s")
             logger.info(f"[STAGE 4: AGENT MODULE PROCESSING] COMPLETE in {module_duration:.1f}s for module: {module_name}")
             
+            # Track module completion in generation tracker
+            try:
+                from codewiki.src.be.generation_tracker import get_generation_tracker
+                gen_tracker = get_generation_tracker()
+                md_exists = os.path.exists(os.path.join(working_dir, f"{module_name}.md"))
+                gen_tracker.track_module_complete(
+                    module_name=module_name,
+                    success=True,
+                    md_file_created=md_exists,
+                    in_module_tree=True,
+                    has_diagram=extracted_diagram is not None,
+                    has_title=extracted_title is not None,
+                    has_description=extracted_desc is not None
+                )
+            except Exception:
+                pass  # Non-critical
+            
             return deps.module_tree
             
         except Exception as e:
@@ -800,4 +827,31 @@ class AgentOrchestrator:
             logger.error(f"[STAGE 4.6] Full traceback:\n{full_tb}")
             logger.error(f"[STAGE 4: AGENT MODULE PROCESSING] FAILED in {module_duration:.1f}s for module: {module_name}")
             print(f"=== END ERROR INFO ===\n", file=sys.stderr)
+            
+            # Track module failure in generation tracker
+            try:
+                from codewiki.src.be.generation_tracker import get_generation_tracker
+                gen_tracker = get_generation_tracker()
+                
+                # Categorize the error
+                error_str = str(e).lower()
+                if "429" in str(e) or "rate limit" in error_str:
+                    error_type = "rate_limit"
+                elif "context" in error_str or "length" in error_str:
+                    error_type = "context_length_exceeded"
+                elif "timeout" in error_str:
+                    error_type = "timeout"
+                else:
+                    error_type = type(e).__name__
+                
+                gen_tracker.track_module_complete(
+                    module_name=module_name,
+                    success=False,
+                    md_file_created=False,
+                    error_type=error_type,
+                    error_message=str(e)[:200]
+                )
+            except Exception:
+                pass  # Non-critical
+            
             raise

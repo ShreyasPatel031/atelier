@@ -59,6 +59,28 @@
             flex: 1;
         }
         
+        .repo-dropdown {
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            color: #1e293b;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        
+        .repo-dropdown:hover {
+            border-color: #2563eb;
+        }
+        
+        .repo-dropdown:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
         .repo-link {
             display: inline-flex;
             align-items: center;
@@ -529,7 +551,10 @@
 <body>
     <div class="header">
         <button class="back-button" id="backButton" onclick="goBack()">← Back</button>
-        <div class="title" id="moduleTitle">📚 Loading...</div>
+        <div class="title" id="moduleTitle">Loading...</div>
+        <select class="repo-dropdown" id="repoDropdown" onchange="switchRepo(this.value)">
+            <option value="">Switch Repo...</option>
+        </select>
         <a href="#" class="repo-link" id="repoLink" target="_blank" style="display: none;">🔗 View Repository</a>
     </div>
             
@@ -1337,12 +1362,37 @@
                 }
                 
                 // Add hover tooltips if metadata exists
-                if (moduleMetadata[nodeId]) {
+                // Try full nodeId first, then try stripping prefix for expanded nodes
+                let tooltipMetadata = moduleMetadata[nodeId];
+                if (!tooltipMetadata) {
+                    // Try stripping known prefixes (from expanded subgraphs)
+                    for (const prefix of expandedNodes) {
+                        if (nodeId.startsWith(prefix + '_')) {
+                            const unprefixedId = nodeId.substring(prefix.length + 1);
+                            if (moduleMetadata[unprefixedId]) {
+                                tooltipMetadata = moduleMetadata[unprefixedId];
+                                break;
+                            }
+                        }
+                    }
+                }
+                // Also try matching by node label text
+                if (!tooltipMetadata && nodeText) {
+                    // Look for metadata by matching title
+                    for (const [key, meta] of Object.entries(moduleMetadata)) {
+                        if (meta.title === nodeText || formatModuleName(key) === nodeText) {
+                            tooltipMetadata = meta;
+                            break;
+                        }
+                    }
+                }
+                
+                if (tooltipMetadata) {
                     node.addEventListener('mouseenter', (e) => {
-                        showTooltip(e, moduleMetadata[nodeId]);
+                        showTooltip(e, tooltipMetadata);
                     });
                     node.addEventListener('mousemove', (e) => {
-                        showTooltip(e, moduleMetadata[nodeId]);
+                        showTooltip(e, tooltipMetadata);
                     });
                     node.addEventListener('mouseleave', hideTooltip);
                 }
@@ -1359,6 +1409,9 @@
             const clickHandler = (e) => {
                 e.stopPropagation();
                 e.preventDefault();
+                
+                // Hide tooltip when clicking
+                hideTooltip();
                 
                 if (capturedNodeId && capturedTargetModule && moduleData[capturedTargetModule]) {
                     const targetModuleData = moduleData[capturedTargetModule];
@@ -1827,6 +1880,41 @@
         }
         
         // ============================================================
+        // REPO SWITCHING
+        // ============================================================
+        
+        const AVAILABLE_REPOS = ['KubeElasti', 'flask', 'fastapi', 'httpx', 'rich', 'typer'];
+        
+        function populateRepoDropdown() {
+            const dropdown = document.getElementById('repoDropdown');
+            if (!dropdown) return;
+            
+            // Clear existing options
+            dropdown.innerHTML = '<option value="">Switch Repo...</option>';
+            
+            // Add repo options
+            AVAILABLE_REPOS.forEach(repo => {
+                const option = document.createElement('option');
+                option.value = repo;
+                option.textContent = repo;
+                // Mark current repo as selected
+                if (repo.toLowerCase() === repoPath.toLowerCase()) {
+                    option.selected = true;
+                }
+                dropdown.appendChild(option);
+            });
+        }
+        
+        function switchRepo(newRepo) {
+            if (!newRepo || newRepo === repoPath) return;
+            
+            // Navigate to new repo
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('repo', newRepo);
+            window.location.href = currentUrl.toString();
+        }
+        
+        // ============================================================
         // INITIALIZATION
         // ============================================================
         
@@ -1841,6 +1929,9 @@
             }
             
             buildModuleData();
+            
+            // Populate repo dropdown
+            populateRepoDropdown();
             
             // Initialize zoom/pan
             initZoomPan();

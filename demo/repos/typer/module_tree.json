@@ -1,1636 +1,1667 @@
 {
-    "typer_completion": {
-        "path": "typer/",
+  "typer_completion": {
+    "path": "typer/",
+    "components": [
+      "ZshComplete",
+      "PowerShellComplete",
+      "FishComplete",
+      "BashComplete",
+      "Shells"
+    ],
+    "children": {
+      "shell_specific_completion": {
+        "title": "Shell Specific Completion",
+        "description": "Provides classes for generating completion scripts tailored to Zsh, PowerShell, Fish, and Bash shells.",
         "components": [
-            "ZshComplete",
-            "PowerShellComplete",
-            "FishComplete",
-            "BashComplete",
-            "Shells"
+          "ZshComplete",
+          "PowerShellComplete",
+          "FishComplete",
+          "BashComplete"
         ],
         "children": {
-            "shell_specific_completion": {
-                "title": "Shell Specific Completion",
-                "description": "Provides classes for generating completion scripts tailored to Zsh, PowerShell, Fish, and Bash shells.",
-                "components": [
-                    "ZshComplete",
-                    "PowerShellComplete",
-                    "FishComplete",
-                    "BashComplete"
-                ],
-                "children": {
-                    "bash_completion": {
-                        "title": "Bash Completion",
-                        "description": "Handles command-line completion logic specific to Bash shell environments.",
-                        "components": [
-                            "BashComplete"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "bash_complete",
-                                    "label": "BashComplete",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "typer_completion",
-                                    "label": "Typer Completion Module",
-                                    "type": "external",
-                                    "link": "typer_completion.md"
-                                },
-                                {
-                                    "id": "shell_utilities",
-                                    "label": "Shell Utilities Module",
-                                    "type": "external",
-                                    "link": "shell_utilities.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "bash_complete",
-                                    "target": "typer_completion"
-                                },
-                                {
-                                    "source": "bash_complete",
-                                    "target": "shell_utilities"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    },
-                    "fish_completion": {
-                        "title": "Fish Completion",
-                        "description": "Manages command-line completion for the Fish shell, providing dynamic suggestions.",
-                        "components": [
-                            "FishComplete"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "fish_complete",
-                                    "label": "FishComplete",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "typer_completion",
-                                    "label": "typer_completion",
-                                    "type": "external",
-                                    "link": "typer_completion.md"
-                                },
-                                {
-                                    "id": "shell_specific_completion",
-                                    "label": "shell_specific_completion",
-                                    "type": "external",
-                                    "link": "shell_specific_completion.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "fish_complete",
-                                    "target": "typer_completion"
-                                },
-                                {
-                                    "source": "fish_complete",
-                                    "target": "shell_specific_completion"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    },
-                    "zsh_completion": {
-                        "title": "Zsh Completion",
-                        "description": "Provides advanced command-line completion features for the Zsh shell.",
-                        "components": [
-                            "ZshComplete"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "zsh_complete",
-                                    "label": "ZshComplete",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "shell_specific_completion",
-                                    "label": "shell_specific_completion Module",
-                                    "type": "external",
-                                    "link": "shell_specific_completion.md"
-                                },
-                                {
-                                    "id": "typer_completion",
-                                    "label": "typer_completion Module",
-                                    "type": "external",
-                                    "link": "typer_completion.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "zsh_complete",
-                                    "target": "shell_specific_completion"
-                                },
-                                {
-                                    "source": "shell_specific_completion",
-                                    "target": "typer_completion"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    },
-                    "powershell_completion": {
-                        "title": "PowerShell Completion",
-                        "description": "Implements command completion functionalities tailored for PowerShell environments.",
-                        "components": [
-                            "PowerShellComplete"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "powershell_complete",
-                                    "label": "PowerShellComplete",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "typer_completion",
-                                    "label": "typer_completion",
-                                    "type": "external",
-                                    "link": "typer_completion.md"
-                                },
-                                {
-                                    "id": "shell_utilities",
-                                    "label": "shell_utilities",
-                                    "type": "external",
-                                    "link": "shell_utilities.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "powershell_complete",
-                                    "target": "typer_completion"
-                                },
-                                {
-                                    "source": "powershell_complete",
-                                    "target": "shell_utilities"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    }
+          "bash_completion": {
+            "title": "Bash Completion",
+            "description": "Handles command-line completion logic specific to Bash shell environments.",
+            "components": [
+              "BashComplete"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "bash_complete",
+                  "label": "BashComplete",
+                  "type": "component",
+                  "link": null
                 },
-                "diagram": {
-                    "direction": "TD",
-                    "nodes": [
-                        {
-                            "id": "bash_completion",
-                            "label": "Bash Completion",
-                            "type": "module",
-                            "link": "bash_completion.md"
-                        },
-                        {
-                            "id": "fish_completion",
-                            "label": "Fish Completion",
-                            "type": "module",
-                            "link": "fish_completion.md"
-                        },
-                        {
-                            "id": "powershell_completion",
-                            "label": "PowerShell Completion",
-                            "type": "module",
-                            "link": "powershell_completion.md"
-                        },
-                        {
-                            "id": "zsh_completion",
-                            "label": "Zsh Completion",
-                            "type": "module",
-                            "link": "zsh_completion.md"
-                        }
-                    ],
-                    "edges": [
-                        {
-                            "source": "shell_specific_completion",
-                            "target": "bash_completion"
-                        },
-                        {
-                            "source": "shell_specific_completion",
-                            "target": "fish_completion"
-                        },
-                        {
-                            "source": "shell_specific_completion",
-                            "target": "powershell_completion"
-                        },
-                        {
-                            "source": "shell_specific_completion",
-                            "target": "zsh_completion"
-                        }
-                    ],
-                    "groups": []
+                {
+                  "id": "typer_completion",
+                  "label": "Typer Completion Module",
+                  "type": "external",
+                  "link": "typer_completion.md"
+                },
+                {
+                  "id": "shell_utilities",
+                  "label": "Shell Utilities Module",
+                  "type": "external",
+                  "link": "shell_utilities.md"
                 }
+              ],
+              "edges": [
+                {
+                  "source": "bash_complete",
+                  "target": "typer_completion"
+                },
+                {
+                  "source": "bash_complete",
+                  "target": "shell_utilities"
+                }
+              ],
+              "groups": []
+            }
+          },
+          "fish_completion": {
+            "title": "Fish Completion",
+            "description": "Manages command-line completion for the Fish shell, providing dynamic suggestions.",
+            "components": [
+              "FishComplete"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "fish_complete",
+                  "label": "FishComplete",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "typer_completion",
+                  "label": "typer_completion",
+                  "type": "external",
+                  "link": "typer_completion.md"
+                },
+                {
+                  "id": "shell_specific_completion",
+                  "label": "shell_specific_completion",
+                  "type": "external",
+                  "link": "shell_specific_completion.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "fish_complete",
+                  "target": "typer_completion"
+                },
+                {
+                  "source": "fish_complete",
+                  "target": "shell_specific_completion"
+                }
+              ],
+              "groups": []
+            }
+          },
+          "zsh_completion": {
+            "title": "Zsh Completion",
+            "description": "Provides advanced command-line completion features for the Zsh shell.",
+            "components": [
+              "ZshComplete"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "zsh_complete",
+                  "label": "ZshComplete",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "shell_specific_completion",
+                  "label": "shell_specific_completion Module",
+                  "type": "external",
+                  "link": "shell_specific_completion.md"
+                },
+                {
+                  "id": "typer_completion",
+                  "label": "typer_completion Module",
+                  "type": "external",
+                  "link": "typer_completion.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "zsh_complete",
+                  "target": "shell_specific_completion"
+                },
+                {
+                  "source": "shell_specific_completion",
+                  "target": "typer_completion"
+                }
+              ],
+              "groups": []
+            }
+          },
+          "powershell_completion": {
+            "title": "PowerShell Completion",
+            "description": "Implements command completion functionalities tailored for PowerShell environments.",
+            "components": [
+              "PowerShellComplete"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "powershell_complete",
+                  "label": "PowerShellComplete",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "typer_completion",
+                  "label": "typer_completion",
+                  "type": "external",
+                  "link": "typer_completion.md"
+                },
+                {
+                  "id": "shell_utilities",
+                  "label": "shell_utilities",
+                  "type": "external",
+                  "link": "shell_utilities.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "powershell_complete",
+                  "target": "typer_completion"
+                },
+                {
+                  "source": "powershell_complete",
+                  "target": "shell_utilities"
+                }
+              ],
+              "groups": []
+            }
+          }
+        },
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "bash_completion",
+              "label": "Bash Completion",
+              "type": "module",
+              "link": "bash_completion.md"
             },
-            "shell_utilities": {
-                "title": "Shell Utilities",
-                "description": "Contains utility functions and classes related to shell operations and detection.",
+            {
+              "id": "fish_completion",
+              "label": "Fish Completion",
+              "type": "module",
+              "link": "fish_completion.md"
+            },
+            {
+              "id": "powershell_completion",
+              "label": "PowerShell Completion",
+              "type": "module",
+              "link": "powershell_completion.md"
+            },
+            {
+              "id": "zsh_completion",
+              "label": "Zsh Completion",
+              "type": "module",
+              "link": "zsh_completion.md"
+            }
+          ],
+          "edges": [
+            {
+              "source": "shell_specific_completion",
+              "target": "bash_completion"
+            },
+            {
+              "source": "shell_specific_completion",
+              "target": "fish_completion"
+            },
+            {
+              "source": "shell_specific_completion",
+              "target": "powershell_completion"
+            },
+            {
+              "source": "shell_specific_completion",
+              "target": "zsh_completion"
+            }
+          ],
+          "groups": []
+        }
+      },
+      "shell_utilities": {
+        "title": "Shell Utilities",
+        "description": "Contains utility functions and classes related to shell operations and detection.",
+        "components": [
+          "Shells"
+        ],
+        "children": {},
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "shells_enum",
+              "label": "Shells Enum",
+              "type": "component",
+              "link": null
+            },
+            {
+              "id": "typer_completion",
+              "label": "typer_completion",
+              "type": "external",
+              "link": "typer_completion.md"
+            },
+            {
+              "id": "shell_specific_completion",
+              "label": "shell_specific_completion",
+              "type": "external",
+              "link": "shell_specific_completion.md"
+            }
+          ],
+          "edges": [
+            {
+              "source": "shells_enum",
+              "target": "typer_completion"
+            },
+            {
+              "source": "shells_enum",
+              "target": "shell_specific_completion"
+            }
+          ],
+          "groups": []
+        }
+      }
+    },
+    "title": "Typer Completion",
+    "description": "The `typer_completion` module is responsible for generating shell completion scripts for various shells, enhancing the user experience by providing command and argument suggestions. It integrates w...",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "shell_specific_completion",
+          "label": "Shell Specific Completion",
+          "type": "module",
+          "link": "shell_specific_completion.md"
+        },
+        {
+          "id": "shell_utilities",
+          "label": "Shell Utilities",
+          "type": "module",
+          "link": "shell_utilities.md"
+        }
+      ],
+      "edges": [
+        {
+          "source": "shell_specific_completion",
+          "target": "shell_utilities"
+        }
+      ],
+      "groups": []
+    }
+  },
+  "typer_types": {
+    "path": "typer/",
+    "components": [
+      "TyperChoice"
+    ],
+    "children": {},
+    "title": "typer_types",
+    "description": "The `typer_types` module is a fundamental part of the Typer framework, responsible for defining custom data types and structures used throughout the library. Its primary purpose is to enhance type ...",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "typer_choice",
+          "label": "TyperChoice",
+          "type": "component",
+          "link": null
+        }
+      ],
+      "edges": [],
+      "groups": []
+    }
+  },
+  "typer_cli": {
+    "path": "typer/",
+    "components": [
+      "TyperCLIGroup",
+      "State"
+    ],
+    "children": {
+      "cli_group_state": {
+        "title": "CLI Group and State Management",
+        "description": "Manages the Typer CLI group and application state, providing mechanisms for command execution and state persistence within the CLI context.",
+        "components": [
+          "TyperCLIGroup",
+          "State"
+        ],
+        "children": {
+          "cli_state_handling": {
+            "title": "CLI State Handling",
+            "description": "Handles and provides access to the state within Typer CLI applications.",
+            "components": [
+              "State"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "cli_state_handler_module",
+                  "label": "CLI State Handling Module",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "state_component",
+                  "label": "State Core Component",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "cli_group_state_mod",
+                  "label": "CLI Group State Module",
+                  "type": "external",
+                  "link": "cli_group_state.md"
+                },
+                {
+                  "id": "typer_cli_mod",
+                  "label": "Typer CLI Module",
+                  "type": "external",
+                  "link": "typer_cli.md"
+                },
+                {
+                  "id": "typer_models_mod",
+                  "label": "Typer Models Module (Context)",
+                  "type": "external",
+                  "link": "typer_models.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "cli_state_handler_module",
+                  "target": "state_component"
+                },
+                {
+                  "source": "cli_group_state_mod",
+                  "target": "cli_state_handler_module"
+                },
+                {
+                  "source": "typer_cli_mod",
+                  "target": "cli_state_handler_module"
+                },
+                {
+                  "source": "state_component",
+                  "target": "typer_models_mod"
+                }
+              ],
+              "groups": []
+            }
+          },
+          "cli_group_management": {
+            "title": "CLI Group Management",
+            "description": "Manages the core functionality and behavior of Typer CLI groups.",
+            "components": [
+              "TyperCLIGroup"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "group_manager",
+                  "label": "Group Management Logic",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "typer_cli_group",
+                  "label": "TyperCLIGroup (from typer_cli)",
+                  "type": "external",
+                  "link": "typer_cli.md"
+                },
+                {
+                  "id": "cli_group_state",
+                  "label": "CLI Group State Module",
+                  "type": "external",
+                  "link": "cli_group_state.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "group_manager",
+                  "target": "typer_cli_group"
+                },
+                {
+                  "source": "group_manager",
+                  "target": "cli_group_state"
+                }
+              ],
+              "groups": []
+            }
+          }
+        },
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "cli_group_management",
+              "label": "CLI Group Management",
+              "type": "module",
+              "link": "cli_group_management.md"
+            },
+            {
+              "id": "cli_state_handling",
+              "label": "CLI State Handling",
+              "type": "module",
+              "link": "cli_state_handling.md"
+            }
+          ],
+          "edges": [
+            {
+              "source": "cli_group_management",
+              "target": "cli_state_handling"
+            }
+          ],
+          "groups": []
+        }
+      }
+    },
+    "title": "Typer CLI",
+    "description": "The `typer_cli` module serves as a crucial component within the Typer framework, focusing on the core command-line interface (CLI) group functionality and state management. It provides the foundati...",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "cli_group_state",
+          "label": "CLI Group and State Management",
+          "type": "module",
+          "link": "cli_group_state.md"
+        },
+        {
+          "id": "typer_core",
+          "label": "Typer Core",
+          "type": "module",
+          "link": "typer_core.md"
+        },
+        {
+          "id": "typer_main",
+          "label": "Typer Main",
+          "type": "module",
+          "link": "typer_main.md"
+        },
+        {
+          "id": "typer_completion",
+          "label": "Typer Completion",
+          "type": "module",
+          "link": "typer_completion.md"
+        }
+      ],
+      "edges": [
+        {
+          "source": "cli_group_state",
+          "target": "typer_core"
+        },
+        {
+          "source": "typer_main",
+          "target": "cli_group_state"
+        },
+        {
+          "source": "cli_group_state",
+          "target": "typer_completion"
+        }
+      ],
+      "groups": []
+    }
+  },
+  "typer_core": {
+    "path": "typer/",
+    "components": [
+      "TyperArgument",
+      "TyperGroup",
+      "TyperCommand",
+      "TyperOption"
+    ],
+    "children": {
+      "command_management": {
+        "title": "Command and Group Management",
+        "description": "Handles the creation and organization of commands and command groups within a Typer application.",
+        "components": [
+          "TyperGroup",
+          "TyperCommand"
+        ],
+        "children": {
+          "command_definition": {
+            "title": "Command Definition",
+            "description": "Defines individual commands and their behavior within the Typer CLI application.",
+            "components": [
+              "typer_core.TyperCommand"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "typer_command_component",
+                  "label": "typer_core.TyperCommand (internal)",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "typer_core",
+                  "label": "typer_core Module",
+                  "type": "external",
+                  "link": "typer_core.md"
+                },
+                {
+                  "id": "parameter_definitions",
+                  "label": "parameter_definitions Module",
+                  "type": "external",
+                  "link": "parameter_definitions.md"
+                },
+                {
+                  "id": "command_management",
+                  "label": "command_management Module",
+                  "type": "external",
+                  "link": "command_management.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "typer_command_component",
+                  "target": "typer_core"
+                },
+                {
+                  "source": "typer_command_component",
+                  "target": "parameter_definitions"
+                },
+                {
+                  "source": "command_management",
+                  "target": "typer_command_component"
+                }
+              ],
+              "groups": []
+            }
+          },
+          "command_group": {
+            "title": "Command Group Management",
+            "description": "Handles the creation and management of command groups, allowing for nested command structures.",
+            "components": [
+              "typer_core.TyperGroup"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "typer_group",
+                  "label": "TyperGroup",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "typer_core",
+                  "label": "typer_core",
+                  "type": "external",
+                  "link": "typer_core.md"
+                },
+                {
+                  "id": "command_management",
+                  "label": "command_management",
+                  "type": "external",
+                  "link": "command_management.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "typer_group",
+                  "target": "typer_core"
+                },
+                {
+                  "source": "typer_group",
+                  "target": "command_management"
+                }
+              ],
+              "groups": []
+            }
+          }
+        },
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "command_management",
+              "label": "Command Management",
+              "type": "module"
+            },
+            {
+              "id": "command_group",
+              "label": "Command Group",
+              "type": "module",
+              "link": "command_group.md"
+            },
+            {
+              "id": "command_definition",
+              "label": "Command Definition",
+              "type": "module",
+              "link": "command_definition.md"
+            },
+            {
+              "id": "parameter_definitions",
+              "label": "Parameter Definitions",
+              "type": "module",
+              "link": "parameter_definitions.md"
+            }
+          ],
+          "edges": [
+            {
+              "source": "command_management",
+              "target": "command_group"
+            },
+            {
+              "source": "command_management",
+              "target": "command_definition"
+            },
+            {
+              "source": "command_group",
+              "target": "parameter_definitions"
+            },
+            {
+              "source": "command_definition",
+              "target": "parameter_definitions"
+            }
+          ],
+          "groups": []
+        }
+      },
+      "parameter_definitions": {
+        "title": "Parameter Definitions",
+        "description": "Defines the core `Argument` and `Option` classes used to specify command-line parameters.",
+        "components": [
+          "TyperArgument",
+          "TyperOption"
+        ],
+        "children": {
+          "argument_definition": {
+            "title": "Argument Definition",
+            "description": "Defines command-line arguments and their characteristics.",
+            "components": [
+              "typer_core.TyperArgument"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "argument_definition_module",
+                  "label": "Argument Definition Module",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "typer_core",
+                  "label": "Typer Core",
+                  "type": "external",
+                  "link": "typer_core.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "argument_definition_module",
+                  "target": "typer_core"
+                }
+              ],
+              "groups": []
+            }
+          },
+          "option_definition": {
+            "title": "Option Definition",
+            "description": "Defines command-line options and their characteristics.",
+            "components": [
+              "typer_core.TyperOption"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "typer_option",
+                  "label": "TyperOption Component",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "parameter_definitions",
+                  "label": "Parameter Definitions Module",
+                  "type": "external",
+                  "link": "parameter_definitions.md"
+                },
+                {
+                  "id": "typer_core",
+                  "label": "Typer Core Module",
+                  "type": "external",
+                  "link": "typer_core.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "typer_option",
+                  "target": "parameter_definitions"
+                },
+                {
+                  "source": "typer_option",
+                  "target": "typer_core"
+                }
+              ],
+              "groups": []
+            }
+          }
+        },
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "argument_definition",
+              "label": "Argument Definition",
+              "type": "module",
+              "link": "argument_definition.md"
+            },
+            {
+              "id": "option_definition",
+              "label": "Option Definition",
+              "type": "module",
+              "link": "option_definition.md"
+            }
+          ],
+          "edges": [
+            {
+              "source": "parameter_definitions",
+              "target": "argument_definition"
+            },
+            {
+              "source": "parameter_definitions",
+              "target": "option_definition"
+            }
+          ],
+          "groups": []
+        }
+      }
+    },
+    "title": "Typer Core",
+    "description": "The `typer_core` module is the foundational layer of the Typer framework, providing the essential building blocks for defining command-line applications. It encapsulates the core concepts of argume...",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "command_management",
+          "label": "Command and Group Management",
+          "type": "module",
+          "link": "command_management.md"
+        },
+        {
+          "id": "parameter_definitions",
+          "label": "Parameter Definitions",
+          "type": "module",
+          "link": "parameter_definitions.md"
+        }
+      ],
+      "edges": [
+        {
+          "source": "command_management",
+          "target": "parameter_definitions"
+        }
+      ],
+      "groups": []
+    }
+  },
+  "typer_main": {
+    "path": "typer/",
+    "components": [
+      "Typer"
+    ],
+    "children": {},
+    "title": "typer_main",
+    "description": "The `typer_main` module is the core entry point for creating powerful command-line interfaces (CLIs) using Typer. It provides the central `Typer` class, which serves as the main application object ...",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "Typer",
+          "label": "Typer (Core Class)",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "typer_completion",
+          "label": "typer_completion",
+          "type": "external",
+          "link": "typer_completion.md"
+        },
+        {
+          "id": "typer_types",
+          "label": "typer_types",
+          "type": "external",
+          "link": "typer_types.md"
+        },
+        {
+          "id": "typer_cli",
+          "label": "typer_cli",
+          "type": "external",
+          "link": "typer_cli.md"
+        },
+        {
+          "id": "typer_core",
+          "label": "typer_core",
+          "type": "external",
+          "link": "typer_core.md"
+        },
+        {
+          "id": "typer_models",
+          "label": "typer_models",
+          "type": "external",
+          "link": "typer_models.md"
+        },
+        {
+          "id": "typer_rich_utils",
+          "label": "typer_rich_utils",
+          "type": "external",
+          "link": "typer_rich_utils.md"
+        }
+      ],
+      "edges": [
+        {
+          "source": "Typer",
+          "target": "typer_completion"
+        },
+        {
+          "source": "Typer",
+          "target": "typer_types"
+        },
+        {
+          "source": "Typer",
+          "target": "typer_cli"
+        },
+        {
+          "source": "Typer",
+          "target": "typer_core"
+        },
+        {
+          "source": "Typer",
+          "target": "typer_models"
+        },
+        {
+          "source": "Typer",
+          "target": "typer_rich_utils"
+        }
+      ],
+      "groups": []
+    }
+  },
+  "typer_models": {
+    "path": "typer/",
+    "components": [
+      "FileTextWrite",
+      "CallbackParam",
+      "FileText",
+      "Context",
+      "FileBinaryRead",
+      "TyperPath",
+      "ParameterInfo",
+      "ParamMeta",
+      "CommandInfo",
+      "ArgumentInfo",
+      "DefaultPlaceholder",
+      "TyperInfo",
+      "FileBinaryWrite",
+      "OptionInfo"
+    ],
+    "children": {
+      "parameter_and_command_info": {
+        "title": "Parameter and Command Information",
+        "description": "Manages metadata and details for Typer parameters, arguments, options, and commands, including callbacks and default values.",
+        "components": [
+          "CallbackParam",
+          "Context",
+          "ParameterInfo",
+          "ParamMeta",
+          "CommandInfo",
+          "ArgumentInfo",
+          "DefaultPlaceholder",
+          "TyperInfo",
+          "OptionInfo"
+        ],
+        "children": {
+          "command_and_runtime": {
+            "title": "Command and Runtime Information",
+            "description": "Manages command-specific information, execution context, and callback parameters within the Typer application.",
+            "components": [
+              "CommandInfo",
+              "Context",
+              "CallbackParam",
+              "TyperInfo"
+            ],
+            "children": {
+              "runtime_context": {
+                "title": "Runtime Context and Callbacks",
+                "description": "Manages the execution context and callback parameters for Typer commands.",
                 "components": [
-                    "Shells"
+                  "Context",
+                  "CallbackParam"
                 ],
                 "children": {},
                 "diagram": {
-                    "direction": "TD",
-                    "nodes": [
-                        {
-                            "id": "shells_enum",
-                            "label": "Shells Enum",
-                            "type": "component",
-                            "link": null
-                        },
-                        {
-                            "id": "typer_completion",
-                            "label": "typer_completion",
-                            "type": "external",
-                            "link": "typer_completion.md"
-                        },
-                        {
-                            "id": "shell_specific_completion",
-                            "label": "shell_specific_completion",
-                            "type": "external",
-                            "link": "shell_specific_completion.md"
-                        }
-                    ],
-                    "edges": [
-                        {
-                            "source": "shells_enum",
-                            "target": "typer_completion"
-                        },
-                        {
-                            "source": "shells_enum",
-                            "target": "shell_specific_completion"
-                        }
-                    ],
-                    "groups": []
-                }
-            }
-        },
-        "title": "Typer Completion",
-        "description": "The `typer_completion` module is responsible for generating shell completion scripts for various shells, enhancing the user experience by providing command and argument suggestions. It integrates w...",
-        "diagram": {
-            "direction": "TD",
-            "nodes": [
-                {
-                    "id": "shell_specific_completion",
-                    "label": "Shell Specific Completion",
-                    "type": "module",
-                    "link": "shell_specific_completion.md"
-                },
-                {
-                    "id": "shell_utilities",
-                    "label": "Shell Utilities",
-                    "type": "module",
-                    "link": "shell_utilities.md"
-                }
-            ],
-            "edges": [
-                {
-                    "source": "shell_specific_completion",
-                    "target": "shell_utilities"
-                }
-            ],
-            "groups": []
-        }
-    },
-    "typer_types": {
-        "path": "typer/",
-        "components": [
-            "TyperChoice"
-        ],
-        "children": {},
-        "title": "typer_types",
-        "description": "The `typer_types` module is a fundamental part of the Typer framework, responsible for defining custom data types and structures used throughout the library. Its primary purpose is to enhance type ...",
-        "diagram": {
-            "direction": "TD",
-            "nodes": [
-                {
-                    "id": "typer_choice",
-                    "label": "TyperChoice",
-                    "type": "component",
-                    "link": null
-                }
-            ],
-            "edges": [],
-            "groups": []
-        }
-    },
-    "typer_cli": {
-        "path": "typer/",
-        "components": [
-            "TyperCLIGroup",
-            "State"
-        ],
-        "children": {
-            "cli_group_state": {
-                "title": "CLI Group and State Management",
-                "description": "Manages the Typer CLI group and application state, providing mechanisms for command execution and state persistence within the CLI context.",
-                "components": [
-                    "TyperCLIGroup",
-                    "State"
-                ],
-                "children": {
-                    "cli_state_handling": {
-                        "title": "CLI State Handling",
-                        "description": "Handles and provides access to the state within Typer CLI applications.",
-                        "components": [
-                            "State"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "cli_state_handler_module",
-                                    "label": "CLI State Handling Module",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "state_component",
-                                    "label": "State Core Component",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "cli_group_state_mod",
-                                    "label": "CLI Group State Module",
-                                    "type": "external",
-                                    "link": "cli_group_state.md"
-                                },
-                                {
-                                    "id": "typer_cli_mod",
-                                    "label": "Typer CLI Module",
-                                    "type": "external",
-                                    "link": "typer_cli.md"
-                                },
-                                {
-                                    "id": "typer_models_mod",
-                                    "label": "Typer Models Module (Context)",
-                                    "type": "external",
-                                    "link": "typer_models.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "cli_state_handler_module",
-                                    "target": "state_component"
-                                },
-                                {
-                                    "source": "cli_group_state_mod",
-                                    "target": "cli_state_handler_module"
-                                },
-                                {
-                                    "source": "typer_cli_mod",
-                                    "target": "cli_state_handler_module"
-                                },
-                                {
-                                    "source": "state_component",
-                                    "target": "typer_models_mod"
-                                }
-                            ],
-                            "groups": []
-                        }
+                  "direction": "TD",
+                  "nodes": [
+                    {
+                      "id": "context",
+                      "label": "Context",
+                      "type": "component",
+                      "link": null
                     },
-                    "cli_group_management": {
-                        "title": "CLI Group Management",
-                        "description": "Manages the core functionality and behavior of Typer CLI groups.",
-                        "components": [
-                            "TyperCLIGroup"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "group_manager",
-                                    "label": "Group Management Logic",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "typer_cli_group",
-                                    "label": "TyperCLIGroup (from typer_cli)",
-                                    "type": "external",
-                                    "link": "typer_cli.md"
-                                },
-                                {
-                                    "id": "cli_group_state",
-                                    "label": "CLI Group State Module",
-                                    "type": "external",
-                                    "link": "cli_group_state.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "group_manager",
-                                    "target": "typer_cli_group"
-                                },
-                                {
-                                    "source": "group_manager",
-                                    "target": "cli_group_state"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    }
-                },
-                "diagram": {
-                    "direction": "TD",
-                    "nodes": [
-                        {
-                            "id": "cli_group_management",
-                            "label": "CLI Group Management",
-                            "type": "module",
-                            "link": "cli_group_management.md"
-                        },
-                        {
-                            "id": "cli_state_handling",
-                            "label": "CLI State Handling",
-                            "type": "module",
-                            "link": "cli_state_handling.md"
-                        }
-                    ],
-                    "edges": [
-                        {
-                            "source": "cli_group_management",
-                            "target": "cli_state_handling"
-                        }
-                    ],
-                    "groups": []
-                }
-            }
-        },
-        "title": "Typer CLI",
-        "description": "The `typer_cli` module serves as a crucial component within the Typer framework, focusing on the core command-line interface (CLI) group functionality and state management. It provides the foundati...",
-        "diagram": {
-            "direction": "TD",
-            "nodes": [
-                {
-                    "id": "cli_group_state",
-                    "label": "CLI Group and State Management",
-                    "type": "module",
-                    "link": "cli_group_state.md"
-                },
-                {
-                    "id": "typer_core",
-                    "label": "Typer Core",
-                    "type": "module",
-                    "link": "typer_core.md"
-                },
-                {
-                    "id": "typer_main",
-                    "label": "Typer Main",
-                    "type": "module",
-                    "link": "typer_main.md"
-                },
-                {
-                    "id": "typer_completion",
-                    "label": "Typer Completion",
-                    "type": "module",
-                    "link": "typer_completion.md"
-                }
-            ],
-            "edges": [
-                {
-                    "source": "cli_group_state",
-                    "target": "typer_core"
-                },
-                {
-                    "source": "typer_main",
-                    "target": "cli_group_state"
-                },
-                {
-                    "source": "cli_group_state",
-                    "target": "typer_completion"
-                }
-            ],
-            "groups": []
-        }
-    },
-    "typer_core": {
-        "path": "typer/",
-        "components": [
-            "TyperArgument",
-            "TyperGroup",
-            "TyperCommand",
-            "TyperOption"
-        ],
-        "children": {
-            "command_management": {
-                "title": "Command and Group Management",
-                "description": "Handles the creation and organization of commands and command groups within a Typer application.",
-                "components": [
-                    "TyperGroup",
-                    "TyperCommand"
-                ],
-                "children": {
-                    "command_definition": {
-                        "title": "Command Definition",
-                        "description": "Defines individual commands and their behavior within the Typer CLI application.",
-                        "components": [
-                            "typer_core.TyperCommand"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "typer_command_component",
-                                    "label": "typer_core.TyperCommand (internal)",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "typer_core",
-                                    "label": "typer_core Module",
-                                    "type": "external",
-                                    "link": "typer_core.md"
-                                },
-                                {
-                                    "id": "parameter_definitions",
-                                    "label": "parameter_definitions Module",
-                                    "type": "external",
-                                    "link": "parameter_definitions.md"
-                                },
-                                {
-                                    "id": "command_management",
-                                    "label": "command_management Module",
-                                    "type": "external",
-                                    "link": "command_management.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "typer_command_component",
-                                    "target": "typer_core"
-                                },
-                                {
-                                    "source": "typer_command_component",
-                                    "target": "parameter_definitions"
-                                },
-                                {
-                                    "source": "command_management",
-                                    "target": "typer_command_component"
-                                }
-                            ],
-                            "groups": []
-                        }
+                    {
+                      "id": "callback_param",
+                      "label": "CallbackParam",
+                      "type": "component",
+                      "link": null
                     },
-                    "command_group": {
-                        "title": "Command Group Management",
-                        "description": "Handles the creation and management of command groups, allowing for nested command structures.",
-                        "components": [
-                            "typer_core.TyperGroup"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "typer_group",
-                                    "label": "TyperGroup",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "typer_core",
-                                    "label": "typer_core",
-                                    "type": "external",
-                                    "link": "typer_core.md"
-                                },
-                                {
-                                    "id": "command_management",
-                                    "label": "command_management",
-                                    "type": "external",
-                                    "link": "command_management.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "typer_group",
-                                    "target": "typer_core"
-                                },
-                                {
-                                    "source": "typer_group",
-                                    "target": "command_management"
-                                }
-                            ],
-                            "groups": []
-                        }
+                    {
+                      "id": "command_and_runtime",
+                      "label": "command_and_runtime",
+                      "type": "external",
+                      "link": "command_and_runtime.md"
+                    },
+                    {
+                      "id": "typer_models",
+                      "label": "typer_models",
+                      "type": "external",
+                      "link": "typer_models.md"
+                    },
+                    {
+                      "id": "typer_cli",
+                      "label": "typer_cli",
+                      "type": "external",
+                      "link": "typer_cli.md"
+                    },
+                    {
+                      "id": "typer_core",
+                      "label": "typer_core",
+                      "type": "external",
+                      "link": "typer_core.md"
+                    },
+                    {
+                      "id": "typer_main",
+                      "label": "typer_main",
+                      "type": "external",
+                      "link": "typer_main.md"
                     }
-                },
-                "diagram": {
-                    "direction": "TD",
-                    "nodes": [
-                        {
-                            "id": "command_management",
-                            "label": "Command Management",
-                            "type": "module"
-                        },
-                        {
-                            "id": "command_group",
-                            "label": "Command Group",
-                            "type": "module",
-                            "link": "command_group.md"
-                        },
-                        {
-                            "id": "command_definition",
-                            "label": "Command Definition",
-                            "type": "module",
-                            "link": "command_definition.md"
-                        },
-                        {
-                            "id": "parameter_definitions",
-                            "label": "Parameter Definitions",
-                            "type": "module",
-                            "link": "parameter_definitions.md"
-                        }
-                    ],
-                    "edges": [
-                        {
-                            "source": "command_management",
-                            "target": "command_group"
-                        },
-                        {
-                            "source": "command_management",
-                            "target": "command_definition"
-                        },
-                        {
-                            "source": "command_group",
-                            "target": "parameter_definitions"
-                        },
-                        {
-                            "source": "command_definition",
-                            "target": "parameter_definitions"
-                        }
-                    ],
-                    "groups": []
+                  ],
+                  "edges": [
+                    {
+                      "source": "context",
+                      "target": "command_and_runtime"
+                    },
+                    {
+                      "source": "callback_param",
+                      "target": "command_and_runtime"
+                    },
+                    {
+                      "source": "context",
+                      "target": "typer_cli"
+                    },
+                    {
+                      "source": "context",
+                      "target": "typer_core"
+                    },
+                    {
+                      "source": "context",
+                      "target": "typer_main"
+                    },
+                    {
+                      "source": "context",
+                      "target": "typer_models"
+                    },
+                    {
+                      "source": "callback_param",
+                      "target": "typer_models"
+                    }
+                  ],
+                  "groups": []
                 }
+              },
+              "command_information": {
+                "title": "Command Information",
+                "description": "Defines structures for command metadata and Typer application details.",
+                "components": [
+                  "CommandInfo",
+                  "TyperInfo"
+                ],
+                "children": {},
+                "diagram": {
+                  "direction": "TD",
+                  "nodes": [
+                    {
+                      "id": "command_information",
+                      "label": "Command Information",
+                      "type": "module"
+                    },
+                    {
+                      "id": "c0",
+                      "label": "CommandInfo",
+                      "type": "component"
+                    },
+                    {
+                      "id": "c1",
+                      "label": "TyperInfo",
+                      "type": "component"
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "source": "command_information",
+                      "target": "c0"
+                    },
+                    {
+                      "source": "command_information",
+                      "target": "c1"
+                    }
+                  ],
+                  "groups": []
+                }
+              }
             },
-            "parameter_definitions": {
-                "title": "Parameter Definitions",
-                "description": "Defines the core `Argument` and `Option` classes used to specify command-line parameters.",
-                "components": [
-                    "TyperArgument",
-                    "TyperOption"
-                ],
-                "children": {
-                    "argument_definition": {
-                        "title": "Argument Definition",
-                        "description": "Defines command-line arguments and their characteristics.",
-                        "components": [
-                            "typer_core.TyperArgument"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "argument_definition_module",
-                                    "label": "Argument Definition Module",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "typer_core",
-                                    "label": "Typer Core",
-                                    "type": "external",
-                                    "link": "typer_core.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "argument_definition_module",
-                                    "target": "typer_core"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    },
-                    "option_definition": {
-                        "title": "Option Definition",
-                        "description": "Defines command-line options and their characteristics.",
-                        "components": [
-                            "typer_core.TyperOption"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "typer_option",
-                                    "label": "TyperOption Component",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "parameter_definitions",
-                                    "label": "Parameter Definitions Module",
-                                    "type": "external",
-                                    "link": "parameter_definitions.md"
-                                },
-                                {
-                                    "id": "typer_core",
-                                    "label": "Typer Core Module",
-                                    "type": "external",
-                                    "link": "typer_core.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "typer_option",
-                                    "target": "parameter_definitions"
-                                },
-                                {
-                                    "source": "typer_option",
-                                    "target": "typer_core"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    }
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "command_information",
+                  "label": "Command Information",
+                  "type": "module",
+                  "link": "command_information.md"
                 },
-                "diagram": {
-                    "direction": "TD",
-                    "nodes": [
-                        {
-                            "id": "argument_definition",
-                            "label": "Argument Definition",
-                            "type": "module",
-                            "link": "argument_definition.md"
-                        },
-                        {
-                            "id": "option_definition",
-                            "label": "Option Definition",
-                            "type": "module",
-                            "link": "option_definition.md"
-                        }
-                    ],
-                    "edges": [
-                        {
-                            "source": "parameter_definitions",
-                            "target": "argument_definition"
-                        },
-                        {
-                            "source": "parameter_definitions",
-                            "target": "option_definition"
-                        }
-                    ],
-                    "groups": []
+                {
+                  "id": "runtime_context",
+                  "label": "Runtime Context and Callbacks",
+                  "type": "module",
+                  "link": "runtime_context.md"
                 }
+              ],
+              "edges": [
+                {
+                  "source": "command_information",
+                  "target": "runtime_context"
+                }
+              ],
+              "groups": []
             }
-        },
-        "title": "Typer Core",
-        "description": "The `typer_core` module is the foundational layer of the Typer framework, providing the essential building blocks for defining command-line applications. It encapsulates the core concepts of argume...",
-        "diagram": {
-            "direction": "TD",
-            "nodes": [
-                {
-                    "id": "command_management",
-                    "label": "Command and Group Management",
-                    "type": "module",
-                    "link": "command_management.md"
-                },
-                {
-                    "id": "parameter_definitions",
-                    "label": "Parameter Definitions",
-                    "type": "module",
-                    "link": "parameter_definitions.md"
-                }
+          },
+          "parameter_details": {
+            "title": "Parameter Details",
+            "description": "Defines the core structures for command parameters, arguments, and options, including metadata and default values.",
+            "components": [
+              "ParameterInfo",
+              "ParamMeta",
+              "ArgumentInfo",
+              "OptionInfo",
+              "DefaultPlaceholder"
             ],
-            "edges": [
-                {
-                    "source": "command_management",
-                    "target": "parameter_definitions"
-                }
-            ],
-            "groups": []
-        }
-    },
-    "typer_main": {
-        "path": "typer/",
-        "components": [
-            "Typer"
-        ],
-        "children": {},
-        "title": "typer_main",
-        "description": "The `typer_main` module is the core entry point for creating powerful command-line interfaces (CLIs) using Typer. It provides the central `Typer` class, which serves as the main application object ...",
-        "diagram": {
-            "direction": "TD",
-            "nodes": [
-                {
-                    "id": "Typer",
-                    "label": "Typer (Core Class)",
-                    "type": "component",
-                    "link": null
-                },
-                {
-                    "id": "typer_completion",
-                    "label": "typer_completion",
-                    "type": "external",
-                    "link": "typer_completion.md"
-                },
-                {
-                    "id": "typer_types",
-                    "label": "typer_types",
-                    "type": "external",
-                    "link": "typer_types.md"
-                },
-                {
-                    "id": "typer_cli",
-                    "label": "typer_cli",
-                    "type": "external",
-                    "link": "typer_cli.md"
-                },
-                {
-                    "id": "typer_core",
-                    "label": "typer_core",
-                    "type": "external",
-                    "link": "typer_core.md"
-                },
-                {
-                    "id": "typer_models",
-                    "label": "typer_models",
-                    "type": "external",
-                    "link": "typer_models.md"
-                },
-                {
-                    "id": "typer_rich_utils",
-                    "label": "typer_rich_utils",
-                    "type": "external",
-                    "link": "typer_rich_utils.md"
-                }
-            ],
-            "edges": [
-                {
-                    "source": "Typer",
-                    "target": "typer_completion"
-                },
-                {
-                    "source": "Typer",
-                    "target": "typer_types"
-                },
-                {
-                    "source": "Typer",
-                    "target": "typer_cli"
-                },
-                {
-                    "source": "Typer",
-                    "target": "typer_core"
-                },
-                {
-                    "source": "Typer",
-                    "target": "typer_models"
-                },
-                {
-                    "source": "Typer",
-                    "target": "typer_rich_utils"
-                }
-            ],
-            "groups": []
-        }
-    },
-    "typer_models": {
-        "path": "typer/",
-        "components": [
-            "FileTextWrite",
-            "CallbackParam",
-            "FileText",
-            "Context",
-            "FileBinaryRead",
-            "TyperPath",
-            "ParameterInfo",
-            "ParamMeta",
-            "CommandInfo",
-            "ArgumentInfo",
-            "DefaultPlaceholder",
-            "TyperInfo",
-            "FileBinaryWrite",
-            "OptionInfo"
-        ],
-        "children": {
-            "parameter_and_command_info": {
-                "title": "Parameter and Command Information",
-                "description": "Manages metadata and details for Typer parameters, arguments, options, and commands, including callbacks and default values.",
+            "children": {
+              "argument_option_details": {
+                "title": "Argument and Option Details",
+                "description": "Specifies details for command-line arguments, options, and default value handling.",
                 "components": [
-                    "CallbackParam",
-                    "Context",
-                    "ParameterInfo",
-                    "ParamMeta",
-                    "CommandInfo",
-                    "ArgumentInfo",
-                    "DefaultPlaceholder",
-                    "TyperInfo",
-                    "OptionInfo"
+                  "ArgumentInfo",
+                  "OptionInfo",
+                  "DefaultPlaceholder"
                 ],
-                "children": {
-                    "command_and_runtime": {
-                        "title": "Command and Runtime Information",
-                        "description": "Manages command-specific information, execution context, and callback parameters within the Typer application.",
-                        "components": [
-                            "CommandInfo",
-                            "Context",
-                            "CallbackParam",
-                            "TyperInfo"
-                        ],
-                        "children": {
-                            "runtime_context": {
-                                "title": "Runtime Context and Callbacks",
-                                "description": "Manages the execution context and callback parameters for Typer commands.",
-                                "components": [
-                                    "Context",
-                                    "CallbackParam"
-                                ],
-                                "children": {},
-                                "diagram": {
-                                    "direction": "TD",
-                                    "nodes": [
-                                        {
-                                            "id": "context",
-                                            "label": "Context",
-                                            "type": "component",
-                                            "link": null
-                                        },
-                                        {
-                                            "id": "callback_param",
-                                            "label": "CallbackParam",
-                                            "type": "component",
-                                            "link": null
-                                        },
-                                        {
-                                            "id": "command_and_runtime",
-                                            "label": "command_and_runtime",
-                                            "type": "external",
-                                            "link": "command_and_runtime.md"
-                                        },
-                                        {
-                                            "id": "typer_models",
-                                            "label": "typer_models",
-                                            "type": "external",
-                                            "link": "typer_models.md"
-                                        },
-                                        {
-                                            "id": "typer_cli",
-                                            "label": "typer_cli",
-                                            "type": "external",
-                                            "link": "typer_cli.md"
-                                        },
-                                        {
-                                            "id": "typer_core",
-                                            "label": "typer_core",
-                                            "type": "external",
-                                            "link": "typer_core.md"
-                                        },
-                                        {
-                                            "id": "typer_main",
-                                            "label": "typer_main",
-                                            "type": "external",
-                                            "link": "typer_main.md"
-                                        }
-                                    ],
-                                    "edges": [
-                                        {
-                                            "source": "context",
-                                            "target": "command_and_runtime"
-                                        },
-                                        {
-                                            "source": "callback_param",
-                                            "target": "command_and_runtime"
-                                        },
-                                        {
-                                            "source": "context",
-                                            "target": "typer_cli"
-                                        },
-                                        {
-                                            "source": "context",
-                                            "target": "typer_core"
-                                        },
-                                        {
-                                            "source": "context",
-                                            "target": "typer_main"
-                                        },
-                                        {
-                                            "source": "context",
-                                            "target": "typer_models"
-                                        },
-                                        {
-                                            "source": "callback_param",
-                                            "target": "typer_models"
-                                        }
-                                    ],
-                                    "groups": []
-                                }
-                            },
-                            "command_information": {
-                                "title": "Command Information",
-                                "description": "Defines structures for command metadata and Typer application details.",
-                                "components": [
-                                    "CommandInfo",
-                                    "TyperInfo"
-                                ],
-                                "children": {}
-                            }
-                        },
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "command_information",
-                                    "label": "Command Information",
-                                    "type": "module",
-                                    "link": "command_information.md"
-                                },
-                                {
-                                    "id": "runtime_context",
-                                    "label": "Runtime Context and Callbacks",
-                                    "type": "module",
-                                    "link": "runtime_context.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "command_information",
-                                    "target": "runtime_context"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    },
-                    "parameter_details": {
-                        "title": "Parameter Details",
-                        "description": "Defines the core structures for command parameters, arguments, and options, including metadata and default values.",
-                        "components": [
-                            "ParameterInfo",
-                            "ParamMeta",
-                            "ArgumentInfo",
-                            "OptionInfo",
-                            "DefaultPlaceholder"
-                        ],
-                        "children": {
-                            "argument_option_details": {
-                                "title": "Argument and Option Details",
-                                "description": "Specifies details for command-line arguments, options, and default value handling.",
-                                "components": [
-                                    "ArgumentInfo",
-                                    "OptionInfo",
-                                    "DefaultPlaceholder"
-                                ],
-                                "children": {},
-                                "diagram": {
-                                    "direction": "TD",
-                                    "nodes": [
-                                        {
-                                            "id": "argument_info",
-                                            "label": "ArgumentInfo",
-                                            "type": "component",
-                                            "link": null
-                                        },
-                                        {
-                                            "id": "option_info",
-                                            "label": "OptionInfo",
-                                            "type": "component",
-                                            "link": null
-                                        },
-                                        {
-                                            "id": "default_placeholder",
-                                            "label": "DefaultPlaceholder",
-                                            "type": "component",
-                                            "link": null
-                                        },
-                                        {
-                                            "id": "parameter_metadata",
-                                            "label": "parameter_metadata",
-                                            "type": "external",
-                                            "link": "parameter_metadata.md"
-                                        },
-                                        {
-                                            "id": "typer_core",
-                                            "label": "typer_core",
-                                            "type": "external",
-                                            "link": "typer_core.md"
-                                        }
-                                    ],
-                                    "edges": [
-                                        {
-                                            "source": "argument_info",
-                                            "target": "default_placeholder"
-                                        },
-                                        {
-                                            "source": "option_info",
-                                            "target": "default_placeholder"
-                                        },
-                                        {
-                                            "source": "argument_info",
-                                            "target": "parameter_metadata"
-                                        },
-                                        {
-                                            "source": "option_info",
-                                            "target": "parameter_metadata"
-                                        },
-                                        {
-                                            "source": "typer_core",
-                                            "target": "argument_info"
-                                        },
-                                        {
-                                            "source": "typer_core",
-                                            "target": "option_info"
-                                        }
-                                    ],
-                                    "groups": []
-                                }
-                            },
-                            "parameter_metadata": {
-                                "title": "Parameter Metadata",
-                                "description": "Defines base information and metadata for command parameters.",
-                                "components": [
-                                    "ParameterInfo",
-                                    "ParamMeta"
-                                ],
-                                "children": {},
-                                "diagram": {
-                                    "direction": "TD",
-                                    "nodes": [
-                                        {
-                                            "id": "parameter_info",
-                                            "label": "ParameterInfo",
-                                            "type": "component",
-                                            "link": null
-                                        },
-                                        {
-                                            "id": "param_meta",
-                                            "label": "ParamMeta",
-                                            "type": "component",
-                                            "link": null
-                                        },
-                                        {
-                                            "id": "parameter_details",
-                                            "label": "parameter_details",
-                                            "type": "external",
-                                            "link": "parameter_details.md"
-                                        },
-                                        {
-                                            "id": "typer_models",
-                                            "label": "typer_models",
-                                            "type": "external",
-                                            "link": "typer_models.md"
-                                        }
-                                    ],
-                                    "edges": [
-                                        {
-                                            "source": "parameter_info",
-                                            "target": "param_meta"
-                                        },
-                                        {
-                                            "source": "parameter_details",
-                                            "target": "parameter_info"
-                                        },
-                                        {
-                                            "source": "parameter_details",
-                                            "target": "param_meta"
-                                        },
-                                        {
-                                            "source": "typer_models",
-                                            "target": "parameter_info"
-                                        },
-                                        {
-                                            "source": "typer_models",
-                                            "target": "param_meta"
-                                        }
-                                    ],
-                                    "groups": []
-                                }
-                            }
-                        },
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "parameter_metadata",
-                                    "label": "Parameter Metadata",
-                                    "type": "module",
-                                    "link": "parameter_metadata.md"
-                                },
-                                {
-                                    "id": "argument_option_details",
-                                    "label": "Argument and Option Details",
-                                    "type": "module",
-                                    "link": "argument_option_details.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "parameter_metadata",
-                                    "target": "argument_option_details"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    }
-                },
+                "children": {},
                 "diagram": {
-                    "direction": "TD",
-                    "nodes": [
-                        {
-                            "id": "command_and_runtime",
-                            "label": "Command and Runtime Information",
-                            "type": "module",
-                            "link": "command_and_runtime.md"
-                        },
-                        {
-                            "id": "parameter_details",
-                            "label": "Parameter Details",
-                            "type": "module",
-                            "link": "parameter_details.md"
-                        }
-                    ],
-                    "edges": [
-                        {
-                            "source": "command_and_runtime",
-                            "target": "parameter_details"
-                        }
-                    ],
-                    "groups": []
+                  "direction": "TD",
+                  "nodes": [
+                    {
+                      "id": "argument_info",
+                      "label": "ArgumentInfo",
+                      "type": "component",
+                      "link": null
+                    },
+                    {
+                      "id": "option_info",
+                      "label": "OptionInfo",
+                      "type": "component",
+                      "link": null
+                    },
+                    {
+                      "id": "default_placeholder",
+                      "label": "DefaultPlaceholder",
+                      "type": "component",
+                      "link": null
+                    },
+                    {
+                      "id": "parameter_metadata",
+                      "label": "parameter_metadata",
+                      "type": "external",
+                      "link": "parameter_metadata.md"
+                    },
+                    {
+                      "id": "typer_core",
+                      "label": "typer_core",
+                      "type": "external",
+                      "link": "typer_core.md"
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "source": "argument_info",
+                      "target": "default_placeholder"
+                    },
+                    {
+                      "source": "option_info",
+                      "target": "default_placeholder"
+                    },
+                    {
+                      "source": "argument_info",
+                      "target": "parameter_metadata"
+                    },
+                    {
+                      "source": "option_info",
+                      "target": "parameter_metadata"
+                    },
+                    {
+                      "source": "typer_core",
+                      "target": "argument_info"
+                    },
+                    {
+                      "source": "typer_core",
+                      "target": "option_info"
+                    }
+                  ],
+                  "groups": []
                 }
+              },
+              "parameter_metadata": {
+                "title": "Parameter Metadata",
+                "description": "Defines base information and metadata for command parameters.",
+                "components": [
+                  "ParameterInfo",
+                  "ParamMeta"
+                ],
+                "children": {},
+                "diagram": {
+                  "direction": "TD",
+                  "nodes": [
+                    {
+                      "id": "parameter_info",
+                      "label": "ParameterInfo",
+                      "type": "component",
+                      "link": null
+                    },
+                    {
+                      "id": "param_meta",
+                      "label": "ParamMeta",
+                      "type": "component",
+                      "link": null
+                    },
+                    {
+                      "id": "parameter_details",
+                      "label": "parameter_details",
+                      "type": "external",
+                      "link": "parameter_details.md"
+                    },
+                    {
+                      "id": "typer_models",
+                      "label": "typer_models",
+                      "type": "external",
+                      "link": "typer_models.md"
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "source": "parameter_info",
+                      "target": "param_meta"
+                    },
+                    {
+                      "source": "parameter_details",
+                      "target": "parameter_info"
+                    },
+                    {
+                      "source": "parameter_details",
+                      "target": "param_meta"
+                    },
+                    {
+                      "source": "typer_models",
+                      "target": "parameter_info"
+                    },
+                    {
+                      "source": "typer_models",
+                      "target": "param_meta"
+                    }
+                  ],
+                  "groups": []
+                }
+              }
             },
-            "file_types": {
-                "title": "File and Path Types",
-                "description": "Defines custom types for handling file paths and binary/text file operations within Typer applications.",
-                "components": [
-                    "FileTextWrite",
-                    "FileText",
-                    "FileBinaryRead",
-                    "TyperPath",
-                    "FileBinaryWrite"
-                ],
-                "children": {
-                    "path_management": {
-                        "title": "Typer Path Management",
-                        "description": "Provides a specialized path type for Typer, enhancing file path handling and validation.",
-                        "components": [
-                            "TyperPath"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "typer_path",
-                                    "label": "TyperPath",
-                                    "type": "component",
-                                    "link": null
-                                },
-                                {
-                                    "id": "file_types",
-                                    "label": "File Types Module",
-                                    "type": "external",
-                                    "link": "file_types.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "typer_path",
-                                    "target": "file_types"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    },
-                    "binary_file_handling": {
-                        "title": "Binary File Handling",
-                        "description": "Handles reading and writing binary data to files, providing tools for non-textual file operations.",
-                        "components": [
-                            "FileBinaryRead",
-                            "FileBinaryWrite"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "typer_models",
-                                    "label": "Typer Models",
-                                    "type": "module",
-                                    "link": "typer_models.md"
-                                },
-                                {
-                                    "id": "file_types",
-                                    "label": "File Types",
-                                    "type": "module",
-                                    "link": "file_types.md"
-                                },
-                                {
-                                    "id": "binary_file_handling",
-                                    "label": "Binary File Handling",
-                                    "type": "module",
-                                    "link": "binary_file_handling.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "typer_models",
-                                    "target": "file_types"
-                                },
-                                {
-                                    "source": "file_types",
-                                    "target": "binary_file_handling"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    },
-                    "text_file_handling": {
-                        "title": "Text File Handling",
-                        "description": "Manages operations related to reading and writing text files within Typer applications.",
-                        "components": [
-                            "FileTextWrite",
-                            "FileText"
-                        ],
-                        "children": {},
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "typer_models",
-                                    "label": "Typer Models",
-                                    "type": "module",
-                                    "link": "typer_models.md"
-                                },
-                                {
-                                    "id": "file_types",
-                                    "label": "File Types",
-                                    "type": "module",
-                                    "link": "file_types.md"
-                                },
-                                {
-                                    "id": "text_file_handling",
-                                    "label": "Text File Handling",
-                                    "type": "module",
-                                    "link": "text_file_handling.md"
-                                },
-                                {
-                                    "id": "path_management",
-                                    "label": "Path Management",
-                                    "type": "module",
-                                    "link": "path_management.md"
-                                },
-                                {
-                                    "id": "binary_file_handling",
-                                    "label": "Binary File Handling",
-                                    "type": "module",
-                                    "link": "binary_file_handling.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "typer_models",
-                                    "target": "file_types"
-                                },
-                                {
-                                    "source": "file_types",
-                                    "target": "text_file_handling"
-                                },
-                                {
-                                    "source": "file_types",
-                                    "target": "path_management"
-                                },
-                                {
-                                    "source": "file_types",
-                                    "target": "binary_file_handling"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    }
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "parameter_metadata",
+                  "label": "Parameter Metadata",
+                  "type": "module",
+                  "link": "parameter_metadata.md"
                 },
-                "diagram": {
-                    "direction": "TD",
-                    "nodes": [
-                        {
-                            "id": "text_file_handling",
-                            "label": "Text File Handling",
-                            "type": "module",
-                            "link": "text_file_handling.md"
-                        },
-                        {
-                            "id": "binary_file_handling",
-                            "label": "Binary File Handling",
-                            "type": "module",
-                            "link": "binary_file_handling.md"
-                        },
-                        {
-                            "id": "path_management",
-                            "label": "Typer Path Management",
-                            "type": "module",
-                            "link": "path_management.md"
-                        }
-                    ],
-                    "edges": [],
-                    "groups": []
+                {
+                  "id": "argument_option_details",
+                  "label": "Argument and Option Details",
+                  "type": "module",
+                  "link": "argument_option_details.md"
                 }
+              ],
+              "edges": [
+                {
+                  "source": "parameter_metadata",
+                  "target": "argument_option_details"
+                }
+              ],
+              "groups": []
             }
+          }
         },
-        "title": "Typer Models",
-        "description": "The `typer_models` module is a foundational component of the Typer framework, providing the core data structures and information models that define how command-line interfaces are constructed. It e...",
         "diagram": {
-            "direction": "TD",
-            "nodes": [
-                {
-                    "id": "file_types",
-                    "label": "File and Path Types",
-                    "type": "module",
-                    "link": "file_types.md"
-                },
-                {
-                    "id": "parameter_and_command_info",
-                    "label": "Parameter and Command Information",
-                    "type": "module",
-                    "link": "parameter_and_command_info.md"
-                }
-            ],
-            "edges": [
-                {
-                    "source": "typer_models",
-                    "target": "file_types"
-                },
-                {
-                    "source": "typer_models",
-                    "target": "parameter_and_command_info"
-                }
-            ],
-            "groups": []
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "command_and_runtime",
+              "label": "Command and Runtime Information",
+              "type": "module",
+              "link": "command_and_runtime.md"
+            },
+            {
+              "id": "parameter_details",
+              "label": "Parameter Details",
+              "type": "module",
+              "link": "parameter_details.md"
+            }
+          ],
+          "edges": [
+            {
+              "source": "command_and_runtime",
+              "target": "parameter_details"
+            }
+          ],
+          "groups": []
         }
-    },
-    "typer_rich_utils": {
-        "path": "typer/",
+      },
+      "file_types": {
+        "title": "File and Path Types",
+        "description": "Defines custom types for handling file paths and binary/text file operations within Typer applications.",
         "components": [
-            "MetavarHighlighter",
-            "OptionHighlighter",
-            "NegativeOptionHighlighter"
+          "FileTextWrite",
+          "FileText",
+          "FileBinaryRead",
+          "TyperPath",
+          "FileBinaryWrite"
         ],
         "children": {
-            "highlighters": {
-                "title": "Rich Highlighters",
-                "description": "Provides specialized highlighters for Typer CLI output, enhancing readability using the rich library.",
-                "components": [
-                    "MetavarHighlighter",
-                    "OptionHighlighter",
-                    "NegativeOptionHighlighter"
-                ],
-                "children": {
-                    "cli_highlighters": {
-                        "title": "CLI Highlighting Utilities",
-                        "description": "Provides classes for highlighting various elements within the command-line interface, such as metavars and options.",
-                        "components": [
-                            "MetavarHighlighter",
-                            "OptionHighlighter",
-                            "NegativeOptionHighlighter"
-                        ],
-                        "children": {
-                            "highlighter_components": {
-                                "title": "Highlighting Components",
-                                "description": "Contains core components for syntax highlighting of CLI elements such as metavars and options.",
-                                "components": [
-                                    "MetavarHighlighter",
-                                    "OptionHighlighter",
-                                    "NegativeOptionHighlighter"
-                                ],
-                                "children": {},
-                                "diagram": {
-                                    "direction": "TD",
-                                    "nodes": [
-                                        {
-                                            "id": "metavar_highlighter",
-                                            "label": "MetavarHighlighter",
-                                            "type": "component",
-                                            "link": null
-                                        },
-                                        {
-                                            "id": "option_highlighter",
-                                            "label": "OptionHighlighter",
-                                            "type": "component",
-                                            "link": null
-                                        },
-                                        {
-                                            "id": "negative_option_highlighter",
-                                            "label": "NegativeOptionHighlighter",
-                                            "type": "component",
-                                            "link": null
-                                        },
-                                        {
-                                            "id": "typer_rich_utils",
-                                            "label": "typer_rich_utils",
-                                            "type": "external",
-                                            "link": "typer_rich_utils.md"
-                                        }
-                                    ],
-                                    "edges": [
-                                        {
-                                            "source": "metavar_highlighter",
-                                            "target": "typer_rich_utils"
-                                        },
-                                        {
-                                            "source": "option_highlighter",
-                                            "target": "typer_rich_utils"
-                                        },
-                                        {
-                                            "source": "negative_option_highlighter",
-                                            "target": "typer_rich_utils"
-                                        }
-                                    ],
-                                    "groups": []
-                                }
-                            }
-                        },
-                        "diagram": {
-                            "direction": "TD",
-                            "nodes": [
-                                {
-                                    "id": "typer_rich_utils",
-                                    "label": "typer_rich_utils",
-                                    "type": "external",
-                                    "link": "typer_rich_utils.md"
-                                },
-                                {
-                                    "id": "highlighters",
-                                    "label": "highlighters",
-                                    "type": "external",
-                                    "link": "highlighters.md"
-                                },
-                                {
-                                    "id": "cli_highlighters",
-                                    "label": "cli_highlighters",
-                                    "type": "module",
-                                    "link": "cli_highlighters.md"
-                                },
-                                {
-                                    "id": "highlighter_components",
-                                    "label": "Highlighting Components",
-                                    "type": "module",
-                                    "link": "highlighter_components.md"
-                                }
-                            ],
-                            "edges": [
-                                {
-                                    "source": "typer_rich_utils",
-                                    "target": "highlighters"
-                                },
-                                {
-                                    "source": "highlighters",
-                                    "target": "cli_highlighters"
-                                },
-                                {
-                                    "source": "cli_highlighters",
-                                    "target": "highlighter_components"
-                                }
-                            ],
-                            "groups": []
-                        }
-                    }
-                },
-                "diagram": {
-                    "direction": "TD",
-                    "nodes": [
-                        {
-                            "id": "cli_highlighters",
-                            "label": "CLI Highlighting Utilities",
-                            "type": "module",
-                            "link": "cli_highlighters.md"
-                        }
-                    ],
-                    "edges": [],
-                    "groups": []
-                }
-            }
-        },
-        "title": "Typer Rich Utils",
-        "description": "The `typer_rich_utils` module provides utility classes for integrating [rich](https://rich.readthedocs.io/en/stable/) capabilities, specifically for enhancing the display of command-line interface ...",
-        "diagram": {
-            "direction": "TD",
-            "nodes": [
-                {
-                    "id": "highlighters",
-                    "label": "Rich Highlighters",
-                    "type": "module",
-                    "link": "highlighters.md"
-                }
+          "path_management": {
+            "title": "Typer Path Management",
+            "description": "Provides a specialized path type for Typer, enhancing file path handling and validation.",
+            "components": [
+              "TyperPath"
             ],
-            "edges": [],
-            "groups": []
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "typer_path",
+                  "label": "TyperPath",
+                  "type": "component",
+                  "link": null
+                },
+                {
+                  "id": "file_types",
+                  "label": "File Types Module",
+                  "type": "external",
+                  "link": "file_types.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "typer_path",
+                  "target": "file_types"
+                }
+              ],
+              "groups": []
+            }
+          },
+          "binary_file_handling": {
+            "title": "Binary File Handling",
+            "description": "Handles reading and writing binary data to files, providing tools for non-textual file operations.",
+            "components": [
+              "FileBinaryRead",
+              "FileBinaryWrite"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "typer_models",
+                  "label": "Typer Models",
+                  "type": "module",
+                  "link": "typer_models.md"
+                },
+                {
+                  "id": "file_types",
+                  "label": "File Types",
+                  "type": "module",
+                  "link": "file_types.md"
+                },
+                {
+                  "id": "binary_file_handling",
+                  "label": "Binary File Handling",
+                  "type": "module",
+                  "link": "binary_file_handling.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "typer_models",
+                  "target": "file_types"
+                },
+                {
+                  "source": "file_types",
+                  "target": "binary_file_handling"
+                }
+              ],
+              "groups": []
+            }
+          },
+          "text_file_handling": {
+            "title": "Text File Handling",
+            "description": "Manages operations related to reading and writing text files within Typer applications.",
+            "components": [
+              "FileTextWrite",
+              "FileText"
+            ],
+            "children": {},
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "typer_models",
+                  "label": "Typer Models",
+                  "type": "module",
+                  "link": "typer_models.md"
+                },
+                {
+                  "id": "file_types",
+                  "label": "File Types",
+                  "type": "module",
+                  "link": "file_types.md"
+                },
+                {
+                  "id": "text_file_handling",
+                  "label": "Text File Handling",
+                  "type": "module",
+                  "link": "text_file_handling.md"
+                },
+                {
+                  "id": "path_management",
+                  "label": "Path Management",
+                  "type": "module",
+                  "link": "path_management.md"
+                },
+                {
+                  "id": "binary_file_handling",
+                  "label": "Binary File Handling",
+                  "type": "module",
+                  "link": "binary_file_handling.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "typer_models",
+                  "target": "file_types"
+                },
+                {
+                  "source": "file_types",
+                  "target": "text_file_handling"
+                },
+                {
+                  "source": "file_types",
+                  "target": "path_management"
+                },
+                {
+                  "source": "file_types",
+                  "target": "binary_file_handling"
+                }
+              ],
+              "groups": []
+            }
+          }
+        },
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "text_file_handling",
+              "label": "Text File Handling",
+              "type": "module",
+              "link": "text_file_handling.md"
+            },
+            {
+              "id": "binary_file_handling",
+              "label": "Binary File Handling",
+              "type": "module",
+              "link": "binary_file_handling.md"
+            },
+            {
+              "id": "path_management",
+              "label": "Typer Path Management",
+              "type": "module",
+              "link": "path_management.md"
+            }
+          ],
+          "edges": [],
+          "groups": []
         }
+      }
+    },
+    "title": "Typer Models",
+    "description": "The `typer_models` module is a foundational component of the Typer framework, providing the core data structures and information models that define how command-line interfaces are constructed. It e...",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "file_types",
+          "label": "File and Path Types",
+          "type": "module",
+          "link": "file_types.md"
+        },
+        {
+          "id": "parameter_and_command_info",
+          "label": "Parameter and Command Information",
+          "type": "module",
+          "link": "parameter_and_command_info.md"
+        }
+      ],
+      "edges": [
+        {
+          "source": "typer_models",
+          "target": "file_types"
+        },
+        {
+          "source": "typer_models",
+          "target": "parameter_and_command_info"
+        }
+      ],
+      "groups": []
     }
+  },
+  "typer_rich_utils": {
+    "path": "typer/",
+    "components": [
+      "MetavarHighlighter",
+      "OptionHighlighter",
+      "NegativeOptionHighlighter"
+    ],
+    "children": {
+      "highlighters": {
+        "title": "Rich Highlighters",
+        "description": "Provides specialized highlighters for Typer CLI output, enhancing readability using the rich library.",
+        "components": [
+          "MetavarHighlighter",
+          "OptionHighlighter",
+          "NegativeOptionHighlighter"
+        ],
+        "children": {
+          "cli_highlighters": {
+            "title": "CLI Highlighting Utilities",
+            "description": "Provides classes for highlighting various elements within the command-line interface, such as metavars and options.",
+            "components": [
+              "MetavarHighlighter",
+              "OptionHighlighter",
+              "NegativeOptionHighlighter"
+            ],
+            "children": {
+              "highlighter_components": {
+                "title": "Highlighting Components",
+                "description": "Contains core components for syntax highlighting of CLI elements such as metavars and options.",
+                "components": [
+                  "MetavarHighlighter",
+                  "OptionHighlighter",
+                  "NegativeOptionHighlighter"
+                ],
+                "children": {},
+                "diagram": {
+                  "direction": "TD",
+                  "nodes": [
+                    {
+                      "id": "metavar_highlighter",
+                      "label": "MetavarHighlighter",
+                      "type": "component",
+                      "link": null
+                    },
+                    {
+                      "id": "option_highlighter",
+                      "label": "OptionHighlighter",
+                      "type": "component",
+                      "link": null
+                    },
+                    {
+                      "id": "negative_option_highlighter",
+                      "label": "NegativeOptionHighlighter",
+                      "type": "component",
+                      "link": null
+                    },
+                    {
+                      "id": "typer_rich_utils",
+                      "label": "typer_rich_utils",
+                      "type": "external",
+                      "link": "typer_rich_utils.md"
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "source": "metavar_highlighter",
+                      "target": "typer_rich_utils"
+                    },
+                    {
+                      "source": "option_highlighter",
+                      "target": "typer_rich_utils"
+                    },
+                    {
+                      "source": "negative_option_highlighter",
+                      "target": "typer_rich_utils"
+                    }
+                  ],
+                  "groups": []
+                }
+              }
+            },
+            "diagram": {
+              "direction": "TD",
+              "nodes": [
+                {
+                  "id": "typer_rich_utils",
+                  "label": "typer_rich_utils",
+                  "type": "external",
+                  "link": "typer_rich_utils.md"
+                },
+                {
+                  "id": "highlighters",
+                  "label": "highlighters",
+                  "type": "external",
+                  "link": "highlighters.md"
+                },
+                {
+                  "id": "cli_highlighters",
+                  "label": "cli_highlighters",
+                  "type": "module",
+                  "link": "cli_highlighters.md"
+                },
+                {
+                  "id": "highlighter_components",
+                  "label": "Highlighting Components",
+                  "type": "module",
+                  "link": "highlighter_components.md"
+                }
+              ],
+              "edges": [
+                {
+                  "source": "typer_rich_utils",
+                  "target": "highlighters"
+                },
+                {
+                  "source": "highlighters",
+                  "target": "cli_highlighters"
+                },
+                {
+                  "source": "cli_highlighters",
+                  "target": "highlighter_components"
+                }
+              ],
+              "groups": []
+            }
+          }
+        },
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "cli_highlighters",
+              "label": "CLI Highlighting Utilities",
+              "type": "module",
+              "link": "cli_highlighters.md"
+            }
+          ],
+          "edges": [],
+          "groups": []
+        }
+      }
+    },
+    "title": "Typer Rich Utils",
+    "description": "The `typer_rich_utils` module provides utility classes for integrating [rich](https://rich.readthedocs.io/en/stable/) capabilities, specifically for enhancing the display of command-line interface ...",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "highlighters",
+          "label": "Rich Highlighters",
+          "type": "module",
+          "link": "highlighters.md"
+        }
+      ],
+      "edges": [],
+      "groups": []
+    }
+  }
 }

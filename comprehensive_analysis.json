@@ -1,0 +1,309 @@
+{
+  "repos": [
+    {
+      "repo_name": "openai-realtime",
+      "repo_path": "/Users/shreyaspatel/atelier/test_repos/openai-realtime",
+      "docs_path": "/Users/shreyaspatel/atelier/demo/repos/openai-realtime",
+      "repo_size_mb": 0.0,
+      "docs_size_mb": 1.0,
+      "source_file_count": 0,
+      "doc_file_count": 22,
+      "total_modules": 21,
+      "modules_with_diagram": 21,
+      "modules_with_title": 21,
+      "modules_with_description": 21,
+      "diagram_coverage_pct": 100.0,
+      "validation_time_ms": 2.6319026947021484,
+      "error_count": 0,
+      "warning_count": 1,
+      "errors_by_type": {},
+      "warnings_by_type": {
+        "DESCRIPTION_TOO_LONG": 1
+      },
+      "generation_time_s": null,
+      "estimated_cost_usd": null,
+      "status": "passed",
+      "error_message": null
+    },
+    {
+      "repo_name": "typer",
+      "repo_path": "/Users/shreyaspatel/atelier/test_repos/typer",
+      "docs_path": "/Users/shreyaspatel/atelier/demo/repos/typer",
+      "repo_size_mb": 5.0,
+      "docs_size_mb": 1.0,
+      "source_file_count": 638,
+      "doc_file_count": 36,
+      "total_modules": 36,
+      "modules_with_diagram": 35,
+      "modules_with_title": 36,
+      "modules_with_description": 36,
+      "diagram_coverage_pct": 97.22222222222221,
+      "validation_time_ms": 4.678010940551758,
+      "error_count": 1,
+      "warning_count": 7,
+      "errors_by_type": {
+        "MISSING_DOCUMENTATION": 1
+      },
+      "warnings_by_type": {
+        "DESCRIPTION_TOO_LONG": 7
+      },
+      "generation_time_s": null,
+      "estimated_cost_usd": null,
+      "status": "failed",
+      "error_message": null
+    },
+    {
+      "repo_name": "flask-new",
+      "repo_path": "/Users/shreyaspatel/atelier/test_repos/flask",
+      "docs_path": "/Users/shreyaspatel/atelier/demo/repos/flask-new",
+      "repo_size_mb": 4.0,
+      "docs_size_mb": 1.0,
+      "source_file_count": 82,
+      "doc_file_count": 45,
+      "total_modules": 34,
+      "modules_with_diagram": 5,
+      "modules_with_title": 33,
+      "modules_with_description": 33,
+      "diagram_coverage_pct": 14.705882352941178,
+      "validation_time_ms": 3.4072399139404297,
+      "error_count": 32,
+      "warning_count": 5,
+      "errors_by_type": {
+        "MISSING_TITLE": 1,
+        "MISSING_DESCRIPTION": 1,
+        "MISSING_DOCUMENTATION": 2,
+        "MISSING_STRUCTURED_DIAGRAM": 9,
+        "MISSING_LEAF_DIAGRAM": 18,
+        "MISSING_OVERVIEW": 1
+      },
+      "warnings_by_type": {
+        "DESCRIPTION_TOO_LONG": 5
+      },
+      "generation_time_s": null,
+      "estimated_cost_usd": null,
+      "status": "failed",
+      "error_message": null
+    },
+    {
+      "repo_name": "KubeElasti",
+      "repo_path": "/Users/shreyaspatel/atelier/test_repos/KubeElasti",
+      "docs_path": "/Users/shreyaspatel/atelier/demo/repos/KubeElasti",
+      "repo_size_mb": 5.0,
+      "docs_size_mb": 1.0,
+      "source_file_count": 45,
+      "doc_file_count": 44,
+      "total_modules": 49,
+      "modules_with_diagram": 42,
+      "modules_with_title": 49,
+      "modules_with_description": 49,
+      "diagram_coverage_pct": 85.71428571428571,
+      "validation_time_ms": 5.589008331298828,
+      "error_count": 7,
+      "warning_count": 3,
+      "errors_by_type": {
+        "MISSING_DOCUMENTATION": 5,
+        "MISSING_STRUCTURED_DIAGRAM": 2
+      },
+      "warnings_by_type": {
+        "DESCRIPTION_TOO_LONG": 3
+      },
+      "generation_time_s": null,
+      "estimated_cost_usd": null,
+      "status": "failed",
+      "error_message": null
+    },
+    {
+      "repo_name": "httpx",
+      "repo_path": "/Users/shreyaspatel/atelier/test_repos/httpx",
+      "docs_path": "/Users/shreyaspatel/atelier/demo/repos/httpx",
+      "repo_size_mb": 5.0,
+      "docs_size_mb": 1.0,
+      "source_file_count": 60,
+      "doc_file_count": 75,
+      "total_modules": 80,
+      "modules_with_diagram": 73,
+      "modules_with_title": 79,
+      "modules_with_description": 79,
+      "diagram_coverage_pct": 91.25,
+      "validation_time_ms": 8.188247680664062,
+      "error_count": 9,
+      "warning_count": 11,
+      "errors_by_type": {
+        "MISSING_DOCUMENTATION": 6,
+        "MISSING_TITLE": 1,
+        "MISSING_DESCRIPTION": 1,
+        "MISSING_LEAF_DIAGRAM": 1
+      },
+      "warnings_by_type": {
+        "DESCRIPTION_TOO_LONG": 11
+      },
+      "generation_time_s": null,
+      "estimated_cost_usd": null,
+      "status": "failed",
+      "error_message": null
+    },
+    {
+      "repo_name": "fastapi",
+      "repo_path": "/Users/shreyaspatel/atelier/test_repos/fastapi",
+      "docs_path": "/Users/shreyaspatel/atelier/demo/repos/fastapi",
+      "repo_size_mb": 25.0,
+      "docs_size_mb": 3.0,
+      "source_file_count": 1253,
+      "doc_file_count": 43,
+      "total_modules": 47,
+      "modules_with_diagram": 42,
+      "modules_with_title": 47,
+      "modules_with_description": 47,
+      "diagram_coverage_pct": 89.36170212765957,
+      "validation_time_ms": 5.718231201171875,
+      "error_count": 5,
+      "warning_count": 9,
+      "errors_by_type": {
+        "MISSING_DOCUMENTATION": 4,
+        "MISSING_STRUCTURED_DIAGRAM": 1
+      },
+      "warnings_by_type": {
+        "DESCRIPTION_TOO_LONG": 9
+      },
+      "generation_time_s": null,
+      "estimated_cost_usd": null,
+      "status": "failed",
+      "error_message": null
+    },
+    {
+      "repo_name": "rich",
+      "repo_path": "/Users/shreyaspatel/atelier/test_repos/rich",
+      "docs_path": "/Users/shreyaspatel/atelier/demo/repos/rich",
+      "repo_size_mb": 36.0,
+      "docs_size_mb": 3.0,
+      "source_file_count": 212,
+      "doc_file_count": 192,
+      "total_modules": 205,
+      "modules_with_diagram": 180,
+      "modules_with_title": 201,
+      "modules_with_description": 201,
+      "diagram_coverage_pct": 87.8048780487805,
+      "validation_time_ms": 21.448135375976562,
+      "error_count": 34,
+      "warning_count": 53,
+      "errors_by_type": {
+        "MISSING_DOCUMENTATION": 18,
+        "MISSING_TITLE": 4,
+        "MISSING_DESCRIPTION": 4,
+        "MISSING_LEAF_DIAGRAM": 5,
+        "MISSING_CHILD_NODE": 1,
+        "MISSING_STRUCTURED_DIAGRAM": 2
+      },
+      "warnings_by_type": {
+        "DESCRIPTION_TOO_LONG": 53
+      },
+      "generation_time_s": null,
+      "estimated_cost_usd": null,
+      "status": "failed",
+      "error_message": null
+    },
+    {
+      "repo_name": "flask",
+      "repo_path": "/Users/shreyaspatel/CodeWiki/test_repos/flask",
+      "docs_path": "/Users/shreyaspatel/CodeWiki/test_repos/flask/docs",
+      "repo_size_mb": 3.0,
+      "docs_size_mb": 1.0,
+      "source_file_count": 82,
+      "doc_file_count": 1,
+      "total_modules": 8,
+      "modules_with_diagram": 0,
+      "modules_with_title": 0,
+      "modules_with_description": 0,
+      "diagram_coverage_pct": 0.0,
+      "validation_time_ms": 0.27298927307128906,
+      "error_count": 25,
+      "warning_count": 0,
+      "errors_by_type": {
+        "MISSING_TITLE": 8,
+        "MISSING_DESCRIPTION": 8,
+        "MISSING_DOCUMENTATION": 7,
+        "MISSING_LEAF_DIAGRAM": 1,
+        "MISSING_OVERVIEW": 1
+      },
+      "warnings_by_type": {},
+      "generation_time_s": null,
+      "estimated_cost_usd": null,
+      "status": "failed",
+      "error_message": null
+    },
+    {
+      "repo_name": "go",
+      "repo_path": "/Users/shreyaspatel/CodeWiki/test_repos/go",
+      "docs_path": "/Users/shreyaspatel/CodeWiki/test_repos/go/docs",
+      "repo_size_mb": 217.0,
+      "docs_size_mb": 1.0,
+      "source_file_count": 11191,
+      "doc_file_count": 0,
+      "total_modules": 1,
+      "modules_with_diagram": 0,
+      "modules_with_title": 0,
+      "modules_with_description": 0,
+      "diagram_coverage_pct": 0.0,
+      "validation_time_ms": 0.10609626770019531,
+      "error_count": 4,
+      "warning_count": 0,
+      "errors_by_type": {
+        "MISSING_TITLE": 1,
+        "MISSING_DESCRIPTION": 1,
+        "MISSING_DOCUMENTATION": 1,
+        "MISSING_OVERVIEW": 1
+      },
+      "warnings_by_type": {},
+      "generation_time_s": null,
+      "estimated_cost_usd": null,
+      "status": "failed",
+      "error_message": null
+    },
+    {
+      "repo_name": "next.js",
+      "repo_path": "/Users/shreyaspatel/CodeWiki/test_repos/next.js",
+      "docs_path": "/Users/shreyaspatel/CodeWiki/test_repos/next.js/docs",
+      "repo_size_mb": 2617.0,
+      "docs_size_mb": 1.0,
+      "source_file_count": 20176,
+      "doc_file_count": 0,
+      "total_modules": 5,
+      "modules_with_diagram": 0,
+      "modules_with_title": 0,
+      "modules_with_description": 0,
+      "diagram_coverage_pct": 0.0,
+      "validation_time_ms": 0.2560615539550781,
+      "error_count": 16,
+      "warning_count": 0,
+      "errors_by_type": {
+        "MISSING_TITLE": 5,
+        "MISSING_DESCRIPTION": 5,
+        "MISSING_DOCUMENTATION": 5,
+        "MISSING_OVERVIEW": 1
+      },
+      "warnings_by_type": {},
+      "generation_time_s": null,
+      "estimated_cost_usd": null,
+      "status": "failed",
+      "error_message": null
+    }
+  ],
+  "summary": {
+    "total_repos": 10,
+    "total_modules": 486,
+    "total_errors": 133,
+    "total_warnings": 89,
+    "error_types": {
+      "MISSING_DOCUMENTATION": 49,
+      "MISSING_TITLE": 20,
+      "MISSING_DESCRIPTION": 20,
+      "MISSING_STRUCTURED_DIAGRAM": 14,
+      "MISSING_LEAF_DIAGRAM": 25,
+      "MISSING_OVERVIEW": 4,
+      "MISSING_CHILD_NODE": 1
+    },
+    "warning_types": {
+      "DESCRIPTION_TOO_LONG": 89
+    }
+  }
+}

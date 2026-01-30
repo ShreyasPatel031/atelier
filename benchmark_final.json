@@ -1,0 +1,92 @@
+[
+  {
+    "name": "KubeElasti",
+    "passed": true,
+    "errors": 0,
+    "warnings": 0,
+    "modules": 49,
+    "size_mb": 1,
+    "md_files": 49
+  },
+  {
+    "name": "typer",
+    "passed": true,
+    "errors": 0,
+    "warnings": 0,
+    "modules": 36,
+    "size_mb": 1,
+    "md_files": 37
+  },
+  {
+    "name": "httpx",
+    "passed": true,
+    "errors": 0,
+    "warnings": 0,
+    "modules": 80,
+    "size_mb": 2,
+    "md_files": 81
+  },
+  {
+    "name": "fastapi",
+    "passed": true,
+    "errors": 0,
+    "warnings": 0,
+    "modules": 47,
+    "size_mb": 3,
+    "md_files": 47
+  },
+  {
+    "name": "rich",
+    "passed": true,
+    "errors": 0,
+    "warnings": 0,
+    "modules": 205,
+    "size_mb": 3,
+    "md_files": 210
+  },
+  {
+    "name": "openai-realtime",
+    "passed": true,
+    "errors": 0,
+    "warnings": 0,
+    "modules": 21,
+    "size_mb": 1,
+    "md_files": 22
+  },
+  {
+    "name": "click",
+    "passed": true,
+    "errors": 0,
+    "warnings": 0,
+    "modules": 82,
+    "size_mb": 2,
+    "md_files": 82
+  },
+  {
+    "name": "requests",
+    "passed": true,
+    "errors": 0,
+    "warnings": 0,
+    "modules": 28,
+    "size_mb": 1,
+    "md_files": 29
+  },
+  {
+    "name": "pydantic",
+    "passed": true,
+    "errors": 0,
+    "warnings": 0,
+    "modules": 32,
+    "size_mb": 4,
+    "md_files": 73
+  },
+  {
+    "name": "flask",
+    "passed": true,
+    "errors": 0,
+    "warnings": 0,
+    "modules": 34,
+    "size_mb": 1,
+    "md_files": 48
+  }
+]
