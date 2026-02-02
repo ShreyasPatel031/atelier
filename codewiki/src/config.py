@@ -43,19 +43,21 @@ MODEL_CONTEXT_WINDOWS = {
 DEFAULT_CONTEXT_WINDOW = 128_000  # Fallback for unknown models
 
 # Model OUTPUT token limits
+# TESTED: 16K works reliably, 20K+ times out on large repos
+# 16K tokens / 40 tokens per node = ~360 nodes max
 MODEL_OUTPUT_LIMITS = {
-    'gemini-2.5-flash': 65_536,
-    'gemini-2.0-flash': 65_536,
-    'gemini-1.5-flash': 8_192,
-    'gemini-1.5-pro': 8_192,
-    'gpt-4o': 16_384,
-    'gpt-4-turbo': 4_096,
-    'claude-3-opus': 4_096,
-    'claude-3-sonnet': 4_096,
-    'claude-3-haiku': 4_096,
-    'glm-4p5': 4_096,
+    'gemini-2.5-flash': 16_000,  # TESTED: max reliable limit
+    'gemini-2.0-flash': 16_000,
+    'gemini-1.5-flash': 8_000,
+    'gemini-1.5-pro': 8_000,
+    'gpt-4o': 16_000,
+    'gpt-4-turbo': 4_000,
+    'claude-3-opus': 4_000,
+    'claude-3-sonnet': 4_000,
+    'claude-3-haiku': 4_000,
+    'glm-4p5': 4_000,
 }
-DEFAULT_OUTPUT_LIMIT = 8_192  # Conservative fallback
+DEFAULT_OUTPUT_LIMIT = 8_000
 
 # System prompt overhead (approximate)
 SYSTEM_PROMPT_TOKENS = 3_000  # Clustering system prompt size
