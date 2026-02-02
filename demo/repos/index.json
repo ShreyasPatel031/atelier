@@ -1,0 +1,12 @@
+[
+  "CruiseKube",
+  "fastapi",
+  "flask",
+  "flask-new",
+  "httpx",
+  "kubecost",
+  "KubeElasti",
+  "openai-realtime",
+  "rich",
+  "typer"
+]

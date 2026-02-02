@@ -268,10 +268,23 @@ def _call_gemini_native(
             prompt,
             generation_config=genai.GenerationConfig(
                 temperature=temperature,
-                max_output_tokens=32768
+                max_output_tokens=65536  # Gemini 2.5 Flash output limit
             )
         )
         llm_duration = time.time() - llm_start
+        
+        # Debug: Log response structure
+        logger.info(f"[LLM] Response received in {llm_duration:.1f}s")
+        if hasattr(response, 'candidates') and response.candidates:
+            candidate = response.candidates[0]
+            logger.info(f"[LLM] Candidate finish_reason: {candidate.finish_reason}")
+            if hasattr(candidate, 'safety_ratings'):
+                for rating in candidate.safety_ratings:
+                    if rating.probability.name != 'NEGLIGIBLE':
+                        logger.warning(f"[LLM] Safety rating: {rating.category.name} = {rating.probability.name}")
+        else:
+            logger.error(f"[LLM] No candidates in response!")
+            logger.error(f"[LLM] Response: {response}")
         
         response_text = response.text
         

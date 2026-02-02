@@ -9,10 +9,24 @@ from codewiki.src.be.utils import count_tokens, count_module_tokens
 from codewiki.src.config import (
     MAX_TOKEN_PER_MODULE, 
     MIN_COMPONENTS_FOR_CLUSTERING,
-    MAX_CLUSTERING_PROMPT_TOKENS,
+    get_max_clustering_tokens,
     Config
 )
 from codewiki.src.be.prompt_template import format_cluster_prompt
+
+
+class ClusteringError(Exception):
+    """
+    Exception raised when LLM clustering fails.
+    Contains detailed context about the failure.
+    """
+    def __init__(self, message: str, error_type: str, context: dict):
+        super().__init__(message)
+        self.error_type = error_type
+        self.context = context
+    
+    def __str__(self):
+        return f"[{self.error_type}] {super().__str__()}\nContext: {self.context}"
 
 
 def _create_directory_based_modules(
@@ -21,11 +35,14 @@ def _create_directory_based_modules(
     current_module_name: str = None
 ) -> Dict[str, Any]:
     """
-    Create modules based on directory structure when LLM clustering fails.
-    This is a deterministic fallback that doesn't require LLM calls.
+    DEPRECATED: This function is no longer used.
     
-    Groups components by their top-level directory, creating manageable modules.
+    Previously used as a fallback when LLM clustering failed.
+    Now we raise ClusteringError instead to make failures explicit.
+    
+    Kept for reference only.
     """
+    logger.warning("DEPRECATED: _create_directory_based_modules called but should not be used")
     from collections import defaultdict
     import os
     
@@ -212,19 +229,8 @@ def cluster_modules(
             logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (leaf module, no children)")
             return {}
         
-        # Root level: Use directory-based splitting for better organization
-        # Even if token count is low, split by top-level directories for logical grouping
-        logger.info(f"[STAGE 2] Root level - using directory-based splitting for organization")
-        directory_modules = _create_directory_based_modules(leaf_nodes, components)
-        
-        if len(directory_modules) > 1:
-            logger.info(f"[STAGE 2] Directory-based split created {len(directory_modules)} modules")
-            for mod_name, mod_info in directory_modules.items():
-                logger.info(f"[STAGE 2]   - {mod_name}: {len(mod_info['components'])} components")
-            logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (directory-based)")
-            return directory_modules
-        
-        # Fallback to single module if directory splitting didn't help
+        # Root level with small token count - create a single module
+        # LLM clustering is not needed for small codebases
         repo_name = "main"
         single_module = {
             repo_name: {
@@ -234,6 +240,7 @@ def cluster_modules(
             }
         }
         logger.info(f"[STAGE 2] Root level - created single module '{repo_name}' with {len(leaf_nodes)} components")
+        logger.info(f"[STAGE 2] Token count {token_count} <= threshold {MAX_TOKEN_PER_MODULE}, no LLM clustering needed")
         logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (single module, no LLM needed)")
         return single_module
 
@@ -245,9 +252,12 @@ def cluster_modules(
     # Check prompt size and chunk if needed
     prompt_tokens = count_tokens(prompt)
     
-    logger.info(f"[STAGE 2] Prompt size: {prompt_tokens} tokens, {len(leaf_nodes)} leaf nodes, threshold: {MAX_CLUSTERING_PROMPT_TOKENS}")
+    # Dynamic token limit based on model context window
+    max_tokens = get_max_clustering_tokens(config.cluster_model)
     
-    if prompt_tokens > MAX_CLUSTERING_PROMPT_TOKENS:
+    logger.info(f"[STAGE 2] Prompt size: {prompt_tokens} tokens, {len(leaf_nodes)} leaf nodes, threshold: {max_tokens} (dynamic for {config.cluster_model})")
+    
+    if prompt_tokens > max_tokens:
         logger.warning(f"[STAGE 2] Prompt too large ({prompt_tokens} tokens), truncating component list to fit context window")
         original_line_count = len(potential_core_components.split('\n'))
         # Truncate potential_core_components to fit
@@ -256,7 +266,7 @@ def cluster_modules(
         current_tokens = count_tokens('\n'.join(truncated))
         for line in lines:
             line_tokens = count_tokens(line)
-            if current_tokens + line_tokens > MAX_CLUSTERING_PROMPT_TOKENS - 5000:  # Safety margin
+            if current_tokens + line_tokens > max_tokens - 5000:  # Safety margin
                 break
             truncated.append(line)
             current_tokens += line_tokens
@@ -274,132 +284,138 @@ def cluster_modules(
     logger.info(f"[STAGE 2]   - Module: {current_module_name or 'root'}")
     
     llm_start = time.time()
-    try:
-        response = call_llm(prompt, config, model=config.cluster_model)
-        llm_duration = time.time() - llm_start
-        response_tokens = count_tokens(response)
-        logger.info(f"[STAGE 2] LLM call completed in {llm_duration:.1f}s")
-        logger.info(f"[STAGE 2] Response length: {len(response)} chars")
-        logger.info(f"[STAGE 2] Response tokens: {response_tokens}")
+    
+    # DYNAMIC ALGORITHM: Retry with node reduction on failure
+    # 
+    # 1. Try with current nodes (3 retries for transient failures)
+    # 2. If all retries fail → reduce nodes by 30% and try again
+    # 3. Continue until success or too few nodes
+    #
+    MAX_RETRIES_PER_SIZE = 3
+    MAX_REDUCTION_ROUNDS = 5
+    REDUCTION_FACTOR = 0.7  # Keep 70% of nodes on each reduction
+    
+    current_leaf_nodes = leaf_nodes.copy()
+    current_prompt = prompt
+    response = None
+    response_tokens = 0
+    
+    for reduction_round in range(MAX_REDUCTION_ROUNDS):
+        last_error = None
         
-        # CRITICAL: Detect if response was truncated (hit max_tokens limit)
-        # GPT-4o max_tokens is 16384, if we're within 100 tokens of that, likely truncated
-        MAX_OUTPUT_TOKENS = 16384
-        if response_tokens >= MAX_OUTPUT_TOKENS - 100:
-            logger.warning(f"[STAGE 2] RESPONSE LIKELY TRUNCATED! Response tokens ({response_tokens}) near max ({MAX_OUTPUT_TOKENS})")
-            logger.warning(f"[STAGE 2] Truncation detected - checking if <GROUPED_COMPONENTS> tags are present")
-            if "<GROUPED_COMPONENTS>" not in response or "</GROUPED_COMPONENTS>" not in response:
-                logger.error(f"[STAGE 2] CONFIRMED TRUNCATION - missing required tags")
-                logger.error(f"[STAGE 2] This repo has too many components ({len(leaf_nodes)}) for a single clustering call")
-                logger.error(f"[STAGE 2] FALLING BACK TO DIRECTORY-BASED CLUSTERING")
-                module_tree = _create_directory_based_modules(leaf_nodes, components, current_module_name)
-                logger.info(f"[STAGE 2] Directory-based fallback created {len(module_tree)} modules")
+        # Regenerate prompt if we reduced nodes
+        if reduction_round > 0:
+            # Filter potential_core_components to only include current_leaf_nodes
+            filtered_components = format_potential_core_components(current_leaf_nodes, components)
+            current_prompt = format_cluster_prompt(filtered_components, current_module_tree, current_module_name)
+            logger.info(f"[STAGE 2] Reduction round {reduction_round}: {len(current_leaf_nodes)} nodes")
+        
+        # Try with current node count
+        for attempt in range(MAX_RETRIES_PER_SIZE):
+            try:
+                response = call_llm(current_prompt, config, model=config.cluster_model)
+                llm_duration = time.time() - llm_start
+                response_tokens = count_tokens(response)
                 
-                # Continue with tree merge logic after fallback
-                if current_module_tree == {}:
-                    current_module_tree = module_tree
-                else:
-                    value = current_module_tree
-                    for key in current_module_path:
-                        value = value[key]["children"]
-                    for module_name, module_info in module_tree.items():
-                        del module_info["path"]
-                        value[module_name] = module_info
+                # Check for garbage response (all whitespace)
+                if response.strip() == "" or len(response.strip()) < 100:
+                    logger.warning(f"[STAGE 2] Round {reduction_round+1} Attempt {attempt+1}/{MAX_RETRIES_PER_SIZE}: Empty/garbage response")
+                    logger.warning(f"[STAGE 2] Response length: {len(response)} chars, stripped: {len(response.strip())} chars")
+                    logger.warning(f"[STAGE 2] Response preview: {repr(response[:200])}")
+                    last_error = "Empty or garbage response"
+                    time.sleep(2 ** attempt)
+                    continue
                 
-                cluster_duration = time.time() - cluster_start
-                logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (directory-based fallback)")
-                return module_tree
+                # Check for missing tags
+                if "<GROUPED_COMPONENTS>" not in response or "</GROUPED_COMPONENTS>" not in response:
+                    logger.warning(f"[STAGE 2] Round {reduction_round+1} Attempt {attempt+1}/{MAX_RETRIES_PER_SIZE}: Missing GROUPED_COMPONENTS ({len(response)} chars)")
+                    last_error = f"Missing GROUPED_COMPONENTS (response: {len(response)} chars)"
+                    time.sleep(2 ** attempt)
+                    continue
+                    
+                logger.info(f"[STAGE 2] LLM success! Round {reduction_round+1}, Attempt {attempt+1}, {len(current_leaf_nodes)} nodes, {llm_duration:.1f}s")
+                logger.info(f"[STAGE 2] Response: {len(response)} chars, {response_tokens} tokens")
+                break  # Success on this attempt
                 
-    except Exception as e:
-        llm_duration = time.time() - llm_start
-        error_msg = str(e)
-        error_type = type(e).__name__
-        
-        logger.error(f"[STAGE 2] LLM call FAILED after {llm_duration:.1f}s")
-        logger.error(f"[STAGE 2] Error type: {error_type}")
-        logger.error(f"[STAGE 2] Error message: {error_msg}")
-        logger.error(f"[STAGE 2] Clustering context:")
-        logger.error(f"[STAGE 2]   - Leaf nodes: {len(leaf_nodes)}")
-        logger.error(f"[STAGE 2]   - Components: {len(components)}")
-        logger.error(f"[STAGE 2]   - Module: {current_module_name or 'root'}")
-        logger.error(f"[STAGE 2]   - Prompt tokens: {prompt_tokens}")
-        logger.error(f"[STAGE 2]   - Model: {config.cluster_model}")
-        
-        # Check for rate limiting
-        if "429" in error_msg or "rate limit" in error_msg.lower() or "rate_limit" in error_msg.lower() or "RateLimitError" in error_type:
-            logger.error(f"[STAGE 2] RATE LIMIT DETECTED!")
-            logger.error(f"[STAGE 2]   - Model: {config.cluster_model}")
-            logger.error(f"[STAGE 2]   - Prompt tokens: {prompt_tokens}")
-            logger.error(f"[STAGE 2]   - Duration before failure: {llm_duration:.1f}s")
-            logger.error(f"[STAGE 2]   - Leaf nodes: {len(leaf_nodes)}")
-            logger.error(f"[STAGE 2]   - Module: {current_module_name or 'root'}")
-            
-            # Try to get retry-after header if available
-            if hasattr(e, 'response') and hasattr(e.response, 'headers'):
-                retry_after = e.response.headers.get('Retry-After', 'unknown')
-                logger.error(f"[STAGE 2]   - Retry-After header: {retry_after}")
-        
-        # Check for timeout
-        if "timeout" in error_msg.lower() or "TimeoutError" in error_type:
-            logger.error(f"[STAGE 2] TIMEOUT DETECTED!")
-            logger.error(f"[STAGE 2]   - Duration: {llm_duration:.1f}s")
-            logger.error(f"[STAGE 2]   - Prompt tokens: {prompt_tokens}")
-        
-        # Check for network errors
-        if "network" in error_msg.lower() or "connection" in error_msg.lower() or "ConnectionError" in error_type:
-            logger.error(f"[STAGE 2] NETWORK ERROR DETECTED!")
-            logger.error(f"[STAGE 2]   - LLM base URL: {config.llm_base_url}")
-        
-        import traceback
-        logger.error(f"[STAGE 2] Full traceback: {traceback.format_exc()}")
-        
-        # FALLBACK: Instead of re-raising, use directory-based clustering
-        logger.warning(f"[STAGE 2] FALLING BACK TO DIRECTORY-BASED CLUSTERING due to LLM failure")
-        module_tree = _create_directory_based_modules(leaf_nodes, components, current_module_name)
-        logger.info(f"[STAGE 2] Directory-based fallback created {len(module_tree)} modules")
-        
-        # Merge into current tree
-        if current_module_tree == {}:
-            current_module_tree = module_tree
+            except Exception as e:
+                last_error = str(e)
+                logger.warning(f"[STAGE 2] Round {reduction_round+1} Attempt {attempt+1}/{MAX_RETRIES_PER_SIZE} failed: {e}")
+                time.sleep(2 ** attempt)
+                continue
         else:
-            value = current_module_tree
-            for key in current_module_path:
-                value = value[key]["children"]
-            for mod_name, mod_info in module_tree.items():
-                if "path" in mod_info:
-                    del mod_info["path"]
-                value[mod_name] = mod_info
+            # All retries for this size exhausted - reduce nodes and try again
+            if len(current_leaf_nodes) <= 50:
+                raise ClusteringError(
+                    f"LLM failed even with {len(current_leaf_nodes)} nodes: {last_error}",
+                    error_type="LLM_IRREDUCIBLE_FAILURE",
+                    context={
+                        "nodes": len(current_leaf_nodes),
+                        "reduction_rounds": reduction_round + 1,
+                        "last_error": last_error,
+                        "module": current_module_name or "root"
+                    }
+                )
+            
+            # Reduce by keeping only top REDUCTION_FACTOR of nodes
+            new_size = max(50, int(len(current_leaf_nodes) * REDUCTION_FACTOR))
+            logger.warning(f"[STAGE 2] ⚠️ Reducing nodes: {len(current_leaf_nodes)} → {new_size} (keeping highest reachability)")
+            current_leaf_nodes = current_leaf_nodes[:new_size]
+            continue
         
-        cluster_duration = time.time() - cluster_start
-        logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (LLM-failure fallback)")
-        return module_tree
+        # If we get here, LLM succeeded
+        break
+    else:
+        raise ClusteringError(
+            f"LLM failed after {MAX_REDUCTION_ROUNDS} reduction rounds",
+            error_type="LLM_MAX_REDUCTIONS",
+            context={
+                "reduction_rounds": MAX_REDUCTION_ROUNDS,
+                "final_nodes": len(current_leaf_nodes),
+                "module": current_module_name or "root"
+            }
+        )
+    
+    # CRITICAL: Detect if response was truncated (hit max_tokens limit)
+    MAX_OUTPUT_TOKENS = 65536  # Gemini 2.5 Flash limit
+    if response_tokens >= MAX_OUTPUT_TOKENS - 100:
+        logger.error(f"[STAGE 2] ════════════════════════════════════════════════════════════")
+        logger.error(f"[STAGE 2] CLUSTERING FAILED: RESPONSE TRUNCATED")
+        logger.error(f"[STAGE 2] ════════════════════════════════════════════════════════════")
+        logger.error(f"[STAGE 2] Response tokens ({response_tokens}) near max ({MAX_OUTPUT_TOKENS})")
+        if "</GROUPED_COMPONENTS>" not in response:
+            logger.error(f"[STAGE 2] Missing closing </GROUPED_COMPONENTS> tag")
+            logger.error(f"[STAGE 2] Components: {len(leaf_nodes)}")
+            logger.error(f"[STAGE 2] Module: {current_module_name or 'root'}")
+            raise ClusteringError(
+                f"LLM response truncated - missing GROUPED_COMPONENTS tags",
+                error_type="TRUNCATION",
+                context={
+                    "response_tokens": response_tokens,
+                    "max_tokens": MAX_OUTPUT_TOKENS,
+                    "leaf_nodes": len(leaf_nodes),
+                    "module": current_module_name or "root"
+                }
+            )
 
     #parse the response
     logger.info(f"[STAGE 2] Parsing LLM response...")
     try:
         if "<GROUPED_COMPONENTS>" not in response or "</GROUPED_COMPONENTS>" not in response:
-            logger.error(f"[STAGE 2] CRITICAL: Invalid LLM response format - missing component tags")
-            logger.error(f"[STAGE 2] Response preview (first 500 chars): {response[:500]}...")
+            logger.error(f"[STAGE 2] ════════════════════════════════════════════════════════════")
+            logger.error(f"[STAGE 2] CLUSTERING FAILED: INVALID RESPONSE FORMAT")
+            logger.error(f"[STAGE 2] ════════════════════════════════════════════════════════════")
+            logger.error(f"[STAGE 2] Missing <GROUPED_COMPONENTS> tags")
             logger.error(f"[STAGE 2] Response length: {len(response)} chars")
-            logger.error(f"[STAGE 2] Looking for <GROUPED_COMPONENTS> and </GROUPED_COMPONENTS> tags")
-            logger.error(f"[STAGE 2] FALLING BACK TO DIRECTORY-BASED CLUSTERING")
-            module_tree = _create_directory_based_modules(leaf_nodes, components, current_module_name)
-            
-            # Continue with tree merge logic 
-            if current_module_tree == {}:
-                current_module_tree = module_tree
-            else:
-                value = current_module_tree
-                for key in current_module_path:
-                    value = value[key]["children"]
-                for mod_name, mod_info in module_tree.items():
-                    if "path" in mod_info:
-                        del mod_info["path"]
-                    value[mod_name] = mod_info
-            
-            cluster_duration = time.time() - cluster_start
-            logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (parse-failed fallback)")
-            return module_tree
+            logger.error(f"[STAGE 2] Response preview: {response[:500]}...")
+            raise ClusteringError(
+                f"Invalid LLM response - missing GROUPED_COMPONENTS tags",
+                error_type="INVALID_FORMAT",
+                context={
+                    "response_length": len(response),
+                    "response_preview": response[:500],
+                    "module": current_module_name or "root"
+                }
+            )
         
         response_content = response.split("<GROUPED_COMPONENTS>")[1].split("</GROUPED_COMPONENTS>")[0]
         logger.info(f"[STAGE 2] Extracted response content: {len(response_content)} chars")
@@ -414,65 +430,60 @@ def cluster_modules(
             return {}
             
     except SyntaxError as e:
-        logger.error(f"[STAGE 2] CRITICAL: Syntax error parsing LLM response: {e}")
-        logger.error(f"[STAGE 2] Response content that failed to parse: {response_content[:500] if 'response_content' in locals() else 'N/A'}...")
-        logger.error(f"[STAGE 2] Full response length: {len(response)} chars")
-        logger.error(f"[STAGE 2] FALLING BACK TO DIRECTORY-BASED CLUSTERING")
-        module_tree = _create_directory_based_modules(leaf_nodes, components, current_module_name)
-        
-        if current_module_tree == {}:
-            current_module_tree = module_tree
-        else:
-            value = current_module_tree
-            for key in current_module_path:
-                value = value[key]["children"]
-            for mod_name, mod_info in module_tree.items():
-                if "path" in mod_info:
-                    del mod_info["path"]
-                value[mod_name] = mod_info
-        
-        cluster_duration = time.time() - cluster_start
-        logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (syntax-error fallback)")
-        return module_tree
+        logger.error(f"[STAGE 2] ════════════════════════════════════════════════════════════")
+        logger.error(f"[STAGE 2] CLUSTERING FAILED: SYNTAX ERROR IN RESPONSE")
+        logger.error(f"[STAGE 2] ════════════════════════════════════════════════════════════")
+        logger.error(f"[STAGE 2] Error: {e}")
+        logger.error(f"[STAGE 2] Response content: {response_content[:500] if 'response_content' in locals() else 'N/A'}...")
+        raise ClusteringError(
+            f"Syntax error parsing LLM response: {e}",
+            error_type="SYNTAX_ERROR",
+            context={
+                "response_content": response_content[:500] if 'response_content' in locals() else 'N/A',
+                "module": current_module_name or "root"
+            }
+        ) from e
     except Exception as e:
-        logger.error(f"[STAGE 2] CRITICAL: Failed to parse LLM response: {type(e).__name__}: {str(e)}")
+        logger.error(f"[STAGE 2] ════════════════════════════════════════════════════════════")
+        logger.error(f"[STAGE 2] CLUSTERING FAILED: PARSE ERROR")
+        logger.error(f"[STAGE 2] ════════════════════════════════════════════════════════════")
+        logger.error(f"[STAGE 2] Error: {type(e).__name__}: {str(e)}")
         logger.error(f"[STAGE 2] Response preview: {response[:500]}...")
-        logger.error(f"[STAGE 2] Full response length: {len(response)} chars")
         import traceback
-        logger.error(f"[STAGE 2] Traceback: {traceback.format_exc()}")
-        logger.error(f"[STAGE 2] FALLING BACK TO DIRECTORY-BASED CLUSTERING")
-        module_tree = _create_directory_based_modules(leaf_nodes, components, current_module_name)
-        
-        if current_module_tree == {}:
-            current_module_tree = module_tree
-        else:
-            value = current_module_tree
-            for key in current_module_path:
-                value = value[key]["children"]
-            for mod_name, mod_info in module_tree.items():
-                if "path" in mod_info:
-                    del mod_info["path"]
-                value[mod_name] = mod_info
-        
-        cluster_duration = time.time() - cluster_start
-        logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (parse-exception fallback)")
-        return module_tree
+        logger.error(f"[STAGE 2] Traceback:\n{traceback.format_exc()}")
+        raise ClusteringError(
+            f"Failed to parse LLM response: {type(e).__name__}: {str(e)}",
+            error_type="PARSE_ERROR",
+            context={
+                "response_preview": response[:500],
+                "response_length": len(response),
+                "module": current_module_name or "root"
+            }
+        ) from e
 
     # check if the module tree is valid - only reject if truly empty
     # Single module results (len=1) are valid and should be accepted
     if len(module_tree) == 0:
-        logger.warning(f"[STAGE 2] CRITICAL: LLM returned empty module tree")
-        logger.warning(f"[STAGE 2]   - Module count: 0")
-        logger.warning(f"[STAGE 2]   - Input: {len(leaf_nodes)} leaf nodes, {len(components)} components")
-        logger.warning(f"[STAGE 2]   - Token count: {token_count}")
-        logger.warning(f"[STAGE 2]   - LLM response length: {len(response)} chars")
+        logger.error(f"[STAGE 2] ════════════════════════════════════════════════════════════")
+        logger.error(f"[STAGE 2] CLUSTERING FAILED: EMPTY MODULE TREE")
+        logger.error(f"[STAGE 2] ════════════════════════════════════════════════════════════")
+        logger.error(f"[STAGE 2] LLM returned empty module tree")
+        logger.error(f"[STAGE 2] Input: {len(leaf_nodes)} leaf nodes, {len(components)} components")
+        logger.error(f"[STAGE 2] Token count: {token_count}")
+        logger.error(f"[STAGE 2] Response length: {len(response)} chars")
         if len(response) > 500:
-            logger.warning(f"[STAGE 2]   - LLM response preview: {response[:500]}...")
-        logger.warning(f"[STAGE 2] FALLING BACK TO DIRECTORY-BASED CLUSTERING")
-        
-        # Use directory-based fallback instead of single giant module
-        module_tree = _create_directory_based_modules(leaf_nodes, components, current_module_name)
-        logger.info(f"[STAGE 2] Directory-based fallback created {len(module_tree)} modules")
+            logger.error(f"[STAGE 2] Response preview: {response[:500]}...")
+        raise ClusteringError(
+            f"LLM returned empty module tree",
+            error_type="EMPTY_RESULT",
+            context={
+                "leaf_nodes": len(leaf_nodes),
+                "components": len(components),
+                "token_count": token_count,
+                "response_length": len(response),
+                "module": current_module_name or "root"
+            }
+        )
     elif len(module_tree) == 1:
         # Single module is valid - log it but don't reject
         logger.info(f"[STAGE 2] LLM returned single module: {list(module_tree.keys())}")

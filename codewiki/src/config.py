@@ -24,11 +24,60 @@ MAX_TOKEN_PER_MODULE = 32_768           # Paper: 32768 tokens per leaf module
 MAX_TOKEN_PER_LEAF_MODULE = 16_000      # Threshold for sub-module delegation in Stage 4
 MIN_COMPONENTS_FOR_CLUSTERING = 3       # Don't try to cluster fewer than this many components
                                         # Fixes infinite nesting bug when 2 components have large files
+MAX_ENTRY_POINTS = 300                  # Max entry points for clustering (top N by reachability)
 
-# LLM Context Thresholds
-MAX_CLUSTERING_PROMPT_TOKENS = 100_000  # Max tokens for clustering prompt before chunking
-MAX_LLM_CONTEXT = 128_000               # GPT-4o context window (use 200K for Claude/Kimi)
-MAX_LLM_OUTPUT_TOKENS = 16_384          # GPT-4o max output tokens
+# LLM Context Thresholds - Dynamic based on model
+# Model context windows (INPUT tokens)
+MODEL_CONTEXT_WINDOWS = {
+    'gemini-2.5-flash': 1_000_000,
+    'gemini-2.0-flash': 1_000_000,
+    'gemini-1.5-flash': 1_000_000,
+    'gemini-1.5-pro': 2_000_000,
+    'gpt-4o': 128_000,
+    'gpt-4-turbo': 128_000,
+    'claude-3-opus': 200_000,
+    'claude-3-sonnet': 200_000,
+    'claude-3-haiku': 200_000,
+    'glm-4p5': 128_000,
+}
+DEFAULT_CONTEXT_WINDOW = 128_000  # Fallback for unknown models
+
+# Model OUTPUT token limits
+MODEL_OUTPUT_LIMITS = {
+    'gemini-2.5-flash': 65_536,
+    'gemini-2.0-flash': 65_536,
+    'gemini-1.5-flash': 8_192,
+    'gemini-1.5-pro': 8_192,
+    'gpt-4o': 16_384,
+    'gpt-4-turbo': 4_096,
+    'claude-3-opus': 4_096,
+    'claude-3-sonnet': 4_096,
+    'claude-3-haiku': 4_096,
+    'glm-4p5': 4_096,
+}
+DEFAULT_OUTPUT_LIMIT = 8_192  # Conservative fallback
+
+# System prompt overhead (approximate)
+SYSTEM_PROMPT_TOKENS = 3_000  # Clustering system prompt size
+SAFETY_BUFFER_PERCENT = 0.10  # 10% buffer
+
+# Tokens per node estimates for clustering
+TOKENS_PER_NODE_INPUT = 25   # Node name in prompt
+TOKENS_PER_NODE_OUTPUT = 40  # Node name + JSON structure in response
+
+def get_max_clustering_tokens(model_name: str) -> int:
+    """Calculate max INPUT tokens for clustering based on model context window."""
+    context = MODEL_CONTEXT_WINDOWS.get(model_name, DEFAULT_CONTEXT_WINDOW)
+    usable = context - SYSTEM_PROMPT_TOKENS
+    return int(usable * (1 - SAFETY_BUFFER_PERCENT))
+
+def get_max_clustering_nodes(model_name: str) -> int:
+    """Calculate max nodes for clustering based on OUTPUT token limit."""
+    output_limit = MODEL_OUTPUT_LIMITS.get(model_name, DEFAULT_OUTPUT_LIMIT)
+    usable = int(output_limit * (1 - SAFETY_BUFFER_PERCENT))
+    return usable // TOKENS_PER_NODE_OUTPUT
+
+MAX_LLM_OUTPUT_TOKENS = 16_384          # Legacy - use get_max_clustering_nodes instead
 
 # Module Tree Tiering Thresholds (for large repos)
 LARGE_REPO_COMPONENT_THRESHOLD = 500    # Switch to tiered module tree above this

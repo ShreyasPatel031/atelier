@@ -304,21 +304,9 @@ class CLIDocumentationGenerator:
             else:
                 click.echo(f"[DEBUG] [{time.time() - stage_2_start:.1f}s] Calling cluster_modules (this may take a while)...", err=True)
                 click.echo(f"[DEBUG] Input: {len(leaf_nodes)} leaf nodes, {len(components)} total components", err=True)
-                import signal
-                
-                def timeout_handler(signum, frame):
-                    raise TimeoutError("Module clustering timed out after 60 seconds")
-                
-                # Set 30 second timeout for clustering
-                signal.signal(signal.SIGALRM, timeout_handler)
-                signal.alarm(30)  # 30 second hard timeout
-                try:
-                    module_tree = cluster_modules(leaf_nodes, components, backend_config)
-                    signal.alarm(0)  # Cancel timeout
-                except TimeoutError as e:
-                    signal.alarm(0)
-                    click.echo(f"[DEBUG] TIMEOUT: {e}", err=True)
-                    raise APIError(f"Module clustering timed out after 30s: {e}")
+                # No artificial timeout - let clustering complete based on context window
+                # The dynamic algorithm fits nodes to context window, LLM determines processing time
+                module_tree = cluster_modules(leaf_nodes, components, backend_config)
                 file_manager.save_json(module_tree, first_module_tree_path)
             
             stage_2_duration = time.time() - stage_2_start

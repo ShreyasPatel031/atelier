@@ -268,83 +268,164 @@ def build_graph_from_components(components: Dict[str, Any]) -> Dict[str, Set[str
     return graph 
 
 
-def get_leaf_nodes(graph: Dict[str, Set[str]], components: Dict[str, Node]) -> List[str]:
+def compute_reachability(graph: Dict[str, Set[str]], start_node: str) -> int:
     """
-    Find leaf nodes (nodes that no other nodes depend on) and build dependency trees
-    showing the full dependency chain from each leaf back to the ultimate dependencies.
+    Compute how many nodes are reachable from start_node via BFS.
     
-    The graph uses natural dependency direction:
-    - If A depends on B, the graph has an edge A → B
-    - Leaf nodes are nodes that appear in no other node's dependency set
-    - Each tree shows the dependency chain: leaf → its dependencies → their dependencies, etc.
+    Args:
+        graph: Dependency graph (node -> set of dependencies)
+        start_node: Node to start BFS from
+    
+    Returns:
+        Count of nodes reachable from start_node (excluding itself)
+    """
+    visited = set()
+    queue = deque([start_node])
+    
+    while queue:
+        node = queue.popleft()
+        if node in visited:
+            continue
+        visited.add(node)
+        
+        # Add all dependencies to queue
+        for dep in graph.get(node, set()):
+            if dep not in visited:
+                queue.append(dep)
+    
+    return len(visited) - 1  # Exclude start_node itself
+
+
+def get_leaf_nodes(
+    graph: Dict[str, Set[str]], 
+    components: Dict[str, Node],
+    max_context_tokens: int = 100_000
+) -> List[str]:
+    """
+    Find entry point candidates using reachability-based ranking.
+    
+    DYNAMIC ALGORITHM - scales to fit context window:
+    1. Find nodes with in-degree=0 (nothing depends on them)
+    2. Filter to nodes with out-degree>0 (they depend on something)
+    3. Compute reachability via BFS for each candidate
+    4. Sort by reachability descending (highest first)
+    5. DYNAMICALLY remove lowest-reachability nodes until tokens fit in context
+    
+    This is language-agnostic, naming-agnostic, and convention-agnostic.
+    High reachability = node controls/orchestrates large portion of codebase.
     
     Args:
         graph: A dependency graph with natural direction (A→B if A depends on B)
+        components: Dictionary of code components
+        max_context_tokens: Maximum tokens for clustering prompt (default 100K)
     
     Returns:
-        A list of leaf nodes
+        A list of entry point node IDs, sorted by reachability (highest first)
     """
     # First, resolve cycles to ensure we have a DAG
     acyclic_graph = resolve_cycles(graph)
     
-    # Find leaf nodes (nodes that no other nodes depend on)
-    leaf_nodes = set(acyclic_graph.keys())
-
+    # Compute in-degree for all nodes
+    in_degree: Dict[str, int] = {node: 0 for node in acyclic_graph}
+    for node, deps in acyclic_graph.items():
+        for dep in deps:
+            if dep in in_degree:
+                in_degree[dep] += 1
     
+    # Find candidates: in-degree=0 AND out-degree>0 AND exists in components
+    candidates = []
+    for node in acyclic_graph:
+        out_degree = len(acyclic_graph.get(node, set()))
+        
+        # Skip invalid nodes
+        if not isinstance(node, str) or node.strip() == "":
+            continue
+        if any(err in node.lower() for err in ['error', 'exception', 'failed', 'invalid']):
+            continue
+        
+        # Entry point criteria: nothing depends on it (in=0) AND it depends on something (out>0)
+        if in_degree[node] == 0 and out_degree > 0:
+            # Must exist in components
+            if node in components:
+                candidates.append(node)
     
-    def concise_node(leaf_nodes: Set[str]) -> Set[str]:
-        concise_leaf_nodes = set()
-        for node in leaf_nodes:
-            if node.endswith("__init__"):
-                # replace by class name
-                concise_leaf_nodes.add(node.replace(".__init__", ""))
-            else:
-                concise_leaf_nodes.add(node)
-        
-        keep_leaf_nodes = []
-        
-        # Determine if we should include functions based on available component types
-        # For C-based projects, we need to include functions since they don't have classes
-        available_types = set()
-        for comp in components.values():
-            available_types.add(comp.component_type)
-        
-        # Valid types for leaf nodes - include functions for C-based codebases
-        valid_types = {"class", "interface", "struct"}
-        # If no classes/interfaces/structs are found, include functions
-        if not available_types.intersection(valid_types):
-            valid_types.add("function")
-
-        for leaf_node in leaf_nodes:
-            # Skip any leaf nodes that are clearly error strings or invalid identifiers
-            if not isinstance(leaf_node, str) or leaf_node.strip() == "" or any(err_keyword in leaf_node.lower() for err_keyword in ['error', 'exception', 'failed', 'invalid']):
-                logger.debug(f"Skipping invalid leaf node identifier: '{leaf_node}'")
-                continue
-                
-            if leaf_node in components:
-                if components[leaf_node].component_type in valid_types:
-                    keep_leaf_nodes.append(leaf_node)
-                else:
-                    # logger.debug(f"Leaf node {leaf_node} is a {components[leaf_node].component_type}, removing it")
-                    pass
-            else:
-                # logger.debug(f"Leaf node {leaf_node} not found in components, removing it")
-                pass
-
-        return keep_leaf_nodes
-
-    concise_leaf_nodes = concise_node(leaf_nodes)
-    if len(concise_leaf_nodes) >= 400:
-        logger.debug(f"Leaf nodes are too many ({len(concise_leaf_nodes)}), removing dependencies of other nodes")
-        # Remove nodes that are dependencies of other nodes
-        for node, deps in acyclic_graph.items():
-            for dep in deps:
-                leaf_nodes.discard(dep)
-        
-        concise_leaf_nodes = concise_node(leaf_nodes)
+    logger.info(f"[ENTRY_POINTS] Found {len(candidates)} candidates with in-degree=0 and out-degree>0")
     
-    if not leaf_nodes:
-        logger.warning("No leaf nodes found in the graph")
+    if not candidates:
+        # Fallback: include all nodes with in-degree=0 (even isolated ones)
+        logger.warning("[ENTRY_POINTS] No candidates with out-degree>0, falling back to all in-degree=0 nodes")
+        candidates = [
+            node for node in acyclic_graph 
+            if in_degree[node] == 0 and node in components
+        ]
+    
+    if not candidates:
+        logger.error("[ENTRY_POINTS] No entry point candidates found")
         return []
     
-    return concise_leaf_nodes 
+    # Compute reachability for each candidate
+    logger.info(f"[ENTRY_POINTS] Computing reachability for {len(candidates)} candidates...")
+    reachability: Dict[str, int] = {}
+    for i, node in enumerate(candidates):
+        reachability[node] = compute_reachability(acyclic_graph, node)
+        if (i + 1) % 500 == 0:
+            logger.debug(f"[ENTRY_POINTS] Computed reachability for {i+1}/{len(candidates)} candidates")
+    
+    # Sort by reachability descending (highest first)
+    sorted_candidates = sorted(candidates, key=lambda n: -reachability[n])
+    
+    # Log top entries
+    top_10 = sorted_candidates[:10]
+    logger.info(f"[ENTRY_POINTS] Top 10 by reachability:")
+    for i, node in enumerate(top_10):
+        logger.info(f"  {i+1}. reach={reachability[node]:4d}  {node[:60]}")
+    
+    # DYNAMIC ALGORITHM: Scale nodes to fit BOTH input AND output constraints
+    # 
+    # Constraints (from config, model-specific):
+    # 1. INPUT: max_context_tokens (passed in, already computed from model)
+    # 2. OUTPUT: MODEL_OUTPUT_LIMITS / TOKENS_PER_NODE_OUTPUT
+    #
+    from codewiki.src.config import (
+        TOKENS_PER_NODE_INPUT, 
+        TOKENS_PER_NODE_OUTPUT,
+        SYSTEM_PROMPT_TOKENS,
+        SAFETY_BUFFER_PERCENT,
+        MODEL_OUTPUT_LIMITS,
+        DEFAULT_OUTPUT_LIMIT
+    )
+    
+    # Calculate max nodes for INPUT
+    available_input_tokens = max_context_tokens - SYSTEM_PROMPT_TOKENS
+    max_nodes_for_input = available_input_tokens // TOKENS_PER_NODE_INPUT
+    
+    # Calculate max nodes for OUTPUT (use Gemini 2.5 Flash as default since that's what we use)
+    # TODO: Pass model_name through to make this truly dynamic
+    output_limit = MODEL_OUTPUT_LIMITS.get('gemini-2.5-flash', DEFAULT_OUTPUT_LIMIT)
+    usable_output = int(output_limit * (1 - SAFETY_BUFFER_PERCENT))
+    max_nodes_for_output = usable_output // TOKENS_PER_NODE_OUTPUT
+    
+    # Use the MORE RESTRICTIVE constraint
+    max_nodes = min(max_nodes_for_input, max_nodes_for_output)
+    
+    # Start with all candidates
+    result = sorted_candidates.copy()
+    
+    logger.info(f"[ENTRY_POINTS] Initial: {len(result)} candidates")
+    logger.info(f"[ENTRY_POINTS] INPUT limit: {max_nodes_for_input} nodes (from {max_context_tokens} token context)")
+    logger.info(f"[ENTRY_POINTS] OUTPUT limit: {max_nodes_for_output} nodes (from {output_limit} token output)")
+    logger.info(f"[ENTRY_POINTS] Using: {max_nodes} nodes (more restrictive)")
+    
+    # Trim to fit both constraints
+    if len(result) > max_nodes:
+        logger.info(f"[ENTRY_POINTS] Trimming {len(result)} → {max_nodes} (output-constrained)")
+        result = result[:max_nodes]
+    
+    logger.info(f"[ENTRY_POINTS] Final: {len(result)} entry points (fits in {max_context_tokens} token context)")
+    
+    if result:
+        min_reach = reachability[result[-1]]
+        max_reach = reachability[result[0]]
+        logger.info(f"[ENTRY_POINTS] Reachability range: {min_reach} - {max_reach}")
+    
+    return result
