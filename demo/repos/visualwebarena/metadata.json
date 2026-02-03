@@ -1,0 +1,41 @@
+{
+    "generation_info": {
+        "timestamp": "2026-02-03T15:26:11.812274",
+        "main_model": "gemini-2.5-flash",
+        "generator_version": "1.0.0",
+        "repo_path": "/Users/shreyaspatel/atelier/demo/repos/visualwebarena",
+        "commit_id": null
+    },
+    "statistics": {
+        "total_components": 89,
+        "leaf_nodes": 23,
+        "max_depth": 10
+    },
+    "files_generated": [
+        "overview.md",
+        "module_tree.json",
+        "first_module_tree.json",
+        "shopping_order_helpers.md",
+        "reporting_and_analysis.md",
+        "dom_query_helpers.md",
+        "prompt_construction.md",
+        "execution_management.md",
+        "openai_chat_completion_api.md",
+        "test_execution.md",
+        "numeric_evaluation.md",
+        "string_evaluation.md",
+        "evaluator_implementations.md",
+        "product_url_retrieval.md",
+        "main.md",
+        "prompt_constructors.md",
+        "evaluation_helpers.md",
+        "openai_completion_api.md",
+        "shopping_product_review_helpers.md",
+        "preparation_and_setup.md",
+        "llm_api_integration.md",
+        "reddit_helpers.md",
+        "prompt_types.md",
+        "product_review_fetchers.md",
+        "order_product_details.md"
+    ]
+}

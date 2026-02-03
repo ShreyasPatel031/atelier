@@ -1,0 +1,61 @@
+{
+  "repo_name": "visualwebarena",
+  "repo_path": "/Users/shreyaspatel/atelier/demo/repos/visualwebarena",
+  "repo_size_mb": 451724.48046875,
+  "total_files": 0,
+  "total_code_files": 50,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 0.22405076026916504,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 0.01450490951538086,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 376.86256885528564,
+      "tokens_used": 0,
+      "files_created": 23,
+      "files_created_list": [
+        "shopping_order_helpers.md",
+        "reporting_and_analysis.md",
+        "dom_query_helpers.md",
+        "overview.md",
+        "prompt_construction.md",
+        "execution_management.md",
+        "openai_chat_completion_api.md",
+        "test_execution.md",
+        "numeric_evaluation.md",
+        "string_evaluation.md",
+        "evaluator_implementations.md",
+        "product_url_retrieval.md",
+        "main.md",
+        "prompt_constructors.md",
+        "evaluation_helpers.md",
+        "openai_completion_api.md",
+        "shopping_product_review_helpers.md",
+        "preparation_and_setup.md",
+        "llm_api_integration.md",
+        "reddit_helpers.md",
+        "prompt_types.md",
+        "product_review_fetchers.md",
+        "order_product_details.md"
+      ]
+    }
+  },
+  "time_to_first_overview": 377.25859093666077,
+  "first_overview_file": "/Users/shreyaspatel/atelier/demo/repos/visualwebarena/overview.md",
+  "total_duration": 377.25863909721375,
+  "total_tokens": 0,
+  "total_files_created": 23,
+  "start_time": 1770112194.554216,
+  "end_time": 1770112571.812855
+}

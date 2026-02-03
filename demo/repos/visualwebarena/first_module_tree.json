@@ -1,0 +1,31 @@
+{
+    "main": {
+        "path": "",
+        "components": [
+            "run.test",
+            "run_demo.test",
+            "agent.prompts.prompt_constructor.MultimodalCoTPromptConstructor",
+            "evaluation_harness.helper_functions.reddit_get_latest_comment_content_by_username",
+            "evaluation_harness.helper_functions.reddit_get_parent_comment_username_of_latest_comment_by_username",
+            "scripts.calc_breakdown_sr.main",
+            "agent.prompts.prompt_constructor.DirectPromptConstructor",
+            "evaluation_harness.evaluators.NumericEvaluator",
+            "evaluation_harness.evaluators.StringSoftEvaluator",
+            "evaluation_harness.helper_functions.shopping_get_latest_order_url",
+            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_author",
+            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_rating",
+            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_text",
+            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_title",
+            "evaluation_harness.helper_functions.shopping_get_sku_product_page_url",
+            "evaluation_harness.helper_functions.shopping_get_order_product_name_list",
+            "evaluation_harness.helper_functions.shopping_get_order_product_quantity",
+            "evaluation_harness.helper_functions.shopping_get_order_product_option",
+            "evaluation_harness.helper_functions.get_query_text_lowercase",
+            "llms.providers.openai_utils.agenerate_from_openai_completion",
+            "llms.providers.openai_utils.agenerate_from_openai_chat_completion",
+            "run.prepare",
+            "run_demo.prepare"
+        ],
+        "children": {}
+    }
+}
