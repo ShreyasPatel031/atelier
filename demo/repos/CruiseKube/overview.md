@@ -32,12 +32,10 @@ graph TD
         TSU[Task Utilities]
     end
 
-    % Core Infrastructure Dependencies
     CFG --> DAT
     APP --> DAT
     TSC --> DAT
 
-    % Data & Persistence Flow
     DBA --> CFG
     DBA -- implements --> APP
     DBA --> DAT
@@ -46,7 +44,6 @@ graph TD
     MPP --> CFG
     MPP --> DAT
 
-    % Cluster Operations Dependencies
     CLM --> CLS
     CLM --> TSC
     CLM --> MPP
@@ -54,7 +51,6 @@ graph TD
     OOM --> CFG
     OOM --> DAT
 
-    % Application Logic Dependencies
     TSI --> TSC
     TSI --> CFG
     TSI --> MPP

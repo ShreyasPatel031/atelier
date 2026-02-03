@@ -795,7 +795,9 @@
         
         async function loadFile(filename) {
             try {
-                const response = await fetch(`${basePath}/${filename}`);
+                // Add cache buster to prevent stale data
+                const cacheBuster = `?_t=${Date.now()}`;
+                const response = await fetch(`${basePath}/${filename}${cacheBuster}`, { cache: 'no-store' });
                 if (!response.ok) throw new Error(`Failed to load ${filename}`);
                 const text = await response.text();
                 return filename.endsWith('.json') ? JSON.parse(text) : text;
@@ -1927,12 +1929,28 @@
         async function init() {
             AVAILABLE_REPOS = await fetchAvailableRepos();
             
+            // When no ?repo= in URL, redirect to first repo so something always loads
+            if (!urlParams.get('repo')) {
+                if (AVAILABLE_REPOS.length > 0) {
+                    const first = AVAILABLE_REPOS[0];
+                    window.location.replace(window.location.pathname + '?repo=' + encodeURIComponent(first));
+                    return;
+                }
+            }
+            
             const success = await loadAllData();
             if (!success) {
-                document.getElementById('mermaid-diagram').innerHTML = 
-                    `<div class="error">Failed to load repository data from "${basePath}"</div>`;
-                document.getElementById('docContent').innerHTML = 
-                    `<div class="error">Check that the repository exists and contains the required files.</div>`;
+                const repoList = AVAILABLE_REPOS.length ? AVAILABLE_REPOS.join(', ') : 'none';
+                const errHtml = `<div class="error" style="padding:1rem;max-width:480px;">
+                    <p><strong>Failed to load repository data</strong></p>
+                    <p>Path tried: <code>${basePath}</code></p>
+                    <p>Serve this app from the <strong>demo</strong> folder (e.g. <code>cd demo && python -m http.server 8080</code>) so that <code>viewer.html</code> and <code>repos/</code> are at the same level.</p>
+                    <p>Then open: <a href="?repo=KubeElasti">viewer.html?repo=KubeElasti</a> or pick a repo from the dropdown.</p>
+                    <p>Available repos: ${repoList || '—'}</p>
+                </div>`;
+                document.getElementById('mermaid-diagram').innerHTML = errHtml;
+                document.getElementById('docContent').innerHTML = '';
+                populateRepoDropdown();
                 return;
             }
             

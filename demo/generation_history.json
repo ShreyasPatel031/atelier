@@ -1,0 +1,41 @@
+[
+  {
+    "timestamp": "2026-02-03T14:34:07.342830",
+    "repo": "CruiseKube",
+    "total_modules": 119,
+    "missing_files": 14,
+    "failure_rate_pct": 11.76,
+    "success_rate_pct": 88.24,
+    "errors": 18,
+    "warnings": 17,
+    "issues_by_type": {
+      "missing_title": 1,
+      "missing_description": 1,
+      "missing_md_file": 14,
+      "missing_diagram": 15,
+      "mermaid_invalid_comment": 4
+    }
+  },
+  {
+    "timestamp": "2026-02-03T14:44:26.690783",
+    "repo": "CruiseKube",
+    "total_modules": 119,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-02-03T14:47:49.688856",
+    "repo": "CruiseKube",
+    "total_modules": 119,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  }
+]
