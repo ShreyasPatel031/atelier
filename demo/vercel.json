@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "node demo/scripts/generate-repos-index.js",
+  "buildCommand": "node scripts/generate-repos-index.js",
   "outputDirectory": ".",
   "routes": [
     {
