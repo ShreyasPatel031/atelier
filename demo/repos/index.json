@@ -1,12 +1,13 @@
 [
-  "CruiseKube",
+  "ExACT",
+  "KubeElasti",
+  "WebDreamer",
   "fastapi",
   "flask",
   "flask-new",
-  "httpx",
-  "kubecost",
-  "KubeElasti",
   "openai-realtime",
-  "rich",
-  "typer"
+  "search-agents",
+  "typer",
+  "visualwebarena",
+  "webarena"
 ]

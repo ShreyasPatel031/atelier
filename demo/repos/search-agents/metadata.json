@@ -1,0 +1,42 @@
+{
+    "generation_info": {
+        "timestamp": "2026-02-05T02:30:40.090730",
+        "main_model": "gemini-2.5-flash",
+        "generator_version": "1.0.0",
+        "repo_path": "/Users/shreyaspatel/atelier/demo/repos/search-agents",
+        "commit_id": null
+    },
+    "statistics": {
+        "total_components": 93,
+        "leaf_nodes": 24,
+        "max_depth": 10
+    },
+    "files_generated": [
+        "overview.md",
+        "module_tree.json",
+        "first_module_tree.json",
+        "shopping_order_helpers.md",
+        "prompt_construction.md",
+        "execution_and_testing.md",
+        "shopping_review_helpers.md",
+        "test_execution.md",
+        "reddit_comment_data_extraction.md",
+        "shopping_helpers.md",
+        "evaluators.md",
+        "direct_prompt_constructor.md",
+        "multimodal_cot_constructor.md",
+        "llm_integrations.md",
+        "evaluation_logic.md",
+        "action_scoring.md",
+        "main.md",
+        "README.md",
+        "evaluation_helpers.md",
+        "openai_completion_api.md",
+        "general_utilities.md",
+        "openai_chat_api.md",
+        "setup_and_initialization.md",
+        "evaluator_components.md",
+        "success_rate_calculation.md",
+        "reddit_helpers.md"
+    ]
+}

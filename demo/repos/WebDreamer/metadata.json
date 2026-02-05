@@ -1,0 +1,30 @@
+{
+    "generation_info": {
+        "timestamp": "2026-02-05T02:19:30.515913",
+        "main_model": "gemini-2.5-flash",
+        "generator_version": "1.0.0",
+        "repo_path": "/Users/shreyaspatel/atelier/demo/repos/WebDreamer",
+        "commit_id": null
+    },
+    "statistics": {
+        "total_components": 30,
+        "leaf_nodes": 9,
+        "max_depth": 10
+    },
+    "files_generated": [
+        "overview.md",
+        "module_tree.json",
+        "first_module_tree.json",
+        "openai_integrations.md",
+        "simulation_execution.md",
+        "llm_core_interface.md",
+        "llm_handling.md",
+        "main.md",
+        "README.md",
+        "simulation_and_control.md",
+        "simulation_scoring.md",
+        "success_evaluation.md",
+        "api_interaction.md",
+        "action_selection.md"
+    ]
+}

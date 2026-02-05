@@ -1,0 +1,1270 @@
+{
+    "main": {
+        "path": "",
+        "components": [
+            "run.test",
+            "run_demo.test",
+            "agent.prompts.prompt_constructor.MultimodalCoTPromptConstructor",
+            "evaluation_harness.helper_functions.reddit_get_latest_comment_content_by_username",
+            "evaluation_harness.helper_functions.reddit_get_parent_comment_username_of_latest_comment_by_username",
+            "run.take_action_and_score",
+            "scripts.calc_breakdown_sr.main",
+            "agent.prompts.prompt_constructor.DirectPromptConstructor",
+            "evaluation_harness.evaluators.NumericEvaluator",
+            "evaluation_harness.evaluators.StringSoftEvaluator",
+            "evaluation_harness.helper_functions.shopping_get_latest_order_url",
+            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_author",
+            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_rating",
+            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_text",
+            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_title",
+            "evaluation_harness.helper_functions.shopping_get_sku_product_page_url",
+            "evaluation_harness.helper_functions.shopping_get_order_product_name_list",
+            "evaluation_harness.helper_functions.shopping_get_order_product_quantity",
+            "evaluation_harness.helper_functions.shopping_get_order_product_option",
+            "evaluation_harness.helper_functions.get_query_text_lowercase",
+            "llms.providers.openai_utils.agenerate_from_openai_completion",
+            "llms.providers.openai_utils.agenerate_from_openai_chat_completion",
+            "run.prepare",
+            "run_demo.prepare"
+        ],
+        "children": {
+            "evaluators": {
+                "title": "Evaluation Logic",
+                "description": "Implements different evaluation strategies, such as numeric and string-based comparisons, to score agent performance.",
+                "components": [
+                    "evaluation_harness.evaluators.NumericEvaluator",
+                    "evaluation_harness.evaluators.StringSoftEvaluator"
+                ],
+                "children": {
+                    "evaluation_logic": {
+                        "title": "Evaluation Logic",
+                        "description": "Provides core evaluation mechanisms for numerical and string-based comparisons against expected values.",
+                        "components": [
+                            "evaluation_harness.evaluators.NumericEvaluator",
+                            "evaluation_harness.evaluators.StringSoftEvaluator"
+                        ],
+                        "children": {
+                            "evaluator_components": {
+                                "title": "Core Evaluator Components",
+                                "description": "Contains the fundamental classes for evaluating agent responses, including numeric and string-based comparisons.",
+                                "components": [
+                                    "evaluation_harness.evaluators.NumericEvaluator",
+                                    "evaluation_harness.evaluators.StringSoftEvaluator"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "numeric_evaluator",
+                                            "label": "NumericEvaluator",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "str_to_int",
+                                            "label": "str_2_int",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "compare_inequality",
+                                            "label": "compare_inequality",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "string_soft_evaluator",
+                                            "label": "StringSoftEvaluator",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "evaluator_base",
+                                            "label": "Evaluator Base Class",
+                                            "type": "external",
+                                            "link": "evaluators.md"
+                                        },
+                                        {
+                                            "id": "json_lib",
+                                            "label": "JSON Library",
+                                            "type": "external",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "huggingface_evaluate",
+                                            "label": "Hugging Face Evaluate Library",
+                                            "type": "external",
+                                            "link": null
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "evaluator_base",
+                                            "target": "numeric_evaluator"
+                                        },
+                                        {
+                                            "source": "evaluator_base",
+                                            "target": "string_soft_evaluator"
+                                        },
+                                        {
+                                            "source": "numeric_evaluator",
+                                            "target": "str_to_int"
+                                        },
+                                        {
+                                            "source": "numeric_evaluator",
+                                            "target": "compare_inequality"
+                                        },
+                                        {
+                                            "source": "string_soft_evaluator",
+                                            "target": "json_lib"
+                                        },
+                                        {
+                                            "source": "string_soft_evaluator",
+                                            "target": "huggingface_evaluate"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "evaluator_components",
+                                    "label": "Evaluator Components",
+                                    "type": "module",
+                                    "link": "evaluator_components.md"
+                                }
+                            ],
+                            "edges": [],
+                            "groups": []
+                        }
+                    }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "execution_and_testing",
+                            "label": "Execution and Testing",
+                            "type": "module",
+                            "link": "execution_and_testing.md"
+                        },
+                        {
+                            "id": "evaluation_helpers",
+                            "label": "Evaluation Helpers",
+                            "type": "module",
+                            "link": "evaluation_helpers.md"
+                        },
+                        {
+                            "id": "evaluators",
+                            "label": "Evaluators Module",
+                            "type": "module"
+                        },
+                        {
+                            "id": "evaluation_logic",
+                            "label": "Evaluation Logic",
+                            "type": "module",
+                            "link": "evaluation_logic.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "execution_and_testing",
+                            "target": "evaluators"
+                        },
+                        {
+                            "source": "evaluation_helpers",
+                            "target": "evaluators"
+                        },
+                        {
+                            "source": "evaluators",
+                            "target": "evaluation_logic"
+                        }
+                    ],
+                    "groups": []
+                }
+            },
+            "success_rate_calculation": {
+                "title": "Success Rate Calculation",
+                "description": "Script for calculating and breaking down success rates based on various criteria like task achievability, website, and task type.",
+                "components": [
+                    "scripts.calc_breakdown_sr.main"
+                ],
+                "children": {},
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "main_sr_calc",
+                            "label": "Success Rate Calculator Main",
+                            "type": "component",
+                            "link": null
+                        },
+                        {
+                            "id": "parse_results_func",
+                            "label": "Parse Results",
+                            "type": "component",
+                            "link": null
+                        },
+                        {
+                            "id": "calc_sr_func",
+                            "label": "Calculate Success Rate",
+                            "type": "component",
+                            "link": null
+                        },
+                        {
+                            "id": "config_file",
+                            "label": "Configuration File",
+                            "type": "external",
+                            "link": null
+                        },
+                        {
+                            "id": "log_file",
+                            "label": "Log File",
+                            "type": "external",
+                            "link": null
+                        },
+                        {
+                            "id": "evaluators_module",
+                            "label": "Evaluators Module",
+                            "type": "external",
+                            "link": "evaluators.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "main_sr_calc",
+                            "target": "parse_results_func"
+                        },
+                        {
+                            "source": "main_sr_calc",
+                            "target": "calc_sr_func"
+                        },
+                        {
+                            "source": "config_file",
+                            "target": "main_sr_calc"
+                        },
+                        {
+                            "source": "log_file",
+                            "target": "parse_results_func"
+                        },
+                        {
+                            "source": "main_sr_calc",
+                            "target": "evaluators_module"
+                        }
+                    ],
+                    "groups": []
+                }
+            },
+            "execution_and_testing": {
+                "title": "Execution and Testing",
+                "description": "Manages the execution of agent tests and demonstrations, including environment setup, action processing, and result handling.",
+                "components": [
+                    "run.test",
+                    "run.take_action_and_score",
+                    "run.prepare",
+                    "run_demo.test",
+                    "run_demo.prepare"
+                ],
+                "children": {
+                    "test_execution": {
+                        "title": "Test and Demo Execution",
+                        "description": "Manages the execution flow for both general tests and interactive demos, including agent interaction, action processing, and scoring.",
+                        "components": [
+                            "run.test",
+                            "run.take_action_and_score",
+                            "run_demo.test"
+                        ],
+                        "children": {
+                            "test_runners": {
+                                "title": "Test Case Runners",
+                                "description": "Manages the execution of test cases for both standard evaluations and interactive demonstrations, orchestrating agent actions within the environment.",
+                                "components": [
+                                    "run.test",
+                                    "run_demo.test"
+                                ],
+                                "children": {}
+                            },
+                            "action_scoring": {
+                                "title": "Action Scoring and Search",
+                                "description": "Provides functionality for taking and evaluating agent actions, especially within a search-based agent paradigm to determine optimal action sequences.",
+                                "components": [
+                                    "run.take_action_and_score"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "take_action_and_score",
+                                            "label": "take_action_and_score",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "test_runners",
+                                            "label": "Test Runners",
+                                            "type": "external",
+                                            "link": "test_runners.md"
+                                        },
+                                        {
+                                            "id": "evaluators",
+                                            "label": "Evaluators",
+                                            "type": "external",
+                                            "link": "evaluators.md"
+                                        },
+                                        {
+                                            "id": "llm_integrations",
+                                            "label": "LLM Integrations",
+                                            "type": "external",
+                                            "link": "llm_integrations.md"
+                                        },
+                                        {
+                                            "id": "prompt_construction",
+                                            "label": "Prompt Construction",
+                                            "type": "external",
+                                            "link": "prompt_construction.md"
+                                        },
+                                        {
+                                            "id": "environment",
+                                            "label": "External Environment",
+                                            "type": "external",
+                                            "link": null
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "test_runners",
+                                            "target": "take_action_and_score"
+                                        },
+                                        {
+                                            "source": "take_action_and_score",
+                                            "target": "evaluators"
+                                        },
+                                        {
+                                            "source": "take_action_and_score",
+                                            "target": "llm_integrations"
+                                        },
+                                        {
+                                            "source": "take_action_and_score",
+                                            "target": "prompt_construction"
+                                        },
+                                        {
+                                            "source": "take_action_and_score",
+                                            "target": "environment"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "test_runners",
+                                    "label": "Test Case Runners",
+                                    "type": "module",
+                                    "link": "test_runners.md"
+                                },
+                                {
+                                    "id": "action_scoring",
+                                    "label": "Action Scoring and Search",
+                                    "type": "module",
+                                    "link": "action_scoring.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "test_runners",
+                                    "target": "action_scoring"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    },
+                    "setup_and_initialization": {
+                        "title": "Setup and Initialization",
+                        "description": "Handles the initial setup of the environment and result directories for test and demo runs.",
+                        "components": [
+                            "run.prepare",
+                            "run_demo.prepare"
+                        ],
+                        "children": {
+                            "preparation_routines": {
+                                "title": "Preparation Routines",
+                                "description": "Handles the initial setup processes for both regular and demo runs, including result directory creation and prompt conversion.",
+                                "components": [
+                                    "run.prepare",
+                                    "run_demo.prepare"
+                                ],
+                                "children": {}
+                            }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "setup_and_initialization_module",
+                                    "label": "Setup and Initialization Module",
+                                    "type": "module"
+                                },
+                                {
+                                    "id": "preparation_routines",
+                                    "label": "Preparation Routines",
+                                    "type": "module",
+                                    "link": "preparation_routines.md"
+                                },
+                                {
+                                    "id": "prompt_construction",
+                                    "label": "Prompt Construction",
+                                    "type": "module",
+                                    "link": "prompt_construction.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "setup_and_initialization_module",
+                                    "target": "preparation_routines"
+                                },
+                                {
+                                    "source": "preparation_routines",
+                                    "target": "prompt_construction"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "setup_and_initialization",
+                            "label": "Setup and Initialization",
+                            "type": "module",
+                            "link": "setup_and_initialization.md"
+                        },
+                        {
+                            "id": "test_execution",
+                            "label": "Test and Demo Execution",
+                            "type": "module",
+                            "link": "test_execution.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "setup_and_initialization",
+                            "target": "test_execution"
+                        }
+                    ],
+                    "groups": []
+                }
+            },
+            "evaluation_helpers": {
+                "title": "Evaluation Helper Functions",
+                "description": "Contains utility functions to assist in the evaluation process by fetching specific data from various platforms like Reddit and Shopping.",
+                "components": [
+                    "evaluation_harness.helper_functions.reddit_get_latest_comment_content_by_username",
+                    "evaluation_harness.helper_functions.reddit_get_parent_comment_username_of_latest_comment_by_username",
+                    "evaluation_harness.helper_functions.shopping_get_latest_order_url",
+                    "evaluation_harness.helper_functions.shopping_get_sku_latest_review_author",
+                    "evaluation_harness.helper_functions.shopping_get_sku_latest_review_rating",
+                    "evaluation_harness.helper_functions.shopping_get_sku_latest_review_text",
+                    "evaluation_harness.helper_functions.shopping_get_sku_latest_review_title",
+                    "evaluation_harness.helper_functions.shopping_get_sku_product_page_url",
+                    "evaluation_harness.helper_functions.shopping_get_order_product_name_list",
+                    "evaluation_harness.helper_functions.shopping_get_order_product_quantity",
+                    "evaluation_harness.helper_functions.shopping_get_order_product_option",
+                    "evaluation_harness.helper_functions.get_query_text_lowercase"
+                ],
+                "children": {
+                    "reddit_helpers": {
+                        "title": "Reddit Helper Functions",
+                        "description": "Provides utility functions for interacting with Reddit content, such as fetching comment details.",
+                        "components": [
+                            "evaluation_harness.helper_functions.reddit_get_latest_comment_content_by_username",
+                            "evaluation_harness.helper_functions.reddit_get_parent_comment_username_of_latest_comment_by_username"
+                        ],
+                        "children": {
+                            "reddit_comment_data_extraction": {
+                                "title": "Reddit Comment Data Extraction",
+                                "description": "Provides helper functions for extracting content and parent comment usernames from Reddit comments.",
+                                "components": [
+                                    "evaluation_harness.helper_functions.reddit_get_latest_comment_content_by_username",
+                                    "evaluation_harness.helper_functions.reddit_get_parent_comment_username_of_latest_comment_by_username"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "get_content",
+                                            "label": "reddit_get_latest_comment_content_by_username",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "get_parent_username",
+                                            "label": "reddit_get_parent_comment_username_of_latest_comment_by_username",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "reddit_helpers",
+                                            "label": "Reddit Helpers Module",
+                                            "type": "external",
+                                            "link": "reddit_helpers.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "get_content",
+                                            "target": "reddit_helpers"
+                                        },
+                                        {
+                                            "source": "get_parent_username",
+                                            "target": "reddit_helpers"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "reddit_comment_data_extraction",
+                                    "label": "Reddit Comment Data Extraction",
+                                    "type": "module",
+                                    "link": "reddit_comment_data_extraction.md"
+                                }
+                            ],
+                            "edges": [],
+                            "groups": []
+                        }
+                    },
+                    "shopping_helpers": {
+                        "title": "Shopping Helper Functions",
+                        "description": "Offers a suite of helper functions to interact with the shopping platform, including order details and product reviews.",
+                        "components": [
+                            "evaluation_harness.helper_functions.shopping_get_latest_order_url",
+                            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_author",
+                            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_rating",
+                            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_text",
+                            "evaluation_harness.helper_functions.shopping_get_sku_latest_review_title",
+                            "evaluation_harness.helper_functions.shopping_get_sku_product_page_url",
+                            "evaluation_harness.helper_functions.shopping_get_order_product_name_list",
+                            "evaluation_harness.helper_functions.shopping_get_order_product_quantity",
+                            "evaluation_harness.helper_functions.shopping_get_order_product_option"
+                        ],
+                        "children": {
+                            "shopping_order_helpers": {
+                                "title": "Shopping Order Helpers",
+                                "description": "Offers utility functions to fetch order-related information, such as the latest order URL, product names, quantities, and options within an order.",
+                                "components": [
+                                    "evaluation_harness.helper_functions.shopping_get_latest_order_url",
+                                    "evaluation_harness.helper_functions.shopping_get_order_product_name_list",
+                                    "evaluation_harness.helper_functions.shopping_get_order_product_quantity",
+                                    "evaluation_harness.helper_functions.shopping_get_order_product_option"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "get_latest_order_url",
+                                            "label": "shopping_get_latest_order_url",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "get_order_product_name_list",
+                                            "label": "shopping_get_order_product_name_list",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "get_order_product_quantity",
+                                            "label": "shopping_get_order_product_quantity",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "get_order_product_option",
+                                            "label": "shopping_get_order_product_option",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "shopping_helpers",
+                                            "label": "shopping_helpers",
+                                            "type": "external",
+                                            "link": "shopping_helpers.md"
+                                        },
+                                        {
+                                            "id": "page_types",
+                                            "label": "Page | PseudoPage Types",
+                                            "type": "external",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "requests_lib",
+                                            "label": "requests (External Library)",
+                                            "type": "external",
+                                            "link": null
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "get_latest_order_url",
+                                            "target": "shopping_helpers"
+                                        },
+                                        {
+                                            "source": "get_latest_order_url",
+                                            "target": "requests_lib"
+                                        },
+                                        {
+                                            "source": "get_order_product_name_list",
+                                            "target": "shopping_helpers"
+                                        },
+                                        {
+                                            "source": "get_order_product_name_list",
+                                            "target": "page_types"
+                                        },
+                                        {
+                                            "source": "get_order_product_quantity",
+                                            "target": "shopping_helpers"
+                                        },
+                                        {
+                                            "source": "get_order_product_quantity",
+                                            "target": "page_types"
+                                        },
+                                        {
+                                            "source": "get_order_product_option",
+                                            "target": "shopping_helpers"
+                                        },
+                                        {
+                                            "source": "get_order_product_option",
+                                            "target": "page_types"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            },
+                            "shopping_review_helpers": {
+                                "title": "Shopping Review Helpers",
+                                "description": "Provides functions to retrieve product review details and product page URLs from the shopping website.",
+                                "components": [
+                                    "evaluation_harness.helper_functions.shopping_get_sku_latest_review_author",
+                                    "evaluation_harness.helper_functions.shopping_get_sku_latest_review_rating",
+                                    "evaluation_harness.helper_functions.shopping_get_sku_latest_review_text",
+                                    "evaluation_harness.helper_functions.shopping_get_sku_latest_review_title",
+                                    "evaluation_harness.helper_functions.shopping_get_sku_product_page_url"
+                                ],
+                                "children": {},
+                                "diagram": {
+                                    "direction": "TD",
+                                    "nodes": [
+                                        {
+                                            "id": "get_sku_latest_review_author",
+                                            "label": "shopping_get_sku_latest_review_author",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "get_sku_latest_review_rating",
+                                            "label": "shopping_get_sku_latest_review_rating",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "get_sku_latest_review_text",
+                                            "label": "shopping_get_sku_latest_review_text",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "get_sku_latest_review_title",
+                                            "label": "shopping_get_sku_latest_review_title",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "get_sku_product_page_url",
+                                            "label": "shopping_get_sku_product_page_url",
+                                            "type": "component",
+                                            "link": null
+                                        },
+                                        {
+                                            "id": "shopping_helpers_module",
+                                            "label": "shopping_helpers",
+                                            "type": "external",
+                                            "link": "shopping_helpers.md"
+                                        }
+                                    ],
+                                    "edges": [
+                                        {
+                                            "source": "get_sku_latest_review_author",
+                                            "target": "shopping_helpers_module"
+                                        },
+                                        {
+                                            "source": "get_sku_latest_review_rating",
+                                            "target": "shopping_helpers_module"
+                                        },
+                                        {
+                                            "source": "get_sku_latest_review_text",
+                                            "target": "shopping_helpers_module"
+                                        },
+                                        {
+                                            "source": "get_sku_latest_review_title",
+                                            "target": "shopping_helpers_module"
+                                        },
+                                        {
+                                            "source": "get_sku_product_page_url",
+                                            "target": "shopping_helpers_module"
+                                        }
+                                    ],
+                                    "groups": []
+                                }
+                            }
+                        },
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "shopping_order_helpers",
+                                    "label": "Shopping Order Helpers",
+                                    "type": "module",
+                                    "link": "shopping_order_helpers.md"
+                                },
+                                {
+                                    "id": "shopping_review_helpers",
+                                    "label": "Shopping Review Helpers",
+                                    "type": "module",
+                                    "link": "shopping_review_helpers.md"
+                                }
+                            ],
+                            "edges": [],
+                            "groups": []
+                        }
+                    },
+                    "general_utilities": {
+                        "title": "General Utilities",
+                        "description": "Contains general utility functions useful across different evaluation scenarios.",
+                        "components": [
+                            "evaluation_harness.helper_functions.get_query_text_lowercase"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "get_query_text_lowercase",
+                                    "label": "get_query_text_lowercase",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "page_text_extraction_base",
+                                    "label": "Page Text Extraction Base (get_query_text)",
+                                    "type": "external",
+                                    "link": "evaluation_helpers.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "get_query_text_lowercase",
+                                    "target": "page_text_extraction_base"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "reddit_helpers",
+                            "label": "Reddit Helper Functions",
+                            "type": "module",
+                            "link": "reddit_helpers.md"
+                        },
+                        {
+                            "id": "shopping_helpers",
+                            "label": "Shopping Helper Functions",
+                            "type": "module",
+                            "link": "shopping_helpers.md"
+                        },
+                        {
+                            "id": "general_utilities",
+                            "label": "General Utilities",
+                            "type": "module",
+                            "link": "general_utilities.md"
+                        }
+                    ],
+                    "edges": [],
+                    "groups": []
+                }
+            },
+            "llm_integrations": {
+                "title": "LLM Integrations",
+                "description": "Provides asynchronous utilities for interacting with various Large Language Model providers, specifically OpenAI's completion and chat APIs.",
+                "components": [
+                    "llms.providers.openai_utils.agenerate_from_openai_completion",
+                    "llms.providers.openai_utils.agenerate_from_openai_chat_completion"
+                ],
+                "children": {
+                    "openai_completion_api": {
+                        "title": "OpenAI Completion API",
+                        "description": "Handles asynchronous text generation using the OpenAI Completion API.",
+                        "components": [
+                            "llms.providers.openai_utils.agenerate_from_openai_completion"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "agenerate_from_openai_completion",
+                                    "label": "agenerate_from_openai_completion",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "_throttled_openai_completion_acreate",
+                                    "label": "_throttled_openai_completion_acreate",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "llm_integrations",
+                                    "label": "LLM Integrations Module",
+                                    "type": "external",
+                                    "link": "llm_integrations.md"
+                                },
+                                {
+                                    "id": "openai_chat_api",
+                                    "label": "OpenAI Chat API Module",
+                                    "type": "external",
+                                    "link": "openai_chat_api.md"
+                                },
+                                {
+                                    "id": "prompt_construction",
+                                    "label": "Prompt Construction Module",
+                                    "type": "external",
+                                    "link": "prompt_construction.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "agenerate_from_openai_completion",
+                                    "target": "_throttled_openai_completion_acreate"
+                                },
+                                {
+                                    "source": "llm_integrations",
+                                    "target": "agenerate_from_openai_completion"
+                                },
+                                {
+                                    "source": "prompt_construction",
+                                    "target": "agenerate_from_openai_completion"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    },
+                    "openai_chat_api": {
+                        "title": "OpenAI Chat API",
+                        "description": "Manages asynchronous chat-based text generation via the OpenAI Chat Completion API.",
+                        "components": [
+                            "llms.providers.openai_utils.agenerate_from_openai_chat_completion"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "agenerate_chat",
+                                    "label": "agenerate_from_openai_chat_completion",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "openai_api",
+                                    "label": "OpenAI Chat API Service",
+                                    "type": "external",
+                                    "link": null
+                                },
+                                {
+                                    "id": "openai_completion_api_module",
+                                    "label": "OpenAI Completion API Module",
+                                    "type": "external",
+                                    "link": "openai_completion_api.md"
+                                },
+                                {
+                                    "id": "prompt_construction_module",
+                                    "label": "Prompt Construction Module",
+                                    "type": "external",
+                                    "link": "prompt_construction.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "agenerate_chat",
+                                    "target": "openai_api"
+                                },
+                                {
+                                    "source": "prompt_construction_module",
+                                    "target": "agenerate_chat"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "openai_completion_api",
+                            "label": "OpenAI Completion API",
+                            "type": "module",
+                            "link": "openai_completion_api.md"
+                        },
+                        {
+                            "id": "openai_chat_api",
+                            "label": "OpenAI Chat API",
+                            "type": "module",
+                            "link": "openai_chat_api.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "llm_integrations",
+                            "target": "openai_completion_api"
+                        },
+                        {
+                            "source": "llm_integrations",
+                            "target": "openai_chat_api"
+                        }
+                    ],
+                    "groups": []
+                }
+            },
+            "prompt_construction": {
+                "title": "Prompt Construction",
+                "description": "Provides classes for constructing prompts for language models, supporting different strategies like multimodal CoT and direct prompting.",
+                "components": [
+                    "agent.prompts.prompt_constructor.MultimodalCoTPromptConstructor",
+                    "agent.prompts.prompt_constructor.DirectPromptConstructor"
+                ],
+                "children": {
+                    "multimodal_cot_constructor": {
+                        "title": "Multimodal CoT Constructor",
+                        "description": "Constructs prompts for multimodal Chain-of-Thought reasoning, incorporating images and text.",
+                        "components": [
+                            "agent.prompts.prompt_constructor.MultimodalCoTPromptConstructor"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "multimodal_cot_constructor",
+                                    "label": "MultimodalCoTPromptConstructor",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "cot_prompt_constructor",
+                                    "label": "CoTPromptConstructor",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "lm_config",
+                                    "label": "LMConfig",
+                                    "type": "external",
+                                    "link": "llm_integrations.md"
+                                },
+                                {
+                                    "id": "tokenizer",
+                                    "label": "Tokenizer",
+                                    "type": "external",
+                                    "link": "llm_integrations.md"
+                                },
+                                {
+                                    "id": "image_handling",
+                                    "label": "Image Handling Utilities",
+                                    "type": "external",
+                                    "link": "llm_integrations.md"
+                                },
+                                {
+                                    "id": "openai_chat_api",
+                                    "label": "OpenAI Chat API",
+                                    "type": "external",
+                                    "link": "openai_chat_api.md"
+                                },
+                                {
+                                    "id": "google_lm_api",
+                                    "label": "Google LM API",
+                                    "type": "external",
+                                    "link": "llm_integrations.md"
+                                },
+                                {
+                                    "id": "api_input_type",
+                                    "label": "APIInput Type",
+                                    "type": "external",
+                                    "link": "llm_integrations.md"
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "multimodal_cot_constructor",
+                                    "target": "cot_prompt_constructor",
+                                    "label": "inherits from"
+                                },
+                                {
+                                    "source": "multimodal_cot_constructor",
+                                    "target": "lm_config",
+                                    "label": "uses"
+                                },
+                                {
+                                    "source": "multimodal_cot_constructor",
+                                    "target": "tokenizer",
+                                    "label": "uses"
+                                },
+                                {
+                                    "source": "multimodal_cot_constructor",
+                                    "target": "image_handling",
+                                    "label": "uses"
+                                },
+                                {
+                                    "source": "multimodal_cot_constructor",
+                                    "target": "openai_chat_api",
+                                    "label": "formats for (OpenAI)"
+                                },
+                                {
+                                    "source": "multimodal_cot_constructor",
+                                    "target": "google_lm_api",
+                                    "label": "formats for (Google)"
+                                },
+                                {
+                                    "source": "multimodal_cot_constructor",
+                                    "target": "api_input_type",
+                                    "label": "returns"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    },
+                    "direct_prompt_constructor": {
+                        "title": "Direct Prompt Constructor",
+                        "description": "Generates direct prompts for language models without explicit Chain-of-Thought, primarily text-based.",
+                        "components": [
+                            "agent.prompts.prompt_constructor.DirectPromptConstructor"
+                        ],
+                        "children": {},
+                        "diagram": {
+                            "direction": "TD",
+                            "nodes": [
+                                {
+                                    "id": "direct_prompt_constructor_class",
+                                    "label": "DirectPromptConstructor",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "construct_method",
+                                    "label": "construct()",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "extract_action_method",
+                                    "label": "_extract_action()",
+                                    "type": "component",
+                                    "link": null
+                                },
+                                {
+                                    "id": "prompt_constructor",
+                                    "label": "PromptConstructor",
+                                    "type": "external",
+                                    "link": "prompt_construction.md"
+                                },
+                                {
+                                    "id": "lm_config",
+                                    "label": "LMConfig",
+                                    "type": "external",
+                                    "link": "llm_integrations.md"
+                                },
+                                {
+                                    "id": "tokenizer",
+                                    "label": "Tokenizer",
+                                    "type": "external",
+                                    "link": null
+                                },
+                                {
+                                    "id": "trajectory_state_info",
+                                    "label": "Trajectory/StateInfo",
+                                    "type": "external",
+                                    "link": "execution_and_testing.md"
+                                },
+                                {
+                                    "id": "api_input",
+                                    "label": "APIInput",
+                                    "type": "external",
+                                    "link": null
+                                },
+                                {
+                                    "id": "action_parsing_error",
+                                    "label": "ActionParsingError",
+                                    "type": "component",
+                                    "link": null
+                                }
+                            ],
+                            "edges": [
+                                {
+                                    "source": "direct_prompt_constructor_class",
+                                    "target": "prompt_constructor"
+                                },
+                                {
+                                    "source": "direct_prompt_constructor_class",
+                                    "target": "construct_method"
+                                },
+                                {
+                                    "source": "direct_prompt_constructor_class",
+                                    "target": "extract_action_method"
+                                },
+                                {
+                                    "source": "construct_method",
+                                    "target": "lm_config"
+                                },
+                                {
+                                    "source": "construct_method",
+                                    "target": "tokenizer"
+                                },
+                                {
+                                    "source": "construct_method",
+                                    "target": "trajectory_state_info"
+                                },
+                                {
+                                    "source": "construct_method",
+                                    "target": "api_input"
+                                },
+                                {
+                                    "source": "extract_action_method",
+                                    "target": "action_parsing_error"
+                                }
+                            ],
+                            "groups": []
+                        }
+                    }
+                },
+                "diagram": {
+                    "direction": "TD",
+                    "nodes": [
+                        {
+                            "id": "multimodal_cot_constructor",
+                            "label": "Multimodal CoT Constructor",
+                            "type": "module",
+                            "link": "multimodal_cot_constructor.md"
+                        },
+                        {
+                            "id": "direct_prompt_constructor",
+                            "label": "Direct Prompt Constructor",
+                            "type": "module",
+                            "link": "direct_prompt_constructor.md"
+                        }
+                    ],
+                    "edges": [
+                        {
+                            "source": "multimodal_cot_constructor",
+                            "target": "llm_integrations"
+                        },
+                        {
+                            "source": "direct_prompt_constructor",
+                            "target": "llm_integrations"
+                        }
+                    ],
+                    "groups": []
+                }
+            }
+        },
+        "title": "Main",
+        "description": "The `main` module serves as the orchestrator for running tests and demonstrations of an agent, encompassing various critical functionalities from environment setup and action execution to prompt co...",
+        "diagram": {
+            "direction": "TD",
+            "nodes": [
+                {
+                    "id": "execution_and_testing",
+                    "label": "Execution and Testing",
+                    "type": "module",
+                    "link": "execution_and_testing.md"
+                },
+                {
+                    "id": "prompt_construction",
+                    "label": "Prompt Construction",
+                    "type": "module",
+                    "link": "prompt_construction.md"
+                },
+                {
+                    "id": "evaluation_helpers",
+                    "label": "Evaluation Helper Functions",
+                    "type": "module",
+                    "link": "evaluation_helpers.md"
+                },
+                {
+                    "id": "evaluators",
+                    "label": "Evaluation Logic",
+                    "type": "module",
+                    "link": "evaluators.md"
+                },
+                {
+                    "id": "llm_integrations",
+                    "label": "LLM Integrations",
+                    "type": "module",
+                    "link": "llm_integrations.md"
+                },
+                {
+                    "id": "success_rate_calculation",
+                    "label": "Success Rate Calculation",
+                    "type": "module",
+                    "link": "success_rate_calculation.md"
+                }
+            ],
+            "edges": [
+                {
+                    "source": "execution_and_testing",
+                    "target": "prompt_construction"
+                },
+                {
+                    "source": "execution_and_testing",
+                    "target": "evaluation_helpers"
+                },
+                {
+                    "source": "execution_and_testing",
+                    "target": "evaluators"
+                },
+                {
+                    "source": "execution_and_testing",
+                    "target": "llm_integrations"
+                },
+                {
+                    "source": "evaluators",
+                    "target": "evaluation_helpers"
+                },
+                {
+                    "source": "prompt_construction",
+                    "target": "llm_integrations"
+                }
+            ],
+            "groups": []
+        }
+    }
+}

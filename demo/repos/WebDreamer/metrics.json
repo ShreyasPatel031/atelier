@@ -1,0 +1,50 @@
+{
+  "repo_name": "WebDreamer",
+  "repo_path": "/Users/shreyaspatel/atelier/demo/repos/WebDreamer",
+  "repo_size_mb": 456357.578125,
+  "total_files": 0,
+  "total_code_files": 10,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 0.05141401290893555,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 0.003353118896484375,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 146.68425011634827,
+      "tokens_used": 0,
+      "files_created": 12,
+      "files_created_list": [
+        "overview.md",
+        "openai_integrations.md",
+        "simulation_execution.md",
+        "llm_core_interface.md",
+        "llm_handling.md",
+        "main.md",
+        "README.md",
+        "simulation_and_control.md",
+        "simulation_scoring.md",
+        "success_evaluation.md",
+        "api_interaction.md",
+        "action_selection.md"
+      ]
+    }
+  },
+  "time_to_first_overview": 146.745197057724,
+  "first_overview_file": "/Users/shreyaspatel/atelier/demo/repos/WebDreamer/overview.md",
+  "total_duration": 146.74526119232178,
+  "total_tokens": 0,
+  "total_files_created": 12,
+  "start_time": 1770238023.7713568,
+  "end_time": 1770238170.516618
+}

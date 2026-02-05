@@ -1,0 +1,31 @@
+{
+    "generation_info": {
+        "timestamp": "2026-02-05T02:23:35.018012",
+        "main_model": "gemini-2.5-flash",
+        "generator_version": "1.0.0",
+        "repo_path": "/Users/shreyaspatel/atelier/demo/repos/ExACT",
+        "commit_id": null
+    },
+    "statistics": {
+        "total_components": 103,
+        "leaf_nodes": 12,
+        "max_depth": 10
+    },
+    "files_generated": [
+        "overview.md",
+        "module_tree.json",
+        "first_module_tree.json",
+        "llm_config_builders.md",
+        "value_function_construction.md",
+        "llm_configuration.md",
+        "README.md",
+        "agent_factory.md",
+        "llm_config_construction.md",
+        "value_function_builders.md",
+        "standard_execution.md",
+        "basic_execution.md",
+        "value_function_arguments.md",
+        "agent_construction.md",
+        "resettable_execution.md"
+    ]
+}

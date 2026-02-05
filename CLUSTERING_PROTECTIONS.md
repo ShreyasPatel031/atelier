@@ -130,3 +130,26 @@ This groups components by top-level directory:
 2. **Add explicit timeout** (e.g., 60s) in LLM call
 3. **Add batch processing** for very large node sets (>500)
 4. **Add retry logic** for transient failures (rate limits, network errors)
+
+Min Components (3) - Skip clustering if <3 nodes
+Module Token Count (32K) - Skip LLM if module fits in context
+Prompt Truncation (100K) - Truncate component list if prompt >100K tokens
+LLM Exception Handling - Catch timeouts, rate limits, network errors → fallback
+Recursion Depth Limit (10) - Stop recursing at max depth
+
+
+
+1. Min Components (3) - Skip clustering if <3 nodes
+- this seems ok
+
+2. Module Token Count (32K) - Skip LLM if module fits in context
+- this seems ok but shoudl be dynamic, find context for the model we use subtract the system promtp leae 10% buffer and define
+3. same as above
+4. no lets make error logging strong here and stop, directory based module fallback needs to be removed
+
+5. seems ok
+
+6. also remove 400 and make dependencies  (0 in, >0 out), 
+
+
+do sequentially, rerun kubecost , after each change to ensure the step works as intended, after all steps we should 

@@ -37,5 +37,33 @@
     "errors": 0,
     "warnings": 0,
     "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-02-03T15:26:48.730084",
+    "repo": "webarena",
+    "total_modules": 15,
+    "missing_files": 1,
+    "failure_rate_pct": 6.67,
+    "success_rate_pct": 93.33,
+    "errors": 2,
+    "warnings": 0,
+    "issues_by_type": {
+      "missing_md_file": 1,
+      "missing_diagram": 1
+    }
+  },
+  {
+    "timestamp": "2026-02-03T15:26:48.767109",
+    "repo": "visualwebarena",
+    "total_modules": 24,
+    "missing_files": 2,
+    "failure_rate_pct": 8.33,
+    "success_rate_pct": 91.67,
+    "errors": 4,
+    "warnings": 0,
+    "issues_by_type": {
+      "missing_md_file": 2,
+      "missing_diagram": 2
+    }
   }
 ]

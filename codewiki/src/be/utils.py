@@ -32,7 +32,7 @@ def count_tokens(text: str) -> int:
     """
     Count the number of tokens in a text.
     """
-    length = len(enc.encode(text))
+    length = len(enc.encode(text, disallowed_special=()))
     # logger.debug(f"Number of tokens: {length}")
     return length
 

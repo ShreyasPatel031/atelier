@@ -1,0 +1,51 @@
+{
+  "repo_name": "ExACT",
+  "repo_path": "/Users/shreyaspatel/atelier/demo/repos/ExACT",
+  "repo_size_mb": 456367.44140625,
+  "total_files": 0,
+  "total_code_files": 47,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 0.10696101188659668,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 0.01612997055053711,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 234.31842708587646,
+      "tokens_used": 0,
+      "files_created": 13,
+      "files_created_list": [
+        "llm_config_builders.md",
+        "overview.md",
+        "value_function_construction.md",
+        "llm_configuration.md",
+        "README.md",
+        "agent_factory.md",
+        "llm_config_construction.md",
+        "value_function_builders.md",
+        "standard_execution.md",
+        "basic_execution.md",
+        "value_function_arguments.md",
+        "agent_construction.md",
+        "resettable_execution.md"
+      ]
+    }
+  },
+  "time_to_first_overview": 234.4532208442688,
+  "first_overview_file": "/Users/shreyaspatel/atelier/demo/repos/ExACT/overview.md",
+  "total_duration": 234.45323705673218,
+  "total_tokens": 0,
+  "total_files_created": 13,
+  "start_time": 1770238180.564975,
+  "end_time": 1770238415.018212
+}
