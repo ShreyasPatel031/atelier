@@ -191,19 +191,23 @@
         }
 
         .doc-pane {
-            width: 0;
-            min-width: 0;
+            width: 40%;
+            min-width: 300px;
             overflow: hidden;
             padding: 0;
             background: #ffffff;
             transition: width 0.3s ease, padding 0.3s ease, min-width 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .doc-pane.open {
             width: 40%;
             min-width: 300px;
-            overflow: auto;
-            padding: 20px 30px;
+            overflow: hidden;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Tooltip for hover */
@@ -288,6 +292,10 @@
             max-width: 800px;
             line-height: 1.7;
             color: #334155;
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 30px;
+            margin: 0;
         }
         
         .doc-content h1 {
@@ -525,6 +533,113 @@
         .collapse-button {
             cursor: pointer !important;
         }
+
+        /* Chat in right pane - now fills entire right panel */
+        .chat-section {
+            margin-top: 0;
+            padding: 20px 30px;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            background: #ffffff;
+            height: 100%;
+            overflow: hidden;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 0;
+        }
+        .chat-message {
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 90%;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .chat-message.user {
+            background: #2563eb;
+            color: white;
+            align-self: flex-end;
+        }
+        .chat-message.assistant {
+            background: #f1f5f9;
+            color: #334155;
+            align-self: flex-start;
+        }
+        /* Markdown in assistant messages */
+        .chat-message.assistant p { margin: 6px 0; }
+        .chat-message.assistant p:first-child { margin-top: 0; }
+        .chat-message.assistant p:last-child { margin-bottom: 0; }
+        .chat-message.assistant ul, .chat-message.assistant ol {
+            margin: 6px 0;
+            padding-left: 20px;
+        }
+        .chat-message.assistant li { margin: 3px 0; }
+        .chat-message.assistant code {
+            background: rgba(0,0,0,0.08);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: #b91c1c;
+        }
+        .chat-message.assistant pre {
+            background: rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+        .chat-message.assistant pre code {
+            background: none;
+            padding: 0;
+            color: #334155;
+        }
+        .chat-message.assistant strong { font-weight: 600; color: #1e293b; }
+        .chat-message.assistant a { color: #2563eb; text-decoration: none; }
+        .chat-message.assistant a:hover { text-decoration: underline; }
+        .chat-message.loading {
+            background: #f1f5f9;
+            color: #64748b;
+            align-self: flex-start;
+            font-style: italic;
+        }
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .chat-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        .chat-send {
+            padding: 8px 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .chat-send:hover:not(:disabled) { background: #1d4ed8; }
+        .chat-send:disabled { background: #94a3b8; cursor: not-allowed; }
         
         @media (max-width: 1024px) {
             .container {
@@ -565,7 +680,6 @@
     
     <div class="container">
         <div class="diagram-pane">
-            <button class="panel-toggle" id="panelToggle" onclick="toggleDocPanel()" title="Toggle documentation panel">›</button>
             <div class="breadcrumb" id="breadcrumb">
                 <span class="breadcrumb-item">
                     <span class="breadcrumb-current" id="breadcrumbRoot">Loading...</span>
@@ -577,7 +691,7 @@
                 <span class="zoom-level" id="zoomLevel">100%</span>
                 <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
                 <button class="zoom-btn" onclick="fitToView()" title="Fit to View">⊡</button>
-                <span class="zoom-hint">Scroll to zoom • Drag to pan</span>
+                <span class="zoom-hint">Scroll to zoom • Drag to pan • Two-finger pan</span>
             </div>
             <div class="diagram-viewport" id="diagramViewport">
                 <div class="diagram-canvas" id="diagramCanvas">
@@ -585,8 +699,16 @@
                 </div>
             </div>
         </div>
-        <div class="doc-pane">
-            <div class="doc-content" id="docContent">Loading documentation...</div>
+        <div class="doc-pane open">
+            <div class="chat-section">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message assistant">Ask about this codebase's architecture.</div>
+                </div>
+                <div class="chat-input-row">
+                    <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="2"></textarea>
+                    <button class="chat-send" id="chatSend">Send</button>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -598,7 +720,7 @@
         
         // Get repo path from URL query param: ?repo=flask or ?repo=repos/flask
         const urlParams = new URLSearchParams(window.location.search);
-        const repoPath = urlParams.get('repo') || 'flask';
+        const repoPath = urlParams.get('repo') || 'search-agents';
         // Ensure relative path with ./ prefix for correct resolution
         const basePath = repoPath.startsWith('repos/') ? `./${repoPath}` : `./repos/${repoPath}`;
         
@@ -616,8 +738,9 @@
         let expandedNodeToModule = new Map();  // Maps nodeId -> moduleId for expanded nodes
         let currentModuleId = 'overview';
         let selectedModuleId = null;  // Currently selected module
+        let openedModules = new Set(['overview']);  // Track opened modules (overview is always open)
         let selectionPath = [];       // Breadcrumb path: [{id, name}, ...]
-        let docPanelOpen = false;     // Track panel state
+        let docPanelOpen = true;     // Panel is always open (chat-only view)
         let moduleMetadata = {};      // Store title/description for tooltips
         
         // ============================================================
@@ -625,18 +748,11 @@
         // ============================================================
         
         function toggleDocPanel(forceOpen = null) {
-            docPanelOpen = forceOpen !== null ? forceOpen : !docPanelOpen;
+            // Panel is always open now (chat-only view)
+            // This function is kept for compatibility but does nothing
             const panel = document.querySelector('.doc-pane');
-            const toggle = document.getElementById('panelToggle');
-            
-            if (docPanelOpen) {
+            if (panel) {
                 panel.classList.add('open');
-                toggle.textContent = '‹';
-                toggle.title = 'Close documentation panel';
-            } else {
-                panel.classList.remove('open');
-                toggle.textContent = '›';
-                toggle.title = 'Open documentation panel';
             }
         }
         
@@ -1128,6 +1244,9 @@
         // ============================================================
         
         async function renderDiagram(code, links, moduleId) {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1256',message:'renderDiagram() called',data:{moduleId,currentModuleId,expandedNodesSize:expandedNodes.size,codeLength:code?.length||0},timestamp:Date.now(),runId:'debug',hypothesisId:'F'})}).catch(()=>{});
+            // #endregion
             const container = document.getElementById('mermaid-diagram');
             if (!code || !code.trim()) {
                 container.innerHTML = '<div class="loading">No diagram available</div>';
@@ -1164,18 +1283,8 @@
         }
         
         function renderDocumentation(content) {
-            const docEl = document.getElementById('docContent');
-            
-            // Remove mermaid blocks from documentation display
-            const cleanContent = content.replace(/```mermaid[\s\S]*?```/g, '');
-            
-            // Handle markdown links to other modules
-            const linkedContent = cleanContent.replace(/\[([^\]]+)\]\(([^)]+\.md)\)/g, (match, text, href) => {
-                const moduleId = href.replace('.md', '');
-                return `<a href="#" onclick="navigateToModule('${moduleId}'); return false;">${text}</a>`;
-            });
-            
-            docEl.innerHTML = marked.parse(linkedContent);
+            // Documentation panel removed - chat only view
+            // This function is kept for compatibility but does nothing
         }
         
         // ============================================================
@@ -1279,6 +1388,9 @@
         // ============================================================
         
         function processNodes(links, contextModuleId) {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1410',message:'processNodes() called',data:{contextModuleId,currentModuleId,expandedNodesSize:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'I'})}).catch(()=>{});
+            // #endregion
             const svg = document.querySelector('#mermaid-diagram svg');
             if (!svg) return;
             
@@ -1286,6 +1398,10 @@
             const mergedLinks = {...links, ...overviewLinks};
             
             const nodes = svg.querySelectorAll('.node');
+            
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1418',message:'processNodes() found nodes',data:{nodeCount:nodes.length,expandedNodesArray:Array.from(expandedNodes)},timestamp:Date.now(),runId:'debug',hypothesisId:'I'})}).catch(()=>{});
+            // #endregion
             
             nodes.forEach(node => {
                 const nodeId = node.id?.replace(/^flowchart-/, '').split('-')[0] || '';
@@ -1296,6 +1412,9 @@
                 if (nodeText === '[-] Collapse' || nodeId.endsWith('_collapse')) {
                     node.classList.add('collapse-button');
                     const parentNodeId = nodeId.replace(/_collapse$/, '');
+                    // #region debug log
+                    fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1425',message:'processNodes() attaching collapse handler',data:{nodeId,parentNodeId,expandedNodesHasParent:expandedNodes.has(parentNodeId)},timestamp:Date.now(),runId:'debug',hypothesisId:'I'})}).catch(()=>{});
+                    // #endregion
                     node.addEventListener('click', (e) => {
                         e.stopPropagation();
                         e.preventDefault();
@@ -1418,8 +1537,7 @@
                 if (capturedNodeId && capturedTargetModule && moduleData[capturedTargetModule]) {
                     const targetModuleData = moduleData[capturedTargetModule];
                     
-                    // Open the doc panel on click
-                    toggleDocPanel(true);
+                    // Panel is always open (chat-only view)
                     
                     if (targetModuleData.diagram && targetModuleData.diagram.trim()) {
                         if (!expandedNodes.has(capturedNodeId)) {
@@ -1428,6 +1546,10 @@
                             selectNode(`${capturedNodeId}_sub`, capturedTargetModule);
                         }
                     } else {
+                        // Module doesn't have diagram, but still add to opened modules
+                        openedModules.add(capturedTargetModule);
+                        console.log('[MODULE TRACKING] Module opened (no diagram):', capturedTargetModule);
+                        console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
                         selectNode(capturedNodeId, capturedTargetModule);
                     }
                 }
@@ -1442,11 +1564,19 @@
         // ============================================================
         
         function expandNodeInline(nodeId, targetModuleId) {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1574',message:'expandNodeInline() called',data:{nodeId,targetModuleId,currentModuleId,expandedNodesSizeBefore:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
             const targetModule = moduleData[targetModuleId];
             if (!targetModule) return;
             
             // Update selection (this updates breadcrumb and documentation)
             updateSelection(targetModuleId, nodeId);
+            
+            // Add module to opened modules set
+            openedModules.add(targetModuleId);
+            console.log('[MODULE TRACKING] Module opened:', targetModuleId);
+            console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
             
             // Try to expand diagram if module has one
             if (targetModule.diagram && targetModule.diagram.trim()) {
@@ -1455,6 +1585,11 @@
                     expandedNodes.add(nodeId);
                     expandedNodeToModule.set(nodeId, targetModuleId);  // Track nodeId -> moduleId mapping
                     currentDiagramCode = newDiagram;
+                    
+                    // #region debug log
+                    fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1593',message:'expandNodeInline() state after expansion',data:{nodeId,targetModuleId,currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'D'})}).catch(()=>{});
+                    // #endregion
+                    
                     renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
                     
                     // Re-apply selection highlight after re-render
@@ -1567,9 +1702,22 @@
         }
         
         function collapseNode(nodeId) {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1704',message:'collapseNode() called',data:{nodeId,currentModuleId,expandedNodesSizeBefore:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'E'})}).catch(()=>{});
+            // #endregion
+            // Get the module ID for this node before removing
+            const targetModuleId = expandedNodeToModule.get(nodeId) || overviewLinks[nodeId];
+            
             // Remove from expanded set and mapping
             expandedNodes.delete(nodeId);
             expandedNodeToModule.delete(nodeId);
+            
+            // Remove module from opened modules (except overview which is always open)
+            if (targetModuleId && targetModuleId !== 'overview') {
+                openedModules.delete(targetModuleId);
+                console.log('[MODULE TRACKING] Module closed:', targetModuleId);
+                console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
+            }
             
             // Rebuild diagram with remaining expansions
             currentDiagramCode = baseDiagramCode;
@@ -1592,6 +1740,10 @@
                 renderDocumentation(moduleData['overview']?.documentation || '');
             }
             
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1740',message:'collapseNode() state after collapse',data:{nodeId,currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'E'})}).catch(()=>{});
+            // #endregion
+            
             renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
         }
         
@@ -1600,6 +1752,9 @@
         // ============================================================
         
         function navigateToModule(moduleId) {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1747',message:'navigateToModule() called',data:{moduleId,currentModuleIdBefore:currentModuleId,expandedNodesSizeBefore:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
             if (!moduleData[moduleId]) return;
             
             navigationHistory.push({
@@ -1611,6 +1766,20 @@
             currentModuleId = moduleId;
             expandedNodes.clear();
             expandedNodeToModule.clear();
+            
+            // Reset opened modules to just overview when navigating to a new module
+            openedModules.clear();
+            openedModules.add('overview');
+            if (moduleId !== 'overview') {
+                openedModules.add(moduleId);
+            }
+            console.log('[MODULE TRACKING] Navigated to module:', moduleId);
+            console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
+            
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1774',message:'navigateToModule() state after reset',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesSize:openedModules.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
+            
             baseDiagramCode = moduleData[moduleId].diagram;
             currentDiagramCode = baseDiagramCode;
             
@@ -1627,6 +1796,9 @@
         }
         
         function goBack() {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1784',message:'goBack() called',data:{currentModuleId,expandedNodesSize:expandedNodes.size,navigationHistoryLength:navigationHistory.length,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
+            // #endregion
             // If there's navigation history, go back in history
             if (navigationHistory.length > 0) {
                 const prev = navigationHistory.pop();
@@ -1634,6 +1806,24 @@
                 currentDiagramCode = prev.diagramCode;
                 expandedNodes = prev.expanded;
                 baseDiagramCode = moduleData[currentModuleId]?.diagram || '';
+                
+                // Rebuild opened modules from expanded nodes
+                openedModules.clear();
+                openedModules.add('overview');
+                if (currentModuleId !== 'overview') {
+                    openedModules.add(currentModuleId);
+                }
+                for (const expandedNodeId of expandedNodes) {
+                    const moduleId = expandedNodeToModule.get(expandedNodeId) || overviewLinks[expandedNodeId];
+                    if (moduleId && moduleId !== 'overview') {
+                        openedModules.add(moduleId);
+                    }
+                }
+                console.log('[MODULE TRACKING] Went back, opened modules:', Array.from(openedModules));
+                
+                // #region debug log
+                fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1807',message:'goBack() branch: history pop',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
                 
                 updateSelection(currentModuleId);
                 renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
@@ -1644,6 +1834,14 @@
             if (expandedNodes.size > 0) {
                 expandedNodes.clear();
                 expandedNodeToModule.clear();
+                openedModules.clear();
+                openedModules.add('overview');
+                console.log('[MODULE TRACKING] Reset to overview, opened modules:', Array.from(openedModules));
+                
+                // #region debug log
+                fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1818',message:'goBack() branch: collapse all',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
+                
                 currentDiagramCode = baseDiagramCode;
                 updateSelection('overview');
                 renderDiagram(currentDiagramCode, overviewLinks, 'overview');
@@ -1660,12 +1858,34 @@
         // ============================================================
         
         document.addEventListener('keydown', (e) => {
-            // Number keys 1-9 to click on nodes
+            // Ignore keyboard shortcuts when typing in input fields
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                return;
+            }
+            
+            // Ctrl/Cmd+W: Collapse last expanded node
+            if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
+                e.preventDefault();
+                const collapseButtons = document.querySelectorAll('.collapse-button');
+                if (collapseButtons.length > 0) {
+                    // Get the last collapse button (most recently expanded)
+                    const lastButton = collapseButtons[collapseButtons.length - 1];
+                    const clickEvent = new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    lastButton.dispatchEvent(clickEvent);
+                }
+                return;
+            }
+            
+            // Number keys 1-9: Click on nodes (for quick navigation)
             if (e.key >= '1' && e.key <= '9') {
                 const nodeIndex = parseInt(e.key) - 1;
                 const clickableNodes = document.querySelectorAll('.clickable-node');
                 if (clickableNodes[nodeIndex]) {
-                    // SVG elements don't have .click(), so dispatch a click event
                     const clickEvent = new MouseEvent('click', {
                         bubbles: true,
                         cancelable: true,
@@ -1673,23 +1893,36 @@
                     });
                     clickableNodes[nodeIndex].dispatchEvent(clickEvent);
                 }
+                return;
             }
-            // Key '0' or 'c' to click collapse buttons
-            if (e.key === '0' || e.key === 'c') {
-                const collapseButtons = document.querySelectorAll('.collapse-button');
-                if (collapseButtons.length > 0) {
-                    const clickEvent = new MouseEvent('click', {
-                        bubbles: true,
-                        cancelable: true,
-                        view: window
-                    });
-                    collapseButtons[0].dispatchEvent(clickEvent);
-                }
-            }
-            // Escape to go back
+            
+            // Escape: Go back
             if (e.key === 'Escape') {
                 goBack();
+                return;
             }
+            
+            // Suggested additional shortcuts (commented out - uncomment to enable):
+            // Ctrl/Cmd+O: Toggle documentation panel
+            // if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+            //     e.preventDefault();
+            //     toggleDocPanel();
+            //     return;
+            // }
+            
+            // Ctrl/Cmd+Home: Go to overview
+            // if ((e.ctrlKey || e.metaKey) && e.key === 'Home') {
+            //     e.preventDefault();
+            //     navigateToModule('overview');
+            //     return;
+            // }
+            
+            // Ctrl/Cmd+Left Arrow: Go back
+            // if ((e.ctrlKey || e.metaKey) && e.key === 'ArrowLeft') {
+            //     e.preventDefault();
+            //     goBack();
+            //     return;
+            // }
         });
         
         // ============================================================
@@ -1829,19 +2062,23 @@
             document.addEventListener('mouseup', handleMouseUp);
             
             // Touch support for mobile
-            let lastTouchDist = 0;
-            let lastTouchCenter = { x: 0, y: 0 };
+            // Two-finger gestures now pan (more intuitive)
+            let lastTwoFingerCenter = { x: 0, y: 0 };
             
             viewport.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 2) {
-                    // Pinch zoom start
-                    const dx = e.touches[0].clientX - e.touches[1].clientX;
-                    const dy = e.touches[0].clientY - e.touches[1].clientY;
-                    lastTouchDist = Math.sqrt(dx * dx + dy * dy);
-                    lastTouchCenter = {
+                    // Two-finger pan start - use center point between two fingers
+                    e.preventDefault();
+                    isPanning = true;
+                    lastTwoFingerCenter = {
                         x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
                         y: (e.touches[0].clientY + e.touches[1].clientY) / 2
                     };
+                    startMouseX = lastTwoFingerCenter.x;
+                    startMouseY = lastTwoFingerCenter.y;
+                    startPanX = panX;
+                    startPanY = panY;
+                    document.getElementById('diagramCanvas').classList.add('panning');
                 } else if (e.touches.length === 1) {
                     // Single touch pan
                     isPanning = true;
@@ -1849,35 +2086,38 @@
                     startMouseY = e.touches[0].clientY;
                     startPanX = panX;
                     startPanY = panY;
+                    document.getElementById('diagramCanvas').classList.add('panning');
                 }
-            }, { passive: true });
+            }, { passive: false });
             
             viewport.addEventListener('touchmove', (e) => {
                 if (e.touches.length === 2) {
-                    // Pinch zoom
-                    const dx = e.touches[0].clientX - e.touches[1].clientX;
-                    const dy = e.touches[0].clientY - e.touches[1].clientY;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    // Two-finger pan - pan based on center point movement
+                    e.preventDefault();
+                    const currentCenter = {
+                        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                    };
                     
-                    const scaleDelta = (dist - lastTouchDist) * 0.01;
-                    zoomScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomScale + scaleDelta));
+                    const dx = currentCenter.x - startMouseX;
+                    const dy = currentCenter.y - startMouseY;
+                    panX = startPanX + dx;
+                    panY = startPanY + dy;
                     
-                    lastTouchDist = dist;
                     applyTransform();
-                    updateZoomDisplay();
                 } else if (e.touches.length === 1 && isPanning) {
-                    // Pan
+                    // Single finger pan
                     const dx = e.touches[0].clientX - startMouseX;
                     const dy = e.touches[0].clientY - startMouseY;
                     panX = startPanX + dx;
                     panY = startPanY + dy;
                     applyTransform();
                 }
-            }, { passive: true });
+            }, { passive: false });
             
             viewport.addEventListener('touchend', () => {
                 isPanning = false;
-                lastTouchDist = 0;
+                document.getElementById('diagramCanvas').classList.remove('panning');
             }, { passive: true });
         }
         
@@ -1927,6 +2167,9 @@
         // ============================================================
         
         async function init() {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2101',message:'init() called',data:{stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
             AVAILABLE_REPOS = await fetchAvailableRepos();
             
             // When no ?repo= in URL, redirect to first repo so something always loads
@@ -1949,7 +2192,6 @@
                     <p>Available repos: ${repoList || '—'}</p>
                 </div>`;
                 document.getElementById('mermaid-diagram').innerHTML = errHtml;
-                document.getElementById('docContent').innerHTML = '';
                 populateRepoDropdown();
                 return;
             }
@@ -1966,16 +2208,118 @@
             baseDiagramCode = moduleData['overview']?.diagram || '';
             currentDiagramCode = baseDiagramCode;
             
+            // Initialize opened modules (overview is always open)
+            openedModules.clear();
+            openedModules.add('overview');
+            console.log('[MODULE TRACKING] Initialized, opened modules:', Array.from(openedModules));
+            
             // Initialize selection and breadcrumb
             updateSelection('overview');
             
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2149',message:'init() completed - state snapshot',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesSize:openedModules.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
+            
             renderDiagram(currentDiagramCode, overviewLinks, 'overview');
         }
+        
+        // Track URL changes
+        window.addEventListener('popstate', () => {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2152',message:'popstate event (browser back/forward)',data:{url:window.location.href,currentModuleId,expandedNodesSize:expandedNodes.size},timestamp:Date.now(),runId:'debug',hypothesisId:'G'})}).catch(()=>{});
+            // #endregion
+        });
+        
+        // Track hash changes
+        window.addEventListener('hashchange', () => {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2158',message:'hashchange event',data:{url:window.location.href,currentModuleId,expandedNodesSize:expandedNodes.size},timestamp:Date.now(),runId:'debug',hypothesisId:'G'})}).catch(()=>{});
+            // #endregion
+        });
+        
+        // Periodic state snapshot to catch unexpected resets
+        setInterval(() => {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2165',message:'periodic state snapshot',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesSize:openedModules.size,openedModulesArray:Array.from(openedModules),url:window.location.href},timestamp:Date.now(),runId:'debug',hypothesisId:'H'})}).catch(()=>{});
+            // #endregion
+        }, 2000); // Every 2 seconds
         
         // Start
         init().catch(err => {
             console.error('Init failed:', err);
             document.body.innerHTML = `<div style="padding:20px;color:red;">Error: ${err.message}</div>`;
+        });
+        
+        // ============================================================
+        // CHAT PANEL (Architectural Agent)
+        // ============================================================
+        const chatInput = document.getElementById('chatInput');
+        const chatSend = document.getElementById('chatSend');
+        const chatMessages = document.getElementById('chatMessages');
+        
+        // API base: when on port 8080 (static demo server), use FastAPI on 8000; else same origin
+        const CHAT_API_BASE = (window.location.port === '8080') ? 'http://127.0.0.1:8001' : '';
+        
+        function getChatJobId() {
+            return (typeof repoPath !== 'undefined' ? repoPath : urlParams.get('repo') || 'search-agents');
+        }
+        
+        function addChatMessage(content, type) {
+            const el = document.createElement('div');
+            el.className = `chat-message ${type}`;
+            if (type === 'assistant') {
+                el.innerHTML = marked.parse(content);
+            } else {
+                el.textContent = content;
+            }
+            chatMessages.appendChild(el);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return el;
+        }
+        
+        async function sendChatMessage() {
+            if (!chatInput.value.trim()) return;
+            const msg = chatInput.value.trim();
+            chatInput.value = '';
+            addChatMessage(msg, 'user');
+            const loadingEl = addChatMessage('Thinking...', 'loading');
+            chatSend.disabled = true;
+            try {
+                const jobId = getChatJobId();
+                // Get opened modules as array (overview is always included)
+                const openedModulesArray = Array.from(openedModules);
+                console.log('[MODULE TRACKING] Sending chat request with opened modules:', openedModulesArray);
+                
+                const res = await fetch(`${CHAT_API_BASE}/api/arch-agent/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        job_id: jobId,
+                        message: msg,
+                        current_page: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null) || (typeof currentModuleId !== 'undefined' ? currentModuleId : null),
+                        current_module: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null),
+                        opened_modules: openedModulesArray
+                    })
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                loadingEl.remove();
+                addChatMessage(data.response || 'No response.', 'assistant');
+            } catch (e) {
+                loadingEl.remove();
+                const hint = e.message === 'Failed to fetch' || e.message === 'Load failed'
+                    ? 'Could not reach chat API. Start the CodeWiki server: cd atelier && python3 -m codewiki.run_web_app --port 8001'
+                    : (e.message || 'Could not reach chat API. Is the CodeWiki server running on port 8001?');
+                addChatMessage('Error: ' + hint, 'assistant');
+            } finally {
+                chatSend.disabled = false;
+                chatInput.focus();
+            }
+        }
+        
+        chatSend.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
         });
     </script>
 </body>

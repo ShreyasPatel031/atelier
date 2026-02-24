@@ -133,6 +133,45 @@ The interactive viewer provides a visual way to explore generated documentation:
 - **Breadcrumb Trail**: Track your navigation path
 - **Zoom & Pan**: Navigate large diagrams easily
 - **Markdown Rendering**: Full markdown support with code highlighting
+- **AI Chat** (optional): Ask questions about the codebase architecture
+
+### Setting Up the Viewer
+
+**Option 1: Simple (Viewer Only, No Chat)**
+```bash
+cd /Users/shreyaspatel/atelier/demo
+python3 -m http.server 8080
+# Open http://localhost:8080/viewer.html?repo=KubeElasti
+```
+
+**Option 2: Full Setup (Viewer + Chat) - Recommended**
+
+**Using the helper script:**
+```bash
+cd /Users/shreyaspatel/atelier
+./demo/start_viewer.sh
+```
+
+**Or manually (two terminals):**
+```bash
+# Terminal 1: Static viewer
+cd /Users/shreyaspatel/atelier/demo
+python3 -m http.server 8080
+
+# Terminal 2: Chat API
+cd /Users/shreyaspatel/atelier
+python3 -m codewiki.run_web_app --port 8001
+```
+
+**Option 3: Single Server (Easiest)**
+```bash
+cd /Users/shreyaspatel/atelier
+python3 -m codewiki.run_web_app --port 8001
+# Open http://localhost:8001/demo/viewer.html?repo=KubeElasti
+```
+This serves both viewer and chat from one server - chat works automatically!
+
+> **Note**: The viewer uses a two-server architecture by design (static files + API). See `demo/SETUP_VIEWER.md` for details on advantages/disadvantages.
 
 ### Using the Viewer with Generated Docs
 
