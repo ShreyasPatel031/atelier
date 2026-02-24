@@ -6,6 +6,7 @@ Test different node limits to find the breaking point.
 import subprocess
 import time
 import os
+from pathlib import Path
 
 # Test these output token limits (nodes = limit * 0.9 / 40)
 TEST_LIMITS = [
@@ -18,12 +19,14 @@ TEST_LIMITS = [
     65_536,  # ~1475 nodes (full Gemini limit)
 ]
 
-CONFIG_PATH = "/Users/shreyaspatel/atelier/codewiki/src/config.py"
-REPO_PATH = "/Users/shreyaspatel/atelier/test_repos/kubecost"
+BENCH_DIR = Path(__file__).parent
+BASE_DIR = BENCH_DIR.parent
+CONFIG_PATH = BASE_DIR / "codewiki" / "src" / "config.py"
+REPO_PATH = BENCH_DIR / "repos" / "kubecost"
 
 def set_output_limit(limit: int):
     """Update the config with new output limit."""
-    with open(CONFIG_PATH, 'r') as f:
+    with open(str(CONFIG_PATH), 'r') as f:
         content = f.read()
     
     # Replace the gemini-2.5-flash limit
@@ -34,7 +37,7 @@ def set_output_limit(limit: int):
         content
     )
     
-    with open(CONFIG_PATH, 'w') as f:
+    with open(str(CONFIG_PATH), 'w') as f:
         f.write(content)
     
     # Calculate expected nodes
@@ -46,7 +49,7 @@ def run_test(limit: int, timeout_minutes: int = 10) -> dict:
     set_output_limit(limit)
     
     # Clean docs
-    subprocess.run(["rm", "-rf", f"{REPO_PATH}/docs"], capture_output=True)
+    subprocess.run(["rm", "-rf", str(REPO_PATH / "docs")], capture_output=True)
     
     start = time.time()
     expected_nodes = int(limit * 0.9 / 40)
@@ -54,7 +57,7 @@ def run_test(limit: int, timeout_minutes: int = 10) -> dict:
     try:
         result = subprocess.run(
             ["codewiki", "generate", "--output", "docs"],
-            cwd=REPO_PATH,
+            cwd=str(REPO_PATH),
             capture_output=True,
             text=True,
             timeout=timeout_minutes * 60,
@@ -78,7 +81,7 @@ def run_test(limit: int, timeout_minutes: int = 10) -> dict:
         
         # Count generated files
         md_count = 0
-        docs_dir = f"{REPO_PATH}/docs"
+        docs_dir = str(REPO_PATH / "docs")
         if os.path.exists(docs_dir):
             for root, dirs, files in os.walk(docs_dir):
                 md_count += len([f for f in files if f.endswith('.md')])

@@ -6,13 +6,15 @@ from pathlib import Path
 
 def analyze_all():
     repos = ["flask", "fastapi", "httpx", "rich", "typer"]
-    
+    bench_dir = Path(__file__).parent
+    repos_dir = bench_dir / "repos"
+
     print("=" * 80)
     print("DETAILED REPO ANALYSIS")
     print("=" * 80)
-    
+
     for repo in repos:
-        docs_path = Path(f"test_repos/{repo}/docs")
+        docs_path = repos_dir / repo / "docs"
         module_tree_path = docs_path / "module_tree.json"
         
         if not module_tree_path.exists():

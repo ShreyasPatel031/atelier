@@ -36,10 +36,10 @@ DEFAULT_REPOS = [
     ("requests", "https://github.com/psf/requests.git", False),
 ]
 
-BASE_DIR = Path("/Users/shreyaspatel/atelier")
-TEST_REPOS_DIR = BASE_DIR / "test_repos"
+BASE_DIR = Path(__file__).parent.parent
+BENCH_DIR = Path(__file__).parent
+REPOS_DIR = BENCH_DIR / "repos"
 DEMO_REPOS_DIR = BASE_DIR / "demo" / "repos"
-CODEWIKI_TEST_DIR = Path("/Users/shreyaspatel/CodeWiki/test_repos")
 
 
 @dataclass
@@ -113,15 +113,9 @@ def get_repo_size(path: Path) -> tuple:
 
 def clone_repo(name: str, url: str) -> bool:
     """Clone repo if needed."""
-    repo_path = TEST_REPOS_DIR / name
+    repo_path = REPOS_DIR / name
     if repo_path.exists():
         print(f"  ✓ {name} already exists")
-        return True
-    
-    # Check CodeWiki test_repos
-    alt_path = CODEWIKI_TEST_DIR / name
-    if alt_path.exists():
-        print(f"  ✓ {name} found in CodeWiki test_repos")
         return True
     
     if not url:
@@ -138,11 +132,7 @@ def clone_repo(name: str, url: str) -> bool:
 
 def run_generation(name: str) -> tuple:
     """Run codewiki generate and return (time, success, error)."""
-    # Find repo path
-    repo_path = TEST_REPOS_DIR / name
-    if not repo_path.exists():
-        repo_path = CODEWIKI_TEST_DIR / name
-    
+    repo_path = REPOS_DIR / name
     if not repo_path.exists():
         return 0, False, f"Repo not found: {name}"
     
@@ -280,7 +270,7 @@ def benchmark_repo(name: str, url: str, skip_generation: bool = False) -> RepoRe
     print(f"{'='*60}")
     
     # Find repo path
-    repo_path = TEST_REPOS_DIR / name
+    repo_path = REPOS_DIR / name
     if not repo_path.exists():
         repo_path = CODEWIKI_TEST_DIR / name
     
@@ -488,7 +478,7 @@ def main():
     print_final_report(results)
     
     # Save results
-    output_path = BASE_DIR / "benchmark_results_tracked.json"
+    output_path = BENCH_DIR / "benchmark_results_tracked.json"
     with open(output_path, 'w') as f:
         json.dump([asdict(r) for r in results], f, indent=2)
     print(f"\nResults saved to: {output_path}")

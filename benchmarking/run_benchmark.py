@@ -16,12 +16,14 @@ REPOS = [
     ("fastapi", "https://github.com/tiangolo/fastapi.git"),
 ]
 
-TEST_REPOS_DIR = Path("/Users/shreyaspatel/atelier/test_repos")
-VENV_ACTIVATE = "source /Users/shreyaspatel/atelier/.venv/bin/activate"
+BENCH_DIR = Path(__file__).parent
+BASE_DIR = BENCH_DIR.parent
+REPOS_DIR = BENCH_DIR / "repos"
+VENV_ACTIVATE = f"source {BASE_DIR}/.venv/bin/activate"
 
 def clone_repo(name: str, url: str) -> bool:
     """Clone repo if not exists."""
-    repo_path = TEST_REPOS_DIR / name
+    repo_path = REPOS_DIR / name
     if repo_path.exists():
         print(f"  ✓ {name} already exists")
         return True
@@ -38,7 +40,7 @@ def clone_repo(name: str, url: str) -> bool:
 
 def run_generation(name: str) -> tuple[float, bool, str]:
     """Run codewiki generate and return (time, success, error)."""
-    repo_path = TEST_REPOS_DIR / name
+    repo_path = REPOS_DIR / name
     docs_path = repo_path / "docs"
     
     # Clean docs
@@ -60,7 +62,7 @@ def run_generation(name: str) -> tuple[float, bool, str]:
 
 def analyze_coverage(name: str) -> dict:
     """Analyze diagram coverage for a repo."""
-    docs_path = TEST_REPOS_DIR / name / "docs"
+    docs_path = REPOS_DIR / name / "docs"
     tree_path = docs_path / "module_tree.json"
     
     if not tree_path.exists():

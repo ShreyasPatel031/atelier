@@ -1,11 +1,13 @@
 #!/bin/bash
 # Quick parallel benchmark - runs all repos simultaneously
 
-source /Users/shreyaspatel/atelier/.venv/bin/activate
+BENCH_DIR="$(cd "$(dirname "$0")" && pwd)"
+BASE_DIR="$(cd "$BENCH_DIR/.." && pwd)"
+source "$BASE_DIR/.venv/bin/activate"
 
 run_repo() {
     repo=$1
-    REPO_PATH="/Users/shreyaspatel/atelier/test_repos/$repo"
+    REPO_PATH="$BENCH_DIR/repos/$repo"
     rm -rf "$REPO_PATH/docs"
     cd "$REPO_PATH"
     

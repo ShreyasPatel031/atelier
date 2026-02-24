@@ -21,8 +21,9 @@ REPOS = [
     ("typer", "https://github.com/tiangolo/typer.git", "master"),
 ]
 
-TEST_REPOS_DIR = Path(__file__).parent / "test_repos"
-RESULTS_FILE = Path(__file__).parent / "benchmark_results.json"
+BENCH_DIR = Path(__file__).parent
+REPOS_DIR = BENCH_DIR / "repos"
+RESULTS_FILE = BENCH_DIR / "benchmark_results.json"
 
 def run_cmd(cmd: list, cwd: str = None, timeout: int = 1800) -> tuple[int, str, float]:
     """Run command and return (exit_code, output, duration_seconds)."""
@@ -45,7 +46,7 @@ def run_cmd(cmd: list, cwd: str = None, timeout: int = 1800) -> tuple[int, str, 
 
 def clone_repo(name: str, url: str, branch: str) -> bool:
     """Clone repo if not exists, return success."""
-    repo_path = TEST_REPOS_DIR / name
+    repo_path = REPOS_DIR / name
     
     if repo_path.exists() and (repo_path / ".git").exists():
         print(f"  ✓ {name} already cloned")
@@ -70,7 +71,7 @@ def clone_repo(name: str, url: str, branch: str) -> bool:
 
 def run_generation(name: str) -> dict:
     """Run codewiki generate and return results."""
-    repo_path = TEST_REPOS_DIR / name
+    repo_path = REPOS_DIR / name
     docs_path = repo_path / "docs"
     
     # Clean previous docs
@@ -128,7 +129,7 @@ def run_generation(name: str) -> dict:
 
 def run_validation(name: str) -> dict:
     """Run validation script and return results."""
-    repo_path = TEST_REPOS_DIR / name
+    repo_path = REPOS_DIR / name
     docs_path = repo_path / "docs"
     validation_script = Path(__file__).parent / "codewiki" / "src" / "be" / "validation.py"
     
@@ -201,7 +202,7 @@ def main():
     # Step 2: Generate docs for each
     print("\n[2/3] Generating documentation...")
     for name, _, _ in REPOS:
-        repo_path = TEST_REPOS_DIR / name
+        repo_path = REPOS_DIR / name
         if not repo_path.exists():
             continue
         

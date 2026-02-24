@@ -302,52 +302,45 @@ def print_report(metrics_list: List[RepoMetrics], benchmark_data: Dict):
 
 def main():
     """Run comprehensive analysis."""
-    base_path = Path("/Users/shreyaspatel/atelier")
+    base_path = Path(__file__).parent.parent
+    bench_dir = Path(__file__).parent
     demo_repos = base_path / "demo" / "repos"
-    test_repos = base_path / "test_repos"
-    benchmark_path = base_path / "benchmark_results.json"
-    
-    # Also check CodeWiki test_repos
-    codewiki_test = Path("/Users/shreyaspatel/CodeWiki/test_repos")
-    
+    repos_dir = bench_dir / "repos"
+    benchmark_path = bench_dir / "benchmark_results.json"
+
     # Load benchmark data
     benchmark_data = load_benchmark_data(benchmark_path)
-    
-    # Define repos to analyze
+
+    # Define repos to analyze: demo repos (docs at root) + benchmarking/repos (docs in docs/)
     repos_to_analyze = []
-    
-    # Atelier demo repos (new format)
+
+    # Demo repos (docs at repo root)
     for repo_dir in demo_repos.iterdir():
         if repo_dir.is_dir():
-            # Map demo folder names to source repo names
             source_name = repo_dir.name
             if source_name == "flask-new":
                 source_name = "flask"
             elif source_name == "flask":
-                continue  # Skip old format flask
-            
-            source_path = test_repos / source_name
-            if not source_path.exists():
-                source_path = codewiki_test / source_name
-            
+                continue
+            source_path = repos_dir / source_name
             repos_to_analyze.append({
                 "name": repo_dir.name,
                 "docs": repo_dir,
                 "source": source_path if source_path.exists() else None
             })
-    
-    # CodeWiki test repos with docs
-    for repo_dir in codewiki_test.iterdir():
-        if repo_dir.is_dir():
-            docs_path = repo_dir / "docs"
-            if docs_path.exists() and (docs_path / "module_tree.json").exists():
-                # Don't add duplicates
-                if repo_dir.name not in [r["name"] for r in repos_to_analyze]:
-                    repos_to_analyze.append({
-                        "name": repo_dir.name,
-                        "docs": docs_path,
-                        "source": repo_dir
-                    })
+
+    # Benchmarking repos (docs in <name>/docs)
+    if repos_dir.exists():
+        for repo_dir in repos_dir.iterdir():
+            if repo_dir.is_dir():
+                docs_path = repo_dir / "docs"
+                if docs_path.exists() and (docs_path / "module_tree.json").exists():
+                    if repo_dir.name not in [r["name"] for r in repos_to_analyze]:
+                        repos_to_analyze.append({
+                            "name": repo_dir.name,
+                            "docs": docs_path,
+                            "source": repo_dir
+                        })
     
     print(f"Found {len(repos_to_analyze)} repos to analyze...")
     
@@ -362,7 +355,7 @@ def main():
     report = print_report(metrics_list, benchmark_data)
     
     # Save JSON report
-    report_path = base_path / "comprehensive_analysis.json"
+    report_path = bench_dir / "comprehensive_analysis.json"
     with open(report_path, "w") as f:
         json.dump(report, f, indent=2)
     print(f"\nJSON report saved to: {report_path}")

@@ -21,8 +21,9 @@ REPOS = [
     ("kubecost", "https://github.com/kubecost/kubecost", "large-go"),
 ]
 
-TEST_REPOS_DIR = Path("/Users/shreyaspatel/atelier/test_repos")
-RESULTS_FILE = Path("/Users/shreyaspatel/atelier/benchmark_timing_results.json")
+BENCH_DIR = Path(__file__).parent
+REPOS_DIR = BENCH_DIR / "repos"
+RESULTS_FILE = BENCH_DIR / "benchmark_timing_results.json"
 
 def get_repo_stats(repo_path: Path) -> dict:
     """Get stats about a repo."""
@@ -63,7 +64,7 @@ def get_repo_stats(repo_path: Path) -> dict:
 
 def clone_repo(name: str, url: str) -> Path:
     """Clone repo if not exists."""
-    repo_path = TEST_REPOS_DIR / name
+    repo_path = REPOS_DIR / name
     if repo_path.exists():
         print(f"  {name} already exists")
         return repo_path

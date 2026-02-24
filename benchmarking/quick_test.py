@@ -3,9 +3,12 @@
 import subprocess
 import time
 import os
+from pathlib import Path
 
-REPO = "/Users/shreyaspatel/atelier/test_repos/kubecost"
-CONFIG = "/Users/shreyaspatel/atelier/codewiki/src/config.py"
+BENCH_DIR = Path(__file__).parent
+BASE_DIR = BENCH_DIR.parent
+REPO = BENCH_DIR / "repos" / "kubecost"
+CONFIG = BASE_DIR / "codewiki" / "src" / "config.py"
 
 # Test: output_tokens -> expected nodes
 TESTS = [
@@ -15,7 +18,7 @@ TESTS = [
 ]
 
 def set_limit(limit):
-    with open(CONFIG, 'r') as f:
+    with open(str(CONFIG), 'r') as f:
         content = f.read()
     import re
     content = re.sub(
@@ -23,12 +26,12 @@ def set_limit(limit):
         f"'gemini-2.5-flash': {limit},  # TEMP",
         content
     )
-    with open(CONFIG, 'w') as f:
+    with open(str(CONFIG), 'w') as f:
         f.write(content)
 
 def run_test(limit, expected_nodes, timeout=300):
     set_limit(limit)
-    subprocess.run(["rm", "-rf", f"{REPO}/docs"], capture_output=True)
+    subprocess.run(["rm", "-rf", str(REPO / "docs")], capture_output=True)
     
     print(f"\n{'='*60}")
     print(f"Testing: {limit} tokens (~{expected_nodes} nodes)")

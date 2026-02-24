@@ -3,7 +3,9 @@
 # Benchmark script for CodeWiki documentation generation
 # Tests 5 repos of varying sizes
 
-source /Users/shreyaspatel/atelier/.venv/bin/activate
+BENCH_DIR="$(cd "$(dirname "$0")" && pwd)"
+BASE_DIR="$(cd "$BENCH_DIR/.." && pwd)"
+source "$BASE_DIR/.venv/bin/activate"
 
 REPOS=("flask" "httpx" "typer" "KubeElasti" "fastapi")
 RESULTS_FILE="/tmp/benchmark_results.txt"
@@ -17,8 +19,8 @@ for repo in "${REPOS[@]}"; do
     echo "Processing: $repo" | tee -a $RESULTS_FILE
     echo "========================================" | tee -a $RESULTS_FILE
     
-    REPO_PATH="/Users/shreyaspatel/atelier/test_repos/$repo"
-    
+    REPO_PATH="$BENCH_DIR/repos/$repo"
+
     # Get repo size
     SIZE=$(du -sh "$REPO_PATH" | cut -f1)
     echo "Size: $SIZE" | tee -a $RESULTS_FILE
@@ -65,7 +67,7 @@ with open('$REPO_PATH/docs/module_tree.json') as f:
     
     # Run validation
     echo "Validation:" | tee -a $RESULTS_FILE
-    python /Users/shreyaspatel/atelier/codewiki/src/be/validation.py "$REPO_PATH/docs" 2>&1 | grep -E "PASSED|FAILED|ERRORS|WARNINGS" | head -3 | tee -a $RESULTS_FILE
+    python "$BASE_DIR/codewiki/src/be/validation.py" "$REPO_PATH/docs" 2>&1 | grep -E "PASSED|FAILED|ERRORS|WARNINGS" | head -3 | tee -a $RESULTS_FILE
     
     echo "" >> $RESULTS_FILE
 done

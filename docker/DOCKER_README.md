@@ -418,7 +418,7 @@ services:
 
 ## More Information
 
-- **Main Documentation**: See [../README.md](../README.md) for complete feature list and usage
+- **Main Documentation**: See [../docs/README.md](../docs/README.md) for complete feature list and usage
 - **CLI Tool**: For command-line documentation generation
 - **Web Interface**: For GitHub URL-based documentation generation
 
