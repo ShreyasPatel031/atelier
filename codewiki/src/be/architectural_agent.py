@@ -16,9 +16,12 @@ But does NOT have access to:
 import logging
 import json
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
+
+from pydantic_core import to_jsonable_python
 from pydantic_ai import Agent
 from pydantic_ai.models import Model
+from pydantic_ai import ModelMessagesTypeAdapter
 
 from codewiki.src.file_manager import file_manager
 
@@ -149,42 +152,47 @@ class ArchitecturalAgentRunner:
         return count
     
     async def chat(
-        self, 
-        message: str, 
+        self,
+        message: str,
         current_module: Optional[str] = None,
         current_page: Optional[str] = None,
-        opened_modules: Optional[list[str]] = None
-    ) -> str:
+        opened_modules: Optional[list[str]] = None,
+        message_history: Optional[List[Any]] = None,
+    ) -> tuple[str, List[Any]]:
         """
-        Process a chat message and return a response.
-        
+        Process a chat message and return a response plus updated message history.
+
         Args:
             message: User's question/message
             current_module: Currently selected module (if any)
             current_page: Currently viewed page (if any)
             opened_modules: List of opened module IDs (overview is always included)
-        
+            message_history: Optional list of prior messages (JSON-serializable form from
+                a previous chat() return). When provided, the agent continues the conversation.
+
         Returns:
-            Assistant's response
+            Tuple of (assistant_response_text, updated_history). The client should store
+            updated_history and send it back as message_history on the next turn.
         """
         logger.info(f"[ARCH-AGENT] Processing chat message: {message[:100]}...")
         logger.info(f"[ARCH-AGENT] Current module: {current_module}")
         logger.info(f"[ARCH-AGENT] Current page: {current_page}")
         logger.info(f"[ARCH-AGENT] Opened modules: {opened_modules}")
-        
-        # Format full module tree for prompt
+        logger.info(f"[ARCH-AGENT] History length: {len(message_history) if message_history else 0}")
+
+        # Format full module tree for prompt (used when no history, or for context in user message)
         module_tree_text = self._format_module_tree_for_prompt()
         system_prompt = ARCHITECTURAL_AGENT_SYSTEM_PROMPT_TEMPLATE.format(module_tree=module_tree_text)
-        
+
         logger.info(f"[ARCH-AGENT] System prompt length: {len(system_prompt)} chars")
         logger.debug(f"[ARCH-AGENT] System prompt preview: {system_prompt[:500]}...")
-        
-        # Create agent (no tools for smoke test - just conversational)
+
+        # Create agent (no tools - conversational only)
         agent = Agent(
             self.model,
             system_prompt=system_prompt
         )
-        
+
         # Enhance user message with current context
         enhanced_message = message
         if current_module or current_page:
@@ -194,18 +202,34 @@ class ArchitecturalAgentRunner:
             if current_page:
                 context_parts.append(f"Currently on page: {current_page}")
             enhanced_message = f"[Context: {', '.join(context_parts)}]\n\n{message}"
-        
-        # Run agent
+
+        # Parse history for pydantic-ai (list of dicts -> list[ModelMessage])
+        history_messages = None
+        if message_history:
+            try:
+                history_messages = ModelMessagesTypeAdapter.validate_python(message_history)
+                logger.info(f"[ARCH-AGENT] Loaded {len(history_messages)} messages from history")
+            except Exception as e:
+                logger.warning(f"[ARCH-AGENT] Invalid message_history, starting fresh: {e}")
+                history_messages = None
+
         try:
-            result = await agent.run(enhanced_message)
+            result = await agent.run(
+                enhanced_message,
+                message_history=history_messages,
+            )
             # Extract the actual text response from pydantic-ai result
             if hasattr(result, 'data'):
                 response = str(result.data)
             else:
-                # Fallback: try to get the output attribute or convert to string
                 response = getattr(result, 'output', str(result))
             logger.info(f"[ARCH-AGENT] Response generated: {len(response)} chars")
-            return response
+
+            # Serialize full conversation so client can send it back next time
+            all_messages = result.all_messages()
+            updated_history = to_jsonable_python(all_messages)
+            logger.info(f"[ARCH-AGENT] Updated history: {len(updated_history)} messages")
+            return (response, updated_history)
         except Exception as e:
             logger.error(f"[ARCH-AGENT] Agent execution failed: {e}")
-            return f"Error processing request: {str(e)}"
+            return (f"Error processing request: {str(e)}", message_history or [])

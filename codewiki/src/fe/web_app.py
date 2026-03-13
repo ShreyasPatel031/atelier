@@ -13,6 +13,9 @@ Features:
 import argparse
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional, List, Any
 
 from .cache_manager import CacheManager
 from .background_worker import BackgroundWorker
@@ -24,6 +27,15 @@ from .config import WebAppConfig
 app = FastAPI(
     title="CodeWiki", 
     description="Generate comprehensive documentation for any GitHub repository"
+)
+
+# CORS for demo viewer on port 8080 calling API on 8001
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:8001", "http://127.0.0.1:8001"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Initialize components
@@ -70,6 +82,66 @@ async def serve_generated_docs(job_id: str, filename: str = "overview.md"):
     if not filename: 
         filename = "overview.md"
     return await web_routes.serve_generated_docs(job_id, filename)
+
+
+# Chat API models
+class ArchAgentChatRequest(BaseModel):
+    job_id: str
+    message: str
+    current_module: Optional[str] = None
+    current_page: Optional[str] = None
+    opened_modules: Optional[List[str]] = None
+    # Message history from previous turns (returned as `history` in response). Send it back on the next request for multi-turn conversation.
+    history: Optional[List[Any]] = None
+
+
+class ArchAgentChatResponse(BaseModel):
+    response: str
+    # Full conversation history after this turn. Store and send as `history` in the next request.
+    history: Optional[List[Any]] = None
+
+
+@app.post("/api/arch-agent/chat", response_model=ArchAgentChatResponse)
+async def arch_agent_chat(request: ArchAgentChatRequest) -> ArchAgentChatResponse:
+    """Chat endpoint for the architectural agent."""
+    from pathlib import Path
+    from codewiki.src.be.architectural_agent import ArchitecturalAgentRunner
+    
+    # Try to find docs directory for the job_id
+    # 1. Check demo repos first (for demo viewer)
+    demo_docs_path = Path(__file__).resolve().parent.parent.parent.parent / "demo" / "repos" / request.job_id
+    if demo_docs_path.exists() and (demo_docs_path / "module_tree.json").exists():
+        docs_path = demo_docs_path
+    else:
+        # 2. Try output/cache (for generated jobs)
+        cache_docs_path = Path(WebAppConfig.get_absolute_path(WebAppConfig.CACHE_DIR)) / request.job_id
+        if cache_docs_path.exists() and (cache_docs_path / "module_tree.json").exists():
+            docs_path = cache_docs_path
+        else:
+            # 3. Try demo repos (for demo viewer: job_id = repo name like "flask", "KubeElasti")
+            raise HTTPException(status_code=404, detail=f"Documentation not found for job_id: {request.job_id}")
+    
+    # Create agent runner (uses env vars for LLM config)
+    agent_runner = ArchitecturalAgentRunner(str(docs_path))
+    
+    # Process chat message
+    try:
+        # Ensure 'overview' is always in opened_modules if provided
+        opened_modules = request.opened_modules or ['overview']
+        if 'overview' not in opened_modules:
+            opened_modules = ['overview'] + opened_modules
+        
+        response, updated_history = await agent_runner.chat(
+            message=request.message,
+            current_module=request.current_module,
+            current_page=request.current_page,
+            opened_modules=opened_modules,
+            message_history=request.history,
+        )
+
+        return ArchAgentChatResponse(response=response, history=updated_history)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Agent error: {str(e)}")
 
 
 def main():

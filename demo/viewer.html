@@ -2263,7 +2263,10 @@
         function getChatJobId() {
             return (typeof repoPath !== 'undefined' ? repoPath : urlParams.get('repo') || 'search-agents');
         }
-        
+
+        // Conversation history for multi-turn chat (send back to API each time)
+        let chatHistory = null;
+
         function addChatMessage(content, type) {
             const el = document.createElement('div');
             el.className = `chat-message ${type}`;
@@ -2298,11 +2301,13 @@
                         message: msg,
                         current_page: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null) || (typeof currentModuleId !== 'undefined' ? currentModuleId : null),
                         current_module: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null),
-                        opened_modules: openedModulesArray
+                        opened_modules: openedModulesArray,
+                        history: chatHistory
                     })
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
+                chatHistory = data.history != null ? data.history : null;
                 loadingEl.remove();
                 addChatMessage(data.response || 'No response.', 'assistant');
             } catch (e) {
