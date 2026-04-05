@@ -38,7 +38,7 @@ WEB_INTERFACE_TEMPLATE = """
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1040px;
             margin: 0 auto;
             background: white;
             border-radius: 16px;
@@ -202,6 +202,139 @@ WEB_INTERFACE_TEMPLATE = """
             padding: 0.5rem 1rem;
             font-size: 0.875rem;
         }
+
+        .pipeline-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .pipeline-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .pipeline-steps {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            flex-wrap: wrap;
+        }
+
+        .pipeline-step {
+            flex: 1;
+            min-width: 140px;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: #f8fafc;
+            position: relative;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pipeline-step:last-child {
+            margin-right: 0;
+        }
+
+        .pipeline-step.done {
+            border-color: var(--success-color);
+            background: #ecfdf5;
+        }
+
+        .pipeline-step.active {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+            box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+        }
+
+        .pipeline-step .step-num {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .pipeline-step .step-label {
+            font-weight: 600;
+            margin-top: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .pipeline-step .step-status {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.35rem;
+        }
+
+        .pipeline-step.done .step-status {
+            color: #166534;
+            font-weight: 600;
+        }
+
+        .viewer-section {
+            margin-top: 1.5rem;
+        }
+
+        .viewer-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+
+        .viewer-frame-wrap {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            min-height: 420px;
+            background: var(--secondary-color);
+            position: relative;
+        }
+
+        .viewer-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 420px;
+            gap: 1rem;
+            color: #64748b;
+        }
+
+        .viewer-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .viewer-iframe {
+            width: 100%;
+            min-height: 420px;
+            border: 0;
+            display: block;
+            background: white;
+        }
+
+        .viewer-error {
+            padding: 2rem;
+            color: #991b1b;
+            text-align: center;
+        }
+
+        .pipeline-hint {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -246,6 +379,42 @@ WEB_INTERFACE_TEMPLATE = """
                 
                 <button type="submit" class="btn">Generate Documentation</button>
             </form>
+
+            <input type="hidden" id="active-job-id" value="{{ active_job_id or '' }}">
+
+            <div id="pipeline-viewer-root" class="pipeline-section" style="display: none;">
+                <h3>Generation progress</h3>
+                <p class="pipeline-hint" id="pipeline-progress-text">—</p>
+                <div class="pipeline-steps" id="pipeline-steps" aria-live="polite">
+                    <div class="pipeline-step" data-step="1" id="step-1">
+                        <div class="step-num">Step 1</div>
+                        <div class="step-label">Dependency analysis</div>
+                        <div class="step-status" id="step-1-status">Pending</div>
+                    </div>
+                    <div class="pipeline-step" data-step="2" id="step-2">
+                        <div class="step-num">Step 2</div>
+                        <div class="step-label">Module clustering</div>
+                        <div class="step-status" id="step-2-status">Pending</div>
+                    </div>
+                    <div class="pipeline-step" data-step="3" id="step-3">
+                        <div class="step-num">Step 3</div>
+                        <div class="step-label">Documentation generation</div>
+                        <div class="step-status" id="step-3-status">Pending</div>
+                    </div>
+                </div>
+
+                <div class="viewer-section">
+                    <h3>Documentation viewer</h3>
+                    <div class="viewer-frame-wrap" id="viewer-wrap">
+                        <div class="viewer-loading" id="viewer-loading">
+                            <div class="spinner" aria-hidden="true"></div>
+                            <div id="viewer-loading-msg">Waiting to start…</div>
+                        </div>
+                        <iframe class="viewer-iframe" id="viewer-iframe" title="Generated documentation" style="display: none;" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+                        <div class="viewer-error" id="viewer-error" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
             
             {% if recent_jobs %}
             <div class="recent-jobs">
@@ -275,7 +444,137 @@ WEB_INTERFACE_TEMPLATE = """
     <script>
         // Form submission protection
         let isSubmitting = false;
-        
+        let pollTimer = null;
+
+        function getQueryJobId() {
+            const q = new URLSearchParams(window.location.search).get('job');
+            return q ? q.trim() : '';
+        }
+
+        function initJobMonitor() {
+            const hidden = document.getElementById('active-job-id');
+            const jobId = (hidden && hidden.value).trim() || getQueryJobId();
+            const root = document.getElementById('pipeline-viewer-root');
+            if (!jobId || !root) {
+                return;
+            }
+            root.style.display = 'block';
+            if (hidden && !hidden.value && getQueryJobId()) {
+                hidden.value = getQueryJobId();
+            }
+            const _params = new URLSearchParams(window.location.search);
+            if (_params.get('job') !== jobId) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('job', jobId);
+                window.history.replaceState({}, '', url);
+            }
+
+            function escapeHtml(s) {
+                const d = document.createElement('div');
+                d.textContent = s;
+                return d.innerHTML;
+            }
+
+            function renderJob(job) {
+                const stage = job.generation_stage || 0;
+                const st = job.status;
+                const progressEl = document.getElementById('pipeline-progress-text');
+                if (progressEl) {
+                    progressEl.textContent = job.progress || '—';
+                }
+
+                for (let i = 1; i <= 3; i++) {
+                    const el = document.getElementById('step-' + i);
+                    const stEl = document.getElementById('step-' + i + '-status');
+                    if (!el || !stEl) continue;
+                    el.classList.remove('done', 'active');
+                    const done = st === 'completed' || stage >= i;
+                    const active = (st === 'processing' && (
+                        (stage === 0 && i === 1) ||
+                        (stage === 1 && i === 2) ||
+                        (stage === 2 && i === 3)
+                    )) || (st === 'queued' && i === 1);
+                    if (done) {
+                        el.classList.add('done');
+                        stEl.textContent = 'Complete';
+                    } else if (active) {
+                        el.classList.add('active');
+                        stEl.textContent = (st === 'queued') ? 'Queued…' : 'In progress…';
+                    } else {
+                        stEl.textContent = 'Pending';
+                    }
+                }
+
+                const loading = document.getElementById('viewer-loading');
+                const iframe = document.getElementById('viewer-iframe');
+                const err = document.getElementById('viewer-error');
+                const msg = document.getElementById('viewer-loading-msg');
+
+                if (st === 'failed') {
+                    if (loading) loading.style.display = 'none';
+                    if (iframe) iframe.style.display = 'none';
+                    if (err) {
+                        err.style.display = 'block';
+                        err.innerHTML = 'Generation failed: ' + escapeHtml(job.error_message || 'Unknown error');
+                    }
+                    return;
+                }
+
+                if (st === 'completed' && job.docs_path) {
+                    if (loading) loading.style.display = 'none';
+                    if (err) err.style.display = 'none';
+                    if (iframe) {
+                        iframe.style.display = 'block';
+                        const src = '/viewer?repo=' + encodeURIComponent(job.job_id);
+                        if (iframe.src.indexOf(src) === -1) {
+                            iframe.src = src;
+                        }
+                    }
+                    return;
+                }
+
+                if (loading) loading.style.display = 'flex';
+                if (iframe) iframe.style.display = 'none';
+                if (err) err.style.display = 'none';
+                if (msg) {
+                    msg.textContent = st === 'queued'
+                        ? 'Queued…'
+                        : (job.progress || 'Generating documentation…');
+                }
+            }
+
+            function poll() {
+                fetch('/api/job/' + encodeURIComponent(jobId))
+                    .then(function(r) {
+                        if (!r.ok) throw new Error('Job not found');
+                        return r.json();
+                    })
+                    .then(function(job) {
+                        renderJob(job);
+                    })
+                    .catch(function() {
+                        const msg = document.getElementById('viewer-loading-msg');
+                        if (msg) msg.textContent = 'Could not load job status.';
+                    });
+            }
+
+            poll();
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = setInterval(function() {
+                fetch('/api/job/' + encodeURIComponent(jobId))
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(job) {
+                        if (!job) return;
+                        renderJob(job);
+                        if (job.status === 'completed' || job.status === 'failed') {
+                            clearInterval(pollTimer);
+                            pollTimer = null;
+                        }
+                    })
+                    .catch(function() {});
+            }, 2000);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.querySelector('form');
             const submitButton = document.querySelector('button[type="submit"]');
@@ -299,8 +598,9 @@ WEB_INTERFACE_TEMPLATE = """
                     }, 10000);
                 });
             }
+
+            initJobMonitor();
             
-            // Optional: Add manual refresh button instead of auto-refresh
             const refreshButton = document.createElement('button');
             refreshButton.textContent = 'Refresh Status';
             refreshButton.className = 'btn btn-small';

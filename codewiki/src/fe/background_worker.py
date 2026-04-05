@@ -12,12 +12,13 @@ import asyncio
 import logging
 from datetime import datetime
 from pathlib import Path
-from queue import Queue
+from queue import Empty, Queue
 from typing import Dict
 from dataclasses import asdict
 
 from codewiki.src.be.documentation_generator import DocumentationGenerator
 from codewiki.src.config import Config, MAIN_MODEL
+from codewiki.src.fe.cli_equivalent_pipeline import run_cli_equivalent_generation
 from .models import JobStatus
 from .cache_manager import CacheManager
 from .github_processor import GitHubRepoProcessor
@@ -44,7 +45,7 @@ class BackgroundWorker:
             self.running = True
             thread = threading.Thread(target=self._worker_loop, daemon=True)
             thread.start()
-            print("Background worker started")
+            logger.info("Background worker started")
     
     def stop(self):
         """Stop the background worker."""
@@ -85,11 +86,17 @@ class BackgroundWorker:
                         completed_at=datetime.fromisoformat(job_data['completed_at']) if job_data.get('completed_at') else None,
                         error_message=job_data.get('error_message'),
                         progress=job_data.get('progress', ''),
-                        docs_path=job_data.get('docs_path')
+                        docs_path=job_data.get('docs_path'),
+                        main_model=job_data.get('main_model'),
+                        commit_id=job_data.get('commit_id'),
+                        generation_stage=job_data.get('generation_stage', 3),
                     )
-            print(f"Loaded {len([j for j in self.job_status.values() if j.status == 'completed'])} completed jobs from disk")
+            logger.info(
+                "Loaded %s completed jobs from disk",
+                len([j for j in self.job_status.values() if j.status == "completed"]),
+            )
         except Exception as e:
-            print(f"Error loading job statuses: {e}")
+            logger.warning("Error loading job statuses: %s", e)
     
     def _reconstruct_jobs_from_cache(self):
         """Reconstruct job statuses from cache entries for backward compatibility."""
@@ -113,18 +120,19 @@ class BackgroundWorker:
                             created_at=cache_entry.created_at,
                             completed_at=cache_entry.created_at,
                             docs_path=cache_entry.docs_path,
-                            progress="Reconstructed from cache"
+                            progress="Reconstructed from cache",
+                            generation_stage=3,
                         )
                         reconstructed_count += 1
                 except Exception as e:
-                    print(f"Failed to reconstruct job for {cache_entry.repo_url}: {e}")
+                    logger.warning("Failed to reconstruct job for %s: %s", cache_entry.repo_url, e)
             
             if reconstructed_count > 0:
-                print(f"Reconstructed {reconstructed_count} job statuses from cache")
+                logger.info("Reconstructed %s job statuses from cache", reconstructed_count)
                 self.save_job_statuses()
                 
         except Exception as e:
-            print(f"Error reconstructing jobs from cache: {e}")
+            logger.warning("Error reconstructing jobs from cache: %s", e)
     
     def save_job_statuses(self):
         """Save job statuses to disk."""
@@ -143,24 +151,28 @@ class BackgroundWorker:
                     'completed_at': job.completed_at.isoformat() if job.completed_at else None,
                     'error_message': job.error_message,
                     'progress': job.progress,
-                    'docs_path': job.docs_path
+                    'docs_path': job.docs_path,
+                    'main_model': job.main_model,
+                    'commit_id': job.commit_id,
+                    'generation_stage': job.generation_stage,
                 }
             
             file_manager.save_json(data, self.jobs_file)
         except Exception as e:
-            print(f"Error saving job statuses: {e}")
+            logger.warning("Error saving job statuses: %s", e)
     
     def _worker_loop(self):
         """Main worker loop."""
         while self.running:
             try:
-                if not self.processing_queue.empty():
-                    job_id = self.processing_queue.get(timeout=1)
-                    self._process_job(job_id)
-                else:
-                    time.sleep(1)
+                # Block with timeout — do not use Queue.empty(); it is not reliable
+                # across threads and can leave jobs stuck while the worker sleeps.
+                job_id = self.processing_queue.get(timeout=1)
+                self._process_job(job_id)
+            except Empty:
+                continue
             except Exception as e:
-                print(f"Worker error: {e}")
+                logger.exception("Worker error: %s", e)
                 time.sleep(1)
     
     def _process_job(self, job_id: str):
@@ -204,8 +216,22 @@ class BackgroundWorker:
                         job.completed_at = datetime.now()
                         job.docs_path = cached_docs
                         job.progress = "Documentation retrieved from cache"
+                        job.generation_stage = 3
                         if not job.main_model:
                             job.main_model = MAIN_MODEL
+
+                        try:
+                            from codewiki.cli.utils.demo_viewer_sync import (
+                                repo_slug_from_url,
+                                sync_generated_docs_to_demo_viewer,
+                            )
+
+                            sync_generated_docs_to_demo_viewer(
+                                cache_path,
+                                repo_slug_from_url(job.repo_url),
+                            )
+                        except Exception as e:
+                            logger.warning("Demo viewer sync failed (non-fatal): %s", e)
                         
                         self.save_job_statuses()
                         logger.info(f"[STAGE 0.1] Job {job_id} completed from cache")
@@ -336,22 +362,35 @@ class BackgroundWorker:
             
             # Generate documentation
             job.progress = "Analyzing repository structure..."
+            job.generation_stage = 0
             logger.info(f"[STAGE 0] Starting documentation generation...")
             logger.info(f"[STAGE 0] Commit ID: {job.commit_id}")
             
             doc_gen_start = time.time()
             job.progress = "Generating documentation..."
+
+            def _on_generation_stage(stage: int) -> None:
+                job.generation_stage = stage
+                if stage == 1:
+                    job.progress = "Dependency analysis complete"
+                elif stage == 2:
+                    job.progress = "Module clustering complete"
+                elif stage == 3:
+                    job.progress = "Documentation generation complete"
+                self.save_job_statuses()
             
             # Generate documentation
-            doc_generator = DocumentationGenerator(config, job.commit_id)
+            doc_generator = DocumentationGenerator(
+                config, job.commit_id, progress_callback=_on_generation_stage
+            )
             
             # Run the async documentation generation in a new event loop
             logger.info(f"[STAGE 0] Creating async event loop for documentation generation...")
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
-                logger.info(f"[STAGE 0] Running documentation generator...")
-                loop.run_until_complete(doc_generator.run())
+                logger.info(f"[STAGE 0] Running CLI-equivalent pipeline (same as codewiki generate)...")
+                loop.run_until_complete(run_cli_equivalent_generation(doc_generator))
                 doc_gen_duration = time.time() - doc_gen_start
                 logger.info(f"[STAGE 0] Documentation generation completed in {doc_gen_duration:.1f}s")
             except Exception as e:
@@ -377,11 +416,25 @@ class BackgroundWorker:
             except Exception as e:
                 logger.error(f"[STAGE 0] Failed to cache results: {type(e).__name__}: {str(e)}")
                 # Non-critical, continue
+
+            try:
+                from codewiki.cli.utils.demo_viewer_sync import (
+                    repo_slug_from_url,
+                    sync_generated_docs_to_demo_viewer,
+                )
+
+                sync_generated_docs_to_demo_viewer(
+                    Path(docs_path),
+                    repo_slug_from_url(job.repo_url),
+                )
+            except Exception as e:
+                logger.warning("Demo viewer sync failed (non-fatal): %s", e)
             
             # Update job status
             job.status = 'completed'
             job.completed_at = datetime.now()
             job.docs_path = docs_path
+            job.generation_stage = 3
             job.progress = "Documentation generation completed"
             
             # Save job status to disk
@@ -394,7 +447,7 @@ class BackgroundWorker:
             
             total_duration = time.time() - stage_start
             logger.info(f"[STAGE 0] Job {job_id} COMPLETED successfully in {total_duration:.1f}s")
-            print(f"Job {job_id}: Documentation generated successfully")
+            logger.info("Job %s: Documentation generated successfully", job_id)
             
         except Exception as e:
             total_duration = time.time() - stage_start if 'stage_start' in locals() else 0
@@ -421,7 +474,7 @@ class BackgroundWorker:
             
             import traceback
             logger.error(f"[STAGE 0] Full traceback:\n{traceback.format_exc()}")
-            print(f"Job {job_id}: Failed with error: {e}")
+            logger.error("Job %s: Failed with error: %s", job_id, e)
         
         finally:
             # Cleanup temporary repository
@@ -440,7 +493,7 @@ class BackgroundWorker:
                     cleanup_duration = time.time() - cleanup_start
                     logger.error(f"[STAGE 0] Cleanup FAILED after {cleanup_duration:.3f}s: {type(e).__name__}: {str(e)}")
                     logger.error(f"[STAGE 0] Temporary directory not removed: {temp_repo_dir}")
-                    print(f"Failed to cleanup temp directory: {e}")
+                    logger.warning("Failed to cleanup temp directory: %s", e)
             else:
                 if 'temp_repo_dir' not in locals():
                     logger.info(f"[STAGE 0] No temporary directory to cleanup (not created)")

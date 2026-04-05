@@ -11,7 +11,9 @@ import json
 import re
 import pytest
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict, List
+
+from codewiki.src.be.mermaid_validator import validate_mermaid
 
 
 # ============================================================
@@ -143,7 +145,22 @@ def validate_overview_md(path: Path) -> Dict[str, Any]:
         result['valid'] = False
         result['errors'].append("Diagram must have click statements linking to module files")
     
+    # Mermaid syntax (invalid % comments, unbalanced brackets, subgraph/end, etc.)
+    mermaid_syn = validate_mermaid(diagram)
+    if not mermaid_syn.valid:
+        result['valid'] = False
+        for err in mermaid_syn.errors:
+            result['errors'].append(f"Mermaid syntax: {err.message}")
+    for warn in mermaid_syn.warnings:
+        result['warnings'].append(f"Mermaid: {warn.message}")
+    
     return result
+
+
+def extract_all_mermaid_diagrams(content: str) -> List[str]:
+    """Return stripped diagram bodies for every ```mermaid block in markdown."""
+    pattern = r'```mermaid\s*([\s\S]*?)```'
+    return [m.strip() for m in re.findall(pattern, content) if m.strip()]
 
 
 def validate_docs_folder(docs_path: Path) -> Dict[str, Any]:
@@ -281,6 +298,45 @@ class TestViewerDataFormat:
                 print(f"  {f['repo']}: {f['errors']}")
         
         assert len(failures) == 0, f"Some repos invalid: {failures}"
+    
+    def test_all_demo_repos_mermaid_syntax(self, demo_repos_path):
+        """Every Mermaid block in demo repo .md files must pass backend syntax validation."""
+        if not demo_repos_path.exists():
+            pytest.skip("Demo repos folder not available")
+        
+        failures: List[Dict[str, Any]] = []
+        
+        for repo_path in demo_repos_path.iterdir():
+            if not repo_path.is_dir():
+                continue
+            if not (repo_path / 'module_tree.json').exists():
+                continue
+            
+            for md_file in sorted(repo_path.glob('*.md')):
+                try:
+                    content = md_file.read_text()
+                except OSError:
+                    continue
+                
+                diagrams = extract_all_mermaid_diagrams(content)
+                for idx, diagram in enumerate(diagrams, start=1):
+                    syn = validate_mermaid(diagram)
+                    if not syn.valid:
+                        failures.append({
+                            'repo': repo_path.name,
+                            'file': md_file.name,
+                            'diagram_index': idx,
+                            'errors': [e.message for e in syn.errors],
+                        })
+        
+        if failures:
+            print("\nMermaid syntax failures:")
+            for f in failures[:30]:
+                print(f"  {f['repo']}/{f['file']} diagram #{f['diagram_index']}: {f['errors']}")
+            if len(failures) > 30:
+                print(f"  ... and {len(failures) - 30} more")
+        
+        assert len(failures) == 0, f"Mermaid syntax errors in demo repos: {failures}"
 
 
 class TestMetadataFormat:

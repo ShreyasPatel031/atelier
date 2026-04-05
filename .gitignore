@@ -69,7 +69,9 @@ docs/.cache/
 Thumbs.db
 
 # Temporary files
+.tmp/
 *.tmp
 *.log
 *.bak
 .vercel
+.env*.local

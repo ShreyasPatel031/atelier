@@ -137,6 +137,22 @@ The interactive viewer provides a visual way to explore generated documentation:
 
 ### Setting Up the Viewer
 
+**Recommended: Use the helper script (starts both servers automatically)**
+```bash
+cd /Users/shreyaspatel/atelier
+./demo/start_viewer.sh
+```
+Then open: http://localhost:8080/viewer.html?repo=KubeElasti
+
+The script automatically:
+- Detects and uses your virtual environment
+- Starts the static viewer server (port 8080)
+- Starts the chat API server (port 8001)
+- Verifies both servers are running
+- Shows helpful error messages if something fails
+
+**Alternative Options:**
+
 **Option 1: Simple (Viewer Only, No Chat)**
 ```bash
 cd /Users/shreyaspatel/atelier/demo
@@ -144,26 +160,7 @@ python3 -m http.server 8080
 # Open http://localhost:8080/viewer.html?repo=KubeElasti
 ```
 
-**Option 2: Full Setup (Viewer + Chat) - Recommended**
-
-**Using the helper script:**
-```bash
-cd /Users/shreyaspatel/atelier
-./demo/start_viewer.sh
-```
-
-**Or manually (two terminals):**
-```bash
-# Terminal 1: Static viewer
-cd /Users/shreyaspatel/atelier/demo
-python3 -m http.server 8080
-
-# Terminal 2: Chat API
-cd /Users/shreyaspatel/atelier
-python3 -m codewiki.run_web_app --port 8001
-```
-
-**Option 3: Single Server (Easiest)**
+**Option 2: Single Server (Easiest)**
 ```bash
 cd /Users/shreyaspatel/atelier
 python3 -m codewiki.run_web_app --port 8001
@@ -249,14 +246,25 @@ CodeWiki/
 ├── codewiki/                 # Main package
 │   ├── cli/                  # CLI commands
 │   │   ├── commands/         # config, generate commands
+│   │   │   └── generate.py   # CLI entry point for `codewiki generate`
+│   │   ├── adapters/         # CLI adapters
+│   │   │   └── doc_generator.py  # CLI adapter for documentation generation
 │   │   └── utils/            # File system, logging utilities
 │   └── src/                  # Core implementation
 │       ├── be/               # Backend (agents, clustering, analysis)
+│       │   ├── documentation_generator.py  # Main generation orchestrator
+│       │   ├── dependency_analyzer.py      # Code parsing & dependency analysis
+│       │   ├── cluster_modules.py           # LLM-powered module clustering
+│       │   ├── agent_orchestrator.py       # Agent orchestration
 │       │   ├── agent_tools/  # LLM agent tools
-│       │   └── dependency_analyzer/  # Code parsing
+│       │   └── main.py       # Backend entry point
 │       └── fe/               # Frontend (web interface)
+│           ├── web_app.py    # FastAPI web application
+│           └── routes.py     # API routes
 ├── demo/                     # Demo viewer and pre-generated docs
 │   ├── viewer.html           # Interactive documentation viewer
+│   ├── start_viewer.sh       # Helper script to start viewer + API server
+│   ├── SETUP_VIEWER.md       # Viewer setup documentation
 │   ├── repos/                # Pre-generated repository docs
 │   │   ├── KubeElasti/       # KubeElasti documentation
 │   │   └── flask/            # Flask documentation
@@ -266,6 +274,22 @@ CodeWiki/
 ├── tests/                    # Test suite
 └── requirements.txt          # Python dependencies
 ```
+
+### Documentation Generation Code Location
+
+The core documentation generation code is located in:
+
+- **CLI Entry Point**: `codewiki/cli/commands/generate.py` - Handles `codewiki generate` command
+- **CLI Adapter**: `codewiki/cli/adapters/doc_generator.py` - Bridges CLI to backend
+- **Main Generator**: `codewiki/src/be/documentation_generator.py` - Orchestrates the 5-stage generation process:
+  1. Dependency Analysis
+  2. Module Clustering  
+  3. Documentation Generation
+  4. Sub-module Documentation
+  5. HTML Generation
+- **Dependency Analysis**: `codewiki/src/be/dependency_analyzer.py` - Parses code and builds dependency graphs
+- **Module Clustering**: `codewiki/src/be/cluster_modules.py` - Uses LLM to cluster components into modules
+- **Agent Orchestration**: `codewiki/src/be/agent_orchestrator.py` - Manages LLM agents for documentation
 
 ---
 

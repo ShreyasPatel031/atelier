@@ -1,0 +1,1716 @@
+{
+    "conversion_utilities": {
+        "path": "src/transformers",
+        "components": [
+            "src.transformers.conversion_mapping.register_checkpoint_conversion_mapping"
+        ],
+        "children": {}
+    },
+    "generation_mixins": {
+        "path": "src/transformers/generation",
+        "components": [
+            "src.transformers.generation.continuous_batching.continuous_api.ContinuousMixin",
+            "src.transformers.generation.utils.GenerationMixin"
+        ],
+        "children": {}
+    },
+    "hyperparameter_search": {
+        "path": "src/transformers",
+        "components": [
+            "src.transformers.hyperparameter_search.WandbBackend"
+        ],
+        "children": {}
+    },
+    "image_utilities": {
+        "path": "src/transformers",
+        "components": [
+            "src.transformers.image_transforms.convert_to_rgb",
+            "src.transformers.image_utils.ImageFeatureExtractionMixin"
+        ],
+        "children": {}
+    },
+    "integrations": {
+        "path": "src/transformers/integrations",
+        "components": [
+            "src.transformers.integrations.integration_utils.DVCLiveCallback",
+            "src.transformers.integrations.peft.PeftAdapterMixin"
+        ],
+        "children": {}
+    },
+    "modeling_utilities": {
+        "path": "src/transformers",
+        "components": [
+            "src.transformers.modeling_utils.PreTrainedAudioTokenizerBase"
+        ],
+        "children": {}
+    },
+    "pipelines": {
+        "path": "src/transformers/pipelines",
+        "components": [
+            "src.transformers.pipelines.base.ChunkPipeline",
+            "src.transformers.pipelines.image_text_to_text.ImageTextToTextPipeline"
+        ],
+        "children": {}
+    },
+    "quantizers": {
+        "path": "src/transformers/quantizers",
+        "components": [
+            "src.transformers.quantizers.quantizer_bitnet.BitNetHfQuantizer",
+            "src.transformers.quantizers.quantizer_bnb_4bit.Bnb4BitHfQuantizer",
+            "src.transformers.quantizers.quantizer_bnb_8bit.Bnb8BitHfQuantizer",
+            "src.transformers.quantizers.quantizer_finegrained_fp8.FineGrainedFP8HfQuantizer",
+            "src.transformers.quantizers.quantizer_fp_quant.FPQuantHfQuantizer",
+            "src.transformers.quantizers.quantizer_metal.MetalHfQuantizer",
+            "src.transformers.quantizers.quantizer_mxfp4.Mxfp4HfQuantizer",
+            "src.transformers.quantizers.quantizer_quark.QuarkHfQuantizer",
+            "src.transformers.quantizers.quantizer_sinq.SinqHfQuantizer",
+            "src.transformers.quantizers.quantizer_torchao.TorchAoHfQuantizer"
+        ],
+        "children": {}
+    },
+    "tokenization_utilities": {
+        "path": "src/transformers",
+        "components": [
+            "src.transformers.tokenization_utils_base.PreTrainedTokenizerBase",
+            "src.transformers.tokenization_utils_tokenizers.TokenizersBackend"
+        ],
+        "children": {}
+    },
+    "afmoe_models": {
+        "path": "src/transformers/models/afmoe",
+        "components": [
+            "src.transformers.models.afmoe.modeling_afmoe.AfmoeForCausalLM",
+            "src.transformers.models.afmoe.modular_afmoe.AfmoeForCausalLM"
+        ],
+        "children": {}
+    },
+    "align_models": {
+        "path": "src/transformers/models/align",
+        "components": [
+            "src.transformers.models.align.convert_align_tf_to_hf.convert_align_checkpoint"
+        ],
+        "children": {}
+    },
+    "aria_models": {
+        "path": "src/transformers/models/aria",
+        "components": [
+            "src.transformers.models.aria.modeling_aria.AriaTextForCausalLM"
+        ],
+        "children": {}
+    },
+    "audio_spectrogram_transformer_models": {
+        "path": "src/transformers/models/audio_spectrogram_transformer",
+        "components": [
+            "src.transformers.models.audio_spectrogram_transformer.convert_audio_spectrogram_transformer_original_to_pytorch.convert_audio_spectrogram_transformer_checkpoint"
+        ],
+        "children": {}
+    },
+    "audioflamingo3_models": {
+        "path": "src/transformers/models/audioflamingo3",
+        "components": [
+            "src.transformers.models.audioflamingo3.convert_audioflamingo3_to_hf.main"
+        ],
+        "children": {}
+    },
+    "autoformer_models": {
+        "path": "src/transformers/models/autoformer",
+        "components": [
+            "src.transformers.models.autoformer.modeling_autoformer.AutoformerForPrediction"
+        ],
+        "children": {}
+    },
+    "bamba_models": {
+        "path": "src/transformers/models/bamba",
+        "components": [
+            "src.transformers.models.bamba.modeling_bamba.BambaForCausalLM",
+            "src.transformers.models.bamba.modular_bamba.BambaModel"
+        ],
+        "children": {}
+    },
+    "bark_models": {
+        "path": "src/transformers/models/bark",
+        "components": [
+            "src.transformers.models.bark.convert_suno_to_hf.load_whole_bark_model"
+        ],
+        "children": {}
+    },
+    "bart_models": {
+        "path": "src/transformers/models/bart",
+        "components": [
+            "src.transformers.models.bart.convert_bart_original_pytorch_checkpoint_to_pytorch.convert_bart_checkpoint",
+            "src.transformers.models.bart.modeling_bart.BartForQuestionAnswering",
+            "src.transformers.models.bart.modeling_bart.BartForCausalLM"
+        ],
+        "children": {}
+    },
+    "beit_models": {
+        "path": "src/transformers/models/beit",
+        "components": [
+            "src.transformers.models.beit.convert_beit_unilm_to_pytorch.convert_beit_checkpoint"
+        ],
+        "children": {}
+    },
+    "bigbird_pegasus_models": {
+        "path": "src/transformers/models/bigbird_pegasus",
+        "components": [
+            "src.transformers.models.bigbird_pegasus.convert_bigbird_pegasus_tf_to_pytorch.convert_bigbird_pegasus_ckpt_to_pytorch",
+            "src.transformers.models.bigbird_pegasus.modeling_bigbird_pegasus.BigBirdPegasusForSequenceClassification",
+            "src.transformers.models.bigbird_pegasus.modeling_bigbird_pegasus.BigBirdPegasusForQuestionAnswering"
+        ],
+        "children": {}
+    },
+    "blenderbot_models": {
+        "path": "src/transformers/models/blenderbot",
+        "components": [
+            "src.transformers.models.blenderbot.convert_blenderbot_original_pytorch_checkpoint_to_pytorch.convert_parlai_checkpoint"
+        ],
+        "children": {}
+    },
+    "blenderbot_small_models": {
+        "path": "src/transformers/models/blenderbot_small",
+        "components": [
+            "src.transformers.models.blenderbot_small.modeling_blenderbot_small.BlenderbotSmallForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "blip_models": {
+        "path": "src/transformers/models/blip",
+        "components": [
+            "src.transformers.models.blip.convert_blip_original_pytorch_to_hf.convert_blip_checkpoint",
+            "src.transformers.models.blip.modeling_blip.BlipModel"
+        ],
+        "children": {}
+    },
+    "blip_2_models": {
+        "path": "src/transformers/models/blip_2",
+        "components": [
+            "src.transformers.models.blip_2.convert_blip_2_original_to_pytorch.convert_blip2_checkpoint"
+        ],
+        "children": {}
+    },
+    "blt_models": {
+        "path": "src/transformers/models/blt",
+        "components": [
+            "src.transformers.models.blt.modeling_blt.BltForCausalLM",
+            "src.transformers.models.blt.modular_blt.BltForCausalLM"
+        ],
+        "children": {}
+    },
+    "bridgetower_models": {
+        "path": "src/transformers/models/bridgetower",
+        "components": [
+            "src.transformers.models.bridgetower.modeling_bridgetower.BridgeTowerForMaskedLM",
+            "src.transformers.models.bridgetower.modeling_bridgetower.BridgeTowerForContrastiveLearning",
+            "src.transformers.models.bridgetower.modeling_bridgetower.BridgeTowerForImageAndTextRetrieval"
+        ],
+        "children": {}
+    },
+    "chameleon_models": {
+        "path": "src/transformers/models/chameleon",
+        "components": [
+            "src.transformers.models.chameleon.image_processing_chameleon.ChameleonImageProcessor",
+            "src.transformers.models.chameleon.image_processing_pil_chameleon.ChameleonImageProcessorPil"
+        ],
+        "children": {}
+    },
+    "chinese_clip_models": {
+        "path": "src/transformers/models/chinese_clip",
+        "components": [
+            "src.transformers.models.chinese_clip.convert_chinese_clip_original_pytorch_to_hf.convert_chinese_clip_checkpoint"
+        ],
+        "children": {}
+    },
+    "clap_models": {
+        "path": "src/transformers/models/clap",
+        "components": [
+            "src.transformers.models.clap.convert_clap_original_pytorch_to_hf.convert_clap_checkpoint"
+        ],
+        "children": {}
+    },
+    "clipseg_models": {
+        "path": "src/transformers/models/clipseg",
+        "components": [
+            "src.transformers.models.clipseg.convert_clipseg_original_pytorch_to_hf.convert_clipseg_checkpoint"
+        ],
+        "children": {}
+    },
+    "clvp_models": {
+        "path": "src/transformers/models/clvp",
+        "components": [
+            "src.transformers.models.clvp.convert_clvp_to_hf.convert_clvp_weights"
+        ],
+        "children": {}
+    },
+    "cohere_asr_models": {
+        "path": "src/transformers/models/cohere_asr",
+        "components": [
+            "src.transformers.models.cohere_asr.modeling_cohere_asr.CohereAsrForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "colmodernvbert_models": {
+        "path": "src/transformers/models/colmodernvbert",
+        "components": [
+            "src.transformers.models.colmodernvbert.modular_colmodernvbert.ColModernVBertProcessor",
+            "src.transformers.models.colmodernvbert.processing_colmodernvbert.ColModernVBertProcessor"
+        ],
+        "children": {}
+    },
+    "colpali_models": {
+        "path": "src/transformers/models/colpali",
+        "components": [
+            "src.transformers.models.colpali.modular_colpali.ColPaliProcessor",
+            "src.transformers.models.colpali.processing_colpali.ColPaliProcessor"
+        ],
+        "children": {}
+    },
+    "conditional_detr_models": {
+        "path": "src/transformers/models/conditional_detr",
+        "components": [
+            "src.transformers.models.conditional_detr.image_processing_pil_conditional_detr.ConditionalDetrImageProcessorPil",
+            "src.transformers.models.conditional_detr.modeling_conditional_detr.ConditionalDetrForSegmentation"
+        ],
+        "children": {}
+    },
+    "convnextv2_models": {
+        "path": "src/transformers/models/convnextv2",
+        "components": [
+            "src.transformers.models.convnextv2.convert_convnextv2_to_pytorch.convert_convnextv2_checkpoint"
+        ],
+        "children": {}
+    },
+    "d_fine_models": {
+        "path": "src/transformers/models/d_fine",
+        "components": [
+            "src.transformers.models.d_fine.convert_d_fine_original_pytorch_checkpoint_to_hf.convert_d_fine_checkpoint",
+            "src.transformers.models.d_fine.modeling_d_fine.DFineForObjectDetection"
+        ],
+        "children": {}
+    },
+    "dab_detr_models": {
+        "path": "src/transformers/models/dab_detr",
+        "components": [
+            "src.transformers.models.dab_detr.convert_dab_detr_original_pytorch_checkpoint_to_pytorch.convert_dab_detr_checkpoint"
+        ],
+        "children": {}
+    },
+    "data2vec_models": {
+        "path": "src/transformers/models/data2vec",
+        "components": [
+            "src.transformers.models.data2vec.convert_data2vec_vision_original_pytorch_checkpoint_to_pytorch.main",
+            "src.transformers.models.data2vec.modeling_data2vec_audio.Data2VecAudioForXVector",
+            "src.transformers.models.data2vec.modeling_data2vec_audio.Data2VecAudioForSequenceClassification"
+        ],
+        "children": {}
+    },
+    "dbrx_models": {
+        "path": "src/transformers/models/dbrx",
+        "components": [
+            "src.transformers.models.dbrx.modeling_dbrx.DbrxForCausalLM"
+        ],
+        "children": {}
+    },
+    "decision_transformer_models": {
+        "path": "src/transformers/models/decision_transformer",
+        "components": [
+            "src.transformers.models.decision_transformer.modeling_decision_transformer.DecisionTransformerModel"
+        ],
+        "children": {}
+    },
+    "deepseek_v2_models": {
+        "path": "src/transformers/models/deepseek_v2",
+        "components": [
+            "src.transformers.models.deepseek_v2.modeling_deepseek_v2.DeepseekV2ForCausalLM"
+        ],
+        "children": {}
+    },
+    "deepseek_v3_models": {
+        "path": "src/transformers/models/deepseek_v3",
+        "components": [
+            "src.transformers.models.deepseek_v3.modeling_deepseek_v3.DeepseekV3ForCausalLM"
+        ],
+        "children": {}
+    },
+    "deformable_detr_models": {
+        "path": "src/transformers/models/deformable_detr",
+        "components": [
+            "src.transformers.models.deformable_detr.convert_deformable_detr_to_pytorch.convert_deformable_detr_checkpoint",
+            "src.transformers.models.deformable_detr.image_processing_pil_deformable_detr.DeformableDetrImageProcessorPil",
+            "src.transformers.models.deformable_detr.modeling_deformable_detr.DeformableDetrForObjectDetection"
+        ],
+        "children": {}
+    },
+    "depth_pro_models": {
+        "path": "src/transformers/models/depth_pro",
+        "components": [
+            "src.transformers.models.depth_pro.convert_depth_pro_weights_to_hf.main"
+        ],
+        "children": {}
+    },
+    "detr_models": {
+        "path": "src/transformers/models/detr",
+        "components": [
+            "src.transformers.models.detr.convert_detr_original_pytorch_checkpoint_to_pytorch.convert_detr_checkpoint",
+            "src.transformers.models.detr.convert_detr_to_pytorch.convert_detr_checkpoint",
+            "src.transformers.models.detr.image_processing_pil_detr.DetrImageProcessorPil"
+        ],
+        "children": {}
+    },
+    "dia_models": {
+        "path": "src/transformers/models/dia",
+        "components": [
+            "src.transformers.models.dia.convert_dia_to_hf.convert_dia_model_to_hf",
+            "src.transformers.models.dia.modeling_dia.DiaForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "dinov2_models": {
+        "path": "src/transformers/models/dinov2",
+        "components": [
+            "src.transformers.models.dinov2.convert_dinov2_to_hf.convert_dinov2_checkpoint"
+        ],
+        "children": {}
+    },
+    "dinov2_with_registers_models": {
+        "path": "src/transformers/models/dinov2_with_registers",
+        "components": [
+            "src.transformers.models.dinov2_with_registers.convert_dinov2_with_registers_to_hf.convert_dinov2_with_registers_checkpoint"
+        ],
+        "children": {}
+    },
+    "dinov3_convnext_models": {
+        "path": "src/transformers/models/dinov3_convnext",
+        "components": [
+            "src.transformers.models.dinov3_convnext.convert_dinov3_convnext_to_hf.convert_and_test_dinov3_checkpoint"
+        ],
+        "children": {}
+    },
+    "dinov3_vit_models": {
+        "path": "src/transformers/models/dinov3_vit",
+        "components": [
+            "src.transformers.models.dinov3_vit.convert_dinov3_vit_to_hf.convert_and_test_dinov3_checkpoint"
+        ],
+        "children": {}
+    },
+    "dit_models": {
+        "path": "src/transformers/models/dit",
+        "components": [
+            "src.transformers.models.dit.convert_dit_unilm_to_pytorch.convert_dit_checkpoint"
+        ],
+        "children": {}
+    },
+    "donut_models": {
+        "path": "src/transformers/models/donut",
+        "components": [
+            "src.transformers.models.donut.convert_donut_to_pytorch.convert_donut_checkpoint"
+        ],
+        "children": {}
+    },
+    "dots1_models": {
+        "path": "src/transformers/models/dots1",
+        "components": [
+            "src.transformers.models.dots1.modeling_dots1.Dots1ForCausalLM"
+        ],
+        "children": {}
+    },
+    "dpt_models": {
+        "path": "src/transformers/models/dpt",
+        "components": [
+            "src.transformers.models.dpt.convert_dinov2_depth_to_hf.convert_dpt_checkpoint",
+            "src.transformers.models.dpt.convert_dpt_beit_to_hf.convert_dpt_checkpoint",
+            "src.transformers.models.dpt.convert_dpt_hybrid_to_pytorch.convert_dpt_checkpoint",
+            "src.transformers.models.dpt.convert_dpt_swinv2_to_hf.convert_dpt_checkpoint",
+            "src.transformers.models.dpt.convert_dpt_to_pytorch.convert_dpt_checkpoint"
+        ],
+        "children": {}
+    },
+    "edgetam_models": {
+        "path": "src/transformers/models/edgetam",
+        "components": [
+            "src.transformers.models.edgetam.convert_edgetam_to_hf.convert_edgetam_checkpoint"
+        ],
+        "children": {}
+    },
+    "edgetam_video_models": {
+        "path": "src/transformers/models/edgetam_video",
+        "components": [
+            "src.transformers.models.edgetam_video.convert_edgetam_video_to_hf.convert_edgetam_checkpoint",
+            "src.transformers.models.edgetam_video.modeling_edgetam_video.EdgeTamVideoModel"
+        ],
+        "children": {}
+    },
+    "efficientloftr_models": {
+        "path": "src/transformers/models/efficientloftr",
+        "components": [
+            "src.transformers.models.efficientloftr.convert_efficientloftr_to_hf.write_model",
+            "src.transformers.models.efficientloftr.image_processing_pil_efficientloftr.EfficientLoFTRImageProcessorPil"
+        ],
+        "children": {}
+    },
+    "efficientnet_models": {
+        "path": "src/transformers/models/efficientnet",
+        "components": [
+            "src.transformers.models.efficientnet.convert_efficientnet_to_pytorch.convert_efficientnet_checkpoint"
+        ],
+        "children": {}
+    },
+    "electra_models": {
+        "path": "src/transformers/models/electra",
+        "components": [
+            "src.transformers.models.electra.convert_electra_original_tf_checkpoint_to_pytorch.convert_tf_checkpoint_to_pytorch"
+        ],
+        "children": {}
+    },
+    "emu3_models": {
+        "path": "src/transformers/models/emu3",
+        "components": [
+            "src.transformers.models.emu3.convert_emu3_weights_to_hf.main"
+        ],
+        "children": {}
+    },
+    "eomt_models": {
+        "path": "src/transformers/models/eomt",
+        "components": [
+            "src.transformers.models.eomt.modeling_eomt.EomtForUniversalSegmentation"
+        ],
+        "children": {}
+    },
+    "eomt_dinov3_models": {
+        "path": "src/transformers/models/eomt_dinov3",
+        "components": [
+            "src.transformers.models.eomt_dinov3.convert_eomt_dinov3_to_hf.verify_conversion",
+            "src.transformers.models.eomt_dinov3.modeling_eomt_dinov3.EomtDinov3ForUniversalSegmentation"
+        ],
+        "children": {}
+    },
+    "ernie4_5_moe_models": {
+        "path": "src/transformers/models/ernie4_5_moe",
+        "components": [
+            "src.transformers.models.ernie4_5_moe.modeling_ernie4_5_moe.Ernie4_5_MoeForCausalLM",
+            "src.transformers.models.ernie4_5_moe.modular_ernie4_5_moe.Ernie4_5_MoeForCausalLM"
+        ],
+        "children": {}
+    },
+    "ernie4_5_vl_moe_models": {
+        "path": "src/transformers/models/ernie4_5_vl_moe",
+        "components": [
+            "src.transformers.models.ernie4_5_vl_moe.convert_ernie4_5_vl_moe_to_hf.convert_processor",
+            "src.transformers.models.ernie4_5_vl_moe.modeling_ernie4_5_vl_moe.Ernie4_5_VL_MoeTextModel"
+        ],
+        "children": {}
+    },
+    "esm_models": {
+        "path": "src/transformers/models/esm",
+        "components": [
+            "src.transformers.models.esm.modeling_esm.EsmForSequenceClassification",
+            "src.transformers.models.esm.modeling_esm.EsmForMaskedLM",
+            "src.transformers.models.esm.modeling_esm.EsmForTokenClassification",
+            "src.transformers.models.esm.modeling_esmfold.EsmForProteinFolding"
+        ],
+        "children": {}
+    },
+    "evolla_models": {
+        "path": "src/transformers/models/evolla",
+        "components": [
+            "src.transformers.models.evolla.modeling_evolla.EvollaForProteinText2Text",
+            "src.transformers.models.evolla.modular_evolla.EvollaForProteinText2Text"
+        ],
+        "children": {}
+    },
+    "exaone_moe_models": {
+        "path": "src/transformers/models/exaone_moe",
+        "components": [
+            "src.transformers.models.exaone_moe.modeling_exaone_moe.ExaoneMoeForCausalLM"
+        ],
+        "children": {}
+    },
+    "falcon_h1_models": {
+        "path": "src/transformers/models/falcon_h1",
+        "components": [
+            "src.transformers.models.falcon_h1.modeling_falcon_h1.FalconH1ForCausalLM",
+            "src.transformers.models.falcon_h1.modular_falcon_h1.FalconH1Model"
+        ],
+        "children": {}
+    },
+    "falcon_mamba_models": {
+        "path": "src/transformers/models/falcon_mamba",
+        "components": [
+            "src.transformers.models.falcon_mamba.modeling_falcon_mamba.FalconMambaForCausalLM"
+        ],
+        "children": {}
+    },
+    "fastspeech2_conformer_models": {
+        "path": "src/transformers/models/fastspeech2_conformer",
+        "components": [
+            "src.transformers.models.fastspeech2_conformer.convert_model_with_hifigan.convert_FastSpeech2ConformerWithHifiGan_checkpoint"
+        ],
+        "children": {}
+    },
+    "flava_models": {
+        "path": "src/transformers/models/flava",
+        "components": [
+            "src.transformers.models.flava.convert_flava_original_pytorch_to_hf.convert_flava_checkpoint"
+        ],
+        "children": {}
+    },
+    "flex_olmo_models": {
+        "path": "src/transformers/models/flex_olmo",
+        "components": [
+            "src.transformers.models.flex_olmo.modeling_flex_olmo.FlexOlmoForCausalLM"
+        ],
+        "children": {}
+    },
+    "gemma2_models": {
+        "path": "src/transformers/models/gemma2",
+        "components": [
+            "src.transformers.models.gemma2.convert_gemma2_weights_to_hf.main",
+            "src.transformers.models.gemma2.modeling_gemma2.Gemma2ForCausalLM"
+        ],
+        "children": {}
+    },
+    "gemma3_models": {
+        "path": "src/transformers/models/gemma3",
+        "components": [
+            "src.transformers.models.gemma3.convert_gemma3_weights.main",
+            "src.transformers.models.gemma3.modeling_gemma3.Gemma3ForCausalLM",
+            "src.transformers.models.gemma3.modeling_gemma3.Gemma3ForSequenceClassification"
+        ],
+        "children": {}
+    },
+    "gemma3n_models": {
+        "path": "src/transformers/models/gemma3n",
+        "components": [
+            "src.transformers.models.gemma3n.modeling_gemma3n.Gemma3nForCausalLM"
+        ],
+        "children": {}
+    },
+    "gemma4_models": {
+        "path": "src/transformers/models/gemma4",
+        "components": [
+            "src.transformers.models.gemma4.convert_gemma4_weights.main",
+            "src.transformers.models.gemma4.modeling_gemma4.Gemma4ForCausalLM",
+            "src.transformers.models.gemma4.modular_gemma4.Gemma4TextModel"
+        ],
+        "children": {
+            "conversion_utils": {
+                "components": [
+                    "src.transformers.models.gemma4.convert_gemma4_weights.main"
+                ],
+                "children": {}
+            },
+            "modeling": {
+                "components": [
+                    "src.transformers.models.gemma4.modeling_gemma4.Gemma4ForCausalLM",
+                    "src.transformers.models.gemma4.modular_gemma4.Gemma4TextModel"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "git_models": {
+        "path": "src/transformers/models/git",
+        "components": [
+            "src.transformers.models.git.convert_git_to_pytorch.convert_git_checkpoint"
+        ],
+        "children": {}
+    },
+    "glm4_moe_models": {
+        "path": "src/transformers/models/glm4_moe",
+        "components": [
+            "src.transformers.models.glm4_moe.modeling_glm4_moe.Glm4MoeForCausalLM"
+        ],
+        "children": {}
+    },
+    "glm4_moe_lite_models": {
+        "path": "src/transformers/models/glm4_moe_lite",
+        "components": [
+            "src.transformers.models.glm4_moe_lite.modeling_glm4_moe_lite.Glm4MoeLiteForCausalLM"
+        ],
+        "children": {}
+    },
+    "glm4v_moe_models": {
+        "path": "src/transformers/models/glm4v_moe",
+        "components": [
+            "src.transformers.models.glm4v_moe.modeling_glm4v_moe.Glm4vMoeTextModel"
+        ],
+        "children": {}
+    },
+    "glm_moe_dsa_models": {
+        "path": "src/transformers/models/glm_moe_dsa",
+        "components": [
+            "src.transformers.models.glm_moe_dsa.modeling_glm_moe_dsa.GlmMoeDsaForCausalLM"
+        ],
+        "children": {}
+    },
+    "glpn_models": {
+        "path": "src/transformers/models/glpn",
+        "components": [
+            "src.transformers.models.glpn.convert_glpn_to_pytorch.convert_glpn_checkpoint"
+        ],
+        "children": {}
+    },
+    "got_ocr2_models": {
+        "path": "src/transformers/models/got_ocr2",
+        "components": [
+            "src.transformers.models.got_ocr2.processing_got_ocr2.GotOcr2Processor"
+        ],
+        "children": {}
+    },
+    "gpt2_models": {
+        "path": "src/transformers/models/gpt2",
+        "components": [
+            "src.transformers.models.gpt2.convert_gpt2_original_tf_checkpoint_to_pytorch.convert_gpt2_checkpoint_to_pytorch",
+            "src.transformers.models.gpt2.modeling_gpt2.GPT2DoubleHeadsModel",
+            "src.transformers.models.gpt2.modeling_gpt2.GPT2ForSequenceClassification",
+            "src.transformers.models.gpt2.modeling_gpt2.GPT2LMHeadModel",
+            "src.transformers.models.gpt2.modeling_gpt2.GPT2ForQuestionAnswering",
+            "src.transformers.models.gpt2.modeling_gpt2.GPT2ForTokenClassification"
+        ],
+        "children": {}
+    },
+    "gpt_oss_models": {
+        "path": "src/transformers/models/gpt_oss",
+        "components": [
+            "src.transformers.models.gpt_oss.modeling_gpt_oss.GptOssForCausalLM"
+        ],
+        "children": {}
+    },
+    "granitemoe_models": {
+        "path": "src/transformers/models/granitemoe",
+        "components": [
+            "src.transformers.models.granitemoe.modeling_granitemoe.GraniteMoeForCausalLM"
+        ],
+        "children": {}
+    },
+    "granitemoehybrid_models": {
+        "path": "src/transformers/models/granitemoehybrid",
+        "components": [
+            "src.transformers.models.granitemoehybrid.modeling_granitemoehybrid.GraniteMoeHybridForCausalLM"
+        ],
+        "children": {}
+    },
+    "granitemoeshared_models": {
+        "path": "src/transformers/models/granitemoeshared",
+        "components": [
+            "src.transformers.models.granitemoeshared.modeling_granitemoeshared.GraniteMoeSharedForCausalLM"
+        ],
+        "children": {}
+    },
+    "grounding_dino_models": {
+        "path": "src/transformers/models/grounding_dino",
+        "components": [
+            "src.transformers.models.grounding_dino.convert_grounding_dino_to_hf.convert_grounding_dino_checkpoint",
+            "src.transformers.models.grounding_dino.image_processing_pil_grounding_dino.GroundingDinoImageProcessorPil"
+        ],
+        "children": {}
+    },
+    "groupvit_models": {
+        "path": "src/transformers/models/groupvit",
+        "components": [
+            "src.transformers.models.groupvit.convert_groupvit_nvlab_to_hf.convert_groupvit_checkpoint"
+        ],
+        "children": {}
+    },
+    "hiera_models": {
+        "path": "src/transformers/models/hiera",
+        "components": [
+            "src.transformers.models.hiera.convert_hiera_to_hf.convert_hiera_checkpoint"
+        ],
+        "children": {}
+    },
+    "higgs_audio_v2_models": {
+        "path": "src/transformers/models/higgs_audio_v2",
+        "components": [
+            "src.transformers.models.higgs_audio_v2.convert_higgs_audio_v2_to_hf.main"
+        ],
+        "children": {}
+    },
+    "hubert_models": {
+        "path": "src/transformers/models/hubert",
+        "components": [
+            "src.transformers.models.hubert.modeling_hubert.HubertForCTC",
+            "src.transformers.models.hubert.modeling_hubert.HubertForSequenceClassification"
+        ],
+        "children": {}
+    },
+    "idefics_models": {
+        "path": "src/transformers/models/idefics",
+        "components": [
+            "src.transformers.models.idefics.modeling_idefics.IdeficsForVisionText2Text"
+        ],
+        "children": {}
+    },
+    "idefics2_models": {
+        "path": "src/transformers/models/idefics2",
+        "components": [
+            "src.transformers.models.idefics2.convert_idefics2_weights_to_hf.main",
+            "src.transformers.models.idefics2.image_processing_pil_idefics2.Idefics2ImageProcessorPil"
+        ],
+        "children": {}
+    },
+    "idefics3_models": {
+        "path": "src/transformers/models/idefics3",
+        "components": [
+            "src.transformers.models.idefics3.convert_idefics3_weights_to_hf.main"
+        ],
+        "children": {}
+    },
+    "informer_models": {
+        "path": "src/transformers/models/informer",
+        "components": [
+            "src.transformers.models.informer.modeling_informer.InformerForPrediction"
+        ],
+        "children": {}
+    },
+    "instructblip_models": {
+        "path": "src/transformers/models/instructblip",
+        "components": [
+            "src.transformers.models.instructblip.convert_instructblip_original_to_pytorch.convert_blip2_checkpoint",
+            "src.transformers.models.instructblip.modeling_instructblip.InstructBlipModel"
+        ],
+        "children": {}
+    },
+    "instructblipvideo_models": {
+        "path": "src/transformers/models/instructblipvideo",
+        "components": [
+            "src.transformers.models.instructblipvideo.convert_instructblipvideo_original_to_pytorch.convert_blip2_checkpoint",
+            "src.transformers.models.instructblipvideo.modeling_instructblipvideo.InstructBlipVideoModel"
+        ],
+        "children": {}
+    },
+    "internvl_models": {
+        "path": "src/transformers/models/internvl",
+        "components": [
+            "src.transformers.models.internvl.convert_internvl_weights_to_hf.main"
+        ],
+        "children": {}
+    },
+    "janus_models": {
+        "path": "src/transformers/models/janus",
+        "components": [
+            "src.transformers.models.janus.convert_janus_weights_to_hf.main"
+        ],
+        "children": {}
+    },
+    "jetmoe_models": {
+        "path": "src/transformers/models/jetmoe",
+        "components": [
+            "src.transformers.models.jetmoe.modeling_jetmoe.JetMoeForCausalLM",
+            "src.transformers.models.jetmoe.modular_jetmoe.JetMoeForCausalLM"
+        ],
+        "children": {}
+    },
+    "kosmos2_models": {
+        "path": "src/transformers/models/kosmos2",
+        "components": [
+            "src.transformers.models.kosmos2.convert_kosmos2_original_pytorch_checkpoint_to_pytorch.convert_kosmos2_checkpoint_to_pytorch",
+            "src.transformers.models.kosmos2.modeling_kosmos2.Kosmos2Model"
+        ],
+        "children": {}
+    },
+    "led_models": {
+        "path": "src/transformers/models/led",
+        "components": [
+            "src.transformers.models.led.modeling_led.LEDForQuestionAnswering",
+            "src.transformers.models.led.modeling_led.LEDForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "lfm2_moe_models": {
+        "path": "src/transformers/models/lfm2_moe",
+        "components": [
+            "src.transformers.models.lfm2_moe.modeling_lfm2_moe.Lfm2MoeForCausalLM"
+        ],
+        "children": {}
+    },
+    "lightglue_models": {
+        "path": "src/transformers/models/lightglue",
+        "components": [
+            "src.transformers.models.lightglue.convert_lightglue_to_hf.write_model",
+            "src.transformers.models.lightglue.image_processing_pil_lightglue.LightGlueImageProcessorPil"
+        ],
+        "children": {}
+    },
+    "llama4_models": {
+        "path": "src/transformers/models/llama4",
+        "components": [
+            "src.transformers.models.llama4.convert_llama4_weights_to_hf.write_model"
+        ],
+        "children": {}
+    },
+    "llava_next_models": {
+        "path": "src/transformers/models/llava_next",
+        "components": [
+            "src.transformers.models.llava_next.convert_llava_next_weights_to_hf.convert_llava_to_hf"
+        ],
+        "children": {}
+    },
+    "longcat_flash_models": {
+        "path": "src/transformers/models/longcat_flash",
+        "components": [
+            "src.transformers.models.longcat_flash.modeling_longcat_flash.LongcatFlashForCausalLM"
+        ],
+        "children": {}
+    },
+    "longt5_models": {
+        "path": "src/transformers/models/longt5",
+        "components": [
+            "src.transformers.models.longt5.modeling_longt5.LongT5ForConditionalGeneration",
+            "src.transformers.models.longt5.modeling_longt5.LongT5Model",
+            "src.transformers.models.longt5.modeling_longt5.LongT5EncoderModel"
+        ],
+        "children": {}
+    },
+    "lw_detr_models": {
+        "path": "src/transformers/models/lw_detr",
+        "components": [
+            "src.transformers.models.lw_detr.convert_lw_detr_to_hf.main",
+            "src.transformers.models.lw_detr.modeling_lw_detr.LwDetrForObjectDetection"
+        ],
+        "children": {}
+    },
+    "m2m_100_models": {
+        "path": "src/transformers/models/m2m_100",
+        "components": [
+            "src.transformers.models.m2m_100.convert_m2m100_original_checkpoint_to_pytorch.convert_fairseq_m2m100_checkpoint_from_disk"
+        ],
+        "children": {}
+    },
+    "mamba_models": {
+        "path": "src/transformers/models/mamba",
+        "components": [
+            "src.transformers.models.mamba.convert_mamba_ssm_checkpoint_to_pytorch.convert_mamba_checkpoint_file_to_huggingface_model_file"
+        ],
+        "children": {}
+    },
+    "marian_models": {
+        "path": "src/transformers/models/marian",
+        "components": [
+            "src.transformers.models.marian.convert_marian_tatoeba_to_pytorch.TatoebaConverter",
+            "src.transformers.models.marian.convert_marian_to_pytorch.convert_all_sentencepiece_models",
+            "src.transformers.models.marian.convert_marian_to_pytorch.convert",
+            "src.transformers.models.marian.convert_marian_to_pytorch.convert_whole_dir"
+        ],
+        "children": {}
+    },
+    "mask2former_models": {
+        "path": "src/transformers/models/mask2former",
+        "components": [
+            "src.transformers.models.mask2former.modeling_mask2former.Mask2FormerForUniversalSegmentation"
+        ],
+        "children": {}
+    },
+    "maskformer_models": {
+        "path": "src/transformers/models/maskformer",
+        "components": [
+            "src.transformers.models.maskformer.convert_maskformer_resnet_to_pytorch.convert_maskformer_checkpoint",
+            "src.transformers.models.maskformer.convert_maskformer_swin_to_pytorch.convert_maskformer_checkpoint",
+            "src.transformers.models.maskformer.modeling_maskformer.MaskFormerForInstanceSegmentation"
+        ],
+        "children": {}
+    },
+    "mbart_models": {
+        "path": "src/transformers/models/mbart",
+        "components": [
+            "src.transformers.models.mbart.convert_mbart_original_checkpoint_to_pytorch.convert_fairseq_mbart_checkpoint_from_disk",
+            "src.transformers.models.mbart.modeling_mbart.MBartForSequenceClassification",
+            "src.transformers.models.mbart.modeling_mbart.MBartForQuestionAnswering"
+        ],
+        "children": {}
+    },
+    "mimi_models": {
+        "path": "src/transformers/models/mimi",
+        "components": [
+            "src.transformers.models.mimi.convert_mimi_checkpoint_to_pytorch.convert_checkpoint"
+        ],
+        "children": {}
+    },
+    "minimax_m2_models": {
+        "path": "src/transformers/models/minimax_m2",
+        "components": [
+            "src.transformers.models.minimax_m2.modeling_minimax_m2.MiniMaxM2ForCausalLM"
+        ],
+        "children": {}
+    },
+    "ministral3_models": {
+        "path": "src/transformers/models/ministral3",
+        "components": [
+            "src.transformers.models.ministral3.convert_ministral3_weights_to_hf.main"
+        ],
+        "children": {}
+    },
+    "mistral4_models": {
+        "path": "src/transformers/models/mistral4",
+        "components": [
+            "src.transformers.models.mistral4.convert_mistral4_weight_to_hf.main",
+            "src.transformers.models.mistral4.modeling_mistral4.Mistral4ForCausalLM"
+        ],
+        "children": {}
+    },
+    "mllama_models": {
+        "path": "src/transformers/models/mllama",
+        "components": [
+            "src.transformers.models.mllama.convert_mllama_weights_to_hf.main",
+            "src.transformers.models.mllama.image_processing_pil_mllama.MllamaImageProcessorPil",
+            "src.transformers.models.mllama.modeling_mllama.MllamaTextModel"
+        ],
+        "children": {}
+    },
+    "mm_grounding_dino_models": {
+        "path": "src/transformers/models/mm_grounding_dino",
+        "components": [
+            "src.transformers.models.mm_grounding_dino.convert_mm_grounding_dino_to_hf.convert_mm_grounding_dino_checkpoint",
+            "src.transformers.models.mm_grounding_dino.modeling_mm_grounding_dino.MMGroundingDinoForObjectDetection"
+        ],
+        "children": {}
+    },
+    "mobilebert_models": {
+        "path": "src/transformers/models/mobilebert",
+        "components": [
+            "src.transformers.models.mobilebert.convert_mobilebert_original_tf_checkpoint_to_pytorch.convert_tf_checkpoint_to_pytorch"
+        ],
+        "children": {}
+    },
+    "mobilenet_v2_models": {
+        "path": "src/transformers/models/mobilenet_v2",
+        "components": [
+            "src.transformers.models.mobilenet_v2.convert_original_tf_checkpoint_to_pytorch.convert_movilevit_checkpoint"
+        ],
+        "children": {}
+    },
+    "mobilevit_models": {
+        "path": "src/transformers/models/mobilevit",
+        "components": [
+            "src.transformers.models.mobilevit.convert_mlcvnets_to_pytorch.convert_movilevit_checkpoint"
+        ],
+        "children": {}
+    },
+    "mobilevitv2_models": {
+        "path": "src/transformers/models/mobilevitv2",
+        "components": [
+            "src.transformers.models.mobilevitv2.convert_mlcvnets_to_pytorch.convert_mobilevitv2_checkpoint"
+        ],
+        "children": {}
+    },
+    "modernbert_decoder_models": {
+        "path": "src/transformers/models/modernbert_decoder",
+        "components": [
+            "src.transformers.models.modernbert_decoder.modeling_modernbert_decoder.ModernBertDecoderForSequenceClassification",
+            "src.transformers.models.modernbert_decoder.modeling_modernbert_decoder.ModernBertDecoderForCausalLM",
+            "src.transformers.models.modernbert_decoder.modular_modernbert_decoder.ModernBertDecoderForSequenceClassification",
+            "src.transformers.models.modernbert_decoder.modular_modernbert_decoder.ModernBertDecoderForCausalLM"
+        ],
+        "children": {}
+    },
+    "moonshine_models": {
+        "path": "src/transformers/models/moonshine",
+        "components": [
+            "src.transformers.models.moonshine.modeling_moonshine.MoonshineForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "moonshine_streaming_models": {
+        "path": "src/transformers/models/moonshine_streaming",
+        "components": [
+            "src.transformers.models.moonshine_streaming.modeling_moonshine_streaming.MoonshineStreamingForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "moshi_models": {
+        "path": "src/transformers/models/moshi",
+        "components": [
+            "src.transformers.models.moshi.convert_moshi_transformers.convert_checkpoint"
+        ],
+        "children": {}
+    },
+    "mt5_models": {
+        "path": "src/transformers/models/mt5",
+        "components": [
+            "src.transformers.models.mt5.modeling_mt5.MT5ForSequenceClassification"
+        ],
+        "children": {}
+    },
+    "musicflamingo_models": {
+        "path": "src/transformers/models/musicflamingo",
+        "components": [
+            "src.transformers.models.musicflamingo.convert_musicflamingo_to_hf.main"
+        ],
+        "children": {}
+    },
+    "musicgen_models": {
+        "path": "src/transformers/models/musicgen",
+        "components": [
+            "src.transformers.models.musicgen.convert_musicgen_transformers.convert_musicgen_checkpoint"
+        ],
+        "children": {}
+    },
+    "musicgen_melody_models": {
+        "path": "src/transformers/models/musicgen_melody",
+        "components": [
+            "src.transformers.models.musicgen_melody.convert_musicgen_melody_transformers.convert_musicgen_melody_checkpoint"
+        ],
+        "children": {}
+    },
+    "nemotron_models": {
+        "path": "src/transformers/models/nemotron",
+        "components": [
+            "src.transformers.models.nemotron.convert_nemotron_nemo_to_hf.convert"
+        ],
+        "children": {}
+    },
+    "nllb_moe_models": {
+        "path": "src/transformers/models/nllb_moe",
+        "components": [
+            "src.transformers.models.nllb_moe.modeling_nllb_moe.NllbMoeForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "nougat_models": {
+        "path": "src/transformers/models/nougat",
+        "components": [
+            "src.transformers.models.nougat.convert_nougat_to_hf.convert_nougat_checkpoint",
+            "src.transformers.models.nougat.image_processing_pil_nougat.NougatImageProcessorPil"
+        ],
+        "children": {}
+    },
+    "olmoe_models": {
+        "path": "src/transformers/models/olmoe",
+        "components": [
+            "src.transformers.models.olmoe.modeling_olmoe.OlmoeForCausalLM"
+        ],
+        "children": {}
+    },
+    "omdet_turbo_models": {
+        "path": "src/transformers/models/omdet_turbo",
+        "components": [
+            "src.transformers.models.omdet_turbo.convert_omdet_turbo_to_hf.convert_omdet_turbo_checkpoint"
+        ],
+        "children": {}
+    },
+    "oneformer_models": {
+        "path": "src/transformers/models/oneformer",
+        "components": [
+            "src.transformers.models.oneformer.modeling_oneformer.OneFormerForUniversalSegmentation"
+        ],
+        "children": {}
+    },
+    "owlv2_models": {
+        "path": "src/transformers/models/owlv2",
+        "components": [
+            "src.transformers.models.owlv2.convert_owlv2_to_hf.convert_owlv2_checkpoint"
+        ],
+        "children": {}
+    },
+    "owlvit_models": {
+        "path": "src/transformers/models/owlvit",
+        "components": [
+            "src.transformers.models.owlvit.convert_owlvit_original_flax_to_hf.convert_owlvit_checkpoint"
+        ],
+        "children": {}
+    },
+    "paligemma_models": {
+        "path": "src/transformers/models/paligemma",
+        "components": [
+            "src.transformers.models.paligemma.convert_paligemma2_weights_to_hf.convert_paligemma2_checkpoint",
+            "src.transformers.models.paligemma.convert_paligemma_weights_to_hf.convert_paligemma_checkpoint"
+        ],
+        "children": {}
+    },
+    "parakeet_models": {
+        "path": "src/transformers/models/parakeet",
+        "components": [
+            "src.transformers.models.parakeet.convert_nemo_to_hf.main"
+        ],
+        "children": {}
+    },
+    "pegasus_models": {
+        "path": "src/transformers/models/pegasus",
+        "components": [
+            "src.transformers.models.pegasus.convert_pegasus_tf_to_pytorch.convert_pegasus_ckpt_to_pytorch"
+        ],
+        "children": {}
+    },
+    "pegasus_x_models": {
+        "path": "src/transformers/models/pegasus_x",
+        "components": [
+            "src.transformers.models.pegasus_x.modeling_pegasus_x.PegasusXForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "perceiver_models": {
+        "path": "src/transformers/models/perceiver",
+        "components": [
+            "src.transformers.models.perceiver.convert_perceiver_haiku_to_pytorch.convert_perceiver_checkpoint"
+        ],
+        "children": {}
+    },
+    "phi4_multimodal_models": {
+        "path": "src/transformers/models/phi4_multimodal",
+        "components": [
+            "src.transformers.models.phi4_multimodal.convert_phi4_multimodal_weights_to_hf.main"
+        ],
+        "children": {}
+    },
+    "pix2struct_models": {
+        "path": "src/transformers/models/pix2struct",
+        "components": [
+            "src.transformers.models.pix2struct.convert_pix2struct_original_pytorch_to_hf.convert_pix2struct_original_pytorch_checkpoint_to_hf"
+        ],
+        "children": {}
+    },
+    "pixio_models": {
+        "path": "src/transformers/models/pixio",
+        "components": [
+            "src.transformers.models.pixio.convert_pixio_to_pytorch.convert_pixio_checkpoint"
+        ],
+        "children": {}
+    },
+    "pixtral_models": {
+        "path": "src/transformers/models/pixtral",
+        "components": [
+            "src.transformers.models.pixtral.convert_pixtral_weights_to_hf.main"
+        ],
+        "children": {}
+    },
+    "plbart_models": {
+        "path": "src/transformers/models/plbart",
+        "components": [
+            "src.transformers.models.plbart.modeling_plbart.PLBartForSequenceClassification",
+            "src.transformers.models.plbart.modeling_plbart.PLBartForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "pp_doclayout_v2_models": {
+        "path": "src/transformers/models/pp_doclayout_v2",
+        "components": [
+            "src.transformers.models.pp_doclayout_v2.modeling_pp_doclayout_v2.PPDocLayoutV2ForObjectDetection"
+        ],
+        "children": {}
+    },
+    "pp_doclayout_v3_models": {
+        "path": "src/transformers/models/pp_doclayout_v3",
+        "components": [
+            "src.transformers.models.pp_doclayout_v3.modeling_pp_doclayout_v3.PPDocLayoutV3ForObjectDetection"
+        ],
+        "children": {}
+    },
+    "qwen2_5_omni_models": {
+        "path": "src/transformers/models/qwen2_5_omni",
+        "components": [
+            "src.transformers.models.qwen2_5_omni.modeling_qwen2_5_omni.Qwen2_5OmniForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "qwen2_moe_models": {
+        "path": "src/transformers/models/qwen2_moe",
+        "components": [
+            "src.transformers.models.qwen2_moe.modeling_qwen2_moe.Qwen2MoeForCausalLM"
+        ],
+        "children": {}
+    },
+    "qwen3_5_models": {
+        "path": "src/transformers/models/qwen3_5",
+        "components": [
+            "src.transformers.models.qwen3_5.modeling_qwen3_5.Qwen3_5ForCausalLM"
+        ],
+        "children": {}
+    },
+    "qwen3_5_moe_models": {
+        "path": "src/transformers/models/qwen3_5_moe",
+        "components": [
+            "src.transformers.models.qwen3_5_moe.modeling_qwen3_5_moe.Qwen3_5MoeForCausalLM"
+        ],
+        "children": {}
+    },
+    "qwen3_next_models": {
+        "path": "src/transformers/models/qwen3_next",
+        "components": [
+            "src.transformers.models.qwen3_next.modeling_qwen3_next.Qwen3NextForCausalLM",
+            "src.transformers.models.qwen3_next.modular_qwen3_next.Qwen3NextModel"
+        ],
+        "children": {}
+    },
+    "qwen3_omni_moe_models": {
+        "path": "src/transformers/models/qwen3_omni_moe",
+        "components": [
+            "src.transformers.models.qwen3_omni_moe.modeling_qwen3_omni_moe.Qwen3OmniMoeTalkerModel",
+            "src.transformers.models.qwen3_omni_moe.modeling_qwen3_omni_moe.Qwen3OmniMoeThinkerTextModel"
+        ],
+        "children": {}
+    },
+    "qwen3_vl_moe_models": {
+        "path": "src/transformers/models/qwen3_vl_moe",
+        "components": [
+            "src.transformers.models.qwen3_vl_moe.modeling_qwen3_vl_moe.Qwen3VLMoeTextModel"
+        ],
+        "children": {}
+    },
+    "recurrent_gemma_models": {
+        "path": "src/transformers/models/recurrent_gemma",
+        "components": [
+            "src.transformers.models.recurrent_gemma.convert_recurrent_gemma_to_hf.main"
+        ],
+        "children": {}
+    },
+    "rt_detr_models": {
+        "path": "src/transformers/models/rt_detr",
+        "components": [
+            "src.transformers.models.rt_detr.convert_rt_detr_original_pytorch_checkpoint_to_hf.convert_rt_detr_checkpoint",
+            "src.transformers.models.rt_detr.modeling_rt_detr.RTDetrForObjectDetection"
+        ],
+        "children": {}
+    },
+    "rt_detr_v2_models": {
+        "path": "src/transformers/models/rt_detr_v2",
+        "components": [
+            "src.transformers.models.rt_detr_v2.modeling_rt_detr_v2.RTDetrV2ForObjectDetection"
+        ],
+        "children": {}
+    },
+    "sam_models": {
+        "path": "src/transformers/models/sam",
+        "components": [
+            "src.transformers.models.sam.convert_sam_to_hf.convert_sam_checkpoint"
+        ],
+        "children": {}
+    },
+    "sam2_models": {
+        "path": "src/transformers/models/sam2",
+        "components": [
+            "src.transformers.models.sam2.convert_sam2_to_hf.convert_sam2_checkpoint"
+        ],
+        "children": {}
+    },
+    "sam2_video_models": {
+        "path": "src/transformers/models/sam2_video",
+        "components": [
+            "src.transformers.models.sam2_video.convert_sam2_video_to_hf.convert_sam2_checkpoint",
+            "src.transformers.models.sam2_video.modeling_sam2_video.Sam2VideoModel"
+        ],
+        "children": {}
+    },
+    "sam3_models": {
+        "path": "src/transformers/models/sam3",
+        "components": [
+            "src.transformers.models.sam3.convert_sam3_to_hf.main"
+        ],
+        "children": {}
+    },
+    "sam3_tracker_video_models": {
+        "path": "src/transformers/models/sam3_tracker_video",
+        "components": [
+            "src.transformers.models.sam3_tracker_video.modeling_sam3_tracker_video.Sam3TrackerVideoModel"
+        ],
+        "children": {}
+    },
+    "sam3_video_models": {
+        "path": "src/transformers/models/sam3_video",
+        "components": [
+            "src.transformers.models.sam3_video.convert_sam3_video_to_hf.main"
+        ],
+        "children": {}
+    },
+    "sam_hq_models": {
+        "path": "src/transformers/models/sam_hq",
+        "components": [
+            "src.transformers.models.sam_hq.convert_samhq_to_hf.convert_sam_hq_checkpoint"
+        ],
+        "children": {}
+    },
+    "seamless_m4t_models": {
+        "path": "src/transformers/models/seamless_m4t",
+        "components": [
+            "src.transformers.models.seamless_m4t.convert_fairseq2_to_hf.load_model",
+            "src.transformers.models.seamless_m4t.modeling_seamless_m4t.SeamlessM4TForSpeechToSpeech",
+            "src.transformers.models.seamless_m4t.modeling_seamless_m4t.SeamlessM4TForSpeechToText",
+            "src.transformers.models.seamless_m4t.modeling_seamless_m4t.SeamlessM4TForTextToSpeech",
+            "src.transformers.models.seamless_m4t.modeling_seamless_m4t.SeamlessM4TForTextToText"
+        ],
+        "children": {
+            "conversion_utils": {
+                "components": [
+                    "src.transformers.models.seamless_m4t.convert_fairseq2_to_hf.load_model"
+                ],
+                "children": {}
+            },
+            "modeling": {
+                "components": [
+                    "src.transformers.models.seamless_m4t.modeling_seamless_m4t.SeamlessM4TForSpeechToSpeech",
+                    "src.transformers.models.seamless_m4t.modeling_seamless_m4t.SeamlessM4TForSpeechToText",
+                    "src.transformers.models.seamless_m4t.modeling_seamless_m4t.SeamlessM4TForTextToSpeech",
+                    "src.transformers.models.seamless_m4t.modeling_seamless_m4t.SeamlessM4TForTextToText"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "seamless_m4t_v2_models": {
+        "path": "src/transformers/models/seamless_m4t_v2",
+        "components": [
+            "src.transformers.models.seamless_m4t_v2.convert_fairseq2_to_hf.load_model",
+            "src.transformers.models.seamless_m4t_v2.modeling_seamless_m4t_v2.SeamlessM4Tv2ForSpeechToSpeech",
+            "src.transformers.models.seamless_m4t_v2.modeling_seamless_m4t_v2.SeamlessM4Tv2ForSpeechToText",
+            "src.transformers.models.seamless_m4t_v2.modeling_seamless_m4t_v2.SeamlessM4Tv2ForTextToSpeech",
+            "src.transformers.models.seamless_m4t_v2.modeling_seamless_m4t_v2.SeamlessM4Tv2ForTextToText"
+        ],
+        "children": {
+            "conversion_utils": {
+                "components": [
+                    "src.transformers.models.seamless_m4t_v2.convert_fairseq2_to_hf.load_model"
+                ],
+                "children": {}
+            },
+            "modeling": {
+                "components": [
+                    "src.transformers.models.seamless_m4t_v2.modeling_seamless_m4t_v2.SeamlessM4Tv2ForSpeechToSpeech",
+                    "src.transformers.models.seamless_m4t_v2.modeling_seamless_m4t_v2.SeamlessM4Tv2ForSpeechToText",
+                    "src.transformers.models.seamless_m4t_v2.modeling_seamless_m4t_v2.SeamlessM4Tv2ForTextToSpeech",
+                    "src.transformers.models.seamless_m4t_v2.modeling_seamless_m4t_v2.SeamlessM4Tv2ForTextToText"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "seggpt_models": {
+        "path": "src/transformers/models/seggpt",
+        "components": [
+            "src.transformers.models.seggpt.convert_seggpt_to_hf.convert_seggpt_checkpoint"
+        ],
+        "children": {}
+    },
+    "sew_d_models": {
+        "path": "src/transformers/models/sew_d",
+        "components": [
+            "src.transformers.models.sew_d.convert_sew_d_original_pytorch_checkpoint_to_pytorch.convert_sew_checkpoint"
+        ],
+        "children": {}
+    },
+    "siglip_models": {
+        "path": "src/transformers/models/siglip",
+        "components": [
+            "src.transformers.models.siglip.convert_siglip_to_hf.convert_siglip_checkpoint"
+        ],
+        "children": {}
+    },
+    "speech_encoder_decoder_models": {
+        "path": "src/transformers/models/speech_encoder_decoder",
+        "components": [
+            "src.transformers.models.speech_encoder_decoder.convert_mbart_wav2vec2_seq2seq_original_to_pytorch.convert_wav2vec2_checkpoint",
+            "src.transformers.models.speech_encoder_decoder.convert_speech_to_text_wav2vec2_seq2seq_original_to_pytorch.convert_wav2vec2_checkpoint"
+        ],
+        "children": {}
+    },
+    "speech_to_text_models": {
+        "path": "src/transformers/models/speech_to_text",
+        "components": [
+            "src.transformers.models.speech_to_text.convert_s2t_fairseq_to_tfms.convert_fairseq_s2t_checkpoint_to_tfms"
+        ],
+        "children": {}
+    },
+    "speecht5_models": {
+        "path": "src/transformers/models/speecht5",
+        "components": [
+            "src.transformers.models.speecht5.convert_speecht5_original_pytorch_checkpoint_to_pytorch.convert_speecht5_checkpoint",
+            "src.transformers.models.speecht5.number_normalizer.EnglishNumberNormalizer"
+        ],
+        "children": {}
+    },
+    "superglue_models": {
+        "path": "src/transformers/models/superglue",
+        "components": [
+            "src.transformers.models.superglue.convert_superglue_to_hf.write_model",
+            "src.transformers.models.superglue.image_processing_pil_superglue.SuperGlueImageProcessorPil"
+        ],
+        "children": {}
+    },
+    "swin_models": {
+        "path": "src/transformers/models/swin",
+        "components": [
+            "src.transformers.models.swin.convert_swin_simmim_to_pytorch.convert_swin_checkpoint",
+            "src.transformers.models.swin.convert_swin_timm_to_pytorch.convert_swin_checkpoint"
+        ],
+        "children": {}
+    },
+    "swin2sr_models": {
+        "path": "src/transformers/models/swin2sr",
+        "components": [
+            "src.transformers.models.swin2sr.convert_swin2sr_original_to_pytorch.convert_swin2sr_checkpoint"
+        ],
+        "children": {}
+    },
+    "swinv2_models": {
+        "path": "src/transformers/models/swinv2",
+        "components": [
+            "src.transformers.models.swinv2.convert_swinv2_timm_to_pytorch.convert_swinv2_checkpoint"
+        ],
+        "children": {}
+    },
+    "switch_transformers_models": {
+        "path": "src/transformers/models/switch_transformers",
+        "components": [
+            "src.transformers.models.switch_transformers.convert_switch_transformers_original_flax_checkpoint_to_pytorch.convert_flax_checkpoint_to_pytorch",
+            "src.transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersForConditionalGeneration",
+            "src.transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersModel",
+            "src.transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersEncoderModel",
+            "src.transformers.models.switch_transformers.modular_switch_transformers.SwitchTransformersModel",
+            "src.transformers.models.switch_transformers.modular_switch_transformers.SwitchTransformersEncoderModel"
+        ],
+        "children": {}
+    },
+    "t5_models": {
+        "path": "src/transformers/models/t5",
+        "components": [
+            "src.transformers.models.t5.convert_t5x_checkpoint_to_pytorch.convert_t5x_checkpoint_to_pytorch",
+            "src.transformers.models.t5.modeling_t5.T5ForSequenceClassification"
+        ],
+        "children": {}
+    },
+    "t5gemma_models": {
+        "path": "src/transformers/models/t5gemma",
+        "components": [
+            "src.transformers.models.t5gemma.modeling_t5gemma.T5GemmaForSequenceClassification",
+            "src.transformers.models.t5gemma.modeling_t5gemma.T5GemmaForTokenClassification",
+            "src.transformers.models.t5gemma.modeling_t5gemma.T5GemmaForConditionalGeneration",
+            "src.transformers.models.t5gemma.modular_t5gemma.T5GemmaForSequenceClassification",
+            "src.transformers.models.t5gemma.modular_t5gemma.T5GemmaForTokenClassification",
+            "src.transformers.models.t5gemma.modular_t5gemma.T5GemmaForConditionalGeneration"
+        ],
+        "children": {}
+    },
+    "t5gemma2_models": {
+        "path": "src/transformers/models/t5gemma2",
+        "components": [
+            "src.transformers.models.t5gemma2.modeling_t5gemma2.T5Gemma2ForConditionalGeneration",
+            "src.transformers.models.t5gemma2.modeling_t5gemma2.T5Gemma2ForSequenceClassification",
+            "src.transformers.models.t5gemma2.modeling_t5gemma2.T5Gemma2ForTokenClassification",
+            "src.transformers.models.t5gemma2.modular_t5gemma2.T5Gemma2ForConditionalGeneration",
+            "src.transformers.models.t5gemma2.modular_t5gemma2.T5Gemma2ForSequenceClassification",
+            "src.transformers.models.t5gemma2.modular_t5gemma2.T5Gemma2ForTokenClassification"
+        ],
+        "children": {}
+    },
+    "table_transformer_models": {
+        "path": "src/transformers/models/table_transformer",
+        "components": [
+            "src.transformers.models.table_transformer.convert_table_transformer_to_hf.convert_table_transformer_checkpoint",
+            "src.transformers.models.table_transformer.convert_table_transformer_to_hf_no_timm.convert_table_transformer_checkpoint"
+        ],
+        "children": {}
+    },
+    "tapas_models": {
+        "path": "src/transformers/models/tapas",
+        "components": [
+            "src.transformers.models.tapas.convert_tapas_original_tf_checkpoint_to_pytorch.convert_tf_checkpoint_to_pytorch"
+        ],
+        "children": {}
+    },
+    "time_series_transformer_models": {
+        "path": "src/transformers/models/time_series_transformer",
+        "components": [
+            "src.transformers.models.time_series_transformer.modeling_time_series_transformer.TimeSeriesTransformerForPrediction"
+        ],
+        "children": {}
+    },
+    "timesformer_models": {
+        "path": "src/transformers/models/timesformer",
+        "components": [
+            "src.transformers.models.timesformer.convert_timesformer_to_pytorch.convert_timesformer_checkpoint"
+        ],
+        "children": {}
+    },
+    "trocr_models": {
+        "path": "src/transformers/models/trocr",
+        "components": [
+            "src.transformers.models.trocr.convert_trocr_unilm_to_pytorch.convert_tr_ocr_checkpoint"
+        ],
+        "children": {}
+    },
+    "udop_models": {
+        "path": "src/transformers/models/udop",
+        "components": [
+            "src.transformers.models.udop.convert_udop_to_hf.convert_udop_checkpoint",
+            "src.transformers.models.udop.modeling_udop.UdopModel",
+            "src.transformers.models.udop.modeling_udop.UdopEncoderModel"
+        ],
+        "children": {}
+    },
+    "umt5_models": {
+        "path": "src/transformers/models/umt5",
+        "components": [
+            "src.transformers.models.umt5.convert_umt5_checkpoint_to_pytorch.convert_t5x_checkpoint_to_pytorch",
+            "src.transformers.models.umt5.modeling_umt5.UMT5ForSequenceClassification"
+        ],
+        "children": {}
+    },
+    "unispeech_models": {
+        "path": "src/transformers/models/unispeech",
+        "components": [
+            "src.transformers.models.unispeech.modeling_unispeech.UniSpeechForPreTraining",
+            "src.transformers.models.unispeech.modeling_unispeech.UniSpeechForCTC",
+            "src.transformers.models.unispeech.modeling_unispeech.UniSpeechForSequenceClassification"
+        ],
+        "children": {}
+    },
+    "unispeech_sat_models": {
+        "path": "src/transformers/models/unispeech_sat",
+        "components": [
+            "src.transformers.models.unispeech_sat.modeling_unispeech_sat.UniSpeechSatForPreTraining",
+            "src.transformers.models.unispeech_sat.modeling_unispeech_sat.UniSpeechSatForXVector",
+            "src.transformers.models.unispeech_sat.modeling_unispeech_sat.UniSpeechSatForCTC",
+            "src.transformers.models.unispeech_sat.modeling_unispeech_sat.UniSpeechSatForSequenceClassification",
+            "src.transformers.models.unispeech_sat.modeling_unispeech_sat.UniSpeechSatForAudioFrameClassification"
+        ],
+        "children": {}
+    },
+    "upernet_models": {
+        "path": "src/transformers/models/upernet",
+        "components": [
+            "src.transformers.models.upernet.convert_convnext_upernet_to_pytorch.convert_upernet_checkpoint",
+            "src.transformers.models.upernet.convert_swin_upernet_to_pytorch.convert_upernet_checkpoint"
+        ],
+        "children": {}
+    },
+    "vaultgemma_models": {
+        "path": "src/transformers/models/vaultgemma",
+        "components": [
+            "src.transformers.models.vaultgemma.modeling_vaultgemma.VaultGemmaForCausalLM"
+        ],
+        "children": {}
+    },
+    "videomae_models": {
+        "path": "src/transformers/models/videomae",
+        "components": [
+            "src.transformers.models.videomae.convert_videomae_to_pytorch.convert_videomae_checkpoint"
+        ],
+        "children": {}
+    },
+    "vilt_models": {
+        "path": "src/transformers/models/vilt",
+        "components": [
+            "src.transformers.models.vilt.convert_vilt_original_to_pytorch.convert_vilt_checkpoint"
+        ],
+        "children": {}
+    },
+    "vit_mae_models": {
+        "path": "src/transformers/models/vit_mae",
+        "components": [
+            "src.transformers.models.vit_mae.convert_vit_mae_to_pytorch.convert_vit_mae_checkpoint"
+        ],
+        "children": {}
+    },
+    "vitmatte_models": {
+        "path": "src/transformers/models/vitmatte",
+        "components": [
+            "src.transformers.models.vitmatte.convert_vitmatte_to_hf.convert_vitmatte_checkpoint"
+        ],
+        "children": {}
+    },
+    "vitpose_models": {
+        "path": "src/transformers/models/vitpose",
+        "components": [
+            "src.transformers.models.vitpose.convert_vitpose_to_hf.main"
+        ],
+        "children": {}
+    },
+    "vits_models": {
+        "path": "src/transformers/models/vits",
+        "components": [
+            "src.transformers.models.vits.convert_original_checkpoint.convert_checkpoint"
+        ],
+        "children": {}
+    },
+    "vjepa2_models": {
+        "path": "src/transformers/models/vjepa2",
+        "components": [
+            "src.transformers.models.vjepa2.convert_vjepa2_to_hf.convert_and_test_vjepa2_checkpoint"
+        ],
+        "children": {}
+    },
+    "voxtral_realtime_models": {
+        "path": "src/transformers/models/voxtral_realtime",
+        "components": [
+            "src.transformers.models.voxtral_realtime.convert_voxtral_realtime_weights_to_hf.main"
+        ],
+        "children": {}
+    },
+    "wav2vec2_models": {
+        "path": "src/transformers/models/wav2vec2",
+        "components": [
+            "src.transformers.models.wav2vec2.convert_wav2vec2_original_pytorch_checkpoint_to_pytorch.convert_wav2vec2_checkpoint",
+            "src.transformers.models.wav2vec2.modeling_wav2vec2.Wav2Vec2ForXVector",
+            "src.transformers.models.wav2vec2.modeling_wav2vec2.Wav2Vec2ForAudioFrameClassification"
+        ],
+        "children": {}
+    },
+    "wav2vec2_bert_models": {
+        "path": "src/transformers/models/wav2vec2_bert",
+        "components": [
+            "src.transformers.models.wav2vec2_bert.convert_wav2vec2_seamless_checkpoint.convert_wav2vec2_bert_checkpoint",
+            "src.transformers.models.wav2vec2_bert.modeling_wav2vec2_bert.Wav2Vec2BertForXVector",
+            "src.transformers.models.wav2vec2_bert.modeling_wav2vec2_bert.Wav2Vec2BertForCTC",
+            "src.transformers.models.wav2vec2_bert.modeling_wav2vec2_bert.Wav2Vec2BertForSequenceClassification",
+            "src.transformers.models.wav2vec2_bert.modeling_wav2vec2_bert.Wav2Vec2BertForAudioFrameClassification"
+        ],
+        "children": {}
+    },
+    "whisper_models": {
+        "path": "src/transformers/models/whisper",
+        "components": [
+            "src.transformers.models.whisper.convert_openai_to_hf.convert_openai_whisper_to_tfms"
+        ],
+        "children": {}
+    },
+    "x_clip_models": {
+        "path": "src/transformers/models/x_clip",
+        "components": [
+            "src.transformers.models.x_clip.convert_x_clip_original_pytorch_to_hf.convert_xclip_checkpoint"
+        ],
+        "children": {}
+    },
+    "xglm_models": {
+        "path": "src/transformers/models/xglm",
+        "components": [
+            "src.transformers.models.xglm.convert_xglm_original_ckpt_to_trfms.convert_fairseq_xglm_checkpoint_from_disk"
+        ],
+        "children": {}
+    },
+    "xmod_models": {
+        "path": "src/transformers/models/xmod",
+        "components": [
+            "src.transformers.models.xmod.convert_xmod_original_pytorch_checkpoint_to_pytorch.convert_xmod_checkpoint_to_pytorch"
+        ],
+        "children": {}
+    },
+    "yolos_models": {
+        "path": "src/transformers/models/yolos",
+        "components": [
+            "src.transformers.models.yolos.image_processing_pil_yolos.YolosImageProcessorPil"
+        ],
+        "children": {}
+    },
+    "zamba_models": {
+        "path": "src/transformers/models/zamba",
+        "components": [
+            "src.transformers.models.zamba.modeling_zamba.ZambaForSequenceClassification",
+            "src.transformers.models.zamba.modeling_zamba.ZambaForCausalLM"
+        ],
+        "children": {}
+    },
+    "zamba2_models": {
+        "path": "src/transformers/models/zamba2",
+        "components": [
+            "src.transformers.models.zamba2.modeling_zamba2.Zamba2ForSequenceClassification",
+            "src.transformers.models.zamba2.modeling_zamba2.Zamba2ForCausalLM",
+            "src.transformers.models.zamba2.modular_zamba2.Zamba2ForSequenceClassification",
+            "src.transformers.models.zamba2.modular_zamba2.Zamba2ForCausalLM"
+        ],
+        "children": {}
+    },
+    "zoedepth_models": {
+        "path": "src/transformers/models/zoedepth",
+        "components": [
+            "src.transformers.models.zoedepth.convert_zoedepth_to_hf.convert_zoedepth_checkpoint"
+        ],
+        "children": {}
+    }
+}

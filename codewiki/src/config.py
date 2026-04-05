@@ -106,7 +106,8 @@ MAIN_MODEL = os.getenv('MAIN_MODEL', 'gemini-2.5-flash')
 FALLBACK_MODEL_1 = os.getenv('FALLBACK_MODEL_1', 'glm-4p5')
 CLUSTER_MODEL = os.getenv('CLUSTER_MODEL', MAIN_MODEL)
 LLM_BASE_URL = os.getenv('LLM_BASE_URL', 'http://0.0.0.0:4000/')
-LLM_API_KEY = os.getenv('LLM_API_KEY', 'sk-1234')
+# OPENAI_API_KEY is a common convention; LLM_API_KEY overrides when set.
+LLM_API_KEY = os.getenv('LLM_API_KEY') or os.getenv('OPENAI_API_KEY') or 'sk-1234'
 
 @dataclass
 class Config:

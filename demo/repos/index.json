@@ -1,13 +1,9 @@
 [
-  "ExACT",
-  "KubeElasti",
-  "WebDreamer",
-  "fastapi",
-  "flask",
-  "flask-new",
-  "openai-realtime",
-  "search-agents",
-  "typer",
-  "visualwebarena",
-  "webarena"
+  "crewai",
+  "dspy",
+  "langchain",
+  "ollama",
+  "pydantic-ai",
+  "swift",
+  "transformers"
 ]

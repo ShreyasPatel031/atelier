@@ -8,6 +8,7 @@ from codewiki.src.be.llm_services import call_llm
 from codewiki.src.be.utils import count_tokens, count_module_tokens
 from codewiki.src.config import (
     MAX_TOKEN_PER_MODULE, 
+    MAX_DEPTH,
     MIN_COMPONENTS_FOR_CLUSTERING,
     get_max_clustering_tokens,
     Config
@@ -210,6 +211,20 @@ def cluster_modules(
         logger.info(f"[STAGE 2] Root level - created single module '{repo_name}' with {len(leaf_nodes)} components")
         logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (too few to cluster)")
         return single_module
+
+    # Enforce MAX_DEPTH to prevent unbounded recursion.
+    # MAX_DEPTH (config.py) is the existing constant; we treat the module as a
+    # leaf when we reach it.  This is a hard guard — the "no-progress" check
+    # below catches the common case much earlier.
+    if depth >= MAX_DEPTH:
+        logger.warning(f"[STAGE 2] Hit MAX_DEPTH ({MAX_DEPTH}) at path={module_path_str} — treating as leaf")
+        cluster_duration = time.time() - cluster_start
+        if current_module_name is not None:
+            logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (max depth reached)")
+            return {}
+        return {
+            "main": {"path": "", "components": leaf_nodes, "children": {}}
+        }
 
     if token_count <= MAX_TOKEN_PER_MODULE:
         # Module fits in single module - no further clustering needed
@@ -485,7 +500,25 @@ def cluster_modules(
             }
         )
     elif len(module_tree) == 1:
-        # Single module is valid - log it but don't reject
+        # Single module is valid, but check for "no-progress": the LLM put all
+        # the same components into one child.  When this happens the recursive
+        # call will see the exact same token count and try to split again,
+        # looping forever.  Detect it and treat this module as a leaf instead.
+        only_key = list(module_tree.keys())[0]
+        child_components = set(module_tree[only_key].get("components", []))
+        parent_components = set(leaf_nodes)
+        if child_components == parent_components:
+            logger.warning(
+                f"[STAGE 2] No-progress: LLM returned single child '{only_key}' "
+                f"with identical {len(child_components)} components — treating as leaf"
+            )
+            cluster_duration = time.time() - cluster_start
+            if current_module_name is not None:
+                logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE in {cluster_duration:.1f}s (no-progress, leaf)")
+                return {}
+            # Root level: wrap in a single module
+            module_tree[only_key]["children"] = {}
+            return module_tree
         logger.info(f"[STAGE 2] LLM returned single module: {list(module_tree.keys())}")
         logger.info(f"[STAGE 2] Single module is valid - proceeding with it")
 

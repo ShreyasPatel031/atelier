@@ -23,6 +23,8 @@ from codewiki.cli.utils.errors import APIError
 from codewiki.src.be.documentation_generator import DocumentationGenerator
 from codewiki.src.config import Config as BackendConfig, set_cli_context
 
+_log = logging.getLogger(__name__)
+
 
 class CLIDocumentationGenerator:
     """
@@ -155,37 +157,8 @@ class CLIDocumentationGenerator:
             asyncio.run(self._run_backend_generation(backend_config))
             
             # Stage 4: HTML Generation (optional)
-            # #region agent log
-            import json
-            import os
-            debug_log_path = '/Users/shreyaspatel/CodeWiki/.cursor/debug.log'
-            click.echo(f"[DEBUG] [HYP-D] Checking HTML generation flag: generate_html={self.generate_html}, output_dir={self.output_dir}", err=True)
-            try:
-                os.makedirs(os.path.dirname(debug_log_path), exist_ok=True)
-                with open(debug_log_path, 'a') as f:
-                    f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"D","location":"doc_generator.py:158","message":"Checking if HTML generation should run","data":{"generate_html":self.generate_html,"output_dir":str(self.output_dir)},"timestamp":int(time.time()*1000)})+"\n")
-            except Exception as e:
-                click.echo(f"[DEBUG] Failed to write debug log: {e}", err=True)
-            # #endregion
             if self.generate_html:
-                # #region agent log
-                click.echo(f"[DEBUG] [HYP-D] HTML generation flag is True, calling _run_html_generation", err=True)
-                try:
-                    with open(debug_log_path, 'a') as f:
-                        f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"D","location":"doc_generator.py:163","message":"HTML generation flag is True, calling _run_html_generation","data":{},"timestamp":int(time.time()*1000)})+"\n")
-                except Exception as e:
-                    click.echo(f"[DEBUG] Failed to log HTML gen call: {e}", err=True)
-                # #endregion
                 self._run_html_generation()
-            else:
-                # #region agent log
-                click.echo(f"[DEBUG] [HYP-D] HTML generation flag is False, SKIPPING HTML generation", err=True)
-                try:
-                    with open(debug_log_path, 'a') as f:
-                        f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"D","location":"doc_generator.py:171","message":"HTML generation flag is False, skipping","data":{},"timestamp":int(time.time()*1000)})+"\n")
-                except Exception:
-                    pass
-                # #endregion
             
             # Stage 5: Finalization (metadata already created by backend)
             self._finalize_job()
@@ -193,7 +166,18 @@ class CLIDocumentationGenerator:
             # Complete job
             generation_time = time.time() - start_time
             self.job.complete()
-            
+
+            try:
+                from codewiki.cli.utils.demo_viewer_sync import (
+                    sync_generated_docs_to_demo_viewer,
+                )
+
+                sync_generated_docs_to_demo_viewer(
+                    self.output_dir, self.repo_path.name
+                )
+            except Exception as e:
+                _log.warning("Demo viewer sync failed (non-fatal): %s", e)
+
             return self.job
             
         except APIError as e:
@@ -401,30 +385,7 @@ class CLIDocumentationGenerator:
     
     def _run_html_generation(self):
         """Run HTML generation stage."""
-        # #region agent log
-        import json
-        import os
-        debug_log_path = '/Users/shreyaspatel/CodeWiki/.cursor/debug.log'
-        try:
-            os.makedirs(os.path.dirname(debug_log_path), exist_ok=True)
-            with open(debug_log_path, 'a') as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"A,D","location":"doc_generator.py:396","message":"_run_html_generation ENTRY","data":{"output_dir":str(self.output_dir),"repo_path":str(self.repo_path)},"timestamp":int(time.time()*1000)})+"\n")
-            click.echo(f"[DEBUG] [HYP-D] _run_html_generation ENTRY: output_dir={self.output_dir}", err=True)
-        except Exception as e:
-            click.echo(f"[DEBUG] Failed to write debug log at entry: {e}", err=True)
-        # #endregion
         logger = logging.getLogger(__name__)
-        # #region agent log
-        try:
-            logger_handlers = len(logger.handlers) if hasattr(logger, 'handlers') else 0
-            logger_level = logger.level if hasattr(logger, 'level') else logging.NOTSET
-            logger_effective = logger.getEffectiveLevel()
-            with open(debug_log_path, 'a') as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"A","location":"doc_generator.py:403","message":"Logger configuration check","data":{"logger_name":__name__,"handlers_count":logger_handlers,"logger_level":logger_level,"effective_level":logger_effective},"timestamp":int(time.time()*1000)})+"\n")
-            click.echo(f"[DEBUG] [HYP-A] Logger config: name={__name__}, handlers={logger_handlers}, level={logger_level}, effective={logger_effective}", err=True)
-        except Exception as e:
-            click.echo(f"[DEBUG] Failed to log logger config: {e}", err=True)
-        # #endregion
         stage_start = time.time()
         
         logger.info(f"[STAGE 5: HTML GENERATION] Starting HTML generation")
@@ -470,11 +431,6 @@ class CLIDocumentationGenerator:
             logger.info(f"[STAGE 5]   - Docs directory: {self.output_dir}")
             
             html_gen_start = time.time()
-            # #region agent log
-            output_path_str = str(output_path.resolve())
-            with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"E","location":"doc_generator.py:429","message":"BEFORE html_generator.generate call","data":{"output_path":output_path_str,"output_path_exists_before":output_path.exists(),"output_path_parent":str(output_path.parent),"parent_exists":output_path.parent.exists()},"timestamp":int(time.time()*1000)})+"\n")
-            # #endregion
             try:
                 html_generator.generate(
                     output_path=output_path,
@@ -484,42 +440,20 @@ class CLIDocumentationGenerator:
                     docs_dir=self.output_dir  # Auto-load module_tree and metadata from here
                 )
                 html_gen_duration = time.time() - html_gen_start
-                # #region agent log
-                output_exists_after = output_path.exists()
-                file_size_after = output_path.stat().st_size if output_exists_after else 0
-                with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                    f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"C,E,F","location":"doc_generator.py:438","message":"AFTER html_generator.generate call","data":{"duration":html_gen_duration,"output_path":output_path_str,"output_path_exists_after":output_exists_after,"file_size":file_size_after},"timestamp":int(time.time()*1000)})+"\n")
-                # #endregion
                 logger.info(f"[STAGE 5] HTML generation completed in {html_gen_duration:.1f}s")
                 
                 # Verify output file was created
-                # #region agent log
-                with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                    f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"E","location":"doc_generator.py:442","message":"File verification check","data":{"output_path":output_path_str,"path_exists":output_path.exists(),"resolved_path":str(output_path.resolve())},"timestamp":int(time.time()*1000)})+"\n")
-                # #endregion
                 if output_path.exists():
                     file_size = output_path.stat().st_size
                     logger.info(f"[STAGE 5] index.html created successfully: {file_size} bytes")
-                    # #region agent log
-                    with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                        f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"C,E","location":"doc_generator.py:444","message":"File verification SUCCESS","data":{"file_size":file_size,"output_path":output_path_str},"timestamp":int(time.time()*1000)})+"\n")
-                    # #endregion
                 else:
-                    # #region agent log
-                    with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                        f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"C,E","location":"doc_generator.py:446","message":"File verification FAILED - file does not exist","data":{"output_path":output_path_str,"parent_exists":output_path.parent.exists(),"parent_dir":str(output_path.parent)},"timestamp":int(time.time()*1000)})+"\n")
-                    # #endregion
                     logger.error(f"[STAGE 5] CRITICAL: index.html was not created at {output_path}")
                     raise FileNotFoundError(f"HTML file was not created: {output_path}")
                 
             except Exception as e:
-                html_gen_duration = time.time() - html_gen_start
-                # #region agent log
                 import traceback
+                html_gen_duration = time.time() - html_gen_start
                 exc_traceback = traceback.format_exc()
-                with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                    f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"doc_generator.py:449","message":"Exception caught in html_generator.generate","data":{"exception_type":type(e).__name__,"exception_msg":str(e),"output_path":output_path_str,"traceback":exc_traceback[:500]},"timestamp":int(time.time()*1000)})+"\n")
-                # #endregion
                 logger.error(f"[STAGE 5] HTML generation FAILED after {html_gen_duration:.1f}s: {type(e).__name__}: {str(e)}")
                 logger.error(f"[STAGE 5]   - Output path: {output_path}")
                 logger.error(f"[STAGE 5]   - Docs directory: {self.output_dir}")
@@ -532,24 +466,13 @@ class CLIDocumentationGenerator:
                 self.progress_tracker.update_stage(1.0, "Generated index.html")
             
             stage_duration = time.time() - stage_start
-            # #region agent log
-            final_output_path = self.output_dir / "index.html"
-            final_check = final_output_path.exists()
-            final_size = final_output_path.stat().st_size if final_check else 0
-            with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"C,E","location":"doc_generator.py:464","message":"_run_html_generation EXIT - SUCCESS","data":{"duration":stage_duration,"final_output_path":str(final_output_path),"final_file_exists":final_check,"final_file_size":final_size},"timestamp":int(time.time()*1000)})+"\n")
-            # #endregion
             logger.info(f"[STAGE 5: HTML GENERATION] COMPLETE in {stage_duration:.1f}s")
             self.progress_tracker.complete_stage()
             
         except Exception as e:
-            stage_duration = time.time() - stage_start
-            # #region agent log
             import traceback
+            stage_duration = time.time() - stage_start
             exc_traceback = traceback.format_exc()
-            with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"B","location":"doc_generator.py:467","message":"Exception caught in _run_html_generation outer handler","data":{"exception_type":type(e).__name__,"exception_msg":str(e),"duration":stage_duration,"traceback":exc_traceback[:500]},"timestamp":int(time.time()*1000)})+"\n")
-            # #endregion
             logger.error(f"[STAGE 5: HTML GENERATION] FAILED after {stage_duration:.1f}s: {type(e).__name__}: {str(e)}")
             logger.error(f"[STAGE 5] Output directory: {self.output_dir}")
             logger.error(f"[STAGE 5] Repository path: {self.repo_path}")

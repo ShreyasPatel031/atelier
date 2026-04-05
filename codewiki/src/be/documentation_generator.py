@@ -2,7 +2,7 @@ import logging
 import os
 import json
 import time
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional, Callable
 from copy import deepcopy
 import traceback
 
@@ -30,11 +30,25 @@ from codewiki.src.be.agent_orchestrator import AgentOrchestrator
 class DocumentationGenerator:
     """Main documentation generation orchestrator."""
     
-    def __init__(self, config: Config, commit_id: str = None):
+    def __init__(
+        self,
+        config: Config,
+        commit_id: str = None,
+        progress_callback: Optional[Callable[[int], None]] = None,
+    ):
         self.config = config
         self.commit_id = commit_id
+        self._progress_callback = progress_callback
         self.graph_builder = DependencyGraphBuilder(config)
         self.agent_orchestrator = AgentOrchestrator(config)
+
+    def _emit_stage(self, stage: int) -> None:
+        if not self._progress_callback:
+            return
+        try:
+            self._progress_callback(stage)
+        except Exception as e:
+            logger.warning(f"progress_callback failed: {e}")
     
     def create_documentation_metadata(self, working_dir: str, components: Dict[str, Any], num_leaf_nodes: int):
         """Create a metadata file with documentation generation information."""
@@ -606,6 +620,7 @@ This is a quick overview generated from the module structure. Detailed documenta
         try:
             # Build dependency graph
             components, leaf_nodes = self.graph_builder.build_dependency_graph()
+            self._emit_stage(1)
 
             logger.debug(f"Found {len(leaf_nodes)} leaf nodes")
             # logger.debug(f"Leaf nodes:\n{'\n'.join(sorted(leaf_nodes)[:200])}")
@@ -667,6 +682,8 @@ This is a quick overview generated from the module structure. Detailed documenta
             except Exception as e:
                 logger.error(f"[STAGE 2] Failed to save module tree to {module_tree_path}: {e}")
                 raise
+
+            self._emit_stage(2)
             
             logger.info(f"[STAGE 2: MODULE CLUSTERING] COMPLETE - Grouped components into {len(module_tree)} modules")
             if len(module_tree) > 0:
@@ -717,6 +734,8 @@ This is a quick overview generated from the module structure. Detailed documenta
                     logger.info(f"[STAGE 4.5] Doc sync updated {sync_result['diagrams_updated']} diagram references")
             except Exception as sync_err:
                 logger.warning(f"[STAGE 4.5] Doc sync failed (non-critical): {sync_err}")
+
+            self._emit_stage(3)
             
             logger.debug(f"Documentation generation completed successfully using dynamic programming!")
             logger.debug(f"Processing order: leaf modules → parent modules → repository overview")

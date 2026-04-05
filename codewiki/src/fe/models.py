@@ -4,7 +4,7 @@ Data models and classes for the CodeWiki web application.
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from dataclasses import dataclass
 from pydantic import BaseModel, HttpUrl
 
@@ -27,6 +27,14 @@ class JobStatusResponse(BaseModel):
     docs_path: Optional[str] = None
     main_model: Optional[str] = None
     commit_id: Optional[str] = None
+    # 0 = not started / queued; 1–3 = pipeline stages; 3 also means docs phase done before job completion
+    generation_stage: int = 0
+
+
+class JobListResponse(BaseModel):
+    """List of all tracked jobs (for UI polling / E2E idle wait)."""
+
+    jobs: List[JobStatusResponse]
 
 
 @dataclass
@@ -43,6 +51,7 @@ class JobStatus:
     docs_path: Optional[str] = None
     main_model: Optional[str] = None
     commit_id: Optional[str] = None
+    generation_stage: int = 0
 
 
 @dataclass

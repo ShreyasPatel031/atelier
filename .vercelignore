@@ -1,3 +1,6 @@
+# Local git clones used for CodeWiki generation (not part of the static site)
+.tmp/
+
 test_repos/
 node_modules/
 *.png
@@ -6,3 +9,7 @@ node_modules/
 test_*.js
 package-lock.json
 .git/
+
+# Python envs (never needed for static demo deploy)
+.venv/
+venv/

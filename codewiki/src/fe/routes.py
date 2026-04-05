@@ -6,13 +6,14 @@ FastAPI route handlers for the CodeWiki web application.
 from datetime import datetime, timedelta
 from pathlib import Path
 from dataclasses import asdict
+from typing import Optional
 
 from traceback import format_exc
 
 from fastapi import Form, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, JSONResponse
 
-from .models import JobStatus, JobStatusResponse
+from .models import JobListResponse, JobStatus, JobStatusResponse
 from .github_processor import GitHubRepoProcessor
 from .background_worker import BackgroundWorker
 from .cache_manager import CacheManager
@@ -42,12 +43,15 @@ class WebRoutes:
             reverse=True
         )[:100]
         
+        active_job_id = (request.query_params.get("job") or "").strip()
+        
         context = {
             "message": None,
             "message_type": None,
             "repo_url": "",
             "commit_id": "",
-            "recent_jobs": recent_jobs
+            "recent_jobs": recent_jobs,
+            "active_job_id": active_job_id,
         }
         
         return HTMLResponse(content=render_template(WEB_INTERFACE_TEMPLATE, context))
@@ -59,6 +63,7 @@ class WebRoutes:
         
         message = None
         message_type = None
+        active_job_id = ""
         
         repo_url = repo_url.strip()
         commit_id = commit_id.strip() if commit_id else ""
@@ -92,6 +97,7 @@ class WebRoutes:
             if existing_job:
                 if existing_job.status in ['queued', 'processing']:
                     message = f"Repository is already being processed (Job ID: {existing_job.job_id})"
+                    active_job_id = existing_job.job_id
                 else:
                     message = f"Repository recently failed processing. Please wait a few minutes before retrying (Job ID: {existing_job.job_id})"
                 message_type = "error"
@@ -110,9 +116,11 @@ class WebRoutes:
                         completed_at=datetime.now(),
                         docs_path=cached_docs,
                         progress="Retrieved from cache",
-                        commit_id=commit_id if commit_id else None
+                        commit_id=commit_id if commit_id else None,
+                        generation_stage=3,
                     )
                     self.background_worker.job_status[job_id] = job
+                    active_job_id = job_id
                 else:
                     # Add to queue
                     try:
@@ -128,6 +136,7 @@ class WebRoutes:
                         self.background_worker.add_job(job_id, job)
                         message = f"Repository added to processing queue! Job ID: {job_id}"
                         message_type = "success"
+                        active_job_id = job_id
                         repo_url = ""  # Clear form
                         
                     except Exception as e:
@@ -147,7 +156,8 @@ class WebRoutes:
             "message_type": message_type,
             "repo_url": repo_url or "",
             "commit_id": commit_id or "",
-            "recent_jobs": recent_jobs
+            "recent_jobs": recent_jobs,
+            "active_job_id": active_job_id,
         }
         
         return HTMLResponse(content=render_template(WEB_INTERFACE_TEMPLATE, context))
@@ -159,7 +169,14 @@ class WebRoutes:
             raise HTTPException(status_code=404, detail="Job not found")
         
         return JobStatusResponse(**asdict(job))
-    
+
+    async def list_jobs(self) -> JobListResponse:
+        """Return all jobs so clients can wait until none are queued or processing."""
+        jobs = self.background_worker.get_all_jobs()
+        return JobListResponse(
+            jobs=[JobStatusResponse(**asdict(j)) for j in jobs.values()]
+        )
+
     async def view_docs(self, job_id: str) -> RedirectResponse:
         """View generated documentation."""
         job = self.background_worker.get_job_status(job_id)
@@ -209,7 +226,8 @@ class WebRoutes:
                     completed_at=datetime.now(),
                     docs_path=cached_docs,
                     progress="Loaded from cache",
-                    commit_id=None  # No commit info available from cache
+                    commit_id=None,  # No commit info available from cache
+                    generation_stage=3,
                 )
                 self.background_worker.job_status[job_id] = job
                 self.background_worker.save_job_statuses()
@@ -266,7 +284,54 @@ class WebRoutes:
             
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error reading {filename}: {e}\n{format_exc()}")
-    
+
+    def _resolve_job_docs_dir(self, job_id: str) -> Optional[Path]:
+        """Absolute path to generated docs for a job (in-memory job or cache)."""
+        job = self.background_worker.get_job_status(job_id)
+        if job and job.docs_path:
+            p = Path(job.docs_path)
+            if p.exists() and p.is_dir():
+                return p
+        repo_full = self._job_id_to_repo_full_name(job_id)
+        url = f"https://github.com/{repo_full}"
+        cached = self.cache_manager.get_cached_docs(url)
+        if cached:
+            cp = Path(cached)
+            if cp.exists() and cp.is_dir():
+                return cp
+        return None
+
+    async def serve_repo_file(self, job_id: str, filename: str) -> FileResponse:
+        """Serve raw files from a job's docs dir (same layout as demo/repos/<name>/)."""
+        docs = self._resolve_job_docs_dir(job_id)
+        if not docs:
+            raise HTTPException(status_code=404, detail="Documentation not found for this job")
+        # Prevent path traversal; allow nested paths if present in generated output
+        target = (docs / filename).resolve()
+        try:
+            target.relative_to(docs.resolve())
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid path")
+        if not target.exists() or not target.is_file():
+            raise HTTPException(status_code=404, detail=f"File not found: {filename}")
+        suffix = target.suffix.lower()
+        if suffix == ".json":
+            media = "application/json"
+        elif suffix == ".md":
+            media = "text/markdown; charset=utf-8"
+        else:
+            media = "application/octet-stream"
+        return FileResponse(target, media_type=media)
+
+    async def serve_repos_index_json(self) -> JSONResponse:
+        """List job_ids with completed docs for the demo viewer dropdown."""
+        ids = []
+        for jid, j in self.background_worker.get_all_jobs().items():
+            if j.status == "completed" and j.docs_path and Path(j.docs_path).exists():
+                ids.append(jid)
+        ids.sort()
+        return JSONResponse(ids)
+
     def _normalize_github_url(self, url: str) -> str:
         """Normalize GitHub URL for consistent comparison."""
         try:

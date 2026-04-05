@@ -1,0 +1,1228 @@
+{
+    "app_ui_codegen_types": {
+        "path": "app/ui/app/codegen",
+        "components": [
+            "app.ui.app.codegen.gotypes.gen.ModelsResponse",
+            "app.ui.app.codegen.gotypes.gen.SettingsResponse",
+            "app.ui.app.codegen.gotypes.gen.HealthResponse",
+            "app.ui.app.codegen.gotypes.gen.ModelUpstreamResponse"
+        ],
+        "children": {}
+    },
+    "app_ui_api_client": {
+        "path": "app/ui/app/src",
+        "components": [
+            "app.ui.app.src.api.pullModel",
+            "app.ui.app.src.api.getInferenceCompute",
+            "app.ui.app.src.api.getChats",
+            "app.ui.app.src.api.updateCloudSetting",
+            "app.ui.app.src.api.getCloudStatus",
+            "app.ui.app.src.api.getSettings",
+            "app.ui.app.src.api.updateSettings",
+            "app.ui.app.src.api.disconnectUser"
+        ],
+        "children": {}
+    },
+    "app_ui_components": {
+        "path": "app/ui/app/src/components",
+        "components": [
+            "app.ui.app.src.components.DisplayLogin.DisplayLogin",
+            "app.ui.app.src.components.DisplayStale.DisplayStale",
+            "app.ui.app.src.components.DisplayUpgrade.DisplayUpgrade",
+            "app.ui.app.src.components.Downloading.Downloading",
+            "app.ui.app.src.components.ImageThumbnail.ImageThumbnail",
+            "app.ui.app.src.components.layout.layout.SidebarLayout",
+            "app.ui.app.src.components.ui.display.Display"
+        ],
+        "children": {}
+    },
+    "app_ui_contexts": {
+        "path": "app/ui/app/src/contexts",
+        "components": [
+            "app.ui.app.src.contexts.StreamingContext.StreamingContextType"
+        ],
+        "children": {}
+    },
+    "app_ui_hooks": {
+        "path": "app/ui/app/src/hooks",
+        "components": [
+            "app.ui.app.src.hooks.useChats.useIsWaitingForLoad",
+            "app.ui.app.src.hooks.useChats.useDismissStaleModel",
+            "app.ui.app.src.hooks.useChats.useShouldShowStaleDisplay",
+            "app.ui.app.src.hooks.useChats.useDownloadProgress",
+            "app.ui.app.src.hooks.useChats.useCancelMessage",
+            "app.ui.app.src.hooks.useDeleteChat.useDeleteChat",
+            "app.ui.app.src.hooks.useMessageAutoscroll.useMessageAutoscroll",
+            "app.ui.app.src.hooks.useModelCapabilities.useHasVisionCapability",
+            "app.ui.app.src.hooks.useModelCapabilities.useHasToolsCapability",
+            "app.ui.app.src.hooks.useQueryBatcher.useQueryBatcher",
+            "app.ui.app.src.hooks.useRenameChat.useRenameChat"
+        ],
+        "children": {}
+    },
+    "app_ui_routing": {
+        "path": "app/ui/app/src/routes",
+        "components": [
+            "app.ui.app.src.routeTree.gen.FileRouteTypes",
+            "app.ui.app.src.routes.__root.RootComponent"
+        ],
+        "children": {}
+    },
+    "app_ui_types": {
+        "path": "app/ui/app/src/types",
+        "components": [
+            "app.ui.app.src.types.webview.d.Window"
+        ],
+        "children": {}
+    },
+    "app_ui_utils": {
+        "path": "app/ui/app/src/utils",
+        "components": [
+            "app.ui.app.src.utils.fileValidation.processFiles",
+            "app.ui.app.src.utils.mergeModels.alphabeticalSort"
+        ],
+        "children": {}
+    },
+    "app_webview_glue": {
+        "path": "app/webview",
+        "components": [
+            "app.webview.glue.CgoWebViewDispatch",
+            "app.webview.glue.CgoWebViewBind",
+            "app.webview.glue.CgoWebViewUnbind"
+        ],
+        "children": {}
+    },
+    "app_webview_api": {
+        "path": "app/webview",
+        "components": [
+            "app.webview.webview.on_application_did_finish_launching",
+            "app.webview.webview.Invoke",
+            "app.webview.webview.terminate",
+            "app.webview.webview.set_title",
+            "app.webview.webview.set_html",
+            "app.webview.webview.enable_dpi_awareness",
+            "app.webview.webview.find_available_client",
+            "app.webview.webview.run",
+            "app.webview.webview.dispatch",
+            "app.webview.webview.set_size",
+            "app.webview.webview.init",
+            "app.webview.webview.set_zoom",
+            "app.webview.webview.get_zoom",
+            "app.webview.webview.gtk_webkit_engine",
+            "app.webview.webview.cocoa_wkwebview_engine",
+            "app.webview.webview.get_window_dpi",
+            "app.webview.webview.get_available_browser_version_string",
+            "app.webview.webview.win32_edge_engine",
+            "app.webview.webview.get_size"
+        ],
+        "children": {}
+    },
+    "llama_cpp_common": {
+        "path": "llama/llama.cpp/common",
+        "components": [
+            "llama.llama.cpp.common.common.postprocess_cpu_params",
+            "llama.llama.cpp.common.common.fs_get_cache_file",
+            "llama.llama.cpp.common.common.common_init_from_params",
+            "llama.llama.cpp.common.common.string_from",
+            "llama.llama.cpp.common.common.common_params_get_system_info",
+            "llama.llama.cpp.common.common.string_remove_suffix",
+            "llama.llama.cpp.common.common.string_find_partial_stop",
+            "llama.llama.cpp.common.common.string_join",
+            "llama.llama.cpp.common.common.common_detokenize",
+            "llama.llama.cpp.common.common.common_opt_lr_pars",
+            "llama.llama.cpp.common.common.common_opt_get_optimizer",
+            "llama.llama.cpp.common.common.llm_ffn_exps_block_regex",
+            "llama.llama.cpp.common.common.llm_ffn_exps_cpu_override",
+            "llama.llama.cpp.common.json-schema-to-grammar.gbnf_format_literal",
+            "llama.llama.cpp.common.json-schema-to-grammar._build_min_max_int",
+            "llama.llama.cpp.common.log.common_log_default_callback",
+            "llama.llama.cpp.common.sampling.common_sampler_sample_and_accept_n",
+            "llama.llama.cpp.common.sampling.common_sampler_types_from_chars"
+        ],
+        "children": {
+            "common_utils": {
+                "components": [
+                    "llama.llama.cpp.common.common.postprocess_cpu_params",
+                    "llama.llama.cpp.common.common.fs_get_cache_file",
+                    "llama.llama.cpp.common.common.common_init_from_params",
+                    "llama.llama.cpp.common.common.string_from",
+                    "llama.llama.cpp.common.common.common_params_get_system_info",
+                    "llama.llama.cpp.common.common.string_remove_suffix",
+                    "llama.llama.cpp.common.common.string_find_partial_stop",
+                    "llama.llama.cpp.common.common.string_join",
+                    "llama.llama.cpp.common.common.common_detokenize",
+                    "llama.llama.cpp.common.common.common_opt_lr_pars",
+                    "llama.llama.cpp.common.common.common_opt_get_optimizer",
+                    "llama.llama.cpp.common.common.llm_ffn_exps_block_regex",
+                    "llama.llama.cpp.common.common.llm_ffn_exps_cpu_override"
+                ],
+                "children": {}
+            },
+            "json_schema_grammar": {
+                "components": [
+                    "llama.llama.cpp.common.json-schema-to-grammar.gbnf_format_literal",
+                    "llama.llama.cpp.common.json-schema-to-grammar._build_min_max_int"
+                ],
+                "children": {}
+            },
+            "common_logging": {
+                "components": [
+                    "llama.llama.cpp.common.log.common_log_default_callback"
+                ],
+                "children": {}
+            },
+            "common_sampling": {
+                "components": [
+                    "llama.llama.cpp.common.sampling.common_sampler_sample_and_accept_n",
+                    "llama.llama.cpp.common.sampling.common_sampler_types_from_chars"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "llama_cpp_context": {
+        "path": "llama/llama.cpp/src",
+        "components": [
+            "llama.llama.cpp.src.llama-context.llama_copy_state_data",
+            "llama.llama.cpp.src.llama-context.llama_set_state_data",
+            "llama.llama.cpp.src.llama-context.llama_load_session_file",
+            "llama.llama.cpp.src.llama-context.llama_save_session_file",
+            "llama.llama.cpp.src.llama-context.llama_state_seq_get_data",
+            "llama.llama.cpp.src.llama-context.llama_state_seq_set_data",
+            "llama.llama.cpp.src.llama-context.llama_get_state_size",
+            "llama.llama.cpp.src.llama-context.llama_state_seq_get_size",
+            "llama.llama.cpp.src.llama-context.llama_state_seq_save_file",
+            "llama.llama.cpp.src.llama-context.llama_state_seq_load_file",
+            "llama.llama.cpp.src.llama-context.llama_perf_context_print",
+            "llama.llama.cpp.src.llama-context.llama_memory_breakdown_print"
+        ],
+        "children": {}
+    },
+    "llama_cpp_grammar": {
+        "path": "llama/llama.cpp/src",
+        "components": [
+            "llama.llama.cpp.src.llama-grammar.llama_grammar_apply_impl",
+            "llama.llama.cpp.src.llama-grammar.llama_grammar_accept_str",
+            "llama.llama.cpp.src.llama-grammar.llama_grammar_accept_token",
+            "llama.llama.cpp.src.llama-grammar.parse_char",
+            "llama.llama.cpp.src.llama-grammar.print_rule",
+            "llama.llama.cpp.src.llama-grammar.llama_grammar_accept_impl"
+        ],
+        "children": {}
+    },
+    "llama_cpp_impl": {
+        "path": "llama/llama.cpp/src",
+        "components": [
+            "llama.llama.cpp.src.llama-impl.gguf_kv_to_str"
+        ],
+        "children": {}
+    },
+    "llama_cpp_kv_cache": {
+        "path": "llama/llama.cpp/src",
+        "components": [
+            "llama.llama.cpp.src.llama-kv-cells.pos_add",
+            "llama.llama.cpp.src.llama-kv-cells.pos_div",
+            "llama.llama.cpp.src.llama-kv-cells.seq_keep",
+            "llama.llama.cpp.src.llama-kv-cells.rm"
+        ],
+        "children": {}
+    },
+    "llama_cpp_mmap": {
+        "path": "llama/llama.cpp/src",
+        "components": [
+            "llama.llama.cpp.src.llama-mmap.impl"
+        ],
+        "children": {}
+    },
+    "llama_cpp_quantization": {
+        "path": "llama/llama.cpp/src",
+        "components": [
+            "llama.llama.cpp.src.llama-quant.llama_model_quantize"
+        ],
+        "children": {}
+    },
+    "llama_cpp_sampling": {
+        "path": "llama/llama.cpp/src",
+        "components": [
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_mirostat_apply",
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_temp_ext_apply",
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_mirostat_v2_apply",
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_top_k_apply",
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_top_p_apply",
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_typical_apply",
+            "llama.llama.cpp.src.llama-sampling.llama_sample_xtc_apply",
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_top_n_sigma_apply",
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_infill_apply",
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_sample",
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_min_p_apply",
+            "llama.llama.cpp.src.llama-sampling.llama_sampler_chain_reset"
+        ],
+        "children": {}
+    },
+    "llama_cpp_vocab": {
+        "path": "llama/llama.cpp/src",
+        "components": [
+            "llama.llama.cpp.src.llama-vocab.llm_tokenizer_ugm",
+            "llama.llama.cpp.src.llama-vocab.llm_tokenizer_bpe",
+            "llama.llama.cpp.src.llama-vocab.llm_tokenizer_rwkv",
+            "llama.llama.cpp.src.llama-vocab.llama_n_vocab",
+            "llama.llama.cpp.src.llama-vocab.llama_token_get_score",
+            "llama.llama.cpp.src.llama-vocab.llama_token_get_attr",
+            "llama.llama.cpp.src.llama-vocab.llama_token_is_eog",
+            "llama.llama.cpp.src.llama-vocab.llama_token_is_control",
+            "llama.llama.cpp.src.llama-vocab.llama_token_bos",
+            "llama.llama.cpp.src.llama-vocab.llama_token_eos",
+            "llama.llama.cpp.src.llama-vocab.llama_token_eot",
+            "llama.llama.cpp.src.llama-vocab.llama_token_cls",
+            "llama.llama.cpp.src.llama-vocab.llama_token_sep",
+            "llama.llama.cpp.src.llama-vocab.llama_token_nl",
+            "llama.llama.cpp.src.llama-vocab.llama_token_pad",
+            "llama.llama.cpp.src.llama-vocab.llama_add_bos_token",
+            "llama.llama.cpp.src.llama-vocab.llama_add_eos_token",
+            "llama.llama.cpp.src.llama-vocab.llama_token_fim_pre",
+            "llama.llama.cpp.src.llama-vocab.llama_token_fim_suf",
+            "llama.llama.cpp.src.llama-vocab.llama_token_fim_mid",
+            "llama.llama.cpp.src.llama-vocab.llama_token_fim_pad",
+            "llama.llama.cpp.src.llama-vocab.llama_token_fim_rep",
+            "llama.llama.cpp.src.llama-vocab.llama_token_fim_sep"
+        ],
+        "children": {
+            "tokenizer_algorithms": {
+                "components": [
+                    "llama.llama.cpp.src.llama-vocab.llm_tokenizer_ugm",
+                    "llama.llama.cpp.src.llama-vocab.llm_tokenizer_bpe",
+                    "llama.llama.cpp.src.llama-vocab.llm_tokenizer_rwkv"
+                ],
+                "children": {}
+            },
+            "token_properties_and_info": {
+                "components": [
+                    "llama.llama.cpp.src.llama-vocab.llama_n_vocab",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_get_score",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_get_attr",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_is_eog",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_is_control"
+                ],
+                "children": {}
+            },
+            "standard_special_tokens": {
+                "components": [
+                    "llama.llama.cpp.src.llama-vocab.llama_token_bos",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_eos",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_eot",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_cls",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_sep",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_nl",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_pad",
+                    "llama.llama.cpp.src.llama-vocab.llama_add_bos_token",
+                    "llama.llama.cpp.src.llama-vocab.llama_add_eos_token"
+                ],
+                "children": {}
+            },
+            "fim_special_tokens": {
+                "components": [
+                    "llama.llama.cpp.src.llama-vocab.llama_token_fim_pre",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_fim_suf",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_fim_mid",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_fim_pad",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_fim_rep",
+                    "llama.llama.cpp.src.llama-vocab.llama_token_fim_sep"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "llama_cpp_core": {
+        "path": "llama/llama.cpp/src",
+        "components": [
+            "llama.llama.cpp.src.llama.llama_params_fit"
+        ],
+        "children": {}
+    },
+    "llama_cpp_unicode": {
+        "path": "llama/llama.cpp/src",
+        "components": [
+            "llama.llama.cpp.src.unicode.unicode_regex_split",
+            "llama.llama.cpp.src.unicode.unicode_cpt_flags_from_utf8",
+            "llama.llama.cpp.src.unicode.unicode_utf8_to_byte"
+        ],
+        "children": {}
+    },
+    "llama_cpp_mtmd_clip": {
+        "path": "llama/llama.cpp/tools/mtmd",
+        "components": [
+            "llama.llama.cpp.tools.mtmd.clip-impl.gguf_kv_to_str",
+            "llama.llama.cpp.tools.mtmd.clip-impl.clip_projector_type_from_string",
+            "llama.llama.cpp.tools.mtmd.clip.clip_encode_float_image",
+            "llama.llama.cpp.tools.mtmd.clip.clip_debug_encode",
+            "llama.llama.cpp.tools.mtmd.clip.clip_image_preprocess",
+            "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_add_mel",
+            "llama.llama.cpp.tools.mtmd.clip.clip_image_convert_f32_to_u8",
+            "llama.llama.cpp.tools.mtmd.clip.clip_init",
+            "llama.llama.cpp.tools.mtmd.clip.clip_build_img_from_pixels",
+            "llama.llama.cpp.tools.mtmd.clip.clip_embd_nbytes",
+            "llama.llama.cpp.tools.mtmd.clip.clip_image_write_image_to_ppm",
+            "llama.llama.cpp.tools.mtmd.clip.clip_image_save_to_bmp",
+            "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_n_images",
+            "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_nx",
+            "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_ny"
+        ],
+        "children": {
+            "clip_implementation_details": {
+                "components": [
+                    "llama.llama.cpp.tools.mtmd.clip-impl.gguf_kv_to_str",
+                    "llama.llama.cpp.tools.mtmd.clip-impl.clip_projector_type_from_string"
+                ],
+                "children": {}
+            },
+            "clip_core_api": {
+                "components": [
+                    "llama.llama.cpp.tools.mtmd.clip.clip_init",
+                    "llama.llama.cpp.tools.mtmd.clip.clip_encode_float_image",
+                    "llama.llama.cpp.tools.mtmd.clip.clip_debug_encode",
+                    "llama.llama.cpp.tools.mtmd.clip.clip_embd_nbytes"
+                ],
+                "children": {}
+            },
+            "clip_image_processing": {
+                "components": [
+                    "llama.llama.cpp.tools.mtmd.clip.clip_image_preprocess",
+                    "llama.llama.cpp.tools.mtmd.clip.clip_build_img_from_pixels",
+                    "llama.llama.cpp.tools.mtmd.clip.clip_image_convert_f32_to_u8",
+                    "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_add_mel",
+                    "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_n_images",
+                    "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_nx",
+                    "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_ny"
+                ],
+                "children": {
+                    "clip_image_basic_ops": {
+                        "components": [
+                            "llama.llama.cpp.tools.mtmd.clip.clip_image_preprocess",
+                            "llama.llama.cpp.tools.mtmd.clip.clip_build_img_from_pixels",
+                            "llama.llama.cpp.tools.mtmd.clip.clip_image_convert_f32_to_u8"
+                        ],
+                        "children": {}
+                    },
+                    "clip_image_batch_utils": {
+                        "components": [
+                            "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_add_mel",
+                            "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_n_images",
+                            "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_nx",
+                            "llama.llama.cpp.tools.mtmd.clip.clip_image_f32_batch_ny"
+                        ],
+                        "children": {}
+                    }
+                }
+            },
+            "clip_image_output": {
+                "components": [
+                    "llama.llama.cpp.tools.mtmd.clip.clip_image_write_image_to_ppm",
+                    "llama.llama.cpp.tools.mtmd.clip.clip_image_save_to_bmp"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "llama_cpp_mtmd_audio": {
+        "path": "llama/llama.cpp/tools/mtmd",
+        "components": [
+            "llama.llama.cpp.tools.mtmd.mtmd-audio.log_mel_spectrogram"
+        ],
+        "children": {}
+    },
+    "llama_cpp_mtmd_helper": {
+        "path": "llama/llama.cpp/tools/mtmd",
+        "components": [
+            "llama.llama.cpp.tools.mtmd.mtmd-helper.mtmd_helper_eval_chunks"
+        ],
+        "children": {}
+    },
+    "llama_cpp_mtmd_core": {
+        "path": "llama/llama.cpp/tools/mtmd",
+        "components": [
+            "llama.llama.cpp.tools.mtmd.mtmd.mtmd_encode_chunk",
+            "llama.llama.cpp.tools.mtmd.mtmd.mtmd_input_chunk_get_n_tokens",
+            "llama.llama.cpp.tools.mtmd.mtmd.mtmd_input_chunk_get_n_pos",
+            "llama.llama.cpp.tools.mtmd.mtmd.n_bytes"
+        ],
+        "children": {}
+    },
+    "ggml_allocator": {
+        "path": "ml/backend/ggml/ggml/src",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-alloc.ggml_gallocr_alloc_graph",
+            "ml.backend.ggml.ggml.src.ggml-alloc.ggml_gallocr_reserve_n_size",
+            "ml.backend.ggml.ggml.src.ggml-alloc.ggml_backend_alloc_ctx_tensors",
+            "ml.backend.ggml.ggml.src.ggml-alloc.ggml_backend_alloc_ctx_tensors_from_buft_size",
+            "ml.backend.ggml.ggml.src.ggml-alloc.ggml_gallocr_free",
+            "ml.backend.ggml.ggml.src.ggml-alloc.ggml_gallocr_new",
+            "ml.backend.ggml.ggml.src.ggml-alloc.ggml_gallocr_get_buffer_size"
+        ],
+        "children": {}
+    },
+    "ggml_backend_registration": {
+        "path": "ml/backend/ggml/ggml/src",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-backend-reg.ggml_backend_load_all",
+            "ml.backend.ggml.ggml.src.ggml-backend-reg.ggml_backend_init_by_name",
+            "ml.backend.ggml.ggml.src.ggml-backend-reg.ggml_backend_reg_by_name",
+            "ml.backend.ggml.ggml.src.ggml-backend-reg.ggml_backend_init_by_type",
+            "ml.backend.ggml.ggml.src.ggml-backend-reg.ggml_backend_init_best"
+        ],
+        "children": {}
+    },
+    "ggml_backend_core": {
+        "path": "ml/backend/ggml/ggml/src",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_sched_graph_compute",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_sched_reserve_size",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_sched_reserve",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_compare_graph_backend",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_sched_new",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_tensor_copy_async",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_alloc_buffer",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_get_alignment",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_get_max_size",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_cpu_buffer_cpy_tensor",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_buffer_get_max_size",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_buffer_set_usage",
+            "ml.backend.ggml.ggml.src.ggml-backend.ggml_backend_cpu_buffer_from_ptr"
+        ],
+        "children": {}
+    },
+    "ggml_backend_blas": {
+        "path": "ml/backend/ggml/ggml/src/ggml-blas",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-blas.ggml-blas.ggml_backend_blas_device_init_backend",
+            "ml.backend.ggml.ggml.src.ggml-blas.ggml-blas.ggml_backend_blas_graph_compute",
+            "ml.backend.ggml.ggml.src.ggml-blas.ggml-blas.ggml_backend_blas_set_n_threads",
+            "ml.backend.ggml.ggml.src.ggml-blas.ggml-blas.ggml_backend_blas_device_get_props"
+        ],
+        "children": {}
+    },
+    "ggml_cpu_amx": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu/amx",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.amx.mmq.convert_B_packed_format",
+            "ml.backend.ggml.ggml.src.ggml-cpu.amx.mmq.quantize_row_q8_K_vnni"
+        ],
+        "children": {}
+    },
+    "ggml_cpu_arm_quants": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu/arch/arm",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q4_K_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q6_K_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq2_xs_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q5_K_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq2_s_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq3_s_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq4_xs_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q2_K_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q3_K_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq1_m_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.quantize_row_q8_1",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq2_xxs_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq3_xxs_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq1_s_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.quantize_row_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q4_0_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_mxfp4_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q8_0_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_tq1_0_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_tq2_0_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq4_nl_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.quantize_row_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q4_1_q8_1",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q5_0_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q5_1_q8_1"
+        ],
+        "children": {
+            "arm_vec_dot_k_quants": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q4_K_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q6_K_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq2_xs_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q5_K_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq2_s_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq3_s_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq4_xs_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q2_K_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q3_K_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq1_m_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq2_xxs_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq3_xxs_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq1_s_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_tq1_0_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_tq2_0_q8_K"
+                ],
+                "children": {
+                    "standard_k_vec_dots": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q4_K_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q6_K_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q5_K_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q2_K_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q3_K_q8_K"
+                        ],
+                        "children": {}
+                    },
+                    "integer_k_vec_dots": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq2_xs_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq2_s_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq3_s_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq4_xs_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq1_m_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq2_xxs_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq3_xxs_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq1_s_q8_K"
+                        ],
+                        "children": {}
+                    },
+                    "tiny_k_vec_dots": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_tq1_0_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_tq2_0_q8_K"
+                        ],
+                        "children": {}
+                    }
+                }
+            },
+            "arm_vec_dot_0_quants": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q4_0_q8_0",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_mxfp4_q8_0",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q8_0_q8_0",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_iq4_nl_q8_0",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q5_0_q8_0"
+                ],
+                "children": {}
+            },
+            "arm_vec_dot_1_quants": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q4_1_q8_1",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.ggml_vec_dot_q5_1_q8_1"
+                ],
+                "children": {}
+            },
+            "arm_row_quantization": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.quantize_row_q8_1",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.quantize_row_q8_0",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.arm.quants.quantize_row_q8_K"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "ggml_cpu_x86_quants": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu/arch/x86",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q4_0_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q5_0_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q8_0_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q5_1_q8_1",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q4_1_q8_1",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_mxfp4_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq4_nl_q8_0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq1_s_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq1_m_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq4_xs_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.quantize_row_q8_1",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q2_K_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q3_K_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q4_K_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q5_K_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q6_K_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_xs_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_s_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.quantize_row_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_tq1_0_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_tq2_0_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_xxs_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq3_xxs_q8_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq3_s_q8_K"
+        ],
+        "children": {
+            "x86_vec_dot_k_quants": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq1_s_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq1_m_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq4_xs_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q2_K_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q3_K_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q4_K_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q5_K_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q6_K_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_xs_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_s_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_tq1_0_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_tq2_0_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_xxs_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq3_xxs_q8_K",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq3_s_q8_K"
+                ],
+                "children": {
+                    "standard_k_vec_dots": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q2_K_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q3_K_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q4_K_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q5_K_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q6_K_q8_K"
+                        ],
+                        "children": {}
+                    },
+                    "integer_k_vec_dots": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq1_s_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq1_m_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq4_xs_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_xs_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_s_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_xxs_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq3_xxs_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq3_s_q8_K"
+                        ],
+                        "children": {
+                            "iq1_k_vec_dots": {
+                                "components": [
+                                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq1_s_q8_K",
+                                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq1_m_q8_K"
+                                ],
+                                "children": {}
+                            },
+                            "iq2_k_vec_dots": {
+                                "components": [
+                                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_xs_q8_K",
+                                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_s_q8_K",
+                                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq2_xxs_q8_K"
+                                ],
+                                "children": {}
+                            },
+                            "iq3_k_vec_dots": {
+                                "components": [
+                                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq3_xxs_q8_K",
+                                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq3_s_q8_K"
+                                ],
+                                "children": {}
+                            },
+                            "iq4_k_vec_dots": {
+                                "components": [
+                                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq4_xs_q8_K"
+                                ],
+                                "children": {}
+                            }
+                        }
+                    },
+                    "tiny_k_vec_dots": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_tq1_0_q8_K",
+                            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_tq2_0_q8_K"
+                        ],
+                        "children": {}
+                    }
+                }
+            },
+            "x86_vec_dot_0_quants": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q4_0_q8_0",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q5_0_q8_0",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q8_0_q8_0",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_mxfp4_q8_0",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_iq4_nl_q8_0"
+                ],
+                "children": {}
+            },
+            "x86_vec_dot_1_quants": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q5_1_q8_1",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.ggml_vec_dot_q4_1_q8_1"
+                ],
+                "children": {}
+            },
+            "x86_row_quantization": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.quantize_row_q8_1",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.quants.quantize_row_q8_K"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "ggml_cpu_x86_repack": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu/arch/x86",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.repack.gemm_q4_b32_8x8_q8_0_lut_avx",
+            "ml.backend.ggml.ggml.src.ggml-cpu.arch.x86.repack.gemv_q4_b32_8x8_q8_0_lut_avx"
+        ],
+        "children": {}
+    },
+    "ggml_cpu_backend": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_graph_compute_with_ctx",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_graph_compute_secondary_thread",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_get_i32_1d",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_set_i32_1d",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_get_f32_1d",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_set_f32_1d",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_numa_init",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_device_init_backend",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_graph_plan_create",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_set_n_threads",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_set_threadpool",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_set_abort_callback",
+            "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_device_get_props"
+        ],
+        "children": {
+            "cpu_graph_and_data_access": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_graph_compute_with_ctx",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_graph_compute_secondary_thread",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_get_i32_1d",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_set_i32_1d",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_get_f32_1d",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_set_f32_1d",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_numa_init"
+                ],
+                "children": {}
+            },
+            "cpu_backend_api": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_device_init_backend",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_graph_plan_create",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_set_n_threads",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_set_threadpool",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_set_abort_callback",
+                    "ml.backend.ggml.ggml.src.ggml-cpu.ggml-cpu.ggml_backend_cpu_device_get_props"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "ggml_cpu_sgemm": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu/llamafile",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.llamafile.sgemm-ppc.matmul_tiled_q0",
+            "ml.backend.ggml.ggml.src.ggml-cpu.llamafile.sgemm.gemm"
+        ],
+        "children": {}
+    },
+    "ggml_cpu_ops": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.ops.ggml_compute_forward_rope_flt"
+        ],
+        "children": {}
+    },
+    "ggml_cpu_quants_generic": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.quants.quantize_row_iq4_nl",
+            "ml.backend.ggml.ggml.src.ggml-cpu.quants.quantize_row_iq4_xs",
+            "ml.backend.ggml.ggml.src.ggml-cpu.quants.quantize_row_q3_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.quants.quantize_row_q4_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.quants.quantize_row_q5_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.quants.quantize_row_mxfp4",
+            "ml.backend.ggml.ggml.src.ggml-cpu.quants.quantize_row_q2_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.quants.quantize_row_q6_K",
+            "ml.backend.ggml.ggml.src.ggml-cpu.quants.quantize_row_q8_K_generic"
+        ],
+        "children": {}
+    },
+    "ggml_cpu_repack": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.repack.repack_q4_0_to_q4_0_4_bl",
+            "ml.backend.ggml.ggml.src.ggml-cpu.repack.repack_q4_K_to_q4_K_8_bl",
+            "ml.backend.ggml.ggml.src.ggml-cpu.repack.repack_q2_K_to_q2_K_8_bl",
+            "ml.backend.ggml.ggml.src.ggml-cpu.repack.repack_q4_0_to_q4_0_8_bl",
+            "ml.backend.ggml.ggml.src.ggml-cpu.repack.repack_iq4_nl_to_iq4_nl_4_bl",
+            "ml.backend.ggml.ggml.src.ggml-cpu.repack.repack_iq4_nl_to_iq4_nl_8_bl"
+        ],
+        "children": {}
+    },
+    "ggml_cpu_unary_ops": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.unary-ops.ggml_compute_forward_xielu"
+        ],
+        "children": {}
+    },
+    "ggml_cpu_vec_utils": {
+        "path": "ml/backend/ggml/ggml/src/ggml-cpu",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-cpu.vec.ggml_vec_norm_inv_f32"
+        ],
+        "children": {}
+    },
+    "ggml_internal_utils": {
+        "path": "ml/backend/ggml/ggml/src",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-impl.ggml_can_fuse_subgraph",
+            "ml.backend.ggml.ggml.src.ggml-impl.ggml_hash_contains",
+            "ml.backend.ggml.ggml.src.ggml-impl.ggml_hash_find_or_insert",
+            "ml.backend.ggml.ggml.src.ggml-impl.ggml_compute_fp16_to_fp32",
+            "ml.backend.ggml.ggml.src.ggml-impl.ggml_compute_fp32_to_fp16"
+        ],
+        "children": {}
+    },
+    "ggml_backend_metal": {
+        "path": "ml/backend/ggml/ggml/src/ggml-metal",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal-common.ggml_graph_optimize",
+            "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal-ops.ggml_metal_op_encode",
+            "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_init",
+            "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_device_init",
+            "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_set_abort_callback",
+            "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_supports_family",
+            "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_capture_next_compute",
+            "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_device_get_props",
+            "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_device_get_buffer_type"
+        ],
+        "children": {
+            "metal_common_utilities": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal-common.ggml_graph_optimize"
+                ],
+                "children": {}
+            },
+            "metal_operations": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal-ops.ggml_metal_op_encode"
+                ],
+                "children": {}
+            },
+            "metal_backend_api": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_init",
+                    "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_device_init",
+                    "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_set_abort_callback",
+                    "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_supports_family",
+                    "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_capture_next_compute",
+                    "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_device_get_props",
+                    "ml.backend.ggml.ggml.src.ggml-metal.ggml-metal.ggml_backend_metal_device_get_buffer_type"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "ggml_optimizer": {
+        "path": "ml/backend/ggml/ggml/src",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-opt.ggml_opt_fit",
+            "ml.backend.ggml.ggml.src.ggml-opt.ggml_opt_init",
+            "ml.backend.ggml.ggml.src.ggml-opt.ggml_opt_epoch_callback_progress_bar"
+        ],
+        "children": {}
+    },
+    "ggml_quants_reference": {
+        "path": "ml/backend/ggml/ggml/src",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-quants.quantize_row_iq3_s_ref",
+            "ml.backend.ggml.ggml.src.ggml-quants.quantize_row_iq2_s_ref",
+            "ml.backend.ggml.ggml.src.ggml-quants.ggml_validate_row_data",
+            "ml.backend.ggml.ggml.src.ggml-quants.quantize_row_iq3_xxs_ref",
+            "ml.backend.ggml.ggml.src.ggml-quants.quantize_row_iq4_xs_ref"
+        ],
+        "children": {}
+    },
+    "ggml_backend_vulkan": {
+        "path": "ml/backend/ggml/ggml/src/ggml-vulkan",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_graph_compute",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_get_tensor_async",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_test_matmul",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_set_tensor_async",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_test_dequant",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_cpy_tensor",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_cpy_tensor_async",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_set_tensor",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_get_tensor",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_init",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_get_buffer_type",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_get_host_buffer_type",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_supports_op",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_reg_get_device",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_free",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_memset_tensor",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_buffer_write_nc_async",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_clear",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_reg_get_device_count",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_synchronize",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_type_alloc_buffer",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_get_props",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_host_buffer_free_buffer",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_wait_events",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_free_buffer",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_graph_optimize"
+        ],
+        "children": {
+            "vk_backend_lifecycle": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_init",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_free",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_reg_get_device",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_reg_get_device_count",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_get_props",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_supports_op",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_synchronize",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_wait_events"
+                ],
+                "children": {
+                    "vk_device_lifecycle_management": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_init",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_free"
+                        ],
+                        "children": {}
+                    },
+                    "vk_device_query_and_capabilities": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_reg_get_device",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_reg_get_device_count",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_get_props",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_supports_op"
+                        ],
+                        "children": {}
+                    },
+                    "vk_command_synchronization": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_synchronize",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_wait_events"
+                        ],
+                        "children": {}
+                    }
+                }
+            },
+            "vk_buffer_management": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_cpy_tensor",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_cpy_tensor_async",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_set_tensor",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_get_tensor",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_memset_tensor",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_clear",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_type_alloc_buffer",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_free_buffer",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_host_buffer_free_buffer",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_buffer_write_nc_async",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_get_buffer_type",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_get_host_buffer_type",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_get_tensor_async",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_set_tensor_async"
+                ],
+                "children": {
+                    "vk_buffer_lifecycle": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_type_alloc_buffer",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_free_buffer",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_host_buffer_free_buffer"
+                        ],
+                        "children": {}
+                    },
+                    "vk_tensor_data_transfer": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_cpy_tensor",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_cpy_tensor_async",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_set_tensor",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_get_tensor",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_buffer_write_nc_async",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_get_tensor_async",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_set_tensor_async"
+                        ],
+                        "children": {
+                            "vk_tensor_copy_operations": {
+                                "components": [
+                                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_cpy_tensor",
+                                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_cpy_tensor_async"
+                                ],
+                                "children": {}
+                            },
+                            "vk_tensor_write_operations": {
+                                "components": [
+                                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_set_tensor",
+                                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_set_tensor_async",
+                                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_buffer_write_nc_async"
+                                ],
+                                "children": {}
+                            },
+                            "vk_tensor_read_operations": {
+                                "components": [
+                                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_get_tensor",
+                                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_get_tensor_async"
+                                ],
+                                "children": {}
+                            }
+                        }
+                    },
+                    "vk_buffer_memory_ops": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_memset_tensor",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_buffer_clear"
+                        ],
+                        "children": {}
+                    },
+                    "vk_buffer_type_queries": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_get_buffer_type",
+                            "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_device_get_host_buffer_type"
+                        ],
+                        "children": {}
+                    }
+                }
+            },
+            "vk_graph_operations": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_backend_vk_graph_compute",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_graph_optimize"
+                ],
+                "children": {}
+            },
+            "vk_testing_utilities": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_test_matmul",
+                    "ml.backend.ggml.ggml.src.ggml-vulkan.ggml-vulkan.ggml_vk_test_dequant"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "ggml_vulkan_shader_gen": {
+        "path": "ml/backend/ggml/ggml/src/ggml-vulkan/vulkan-shaders",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml-vulkan.vulkan-shaders.vulkan-shaders-gen.main",
+            "ml.backend.ggml.ggml.src.ggml-vulkan.vulkan-shaders.vulkan-shaders-gen.string_to_spv_func"
+        ],
+        "children": {}
+    },
+    "ggml_core": {
+        "path": "ml/backend/ggml/ggml/src",
+        "components": [
+            "ml.backend.ggml.ggml.src.ggml.ggml_quantize_chunk",
+            "ml.backend.ggml.ggml.src.ggml.ggml_build_backward_expand",
+            "ml.backend.ggml.ggml.src.ggml.ggml_quantize_free",
+            "ml.backend.ggml.ggml.src.ggml.ggml_graph_cpy",
+            "ml.backend.ggml.ggml.src.ggml.ggml_graph_dump_dot",
+            "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguously_allocated",
+            "ml.backend.ggml.ggml.src.ggml.ggml_graph_overhead",
+            "ml.backend.ggml.ggml.src.ggml.ggml_nbytes_pad",
+            "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguous_1",
+            "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguous_2",
+            "ml.backend.ggml.ggml.src.ggml.ggml_get_max_tensor_size",
+            "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguous_rows",
+            "ml.backend.ggml.ggml.src.ggml.ggml_can_repeat_rows",
+            "ml.backend.ggml.ggml.src.ggml.ggml_graph_reset"
+        ],
+        "children": {
+            "ggml_quantization": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml.ggml_quantize_chunk",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_quantize_free"
+                ],
+                "children": {}
+            },
+            "ggml_graph_management": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml.ggml_build_backward_expand",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_graph_cpy",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_graph_dump_dot",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_graph_overhead",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_graph_reset"
+                ],
+                "children": {
+                    "graph_construction": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml.ggml_build_backward_expand"
+                        ],
+                        "children": {}
+                    },
+                    "graph_state_management": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml.ggml_graph_cpy",
+                            "ml.backend.ggml.ggml.src.ggml.ggml_graph_reset"
+                        ],
+                        "children": {}
+                    },
+                    "graph_introspection_and_debug": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml.ggml_graph_dump_dot",
+                            "ml.backend.ggml.ggml.src.ggml.ggml_graph_overhead"
+                        ],
+                        "children": {}
+                    }
+                }
+            },
+            "ggml_tensor_properties": {
+                "components": [
+                    "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguously_allocated",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_nbytes_pad",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguous_1",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguous_2",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_get_max_tensor_size",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguous_rows",
+                    "ml.backend.ggml.ggml.src.ggml.ggml_can_repeat_rows"
+                ],
+                "children": {
+                    "tensor_contiguity_checks": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguously_allocated",
+                            "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguous_1",
+                            "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguous_2",
+                            "ml.backend.ggml.ggml.src.ggml.ggml_is_contiguous_rows",
+                            "ml.backend.ggml.ggml.src.ggml.ggml_can_repeat_rows"
+                        ],
+                        "children": {}
+                    },
+                    "tensor_size_and_padding": {
+                        "components": [
+                            "ml.backend.ggml.ggml.src.ggml.ggml_nbytes_pad",
+                            "ml.backend.ggml.ggml.src.ggml.ggml_get_max_tensor_size"
+                        ],
+                        "children": {}
+                    }
+                }
+            }
+        }
+    },
+    "ggml_gguf_format": {
+        "path": "ml/backend/ggml/ggml/src",
+        "components": [
+            "ml.backend.ggml.ggml.src.gguf.gguf_set_kv",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_meta_size",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_meta_data",
+            "ml.backend.ggml.ggml.src.gguf.gguf_write_to_file",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_u8",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_i8",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_u16",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_i16",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_u32",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_i32",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_f32",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_u64",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_i64",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_f64",
+            "ml.backend.ggml.ggml.src.gguf.gguf_get_val_bool",
+            "ml.backend.ggml.ggml.src.gguf.gguf_add_tensor",
+            "ml.backend.ggml.ggml.src.gguf.gguf_set_tensor_type",
+            "ml.backend.ggml.ggml.src.gguf.gguf_set_tensor_data"
+        ],
+        "children": {}
+    },
+    "ggml_memory_dxgi_pdh": {
+        "path": "ml/backend/ggml/ggml/src",
+        "components": [
+            "ml.backend.ggml.ggml.src.mem_dxgi_pdh.ggml_dxgi_pdh_get_device_memory"
+        ],
+        "children": {}
+    },
+    "imagegen_mlx_dynamic": {
+        "path": "x/imagegen/mlx",
+        "components": [
+            "x.imagegen.mlx.mlx_dynamic.mlx_dynamic_init_path"
+        ],
+        "children": {}
+    }
+}

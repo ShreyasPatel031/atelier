@@ -173,14 +173,22 @@ def _is_gemini_model(model_name: str) -> bool:
     return 'gemini' in model_name.lower()
 
 
+def _resolve_gemini_api_key(config: Config) -> str:
+    """Prefer GEMINI_API_KEY env; do not overwrite it with LLM_API_KEY defaults (e.g. sk-1234)."""
+    env_key = (os.getenv("GEMINI_API_KEY") or "").strip()
+    if env_key:
+        return env_key
+    return (config.llm_api_key or "").strip()
+
+
 def create_main_model(config: Config) -> Model:
     """Create the main LLM model from configuration."""
     
     # Native Gemini support - use pydantic_ai's GoogleModel
     if _is_gemini_model(config.main_model) and GEMINI_AVAILABLE:
         logger.info(f"[LLM] Using native Gemini support for {config.main_model}")
-        # Set environment variable for GoogleProvider to pick up
-        os.environ['GEMINI_API_KEY'] = config.llm_api_key
+        gemini_key = _resolve_gemini_api_key(config)
+        os.environ["GEMINI_API_KEY"] = gemini_key
         return GoogleModel(
             model_name=config.main_model,
             provider='google-gla'  # Use string provider, API key from env
@@ -207,7 +215,7 @@ def create_fallback_model(config: Config) -> Model:
     # Native Gemini support
     if _is_gemini_model(config.fallback_model) and GEMINI_AVAILABLE:
         logger.info(f"[LLM] Using native Gemini support for fallback {config.fallback_model}")
-        os.environ['GEMINI_API_KEY'] = config.llm_api_key
+        os.environ["GEMINI_API_KEY"] = _resolve_gemini_api_key(config)
         return GoogleModel(
             model_name=config.fallback_model,
             provider='google-gla'

@@ -11,8 +11,11 @@ Features:
 """
 
 import argparse
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+from contextlib import asynccontextmanager
+from pathlib import Path
+
+from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Any
@@ -22,33 +25,59 @@ from .background_worker import BackgroundWorker
 from .routes import WebRoutes
 from .config import WebAppConfig
 
+# atelier/demo — interactive viewer (index.html, viewer-debug.js)
+_DEMO_ROOT = Path(__file__).resolve().parent.parent.parent.parent / "demo"
+
+
+# Shared app components (must exist before FastAPI so lifespan can start the worker)
+cache_manager = CacheManager(
+    cache_dir=WebAppConfig.CACHE_DIR,
+    cache_expiry_days=WebAppConfig.CACHE_EXPIRY_DAYS,
+)
+background_worker = BackgroundWorker(
+    cache_manager=cache_manager,
+    temp_dir=WebAppConfig.TEMP_DIR,
+)
+web_routes = WebRoutes(background_worker=background_worker, cache_manager=cache_manager)
+
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    """Start queue worker in the same OS process that serves HTTP.
+
+    Without this, ``uvicorn codewiki.src.fe.web_app:app`` (and the child process used by
+    ``--reload``) never runs ``main()``, so ``background_worker.start()`` is
+    never called and jobs stay ``queued`` forever.
+    """
+    background_worker.start()
+    try:
+        yield
+    finally:
+        background_worker.stop()
+
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="CodeWiki", 
-    description="Generate comprehensive documentation for any GitHub repository"
+    title="CodeWiki",
+    description="Generate comprehensive documentation for any GitHub repository",
+    lifespan=_lifespan,
 )
 
-# CORS for demo viewer on port 8080 calling API on 8001
+# CORS: static demo on 8080; web app on 8000/8001
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:8001", "http://127.0.0.1:8001"],
+    allow_origins=[
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:8001",
+        "http://127.0.0.1:8001",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Initialize components
-cache_manager = CacheManager(
-    cache_dir=WebAppConfig.CACHE_DIR, 
-    cache_expiry_days=WebAppConfig.CACHE_EXPIRY_DAYS
-)
-background_worker = BackgroundWorker(
-    cache_manager=cache_manager, 
-    temp_dir=WebAppConfig.TEMP_DIR
-)
-web_routes = WebRoutes(background_worker=background_worker, cache_manager=cache_manager)
-
 
 # Register routes
 @app.get("/", response_class=HTMLResponse)
@@ -69,6 +98,12 @@ async def get_job_status(job_id: str):
     return await web_routes.get_job_status(job_id)
 
 
+@app.get("/api/jobs")
+async def list_jobs():
+    """All tracked jobs (for E2E: wait until worker has no queued/processing work)."""
+    return await web_routes.list_jobs()
+
+
 @app.get("/docs/{job_id}")
 async def view_docs(job_id: str):
     """View generated documentation."""
@@ -82,6 +117,36 @@ async def serve_generated_docs(job_id: str, filename: str = "overview.md"):
     if not filename: 
         filename = "overview.md"
     return await web_routes.serve_generated_docs(job_id, filename)
+
+
+@app.get("/viewer")
+async def viewer_interactive():
+    """Same demo viewer as localhost:8080 (interactive Mermaid, chat). Query: ?repo=<job_id>."""
+    idx = _DEMO_ROOT / "index.html"
+    if not idx.is_file():
+        raise HTTPException(status_code=404, detail="demo/index.html not found")
+    return FileResponse(idx, media_type="text/html")
+
+
+@app.get("/viewer-debug.js")
+async def viewer_debug_script():
+    """Loaded by demo/index.html when served from /viewer."""
+    p = _DEMO_ROOT / "viewer-debug.js"
+    if not p.is_file():
+        raise HTTPException(status_code=404, detail="viewer-debug.js not found")
+    return FileResponse(p, media_type="application/javascript")
+
+
+@app.get("/repos/index.json")
+async def repos_index_for_viewer():
+    """Dropdown list for demo viewer (completed web jobs)."""
+    return await web_routes.serve_repos_index_json()
+
+
+@app.get("/repos/{job_id}/{filename:path}")
+async def serve_repo_raw_file(job_id: str, filename: str):
+    """Raw module_tree.json / overview.md / *.md for the interactive viewer."""
+    return await web_routes.serve_repo_file(job_id, filename)
 
 
 # Chat API models
@@ -104,22 +169,43 @@ class ArchAgentChatResponse(BaseModel):
 @app.post("/api/arch-agent/chat", response_model=ArchAgentChatResponse)
 async def arch_agent_chat(request: ArchAgentChatRequest) -> ArchAgentChatResponse:
     """Chat endpoint for the architectural agent."""
-    from pathlib import Path
     from codewiki.src.be.architectural_agent import ArchitecturalAgentRunner
-    
-    # Try to find docs directory for the job_id
-    # 1. Check demo repos first (for demo viewer)
-    demo_docs_path = Path(__file__).resolve().parent.parent.parent.parent / "demo" / "repos" / request.job_id
-    if demo_docs_path.exists() and (demo_docs_path / "module_tree.json").exists():
-        docs_path = demo_docs_path
-    else:
-        # 2. Try output/cache (for generated jobs)
-        cache_docs_path = Path(WebAppConfig.get_absolute_path(WebAppConfig.CACHE_DIR)) / request.job_id
-        if cache_docs_path.exists() and (cache_docs_path / "module_tree.json").exists():
-            docs_path = cache_docs_path
+
+    # 1. Completed web job (authoritative docs_path on the worker)
+    job = background_worker.get_job_status(request.job_id)
+    if job and job.docs_path:
+        wp = Path(job.docs_path)
+        if wp.exists() and (wp / "module_tree.json").exists():
+            docs_path = wp
         else:
-            # 3. Try demo repos (for demo viewer: job_id = repo name like "flask", "KubeElasti")
-            raise HTTPException(status_code=404, detail=f"Documentation not found for job_id: {request.job_id}")
+            docs_path = None
+    else:
+        docs_path = None
+
+    # 2. Static demo repos (e.g. crewai) — same as http.server 8080
+    if docs_path is None:
+        demo_docs_path = Path(__file__).resolve().parent.parent.parent.parent / "demo" / "repos" / request.job_id
+        if demo_docs_path.exists() and (demo_docs_path / "module_tree.json").exists():
+            docs_path = demo_docs_path
+
+    # 3. Cache index (docs_path is full path to .../job_id-docs)
+    if docs_path is None:
+        try:
+            repo_full = request.job_id.replace("--", "/")
+            url = f"https://github.com/{repo_full}"
+            cached = cache_manager.get_cached_docs(url)
+            if cached:
+                cp = Path(cached)
+                if cp.exists() and (cp / "module_tree.json").exists():
+                    docs_path = cp
+        except Exception:
+            pass
+
+    if docs_path is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Documentation not found for job_id: {request.job_id}",
+        )
     
     # Create agent runner (uses env vars for LLM config)
     agent_runner = ArchitecturalAgentRunner(str(docs_path))
@@ -178,10 +264,7 @@ def main():
     
     # Ensure required directories exist
     WebAppConfig.ensure_directories()
-    
-    # Start background worker
-    background_worker.start()
-    
+
     print(f"🚀 CodeWiki Web Application starting...")
     print(f"🌐 Server running at: http://{args.host}:{args.port}")
     print(f"📁 Cache directory: {WebAppConfig.get_absolute_path(WebAppConfig.CACHE_DIR)}")
@@ -190,7 +273,7 @@ def main():
     
     try:
         uvicorn.run(
-            "fe.web_app:app",
+            "codewiki.src.fe.web_app:app",
             host=args.host,
             port=args.port,
             reload=args.reload,
@@ -198,7 +281,6 @@ def main():
         )
     except KeyboardInterrupt:
         print("\n👋 Server stopped")
-        background_worker.stop()
 
 
 if __name__ == "__main__":

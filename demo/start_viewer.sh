@@ -137,13 +137,11 @@ else
 fi
 echo ""
 echo "🌐 Open in your browser:"
-echo "   http://localhost:8080/viewer.html?repo=KubeElasti"
+echo "   http://localhost:8080/"
+echo "   (first repo in repos/index.json loads automatically; use ?repo=name or the dropdown)"
+echo "   Legacy /viewer.html?repo=… redirects to /?repo=…"
 echo ""
-echo "📝 Available repositories:"
-echo "   - KubeElasti"
-echo "   - flask"
-echo "   - fastapi"
-echo "   - typer"
+echo "📝 Repositories are listed in demo/repos/index.json (viewer dropdown reads this file)."
 echo ""
 if [ "$API_RUNNING" = false ]; then
     echo "🔧 Troubleshooting:"

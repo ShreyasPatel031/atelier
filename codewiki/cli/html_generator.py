@@ -332,37 +332,14 @@ class HTMLGenerator:
             raise
         
         try:
-            # #region agent log
-            output_path_str = str(output_path.resolve())
-            with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"html_generator.py:311","message":"BEFORE safe_write call","data":{"output_path":output_path_str,"html_content_length":len(html_content),"parent_dir":str(output_path.parent),"parent_exists":output_path.parent.exists()},"timestamp":int(time.time()*1000)})+"\n")
-            # #endregion
             safe_write(output_path, html_content)
-            # #region agent log
-            file_size_check = output_path.stat().st_size if output_path.exists() else 0
-            with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"html_generator.py:312","message":"AFTER safe_write call","data":{"output_path":output_path_str,"file_exists":output_path.exists(),"file_size":file_size_check},"timestamp":int(time.time()*1000)})+"\n")
-            # #endregion
             file_size = output_path.stat().st_size
             logger.info(f"[STAGE 5] Successfully wrote HTML file: {file_size} bytes")
         except Exception as e:
-            # #region agent log
-            import traceback
-            exc_traceback = traceback.format_exc()
-            with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-                f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"html_generator.py:315","message":"safe_write EXCEPTION caught in generate","data":{"exception_type":type(e).__name__,"exception_msg":str(e),"output_path":output_path_str,"traceback":exc_traceback[:500]},"timestamp":int(time.time()*1000)})+"\n")
-            # #endregion
             logger.error(f"[STAGE 5] CRITICAL: Failed to write HTML file: {e}")
             raise
         
         stage_duration = time.time() - stage_start
-        # #region agent log
-        final_check_path = output_path.resolve()
-        final_exists = final_check_path.exists()
-        final_size = final_check_path.stat().st_size if final_exists else 0
-        with open('/Users/shreyaspatel/CodeWiki/.cursor/debug.log', 'a') as f:
-            f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"C,E,F","location":"html_generator.py:319","message":"generate EXIT - SUCCESS","data":{"duration":stage_duration,"final_path":str(final_check_path),"final_exists":final_exists,"final_size":final_size},"timestamp":int(time.time()*1000)})+"\n")
-        # #endregion
         logger.info(f"[STAGE 5: HTML GENERATION] COMPLETE in {stage_duration:.1f}s")
     
     def _build_info_content(self, metadata: Optional[Dict[str, Any]]) -> str:

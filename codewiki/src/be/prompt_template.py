@@ -70,6 +70,20 @@ Key requirements:
 - Use "click nodeId 'filename.md' 'tooltip'" to make nodes navigable
 - Show relationships between modules with arrows
 - DO NOT use classDiagram, sequenceDiagram, or other diagram types
+
+<MERMAID_SYNTAX_RULES>
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use "graph TD" or "flowchart TD" only
+- Subgraph labels must not use reserved words like "end"
+</MERMAID_SYNTAX_RULES>
 </ARCHITECTURE_DIAGRAM_EXAMPLE>
 
 <CRITICAL_NAMING_RULES>
@@ -176,6 +190,20 @@ graph TD
     click config "config.md"
     click utils "utils.md"
 ```
+
+<MERMAID_SYNTAX_RULES>
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use "graph TD" or "flowchart TD" only
+- Subgraph labels must not use reserved words like "end"
+</MERMAID_SYNTAX_RULES>
 </DIAGRAM_REQUIREMENTS>
 
 <AVAILABLE_TOOLS>
@@ -243,7 +271,20 @@ graph TD
     main_handler --> utils
     main_handler --> config
 ```
-</DOCUMENTATION_REQUIREMENTS>
+
+<MERMAID_SYNTAX_RULES>
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use "graph TD" or "flowchart TD" only
+- Subgraph labels must not use reserved words like "end"
+</MERMAID_SYNTAX_RULES>
 
 <CRITICAL_NAMING_RULES>
 All module names and file references MUST use consistent lowercase_with_underscores naming:
@@ -306,6 +347,20 @@ graph TD
     click db "database.md" "View Database Module"
 ```
 
+<MERMAID_SYNTAX_RULES>
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use "graph TD" or "flowchart TD" only
+- Subgraph labels must not use reserved words like "end"
+</MERMAID_SYNTAX_RULES>
+
 CRITICAL: You can ONLY link to modules that exist in the AVAILABLE_MODULES list below.
 DO NOT create links to files that don't exist. DO NOT infer modules from directory structure or component paths.
 If there is only one module (e.g., "main"), create a diagram showing the internal architecture without click statements,
@@ -354,6 +409,20 @@ graph TD
     click sub1 "sub_component_1.md" "View Sub Component 1"
     click sub2 "sub_component_2.md" "View Sub Component 2"
 ```
+
+<MERMAID_SYNTAX_RULES>
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use "graph TD" or "flowchart TD" only
+- Subgraph labels must not use reserved words like "end"
+</MERMAID_SYNTAX_RULES>
 
 Provide repo structure and core components documentation of the `{module_name}` module:
 <REPO_STRUCTURE>

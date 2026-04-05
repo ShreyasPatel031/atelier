@@ -3,438 +3,2575 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeWiki Demo - Repository Documentation</title>
-    <script>
-        // Redirect to generic viewer with Flask repo
-        window.location.href = '/viewer.html?repo=flask';
-    </script>
+    <title>CodeWiki Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11.9.0/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
+    <script src="./viewer-debug.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0f0f0f;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             height: 100vh;
             overflow: hidden;
-            color: #e4e4e7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 15px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-button {
+            padding: 8px 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background: #1d4ed8;
+        }
+
+        .back-button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            flex: 1;
+        }
+        
+        .repo-dropdown {
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            color: #1e293b;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        
+        .repo-dropdown:hover {
+            border-color: #2563eb;
+        }
+        
+        .repo-dropdown:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .repo-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: white;
+            color: #2563eb;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .repo-link:hover {
+            background: #f8fafc;
+            border-color: #2563eb;
         }
 
         .container {
             display: flex;
-            height: 100vh;
-        }
-
-        /* Left Sidebar */
-        .sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
-            border-right: 1px solid #27272a;
-            display: flex;
-            flex-direction: column;
+            flex: 1;
             overflow: hidden;
         }
 
-        .sidebar-header {
-            padding: 24px;
-            border-bottom: 1px solid #27272a;
-        }
-
-        .logo {
+        .diagram-pane {
+            flex: 1 1 auto;
+            min-width: 220px;
+            overflow: hidden;
+            background: #ffffff;
+            position: relative;
             display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
+            flex-direction: column;
+            transition: all 0.3s ease;
         }
-
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            border-radius: 10px;
+        
+        .pane-resizer {
+            flex: 0 0 6px;
+            cursor: col-resize;
+            background: #f1f5f9;
+            border-left: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            z-index: 5;
+            align-self: stretch;
+        }
+        .pane-resizer:hover,
+        .pane-resizer:focus-visible {
+            background: #cbd5e1;
+        }
+        .pane-resizer.is-dragging {
+            background: #94a3b8;
+        }
+        
+        .zoom-controls {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 16px;
-            color: white;
-        }
-
-        .logo h1 {
-            font-size: 20px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f4f4f5 0%, #a1a1aa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .tagline {
-            font-size: 12px;
-            color: #71717a;
-            margin-top: 4px;
-        }
-
-        .repo-list-header {
-            padding: 16px 24px 12px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #52525b;
-        }
-
-        .repo-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 12px;
-        }
-
-        .repo-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .repo-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .repo-list::-webkit-scrollbar-thumb {
-            background: #27272a;
-            border-radius: 3px;
-        }
-
-        .repo-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            gap: 8px;
             padding: 12px 16px;
-            margin-bottom: 4px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            align-items: center;
+            flex-shrink: 0;
         }
-
-        .repo-item:hover {
-            background: rgba(63, 63, 70, 0.5);
-            border-color: #3f3f46;
-        }
-
-        .repo-item.active {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .repo-icon {
+        
+        .zoom-btn {
             width: 32px;
             height: 32px;
-            background: #27272a;
-            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            transition: all 0.15s;
+            color: #475569;
         }
-
-        .repo-info {
-            flex: 1;
-            min-width: 0;
+        
+        .zoom-btn:hover {
+            background: #f1f5f9;
+            border-color: #2563eb;
+            color: #2563eb;
         }
-
-        .repo-name {
-            font-size: 14px;
+        
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .zoom-level {
+            font-size: 13px;
+            color: #64748b;
+            min-width: 50px;
+            text-align: center;
             font-weight: 500;
-            color: #fafafa;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
-
-        .repo-org {
-            font-size: 12px;
-            color: #71717a;
+        
+        .zoom-hint {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-left: auto;
         }
-
-        .repo-status {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #22c55e;
+        
+        /* Dev: tune panel sits inside diagram viewport (bottom-left), not over the chat column */
+        .view-tune-panel {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            z-index: 20;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 11px;
+            background: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 0;
+            max-width: min(300px, calc(100% - 24px));
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            pointer-events: auto;
         }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
+        .view-tune-panel > summary {
+            cursor: pointer;
+            padding: 8px 12px;
+            list-style: none;
+            user-select: none;
+            color: #94a3b8;
+        }
+        .view-tune-panel > summary::-webkit-details-marker { display: none; }
+        .view-tune-panel[open] > summary { border-bottom: 1px solid #334155; color: #cbd5e1; }
+        .view-tune-body {
+            padding: 10px 12px 12px;
             display: flex;
             flex-direction: column;
-            background: #09090b;
-            overflow: hidden;
+            gap: 10px;
         }
-
-        .header {
+        .view-tune-row label {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 24px;
-            background: #18181b;
-            border-bottom: 1px solid #27272a;
+            flex-direction: column;
+            gap: 4px;
+            color: #94a3b8;
         }
-
-        .current-repo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .current-repo h2 {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .github-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: #27272a;
-            border: 1px solid #3f3f46;
-            border-radius: 8px;
-            color: #e4e4e7;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .github-link:hover {
-            background: #3f3f46;
-            border-color: #52525b;
-        }
-
-        .github-link svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        /* Viewer Frame */
-        .viewer-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .viewer-frame {
+        .view-tune-row input[type="range"] {
             width: 100%;
-            height: 100%;
-            border: none;
-            background: #09090b;
+            accent-color: #38bdf8;
         }
-
-        .loading-state {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: #71717a;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #27272a;
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .empty-state {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: #71717a;
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .empty-state h3 {
-            font-size: 18px;
+        .view-tune-val {
+            color: #38bdf8;
             font-weight: 600;
-            color: #e4e4e7;
-            margin-bottom: 8px;
+        }
+        .view-tune-hint {
+            color: #64748b;
+            font-size: 10px;
+            line-height: 1.35;
+        }
+        
+        .diagram-viewport {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+        }
+        
+        .diagram-viewport:active {
+            cursor: grabbing;
+        }
+        
+        .diagram-canvas {
+            transform-origin: 0 0;
+            transition: transform 0.1s ease-out;
+            padding: 20px;
+            min-width: 100%;
+            min-height: 100%;
+        }
+        
+        .diagram-canvas.panning {
+            transition: none;
         }
 
-        .empty-state p {
+        .doc-pane {
+            flex: 0 0 auto;
+            width: 40%;
+            min-width: 260px;
+            max-width: min(85vw, calc(100% - 240px));
+            overflow: hidden;
+            padding: 0;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .doc-pane.open {
+            flex: 0 0 auto;
+            min-width: 260px;
+            max-width: min(85vw, calc(100% - 240px));
+            overflow: hidden;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Tooltip for hover */
+        .module-tooltip {
+            position: fixed;
+            background: #1e293b;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            max-width: 320px;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+        }
+
+        .module-tooltip .tooltip-title {
+            font-weight: 600;
             font-size: 14px;
+            margin-bottom: 6px;
+            color: #60a5fa;
         }
 
-        /* Footer */
-        .sidebar-footer {
-            padding: 16px 24px;
-            border-top: 1px solid #27272a;
-            background: #18181b;
+        .module-tooltip .tooltip-desc {
+            opacity: 0.9;
+            line-height: 1.5;
         }
 
-        .powered-by {
-            font-size: 11px;
-            color: #52525b;
-            text-align: center;
+        /* Node type styling */
+        .node-module rect,
+        .node-module circle,
+        .node-module polygon {
+            stroke: #2563eb !important;
+            stroke-width: 2px !important;
+            cursor: pointer !important;
         }
 
-        .powered-by a {
-            color: #3b82f6;
+        .node-component rect,
+        .node-component circle,
+        .node-component polygon {
+            stroke: #6b7280 !important;
+            fill: #f3f4f6 !important;
+        }
+
+        .node-external rect,
+        .node-external circle,
+        .node-external polygon {
+            stroke: #9ca3af !important;
+            fill: #f9fafb !important;
+            stroke-dasharray: 4 2 !important;
+        }
+
+        /* Panel toggle button */
+        .panel-toggle {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 48px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 12px;
+            z-index: 10;
+            transition: background 0.15s;
+        }
+
+        .panel-toggle:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .doc-content {
+            max-width: 800px;
+            line-height: 1.7;
+            color: #334155;
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 30px;
+            margin: 0;
+        }
+        
+        .doc-content h1 {
+            font-size: 28px;
+            margin-bottom: 16px;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+        
+        .doc-content h2 {
+            font-size: 22px;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            color: #334155;
+        }
+        
+        .doc-content h3 {
+            font-size: 18px;
+            margin-top: 24px;
+            margin-bottom: 10px;
+            color: #475569;
+        }
+        
+        .doc-content p {
+            margin: 12px 0;
+        }
+        
+        .doc-content ul, .doc-content ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        
+        .doc-content li {
+            margin: 6px 0;
+        }
+        
+        .doc-content a {
+            color: #2563eb;
             text-decoration: none;
         }
-
-        .powered-by a:hover {
+        
+        .doc-content a:hover {
             text-decoration: underline;
+        }
+        
+        .doc-content code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            color: #e11d48;
+        }
+        
+        .doc-content pre {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        
+        .doc-content pre code {
+            background: transparent;
+            padding: 0;
+            color: #334155;
+        }
+
+        .doc-content blockquote {
+            border-left: 4px solid #2563eb;
+            padding-left: 16px;
+            margin: 16px 0;
+            color: #64748b;
+            background: #f8fafc;
+            padding: 16px 16px 16px 24px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .doc-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        .doc-content th, .doc-content td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .doc-content th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #dc2626;
+            background: #fef2f2;
+            border-radius: 8px;
+            margin: 20px;
+        }
+
+        /* Make clickable nodes have blue border only */
+        svg g.node.clickable-node rect,
+        svg g.node.clickable-node circle,
+        svg g.node.clickable-node polygon,
+        svg g.node.clickable-node ellipse,
+        .mermaid g.node.clickable-node rect,
+        .mermaid g.node.clickable-node circle,
+        .mermaid g.node.clickable-node polygon,
+        .mermaid g.node.clickable-node ellipse,
+        #mermaid-diagram g.node.clickable-node rect,
+        #mermaid-diagram g.node.clickable-node circle,
+        #mermaid-diagram g.node.clickable-node polygon,
+        #mermaid-diagram g.node.clickable-node ellipse,
+        g.clickable-node rect,
+        g.clickable-node circle,
+        g.clickable-node polygon,
+        g.clickable-node ellipse,
+        .clickable-node rect,
+        .clickable-node circle,
+        .clickable-node polygon,
+        .clickable-node path:not(.edgePath *),
+        .clickable-node ellipse {
+            stroke: #2563eb !important;
+            stroke-width: 3px !important;
+        }
+
+        .clickable-node text,
+        .clickable-node tspan {
+            font-weight: 600 !important;
+        }
+
+        .clickable-node,
+        g.node.clickable-node {
+            cursor: pointer !important;
+        }
+        
+        .clickable-node *,
+        g.node.clickable-node * {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+        
+        .mermaid .edgePath path,
+        .mermaid .edgePath .path {
+            stroke: inherit !important;
+        }
+        
+        /* Selection styling - light grey border */
+        .selected-node rect,
+        .selected-node circle,
+        .selected-node polygon,
+        .selected-node path,
+        .selected-node ellipse {
+            stroke: #94a3b8 !important;
+            stroke-width: 4px !important;
+            fill: #f1f5f9 !important;
+        }
+        
+        .selected-subgraph > rect,
+        .selected-subgraph > .cluster-label rect,
+        svg g.selected-subgraph > rect {
+            stroke: #94a3b8 !important;
+            stroke-width: 3px !important;
+            fill: rgba(148, 163, 184, 0.1) !important;
+        }
+        
+        .selected-subgraph .flowchart-labelBox {
+            stroke: #94a3b8 !important;
+            stroke-width: 3px !important;
+        }
+        
+        /* Breadcrumb navigation */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+            color: #64748b;
+            flex-shrink: 0;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .breadcrumb-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .breadcrumb-link {
+            color: #2563eb;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+        
+        .breadcrumb-link:hover {
+            background: #e0e7ff;
+        }
+        
+        .breadcrumb-current {
+            color: #1e293b;
+            font-weight: 600;
+        }
+        
+        .breadcrumb-separator {
+            color: #cbd5e1;
+            font-size: 10px;
+        }
+
+        .collapse-button rect,
+        .collapse-button circle,
+        .collapse-button polygon {
+            stroke: #dc2626 !important;
+            stroke-width: 2px !important;
+        }
+
+        .collapse-button {
+            cursor: pointer !important;
+        }
+
+        /* Chat in right pane - now fills entire right panel */
+        .chat-section {
+            margin-top: 0;
+            padding: 20px 30px;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            background: #ffffff;
+            height: 100%;
+            overflow: hidden;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 0;
+        }
+        .chat-message {
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 90%;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .chat-message.user {
+            background: #2563eb;
+            color: white;
+            align-self: flex-end;
+        }
+        .chat-message.assistant {
+            background: #f1f5f9;
+            color: #334155;
+            align-self: flex-start;
+        }
+        /* Markdown in assistant messages */
+        .chat-message.assistant p { margin: 6px 0; }
+        .chat-message.assistant p:first-child { margin-top: 0; }
+        .chat-message.assistant p:last-child { margin-bottom: 0; }
+        .chat-message.assistant ul, .chat-message.assistant ol {
+            margin: 6px 0;
+            padding-left: 20px;
+        }
+        .chat-message.assistant li { margin: 3px 0; }
+        .chat-message.assistant code {
+            background: rgba(0,0,0,0.08);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: #b91c1c;
+        }
+        .chat-message.assistant pre {
+            background: rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+        .chat-message.assistant pre code {
+            background: none;
+            padding: 0;
+            color: #334155;
+        }
+        .chat-message.assistant strong { font-weight: 600; color: #1e293b; }
+        .chat-message.assistant a { color: #2563eb; text-decoration: none; }
+        .chat-message.assistant a:hover { text-decoration: underline; }
+        .chat-message.loading {
+            background: #f1f5f9;
+            color: #64748b;
+            align-self: flex-start;
+            font-style: italic;
+        }
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .chat-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        .chat-send {
+            padding: 8px 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .chat-send:hover:not(:disabled) { background: #1d4ed8; }
+        .chat-send:disabled { background: #94a3b8; cursor: not-allowed; }
+        
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            .pane-resizer {
+                display: none;
+            }
+            .diagram-pane {
+                width: 100%;
+                height: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .doc-pane {
+                width: 100% !important;
+                max-width: none !important;
+                height: 0;
+                min-height: 0;
+            }
+            .doc-pane.open {
+                height: 50%;
+                min-height: 200px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">CW</div>
-                    <h1>CodeWiki</h1>
-                </div>
-                <p class="tagline">AI-Generated Documentation</p>
-            </div>
-
-            <div class="repo-list-header">Repositories</div>
+    <div class="header">
+        <button class="back-button" id="backButton" onclick="goBack()">← Back</button>
+        <div class="title" id="moduleTitle">Loading...</div>
+        <select class="repo-dropdown" id="repoDropdown" onchange="switchRepo(this.value)">
+            <option value="">Switch Repo...</option>
+        </select>
+        <a href="#" class="repo-link" id="repoLink" target="_blank" style="display: none;">🔗 View Repository</a>
+    </div>
             
-            <div class="repo-list" id="repoList">
-                <!-- Repos loaded dynamically -->
+    <div class="module-tooltip" id="moduleTooltip">
+        <div class="tooltip-title"></div>
+        <div class="tooltip-desc"></div>
+    </div>
+    
+    <div class="container">
+        <div class="diagram-pane">
+            <div class="breadcrumb" id="breadcrumb">
+                <span class="breadcrumb-item">
+                    <span class="breadcrumb-current" id="breadcrumbRoot">Loading...</span>
+                </span>
             </div>
-
-            <div class="sidebar-footer">
-                <p class="powered-by">
-                    Powered by <a href="https://github.com/ShreyasPatel031/CodeWiki" target="_blank">CodeWiki</a>
-                </p>
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                <span class="zoom-level" id="zoomLevel">100%</span>
+                <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
+                <button class="zoom-btn" onclick="fitToView()" title="Fit to View">⊡</button>
+                <span class="zoom-hint">Scroll / two-finger trackpad → pan • ⌘/Ctrl+scroll or pinch → zoom • Drag to pan</span>
+            </div>
+            <div class="diagram-viewport" id="diagramViewport">
+                <div class="diagram-canvas" id="diagramCanvas">
+                    <div id="mermaid-diagram" class="loading">Loading diagram...</div>
+                </div>
+                <details class="view-tune-panel" id="viewTunePanel">
+                    <summary>Pan / zoom tune (dev)</summary>
+                    <div class="view-tune-body">
+                        <div class="view-tune-row">
+                            <label>
+                                Wheel / trackpad pan sensitivity
+                                <span class="view-tune-val" id="tunePanVal">2.00</span>
+                                <input type="range" id="tunePanMult" min="0.25" max="3" step="0.05" value="2" />
+                            </label>
+                        </div>
+                        <div class="view-tune-row">
+                            <label>
+                                Zoom step (⌘/Ctrl+scroll &amp; +/− buttons)
+                                <span class="view-tune-val" id="tuneZoomVal">0.20</span>
+                                <input type="range" id="tuneZoomStep" min="0.05" max="1" step="0.05" value="0.2" />
+                            </label>
+                        </div>
+                        <p class="view-tune-hint">Console: <code style="color:#94a3b8">viewTune.panWheelMult = 1.2</code> then <code style="color:#94a3b8">syncViewTuneUI()</code> to refresh sliders.</p>
+                    </div>
+                </details>
             </div>
         </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <div class="current-repo">
-                    <h2 id="currentRepoName">Select a repository</h2>
+        <div class="pane-resizer" id="paneResizer" role="separator" aria-orientation="vertical" aria-label="Resize chat panel" tabindex="0" title="Drag to resize chat"></div>
+        <div class="doc-pane open">
+            <div class="chat-section">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message assistant">Ask about this codebase's architecture.</div>
                 </div>
-                <a href="#" class="github-link" id="githubLink" target="_blank" style="display: none;">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
-                    View on GitHub
-                </a>
-            </div>
-
-            <div class="viewer-container" id="viewerContainer">
-                <div class="empty-state" id="emptyState">
-                    <div class="empty-state-icon">📚</div>
-                    <h3>Welcome to CodeWiki Demo</h3>
-                    <p>Select a repository from the sidebar to view its documentation</p>
+                <div class="chat-input-row">
+                    <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="2"></textarea>
+                    <button class="chat-send" id="chatSend">Send</button>
                 </div>
-                <div class="loading-state" id="loadingState" style="display: none;">
-                    <div class="loading-spinner"></div>
-                    <p>Loading documentation...</p>
-                </div>
-                <iframe class="viewer-frame" id="viewerFrame" style="display: none;"></iframe>
             </div>
         </div>
     </div>
-
+    
     <script>
-        // Repository configurations
-        const repos = [
-            { id: 'flask', name: 'Flask', org: 'pallets', icon: '🧪', github: 'pallets/flask' }
-        ];
-
-        let currentRepo = null;
-
-        // Initialize repo list
-        function initRepoList() {
-            const repoList = document.getElementById('repoList');
-            
-            repos.forEach(repo => {
-                const item = document.createElement('div');
-                item.className = 'repo-item';
-                item.dataset.id = repo.id;
-                item.innerHTML = `
-                    <div class="repo-icon">${repo.icon}</div>
-                    <div class="repo-info">
-                        <div class="repo-name">${repo.name}</div>
-                        <div class="repo-org">${repo.org}</div>
-                    </div>
-                    <div class="repo-status"></div>
-                `;
-                item.addEventListener('click', () => loadRepo(repo));
-                repoList.appendChild(item);
-            });
-        }
-
-        // Load repository documentation
-        function loadRepo(repo) {
-            if (currentRepo === repo.id) return;
-            currentRepo = repo.id;
-
-            // Update active state
-            document.querySelectorAll('.repo-item').forEach(item => {
-                item.classList.toggle('active', item.dataset.id === repo.id);
-            });
-
-            // Update header
-            document.getElementById('currentRepoName').textContent = repo.name;
-            const githubLink = document.getElementById('githubLink');
-            githubLink.href = `https://github.com/${repo.github}`;
-            githubLink.style.display = 'flex';
-
-            // Show loading
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('loadingState').style.display = 'block';
-            document.getElementById('viewerFrame').style.display = 'none';
-
-            // Load the generic viewer with the repo parameter
-            const frame = document.getElementById('viewerFrame');
-            const repoPath = `/viewer.html?repo=${repo.id}`;
-            
-            frame.onload = () => {
-                document.getElementById('loadingState').style.display = 'none';
-                frame.style.display = 'block';
-            };
-
-            frame.onerror = () => {
-                document.getElementById('loadingState').innerHTML = `
-                    <div class="empty-state-icon">⚠️</div>
-                    <h3>Documentation not available</h3>
-                    <p>Could not load documentation for ${repo.name}</p>
-                `;
-            };
-
-            frame.src = repoPath;
-        }
-
-        // Initialize
-        initRepoList();
+        // ============================================================
+        // GENERIC VIEWER ENGINE
+        // This viewer dynamically loads repo data from JSON/MD files
+        // ============================================================
         
-        // Auto-load Flask since it's the only repo
-        if (repos.length === 1) {
-            loadRepo(repos[0]);
+        // Get repo path from URL query param: ?repo=flask or ?repo=repos/flask
+        const urlParams = new URLSearchParams(window.location.search);
+        const repoPath = urlParams.get('repo') || 'crewai';
+        // Ensure relative path with ./ prefix for correct resolution
+        const basePath = repoPath.startsWith('repos/') ? `./${repoPath}` : `./repos/${repoPath}`;
+        
+        // State
+        let REPO_TITLE = '';
+        let REPO_URL = '';
+        let MODULE_TREE = {};
+        let DOCS_CONTENT = {};
+        let moduleData = {};
+        let overviewLinks = {};
+        let currentDiagramCode = '';
+        let baseDiagramCode = '';
+        let navigationHistory = [];
+        let expandedNodes = new Set();
+        let expandedNodeToModule = new Map();  // Maps nodeId -> moduleId for expanded nodes
+        let currentModuleId = 'overview';
+        let selectedModuleId = null;  // Currently selected module
+        let openedModules = new Set(['overview']);  // Track opened modules (overview is always open)
+        let selectionPath = [];       // Breadcrumb path: [{id, name}, ...]
+        let docPanelOpen = true;     // Panel is always open (chat-only view)
+        let moduleMetadata = {};      // Store title/description for tooltips
+        
+        // ============================================================
+        // PANEL TOGGLE & TOOLTIPS
+        // ============================================================
+        
+        function toggleDocPanel(forceOpen = null) {
+            // Panel is always open now (chat-only view)
+            // This function is kept for compatibility but does nothing
+            const panel = document.querySelector('.doc-pane');
+            if (panel) {
+                panel.classList.add('open');
+            }
         }
+        
+        function showTooltip(event, metadata) {
+            if (!metadata || !metadata.title) return;
+            
+            const tooltip = document.getElementById('moduleTooltip');
+            tooltip.querySelector('.tooltip-title').textContent = metadata.title;
+            tooltip.querySelector('.tooltip-desc').textContent = metadata.description || '';
+            
+            // Position near cursor
+            const x = event.clientX + 15;
+            const y = event.clientY + 15;
+            
+            // Keep tooltip in viewport
+            const maxX = window.innerWidth - 340;
+            const maxY = window.innerHeight - 100;
+            
+            tooltip.style.left = Math.min(x, maxX) + 'px';
+            tooltip.style.top = Math.min(y, maxY) + 'px';
+            tooltip.style.display = 'block';
+        }
+        
+        function hideTooltip() {
+            const tooltip = document.getElementById('moduleTooltip');
+            tooltip.style.display = 'none';
+        }
+        
+        // Convert structured diagram to Mermaid code
+        function convertDiagramToMermaid(diagram) {
+            if (!diagram || !diagram.nodes) return '';
+            
+            // Escape special characters in labels for Mermaid
+            function escapeLabel(label) {
+                if (!label) return '';
+                return label
+                    .replace(/\(/g, '#40;')  // Escape (
+                    .replace(/\)/g, '#41;')  // Escape )
+                    .replace(/\[/g, '#91;')  // Escape [
+                    .replace(/\]/g, '#93;')  // Escape ]
+                    .replace(/\{/g, '#123;') // Escape {
+                    .replace(/\}/g, '#125;') // Escape }
+                    .replace(/"/g, '#quot;'); // Escape "
+            }
+            
+            let code = `graph ${diagram.direction || 'TD'}\n`;
+            
+            // Add groups/subgraphs first
+            if (diagram.groups && diagram.groups.length > 0) {
+                for (const group of diagram.groups) {
+                    code += `    subgraph ${group.id}["${escapeLabel(group.label)}"]\n`;
+                    for (const nodeId of group.nodes) {
+                        const node = diagram.nodes.find(n => n.id === nodeId);
+                        if (node) {
+                            code += `        ${node.id}["${escapeLabel(node.label)}"]\n`;
+                        }
+                    }
+                    code += `    end\n`;
+                }
+            }
+            
+            // Add nodes not in groups
+            const groupedNodeIds = new Set();
+            if (diagram.groups) {
+                diagram.groups.forEach(g => g.nodes.forEach(n => groupedNodeIds.add(n)));
+            }
+            
+            for (const node of diagram.nodes) {
+                if (!groupedNodeIds.has(node.id)) {
+                    code += `    ${node.id}["${escapeLabel(node.label)}"]\n`;
+                }
+            }
+            
+            // Add edges
+            for (const edge of diagram.edges || []) {
+                const label = edge.label ? `|${escapeLabel(edge.label)}|` : '';
+                code += `    ${edge.source} -->${label} ${edge.target}\n`;
+            }
+            
+            return code;
+        }
+        
+        // Build metadata lookup from module tree (recursive)
+        function buildModuleMetadata(tree, prefix = '') {
+            for (const [key, data] of Object.entries(tree)) {
+                // Store metadata for this module
+                moduleMetadata[key] = {
+                    title: data.title || formatModuleName(key),
+                    description: data.description || ''
+                };
+                
+                // Also store for diagram nodes if diagram exists
+                if (data.diagram && data.diagram.nodes) {
+                    for (const node of data.diagram.nodes) {
+                        if (!moduleMetadata[node.id]) {
+                            // Try to find child with this ID
+                            const childData = data.children?.[node.id];
+                            moduleMetadata[node.id] = {
+                                title: childData?.title || node.label,
+                                description: childData?.description || ''
+                            };
+                        }
+                    }
+                }
+                
+                // Recurse into children
+                if (data.children) {
+                    buildModuleMetadata(data.children, key + '/');
+                }
+            }
+        }
+        
+        // Style nodes based on type from diagram data
+        function styleNodesFromDiagram(diagram) {
+            if (!diagram || !diagram.nodes) return;
+            
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            
+            for (const node of diagram.nodes) {
+                // Find the SVG node element
+                const nodeEl = svg.querySelector(`[id*="${node.id}"]`);
+                if (nodeEl) {
+                    const gNode = nodeEl.closest('.node') || nodeEl;
+                    gNode.classList.add(`node-${node.type}`);
+                    
+                    // Add hover listeners for tooltips
+                    if (moduleMetadata[node.id]) {
+                        gNode.addEventListener('mouseenter', (e) => {
+                            showTooltip(e, moduleMetadata[node.id]);
+                        });
+                        gNode.addEventListener('mousemove', (e) => {
+                            showTooltip(e, moduleMetadata[node.id]);
+                        });
+                        gNode.addEventListener('mouseleave', hideTooltip);
+                    }
+                }
+            }
+        }
+        
+        // Initialize mermaid
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+        
+        // ============================================================
+        // DATA LOADING
+        // ============================================================
+        
+        async function loadFile(filename) {
+            try {
+                // Add cache buster to prevent stale data
+                const cacheBuster = `?_t=${Date.now()}`;
+                const response = await fetch(`${basePath}/${filename}${cacheBuster}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`Failed to load ${filename}`);
+                const text = await response.text();
+                return filename.endsWith('.json') ? JSON.parse(text) : text;
+            } catch (err) {
+                console.error(`Error loading ${filename}:`, err);
+                return null;
+            }
+        }
+        
+        async function loadAllData() {
+            try {
+                // Load metadata
+                const metadata = await loadFile('metadata.json');
+                if (metadata) {
+                    const repoPathParts = (metadata.generation_info?.repo_path || repoPath).split('/');
+                    REPO_TITLE = repoPathParts[repoPathParts.length - 1] || 'Repository';
+                }
+                
+                // Load module tree
+                MODULE_TREE = await loadFile('module_tree.json') || {};
+                
+                // Build metadata for tooltips
+                buildModuleMetadata(MODULE_TREE);
+                
+                // Track metadata issues for reliability (Agent 3 hook)
+                for (const [key, data] of Object.entries(MODULE_TREE)) {
+                    if (!data.title || !data.description) {
+                        if (window.trackMetadataIssue) {
+                            window.trackMetadataIssue(key, 'missing_metadata');
+                        }
+                    }
+                }
+                
+                // Load overview.md
+                const overviewMd = await loadFile('overview.md');
+                if (overviewMd) {
+                    DOCS_CONTENT['overview.md'] = overviewMd;
+                }
+                
+                // Load all module documentation files (recursively from tree)
+                function collectAllModuleKeys(tree) {
+                    let keys = [];
+                    for (const [key, data] of Object.entries(tree)) {
+                        keys.push(key);
+                        if (data.children && Object.keys(data.children).length > 0) {
+                            keys = keys.concat(collectAllModuleKeys(data.children));
+                        }
+                    }
+                    return keys;
+                }
+                const allModuleKeys = collectAllModuleKeys(MODULE_TREE);
+                const moduleFiles = allModuleKeys.map(key => `${key}.md`);
+                await Promise.all(moduleFiles.map(async (filename) => {
+                    const content = await loadFile(filename);
+                    if (content) {
+                        DOCS_CONTENT[filename] = content;
+                    }
+                }));
+                
+                // Update UI
+                document.title = REPO_TITLE;
+                document.getElementById('moduleTitle').textContent = `📚 ${REPO_TITLE}`;
+                
+                // Try to extract repo URL from overview or hide link
+                const repoLinkEl = document.getElementById('repoLink');
+                if (REPO_URL) {
+                    repoLinkEl.href = REPO_URL;
+                    repoLinkEl.style.display = 'inline-flex';
+                }
+                
+                return true;
+            } catch (err) {
+                console.error('Failed to load data:', err);
+                return false;
+            }
+        }
+        
+        // ============================================================
+        // HELPER FUNCTIONS
+        // ============================================================
+        
+        function formatModuleName(key) {
+            return key.split('_').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        }
+        
+        function extractMermaidFromMarkdown(markdown) {
+            const mermaidRegex = /```mermaid\n([\s\S]*?)```/g;
+            const match = mermaidRegex.exec(markdown);
+            return match ? match[1].trim() : null;
+        }
+        
+        function stripClickStatements(diagram) {
+            // Strip out click statements to allow custom click handling
+            // Also strip :::className styling from node definitions
+            let cleaned = diagram.replace(/^\s*click\s+.+$/gm, '');
+            cleaned = cleaned.replace(/:::[a-zA-Z_][a-zA-Z0-9_]*/g, '');
+            return cleaned;
+        }
+        
+        // Sanitize Mermaid diagram to fix common issues that break rendering
+        function sanitizeMermaidDiagram(diagram) {
+            if (!diagram) return diagram;
+            
+            let sanitized = diagram;
+            
+            // Fix 0: Escape parentheses inside node labels - they break Mermaid parsing
+            // Pattern: nodeId["Label with (parens)"] -> nodeId["Label with #40;parens#41;"]
+            sanitized = sanitized.replace(/\["([^"]+)"\]/g, (match, label) => {
+                const escaped = label
+                    .replace(/\(/g, '#40;')
+                    .replace(/\)/g, '#41;')
+                    .replace(/\[/g, '#91;')
+                    .replace(/\]/g, '#93;')
+                    .replace(/\{/g, '#123;')
+                    .replace(/\}/g, '#125;');
+                return `["${escaped}"]`;
+            });
+            
+            // Also escape in unquoted labels: nodeId[Label with (parens)]
+            sanitized = sanitized.replace(/\[([^\]"]+)\]/g, (match, label) => {
+                // Skip if already escaped or if it's a special Mermaid syntax
+                if (label.includes('#40;') || label.startsWith('-') || label.includes('|')) {
+                    return match;
+                }
+                if (/[\(\)\[\]\{\}]/.test(label)) {
+                    const escaped = label
+                        .replace(/\(/g, '#40;')
+                        .replace(/\)/g, '#41;')
+                        .replace(/\[/g, '#91;')
+                        .replace(/\]/g, '#93;')
+                        .replace(/\{/g, '#123;')
+                        .replace(/\}/g, '#125;');
+                    return `["${escaped}"]`;
+                }
+                return match;
+            });
+            
+            // Fix 1: Edge labels like |1. Something| get misinterpreted as markdown list
+            // Remove the number prefix from edge labels to prevent markdown interpretation
+            sanitized = sanitized.replace(/\|(\d+)\.\s*([^|]+)\|/g, (match, num, text) => {
+                // Remove "1. " prefix, keep just the text
+                return `|${text.trim()}|`;
+            });
+            
+            // Fix 2: Any remaining edge labels with problematic characters - wrap in quotes
+            sanitized = sanitized.replace(/\|([^|"]+)\|/g, (match, content) => {
+                // If content has special chars, wrap in quotes
+                if (/[.:\-><]/.test(content)) {
+                    return `|"${content.trim()}"|`;
+                }
+                return match;
+            });
+            
+            // Fix 3: Subgraph names with spaces need quotes
+            sanitized = sanitized.replace(/subgraph\s+([^"[\n]+)$/gm, (match, name) => {
+                const trimmed = name.trim();
+                if (trimmed && !trimmed.startsWith('"') && trimmed.includes(' ')) {
+                    return `subgraph "${trimmed}"`;
+                }
+                return match;
+            });
+            
+            // Fix 4: Remove any HTML-like tags that might break rendering
+            sanitized = sanitized.replace(/<[^>]+>/g, '');
+            
+            // Fix 5: Escape backticks inside labels
+            sanitized = sanitized.replace(/\["([^"]*)`([^"]*)"]/g, '["$1\'$2"]');
+            
+            return sanitized;
+        }
+        
+        function generateModuleDiagram(key, data) {
+            // FIRST: Check for structured diagram object (new format from VIEWER_MIGRATION)
+            if (data.diagram && typeof data.diagram === 'object' && data.diagram.nodes) {
+                return convertDiagramToMermaid(data.diagram);
+            }
+            
+            // FALLBACK: Generate from children if no structured diagram
+            if (!data.children || Object.keys(data.children).length === 0) {
+                return '';
+            }
+            
+            const formattedName = formatModuleName(key);
+            let diagram = `graph TD\n    ${key}["${formattedName}"]\n`;
+            
+            for (const [childKey, childData] of Object.entries(data.children)) {
+                const childFormatted = formatModuleName(childKey);
+                diagram += `    ${childKey}["${childFormatted}"]\n`;
+                diagram += `    ${key} --> ${childKey}\n`;
+            }
+            
+            return diagram;
+        }
+        
+        // ============================================================
+        // BUILD MODULE DATA
+        // ============================================================
+        
+        function buildModuleData() {
+            // Build overview from overview.md
+            const overviewContent = DOCS_CONTENT['overview.md'] || '';
+            const overviewDiagram = extractMermaidFromMarkdown(overviewContent);
+            
+            // FIRST: Build module data from tree so we have all modules available
+            buildModulesFromTree(MODULE_TREE, '');
+            
+            if (overviewDiagram) {
+                // Parse click statements to build node-to-module mappings (legacy support)
+                const clickRegex = /click\s+(\w+)\s+"([^"]+)"/g;
+                let match;
+                while ((match = clickRegex.exec(overviewDiagram)) !== null) {
+                    const nodeId = match[1];
+                    const targetFile = match[2];
+                    const moduleId = targetFile.replace('.md', '');
+                    overviewLinks[nodeId] = moduleId;
+                }
+                
+                // Also build label-to-module mappings from node definitions
+                const nodeDefRegex = /(\w+)\s*\["([^"]+)"\]/g;
+                while ((match = nodeDefRegex.exec(overviewDiagram)) !== null) {
+                    const nodeId = match[1];
+                    const label = match[2];
+                    if (overviewLinks[nodeId]) {
+                        overviewLinks[label] = overviewLinks[nodeId];
+                    }
+                }
+                
+                // Map nodes to modules ONLY if they match an actual module key in MODULE_TREE
+                // No fuzzy matching - only exact matches
+                buildExactModuleMappings(overviewDiagram);
+            }
+            
+            moduleData['overview'] = {
+                name: REPO_TITLE + ' Overview',
+                diagram: stripClickStatements(overviewDiagram || ''),
+                documentation: overviewContent || '# Overview\n\nNo overview available.',
+                links: overviewLinks
+            };
+        }
+        
+        // Build EXACT module mappings - only map nodes that exactly match module keys
+        // NO fuzzy matching - prevents false positives like mapping "Resolver" to "main"
+        function buildExactModuleMappings(diagram) {
+            // Get all module keys from the tree (flattened)
+            const moduleKeys = new Set();
+            
+            function collectModuleKeys(tree) {
+                for (const [key, data] of Object.entries(tree)) {
+                    moduleKeys.add(key);
+                    if (data.children) {
+                        collectModuleKeys(data.children);
+                    }
+                }
+            }
+            collectModuleKeys(MODULE_TREE);
+            
+            // Parse all node definitions from diagram
+            const nodeDefRegex = /(\w+)\s*\[["']?([^\]"']+)["']?\]/g;
+            let match;
+            while ((match = nodeDefRegex.exec(diagram)) !== null) {
+                const nodeId = match[1];
+                const label = match[2];
+                
+                // Skip if already mapped (from click statements)
+                if (overviewLinks[nodeId]) continue;
+                
+                // ONLY map if nodeId exactly matches a module key
+                if (moduleKeys.has(nodeId)) {
+                    overviewLinks[nodeId] = nodeId;
+                    overviewLinks[label] = nodeId;
+                }
+            }
+        }
+        
+        function buildModulesFromTree(tree, parentPath) {
+            for (const [key, data] of Object.entries(tree)) {
+                const moduleId = parentPath ? `${parentPath}/${key}` : key;
+                const formattedName = formatModuleName(key);
+                
+                // Try to get documentation for this module
+                const docFilename = `${key}.md`;
+                const documentation = DOCS_CONTENT[docFilename] || `# ${formattedName}\n\nNo documentation available.`;
+                
+                // Extract diagram from markdown FIRST, then fallback to generated
+                const extractedDiagram = extractMermaidFromMarkdown(documentation);
+                const diagram = extractedDiagram || generateModuleDiagram(key, data);
+                
+                // Build links for children and from diagram click statements
+                const links = {};
+                if (data.children) {
+                    for (const [childKey, childData] of Object.entries(data.children)) {
+                        const childFormattedName = formatModuleName(childKey);
+                        links[childFormattedName] = childKey;
+                    }
+                }
+                
+                // Parse click statements from extracted diagram
+                if (extractedDiagram) {
+                    const clickRegex = /click\s+(\w+)\s+"([^"]+)"/g;
+                    let match;
+                    while ((match = clickRegex.exec(extractedDiagram)) !== null) {
+                        const nodeId = match[1];
+                        const targetFile = match[2];
+                        const targetModuleId = targetFile.replace('.md', '');
+                        links[nodeId] = targetModuleId;
+                    }
+                }
+                
+                moduleData[key] = {
+                    name: formattedName,
+                    diagram: stripClickStatements(diagram),
+                    documentation: documentation,
+                    links: links,
+                    path: data.path
+                };
+                
+                // Recursively process children
+                if (data.children && Object.keys(data.children).length > 0) {
+                    buildModulesFromTree(data.children, moduleId);
+                }
+            }
+        }
+        
+        // ============================================================
+        // RENDERING
+        // ============================================================
+        
+        async function renderDiagram(code, links, moduleId) {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1256',message:'renderDiagram() called',data:{moduleId,currentModuleId,expandedNodesSize:expandedNodes.size,codeLength:code?.length||0},timestamp:Date.now(),runId:'debug',hypothesisId:'F'})}).catch(()=>{});
+            // #endregion
+            const container = document.getElementById('mermaid-diagram');
+            if (!code || !code.trim()) {
+                container.innerHTML = '<div class="loading">No diagram available</div>';
+                return;
+            }
+            
+            // Sanitize diagram to fix common Mermaid parsing issues
+            const sanitizedCode = sanitizeMermaidDiagram(code);
+            
+            try {
+                container.innerHTML = '';
+                const id = 'mermaid-' + Date.now();
+                const { svg } = await mermaid.render(id, sanitizedCode);
+                container.innerHTML = svg;
+                
+                // Process nodes to make them clickable
+                setTimeout(() => processNodes(links, moduleId), 100);
+            } catch (err) {
+                console.error('Mermaid render error:', err);
+                // Try rendering without sanitization as fallback
+                try {
+                    const id2 = 'mermaid-fallback-' + Date.now();
+                    const { svg } = await mermaid.render(id2, code);
+                    container.innerHTML = svg;
+                    setTimeout(() => processNodes(links, moduleId), 100);
+                } catch (err2) {
+                    container.innerHTML = `<div class="error">Error rendering diagram.<br>${err2.message}</div>`;
+                    // Track mermaid error for reliability (Agent 3 hook)
+                    if (window.trackMermaidError) {
+                        window.trackMermaidError(err2.message, code.substring(0, 500));
+                    }
+                }
+            }
+        }
+        
+        function renderDocumentation(content) {
+            // Documentation panel removed - chat only view
+            // This function is kept for compatibility but does nothing
+        }
+        
+        // ============================================================
+        // SELECTION & BREADCRUMB
+        // ============================================================
+        
+        function updateSelection(moduleId, nodeId = null) {
+            selectedModuleId = moduleId;
+            
+            // Build selection path
+            selectionPath = [{id: 'overview', name: REPO_TITLE}];
+            
+            if (moduleId && moduleId !== 'overview') {
+                const mod = moduleData[moduleId];
+                if (mod) {
+                    selectionPath.push({id: moduleId, name: mod.name});
+                }
+            }
+            
+            // Update breadcrumb UI
+            updateBreadcrumb();
+            
+            // Update selection highlighting in diagram
+            updateSelectionHighlight(nodeId);
+            
+            // Update documentation
+            if (moduleId && moduleData[moduleId]) {
+                renderDocumentation(moduleData[moduleId].documentation);
+                document.getElementById('moduleTitle').textContent = moduleData[moduleId].name;
+            }
+        }
+        
+        function updateBreadcrumb() {
+            const breadcrumbEl = document.getElementById('breadcrumb');
+            if (!breadcrumbEl) return;
+            
+            let html = '';
+            selectionPath.forEach((item, index) => {
+                if (index > 0) {
+                    html += '<span class="breadcrumb-separator">›</span>';
+                }
+                
+                if (index === selectionPath.length - 1) {
+                    // Current item (not clickable)
+                    html += `<span class="breadcrumb-item"><span class="breadcrumb-current">${item.name}</span></span>`;
+                } else {
+                    // Clickable parent
+                    html += `<span class="breadcrumb-item"><a class="breadcrumb-link" onclick="navigateToBreadcrumb('${item.id}')">${item.name}</a></span>`;
+                }
+            });
+            
+            breadcrumbEl.innerHTML = html;
+        }
+        
+        function navigateToBreadcrumb(moduleId) {
+            if (moduleId === 'overview') {
+                // Go back to overview
+                expandedNodes.clear();
+                expandedNodeToModule.clear();
+                currentDiagramCode = baseDiagramCode;
+                currentModuleId = 'overview';
+                updateSelection('overview');
+                renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+            } else {
+                updateSelection(moduleId);
+            }
+        }
+        
+        function updateSelectionHighlight(nodeId) {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            
+            // Remove existing selection classes
+            svg.querySelectorAll('.selected-node, .selected-subgraph').forEach(el => {
+                el.classList.remove('selected-node', 'selected-subgraph');
+            });
+            
+            if (!nodeId) return;
+            
+            // Find and highlight the subgraph for this node
+            const subgraphId = `${nodeId}_sub`;
+            
+            // Try to find subgraph by various ID patterns
+            const subgraph = svg.querySelector(`g[id*="${subgraphId}"], g.cluster[id*="${nodeId}"]`);
+            if (subgraph) {
+                subgraph.classList.add('selected-subgraph');
+            }
+            
+            // Also highlight the node itself if visible
+            const nodes = svg.querySelectorAll('.node');
+            nodes.forEach(node => {
+                const id = node.id?.replace(/^flowchart-/, '').split('-')[0] || '';
+                if (id === nodeId || id === subgraphId) {
+                    node.classList.add('selected-node');
+                }
+            });
+        }
+        
+        // ============================================================
+        // NODE PROCESSING & CLICK HANDLING
+        // ============================================================
+        
+        function processNodes(links, contextModuleId) {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1410',message:'processNodes() called',data:{contextModuleId,currentModuleId,expandedNodesSize:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'I'})}).catch(()=>{});
+            // #endregion
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            
+            // Build a merged links object for top-level lookups
+            const mergedLinks = {...links, ...overviewLinks};
+            
+            const nodes = svg.querySelectorAll('.node');
+            
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1418',message:'processNodes() found nodes',data:{nodeCount:nodes.length,expandedNodesArray:Array.from(expandedNodes)},timestamp:Date.now(),runId:'debug',hypothesisId:'I'})}).catch(()=>{});
+            // #endregion
+            
+            nodes.forEach(node => {
+                const nodeId = node.id?.replace(/^flowchart-/, '').split('-')[0] || '';
+                const textEl = node.querySelector('text, .nodeLabel');
+                const nodeText = textEl?.textContent?.trim() || '';
+                
+                // Handle collapse buttons
+                if (nodeText === '[-] Collapse' || nodeId.endsWith('_collapse')) {
+                    node.classList.add('collapse-button');
+                    const parentNodeId = nodeId.replace(/_collapse$/, '');
+                    // #region debug log
+                    fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1425',message:'processNodes() attaching collapse handler',data:{nodeId,parentNodeId,expandedNodesHasParent:expandedNodes.has(parentNodeId)},timestamp:Date.now(),runId:'debug',hypothesisId:'I'})}).catch(()=>{});
+                    // #endregion
+                    node.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        collapseNode(parentNodeId);
+                    });
+                    return;
+                }
+                
+                // Try to find target module by various methods
+                let targetModule = null;
+                
+                // Find the LONGEST matching prefix from expanded nodes
+                // This handles nested expansions like operator_operator_controller_elastiservice_controller
+                let longestPrefix = '';
+                let longestPrefixModuleId = null;
+                
+                for (const expandedNodeId of expandedNodes) {
+                    const prefix = `${expandedNodeId}_`;
+                    if (nodeId.startsWith(prefix) && prefix.length > longestPrefix.length) {
+                        longestPrefix = prefix;
+                        // Use the stored mapping to get the module ID
+                        longestPrefixModuleId = expandedNodeToModule.get(expandedNodeId);
+                    }
+                }
+                
+                // If we found a prefix, strip it and look up in that module's links
+                if (longestPrefix && longestPrefixModuleId && moduleData[longestPrefixModuleId]) {
+                    const unprefixedNodeId = nodeId.substring(longestPrefix.length);
+                    const parentModule = moduleData[longestPrefixModuleId];
+                    const childLinks = parentModule.links || {};
+                    
+                    // Check unprefixed ID in child links
+                    if (childLinks[unprefixedNodeId]) {
+                        targetModule = childLinks[unprefixedNodeId];
+                    }
+                    // Check by label text
+                    else if (childLinks[nodeText]) {
+                        targetModule = childLinks[nodeText];
+                    }
+                }
+                
+                // If not found via prefix stripping, try standard lookup
+                if (!targetModule) {
+                    // 1. Direct ID match in merged links
+                    if (mergedLinks[nodeId]) {
+                        targetModule = mergedLinks[nodeId];
+                    }
+                    // 2. Label text match
+                    else if (mergedLinks[nodeText]) {
+                        targetModule = mergedLinks[nodeText];
+                    }
+                    // 3. Direct module key match (for nodes like "operator_controller")
+                    else if (moduleData[nodeId]) {
+                        targetModule = nodeId;
+                    }
+                }
+                
+                // Check if target exists in moduleData
+                if (targetModule && moduleData[targetModule]) {
+                    makeNodeClickable(node, nodeId, targetModule);
+                } else if (nodeId && !nodeId.endsWith('_collapse')) {
+                    // Track broken link for reliability (Agent 3 hook)
+                    if (window.trackBrokenLink) {
+                        window.trackBrokenLink(nodeId, { contextModuleId, nodeText });
+                    }
+                }
+                
+                // Add hover tooltips if metadata exists
+                // Try full nodeId first, then try stripping prefix for expanded nodes
+                let tooltipMetadata = moduleMetadata[nodeId];
+                if (!tooltipMetadata) {
+                    // Try stripping known prefixes (from expanded subgraphs)
+                    for (const prefix of expandedNodes) {
+                        if (nodeId.startsWith(prefix + '_')) {
+                            const unprefixedId = nodeId.substring(prefix.length + 1);
+                            if (moduleMetadata[unprefixedId]) {
+                                tooltipMetadata = moduleMetadata[unprefixedId];
+                                break;
+                            }
+                        }
+                    }
+                }
+                // Also try matching by node label text
+                if (!tooltipMetadata && nodeText) {
+                    // Look for metadata by matching title
+                    for (const [key, meta] of Object.entries(moduleMetadata)) {
+                        if (meta.title === nodeText || formatModuleName(key) === nodeText) {
+                            tooltipMetadata = meta;
+                            break;
+                        }
+                    }
+                }
+                
+                if (tooltipMetadata) {
+                    node.addEventListener('mouseenter', (e) => {
+                        showTooltip(e, tooltipMetadata);
+                    });
+                    node.addEventListener('mousemove', (e) => {
+                        showTooltip(e, tooltipMetadata);
+                    });
+                    node.addEventListener('mouseleave', hideTooltip);
+                }
+            });
+        }
+        
+        function makeNodeClickable(node, nodeId, targetModuleId) {
+            node.classList.add('clickable-node');
+            
+            // Capture values for closure
+            const capturedNodeId = nodeId;
+            const capturedTargetModule = targetModuleId;
+            
+            const clickHandler = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                
+                // Hide tooltip when clicking
+                hideTooltip();
+                
+                if (capturedNodeId && capturedTargetModule && moduleData[capturedTargetModule]) {
+                    const targetModuleData = moduleData[capturedTargetModule];
+                    
+                    // Panel is always open (chat-only view)
+                    
+                    if (targetModuleData.diagram && targetModuleData.diagram.trim()) {
+                        if (!expandedNodes.has(capturedNodeId)) {
+                            expandNodeInline(capturedNodeId, capturedTargetModule);
+                        } else {
+                            selectNode(`${capturedNodeId}_sub`, capturedTargetModule);
+                        }
+                    } else {
+                        // Module doesn't have diagram, but still add to opened modules
+                        openedModules.add(capturedTargetModule);
+                        console.log('[MODULE TRACKING] Module opened (no diagram):', capturedTargetModule);
+                        console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
+                        selectNode(capturedNodeId, capturedTargetModule);
+                    }
+                }
+            };
+            
+            node.addEventListener('click', clickHandler);
+            node.addEventListener('touchend', clickHandler);
+        }
+        
+        // ============================================================
+        // EXPANSION LOGIC
+        // ============================================================
+        
+        function expandNodeInline(nodeId, targetModuleId) {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1574',message:'expandNodeInline() called',data:{nodeId,targetModuleId,currentModuleId,expandedNodesSizeBefore:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            const targetModule = moduleData[targetModuleId];
+            if (!targetModule) return;
+            
+            // Update selection (this updates breadcrumb and documentation)
+            updateSelection(targetModuleId, nodeId);
+            
+            // Add module to opened modules set
+            openedModules.add(targetModuleId);
+            console.log('[MODULE TRACKING] Module opened:', targetModuleId);
+            console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
+            
+            // Try to expand diagram if module has one
+            if (targetModule.diagram && targetModule.diagram.trim()) {
+                const newDiagram = applyExpansionToDiagram(currentDiagramCode, nodeId, targetModuleId, targetModule.name);
+                if (newDiagram !== currentDiagramCode) {
+                    expandedNodes.add(nodeId);
+                    expandedNodeToModule.set(nodeId, targetModuleId);  // Track nodeId -> moduleId mapping
+                    currentDiagramCode = newDiagram;
+                    
+                    // #region debug log
+                    fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1593',message:'expandNodeInline() state after expansion',data:{nodeId,targetModuleId,currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'D'})}).catch(()=>{});
+                    // #endregion
+                    
+                    renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
+                    
+                    // Re-apply selection highlight after re-render
+                    setTimeout(() => updateSelectionHighlight(nodeId), 150);
+                }
+            }
+        }
+        
+        function applyExpansionToDiagram(diagram, nodeId, targetModuleId, fallbackLabel) {
+            const targetModule = moduleData[targetModuleId];
+            if (!targetModule || !targetModule.diagram) {
+                return diagram;
+            }
+            
+            const subgraphName = `${nodeId}_sub`;
+            const prefix = `${nodeId}_`;
+            const collapseNodeId = `${prefix}collapse`;
+            
+            // Extract the ACTUAL node label from the diagram (not the module name)
+            // Pattern: nodeId["label"] or nodeId[label]
+            const labelPattern = new RegExp(`${nodeId}\\["?([^"\\]]+)"?\\]`);
+            const labelMatch = diagram.match(labelPattern);
+            const nodeLabel = labelMatch ? labelMatch[1] : fallbackLabel;
+            
+            // Get target module's diagram content
+            let subgraphContent = targetModule.diagram.trim().replace(/^(graph|flowchart)\s+\w+\s*\n?/, '');
+            
+            // Strip out styling statements incompatible with subgraphs
+            subgraphContent = subgraphContent.replace(/^\s*classDef\s+.+$/gm, '');
+            subgraphContent = subgraphContent.replace(/^\s*class\s+.+$/gm, '');
+            subgraphContent = subgraphContent.replace(/^\s*style\s+.+$/gm, '');
+            
+            // Prefix all node IDs to avoid conflicts
+            const nodeIdMatches = [...subgraphContent.matchAll(/\b([A-Za-z][A-Za-z0-9_]*)\b(?=\s*\[|-->|--)/g)];
+            const uniqueIds = [...new Set(nodeIdMatches.map(m => m[1]))].filter(id => 
+                !['subgraph', 'end', 'graph', 'flowchart', 'direction', 'style', 'classDef', 'class'].includes(id.toLowerCase())
+            );
+            for (const oldId of uniqueIds) {
+                const newId = prefix + oldId;
+                subgraphContent = subgraphContent.replace(new RegExp(`\\b${oldId}\\b`, 'g'), newId);
+            }
+            
+            // Build subgraph block - use the ACTUAL node label from the diagram
+            const subgraphLines = subgraphContent.split('\n').filter(l => l.trim());
+            const indentedContent = subgraphLines.map(l => '        ' + l.trim()).join('\n');
+            const subgraphDef = `subgraph ${subgraphName} ["${nodeLabel}"]\n${indentedContent}\n        ${collapseNodeId}["[-] Collapse"]\n    end`;
+            
+            // STEP 1: Normalize diagram - extract inline node definitions to separate lines
+            // Handles: A[Label] --> B[Label] or A -->|text| B[Label]
+            let normalizedDiagram = diagram;
+            
+            // First, strip inline node definitions from edge lines
+            // Pattern: NodeId[Label] in context of an edge (has --> or -- on same line)
+            normalizedDiagram = normalizedDiagram.replace(
+                new RegExp(`(\\s+)${nodeId}\\[[^\\]]+\\](\\s*)(-->|--[^>])`, 'g'),
+                `$1${nodeId}$2$3`
+            );
+            normalizedDiagram = normalizedDiagram.replace(
+                new RegExp(`(-->|\\|[^|]*\\|)\\s*${nodeId}\\[[^\\]]+\\]`, 'g'),
+                `$1 ${nodeId}`
+            );
+            
+            // STEP 2: Check if the node is defined standalone (on its own line or in a subgraph)
+            // Pattern 1: nodeId["label"] or nodeId[label] on its own line
+            const standaloneWithLabelPattern = new RegExp(`(^|\\n)(\\s*)${nodeId}\\[[^\\]]+\\]\\s*$`, 'm');
+            const standaloneWithLabelMatch = normalizedDiagram.match(standaloneWithLabelPattern);
+            
+            // Pattern 2: Plain nodeId on its own line (inside a subgraph typically)
+            const standalonePlainPattern = new RegExp(`(^|\\n)(\\s*)${nodeId}\\s*$`, 'm');
+            const standalonePlainMatch = normalizedDiagram.match(standalonePlainPattern);
+            
+            let newDiagram;
+            if (standaloneWithLabelMatch) {
+                // Replace standalone node definition (with label) with the subgraph
+                const indent = standaloneWithLabelMatch[2] || '    ';
+                const indentedSubgraph = subgraphDef.split('\n').map((line, i) => i === 0 ? indent + line : indent + line).join('\n');
+                newDiagram = normalizedDiagram.replace(standaloneWithLabelPattern, `$1${indentedSubgraph}`);
+            } else if (standalonePlainMatch) {
+                // Replace plain node reference (inside subgraph) with the subgraph
+                const indent = standalonePlainMatch[2] || '        ';
+                const indentedSubgraph = subgraphDef.split('\n').map((line, i) => i === 0 ? indent + line : indent + line).join('\n');
+                newDiagram = normalizedDiagram.replace(standalonePlainPattern, `$1${indentedSubgraph}`);
+            } else {
+                // Node is only referenced in edges, add subgraph after the graph header
+                const headerMatch = normalizedDiagram.match(/^(graph|flowchart)\s+\w+\s*\n/);
+                if (headerMatch) {
+                    const insertPos = headerMatch.index + headerMatch[0].length;
+                    newDiagram = normalizedDiagram.slice(0, insertPos) + 
+                                 '    ' + subgraphDef + '\n' + 
+                                 normalizedDiagram.slice(insertPos);
+                } else {
+                    // Fallback: append at end
+                    newDiagram = normalizedDiagram.trimEnd() + '\n    ' + subgraphDef + '\n';
+                }
+            }
+            
+            // STEP 3: Update edge references - any edge to/from nodeId should go to the subgraph
+            // Use word boundaries to avoid matching nodeId inside prefixed node names (e.g., Resolver_Resolver)
+            
+            // Handle simple edges: A --> B, B --> A
+            newDiagram = newDiagram.replace(new RegExp(`-->\\s*\\b${nodeId}\\b`, 'g'), `--> ${subgraphName}`);
+            newDiagram = newDiagram.replace(new RegExp(`\\b${nodeId}\\b\\s*-->`, 'g'), `${subgraphName} -->`);
+            // Handle labeled edges with pipe syntax: A -->|label| B
+            newDiagram = newDiagram.replace(new RegExp(`\\|\\s*\\b${nodeId}\\b`, 'g'), `| ${subgraphName}`);
+            newDiagram = newDiagram.replace(new RegExp(`\\b${nodeId}\\b\\s*\\|`, 'g'), `${subgraphName} |`);
+            // Handle labeled edges with dash syntax: A -- "label" --> B
+            newDiagram = newDiagram.replace(new RegExp(`\\b${nodeId}\\b\\s*--(?!>)`, 'g'), `${subgraphName} --`);
+            
+            return newDiagram;
+        }
+        
+        function collapseNode(nodeId) {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1704',message:'collapseNode() called',data:{nodeId,currentModuleId,expandedNodesSizeBefore:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'E'})}).catch(()=>{});
+            // #endregion
+            // Get the module ID for this node before removing
+            const targetModuleId = expandedNodeToModule.get(nodeId) || overviewLinks[nodeId];
+            
+            // Remove from expanded set and mapping
+            expandedNodes.delete(nodeId);
+            expandedNodeToModule.delete(nodeId);
+            
+            // Remove module from opened modules (except overview which is always open)
+            if (targetModuleId && targetModuleId !== 'overview') {
+                openedModules.delete(targetModuleId);
+                console.log('[MODULE TRACKING] Module closed:', targetModuleId);
+                console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
+            }
+            
+            // Rebuild diagram with remaining expansions
+            currentDiagramCode = baseDiagramCode;
+            
+            for (const expandedNodeId of expandedNodes) {
+                const targetModuleId = expandedNodeToModule.get(expandedNodeId) || overviewLinks[expandedNodeId];
+                if (targetModuleId && moduleData[targetModuleId]) {
+                    currentDiagramCode = applyExpansionToDiagram(
+                        currentDiagramCode, 
+                        expandedNodeId, 
+                        targetModuleId, 
+                        moduleData[targetModuleId].name
+                    );
+                }
+            }
+            
+            // Update the title and documentation back to overview if no expansions remain
+            if (expandedNodes.size === 0) {
+                document.getElementById('moduleTitle').textContent = moduleData['overview']?.name || REPO_TITLE + ' Overview';
+                renderDocumentation(moduleData['overview']?.documentation || '');
+            }
+            
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1740',message:'collapseNode() state after collapse',data:{nodeId,currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'E'})}).catch(()=>{});
+            // #endregion
+            
+            renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
+        }
+        
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        
+        function navigateToModule(moduleId) {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1747',message:'navigateToModule() called',data:{moduleId,currentModuleIdBefore:currentModuleId,expandedNodesSizeBefore:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
+            if (!moduleData[moduleId]) return;
+            
+            navigationHistory.push({
+                moduleId: currentModuleId,
+                diagramCode: currentDiagramCode,
+                expanded: new Set(expandedNodes)
+            });
+            
+            currentModuleId = moduleId;
+            expandedNodes.clear();
+            expandedNodeToModule.clear();
+            
+            // Reset opened modules to just overview when navigating to a new module
+            openedModules.clear();
+            openedModules.add('overview');
+            if (moduleId !== 'overview') {
+                openedModules.add(moduleId);
+            }
+            console.log('[MODULE TRACKING] Navigated to module:', moduleId);
+            console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
+            
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1774',message:'navigateToModule() state after reset',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesSize:openedModules.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
+            
+            baseDiagramCode = moduleData[moduleId].diagram;
+            currentDiagramCode = baseDiagramCode;
+            
+            document.getElementById('moduleTitle').textContent = moduleData[moduleId].name;
+            
+            renderDiagram(currentDiagramCode, moduleData[moduleId].links || {}, moduleId);
+            renderDocumentation(moduleData[moduleId].documentation);
+        }
+        
+        function selectNode(nodeId, moduleId) {
+            if (!moduleData[moduleId]) return;
+            
+            updateSelection(moduleId, nodeId);
+        }
+        
+        function goBack() {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1784',message:'goBack() called',data:{currentModuleId,expandedNodesSize:expandedNodes.size,navigationHistoryLength:navigationHistory.length,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
+            // #endregion
+            // If there's navigation history, go back in history
+            if (navigationHistory.length > 0) {
+                const prev = navigationHistory.pop();
+                currentModuleId = prev.moduleId;
+                currentDiagramCode = prev.diagramCode;
+                expandedNodes = prev.expanded;
+                baseDiagramCode = moduleData[currentModuleId]?.diagram || '';
+                
+                // Rebuild opened modules from expanded nodes
+                openedModules.clear();
+                openedModules.add('overview');
+                if (currentModuleId !== 'overview') {
+                    openedModules.add(currentModuleId);
+                }
+                for (const expandedNodeId of expandedNodes) {
+                    const moduleId = expandedNodeToModule.get(expandedNodeId) || overviewLinks[expandedNodeId];
+                    if (moduleId && moduleId !== 'overview') {
+                        openedModules.add(moduleId);
+                    }
+                }
+                console.log('[MODULE TRACKING] Went back, opened modules:', Array.from(openedModules));
+                
+                // #region debug log
+                fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1807',message:'goBack() branch: history pop',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
+                
+                updateSelection(currentModuleId);
+                renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
+                return;
+            }
+            
+            // If on overview with expanded nodes, collapse all and reset selection
+            if (expandedNodes.size > 0) {
+                expandedNodes.clear();
+                expandedNodeToModule.clear();
+                openedModules.clear();
+                openedModules.add('overview');
+                console.log('[MODULE TRACKING] Reset to overview, opened modules:', Array.from(openedModules));
+                
+                // #region debug log
+                fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1818',message:'goBack() branch: collapse all',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
+                
+                currentDiagramCode = baseDiagramCode;
+                updateSelection('overview');
+                renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+                return;
+            }
+            
+            // Already at overview with no expansions - stay on current page
+            // (User can use browser back button to leave the viewer)
+            return;
+        }
+        
+        // ============================================================
+        // KEYBOARD SHORTCUTS
+        // ============================================================
+        
+        document.addEventListener('keydown', (e) => {
+            // Ignore keyboard shortcuts when typing in input fields
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                return;
+            }
+            
+            // Ctrl/Cmd+W: Collapse last expanded node
+            if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
+                e.preventDefault();
+                const collapseButtons = document.querySelectorAll('.collapse-button');
+                if (collapseButtons.length > 0) {
+                    // Get the last collapse button (most recently expanded)
+                    const lastButton = collapseButtons[collapseButtons.length - 1];
+                    const clickEvent = new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    lastButton.dispatchEvent(clickEvent);
+                }
+                return;
+            }
+            
+            // Number keys 1-9: Click on nodes (for quick navigation)
+            if (e.key >= '1' && e.key <= '9') {
+                const nodeIndex = parseInt(e.key) - 1;
+                const clickableNodes = document.querySelectorAll('.clickable-node');
+                if (clickableNodes[nodeIndex]) {
+                    const clickEvent = new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    clickableNodes[nodeIndex].dispatchEvent(clickEvent);
+                }
+                return;
+            }
+            
+            // Escape: Go back
+            if (e.key === 'Escape') {
+                goBack();
+                return;
+            }
+            
+            // Suggested additional shortcuts (commented out - uncomment to enable):
+            // Ctrl/Cmd+O: Toggle documentation panel
+            // if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+            //     e.preventDefault();
+            //     toggleDocPanel();
+            //     return;
+            // }
+            
+            // Ctrl/Cmd+Home: Go to overview
+            // if ((e.ctrlKey || e.metaKey) && e.key === 'Home') {
+            //     e.preventDefault();
+            //     navigateToModule('overview');
+            //     return;
+            // }
+            
+            // Ctrl/Cmd+Left Arrow: Go back
+            // if ((e.ctrlKey || e.metaKey) && e.key === 'ArrowLeft') {
+            //     e.preventDefault();
+            //     goBack();
+            //     return;
+            // }
+        });
+        
+        // ============================================================
+        // ZOOM & PAN FUNCTIONALITY
+        // ============================================================
+        
+        let zoomScale = 1;
+        let panX = 0;
+        let panY = 0;
+        let isPanning = false;
+        let startPanX = 0;
+        let startPanY = 0;
+        let startMouseX = 0;
+        let startMouseY = 0;
+        
+        const MIN_ZOOM = 0.25;
+        const MAX_ZOOM = 4;
+        const VIEW_TUNE_STORAGE = { pan: 'atelier_view_tune_pan_v2', zoom: 'atelier_view_tune_zoom_v2' };
+        const viewTune = {
+            panWheelMult: 2,
+            zoomStep: 0.2,
+        };
+        window.viewTune = viewTune;
+        
+        function updateZoomDisplay() {
+            document.getElementById('zoomLevel').textContent = Math.round(zoomScale * 100) + '%';
+        }
+        
+        function applyTransform() {
+            const canvas = document.getElementById('diagramCanvas');
+            canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+        }
+        
+        function zoomIn() {
+            zoomScale = Math.min(MAX_ZOOM, zoomScale + viewTune.zoomStep);
+            applyTransform();
+            updateZoomDisplay();
+        }
+        
+        function zoomOut() {
+            zoomScale = Math.max(MIN_ZOOM, zoomScale - viewTune.zoomStep);
+            applyTransform();
+            updateZoomDisplay();
+        }
+        
+        function resetZoom() {
+            zoomScale = 1;
+            panX = 0;
+            panY = 0;
+            applyTransform();
+            updateZoomDisplay();
+        }
+        
+        function fitToView() {
+            const viewport = document.getElementById('diagramViewport');
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg || !viewport) return;
+            
+            const svgRect = svg.getBoundingClientRect();
+            const viewportRect = viewport.getBoundingClientRect();
+            
+            // Calculate scale to fit
+            const scaleX = (viewportRect.width - 40) / (svgRect.width / zoomScale);
+            const scaleY = (viewportRect.height - 40) / (svgRect.height / zoomScale);
+            zoomScale = Math.min(scaleX, scaleY, MAX_ZOOM);
+            zoomScale = Math.max(zoomScale, MIN_ZOOM);
+            
+            // Center the diagram
+            panX = 0;
+            panY = 0;
+            
+            applyTransform();
+            updateZoomDisplay();
+        }
+        
+        // Wheel: trackpad two-finger scroll fires wheel (not touch). Without ctrl/meta that must pan, not zoom.
+        // Chrome maps trackpad pinch to wheel + ctrlKey — use that for zoom (same as map/design tools).
+        function handleWheel(e) {
+            if (e.target.closest && e.target.closest('.view-tune-panel')) return;
+            e.preventDefault();
+            
+            const viewport = document.getElementById('diagramViewport');
+            const rect = viewport.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const zoomChord = e.ctrlKey || e.metaKey;
+            
+            if (zoomChord) {
+                const step = viewTune.zoomStep;
+                const delta = e.deltaY > 0 ? -step : step;
+                const newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomScale + delta));
+                if (newScale !== zoomScale) {
+                    const scaleRatio = newScale / zoomScale;
+                    panX = mouseX - (mouseX - panX) * scaleRatio;
+                    panY = mouseY - (mouseY - panY) * scaleRatio;
+                    zoomScale = newScale;
+                    applyTransform();
+                    updateZoomDisplay();
+                }
+                return;
+            }
+            let dx = e.deltaX;
+            let dy = e.deltaY;
+            if (e.deltaMode === 1) {
+                dx *= 16;
+                dy *= 16;
+            } else if (e.deltaMode === 2) {
+                dx *= rect.width;
+                dy *= rect.height;
+            }
+            const m = viewTune.panWheelMult;
+            panX -= dx * m;
+            panY -= dy * m;
+            applyTransform();
+        }
+        
+        function initViewTuneSliders() {
+            const panIn = document.getElementById('tunePanMult');
+            const panVal = document.getElementById('tunePanVal');
+            const zoomIn = document.getElementById('tuneZoomStep');
+            const zoomVal = document.getElementById('tuneZoomVal');
+            try {
+                const sp = localStorage.getItem(VIEW_TUNE_STORAGE.pan);
+                const sz = localStorage.getItem(VIEW_TUNE_STORAGE.zoom);
+                if (sp != null) {
+                    viewTune.panWheelMult = Math.max(0.25, Math.min(3, parseFloat(sp)));
+                }
+                if (sz != null) {
+                    viewTune.zoomStep = Math.max(0.05, Math.min(1, parseFloat(sz)));
+                }
+            } catch (e) { /* ignore */ }
+            if (panIn && panVal) {
+                panIn.value = String(viewTune.panWheelMult);
+                panVal.textContent = viewTune.panWheelMult.toFixed(2);
+                panIn.addEventListener('input', function () {
+                    viewTune.panWheelMult = parseFloat(panIn.value);
+                    panVal.textContent = viewTune.panWheelMult.toFixed(2);
+                    try { localStorage.setItem(VIEW_TUNE_STORAGE.pan, String(viewTune.panWheelMult)); } catch (e) {}
+                });
+            }
+            if (zoomIn && zoomVal) {
+                zoomIn.value = String(viewTune.zoomStep);
+                zoomVal.textContent = viewTune.zoomStep.toFixed(2);
+                zoomIn.addEventListener('input', function () {
+                    viewTune.zoomStep = parseFloat(zoomIn.value);
+                    zoomVal.textContent = viewTune.zoomStep.toFixed(2);
+                    try { localStorage.setItem(VIEW_TUNE_STORAGE.zoom, String(viewTune.zoomStep)); } catch (e) {}
+                });
+            }
+            const tunePanel = document.getElementById('viewTunePanel');
+            if (tunePanel) {
+                tunePanel.addEventListener('wheel', function (ev) { ev.stopPropagation(); }, { passive: true });
+                tunePanel.addEventListener('touchstart', function (ev) { ev.stopPropagation(); }, { passive: true });
+                tunePanel.addEventListener('touchmove', function (ev) { ev.stopPropagation(); }, { passive: true });
+            }
+            console.info('[viewTune] Panel bottom-left on diagram. Console: viewTune.panWheelMult = 1.2; syncViewTuneUI()', viewTune);
+            window.syncViewTuneUI = function () {
+                viewTune.panWheelMult = Math.max(0.25, Math.min(3, Number(viewTune.panWheelMult) || 2));
+                viewTune.zoomStep = Math.max(0.05, Math.min(1, Number(viewTune.zoomStep) || 0.2));
+                const pi = document.getElementById('tunePanMult');
+                const pv = document.getElementById('tunePanVal');
+                const zi = document.getElementById('tuneZoomStep');
+                const zv = document.getElementById('tuneZoomVal');
+                if (pi && pv) { pi.value = String(viewTune.panWheelMult); pv.textContent = viewTune.panWheelMult.toFixed(2); }
+                if (zi && zv) { zi.value = String(viewTune.zoomStep); zv.textContent = viewTune.zoomStep.toFixed(2); }
+            };
+        }
+        
+        // Pan with mouse drag
+        function handleMouseDown(e) {
+            // Only start panning on left click and not on nodes
+            if (e.button !== 0) return;
+            if (e.target.closest('.view-tune-panel')) return;
+            if (e.target.closest('.clickable-node, .collapse-button')) return;
+            
+            isPanning = true;
+            startMouseX = e.clientX;
+            startMouseY = e.clientY;
+            startPanX = panX;
+            startPanY = panY;
+            
+            document.getElementById('diagramCanvas').classList.add('panning');
+        }
+        
+        function handleMouseMove(e) {
+            if (!isPanning) return;
+            
+            const dx = e.clientX - startMouseX;
+            const dy = e.clientY - startMouseY;
+            
+            panX = startPanX + dx;
+            panY = startPanY + dy;
+            
+            applyTransform();
+        }
+        
+        function handleMouseUp() {
+            isPanning = false;
+            document.getElementById('diagramCanvas').classList.remove('panning');
+        }
+        
+        // Initialize pan/zoom event listeners
+        function initZoomPan() {
+            const viewport = document.getElementById('diagramViewport');
+            
+            viewport.addEventListener('wheel', handleWheel, { passive: false });
+            viewport.addEventListener('mousedown', handleMouseDown);
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            
+            // Touch support for mobile
+            // Two-finger gestures now pan (more intuitive)
+            let lastTwoFingerCenter = { x: 0, y: 0 };
+            
+            viewport.addEventListener('touchstart', (e) => {
+                if (e.target.closest && e.target.closest('.view-tune-panel')) return;
+                if (e.touches.length === 2) {
+                    // Two-finger pan start - use center point between two fingers
+                    e.preventDefault();
+                    isPanning = true;
+                    lastTwoFingerCenter = {
+                        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                    };
+                    startMouseX = lastTwoFingerCenter.x;
+                    startMouseY = lastTwoFingerCenter.y;
+                    startPanX = panX;
+                    startPanY = panY;
+                    document.getElementById('diagramCanvas').classList.add('panning');
+                } else if (e.touches.length === 1) {
+                    // Single touch pan
+                    isPanning = true;
+                    startMouseX = e.touches[0].clientX;
+                    startMouseY = e.touches[0].clientY;
+                    startPanX = panX;
+                    startPanY = panY;
+                    document.getElementById('diagramCanvas').classList.add('panning');
+                }
+            }, { passive: false });
+            
+            viewport.addEventListener('touchmove', (e) => {
+                if (e.target.closest && e.target.closest('.view-tune-panel')) return;
+                if (e.touches.length === 2) {
+                    // Two-finger pan - pan based on center point movement
+                    e.preventDefault();
+                    const currentCenter = {
+                        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                    };
+                    
+                    const dx = currentCenter.x - startMouseX;
+                    const dy = currentCenter.y - startMouseY;
+                    panX = startPanX + dx;
+                    panY = startPanY + dy;
+                    
+                    applyTransform();
+                } else if (e.touches.length === 1 && isPanning) {
+                    // Single finger pan
+                    const dx = e.touches[0].clientX - startMouseX;
+                    const dy = e.touches[0].clientY - startMouseY;
+                    panX = startPanX + dx;
+                    panY = startPanY + dy;
+                    applyTransform();
+                }
+            }, { passive: false });
+            
+            viewport.addEventListener('touchend', () => {
+                isPanning = false;
+                document.getElementById('diagramCanvas').classList.remove('panning');
+            }, { passive: true });
+        }
+        
+        const DOC_PANE_WIDTH_KEY = 'atelier_doc_pane_width_px';
+        
+        function initPaneResizer() {
+            const container = document.querySelector('.container');
+            const docPane = document.querySelector('.doc-pane');
+            const resizer = document.getElementById('paneResizer');
+            if (!container || !docPane || !resizer) return;
+            
+            function clampDocWidth(px) {
+                const cw = container.getBoundingClientRect().width;
+                const minDoc = 260;
+                const minDiagram = 220;
+                const maxDoc = Math.max(minDoc, cw - minDiagram - resizer.offsetWidth - 4);
+                return Math.max(minDoc, Math.min(px, maxDoc));
+            }
+            
+            let saved = parseInt(localStorage.getItem(DOC_PANE_WIDTH_KEY), 10);
+            if (!Number.isFinite(saved) || saved < 260) {
+                saved = Math.round(docPane.getBoundingClientRect().width) || Math.round(container.getBoundingClientRect().width * 0.4);
+            }
+            docPane.style.width = clampDocWidth(saved) + 'px';
+            
+            function onDragMove(e) {
+                const dx = startX - e.clientX;
+                const next = clampDocWidth(startW + dx);
+                docPane.style.width = next + 'px';
+            }
+            function onDragEnd() {
+                document.removeEventListener('mousemove', onDragMove);
+                document.removeEventListener('mouseup', onDragEnd);
+                resizer.classList.remove('is-dragging');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                try {
+                    localStorage.setItem(DOC_PANE_WIDTH_KEY, String(Math.round(docPane.getBoundingClientRect().width)));
+                } catch (err) { /* ignore */ }
+            }
+            let startX = 0;
+            let startW = 0;
+            
+            resizer.addEventListener('mousedown', function (e) {
+                if (window.innerWidth <= 1024) return;
+                e.preventDefault();
+                startX = e.clientX;
+                startW = docPane.getBoundingClientRect().width;
+                resizer.classList.add('is-dragging');
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+                document.addEventListener('mousemove', onDragMove);
+                document.addEventListener('mouseup', onDragEnd);
+            });
+            
+            resizer.addEventListener('keydown', function (e) {
+                if (window.innerWidth <= 1024) return;
+                if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+                e.preventDefault();
+                const step = 20;
+                const w = docPane.getBoundingClientRect().width;
+                const next = e.key === 'ArrowRight' ? w + step : w - step;
+                docPane.style.width = clampDocWidth(next) + 'px';
+                try {
+                    localStorage.setItem(DOC_PANE_WIDTH_KEY, String(Math.round(docPane.getBoundingClientRect().width)));
+                } catch (err) { /* ignore */ }
+            });
+            
+            window.addEventListener('resize', function () {
+                if (window.innerWidth <= 1024) return;
+                const w = docPane.getBoundingClientRect().width;
+                const c = clampDocWidth(w);
+                if (c !== w) docPane.style.width = c + 'px';
+            });
+        }
+        
+        // ============================================================
+        // REPO SWITCHING (dynamic from repos/index.json)
+        // ============================================================
+        
+        let AVAILABLE_REPOS = [];
+        
+        async function fetchAvailableRepos() {
+            try {
+                const url = new URL('repos/index.json', window.location.href);
+                const res = await fetch(url.toString(), { cache: 'no-store' });
+                if (res.ok) {
+                    const list = await res.json();
+                    if (Array.isArray(list) && list.length > 0) return list;
+                }
+            } catch (e) { /* ignore */ }
+            return [repoPath];
+        }
+        
+        function populateRepoDropdown() {
+            const dropdown = document.getElementById('repoDropdown');
+            if (!dropdown) return;
+            
+            dropdown.innerHTML = '<option value="">Switch Repo...</option>';
+            (AVAILABLE_REPOS.length ? AVAILABLE_REPOS : [repoPath]).forEach(repo => {
+                const option = document.createElement('option');
+                option.value = repo;
+                option.textContent = repo;
+                if (repo.toLowerCase() === repoPath.toLowerCase()) option.selected = true;
+                dropdown.appendChild(option);
+            });
+        }
+        
+        function switchRepo(newRepo) {
+            if (!newRepo || newRepo === repoPath) return;
+            
+            // Navigate to new repo
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('repo', newRepo);
+            window.location.href = currentUrl.toString();
+        }
+        
+        // ============================================================
+        // INITIALIZATION
+        // ============================================================
+        
+        async function init() {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2101',message:'init() called',data:{stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
+            AVAILABLE_REPOS = await fetchAvailableRepos();
+            
+            // When no ?repo= in URL, redirect to first repo so something always loads
+            if (!urlParams.get('repo')) {
+                if (AVAILABLE_REPOS.length > 0) {
+                    const first = AVAILABLE_REPOS[0];
+                    window.location.replace(window.location.pathname + '?repo=' + encodeURIComponent(first));
+                    return;
+                }
+            }
+            
+            const success = await loadAllData();
+            if (!success) {
+                const repoList = AVAILABLE_REPOS.length ? AVAILABLE_REPOS.join(', ') : 'none';
+                const errHtml = `<div class="error" style="padding:1rem;max-width:480px;">
+                    <p><strong>Failed to load repository data</strong></p>
+                    <p>Path tried: <code>${basePath}</code></p>
+                    <p>Serve this app from the <strong>demo</strong> folder (e.g. <code>cd demo && python -m http.server 8080</code>) so that <code>index.html</code> and <code>repos/</code> are at the same level.</p>
+                    <p>Then open: <a href="?repo=crewai">/?repo=crewai</a> or pick a repo from the dropdown.</p>
+                    <p>Available repos: ${repoList || '—'}</p>
+                </div>`;
+                document.getElementById('mermaid-diagram').innerHTML = errHtml;
+                populateRepoDropdown();
+                return;
+            }
+            
+            buildModuleData();
+            
+            populateRepoDropdown();
+            
+            // Initialize with overview
+            currentModuleId = 'overview';
+            baseDiagramCode = moduleData['overview']?.diagram || '';
+            currentDiagramCode = baseDiagramCode;
+            
+            // Initialize opened modules (overview is always open)
+            openedModules.clear();
+            openedModules.add('overview');
+            console.log('[MODULE TRACKING] Initialized, opened modules:', Array.from(openedModules));
+            
+            // Initialize selection and breadcrumb
+            updateSelection('overview');
+            
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2149',message:'init() completed - state snapshot',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesSize:openedModules.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
+            
+            renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+        }
+        
+        // Track URL changes
+        window.addEventListener('popstate', () => {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2152',message:'popstate event (browser back/forward)',data:{url:window.location.href,currentModuleId,expandedNodesSize:expandedNodes.size},timestamp:Date.now(),runId:'debug',hypothesisId:'G'})}).catch(()=>{});
+            // #endregion
+        });
+        
+        // Track hash changes
+        window.addEventListener('hashchange', () => {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2158',message:'hashchange event',data:{url:window.location.href,currentModuleId,expandedNodesSize:expandedNodes.size},timestamp:Date.now(),runId:'debug',hypothesisId:'G'})}).catch(()=>{});
+            // #endregion
+        });
+        
+        // Periodic state snapshot to catch unexpected resets
+        setInterval(() => {
+            // #region debug log
+            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2165',message:'periodic state snapshot',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesSize:openedModules.size,openedModulesArray:Array.from(openedModules),url:window.location.href},timestamp:Date.now(),runId:'debug',hypothesisId:'H'})}).catch(()=>{});
+            // #endregion
+        }, 2000); // Every 2 seconds
+        
+        initZoomPan();
+        initViewTuneSliders();
+        initPaneResizer();
+        
+        // Start
+        init().catch(err => {
+            console.error('Init failed:', err);
+            document.body.innerHTML = `<div style="padding:20px;color:red;">Error: ${err.message}</div>`;
+        });
+        
+        // ============================================================
+        // CHAT PANEL (Architectural Agent)
+        // ============================================================
+        const chatInput = document.getElementById('chatInput');
+        const chatSend = document.getElementById('chatSend');
+        const chatMessages = document.getElementById('chatMessages');
+        
+        // API base: when on port 8080 (static demo server), use FastAPI on 8000; else same origin
+        const CHAT_API_BASE = (window.location.port === '8080') ? 'http://127.0.0.1:8001' : '';
+        
+        function getChatJobId() {
+            return (typeof repoPath !== 'undefined' ? repoPath : urlParams.get('repo') || 'search-agents');
+        }
+
+        // Conversation history for multi-turn chat (send back to API each time)
+        let chatHistory = null;
+
+        function addChatMessage(content, type) {
+            const el = document.createElement('div');
+            el.className = `chat-message ${type}`;
+            if (type === 'assistant') {
+                el.innerHTML = marked.parse(content);
+            } else {
+                el.textContent = content;
+            }
+            chatMessages.appendChild(el);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return el;
+        }
+        
+        async function sendChatMessage() {
+            if (!chatInput.value.trim()) return;
+            const msg = chatInput.value.trim();
+            chatInput.value = '';
+            addChatMessage(msg, 'user');
+            const loadingEl = addChatMessage('Thinking...', 'loading');
+            chatSend.disabled = true;
+            try {
+                const jobId = getChatJobId();
+                // Get opened modules as array (overview is always included)
+                const openedModulesArray = Array.from(openedModules);
+                console.log('[MODULE TRACKING] Sending chat request with opened modules:', openedModulesArray);
+                
+                const res = await fetch(`${CHAT_API_BASE}/api/arch-agent/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        job_id: jobId,
+                        message: msg,
+                        current_page: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null) || (typeof currentModuleId !== 'undefined' ? currentModuleId : null),
+                        current_module: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null),
+                        opened_modules: openedModulesArray,
+                        history: chatHistory
+                    })
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                chatHistory = data.history != null ? data.history : null;
+                loadingEl.remove();
+                addChatMessage(data.response || 'No response.', 'assistant');
+            } catch (e) {
+                loadingEl.remove();
+                const hint = e.message === 'Failed to fetch' || e.message === 'Load failed'
+                    ? 'Could not reach chat API. Start the CodeWiki server: cd atelier && python3 -m codewiki.run_web_app --port 8001'
+                    : (e.message || 'Could not reach chat API. Is the CodeWiki server running on port 8001?');
+                addChatMessage('Error: ' + hint, 'assistant');
+            } finally {
+                chatSend.disabled = false;
+                chatInput.focus();
+            }
+        }
+        
+        chatSend.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+        });
     </script>
 </body>
 </html>
+
+<!-- Trigger redeploy Fri Jan 16 22:19:39 IST 2026 -->

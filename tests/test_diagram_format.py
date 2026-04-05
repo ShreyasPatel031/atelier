@@ -17,6 +17,8 @@ import pytest
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+from codewiki.src.be.mermaid_validator import validate_mermaid, fix_mermaid_diagram
+
 
 # ============================================================
 # DIAGRAM VALIDATION FUNCTIONS
@@ -87,33 +89,16 @@ def validate_node_definitions(diagram: str) -> Tuple[bool, str, int]:
 
 def validate_no_syntax_issues(diagram: str) -> Tuple[bool, str]:
     """
-    Check for common syntax issues.
-    
+    Check Mermaid syntax via backend validator (comments %%, brackets, subgraph/end, etc.).
+
     Returns:
         (is_valid, message)
     """
-    issues = []
-    
-    # Check for unbalanced brackets
-    if diagram.count('[') != diagram.count(']'):
-        issues.append("Unbalanced square brackets")
-    
-    if diagram.count('(') != diagram.count(')'):
-        issues.append("Unbalanced parentheses")
-    
-    # Check for problematic characters in labels
-    if re.search(r'\[.*[(){}].*\]', diagram):
-        issues.append("Parentheses/braces inside node labels (may cause parse errors)")
-    
-    # Check for subgraph/end balance
-    subgraph_count = len(re.findall(r'\bsubgraph\b', diagram))
-    end_count = len(re.findall(r'\bend\b', diagram))
-    if subgraph_count != end_count:
-        issues.append(f"Unbalanced subgraph/end ({subgraph_count} subgraph, {end_count} end)")
-    
-    if issues:
-        return False, "; ".join(issues)
-    
+    result = validate_mermaid(diagram)
+    if not result.valid:
+        return False, "; ".join(e.message for e in result.errors)
+    if result.warnings:
+        return True, "No syntax errors; warnings: " + "; ".join(w.message for w in result.warnings)
     return True, "No syntax issues detected"
 
 
@@ -159,11 +144,23 @@ def validate_overview_diagram(diagram: str) -> Dict:
         result['valid'] = False
         result['errors'].append(node_msg)
     
-    # Syntax check
-    syntax_valid, syntax_msg = validate_no_syntax_issues(diagram)
-    result['info']['syntax'] = syntax_msg
-    if not syntax_valid:
-        result['warnings'].append(syntax_msg)
+    # Backend Mermaid syntax (invalid % comments, brackets, subgraph/end, etc.)
+    mermaid_res = validate_mermaid(diagram)
+    result['info']['syntax'] = (
+        "No syntax issues detected"
+        if mermaid_res.valid and not mermaid_res.warnings
+        else (
+            "; ".join(e.message for e in mermaid_res.errors)
+            if not mermaid_res.valid
+            else "warnings: " + "; ".join(w.message for w in mermaid_res.warnings)
+        )
+    )
+    if not mermaid_res.valid:
+        result['valid'] = False
+        for e in mermaid_res.errors:
+            result['errors'].append(e.message)
+    for w in mermaid_res.warnings:
+        result['warnings'].append(w.message)
     
     return result
 
@@ -306,6 +303,36 @@ class TestSyntaxValidation:
         valid, msg = validate_no_syntax_issues(diagram)
         assert not valid
         assert "subgraph" in msg.lower()
+
+
+class TestInvalidCommentDetection:
+    """Backend validator must reject single-% Mermaid comments."""
+
+    def test_single_percent_line_comment_fails(self):
+        diagram = "graph TD\n    % bad comment\n    A[Node] --> B[Other]"
+        valid, msg = validate_no_syntax_issues(diagram)
+        assert not valid
+        assert "%" in msg or "comment" in msg.lower()
+
+    def test_inline_single_percent_fails(self):
+        diagram = "graph TD\n    A[Node] --> B[Other] % inline note"
+        valid, msg = validate_no_syntax_issues(diagram)
+        assert not valid
+
+    def test_double_percent_comment_passes(self):
+        diagram = "graph TD\n    %% good comment\n    A[Node] --> B[Other]"
+        valid, msg = validate_no_syntax_issues(diagram)
+        assert valid, msg
+
+
+class TestFixMermaidDiagram:
+    """Optional CLI helper still normalizes the most common LLM mistake."""
+
+    def test_fix_converts_single_percent_comments(self):
+        bad = "graph TD\n    % Core deps\n    A --> B"
+        fixed = fix_mermaid_diagram(bad)
+        res = validate_mermaid(fixed)
+        assert res.valid, res.errors
 
 
 class TestOverviewValidation:

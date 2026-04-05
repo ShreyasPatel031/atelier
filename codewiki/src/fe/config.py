@@ -29,9 +29,9 @@ class WebAppConfig:
     DEFAULT_HOST = "127.0.0.1"
     DEFAULT_PORT = 8000
     
-    # Git settings
-    CLONE_TIMEOUT = 300
-    CLONE_DEPTH = 1
+    # Git settings (clone uses subprocess timeout; large repos need higher than 300s)
+    CLONE_TIMEOUT = int(os.environ.get("CODEWIKI_CLONE_TIMEOUT", "300"))
+    CLONE_DEPTH = int(os.environ.get("CODEWIKI_CLONE_DEPTH", "1"))
     
     @classmethod
     def ensure_directories(cls):

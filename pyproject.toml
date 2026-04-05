@@ -48,7 +48,8 @@ dependencies = [
     "rich>=14.1.0",
     "networkx>=3.0",
     "psutil>=7.0.0",
-    "PyYAML>=6.0.2"
+    "PyYAML>=6.0.2",
+    "colorama>=0.4.6"
 ]
 
 [external]
@@ -62,6 +63,7 @@ dev = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
     "pytest-asyncio>=0.21.0",
+    "playwright>=1.49.0",
     "black>=23.0.0",
     "mypy>=1.5.0",
     "ruff>=0.1.0",
@@ -119,5 +121,6 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --cov=codewiki --cov-report=term-missing"
+# -s: Web E2E (TestClient + background worker) can break pytest FD capture on teardown without it.
+addopts = "-v -s --cov=codewiki --cov-report=term-missing"
 
