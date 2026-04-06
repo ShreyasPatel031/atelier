@@ -331,6 +331,31 @@ class WindowExpander:
             Both inclusive.
         """
         # print("Input:", start, stop)
+        # region agent log
+        try:
+            with open("/Users/shreyaspatel/atelier/.cursor/debug-c1a65d.log", "a", encoding="utf-8") as _dbg_f:
+                _dbg_f.write(
+                    json.dumps(
+                        {
+                            "sessionId": "c1a65d",
+                            "runId": "post-fix",
+                            "hypothesisId": "H3",
+                            "location": "str_replace_editor.py:expand_window",
+                            "message": "expand_window entry",
+                            "data": {
+                                "start": start,
+                                "stop": stop,
+                                "n_lines": len(lines),
+                                "valid_window": bool(1 <= start <= stop <= len(lines)),
+                            },
+                            "timestamp": int(__import__("time").time() * 1000),
+                        }
+                    )
+                    + "\n"
+                )
+        except Exception:
+            pass
+        # endregion
         assert 1 <= start <= stop <= len(lines), (start, stop, len(lines))
         if max_added_lines <= 0:
             # Already at max range, no expansion
@@ -602,14 +627,43 @@ class EditTool:
         # Save the content to history
         self._file_history[path].append(file_content)
 
-        # Create a snippet of the edited section
+        # Create a snippet of the edited section (use split("\\n") consistently; splitlines() differs for "")
+        new_file_lines = new_file_content.split("\n")
         replacement_line = file_content.split(old_str)[0].count("\n")
         start_line = max(1, replacement_line - SNIPPET_LINES)
-        end_line = min(replacement_line + SNIPPET_LINES + new_str.count("\n"), len(new_file_content.splitlines()))
+        end_line = min(replacement_line + SNIPPET_LINES + new_str.count("\n"), len(new_file_lines))
+        # region agent log
+        try:
+            with open("/Users/shreyaspatel/atelier/.cursor/debug-c1a65d.log", "a", encoding="utf-8") as _dbg_f:
+                _dbg_f.write(
+                    json.dumps(
+                        {
+                            "sessionId": "c1a65d",
+                            "runId": "post-fix",
+                            "hypothesisId": "H1",
+                            "location": "str_replace_editor.py:str_replace",
+                            "message": "snippet window before expand_window",
+                            "data": {
+                                "replacement_line": replacement_line,
+                                "start_line": start_line,
+                                "end_line": end_line,
+                                "len_splitlines": len(new_file_content.splitlines()),
+                                "len_split_n": len(new_file_lines),
+                                "len_new_file_chars": len(new_file_content),
+                                "mismatch_split": len(new_file_content.splitlines()) != len(new_file_lines),
+                            },
+                            "timestamp": int(__import__("time").time() * 1000),
+                        }
+                    )
+                    + "\n"
+                )
+        except Exception:
+            pass
+        # endregion
         start_line, end_line = WindowExpander(suffix=path.suffix).expand_window(
-            new_file_content.split("\n"), start_line, end_line, max_added_lines=MAX_WINDOW_EXPANSION_EDIT_CONFIRM
+            new_file_lines, start_line, end_line, max_added_lines=MAX_WINDOW_EXPANSION_EDIT_CONFIRM
         )
-        snippet = "\n".join(new_file_content.split("\n")[start_line - 1 : end_line])
+        snippet = "\n".join(new_file_lines[start_line - 1 : end_line])
 
         # Prepare the success message
         success_msg = f"The file {self._get_display_path(path)} has been edited. "

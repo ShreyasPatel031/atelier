@@ -30,6 +30,31 @@ from codewiki.cli.utils.instructions import display_post_generation_instructions
 from codewiki.cli.models.job import GenerationOptions
 
 
+def _clear_generated_docs_at_output_root(output_dir: Path, logger) -> None:
+    """
+    Remove top-level *.md and *.json so Stage 3 agents run and metadata extraction applies.
+    Preserves subdirectories (e.g. temp/dependency_graphs).
+    """
+    if not output_dir.exists():
+        return
+    cleared_md = 0
+    cleared_json = 0
+    for p in output_dir.iterdir():
+        if not p.is_file():
+            continue
+        suf = p.suffix.lower()
+        if suf == ".md":
+            p.unlink(missing_ok=True)
+            cleared_md += 1
+        elif suf == ".json":
+            p.unlink(missing_ok=True)
+            cleared_json += 1
+    if cleared_md or cleared_json:
+        logger.info(
+            f"Cleared {cleared_md} .md and {cleared_json} .json from {output_dir} (--force)."
+        )
+
+
 @click.command(name="generate")
 @click.option(
     "--output",
@@ -59,6 +84,12 @@ from codewiki.cli.models.job import GenerationOptions
     is_flag=True,
     help="Show detailed progress and debug information",
 )
+@click.option(
+    "--force",
+    "-f",
+    is_flag=True,
+    help="Overwrite existing documentation without prompting (for automation / CI)",
+)
 @click.pass_context
 def generate_command(
     ctx,
@@ -66,7 +97,8 @@ def generate_command(
     create_branch: bool,
     github_pages: bool,
     no_cache: bool,
-    verbose: bool
+    verbose: bool,
+    force: bool,
 ):
     """
     Generate comprehensive documentation for a code repository.
@@ -148,13 +180,19 @@ def generate_command(
         
         # Check for existing documentation
         if output_dir.exists() and list(output_dir.glob("*.md")):
-            if not click.confirm(
+            if force:
+                logger.info(f"Overwriting existing documentation in {output_dir} (--force).")
+            elif not click.confirm(
                 f"\n{output_dir} already contains documentation. Overwrite?",
                 default=True
             ):
                 logger.info("Generation cancelled by user.")
                 sys.exit(EXIT_SUCCESS)
-        
+
+        # --force: remove stale .md/.json at output root so agents are not skipped and tree matches files
+        if force:
+            _clear_generated_docs_at_output_root(output_dir, logger)
+
         # Git branch creation (if requested)
         branch_name = None
         if create_branch:

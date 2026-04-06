@@ -241,6 +241,41 @@ async def validate_single_diagram(diagram_content: str, diagram_num: int, line_s
     return ""  # No error
 
 
+def make_response_logger_hooks(module_name: str):
+    """Create a Hooks capability that logs every Gemini ModelResponse for debugging empty-response failures."""
+    from pydantic_ai.capabilities.hooks import Hooks
+    hooks = Hooks()
+
+    @hooks.on.after_model_request
+    def _log_model_response(ctx, *, request_context, response):
+        parts_summary = []
+        for p in response.parts:
+            ptype = type(p).__name__
+            if hasattr(p, 'content'):
+                parts_summary.append(f"{ptype}(len={len(str(p.content))})")
+            elif hasattr(p, 'tool_name'):
+                parts_summary.append(f"{ptype}(tool={p.tool_name})")
+            else:
+                parts_summary.append(ptype)
+        is_empty = not response.parts
+        logger.info(
+            "[MODEL_RESPONSE] module=%s parts=%d empty=%s finish_reason=%s parts_detail=%s provider_details=%s",
+            module_name, len(response.parts), is_empty, response.finish_reason,
+            parts_summary[:10], getattr(response, 'provider_details', None),
+        )
+        if is_empty:
+            logger.error(
+                "[MODEL_RESPONSE] EMPTY RESPONSE from Gemini for module=%s "
+                "finish_reason=%s provider_details=%s full_response=%r",
+                module_name, response.finish_reason,
+                getattr(response, 'provider_details', None),
+                response,
+            )
+        return response
+
+    return [hooks]
+
+
 if __name__ == "__main__":
     # Test with the provided file
     import asyncio

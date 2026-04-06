@@ -151,6 +151,29 @@ class ArchitecturalAgentRunner:
                 count += self._count_components(module_data['children'])
         return count
     
+    def _format_architecture_group_context(
+        self, architecture_group: Optional[Dict[str, Any]]
+    ) -> str:
+        """Extra system context when the user selects an overview diagram group."""
+        if not architecture_group:
+            return ""
+        gid = str(architecture_group.get("id") or "").strip()
+        label = str(architecture_group.get("label") or gid).strip()
+        module_ids = architecture_group.get("module_ids") or []
+        lines = [
+            f"USER ARCHITECTURE FOCUS: The user selected diagram group \"{label}\" (id: {gid}).",
+            "Prioritize modules, dependencies, and explanations relevant to this functional area.",
+        ]
+        if module_ids:
+            uniq = [str(m) for m in module_ids if m]
+            if uniq:
+                lines.append(
+                    "Diagram nodes in this group map to these module entry points: "
+                    + ", ".join(uniq)
+                    + "."
+                )
+        return "\n".join(lines)
+
     async def chat(
         self,
         message: str,
@@ -158,6 +181,7 @@ class ArchitecturalAgentRunner:
         current_page: Optional[str] = None,
         opened_modules: Optional[list[str]] = None,
         message_history: Optional[List[Any]] = None,
+        architecture_group: Optional[Dict[str, Any]] = None,
     ) -> tuple[str, List[Any]]:
         """
         Process a chat message and return a response plus updated message history.
@@ -169,6 +193,8 @@ class ArchitecturalAgentRunner:
             opened_modules: List of opened module IDs (overview is always included)
             message_history: Optional list of prior messages (JSON-serializable form from
                 a previous chat() return). When provided, the agent continues the conversation.
+            architecture_group: Optional dict with id, label, and optional module_ids
+                when the user focuses the agent on one overview diagram group.
 
         Returns:
             Tuple of (assistant_response_text, updated_history). The client should store
@@ -183,6 +209,9 @@ class ArchitecturalAgentRunner:
         # Format full module tree for prompt (used when no history, or for context in user message)
         module_tree_text = self._format_module_tree_for_prompt()
         system_prompt = ARCHITECTURAL_AGENT_SYSTEM_PROMPT_TEMPLATE.format(module_tree=module_tree_text)
+        group_ctx = self._format_architecture_group_context(architecture_group)
+        if group_ctx:
+            system_prompt = system_prompt + "\n\n" + group_ctx
 
         logger.info(f"[ARCH-AGENT] System prompt length: {len(system_prompt)} chars")
         logger.debug(f"[ARCH-AGENT] System prompt preview: {system_prompt[:500]}...")

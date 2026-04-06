@@ -150,12 +150,22 @@ async def serve_repo_raw_file(job_id: str, filename: str):
 
 
 # Chat API models
+class ArchitectureGroupSelection(BaseModel):
+    """Optional focus for the architectural agent: a diagram subgraph / group, or omit for none."""
+
+    id: str
+    label: str
+    module_ids: Optional[List[str]] = None
+
+
 class ArchAgentChatRequest(BaseModel):
     job_id: str
     message: str
     current_module: Optional[str] = None
     current_page: Optional[str] = None
     opened_modules: Optional[List[str]] = None
+    # When set, the agent prioritizes this overview diagram group (subgraph).
+    architecture_group: Optional[ArchitectureGroupSelection] = None
     # Message history from previous turns (returned as `history` in response). Send it back on the next request for multi-turn conversation.
     history: Optional[List[Any]] = None
 
@@ -223,6 +233,7 @@ async def arch_agent_chat(request: ArchAgentChatRequest) -> ArchAgentChatRespons
             current_page=request.current_page,
             opened_modules=opened_modules,
             message_history=request.history,
+            architecture_group=request.architecture_group.model_dump() if request.architecture_group else None,
         )
 
         return ArchAgentChatResponse(response=response, history=updated_history)

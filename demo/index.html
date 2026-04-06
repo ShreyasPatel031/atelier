@@ -682,6 +682,32 @@
             align-self: flex-start;
             font-style: italic;
         }
+        .arch-group-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .arch-group-row label {
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+        .arch-group-select {
+            flex: 1;
+            min-width: 0;
+            padding: 6px 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: inherit;
+            background: #fff;
+        }
+        .arch-group-select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
         .chat-input-row {
             display: flex;
             gap: 8px;
@@ -800,6 +826,12 @@
                 <div class="chat-messages" id="chatMessages">
                     <div class="chat-message assistant">Ask about this codebase's architecture.</div>
                 </div>
+                <div class="arch-group-row">
+                    <label for="archAgentGroupSelect">Arch agent focus</label>
+                    <select class="arch-group-select" id="archAgentGroupSelect" title="Limit answers to one overview diagram group, or None for the whole repo">
+                        <option value="">None (full repo)</option>
+                    </select>
+                </div>
                 <div class="chat-input-row">
                     <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="2"></textarea>
                     <button class="chat-send" id="chatSend">Send</button>
@@ -838,6 +870,7 @@
         let selectionPath = [];       // Breadcrumb path: [{id, name}, ...]
         let docPanelOpen = true;     // Panel is always open (chat-only view)
         let moduleMetadata = {};      // Store title/description for tooltips
+        let architectureGroups = [];  // Overview diagram groups for arch-agent focus (DIAGRAM_JSON or mermaid subgraphs)
         
         // ============================================================
         // PANEL TOGGLE & TOOLTIPS
@@ -1103,6 +1136,87 @@
             return match ? match[1].trim() : null;
         }
         
+        function extractDiagramJsonFromOverviewMarkdown(markdown) {
+            const pattern = /<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->/;
+            const match = markdown.match(pattern);
+            if (match) {
+                try {
+                    return JSON.parse(match[1]);
+                } catch (e) {
+                    return null;
+                }
+            }
+            return null;
+        }
+        
+        function extractArchitectureGroupsFromOverview(overviewContent) {
+            const groups = [];
+            const dj = extractDiagramJsonFromOverviewMarkdown(overviewContent);
+            if (dj && Array.isArray(dj.groups) && dj.groups.length) {
+                for (const g of dj.groups) {
+                    if (g.id != null && g.label != null) {
+                        groups.push({
+                            id: String(g.id),
+                            label: String(g.label),
+                            nodeIds: Array.isArray(g.nodes) ? g.nodes.map(String) : []
+                        });
+                    }
+                }
+                return groups;
+            }
+            const mermaid = extractMermaidFromMarkdown(overviewContent);
+            if (!mermaid) return [];
+            const re = /subgraph\s+(\w+)\["([^"]+)"\]/g;
+            let m;
+            while ((m = re.exec(mermaid)) !== null) {
+                groups.push({ id: m[1], label: m[2], nodeIds: [] });
+            }
+            return groups;
+        }
+        
+        function moduleIdsForArchitectureGroup(group) {
+            const ids = [];
+            const seen = new Set();
+            for (const nodeId of group.nodeIds || []) {
+                const mid = overviewLinks[nodeId];
+                if (mid && !seen.has(mid)) {
+                    seen.add(mid);
+                    ids.push(mid);
+                }
+            }
+            return ids;
+        }
+        
+        function populateArchitectureGroupSelect() {
+            const sel = document.getElementById('archAgentGroupSelect');
+            if (!sel) return;
+            const overviewContent = DOCS_CONTENT['overview.md'] || '';
+            architectureGroups = extractArchitectureGroupsFromOverview(overviewContent);
+            sel.innerHTML = '';
+            const noneOpt = document.createElement('option');
+            noneOpt.value = '';
+            noneOpt.textContent = 'None (full repo)';
+            sel.appendChild(noneOpt);
+            for (const g of architectureGroups) {
+                const opt = document.createElement('option');
+                opt.value = g.id;
+                opt.textContent = g.label;
+                opt.dataset.label = g.label;
+                sel.appendChild(opt);
+            }
+        }
+        
+        function getArchitectureGroupPayload() {
+            const sel = document.getElementById('archAgentGroupSelect');
+            if (!sel || !sel.value) return null;
+            const g = architectureGroups.find(x => x.id === sel.value);
+            if (!g) return null;
+            const module_ids = moduleIdsForArchitectureGroup(g);
+            const payload = { id: g.id, label: g.label };
+            if (module_ids.length) payload.module_ids = module_ids;
+            return payload;
+        }
+        
         function stripClickStatements(diagram) {
             // Strip out click statements to allow custom click handling
             // Also strip :::className styling from node definitions
@@ -1111,76 +1225,8 @@
             return cleaned;
         }
         
-        // Sanitize Mermaid diagram to fix common issues that break rendering
         function sanitizeMermaidDiagram(diagram) {
-            if (!diagram) return diagram;
-            
-            let sanitized = diagram;
-            
-            // Fix 0: Escape parentheses inside node labels - they break Mermaid parsing
-            // Pattern: nodeId["Label with (parens)"] -> nodeId["Label with #40;parens#41;"]
-            sanitized = sanitized.replace(/\["([^"]+)"\]/g, (match, label) => {
-                const escaped = label
-                    .replace(/\(/g, '#40;')
-                    .replace(/\)/g, '#41;')
-                    .replace(/\[/g, '#91;')
-                    .replace(/\]/g, '#93;')
-                    .replace(/\{/g, '#123;')
-                    .replace(/\}/g, '#125;');
-                return `["${escaped}"]`;
-            });
-            
-            // Also escape in unquoted labels: nodeId[Label with (parens)]
-            sanitized = sanitized.replace(/\[([^\]"]+)\]/g, (match, label) => {
-                // Skip if already escaped or if it's a special Mermaid syntax
-                if (label.includes('#40;') || label.startsWith('-') || label.includes('|')) {
-                    return match;
-                }
-                if (/[\(\)\[\]\{\}]/.test(label)) {
-                    const escaped = label
-                        .replace(/\(/g, '#40;')
-                        .replace(/\)/g, '#41;')
-                        .replace(/\[/g, '#91;')
-                        .replace(/\]/g, '#93;')
-                        .replace(/\{/g, '#123;')
-                        .replace(/\}/g, '#125;');
-                    return `["${escaped}"]`;
-                }
-                return match;
-            });
-            
-            // Fix 1: Edge labels like |1. Something| get misinterpreted as markdown list
-            // Remove the number prefix from edge labels to prevent markdown interpretation
-            sanitized = sanitized.replace(/\|(\d+)\.\s*([^|]+)\|/g, (match, num, text) => {
-                // Remove "1. " prefix, keep just the text
-                return `|${text.trim()}|`;
-            });
-            
-            // Fix 2: Any remaining edge labels with problematic characters - wrap in quotes
-            sanitized = sanitized.replace(/\|([^|"]+)\|/g, (match, content) => {
-                // If content has special chars, wrap in quotes
-                if (/[.:\-><]/.test(content)) {
-                    return `|"${content.trim()}"|`;
-                }
-                return match;
-            });
-            
-            // Fix 3: Subgraph names with spaces need quotes
-            sanitized = sanitized.replace(/subgraph\s+([^"[\n]+)$/gm, (match, name) => {
-                const trimmed = name.trim();
-                if (trimmed && !trimmed.startsWith('"') && trimmed.includes(' ')) {
-                    return `subgraph "${trimmed}"`;
-                }
-                return match;
-            });
-            
-            // Fix 4: Remove any HTML-like tags that might break rendering
-            sanitized = sanitized.replace(/<[^>]+>/g, '');
-            
-            // Fix 5: Escape backticks inside labels
-            sanitized = sanitized.replace(/\["([^"]*)`([^"]*)"]/g, '["$1\'$2"]');
-            
-            return sanitized;
+            return diagram || '';
         }
         
         function generateModuleDiagram(key, data) {
@@ -1211,6 +1257,7 @@
         // ============================================================
         
         function buildModuleData() {
+            overviewLinks = {};
             // Build overview from overview.md
             const overviewContent = DOCS_CONTENT['overview.md'] || '';
             const overviewDiagram = extractMermaidFromMarkdown(overviewContent);
@@ -1250,6 +1297,8 @@
                 documentation: overviewContent || '# Overview\n\nNo overview available.',
                 links: overviewLinks
             };
+            
+            populateArchitectureGroupSelect();
         }
         
         // Build EXACT module mappings - only map nodes that exactly match module keys
@@ -2546,6 +2595,7 @@
                         current_page: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null) || (typeof currentModuleId !== 'undefined' ? currentModuleId : null),
                         current_module: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null),
                         opened_modules: openedModulesArray,
+                        architecture_group: getArchitectureGroupPayload(),
                         history: chatHistory
                     })
                 });

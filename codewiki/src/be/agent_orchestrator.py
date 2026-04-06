@@ -42,6 +42,10 @@ from codewiki.src.be.agent_tools.str_replace_editor import str_replace_editor_to
 from codewiki.src.be.agent_tools.generate_sub_module_documentations import generate_sub_module_documentation_tool
 from codewiki.src.be.agent_tools.list_module_components import list_module_components_tool, get_module_summary_tool
 from codewiki.src.be.llm_services import create_fallback_models
+from codewiki.src.be.module_metadata import (
+    apply_metadata_to_tree_path,
+    extract_module_metadata_from_file,
+)
 from codewiki.src.be.prompt_template import (
     SYSTEM_PROMPT,
     LEAF_SYSTEM_PROMPT,
@@ -58,6 +62,48 @@ from codewiki.src.config import (
 )
 from codewiki.src.file_manager import file_manager
 from codewiki.src.be.dependency_analyzer.models.core import Node
+
+
+def _log_pydantic_ai_failure_chain(exc: BaseException, log_prefix: str = "[STAGE 4.6] DIAG") -> None:
+    """
+    pydantic-ai surfaces 'Exceeded maximum retries (1) for output validation' when the model
+    used up its retry budget. Common *underlying* reasons (see chained exceptions / group members):
+
+    - Model returned an empty turn → silent resubmit; still bad after 1 retry.
+    - Model returned only "thinking" / no text and no tool calls → ToolRetryError with
+      "Please return text or call a tool."
+    - Tool call arguments failed Pydantic validation → ToolRetryError with validation details.
+    - Tool call JSON truncated (output token limit) → IncompleteToolCall.
+    - Unknown tool name in response → retry exhausted similarly.
+
+    The leaf exception in this walk is usually the actionable message.
+    """
+    seen: set[int] = set()
+
+    def walk(ex: BaseException, label: str, depth: int) -> None:
+        if depth > 25:
+            return
+        eid = id(ex)
+        if eid in seen:
+            return
+        seen.add(eid)
+        logger.error("%s %s %s: %s", log_prefix, label, type(ex).__name__, ex)
+        tool_retry = getattr(ex, "tool_retry", None)
+        if tool_retry is not None:
+            content = getattr(tool_retry, "content", None)
+            if content is not None:
+                logger.error("%s   -> tool_retry.content: %s", log_prefix, repr(content)[:3000])
+        if isinstance(ex, BaseExceptionGroup):
+            for i, sub in enumerate(ex.exceptions):
+                walk(sub, f"group[{i}]:", depth + 1)
+            return
+        if ex.__cause__ is not None:
+            walk(ex.__cause__, "cause:", depth + 1)
+
+    walk(exc, "failure-chain root:", 0)
+
+
+from codewiki.src.be.utils import make_response_logger_hooks
 
 
 class AgentOrchestrator:
@@ -97,6 +143,8 @@ class AgentOrchestrator:
         # Force complex agent at root level to guarantee at least MIN_DEPTH levels
         force_complex = len(core_component_ids) >= 2  # Root level is always depth 0 < MIN_DEPTH
         
+        response_hooks = make_response_logger_hooks(module_name)
+
         if is_complex or force_complex:
             logger.debug(f"[STAGE 4.3] Module is complex or forced - creating complex agent with sub-module tool")
             logger.debug(f"[STAGE 4.3]   is_complex={is_complex}, force_complex={force_complex}")
@@ -107,6 +155,7 @@ class AgentOrchestrator:
                 deps_type=CodeWikiDeps,
                 tools=tools,
                 system_prompt=SYSTEM_PROMPT.format(module_name=module_name),
+                capabilities=response_hooks,
             )
             logger.debug(f"[STAGE 4.3] Complex agent created with {len(tools)} tools")
         else:
@@ -117,6 +166,7 @@ class AgentOrchestrator:
                 deps_type=CodeWikiDeps,
                 tools=base_tools,
                 system_prompt=LEAF_SYSTEM_PROMPT.format(module_name=module_name),
+                capabilities=response_hooks,
             )
             logger.debug(f"[STAGE 4.3] Leaf agent created with {len(base_tools)} tools")
         
@@ -247,32 +297,6 @@ class AgentOrchestrator:
         logger.info(f"[AUTO-SPLIT] Created {len(sub_modules)} sub-modules")
         return sub_modules
     
-    def _apply_metadata_to_path(self, tree: Dict, path: List[str], title: str, desc: str, diagram: Optional[Dict]) -> None:
-        """
-        Navigate to the correct position in module_tree using path and apply metadata.
-        Recursive - works for nested modules at any depth.
-        """
-        if not path:
-            return
-        
-        current = tree
-        for i, part in enumerate(path):
-            if part in current:
-                if i == len(path) - 1:
-                    # Target node - apply metadata
-                    current[part]["title"] = title
-                    current[part]["description"] = desc
-                    if diagram:
-                        current[part]["diagram"] = diagram
-                else:
-                    # Navigate through children
-                    if "children" in current[part] and current[part]["children"]:
-                        current = current[part]["children"]
-                    else:
-                        break
-            else:
-                break
-    
     def _merge_module_tree(self, target: Dict[str, Any], source: Dict[str, Any]) -> None:
         """
         Merge source module tree into target, preserving all fields.
@@ -292,108 +316,6 @@ class AgentOrchestrator:
                     elif field_val is not None:
                         # Only overwrite if source has a value
                         target[key][field] = field_val
-    
-    def _extract_diagram_json(self, content: str) -> Optional[Dict]:
-        """
-        Extract structured diagram JSON from markdown content.
-        
-        Looks for:
-        <!-- DIAGRAM_JSON
-        { ... }
-        -->
-        
-        Returns:
-            Parsed diagram dict or None if not found
-        """
-        import re
-        import json
-        
-        pattern = r'<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->'
-        match = re.search(pattern, content)
-        if match:
-            try:
-                return json.loads(match.group(1))
-            except json.JSONDecodeError as e:
-                logger.warning(f"Failed to parse DIAGRAM_JSON: {e}")
-                return None
-        return None
-    
-    def _extract_module_metadata(self, md_path: str) -> tuple:
-        """
-        Extract title, description, and diagram from a generated markdown file.
-        
-        Returns:
-            (title, description, diagram) tuple where diagram is dict or None
-        """
-        import re
-        
-        with open(md_path, 'r') as f:
-            content = f.read()
-        
-        # Extract diagram JSON first
-        diagram = self._extract_diagram_json(content)
-        
-        # Extract title from first # heading
-        title_match = re.search(r'^#\s+(.+?)(?:\s+Module)?(?:\s+Documentation)?\s*$', content, re.MULTILINE)
-        if title_match:
-            title = title_match.group(1).strip()
-            # Limit to 4-5 words
-            words = title.split()[:5]
-            title = ' '.join(words)
-        else:
-            # Fallback: use module name from filename
-            title = os.path.basename(md_path).replace('.md', '').replace('_', ' ').title()
-        
-        # Extract description - find first paragraph that's not a heading or code
-        # Skip past title and any ##/### headings, find actual text content
-        lines = content.split('\n')
-        description_lines = []
-        in_code_block = False
-        past_title = False
-        
-        for line in lines:
-            # Track code blocks
-            if line.strip().startswith('```'):
-                in_code_block = not in_code_block
-                continue
-            
-            if in_code_block:
-                continue
-            
-            # Skip title (first #)
-            if not past_title and line.startswith('# '):
-                past_title = True
-                continue
-            
-            # Skip other headings
-            if line.startswith('#'):
-                continue
-            
-            # Skip empty lines at start
-            if not description_lines and not line.strip():
-                continue
-            
-            # Found actual content
-            if line.strip():
-                description_lines.append(line.strip())
-                # Get 1-2 sentences (roughly 2 lines max)
-                if len(description_lines) >= 2:
-                    break
-            elif description_lines:
-                # Empty line after content = end of paragraph
-                break
-        
-        if description_lines:
-            description = ' '.join(description_lines)
-            # Take first 2 sentences
-            sentences = re.split(r'(?<=[.!?])\s+', description)
-            description = ' '.join(sentences[:2])
-            if len(description) > 200:
-                description = description[:197] + '...'
-        else:
-            description = f"Documentation for the {title} module."
-        
-        return title, description, diagram
     
     async def _generate_parent_overview(self, module_name: str, sub_modules: Dict[str, Any],
                                         working_dir: str, deps: 'CodeWikiDeps') -> None:
@@ -442,6 +364,14 @@ class AgentOrchestrator:
         except Exception:
             pass  # Non-critical
         logger.info(f"[STAGE 4] Module path: {'.'.join(module_path) if module_path else 'root'}")
+        # On-disk doc filename must match tree leaf key (nested modules: path[-1], not ambiguous name)
+        doc_stem = module_path[-1] if module_path else module_name
+        if module_path and module_path[-1] != module_name:
+            logger.warning(
+                "[STAGE 4] module_name=%r differs from module_path[-1]=%r; using path tail for .md file",
+                module_name,
+                module_path[-1],
+            )
         logger.info(f"[STAGE 4] Core component IDs: {len(core_component_ids)}")
         logger.info(f"[STAGE 4] Total components: {len(components)}")
         logger.info(f"[STAGE 4] Working directory: {working_dir}")
@@ -484,7 +414,7 @@ class AgentOrchestrator:
         
         # STAGE 4.2: Check if docs already exist
         overview_docs_path = os.path.join(working_dir, OVERVIEW_FILENAME)
-        docs_path = os.path.join(working_dir, f"{module_name}.md")
+        docs_path = os.path.join(working_dir, f"{doc_stem}.md")
         
         logger.info(f"[STAGE 4.2: DOCS CHECK] Checking for existing documentation...")
         logger.info(f"[STAGE 4.2] Overview docs path: {overview_docs_path} (exists: {os.path.exists(overview_docs_path)})")
@@ -732,10 +662,12 @@ class AgentOrchestrator:
             extracted_title = None
             extracted_desc = None
             extracted_diagram = None
-            md_path = os.path.join(working_dir, f"{module_name}.md")
+            md_path = os.path.join(working_dir, f"{doc_stem}.md")
             if os.path.exists(md_path):
                 try:
-                    extracted_title, extracted_desc, extracted_diagram = self._extract_module_metadata(md_path)
+                    extracted_title, extracted_desc, extracted_diagram = extract_module_metadata_from_file(
+                        md_path
+                    )
                     logger.info(f"[STAGE 4.6] Extracted metadata for '{module_name}': title='{extracted_title}'"
                                f", diagram={'yes' if extracted_diagram else 'no'}")
                 except Exception as meta_err:
@@ -751,12 +683,24 @@ class AgentOrchestrator:
                     self._merge_module_tree(current_tree, deps.module_tree)
                     # Apply extracted metadata (title, description, diagram) to correct nested position
                     if extracted_title:
-                        self._apply_metadata_to_path(current_tree, module_path, extracted_title, extracted_desc, extracted_diagram)
+                        apply_metadata_to_tree_path(
+                            current_tree,
+                            module_path,
+                            extracted_title,
+                            extracted_desc,
+                            extracted_diagram,
+                        )
                     file_manager.save_json(current_tree, module_tree_path)
                     deps.module_tree = current_tree
             else:
                 if extracted_title:
-                    self._apply_metadata_to_path(deps.module_tree, module_path, extracted_title, extracted_desc, extracted_diagram)
+                    apply_metadata_to_tree_path(
+                        deps.module_tree,
+                        module_path,
+                        extracted_title,
+                        extracted_desc,
+                        extracted_diagram,
+                    )
                 file_manager.save_json(deps.module_tree, module_tree_path)
             save_duration = time.time() - save_start
             
@@ -768,7 +712,7 @@ class AgentOrchestrator:
             try:
                 from codewiki.src.be.generation_tracker import get_generation_tracker
                 gen_tracker = get_generation_tracker()
-                md_exists = os.path.exists(os.path.join(working_dir, f"{module_name}.md"))
+                md_exists = os.path.exists(os.path.join(working_dir, f"{doc_stem}.md"))
                 gen_tracker.track_module_complete(
                     module_name=module_name,
                     success=True,
@@ -795,6 +739,75 @@ class AgentOrchestrator:
             logger.error(f"[STAGE 4.6] Prompt tokens: {prompt_tokens}")
             logger.error(f"[STAGE 4.6] Error type: {type(e).__name__}")
             logger.error(f"[STAGE 4.6] Error message: {str(e)}")
+            _log_pydantic_ai_failure_chain(e)
+            # pydantic-ai raises UnexpectedModelBehavior with __cause__=None on the "empty model
+            # response" path (_agent_graph.py ~1040: increment_retries without error=). Traceback
+            # shows that line when the model returned an empty / non-actionable turn twice.
+            if (
+                type(e).__name__ == "UnexpectedModelBehavior"
+                and "output validation" in str(e)
+                and getattr(e, "__cause__", None) is None
+            ):
+                logger.error(
+                    "[STAGE 4.6] DIAG NOTE: No __cause__ on this UnexpectedModelBehavior — in "
+                    "pydantic-ai this matches the empty-response retry path (~1040 in "
+                    "_agent_graph.py): the model returned an empty or stripped-to-empty turn; one "
+                    "silent resubmit; still empty; retries exhausted (budget=1)."
+                )
+            if isinstance(e, AssertionError) and e.args and e.args[0] == (1, 0, 1):
+                logger.error(
+                    "[STAGE 4.6] DIAG NOTE: (1,0,1) is str_replace_editor.WindowExpander.expand_window "
+                    "— invalid line window (stop < start) on a tiny/empty file; model str_replace "
+                    "args did not match file contents. See str_replace_editor.py expand_window assert."
+                )
+
+            # Diagnostics: why the agent failed (no result object when run raises)
+            fail_md = os.path.join(working_dir, f"{doc_stem}.md")
+            logger.error(
+                "[STAGE 4.6] DIAG: module_name=%r module_path=%r doc_stem=%r expected_md exists=%s path=%s",
+                module_name,
+                module_path,
+                doc_stem,
+                os.path.exists(fail_md),
+                fail_md,
+            )
+            if os.path.exists(fail_md):
+                try:
+                    logger.error(
+                        "[STAGE 4.6] DIAG: partial md file size=%d bytes (agent may have written before failure)",
+                        os.path.getsize(fail_md),
+                    )
+                except OSError as ose:
+                    logger.error("[STAGE 4.6] DIAG: could not stat md: %s", ose)
+            try:
+                import json as _json
+
+                st = _json.dumps(deps.module_tree, default=str)
+                logger.error(
+                    "[STAGE 4.6] DIAG: deps.module_tree snapshot (truncated): %s%s",
+                    st[:4000],
+                    "..." if len(st) > 4000 else "",
+                )
+            except Exception as dump_err:
+                logger.error("[STAGE 4.6] DIAG: could not serialize deps.module_tree: %s", dump_err)
+            for attr in (
+                "body",
+                "messages",
+                "message_history",
+                "model_response",
+                "response",
+                "args",
+            ):
+                if hasattr(e, attr):
+                    try:
+                        val = getattr(e, attr)
+                        logger.error(
+                            "[STAGE 4.6] DIAG: exception.%s=%s",
+                            attr,
+                            repr(val)[:2500],
+                        )
+                    except Exception:
+                        pass
             
             # Check for rate limiting
             error_str = str(e).lower()

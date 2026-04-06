@@ -6,7 +6,9 @@ from codewiki.src.be.agent_tools.str_replace_editor import str_replace_editor_to
 from codewiki.src.be.llm_services import create_fallback_models
 from codewiki.src.be.prompt_template import SYSTEM_PROMPT, LEAF_SYSTEM_PROMPT, format_user_prompt
 from codewiki.src.be.utils import is_complex_module, count_module_tokens
-from codewiki.src.config import MAX_TOKEN_PER_LEAF_MODULE, MIN_DEPTH
+from codewiki.src.config import MAX_TOKEN_PER_LEAF_MODULE, MIN_DEPTH, MODULE_TREE_FILENAME
+from codewiki.src.file_manager import file_manager
+from codewiki.src.be.utils import make_response_logger_hooks
 
 import logging
 import os
@@ -106,10 +108,37 @@ async def generate_sub_module_documentation(
     # Create fallback models from config
     fallback_models = create_fallback_models(deps.config)
 
+    # Reload module tree from disk so nested tools see merges from parallel Stage 3 workers.
+    tree_path = os.path.join(deps.absolute_docs_path, MODULE_TREE_FILENAME)
+    try:
+        if os.path.exists(tree_path):
+            loaded = file_manager.load_json(tree_path)
+            if isinstance(loaded, dict):
+                deps.module_tree = loaded
+    except Exception as reload_err:
+        logger.warning("Could not reload module tree from %s: %s", tree_path, reload_err)
+
     # add the sub-module to the module tree
     value = deps.module_tree
     for key in deps.path_to_current_module:
-        value = value[key]["children"]
+        if key not in value:
+            logger.error(
+                "module_tree missing key %r for path %s (available: %s)",
+                key,
+                deps.path_to_current_module,
+                list(value.keys())[:40],
+            )
+            return (
+                f"Error: module tree has no segment {key!r} for path {deps.path_to_current_module!r}; "
+                "cannot attach sub-modules (tree may be out of sync)."
+            )
+        node = value[key]
+        if not isinstance(node, dict):
+            logger.error("module_tree[%r] is not a dict: %s", key, type(node).__name__)
+            return f"Error: invalid module_tree node at {key!r}."
+        if node.get("children") is None:
+            node["children"] = {}
+        value = node["children"]
     
     # Parse specs - support both old format (list) and new format (dict with title/description)
     parsed_specs = {}
@@ -159,6 +188,8 @@ async def generate_sub_module_documentation(
             num_tokens >= MAX_TOKEN_PER_LEAF_MODULE
         )
         
+        sub_caps = make_response_logger_hooks(sub_module_name)
+
         if force_subagent or normal_criteria:
             logger.info(f"{indent}  Using complex agent (force={force_subagent}, normal={normal_criteria}, depth={ctx.deps.current_depth}, min_depth={MIN_DEPTH})")
             sub_agent = Agent(
@@ -167,6 +198,7 @@ async def generate_sub_module_documentation(
                 deps_type=CodeWikiDeps,
                 system_prompt=SYSTEM_PROMPT.format(module_name=sub_module_name),
                 tools=[read_code_components_tool, str_replace_editor_tool, generate_sub_module_documentation_tool],
+                capabilities=sub_caps,
             )
         else:
             logger.info(f"{indent}  Using leaf agent (depth={ctx.deps.current_depth}, tokens={num_tokens})")
@@ -176,8 +208,8 @@ async def generate_sub_module_documentation(
                 deps_type=CodeWikiDeps,
                 system_prompt=LEAF_SYSTEM_PROMPT.format(module_name=sub_module_name),
                 tools=[read_code_components_tool, str_replace_editor_tool],
+                capabilities=sub_caps,
             )
-
         deps.current_module_name = sub_module_name
         deps.path_to_current_module.append(sub_module_name)
         deps.current_depth += 1

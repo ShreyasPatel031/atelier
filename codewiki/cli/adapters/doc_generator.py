@@ -345,8 +345,21 @@ class CLIDocumentationGenerator:
             
             # Create metadata
             doc_generator.create_documentation_metadata(working_dir, components, len(leaf_nodes))
+
+            # Stage 4.5: same as DocumentationGenerator.run — sync_issues.json + measurement_summary
+            try:
+                from codewiki.src.be.doc_file_sync import run_full_sync
+
+                repo_name = os.path.basename(os.path.normpath(self.repo_path))
+                sync_result = run_full_sync(working_dir, components, repo_name=repo_name)
+                click.echo(
+                    f"[DEBUG] Doc sync wrote sync_issues.json (issues={sync_result.get('issues', 0)})",
+                    err=True,
+                )
+            except Exception as sync_err:
+                _log.warning("Doc sync failed (non-critical): %s", sync_err)
             
-            # Collect generated files
+            # Collect generated files (after sync may add placeholders)
             md_files = []
             for file_path in os.listdir(working_dir):
                 if file_path.endswith('.md') or file_path.endswith('.json'):

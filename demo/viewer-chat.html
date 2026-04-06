@@ -792,44 +792,8 @@
             return cleaned;
         }
         
-        // Sanitize Mermaid diagram to fix common issues that break rendering
         function sanitizeMermaidDiagram(diagram) {
-            if (!diagram) return diagram;
-            
-            let sanitized = diagram;
-            
-            // Fix 1: Edge labels like |1. Something| get misinterpreted as markdown list
-            // Remove the number prefix from edge labels to prevent markdown interpretation
-            sanitized = sanitized.replace(/\|(\d+)\.\s*([^|]+)\|/g, (match, num, text) => {
-                // Remove "1. " prefix, keep just the text
-                return `|${text.trim()}|`;
-            });
-            
-            // Fix 2: Any remaining edge labels with problematic characters - wrap in quotes
-            sanitized = sanitized.replace(/\|([^|"]+)\|/g, (match, content) => {
-                // If content has special chars, wrap in quotes
-                if (/[.:\-><]/.test(content)) {
-                    return `|"${content.trim()}"|`;
-                }
-                return match;
-            });
-            
-            // Fix 3: Subgraph names with spaces need quotes
-            sanitized = sanitized.replace(/subgraph\s+([^"[\n]+)$/gm, (match, name) => {
-                const trimmed = name.trim();
-                if (trimmed && !trimmed.startsWith('"') && trimmed.includes(' ')) {
-                    return `subgraph "${trimmed}"`;
-                }
-                return match;
-            });
-            
-            // Fix 4: Remove any HTML-like tags that might break rendering
-            sanitized = sanitized.replace(/<[^>]+>/g, '');
-            
-            // Fix 5: Escape backticks inside labels
-            sanitized = sanitized.replace(/\["([^"]*)`([^"]*)"]/g, '["$1\'$2"]');
-            
-            return sanitized;
+            return diagram || '';
         }
         
         function generateModuleDiagram(key, data) {

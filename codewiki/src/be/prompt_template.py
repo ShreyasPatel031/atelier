@@ -1,3 +1,34 @@
+# Single block: swap this string to change diagram-language instructions (e.g. non-Mermaid).
+DIAGRAM_SYNTAX_RULES_SECTION = """
+<DIAGRAM_SYNTAX_RULES>
+**Diagram language:** Mermaid (replace this entire block if you change diagram format.)
+
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use `graph` or `flowchart` with direction TD, TB, LR, RL, or BT as needed (module docs often use TD/TB; repository overviews may use LR when that prompt requires horizontal layout).
+- Subgraph labels must not use reserved words like "end"
+- **Parentheses in node labels:** If a label includes parentheses, function-call parens, or type-like qualifiers (e.g. `Thing (Type)`, `main()`, "(from …)"), use **quoted** node text: `nodeId["Full label text"]` instead of `nodeId[unquoted text with parens]`, or rephrase without parentheses. For edge labels with special characters, use quoted edge text, e.g. `A -->|"label with (parens)"| B`.
+- **Sequence-only constructs:** Do not use sequence-diagram-only or callback-style syntax in **flowchart** diagrams; use normal flowchart nodes and edges only.
+- **Edge labels:** Always wrap edge text in `|"…"|` with **no space** between the pipe and the quote. The pattern is the same for all arrow types:
+  CORRECT: `A -->|"label"| B`   `C ==>|"label"| D`   `E -.->|"label"| F`
+  WRONG:   `A -->| "label"| B`  (space after first pipe)
+  WRONG:   `A --|>|"label"| B`  (activation-style `--|>` arrow is invalid in flowcharts)
+  WRONG:   `A ==>\"label\"| B`  (missing pipes / escaped quotes)
+- **Edges:** Avoid activation-style arrows such as `--|>` in flowcharts; use only `-->`, `-.->`, or `==>`.
+- Edge labels must be on the **same line** as the arrow — do not break an edge statement across multiple lines.
+- **Comments and edges:** Put `%%` comments on separate lines above the statement; do not append `%%` or other tokens on the same line as an edge in a way that splits the statement. Keep `click` lines valid: `click nodeId "file.md"` (optional tooltip), with no stray spaces breaking the statement.
+- **Double colons:** Avoid raw `::` in unquoted node labels (e.g. C++/Rust paths). Use quoted labels `id["a::b"]` or rewrite (e.g. `a / b`, `-`).
+- These rules reflect automated validation of common Mermaid parse failures.
+</DIAGRAM_SYNTAX_RULES>
+"""
+
 SYSTEM_PROMPT = """
 <ROLE>
 You are an AI documentation assistant. Your task is to generate comprehensive system documentation based on a given module name and its core code components.
@@ -73,19 +104,7 @@ Key requirements:
 - Use "click nodeId 'filename.md' 'tooltip'" to make nodes navigable
 - DO NOT use classDiagram, sequenceDiagram, or other diagram types
 
-<MERMAID_SYNTAX_RULES>
-- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
-  CORRECT: %% This is a comment
-  WRONG:   % This is a comment
-- Do NOT use inline comments on edge/node lines. Put comments on their own line.
-  CORRECT:
-    %% Dependencies
-    A --> B
-  WRONG:
-    A --> B % dependency
-- Use "graph TD" or "flowchart TD" only
-- Subgraph labels must not use reserved words like "end"
-</MERMAID_SYNTAX_RULES>
+""" + DIAGRAM_SYNTAX_RULES_SECTION + """
 </ARCHITECTURE_DIAGRAM_EXAMPLE>
 
 <DIAGRAM_DESIGN_RULES>
@@ -242,19 +261,7 @@ flowchart TD
     click utils "utils.md"
 ```
 
-<MERMAID_SYNTAX_RULES>
-- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
-  CORRECT: %% This is a comment
-  WRONG:   % This is a comment
-- Do NOT use inline comments on edge/node lines. Put comments on their own line.
-  CORRECT:
-    %% Dependencies
-    A --> B
-  WRONG:
-    A --> B % dependency
-- Use "graph TD" or "flowchart TD" only
-- Subgraph labels must not use reserved words like "end"
-</MERMAID_SYNTAX_RULES>
+""" + DIAGRAM_SYNTAX_RULES_SECTION + """
 </DIAGRAM_REQUIREMENTS>
 
 <AVAILABLE_TOOLS>
@@ -332,19 +339,7 @@ flowchart TD
     validate -.->|"reads schema from"| config
 ```
 
-<MERMAID_SYNTAX_RULES>
-- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
-  CORRECT: %% This is a comment
-  WRONG:   % This is a comment
-- Do NOT use inline comments on edge/node lines. Put comments on their own line.
-  CORRECT:
-    %% Dependencies
-    A --> B
-  WRONG:
-    A --> B % dependency
-- Use "graph TD" or "flowchart TD" only
-- Subgraph labels must not use reserved words like "end"
-</MERMAID_SYNTAX_RULES>
+""" + DIAGRAM_SYNTAX_RULES_SECTION + """
 
 <DIAGRAM_DESIGN_RULES>
 1. NODE LABELS: Describe what happens, NOT class/file names.
@@ -480,19 +475,7 @@ flowchart LR
     click search "search.md" "View Search Module"
 ```
 
-<MERMAID_SYNTAX_RULES>
-- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
-  CORRECT: %% This is a comment
-  WRONG:   % This is a comment
-- Do NOT use inline comments on edge/node lines. Put comments on their own line.
-  CORRECT:
-    %% Dependencies
-    A --> B
-  WRONG:
-    A --> B % dependency
-- Use "graph TD" or "flowchart TD" only
-- Subgraph labels must not use reserved words like "end"
-</MERMAID_SYNTAX_RULES>
+""" + DIAGRAM_SYNTAX_RULES_SECTION + """
 
 CRITICAL: You can ONLY link to modules that exist in the AVAILABLE_MODULES list below.
 DO NOT create links to files that don't exist. DO NOT infer modules from directory structure or component paths.
@@ -571,19 +554,7 @@ flowchart TD
     click transform "processing.md" "View Processing"
 ```
 
-<MERMAID_SYNTAX_RULES>
-- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
-  CORRECT: %% This is a comment
-  WRONG:   % This is a comment
-- Do NOT use inline comments on edge/node lines. Put comments on their own line.
-  CORRECT:
-    %% Dependencies
-    A --> B
-  WRONG:
-    A --> B % dependency
-- Use "graph TD" or "flowchart TD" only
-- Subgraph labels must not use reserved words like "end"
-</MERMAID_SYNTAX_RULES>
+""" + DIAGRAM_SYNTAX_RULES_SECTION + """
 
 Provide repo structure and core components documentation of the `{module_name}` module:
 <REPO_STRUCTURE>

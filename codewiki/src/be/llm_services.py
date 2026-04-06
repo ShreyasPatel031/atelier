@@ -14,20 +14,69 @@ from pydantic_ai.models import Model
 from openai import OpenAI
 
 # Try to import Gemini support (use GoogleModel, not deprecated GeminiModel)
+CodeWikiGoogleModel = None  # type: ignore[misc, assignment]
 try:
     from pydantic_ai.models.google import GoogleModel
     from pydantic_ai.providers.google import GoogleProvider
+    from pydantic_ai.models import ModelRequestParameters
+
+    from google.genai.types import (
+        FunctionCallingConfigDict,
+        FunctionCallingConfigMode,
+        ToolConfigDict,
+        ToolDict,
+    )
+
+    class CodeWikiGoogleModel(GoogleModel):
+        """
+        Gemini with FunctionCallingConfig mode VALIDATED when using function tools + text.
+
+        pydantic-ai's GoogleModel only sets tool_config when *only* tool output is allowed
+        (mode ANY). For agents that need both tools and assistant text, it sends tool_config=None
+        (AUTO), which is prone to MALFORMED_FUNCTION_CALL. Google's API supports VALIDATED
+        (preview) to constrain tool calls to valid schema while still allowing natural language.
+        See: https://ai.google.dev/gemini-api/docs/function-calling#function_calling_modes
+        """
+
+        def _get_tool_config(
+            self,
+            model_request_parameters: ModelRequestParameters,
+            tools: list[ToolDict] | None,
+        ) -> ToolConfigDict | None:
+            # Preserve pydantic-ai behavior when the model must emit only tool calls (no text).
+            if not model_request_parameters.allow_text_output and tools:
+                return super()._get_tool_config(model_request_parameters, tools)
+            if not tools:
+                return None
+            names: list[str] = []
+            for tool in tools:
+                for function_declaration in tool.get("function_declarations") or []:
+                    if name := function_declaration.get("name"):
+                        names.append(name)
+            if not names:
+                # Built-in tools only (search, code_execution, …) — keep default.
+                return super()._get_tool_config(model_request_parameters, tools)
+            return ToolConfigDict(
+                function_calling_config=FunctionCallingConfigDict(
+                    mode=FunctionCallingConfigMode.VALIDATED,
+                    allowed_function_names=names,
+                )
+            )
+
     GEMINI_AVAILABLE = True
 except ImportError:
     try:
         # Fallback to deprecated GeminiModel
         from pydantic_ai.models.gemini import GeminiModel as GoogleModel
         from pydantic_ai.providers.google import GoogleProvider
+        from pydantic_ai.models import ModelRequestParameters  # noqa: F401
+
         GEMINI_AVAILABLE = True
     except ImportError:
         GEMINI_AVAILABLE = False
         GoogleProvider = None
         GoogleModel = None
+        ModelRequestParameters = None  # type: ignore[misc, assignment]
 
 try:
     import google.generativeai as genai
@@ -184,12 +233,18 @@ def _resolve_gemini_api_key(config: Config) -> str:
 def create_main_model(config: Config) -> Model:
     """Create the main LLM model from configuration."""
     
-    # Native Gemini support - use pydantic_ai's GoogleModel
+    # Native Gemini support - use CodeWikiGoogleModel (VALIDATED tool config) when available
     if _is_gemini_model(config.main_model) and GEMINI_AVAILABLE:
         logger.info(f"[LLM] Using native Gemini support for {config.main_model}")
         gemini_key = _resolve_gemini_api_key(config)
         os.environ["GEMINI_API_KEY"] = gemini_key
-        return GoogleModel(
+        model_cls = CodeWikiGoogleModel if CodeWikiGoogleModel is not None else GoogleModel
+        if model_cls is CodeWikiGoogleModel:
+            logger.info(
+                "[LLM] Gemini function calling: ToolConfig mode VALIDATED "
+                "(reduces MALFORMED_FUNCTION_CALL vs AUTO; see Google API docs)"
+            )
+        return model_cls(
             model_name=config.main_model,
             provider='google-gla'  # Use string provider, API key from env
         )
@@ -216,7 +271,8 @@ def create_fallback_model(config: Config) -> Model:
     if _is_gemini_model(config.fallback_model) and GEMINI_AVAILABLE:
         logger.info(f"[LLM] Using native Gemini support for fallback {config.fallback_model}")
         os.environ["GEMINI_API_KEY"] = _resolve_gemini_api_key(config)
-        return GoogleModel(
+        model_cls = CodeWikiGoogleModel if CodeWikiGoogleModel is not None else GoogleModel
+        return model_cls(
             model_name=config.fallback_model,
             provider='google-gla'
         )

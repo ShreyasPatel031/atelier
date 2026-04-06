@@ -25,6 +25,10 @@ from codewiki.src.config import (
 )
 from codewiki.src.file_manager import file_manager
 from codewiki.src.be.agent_orchestrator import AgentOrchestrator
+from codewiki.src.be.module_metadata import (
+    apply_metadata_to_tree_path,
+    extract_module_metadata_from_file,
+)
 
 
 class DocumentationGenerator:
@@ -194,16 +198,29 @@ This is a quick overview generated from the module structure. Detailed documenta
         """Build structure for overview generation with 1-depth children docs and target indicator."""
         
         processed_module_tree = deepcopy(module_tree)
-        module_info = processed_module_tree
+        module_info: Any = processed_module_tree
         for path_part in module_path:
+            if not isinstance(module_info, dict) or path_part not in module_info:
+                logger.warning(
+                    "build_overview_structure: missing segment %r for path %s",
+                    path_part,
+                    module_path,
+                )
+                return processed_module_tree
             module_info = module_info[path_part]
             if path_part != module_path[-1]:
-                module_info = module_info.get("children", {})
+                module_info = module_info.get("children") or {}
             else:
                 module_info["is_target_for_overview_generation"] = True
 
+        if not isinstance(module_info, dict):
+            logger.warning("build_overview_structure: target node is not a dict for path %s", module_path)
+            return processed_module_tree
+
         if "children" in module_info:
             module_info = module_info["children"]
+        else:
+            module_info = {}
 
         for child_name, child_info in module_info.items():
             if os.path.exists(os.path.join(working_dir, f"{child_name}.md")):
@@ -396,7 +413,12 @@ This is a quick overview generated from the module structure. Detailed documenta
             logger.info(f"[STAGE 3]   - Successful: {len(successful_modules)}")
             logger.info(f"[STAGE 3]   - Failed: {len(failed_modules)}")
             if failed_modules:
-                logger.warning(f"[STAGE 3] Failed modules: {[name for name, _ in failed_modules]}")
+                logger.warning(
+                    f"[STAGE 3] Failed module summary ({len(failed_modules)} total):"
+                )
+                for name, err in failed_modules:
+                    err_one_line = (err or "").replace("\n", " ")[:500]
+                    logger.warning(f"[STAGE 3]   - {name}: {err_one_line}")
 
             # Generate repo overview
             logger.info(f"📚 Generating repository overview")
@@ -594,6 +616,39 @@ This is a quick overview generated from the module structure. Detailed documenta
             except Exception as e:
                 logger.error(f"[STAGE 3] Failed to save parent documentation: {e}")
                 raise
+
+            # Write title/description/diagram from parent .md into module_tree (same as leaf path)
+            if len(module_path) >= 1:
+                try:
+                    ext_title, ext_desc, ext_diagram = extract_module_metadata_from_file(
+                        parent_docs_path
+                    )
+                    if ext_title:
+                        fresh_tree = file_manager.load_json(module_tree_path)
+                        if apply_metadata_to_tree_path(
+                            fresh_tree,
+                            module_path,
+                            ext_title,
+                            ext_desc,
+                            ext_diagram,
+                        ):
+                            file_manager.save_json(fresh_tree, module_tree_path)
+                            module_tree = fresh_tree
+                            logger.info(
+                                "[STAGE 3] Applied parent metadata to tree for path %s: title=%r",
+                                module_path,
+                                ext_title,
+                            )
+                        else:
+                            logger.warning(
+                                "[STAGE 3] Could not apply parent metadata to tree for path %s",
+                                module_path,
+                            )
+                except Exception as meta_err:
+                    logger.warning(
+                        "[STAGE 3] Parent metadata extraction failed (non-fatal): %s",
+                        meta_err,
+                    )
             
             logger.info(f"[STAGE 3] Successfully generated parent documentation for: {module_name}")
             return module_tree

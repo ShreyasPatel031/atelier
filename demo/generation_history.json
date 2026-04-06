@@ -65,5 +65,22 @@
       "missing_md_file": 2,
       "missing_diagram": 2
     }
+  },
+  {
+    "timestamp": "2026-04-06T06:47:34.793255",
+    "repo": "pydantic-ai-src",
+    "total_modules": 270,
+    "missing_files": 86,
+    "failure_rate_pct": 31.85,
+    "success_rate_pct": 68.15,
+    "errors": 176,
+    "warnings": 16,
+    "issues_by_type": {
+      "missing_title": 8,
+      "missing_description": 8,
+      "missing_md_file": 86,
+      "missing_diagram": 89,
+      "mermaid_unbalanced_subgraph": 1
+    }
   }
 ]
