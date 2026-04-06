@@ -26,6 +26,9 @@ Usage:
 import json
 import logging
 import os
+import re
+import time
+from collections import Counter
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Set, Tuple
 from datetime import datetime
@@ -43,7 +46,6 @@ class IssueType(Enum):
     MISSING_DESCRIPTION = "missing_description"
     MISSING_DIAGRAM = "missing_diagram"
     MISSING_OVERVIEW = "missing_overview"
-    ORPHAN_MD_FILE = "orphan_md_file"  # MD file exists but not in tree
     
     # Mermaid syntax errors
     MERMAID_INVALID_COMMENT = "mermaid_invalid_comment"
@@ -85,6 +87,8 @@ class SyncReport:
     files_created: List[str] = field(default_factory=list)
     metadata_added: List[str] = field(default_factory=list)
     diagrams_added: List[str] = field(default_factory=list)
+    # presync/postsync audits, mermaid timings, histograms (see run_full_sync)
+    metrics: Dict[str, Any] = field(default_factory=dict)
     
     @property
     def error_count(self) -> int:
@@ -134,6 +138,7 @@ class SyncReport:
                 "metadata_added": len(self.metadata_added),
                 "diagrams_added": len(self.diagrams_added)
             },
+            "metrics": self.metrics,
             "issues_by_type": self._group_by_type(),
             "issues": [i.to_dict() for i in self.issues],
             "files_created": self.files_created,
@@ -330,6 +335,204 @@ def get_all_modules_in_tree(tree: Dict[str, Any], path: str = "") -> List[Tuple[
             modules.extend(get_all_modules_in_tree(data["children"], current_path))
     
     return modules
+
+
+def audit_docs_state(docs_dir: str) -> Dict[str, Any]:
+    """
+    Read-only audit of docs vs module_tree (Stage 3 output before sync repairs).
+
+    Used to quantify how much Stage 4.5 fixes and what Stage 3 left incomplete.
+    """
+    docs_path = Path(docs_dir)
+    tree_path = docs_path / "module_tree.json"
+    out: Dict[str, Any] = {
+        "modules_total": 0,
+        "missing_md": 0,
+        "missing_title": 0,
+        "missing_description": 0,
+        "leaf_missing_diagram": 0,
+        "parent_missing_diagram_with_children": 0,
+        "diagram_nodes_with_empty_label": 0,
+        "diagram_edges_unknown_endpoint": 0,
+        "children_missing_from_diagram_nodes": 0,
+        "parent_diagram_gaps_to_inject": 0,
+        "mermaid_fence_blocks_total": 0,
+    }
+    if not tree_path.exists():
+        return out
+    try:
+        with open(tree_path) as f:
+            tree = json.load(f)
+    except Exception:
+        return out
+
+    # Extra *.md files not listed in module_tree (e.g. hand-written notes) are allowed by
+    # design; do not count them as audit defects.
+
+    existing_md = {f.stem for f in docs_path.glob("*.md")}
+
+    for module_name, _path, module_data in get_all_modules_in_tree(tree):
+        if module_name == "overview":
+            continue
+        out["modules_total"] += 1
+        if module_name not in existing_md:
+            out["missing_md"] += 1
+        if not module_data.get("title"):
+            out["missing_title"] += 1
+        if not module_data.get("description"):
+            out["missing_description"] += 1
+
+        children = module_data.get("children") or {}
+        diagram = module_data.get("diagram") or {}
+        nodes = diagram.get("nodes") if isinstance(diagram, dict) else []
+        edges = diagram.get("edges") if isinstance(diagram, dict) else []
+
+        if not children:
+            if not diagram or not nodes:
+                out["leaf_missing_diagram"] += 1
+        else:
+            if not diagram or not nodes:
+                out["parent_missing_diagram_with_children"] += 1
+
+        if isinstance(diagram, dict) and nodes:
+            node_ids = {n.get("id") for n in nodes if isinstance(n, dict) and n.get("id")}
+            for n in nodes:
+                if not isinstance(n, dict):
+                    continue
+                lab = n.get("label")
+                if lab is None or (isinstance(lab, str) and not lab.strip()):
+                    out["diagram_nodes_with_empty_label"] += 1
+            for child_name in children:
+                if child_name not in node_ids:
+                    out["children_missing_from_diagram_nodes"] += 1
+            for e in edges:
+                if not isinstance(e, dict):
+                    continue
+                for key in ("source", "target"):
+                    nid = e.get(key)
+                    if nid and nid not in node_ids:
+                        out["diagram_edges_unknown_endpoint"] += 1
+
+        if children and isinstance(diagram, dict):
+            existing_node_ids = {n.get("id") for n in (diagram.get("nodes") or []) if isinstance(n, dict)}
+            for child_name in children:
+                if child_name not in existing_node_ids:
+                    out["parent_diagram_gaps_to_inject"] += 1
+
+    for md_file in docs_path.glob("*.md"):
+        try:
+            content = md_file.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            continue
+        out["mermaid_fence_blocks_total"] += len(
+            re.findall(r"```mermaid\s*([\s\S]*?)```", content, flags=re.IGNORECASE)
+        )
+
+    return out
+
+
+def _metrics_delta(before: Dict[str, Any], after: Dict[str, Any]) -> Dict[str, Any]:
+    """Numeric presync minus postsync (positive => problems reduced by sync)."""
+    keys = set(before.keys()) | set(after.keys())
+    delta: Dict[str, Any] = {}
+    for k in keys:
+        b, a = before.get(k), after.get(k)
+        if isinstance(b, (int, float)) and isinstance(a, (int, float)):
+            delta[k] = round(float(b) - float(a), 4)
+    return delta
+
+
+# Viewer `demo/index.html` sanitizeMermaidDiagram — used to relate LLM mistakes to regex layers vs backend checks
+_VIEWER_REGEX_LAYERS_DOC: List[Dict[str, Any]] = [
+    {
+        "layer": "Fix 0",
+        "what": "Escape ()[]{} inside quoted [\"...\"] and some unquoted labels",
+        "backend_heuristic": "Not checked in sync (viewer-only escape path)",
+        "deep_validator": "May surface as invalid_node_id warning or missing_diagram_type if line breaks badly",
+    },
+    {
+        "layer": "Fix 1–2",
+        "what": "Edge labels |...| — strip numbered lists, quote edge text with .:-><",
+        "backend_heuristic": "Not checked",
+        "deep_validator": "malformed_edge_label if present",
+    },
+    {
+        "layer": "Fix 3",
+        "what": "subgraph + spaces → quote subgraph name",
+        "backend_heuristic": "MERMAID_UNBALANCED_SUBGRAPH if end/subgraph mismatch",
+        "deep_validator": "subgraph balance in mermaid_validator",
+    },
+    {
+        "layer": "Fix 4–5",
+        "what": "Strip HTML tags; backticks in labels",
+        "backend_heuristic": "Not checked",
+        "deep_validator": "syntax_error or warnings depending on content",
+    },
+    {
+        "layer": "sync heuristic",
+        "what": "% vs %%, bracket count, subgraph/end count",
+        "backend_heuristic": "MERMAID_INVALID_COMMENT, MERMAID_UNBALANCED_BRACKETS, MERMAID_UNBALANCED_SUBGRAPH",
+        "deep_validator": "invalid_comment, unbalanced_brackets, unbalanced_subgraph, etc.",
+    },
+]
+
+
+def _build_measurement_summary(report: SyncReport, mermaid_stats: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    One JSON blob for experiments answering:
+    (1) Stage 3 defects vs what Stage 4.5 fixes (tree/md/diagram + sync issue counts),
+    (2) Mermaid error *types* (heuristic + deep) vs viewer regex coverage,
+    (3) Mermaid validation wall time (heuristic vs deep).
+    """
+    by_type: Dict[str, int] = {}
+    for i in report.issues:
+        by_type[i.issue_type] = by_type.get(i.issue_type, 0) + 1
+
+    mermaid_from_issues = {k: v for k, v in by_type.items() if k.startswith("mermaid_")}
+    non_mermaid_from_issues = {k: v for k, v in by_type.items() if not k.startswith("mermaid_")}
+
+    presync = report.metrics.get("presync_audit") or {}
+    postsync = report.metrics.get("postsync_audit") or {}
+
+    return {
+        "1_stage3_defects_before_stage45": {
+            "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
+            "presync_audit": presync,
+        },
+        "1b_stage45_fixes_applied_counters": report.metrics.get("fixes_applied_counts") or {},
+        "1c_residual_after_stage45": {
+            "postsync_audit": postsync,
+        },
+        "1d_reduction_delta_presync_minus_postsync": {
+            "note": "Positive number = fewer problems after sync for that metric",
+            "delta": report.metrics.get("delta_presync_minus_postsync") or {},
+        },
+        "1e_issues_logged_this_run_by_type": {
+            "all": by_type,
+            "non_mermaid": non_mermaid_from_issues,
+            "mermaid_only": mermaid_from_issues,
+        },
+        "2_mermaid_syntax_error_types": {
+            "from_sync_heuristic_pass": {
+                "total_issue_rows": mermaid_stats.get("issues_found", 0),
+                "by_issue_type": mermaid_from_issues,
+            },
+            "from_deep_validator_per_block": {
+                "enabled": mermaid_stats.get("deep_validate_enabled"),
+                "mermaid_blocks_scanned": mermaid_stats.get("mermaid_blocks_total", 0),
+                "invalid_blocks": mermaid_stats.get("deep_invalid_blocks", 0),
+                "error_histogram": mermaid_stats.get("deep_error_histogram") or {},
+                "note": "Keys are MermaidErrorType values from mermaid_validator.validate_mermaid; "
+                "warnings prefixed with warning:",
+            },
+            "viewer_regex_layers_vs_backend": _VIEWER_REGEX_LAYERS_DOC,
+        },
+        "3_mermaid_validation_timing_ms": {
+            "heuristic_pass": mermaid_stats.get("heuristic_ms"),
+            "deep_pass": mermaid_stats.get("deep_ms"),
+            "deep_enabled": mermaid_stats.get("deep_validate_enabled"),
+        },
+    }
 
 
 def generate_minimal_doc(module_name: str, module_data: Dict, module_path: str, 
@@ -597,119 +800,159 @@ def add_leaf_diagrams(docs_dir: str, report: SyncReport = None) -> int:
     return added
 
 
-def validate_mermaid_diagrams(docs_dir: str, report: SyncReport) -> int:
+def validate_mermaid_diagrams(
+    docs_dir: str,
+    report: SyncReport,
+    deep_validate: Optional[bool] = None,
+) -> Dict[str, Any]:
     """
     Validate all Mermaid diagrams in the docs directory.
-    
-    Catches common syntax errors like:
-    - % instead of %% for comments
-    - Unbalanced brackets
-    - Unbalanced subgraph/end
-    
+
+    Heuristic checks (fast): invalid % comments, bracket balance, subgraph/end.
+    Optional deep pass: ``codewiki.src.be.mermaid_validator.validate_mermaid`` per block
+    (set env ``CODEWIKI_SYNC_DEEP_MERMAID=1`` or pass ``deep_validate=True``).
+
     Returns:
-        Number of issues found
+        Dict with issue counts, timings (ms), and deep histogram (error_type -> count).
     """
-    import re
-    
+    from codewiki.src.be.mermaid_validator import validate_mermaid
+
+    if deep_validate is None:
+        deep_validate = os.environ.get("CODEWIKI_SYNC_DEEP_MERMAID", "0") == "1"
+
     docs_path = Path(docs_dir)
     issues_found = 0
-    
-    # Check all .md files for embedded mermaid blocks
+    t_heuristic = time.perf_counter()
+    pattern = r"```mermaid\s*([\s\S]*?)```"
+
     for md_file in docs_path.glob("*.md"):
         try:
-            content = md_file.read_text()
+            content = md_file.read_text(encoding="utf-8", errors="replace")
         except Exception:
             continue
-        
-        # Find mermaid blocks
-        pattern = r'```mermaid\s*([\s\S]*?)```'
-        for match in re.finditer(pattern, content):
+
+        for match in re.finditer(pattern, content, flags=re.IGNORECASE):
             diagram = match.group(1).strip()
-            lines = diagram.split('\n')
-            
+            lines = diagram.split("\n")
+
             for i, line in enumerate(lines, 1):
                 stripped = line.strip()
-                
-                # Check for invalid comments (% instead of %%)
-                if stripped.startswith('%') and not stripped.startswith('%%'):
+
+                if stripped.startswith("%") and not stripped.startswith("%%"):
                     issues_found += 1
                     logger.error(f"[MERMAID_ERROR] {md_file.name}:line {i} - Invalid comment syntax")
-                    logger.error(f"[MERMAID_ERROR]   Found: {stripped[:50]}")
-                    logger.error(f"[MERMAID_ERROR]   Fix: Use %% instead of %")
-                    
-                    report.add_issue(SyncIssue(
-                        issue_type=IssueType.MERMAID_INVALID_COMMENT.value,
-                        module_name=md_file.stem,
-                        module_path=md_file.stem,
-                        severity="error",
-                        details={
-                            "line_number": i,
-                            "line_content": stripped[:100],
-                            "fix": f"Change '%' to '%%'"
-                        },
-                        auto_fixed=False
-                    ))
-                
-                # Check for inline % comments
-                if ' % ' in stripped and not stripped.startswith('%%'):
+                    report.add_issue(
+                        SyncIssue(
+                            issue_type=IssueType.MERMAID_INVALID_COMMENT.value,
+                            module_name=md_file.stem,
+                            module_path=md_file.stem,
+                            severity="error",
+                            details={
+                                "line_number": i,
+                                "line_content": stripped[:100],
+                                "fix": "Change '%' to '%%'",
+                            },
+                            auto_fixed=False,
+                        )
+                    )
+
+                if " % " in stripped and not stripped.startswith("%%"):
                     issues_found += 1
                     logger.error(f"[MERMAID_ERROR] {md_file.name}:line {i} - Inline comment with single %")
-                    
-                    report.add_issue(SyncIssue(
-                        issue_type=IssueType.MERMAID_INVALID_COMMENT.value,
+                    report.add_issue(
+                        SyncIssue(
+                            issue_type=IssueType.MERMAID_INVALID_COMMENT.value,
+                            module_name=md_file.stem,
+                            module_path=md_file.stem,
+                            severity="error",
+                            details={
+                                "line_number": i,
+                                "line_content": stripped[:100],
+                                "fix": "Use %% for comments",
+                            },
+                            auto_fixed=False,
+                        )
+                    )
+
+            open_brackets = diagram.count("[")
+            close_brackets = diagram.count("]")
+            if open_brackets != close_brackets:
+                issues_found += 1
+                logger.error(
+                    f"[MERMAID_ERROR] {md_file.name} - Unbalanced brackets: {open_brackets} '[' vs {close_brackets} ']'"
+                )
+                report.add_issue(
+                    SyncIssue(
+                        issue_type=IssueType.MERMAID_UNBALANCED_BRACKETS.value,
                         module_name=md_file.stem,
                         module_path=md_file.stem,
                         severity="error",
-                        details={
-                            "line_number": i,
-                            "line_content": stripped[:100],
-                            "fix": "Use %% for comments"
-                        },
-                        auto_fixed=False
-                    ))
-            
-            # Check bracket balance
-            open_brackets = diagram.count('[')
-            close_brackets = diagram.count(']')
-            if open_brackets != close_brackets:
-                issues_found += 1
-                logger.error(f"[MERMAID_ERROR] {md_file.name} - Unbalanced brackets: {open_brackets} '[' vs {close_brackets} ']'")
-                
-                report.add_issue(SyncIssue(
-                    issue_type=IssueType.MERMAID_UNBALANCED_BRACKETS.value,
-                    module_name=md_file.stem,
-                    module_path=md_file.stem,
-                    severity="error",
-                    details={
-                        "open_count": open_brackets,
-                        "close_count": close_brackets
-                    },
-                    auto_fixed=False
-                ))
-            
-            # Check subgraph/end balance
-            subgraph_count = len(re.findall(r'\bsubgraph\b', diagram, re.IGNORECASE))
-            end_count = len(re.findall(r'^\s*end\s*$', diagram, re.MULTILINE | re.IGNORECASE))
+                        details={"open_count": open_brackets, "close_count": close_brackets},
+                        auto_fixed=False,
+                    )
+                )
+
+            subgraph_count = len(re.findall(r"\bsubgraph\b", diagram, re.IGNORECASE))
+            end_count = len(re.findall(r"^\s*end\s*$", diagram, re.MULTILINE | re.IGNORECASE))
             if subgraph_count != end_count:
                 issues_found += 1
-                logger.error(f"[MERMAID_ERROR] {md_file.name} - Unbalanced subgraph/end: {subgraph_count} subgraph vs {end_count} end")
-                
-                report.add_issue(SyncIssue(
-                    issue_type=IssueType.MERMAID_UNBALANCED_SUBGRAPH.value,
-                    module_name=md_file.stem,
-                    module_path=md_file.stem,
-                    severity="error",
-                    details={
-                        "subgraph_count": subgraph_count,
-                        "end_count": end_count
-                    },
-                    auto_fixed=False
-                ))
-    
+                logger.error(
+                    f"[MERMAID_ERROR] {md_file.name} - Unbalanced subgraph/end: {subgraph_count} subgraph vs {end_count} end"
+                )
+                report.add_issue(
+                    SyncIssue(
+                        issue_type=IssueType.MERMAID_UNBALANCED_SUBGRAPH.value,
+                        module_name=md_file.stem,
+                        module_path=md_file.stem,
+                        severity="error",
+                        details={"subgraph_count": subgraph_count, "end_count": end_count},
+                        auto_fixed=False,
+                    )
+                )
+
+    heuristic_ms = (time.perf_counter() - t_heuristic) * 1000.0
+
+    deep_hist: Counter = Counter()
+    blocks_total = 0
+    invalid_blocks = 0
+    deep_ms = 0.0
+
+    if deep_validate:
+        t_deep = time.perf_counter()
+        for md_file in docs_path.glob("*.md"):
+            try:
+                content = md_file.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                continue
+            for match in re.finditer(pattern, content, flags=re.IGNORECASE):
+                blocks_total += 1
+                diagram = match.group(1).strip()
+                vr = validate_mermaid(diagram, f"{md_file.name}")
+                if not vr.valid:
+                    invalid_blocks += 1
+                for err in vr.errors:
+                    deep_hist[err.error_type.value] += 1
+                for warn in vr.warnings:
+                    deep_hist[f"warning:{warn.error_type.value}"] += 1
+        deep_ms = (time.perf_counter() - t_deep) * 1000.0
+
     if issues_found > 0:
-        logger.warning(f"[DOC_SYNC] Found {issues_found} Mermaid syntax errors")
-    
-    return issues_found
+        logger.warning(f"[DOC_SYNC] Found {issues_found} Mermaid heuristic issues")
+
+    result = {
+        "issues_found": issues_found,
+        "heuristic_ms": round(heuristic_ms, 4),
+        "deep_validate_enabled": deep_validate,
+        "deep_ms": round(deep_ms, 4),
+        "mermaid_blocks_total": blocks_total,
+        "deep_invalid_blocks": invalid_blocks,
+        "deep_error_histogram": dict(deep_hist),
+    }
+    logger.info(
+        f"[DOC_SYNC] Mermaid validation: heuristic {heuristic_ms:.2f}ms"
+        + (f", deep {deep_ms:.2f}ms over {blocks_total} blocks" if deep_validate else "")
+    )
+    return result
 
 
 def update_tree_diagrams(docs_dir: str) -> int:
@@ -990,6 +1233,13 @@ def run_full_sync(docs_dir: str, components: Dict = None, repo_name: str = None)
         total_modules=total_modules
     )
     _current_report = report
+
+    # Stage 3 snapshot (before any sync mutation) — quantifies what 4.5 must repair
+    try:
+        report.metrics["presync_audit"] = audit_docs_state(docs_dir)
+    except Exception as e:
+        logger.warning(f"[DOC_SYNC] presync audit failed: {e}")
+        report.metrics["presync_audit"] = {"error": str(e)}
     
     # Ensure overview exists
     overview_created = ensure_overview_exists(docs_dir)
@@ -1015,9 +1265,30 @@ def run_full_sync(docs_dir: str, components: Dict = None, repo_name: str = None)
     # Update parent diagrams to include children
     diagram_updates = update_tree_diagrams(docs_dir)
     
-    # Validate Mermaid diagrams - catch syntax errors
-    mermaid_errors = validate_mermaid_diagrams(docs_dir, report)
-    
+    # Validate Mermaid diagrams (heuristic + optional deep); records timing for latency analysis
+    mermaid_stats = validate_mermaid_diagrams(docs_dir, report)
+    report.metrics["mermaid_validation"] = mermaid_stats
+
+    try:
+        report.metrics["postsync_audit"] = audit_docs_state(docs_dir)
+        pre = report.metrics.get("presync_audit") or {}
+        post = report.metrics.get("postsync_audit") or {}
+        if isinstance(pre, dict) and isinstance(post, dict) and "error" not in pre:
+            report.metrics["delta_presync_minus_postsync"] = _metrics_delta(pre, post)
+    except Exception as e:
+        logger.warning(f"[DOC_SYNC] postsync audit failed: {e}")
+
+    report.metrics["fixes_applied_counts"] = {
+        "metadata_field_updates": metadata_updates,
+        "placeholder_md_files_created": len(created_files),
+        "leaf_diagrams_added": leaf_diagrams,
+        "parent_diagram_child_nodes_injected": diagram_updates,
+        "overview_md_created": int(overview_created),
+        "mermaid_heuristic_issues_reported": mermaid_stats.get("issues_found", 0),
+    }
+
+    report.metrics["measurement_summary"] = _build_measurement_summary(report, mermaid_stats)
+
     # Save issue report
     report_path = Path(docs_dir) / "sync_issues.json"
     report.save(str(report_path))
@@ -1041,7 +1312,9 @@ def run_full_sync(docs_dir: str, components: Dict = None, repo_name: str = None)
         "metadata_updates": metadata_updates,
         "leaf_diagrams_added": leaf_diagrams,
         "diagrams_updated": diagram_updates,
-        "mermaid_errors": mermaid_errors,
+        "mermaid_validation": mermaid_stats,
+        "metrics": report.metrics,
+        "measurement_summary": report.metrics.get("measurement_summary"),
         "issues": len(report.issues),
         "errors": report.error_count,
         "warnings": report.warning_count,
