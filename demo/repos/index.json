@@ -1,9 +1,23 @@
 [
   "crewai",
+  "crewai-src",
+  "crewai_updated",
   "dspy",
+  "dspy-src",
   "langchain",
+  "langchain-src",
   "ollama",
+  "ollama-src",
   "pydantic-ai",
+  "pydantic-ai-diag",
+  "pydantic-ai-diag2",
+  "pydantic-ai-regen",
+  "pydantic-ai-regen-promptfix",
+  "pydantic-ai-regen-retries",
+  "pydantic-ai-src",
+  "pydantic-ai-validated-run",
+  "pydantic-ai_updated",
   "swift",
-  "transformers"
+  "transformers",
+  "transformers-src"
 ]
