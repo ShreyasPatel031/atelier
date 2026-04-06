@@ -4,10 +4,10 @@ You are an AI documentation assistant. Your task is to generate comprehensive sy
 </ROLE>
 
 <OBJECTIVES>
-Create documentation that helps developers and maintainers understand:
-1. The module's purpose and core functionality
-2. Architecture and component relationships
-3. How the module fits into the overall system
+Create documentation that helps new users and developers understand:
+1. What this module does and why it matters
+2. How its parts work together from a user's perspective
+3. How it connects to the rest of the system
 </OBJECTIVES>
 
 <DOCUMENTATION_STRUCTURE>
@@ -42,35 +42,70 @@ Generate documentation following this structure:
    - Include edges showing relationships between modules
 
 <ARCHITECTURE_DIAGRAM_EXAMPLE>
-CORRECT - Architecture diagram with clickable nodes linking to child module docs:
+CORRECT - Architecture diagram with grouped nodes, labeled edges, and clickable links:
 
 ```mermaid
-graph TD
-    core[Core Module]
-    auth[Authentication]
-    db[Database Layer]
-    api[API Routes]
-    utils[Utilities]
-    
-    core --> auth
-    core --> db
-    core --> api
-    auth --> utils
-    db --> utils
-    
-    click auth "authentication.md" "View Authentication Module"
-    click db "database_layer.md" "View Database Module"
-    click api "api_routes.md" "View API Module"
-    click utils "utilities.md" "View Utilities Module"
+flowchart TD
+    subgraph ingestion["Request Handling"]
+        router["Route Requests"]
+        validator["Validate Input"]
+    end
+
+    subgraph processing["Core Processing"]
+        handler["Process Data"]
+        transformer["Transform Output"]
+    end
+
+    router -->|"validated request"| handler
+    validator -.->|"schema check"| router
+    handler ==>|"processed result"| transformer
+
+    click router "request_handling.md" "View Request Handling"
+    click handler "core_processing.md" "View Core Processing"
 ```
 
 Key requirements:
 - Use "graph TD" or "flowchart TD" only
-- Each node represents a sub-module or documentation file
+- Organize nodes into subgraphs (groups) by functional role
+- Each node label describes what happens, NOT the class/file name
+- Every arrow MUST have a label describing what flows between nodes
+- Use ==> for primary data flow, --> for normal flow, -.-> for references/dependencies
 - Use "click nodeId 'filename.md' 'tooltip'" to make nodes navigable
-- Show relationships between modules with arrows
 - DO NOT use classDiagram, sequenceDiagram, or other diagram types
+
+<MERMAID_SYNTAX_RULES>
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use "graph TD" or "flowchart TD" only
+- Subgraph labels must not use reserved words like "end"
+</MERMAID_SYNTAX_RULES>
 </ARCHITECTURE_DIAGRAM_EXAMPLE>
+
+<DIAGRAM_DESIGN_RULES>
+1. GROUPING: Organize nodes into subgraphs by functional role, not by file/directory.
+   - Max 5 nodes per group. If more, create nested subgroups.
+   - Subgroups follow the same max-5 rule recursively.
+
+2. NODE LABELS: Describe what happens or what the user sees, NOT class/file names.
+   - Good: "Parse source files", "Validate input", "Route requests"
+   - Bad: "DependencyParser", "ast_parser.py", "RequestHandler"
+
+3. CONNECTIONS:
+   - Every arrow MUST have a label describing what flows (data, control, reads, writes)
+   - No generic "depends on" arrows
+   - Use ==> for primary data pipeline, --> for normal flow, -.-> for reads/references
+   - Avoid pure linear chains (A-->B-->C-->D) — show forks, parallel paths, and real relationships
+
+4. CROSS-MODULE LINKS: Actively look for dependencies on modules outside your immediate siblings.
+   If a component depends on something in a different part of the module tree, include that as an external node.
+</DIAGRAM_DESIGN_RULES>
 
 <CRITICAL_NAMING_RULES>
 **IMPORTANT**: All module names and file references MUST use consistent lowercase_with_underscores naming:
@@ -141,13 +176,28 @@ MANDATORY FORMAT - add this block in your {module_name}.md file:
 {{
     "direction": "TD",
     "nodes": [
-        {{"id": "auth_module", "label": "Authentication System", "type": "module", "link": "auth_module.md"}},
-        {{"id": "database_layer", "label": "Database Access", "type": "module", "link": "database_layer.md"}}
+        {{"id": "request_handling", "label": "Handle Incoming Requests", "type": "module", "link": "request_handling.md"}},
+        {{"id": "data_processing", "label": "Process and Transform Data", "type": "module", "link": "data_processing.md"}},
+        {{"id": "output_layer", "label": "Format and Deliver Output", "type": "module", "link": "output_layer.md"}}
     ],
     "edges": [
-        {{"source": "auth_module", "target": "database_layer"}}
+        {{"source": "request_handling", "target": "data_processing", "label": "validated input"}},
+        {{"source": "data_processing", "target": "output_layer", "label": "processed result"}}
     ],
-    "groups": []
+    "groups": [
+        {{
+            "id": "intake",
+            "label": "Intake",
+            "role": "surface",
+            "nodes": ["request_handling"]
+        }},
+        {{
+            "id": "core",
+            "label": "Core Logic",
+            "role": "generative",
+            "nodes": ["data_processing", "output_layer"]
+        }}
+    ]
 }}
 -->
 ```
@@ -157,6 +207,8 @@ VALIDATION CHECKLIST (verify before finishing):
 ✅ Node "id" matches sub-module name EXACTLY (lowercase_with_underscores)
 ✅ Node "type" is "module" for all sub-modules you created
 ✅ Node "link" is "{{sub_module_name}}.md"
+✅ Every node is assigned to a group
+✅ Edge labels describe what flows between nodes
 
 EXAMPLE: If you called:
 generate_sub_module_documentation({{"handler": ..., "config": ..., "utils": ...}})
@@ -167,15 +219,42 @@ Node types:
 - "module": Sub-module with documentation (REQUIRED for all sub-modules)
 - "external": External dependency outside this module
 
+Group roles (used for semantic color coding):
+- "surface": User-facing interactive layer (blue)
+- "generative": Content creation / AI-driven process (orange)
+- "analytical": Code parsing / structural analysis (purple)
+- "data": Persisted artifacts / stored data (green)
+
 After DIAGRAM_JSON, include Mermaid for backwards compatibility:
 ```mermaid
-graph TD
-    handler[Handler] --> config[Config]
-    handler --> utils[Utils]
+flowchart TD
+    subgraph intake["Intake"]
+        handler["Handle Requests"]
+    end
+    subgraph core_logic["Core Logic"]
+        config["Load Configuration"]
+        utils["Shared Utilities"]
+    end
+    handler -->|"reads config"| config
+    handler -->|"calls"| utils
     click handler "handler.md"
     click config "config.md"
     click utils "utils.md"
 ```
+
+<MERMAID_SYNTAX_RULES>
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use "graph TD" or "flowchart TD" only
+- Subgraph labels must not use reserved words like "end"
+</MERMAID_SYNTAX_RULES>
 </DIAGRAM_REQUIREMENTS>
 
 <AVAILABLE_TOOLS>
@@ -191,10 +270,10 @@ You are an AI documentation assistant. Your task is to generate comprehensive sy
 </ROLE>
 
 <OBJECTIVES>
-Create a comprehensive documentation that helps developers and maintainers understand:
-1. The module's purpose and core functionality
-2. Architecture and component relationships
-3. How the module fits into the overall system
+Create documentation that helps new users and developers understand:
+1. What this module does and why it matters
+2. How its parts work together from a user's perspective
+3. How it connects to the rest of the system
 </OBJECTIVES>
 
 <DOCUMENTATION_REQUIREMENTS>
@@ -217,15 +296,22 @@ You MUST include this block in your markdown file:
 {{
     "direction": "TD",
     "nodes": [
-        {{"id": "main_handler", "label": "Main Handler", "type": "component", "link": null}},
-        {{"id": "utils", "label": "Utility Functions", "type": "component", "link": null}},
-        {{"id": "config", "label": "Config Module", "type": "external", "link": "config.md"}}
+        {{"id": "parse_input", "label": "Parse Incoming Data", "type": "component", "link": null}},
+        {{"id": "validate", "label": "Validate Against Schema", "type": "component", "link": null}},
+        {{"id": "config", "label": "Configuration Module", "type": "external", "link": "config.md"}}
     ],
     "edges": [
-        {{"source": "main_handler", "target": "utils"}},
-        {{"source": "main_handler", "target": "config"}}
+        {{"source": "parse_input", "target": "validate", "label": "raw data"}},
+        {{"source": "validate", "target": "config", "label": "reads schema from"}}
     ],
-    "groups": []
+    "groups": [
+        {{
+            "id": "data_flow",
+            "label": "Data Pipeline",
+            "role": "analytical",
+            "nodes": ["parse_input", "validate"]
+        }}
+    ]
 }}
 -->
 
@@ -236,14 +322,43 @@ Node types:
 
 After DIAGRAM_JSON, also include the Mermaid version:
 ```mermaid
-graph TD
-    main_handler[Main Handler]
-    utils[Utility Functions]
-    config[Config Module]
-    main_handler --> utils
-    main_handler --> config
+flowchart TD
+    subgraph pipeline["Data Pipeline"]
+        parse_input["Parse Incoming Data"]
+        validate["Validate Against Schema"]
+    end
+    config["Configuration Module"]
+    parse_input -->|"raw data"| validate
+    validate -.->|"reads schema from"| config
 ```
-</DOCUMENTATION_REQUIREMENTS>
+
+<MERMAID_SYNTAX_RULES>
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use "graph TD" or "flowchart TD" only
+- Subgraph labels must not use reserved words like "end"
+</MERMAID_SYNTAX_RULES>
+
+<DIAGRAM_DESIGN_RULES>
+1. NODE LABELS: Describe what happens, NOT class/file names.
+   - Good: "Parse incoming data", "Validate schema", "Cache results"
+   - Bad: "DataParser", "validator.py", "CacheManager"
+
+2. CONNECTIONS:
+   - Every arrow MUST have a label describing what flows
+   - Use ==> for primary data pipeline, --> for normal flow, -.-> for reads/references
+   - Avoid pure linear chains — show forks, parallel paths, and real dependencies
+
+3. CROSS-MODULE LINKS: Actively look for dependencies on modules outside your immediate siblings.
+   If this module depends on something in a different part of the module tree, include it as an external node with a link.
+</DIAGRAM_DESIGN_RULES>
 
 <CRITICAL_NAMING_RULES>
 All module names and file references MUST use consistent lowercase_with_underscores naming:
@@ -285,26 +400,99 @@ Generate comprehensive documentation for the {module_name} module using the prov
 REPO_OVERVIEW_PROMPT = """
 You are an AI documentation assistant. Your task is to generate a brief overview of the {repo_name} repository.
 
-The overview should be a brief documentation of the repository, including:
+Before writing, take a holistic view of the full parsed codebase:
+- Who is this software for? What problem does it solve?
+- How would a new user or developer actually use it?
+- What are the 3-4 main things someone does with this system?
+- Frame the overview around user workflows and entry points, not internal code structure or folder layout.
+- A small but critical entry point matters more than a large utility module — prioritize by importance to the user, not by size.
+
+The overview should include:
 - The purpose of the repository
-- A mermaid architecture diagram showing the main modules and their relationships
+- A mermaid architecture diagram showing how users interact with the system and how the main functional areas connect
 - Each node in the diagram should be clickable and link to its documentation file
 
-IMPORTANT: Use ONLY "graph TD" or "flowchart TD" syntax. DO NOT use classDiagram or sequenceDiagram.
+IMPORTANT: Use ONLY "flowchart LR" or "flowchart TD" syntax. DO NOT use classDiagram or sequenceDiagram.
 
-Example architecture diagram with clickable nodes:
+<DIAGRAM_DESIGN_RULES>
+1. LAYOUT: Use "flowchart LR" (horizontal). Users on the left, system flows right.
+
+2. GROUPING: Organize ALL nodes into 3-4 top-level subgraphs.
+   - Each subgraph represents a functional layer (e.g., "User Interface", "Processing Engine", "Data Storage")
+   - User entry points float outside groups with distinct styling
+   - Max 5 nodes per group. If more, create nested subgroups.
+
+3. OVERVIEW LEVEL: Each functional area appears as a SINGLE collapsed node.
+   - This is the 30,000-foot view — detail lives in child docs
+   - Cross-group connections connect collapsed nodes, not internals
+
+4. CONNECTIONS:
+   - Max 2 cross-group arrows per group pair. Pick the most important data flows.
+   - Every arrow MUST have a label describing what flows ("reads structure", "writes docs")
+   - Use ==> for primary pipeline, --> for normal, -.-> for references
+   - Arrows radiate OUTWARD from user entry points
+
+5. COLORS (semantic — apply classDef and class statements):
+   - classDef userNode fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
+   - classDef surface fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+   - classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
+   - classDef generative fill:#fed7aa,stroke:#ea580c,stroke-width:1px,color:#7c2d12
+   - classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
+   Color meanings: Gold = human actor, Blue = interactive read surface, Green = persisted data, Orange = AI-driven creation, Purple = code analysis
+
+6. NODE LABELS: Describe what happens or what the user sees, NOT class/file names.
+   - Good: "Scan source files", "Web Viewer", "Walk tree bottom-up"
+   - Bad: "DependencyParser", "ast_parser.py", "AgentOrchestrator"
+
+7. DATA ARTIFACTS: Use cylinder shape [("label")] for stored data.
+   - Group artifacts together in their own subgraph
+   - One write arrow in (from producer), 1-2 read arrows out (to consumers)
+</DIAGRAM_DESIGN_RULES>
+
+Example architecture diagram:
 ```mermaid
-graph TD
-    core[Core Module]
-    auth[Authentication]
-    db[Database]
-    
-    core --> auth
-    core --> db
-    
-    click auth "authentication.md" "View Auth Module"
-    click db "database.md" "View Database Module"
+flowchart LR
+    user(("User"))
+    user ==>|"explores"| viewer
+
+    subgraph ui["User Interface"]
+        viewer["Web Viewer"]
+        search["Search & Navigate"]
+    end
+
+    subgraph data_store["Stored Data"]
+        docs[("Documentation")]
+        index[("Search Index")]
+    end
+
+    viewer -->|"reads content"| docs
+    search -->|"queries"| index
+
+    classDef userNode fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
+    classDef surface fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
+
+    class user userNode
+    class viewer,search surface
+    class docs,index data
+
+    click viewer "user_interface.md" "View UI Module"
+    click search "search.md" "View Search Module"
 ```
+
+<MERMAID_SYNTAX_RULES>
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use "graph TD" or "flowchart TD" only
+- Subgraph labels must not use reserved words like "end"
+</MERMAID_SYNTAX_RULES>
 
 CRITICAL: You can ONLY link to modules that exist in the AVAILABLE_MODULES list below.
 DO NOT create links to files that don't exist. DO NOT infer modules from directory structure or component paths.
@@ -335,25 +523,67 @@ MODULE_OVERVIEW_PROMPT = """
 You are an AI documentation assistant. Your task is to generate a brief overview of `{module_name}` module.
 
 The overview should be a brief documentation of the module, including:
-- The purpose of the module
-- The architecture of the module visualized by mermaid diagrams
+- The purpose of the module and what it does for the user
+- How the module's components work together, visualized by mermaid diagrams
 - The references to the core components documentation
 
-IMPORTANT: Use ONLY "graph TD" or "flowchart TD" syntax. DO NOT use classDiagram or sequenceDiagram.
+IMPORTANT: Use ONLY "flowchart TD" syntax. DO NOT use classDiagram or sequenceDiagram.
+
+<DIAGRAM_DESIGN_RULES>
+1. GROUPING: Organize nodes into 3-4 subgraphs by functional role.
+   - Max 5 nodes per group. If more, create nested subgroups.
+   - Subgroups follow the same max-5 rule recursively.
+
+2. NODE LABELS: Describe what happens or what the user sees, NOT class/file names.
+   - Good: "Parse configuration", "Run validation checks", "Generate output"
+   - Bad: "ConfigParser", "validator.py", "OutputGenerator"
+
+3. CONNECTIONS:
+   - Every arrow MUST have a label describing what flows
+   - Use ==> for primary data flow, --> for normal, -.-> for references
+   - Avoid pure linear chains — show real relationships, forks, parallel paths
+
+4. COLORS (semantic):
+   - classDef surface fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+   - classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
+   - classDef generative fill:#fed7aa,stroke:#ea580c,stroke-width:1px,color:#7c2d12
+   - classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
+   Color meanings: Blue = interactive surface, Green = persisted data, Orange = AI-driven creation, Purple = code analysis
+</DIAGRAM_DESIGN_RULES>
 
 Example architecture diagram with clickable nodes:
 ```mermaid
-graph TD
-    main[Main Component]
-    sub1[Sub Component 1]
-    sub2[Sub Component 2]
-    
-    main --> sub1
-    main --> sub2
-    
-    click sub1 "sub_component_1.md" "View Sub Component 1"
-    click sub2 "sub_component_2.md" "View Sub Component 2"
+flowchart TD
+    subgraph intake["Intake"]
+        receiver["Receive Input"]
+    end
+    subgraph processing["Processing"]
+        transform["Transform Data"]
+        validate["Validate Output"]
+    end
+    receiver ==>|"raw input"| transform
+    transform -->|"processed data"| validate
+
+    classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
+    class receiver,transform,validate analytical
+
+    click receiver "intake.md" "View Intake"
+    click transform "processing.md" "View Processing"
 ```
+
+<MERMAID_SYNTAX_RULES>
+- Comments MUST use %% (double percent). Single % is INVALID and will cause parse errors.
+  CORRECT: %% This is a comment
+  WRONG:   % This is a comment
+- Do NOT use inline comments on edge/node lines. Put comments on their own line.
+  CORRECT:
+    %% Dependencies
+    A --> B
+  WRONG:
+    A --> B % dependency
+- Use "graph TD" or "flowchart TD" only
+- Subgraph labels must not use reserved words like "end"
+</MERMAID_SYNTAX_RULES>
 
 Provide repo structure and core components documentation of the `{module_name}` module:
 <REPO_STRUCTURE>
@@ -372,8 +602,13 @@ Here is list of all potential core components of the repository (It's normal tha
 {potential_core_components}
 </POTENTIAL_CORE_COMPONENTS>
 
+Before grouping, step back and consider: who uses this repository and what are the 3-4 main things they do with it?
+Think about the types of users (developers, end-users, administrators) and their primary workflows.
+Identify the 3-4 main user-facing entry points — the places where someone first interacts with the system.
+Determine entry points by importance to user workflow, NOT by lines of code or folder size.
+
 IMPORTANT: You MUST output the <GROUPED_COMPONENTS> tag FIRST, BEFORE any reasoning or explanation.
-Group components by their file paths and logical relationships. Create modules based on directory structure and naming patterns.
+Group components by functional role and user-facing workflow. Consider how a user or developer would mentally organize this system, not how the files are laid out on disk.
 
 Your response MUST start immediately with:
 <GROUPED_COMPONENTS>
@@ -390,7 +625,7 @@ Your response MUST start immediately with:
 </GROUPED_COMPONENTS>
 
 Rules:
-- Group by top-level directories (e.g., all components in "torch/nn/" -> "neural_network_module")
+- Group by functional responsibility and user workflow (e.g., components that together handle "user authentication" regardless of which directories they live in)
 - Keep groups manageable (5-50 components each when possible)
 - Use snake_case for module names
 - Only include essential components, skip test/example files
@@ -409,8 +644,11 @@ Here is list of all potential core components of the module {module_name} (It's 
 {potential_core_components}
 </POTENTIAL_CORE_COMPONENTS>
 
+Before grouping, consider: what does this module do from a user's perspective, and what are the main functional areas within it?
+Think about how a developer exploring this module would mentally organize its parts.
+
 IMPORTANT: You MUST output the <GROUPED_COMPONENTS> tag FIRST, BEFORE any reasoning or explanation.
-Group these components into smaller sub-modules based on file paths and logical relationships.
+Group these components into smaller sub-modules based on functional role and how they work together from a user's perspective.
 
 Your response MUST start immediately with:
 <GROUPED_COMPONENTS>
@@ -427,7 +665,7 @@ Your response MUST start immediately with:
 </GROUPED_COMPONENTS>
 
 Rules:
-- Group by subdirectories and logical relationships
+- Group by functional responsibility — components that serve the same user-facing purpose belong together regardless of directory
 - Keep groups manageable (5-50 components each when possible)
 - Use snake_case for submodule names
 - Only include essential components
