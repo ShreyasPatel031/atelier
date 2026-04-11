@@ -109,12 +109,13 @@ if [ "$API_RUNNING" = false ]; then
             echo "   📋 Error log:"
             tail -20 /tmp/codewiki_api.log | sed 's/^/      /'
             echo ""
-            echo "   💡 Try installing dependencies:"
+            echo "   💡 Try installing API deps (minimal, for chat on port 8001):"
             if [ ! -z "$VENV_PYTHON" ]; then
-                echo "      cd $ATELIER_ROOT && $VENV_PYTHON -m pip install -r requirements.txt"
+                echo "      cd $ATELIER_ROOT && $VENV_PYTHON -m pip install -r demo/requirements-api.txt"
             else
-                echo "      cd $ATELIER_ROOT && pip install -r requirements.txt"
+                echo "      cd $ATELIER_ROOT && pip install -r demo/requirements-api.txt"
             fi
+            echo "   Full stack (may fail on very new Python): pip install -r requirements.txt"
             API_PID=""
             break
         fi
@@ -146,7 +147,7 @@ echo ""
 if [ "$API_RUNNING" = false ]; then
     echo "🔧 Troubleshooting:"
     echo "   1. Check API server logs: tail -f /tmp/codewiki_api.log"
-    echo "   2. Install dependencies: cd $ATELIER_ROOT && pip install -r requirements.txt"
+    echo "   2. Install API deps: cd $ATELIER_ROOT && pip install -r demo/requirements-api.txt"
     echo "   3. Or use single-server mode: python3 -m codewiki.run_web_app --port 8001"
     echo ""
 fi

@@ -1,0 +1,6 @@
+# Minimal deps for codewiki chat API (demo/start_viewer.sh → port 8001).
+# Use this if `pip install -r requirements.txt` fails (e.g. Python 3.14 + heavy pins).
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.10
+python-multipart>=0.0.9

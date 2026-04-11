@@ -243,6 +243,12 @@
             cursor: grab;
         }
         
+        /* Pointer over diagram nodes (overrides inherited grab from .diagram-viewport) */
+        #diagramViewport #mermaid-diagram svg g.node,
+        #diagramViewport #mermaid-diagram svg g.node * {
+            cursor: pointer !important;
+        }
+        
         .diagram-viewport:active {
             cursor: grabbing;
         }
@@ -500,9 +506,24 @@
         .clickable-node circle,
         .clickable-node polygon,
         .clickable-node path:not(.edgePath *),
-        .clickable-node ellipse {
+        .clickable-node ellipse,
+        /* Mermaid v11 flowchart often puts shapes inside .label-container */
+        #mermaid-diagram g.node.clickable-node .label-container rect,
+        #mermaid-diagram g.node.clickable-node .label-container path,
+        #mermaid-diagram g.node.clickable-node .label-container polygon,
+        #mermaid-diagram g.node.clickable-node .label-container ellipse {
             stroke: #2563eb !important;
             stroke-width: 3px !important;
+        }
+
+        /* Stroke transitions — hover doubling is applied in JS (attachDiagramNodeHoverStroke)
+           so classDef / Mermaid theme colors still respond; pure CSS :hover loses to injected styles. */
+        #mermaid-diagram svg g.node rect,
+        #mermaid-diagram svg g.node circle,
+        #mermaid-diagram svg g.node polygon,
+        #mermaid-diagram svg g.node ellipse,
+        #mermaid-diagram svg g.node .label-container path {
+            transition: stroke-width 0.12s ease, stroke 0.12s ease;
         }
 
         .clickable-node text,
@@ -824,7 +845,7 @@
         <div class="doc-pane open">
             <div class="chat-section">
                 <div class="chat-messages" id="chatMessages">
-                    <div class="chat-message assistant">Ask about this codebase's architecture.</div>
+                    <div class="chat-message assistant">Ask about this codebase's architecture. Use <strong>Arch agent focus</strong> to pick an overview subgraph (or None for the whole repo). Questions like &quot;what group is selected&quot; refer to that dropdown, not the module page you have open.</div>
                 </div>
                 <div class="arch-group-row">
                     <label for="archAgentGroupSelect">Arch agent focus</label>
@@ -866,10 +887,14 @@
         let expandedNodeToModule = new Map();  // Maps nodeId -> moduleId for expanded nodes
         let currentModuleId = 'overview';
         let selectedModuleId = null;  // Currently selected module
+        /** Last diagram shape id passed to updateSelectionHighlight (for clearing on background click). */
+        let selectedDiagramNodeId = null;
         let openedModules = new Set(['overview']);  // Track opened modules (overview is always open)
         let selectionPath = [];       // Breadcrumb path: [{id, name}, ...]
         let docPanelOpen = true;     // Panel is always open (chat-only view)
-        let moduleMetadata = {};      // Store title/description for tooltips
+        let moduleMetadata = {};      // Store title/description for tooltips (module docs / tree)
+        /** Per-diagram-node title+description from DIAGRAM_JSON in markdown (nodes array; id/label keys). Module link is optional. */
+        let overviewDiagramNodeMeta = {};
         let architectureGroups = [];  // Overview diagram groups for arch-agent focus (DIAGRAM_JSON or mermaid subgraphs)
         
         // ============================================================
@@ -1002,8 +1027,7 @@
             if (!svg) return;
             
             for (const node of diagram.nodes) {
-                // Find the SVG node element
-                const nodeEl = svg.querySelector(`[id*="${node.id}"]`);
+                const nodeEl = queryDiagramElementByLogicalId(svg, node.id) || svg.querySelector(`[id*="${node.id}"]`);
                 if (nodeEl) {
                     const gNode = nodeEl.closest('.node') || nodeEl;
                     gNode.classList.add(`node-${node.type}`);
@@ -1129,6 +1153,288 @@
                 word.charAt(0).toUpperCase() + word.slice(1)
             ).join(' ');
         }
+
+        // ------------------------------------------------------------
+        // RENDERER BOUNDARY — diagram engine is pluggable
+        // Today: Mermaid renders SVG with opaque internal ids. We parse the
+        // same source string used for render to build a logical-id registry,
+        // then stamp data-logical-id on g.node / g.cluster and data-edge-* on g.edgePath.
+        // Replacing Mermaid: change render + stamp; keep registry format + DOM contract.
+        // ------------------------------------------------------------
+
+        const MERMAID_NODE_ID_RESERVED = new Set([
+            'subgraph', 'graph', 'flowchart', 'end', 'classdef', 'class', 'style',
+            'direction', 'linkstyle', 'click'
+        ]);
+
+        /** Decode label fragments produced by convertDiagramToMermaid escapeLabel (and similar). */
+        function decodeMermaidLabelFromSource(raw) {
+            if (raw == null) return '';
+            return String(raw)
+                .replace(/#quot;/g, '"')
+                .replace(/#40;/g, '(')
+                .replace(/#41;/g, ')')
+                .replace(/#91;/g, '[')
+                .replace(/#93;/g, ']')
+                .replace(/#123;/g, '{')
+                .replace(/#125;/g, '}');
+        }
+
+        function normalizeDiagramLabelKey(s) {
+            return decodeMermaidLabelFromSource(String(s)).replace(/\s+/g, ' ').trim();
+        }
+
+        /** flowchart edge: source --arrow--> optional |label| target */
+        function tryParseMermaidEdgeLine(trimmed) {
+            const m = trimmed.match(
+                /^([A-Za-z_][\w]*)\s*(?:={2,3}>|-{2,3}[.=]?-?>|-\.->|\.-{2,}>)\s*(.+)$/
+            );
+            if (!m) return null;
+            const src = m[1];
+            let rest = m[2].trim();
+            let label = '';
+            if (rest.startsWith('|')) {
+                const close = rest.indexOf('|', 1);
+                if (close === -1) return null;
+                label = rest.slice(1, close).replace(/^"|"$/g, '').trim();
+                rest = rest.slice(close + 1).trim();
+            }
+            const dm = rest.match(/^([A-Za-z_][\w]*)\s*$/);
+            if (!dm) return null;
+            const dst = dm[1];
+            if (MERMAID_NODE_ID_RESERVED.has(src.toLowerCase()) || MERMAID_NODE_ID_RESERVED.has(dst.toLowerCase())) {
+                return null;
+            }
+            return { source: src, target: dst, rawLabel: label };
+        }
+
+        function parseMermaidEdgesForRegistry(mermaidCode) {
+            const edges = [];
+            const lines = String(mermaidCode || '').split(/\r?\n/);
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('%%')) continue;
+                const tl = trimmed.toLowerCase();
+                if (/^subgraph\s|^classdef\s|^class\s|^style\s|^linkstyle|^direction\s|^click\s/.test(tl)) continue;
+                if (/^\s*end\s*$/i.test(trimmed)) continue;
+                if (!/(?:={2,3}>|-{2,3}[.=]?-?>|-\.->|\.-{2,}>)/.test(trimmed)) continue;
+                const e = tryParseMermaidEdgeLine(trimmed);
+                if (e) edges.push(e);
+            }
+            return edges;
+        }
+
+        /**
+         * Walk source lines and collect node / subgraph definitions in file order.
+         * Supports id["label"], id(("label")) (circle), id("label") (stadium), and bracket nodes.
+         * Skips subgraph header lines for node extraction so subgraph ids are not double-counted as nodes.
+         */
+        function parseMermaidDefinitionsForRegistry(mermaidCode) {
+            const nodeDefs = [];
+            const clusterDefs = [];
+            const lines = String(mermaidCode || '').split(/\r?\n/);
+            const nodeBracketRe = /\b([A-Za-z_][\w]*)\s*\[\s*"([^"]*)"\s*\]/g;
+            const nodeCircleQuotedRe = /\b([A-Za-z_][\w]*)\s*\(\(\s*"([^"]*)"\s*\)\)/g;
+            const nodeStadiumQuotedRe = /\b([A-Za-z_][\w]*)\s*\(\s*"([^"]*)"\s*\)/g;
+
+            function pushNodeIfAllowed(id, rawLabel) {
+                if (MERMAID_NODE_ID_RESERVED.has(id.toLowerCase())) return;
+                nodeDefs.push({ logicalId: id, rawLabel });
+            }
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('%%')) continue;
+                if (/^classdef\s|^class\s|^linkstyle\s|^style\s|^\s*direction\s/i.test(trimmed)) continue;
+
+                if (/^subgraph\s+/i.test(trimmed)) {
+                    const sm = trimmed.match(/^subgraph\s+([A-Za-z_][\w]*)\s*\[\s*"([^"]*)"\s*\]/i);
+                    if (sm) {
+                        clusterDefs.push({ logicalId: sm[1], rawLabel: sm[2] });
+                    }
+                    continue;
+                }
+
+                let nm;
+                while ((nm = nodeBracketRe.exec(line)) !== null) {
+                    pushNodeIfAllowed(nm[1], nm[2]);
+                }
+                nodeBracketRe.lastIndex = 0;
+
+                while ((nm = nodeCircleQuotedRe.exec(line)) !== null) {
+                    pushNodeIfAllowed(nm[1], nm[2]);
+                }
+                nodeCircleQuotedRe.lastIndex = 0;
+
+                while ((nm = nodeStadiumQuotedRe.exec(line)) !== null) {
+                    pushNodeIfAllowed(nm[1], nm[2]);
+                }
+                nodeStadiumQuotedRe.lastIndex = 0;
+            }
+            return { nodeDefs, clusterDefs };
+        }
+
+        function collectDuplicateLabelWarnings(defs, kind) {
+            const byLabel = new Map();
+            for (const { logicalId, rawLabel } of defs) {
+                const k = normalizeDiagramLabelKey(rawLabel);
+                if (!k) continue;
+                if (!byLabel.has(k)) byLabel.set(k, new Set());
+                byLabel.get(k).add(logicalId);
+            }
+            const out = [];
+            for (const [label, ids] of byLabel) {
+                if (ids.size > 1) {
+                    out.push(`[diagram] Duplicate ${kind} display label "${label}" → logical ids: ${[...ids].join(', ')}`);
+                }
+            }
+            return out;
+        }
+
+        function buildLabelQueues(defs) {
+            const m = new Map();
+            for (const { logicalId, rawLabel } of defs) {
+                const k = normalizeDiagramLabelKey(rawLabel);
+                if (!m.has(k)) m.set(k, []);
+                m.get(k).push(logicalId);
+            }
+            return m;
+        }
+
+        function cloneQueueMap(queueMap) {
+            const out = new Map();
+            for (const [k, arr] of queueMap) {
+                out.set(k, [...arr]);
+            }
+            return out;
+        }
+
+        function buildDiagramLogicalIdRegistry(mermaidCode) {
+            const { nodeDefs, clusterDefs } = parseMermaidDefinitionsForRegistry(mermaidCode);
+            const edgeDefs = parseMermaidEdgesForRegistry(mermaidCode);
+            const warnings = [
+                ...collectDuplicateLabelWarnings(nodeDefs, 'node'),
+                ...collectDuplicateLabelWarnings(clusterDefs, 'cluster')
+            ];
+            return {
+                nodeQueues: buildLabelQueues(nodeDefs),
+                clusterQueues: buildLabelQueues(clusterDefs),
+                edgeDefs,
+                duplicateLabelWarnings: warnings
+            };
+        }
+
+        function getFlowchartNodeVisibleLabel(g) {
+            const fo = g.querySelector('foreignObject');
+            if (fo && fo.textContent) return fo.textContent.trim();
+            const nl = g.querySelector('.nodeLabel');
+            if (nl && nl.textContent) return nl.textContent.trim();
+            const tx = g.querySelector('text');
+            if (tx && tx.textContent) return tx.textContent.trim();
+            return '';
+        }
+
+        function getClusterVisibleLabel(clusterG) {
+            const lab = clusterG.querySelector('.cluster-label');
+            if (lab && lab.textContent) return lab.textContent.trim();
+            const fo = clusterG.querySelector('foreignObject');
+            if (fo && fo.textContent) return fo.textContent.trim();
+            const tx = clusterG.querySelector('text');
+            if (tx && tx.textContent) return tx.textContent.trim();
+            return '';
+        }
+
+        /**
+         * Stamp data-logical-id on g.node and g.cluster by matching visible label text
+         * to registry queues (source order × DOM order).
+         */
+        function stampLogicalIdsOntoSvg(svg, registry) {
+            if (!svg || !registry) {
+                return { unstampedNodes: [], unstampedClusters: [], edgePathMismatch: null };
+            }
+            const nq = cloneQueueMap(registry.nodeQueues);
+            const cq = cloneQueueMap(registry.clusterQueues);
+            const unstampedNodes = [];
+            const unstampedClusters = [];
+
+            function takeFromQueue(queueMap, labelKey) {
+                const q = queueMap.get(labelKey);
+                if (!q || q.length === 0) return null;
+                return q.shift();
+            }
+
+            svg.querySelectorAll('g.node').forEach((g) => {
+                const labelKey = normalizeDiagramLabelKey(getFlowchartNodeVisibleLabel(g));
+                const lid = labelKey ? takeFromQueue(nq, labelKey) : null;
+                if (lid) {
+                    g.setAttribute('data-logical-id', lid);
+                } else if (labelKey) {
+                    unstampedNodes.push(labelKey);
+                }
+            });
+
+            svg.querySelectorAll('g.cluster').forEach((g) => {
+                const labelKey = normalizeDiagramLabelKey(getClusterVisibleLabel(g));
+                const lid = labelKey ? takeFromQueue(cq, labelKey) : null;
+                if (lid) {
+                    g.setAttribute('data-logical-id', lid);
+                } else if (labelKey) {
+                    unstampedClusters.push(labelKey);
+                }
+            });
+
+            const edgeDefs = registry.edgeDefs || [];
+            let edgePathMismatch = null;
+            const edgePaths = svg.querySelectorAll('g.edgePath');
+            if (edgeDefs.length > 0) {
+                edgePaths.forEach((g, i) => {
+                    const def = edgeDefs[i];
+                    if (def) {
+                        g.setAttribute('data-edge-source', def.source);
+                        g.setAttribute('data-edge-target', def.target);
+                        if (def.rawLabel) {
+                            g.setAttribute('data-edge-label', def.rawLabel);
+                        }
+                    }
+                });
+                if (edgePaths.length !== edgeDefs.length) {
+                    edgePathMismatch = { dom: edgePaths.length, parsed: edgeDefs.length };
+                }
+            }
+
+            return { unstampedNodes, unstampedClusters, edgePathMismatch };
+        }
+
+        function queryDiagramElementByLogicalId(svg, logicalId) {
+            if (!svg || !logicalId) return null;
+            try {
+                if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+                    return svg.querySelector(`[data-logical-id="${CSS.escape(logicalId)}"]`);
+                }
+            } catch (_) { /* fall through */ }
+            return svg.querySelector(`[data-logical-id="${String(logicalId).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"]`);
+        }
+
+        function clearDiagramShapeSelection() {
+            selectedDiagramNodeId = null;
+            updateSelectionHighlight(null);
+        }
+
+        function attachDiagramBackgroundDeselect(svg) {
+            if (!svg || svg.dataset.bgDeselectBound === '1') return;
+            svg.dataset.bgDeselectBound = '1';
+            svg.addEventListener(
+                'click',
+                (e) => {
+                    const t = e.target;
+                    if (t && t.closest && (t.closest('g.node') || t.closest('g.cluster') || t.closest('g.edgePath'))) {
+                        return;
+                    }
+                    clearDiagramShapeSelection();
+                },
+                false
+            );
+        }
         
         function extractMermaidFromMarkdown(markdown) {
             const mermaidRegex = /```mermaid\n([\s\S]*?)```/g;
@@ -1136,7 +1442,7 @@
             return match ? match[1].trim() : null;
         }
         
-        function extractDiagramJsonFromOverviewMarkdown(markdown) {
+        function extractDiagramJsonFromMarkdown(markdown) {
             const pattern = /<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->/;
             const match = markdown.match(pattern);
             if (match) {
@@ -1149,9 +1455,58 @@
             return null;
         }
         
+        function extractDiagramJsonFromOverviewMarkdown(markdown) {
+            return extractDiagramJsonFromMarkdown(markdown);
+        }
+        
+        /** Build id/label -> { title, description } from DIAGRAM_JSON.nodes (title/description required in authored JSON; label fallback for title). */
+        function buildDiagramNodeMetaMap(dj) {
+            const map = {};
+            if (!dj || !Array.isArray(dj.nodes)) return map;
+            for (const n of dj.nodes) {
+                if (!n || n.id == null) continue;
+                const id = String(n.id);
+                const label = n.label != null ? String(n.label) : '';
+                const title =
+                    n.title != null && String(n.title).trim() !== ''
+                        ? String(n.title).trim()
+                        : label || id;
+                const description =
+                    n.description != null && String(n.description).trim() !== ''
+                        ? String(n.description).trim()
+                        : '';
+                const entry = { title, description };
+                map[id] = entry;
+                if (label) map[label] = entry;
+            }
+            return map;
+        }
+        
+        function extractNodeIdsInsideSubgraph(mermaid, subgraphId) {
+            if (!mermaid || !subgraphId) return [];
+            const esc = String(subgraphId).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const re = new RegExp(
+                `subgraph\\s+${esc}\\s*\\[\"[^\"]*\"\\]\\s*\\r?\\n([\\s\\S]*?)\\r?\\n\\s*end\\b`,
+                'm'
+            );
+            const mm = mermaid.match(re);
+            if (!mm) return [];
+            const block = mm[1];
+            const skip = new Set(['class', 'classDef', 'direction', 'subgraph', 'linkStyle', 'style', 'end']);
+            const ids = [];
+            const nodeLine = /^\s*(\w+)\s*\[/gm;
+            let lm;
+            while ((lm = nodeLine.exec(block)) !== null) {
+                const id = lm[1];
+                if (skip.has(id)) continue;
+                ids.push(id);
+            }
+            return ids;
+        }
+        
         function extractArchitectureGroupsFromOverview(overviewContent) {
             const groups = [];
-            const dj = extractDiagramJsonFromOverviewMarkdown(overviewContent);
+            const dj = extractDiagramJsonFromMarkdown(overviewContent);
             if (dj && Array.isArray(dj.groups) && dj.groups.length) {
                 for (const g of dj.groups) {
                     if (g.id != null && g.label != null) {
@@ -1170,6 +1525,10 @@
             let m;
             while ((m = re.exec(mermaid)) !== null) {
                 groups.push({ id: m[1], label: m[2], nodeIds: [] });
+            }
+            for (const g of groups) {
+                const inside = extractNodeIdsInsideSubgraph(mermaid, g.id);
+                if (inside.length) g.nodeIds = inside;
             }
             return groups;
         }
@@ -1228,6 +1587,28 @@
         function sanitizeMermaidDiagram(diagram) {
             return diagram || '';
         }
+
+        /** DevTools: `getDiagramRegistry()` — registry for current `currentDiagramCode` (overview, expanded, or navigated module). */
+        window.getDiagramRegistry = function getDiagramRegistry() {
+            const code = sanitizeMermaidDiagram(typeof currentDiagramCode !== 'undefined' ? currentDiagramCode : '');
+            const { nodeDefs, clusterDefs } = parseMermaidDefinitionsForRegistry(code);
+            const reg = buildDiagramLogicalIdRegistry(code);
+            const serializeQueues = (map) => {
+                const o = {};
+                for (const [k, v] of map) o[k] = [...v];
+                return o;
+            };
+            return {
+                diagramCodeChars: code.length,
+                currentModuleId: typeof currentModuleId !== 'undefined' ? currentModuleId : null,
+                duplicateLabelWarnings: reg.duplicateLabelWarnings,
+                nodeDefs,
+                clusterDefs,
+                edgeDefs: reg.edgeDefs || [],
+                nodeQueues: serializeQueues(reg.nodeQueues),
+                clusterQueues: serializeQueues(reg.clusterQueues),
+            };
+        };
         
         function generateModuleDiagram(key, data) {
             // FIRST: Check for structured diagram object (new format from VIEWER_MIGRATION)
@@ -1261,6 +1642,7 @@
             // Build overview from overview.md
             const overviewContent = DOCS_CONTENT['overview.md'] || '';
             const overviewDiagram = extractMermaidFromMarkdown(overviewContent);
+            overviewDiagramNodeMeta = buildDiagramNodeMetaMap(extractDiagramJsonFromMarkdown(overviewContent));
             
             // FIRST: Build module data from tree so we have all modules available
             buildModulesFromTree(MODULE_TREE, '');
@@ -1295,7 +1677,8 @@
                 name: REPO_TITLE + ' Overview',
                 diagram: stripClickStatements(overviewDiagram || ''),
                 documentation: overviewContent || '# Overview\n\nNo overview available.',
-                links: overviewLinks
+                links: overviewLinks,
+                diagramNodeMeta: overviewDiagramNodeMeta
             };
             
             populateArchitectureGroupSelect();
@@ -1347,6 +1730,7 @@
                 // Extract diagram from markdown FIRST, then fallback to generated
                 const extractedDiagram = extractMermaidFromMarkdown(documentation);
                 const diagram = extractedDiagram || generateModuleDiagram(key, data);
+                const diagramNodeMeta = buildDiagramNodeMetaMap(extractDiagramJsonFromMarkdown(documentation));
                 
                 // Build links for children and from diagram click statements
                 const links = {};
@@ -1374,7 +1758,8 @@
                     diagram: stripClickStatements(diagram),
                     documentation: documentation,
                     links: links,
-                    path: data.path
+                    path: data.path,
+                    diagramNodeMeta
                 };
                 
                 // Recursively process children
@@ -1389,9 +1774,6 @@
         // ============================================================
         
         async function renderDiagram(code, links, moduleId) {
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1256',message:'renderDiagram() called',data:{moduleId,currentModuleId,expandedNodesSize:expandedNodes.size,codeLength:code?.length||0},timestamp:Date.now(),runId:'debug',hypothesisId:'F'})}).catch(()=>{});
-            // #endregion
             const container = document.getElementById('mermaid-diagram');
             if (!code || !code.trim()) {
                 container.innerHTML = '<div class="loading">No diagram available</div>';
@@ -1401,11 +1783,34 @@
             // Sanitize diagram to fix common Mermaid parsing issues
             const sanitizedCode = sanitizeMermaidDiagram(code);
             
+            const diagramRegistry = buildDiagramLogicalIdRegistry(sanitizedCode);
+            for (const w of diagramRegistry.duplicateLabelWarnings) {
+                console.warn(w);
+            }
+
             try {
                 container.innerHTML = '';
                 const id = 'mermaid-' + Date.now();
                 const { svg } = await mermaid.render(id, sanitizedCode);
                 container.innerHTML = svg;
+                const svgEl = container.querySelector('svg');
+                if (svgEl) {
+                    const stamp = stampLogicalIdsOntoSvg(svgEl, diagramRegistry);
+                    if (stamp.unstampedNodes.length) {
+                        console.warn('[diagram] Unstamped node label(s) after registry match:', stamp.unstampedNodes);
+                    }
+                    if (stamp.unstampedClusters.length) {
+                        console.warn('[diagram] Unstamped cluster label(s) after registry match:', stamp.unstampedClusters);
+                    }
+                    if (stamp.edgePathMismatch) {
+                        console.warn(
+                            '[diagram] edgePath count mismatch: SVG',
+                            stamp.edgePathMismatch.dom,
+                            'vs parsed',
+                            stamp.edgePathMismatch.parsed
+                        );
+                    }
+                }
                 
                 // Process nodes to make them clickable
                 setTimeout(() => processNodes(links, moduleId), 100);
@@ -1414,8 +1819,30 @@
                 // Try rendering without sanitization as fallback
                 try {
                     const id2 = 'mermaid-fallback-' + Date.now();
+                    const fallbackRegistry = buildDiagramLogicalIdRegistry(code);
+                    for (const w of fallbackRegistry.duplicateLabelWarnings) {
+                        console.warn(w);
+                    }
                     const { svg } = await mermaid.render(id2, code);
                     container.innerHTML = svg;
+                    const svgEl = container.querySelector('svg');
+                    if (svgEl) {
+                        const stamp = stampLogicalIdsOntoSvg(svgEl, fallbackRegistry);
+                        if (stamp.unstampedNodes.length) {
+                            console.warn('[diagram] Unstamped node label(s) after registry match:', stamp.unstampedNodes);
+                        }
+                        if (stamp.unstampedClusters.length) {
+                            console.warn('[diagram] Unstamped cluster label(s) after registry match:', stamp.unstampedClusters);
+                        }
+                        if (stamp.edgePathMismatch) {
+                            console.warn(
+                                '[diagram] edgePath count mismatch: SVG',
+                                stamp.edgePathMismatch.dom,
+                                'vs parsed',
+                                stamp.edgePathMismatch.parsed
+                            );
+                        }
+                    }
                     setTimeout(() => processNodes(links, moduleId), 100);
                 } catch (err2) {
                     container.innerHTML = `<div class="error">Error rendering diagram.<br>${err2.message}</div>`;
@@ -1438,6 +1865,7 @@
         
         function updateSelection(moduleId, nodeId = null) {
             selectedModuleId = moduleId;
+            selectedDiagramNodeId = nodeId != null ? nodeId : null;
             
             // Build selection path
             selectionPath = [{id: 'overview', name: REPO_TITLE}];
@@ -1501,41 +1929,92 @@
         function updateSelectionHighlight(nodeId) {
             const svg = document.querySelector('#mermaid-diagram svg');
             if (!svg) return;
-            
-            // Remove existing selection classes
+
             svg.querySelectorAll('.selected-node, .selected-subgraph').forEach(el => {
                 el.classList.remove('selected-node', 'selected-subgraph');
             });
-            
+
             if (!nodeId) return;
-            
-            // Find and highlight the subgraph for this node
-            const subgraphId = `${nodeId}_sub`;
-            
-            // Try to find subgraph by various ID patterns
-            const subgraph = svg.querySelector(`g[id*="${subgraphId}"], g.cluster[id*="${nodeId}"]`);
-            if (subgraph) {
-                subgraph.classList.add('selected-subgraph');
+
+            // Inline expansion subgraph in source is named `${baseId}_sub`. If nodeId already
+            // ends with _sub, do not append again (avoids agent_def_sub_sub).
+            const expansionClusterId = nodeId.endsWith('_sub')
+                ? nodeId
+                : `${nodeId}_sub`;
+
+            const clusterEl = queryDiagramElementByLogicalId(svg, expansionClusterId);
+            if (clusterEl && clusterEl.classList.contains('cluster')) {
+                clusterEl.classList.add('selected-subgraph');
             }
-            
-            // Also highlight the node itself if visible
-            const nodes = svg.querySelectorAll('.node');
-            nodes.forEach(node => {
-                const id = node.id?.replace(/^flowchart-/, '').split('-')[0] || '';
-                if (id === nodeId || id === subgraphId) {
-                    node.classList.add('selected-node');
+
+            const nodeGroup = queryDiagramElementByLogicalId(svg, nodeId);
+            if (nodeGroup && nodeGroup.classList.contains('node')) {
+                nodeGroup.classList.add('selected-node');
+            }
+
+            if (!clusterEl && !nodeGroup) {
+                const onlyCluster = queryDiagramElementByLogicalId(svg, nodeId);
+                if (onlyCluster && onlyCluster.classList.contains('cluster')) {
+                    onlyCluster.classList.add('selected-subgraph');
                 }
-            });
+            }
         }
         
         // ============================================================
         // NODE PROCESSING & CLICK HANDLING
         // ============================================================
         
+        /** Hover stroke: two fixed strings per shape (def / hov), set once; only toggle between them (no re-measuring = no stacking). */
+        function attachDiagramNodeHoverStroke(svg) {
+            if (!svg) return;
+            function ensureStrokePair(el) {
+                if (el.dataset.nodeStrokeHov) return;
+                let defStr = window.getComputedStyle(el).strokeWidth || '';
+                if (!defStr || parseFloat(defStr) === 0) {
+                    const a = el.getAttribute('stroke-width');
+                    defStr = a ? `${parseFloat(a)}px` : '1px';
+                }
+                let w = parseFloat(defStr);
+                if (!w || Number.isNaN(w)) w = 1.5;
+                const suf = String(defStr).replace(/^[\d.\s-]+/, '').trim() || 'px';
+                el.dataset.nodeStrokeDef = defStr;
+                el.dataset.nodeStrokeHov = String(w * 2) + suf;
+            }
+
+            svg.querySelectorAll('g.node').forEach((g) => {
+                if (g.classList.contains('collapse-button')) return;
+
+                const collectShapes = () =>
+                    [...g.querySelectorAll(
+                        'rect, circle, polygon, ellipse, path, use, .label-container rect, .label-container path, .basic rect, .basic path, g.shape rect, g.shape path'
+                    )].filter((el) => {
+                        if (el.closest('.edgePath')) return false;
+                        if (el.closest('defs')) return false;
+                        return true;
+                    });
+
+                g.addEventListener('mouseenter', () => {
+                    const touched = [];
+                    collectShapes().forEach((el) => {
+                        ensureStrokePair(el);
+                        el.style.setProperty('stroke-width', el.dataset.nodeStrokeHov, 'important');
+                        touched.push(el);
+                    });
+                    g._hoverStrokeEls = touched;
+                });
+
+                g.addEventListener('mouseleave', () => {
+                    const els = g._hoverStrokeEls && g._hoverStrokeEls.length ? g._hoverStrokeEls : collectShapes();
+                    g._hoverStrokeEls = null;
+                    els.forEach((el) => {
+                        if (!el || !el.isConnected || !el.dataset.nodeStrokeDef) return;
+                        el.style.setProperty('stroke-width', el.dataset.nodeStrokeDef, 'important');
+                    });
+                });
+            });
+        }
+        
         function processNodes(links, contextModuleId) {
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1410',message:'processNodes() called',data:{contextModuleId,currentModuleId,expandedNodesSize:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'I'})}).catch(()=>{});
-            // #endregion
             const svg = document.querySelector('#mermaid-diagram svg');
             if (!svg) return;
             
@@ -1543,23 +2022,19 @@
             const mergedLinks = {...links, ...overviewLinks};
             
             const nodes = svg.querySelectorAll('.node');
-            
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1418',message:'processNodes() found nodes',data:{nodeCount:nodes.length,expandedNodesArray:Array.from(expandedNodes)},timestamp:Date.now(),runId:'debug',hypothesisId:'I'})}).catch(()=>{});
-            // #endregion
+            const diagramNodeMeta = moduleData[contextModuleId]?.diagramNodeMeta || {};
             
             nodes.forEach(node => {
-                const nodeId = node.id?.replace(/^flowchart-/, '').split('-')[0] || '';
+                const nodeId = node.getAttribute('data-logical-id') || '';
+                const fo = node.querySelector('foreignObject');
                 const textEl = node.querySelector('text, .nodeLabel');
-                const nodeText = textEl?.textContent?.trim() || '';
+                const nodeText =
+                    (fo && fo.textContent?.trim()) || textEl?.textContent?.trim() || '';
                 
                 // Handle collapse buttons
                 if (nodeText === '[-] Collapse' || nodeId.endsWith('_collapse')) {
                     node.classList.add('collapse-button');
                     const parentNodeId = nodeId.replace(/_collapse$/, '');
-                    // #region debug log
-                    fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1425',message:'processNodes() attaching collapse handler',data:{nodeId,parentNodeId,expandedNodesHasParent:expandedNodes.has(parentNodeId)},timestamp:Date.now(),runId:'debug',hypothesisId:'I'})}).catch(()=>{});
-                    // #endregion
                     node.addEventListener('click', (e) => {
                         e.stopPropagation();
                         e.preventDefault();
@@ -1627,32 +2102,25 @@
                     }
                 }
                 
-                // Add hover tooltips if metadata exists
-                // Try full nodeId first, then try stripping prefix for expanded nodes
-                let tooltipMetadata = moduleMetadata[nodeId];
-                if (!tooltipMetadata) {
-                    // Try stripping known prefixes (from expanded subgraphs)
-                    for (const prefix of expandedNodes) {
-                        if (nodeId.startsWith(prefix + '_')) {
-                            const unprefixedId = nodeId.substring(prefix.length + 1);
-                            if (moduleMetadata[unprefixedId]) {
-                                tooltipMetadata = moduleMetadata[unprefixedId];
-                                break;
-                            }
-                        }
-                    }
+                // Tooltip: DIAGRAM_JSON nodes[] supply title+description per shape; optional click → module fills gaps only
+                let dm =
+                    diagramNodeMeta[nodeId] ||
+                    (nodeText && diagramNodeMeta[nodeText]) ||
+                    null;
+                if (!dm && longestPrefix) {
+                    const u = nodeId.substring(longestPrefix.length);
+                    if (u) dm = diagramNodeMeta[u] || null;
                 }
-                // Also try matching by node label text
-                if (!tooltipMetadata && nodeText) {
-                    // Look for metadata by matching title
-                    for (const [key, meta] of Object.entries(moduleMetadata)) {
-                        if (meta.title === nodeText || formatModuleName(key) === nodeText) {
-                            tooltipMetadata = meta;
-                            break;
-                        }
-                    }
+                let tooltipTitle = dm?.title || '';
+                let tooltipDesc = dm?.description || '';
+                if (targetModule && moduleMetadata[targetModule]) {
+                    const mm = moduleMetadata[targetModule];
+                    if (!tooltipTitle) tooltipTitle = mm.title || '';
+                    if (!tooltipDesc) tooltipDesc = mm.description || '';
                 }
-                
+                if (!tooltipTitle) tooltipTitle = nodeText || (nodeId ? formatModuleName(nodeId) : '');
+                if (!tooltipDesc) tooltipDesc = '';
+                const tooltipMetadata = tooltipTitle ? { title: tooltipTitle, description: tooltipDesc } : null;
                 if (tooltipMetadata) {
                     node.addEventListener('mouseenter', (e) => {
                         showTooltip(e, tooltipMetadata);
@@ -1663,6 +2131,8 @@
                     node.addEventListener('mouseleave', hideTooltip);
                 }
             });
+            attachDiagramNodeHoverStroke(svg);
+            attachDiagramBackgroundDeselect(svg);
         }
         
         function makeNodeClickable(node, nodeId, targetModuleId) {
@@ -1709,9 +2179,6 @@
         // ============================================================
         
         function expandNodeInline(nodeId, targetModuleId) {
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1574',message:'expandNodeInline() called',data:{nodeId,targetModuleId,currentModuleId,expandedNodesSizeBefore:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'D'})}).catch(()=>{});
-            // #endregion
             const targetModule = moduleData[targetModuleId];
             if (!targetModule) return;
             
@@ -1730,10 +2197,6 @@
                     expandedNodes.add(nodeId);
                     expandedNodeToModule.set(nodeId, targetModuleId);  // Track nodeId -> moduleId mapping
                     currentDiagramCode = newDiagram;
-                    
-                    // #region debug log
-                    fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1593',message:'expandNodeInline() state after expansion',data:{nodeId,targetModuleId,currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'D'})}).catch(()=>{});
-                    // #endregion
                     
                     renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
                     
@@ -1847,9 +2310,6 @@
         }
         
         function collapseNode(nodeId) {
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1704',message:'collapseNode() called',data:{nodeId,currentModuleId,expandedNodesSizeBefore:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'E'})}).catch(()=>{});
-            // #endregion
             // Get the module ID for this node before removing
             const targetModuleId = expandedNodeToModule.get(nodeId) || overviewLinks[nodeId];
             
@@ -1885,10 +2345,6 @@
                 renderDocumentation(moduleData['overview']?.documentation || '');
             }
             
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1740',message:'collapseNode() state after collapse',data:{nodeId,currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'E'})}).catch(()=>{});
-            // #endregion
-            
             renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
         }
         
@@ -1897,9 +2353,6 @@
         // ============================================================
         
         function navigateToModule(moduleId) {
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1747',message:'navigateToModule() called',data:{moduleId,currentModuleIdBefore:currentModuleId,expandedNodesSizeBefore:expandedNodes.size,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'B'})}).catch(()=>{});
-            // #endregion
             if (!moduleData[moduleId]) return;
             
             navigationHistory.push({
@@ -1921,10 +2374,6 @@
             console.log('[MODULE TRACKING] Navigated to module:', moduleId);
             console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
             
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1774',message:'navigateToModule() state after reset',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesSize:openedModules.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'B'})}).catch(()=>{});
-            // #endregion
-            
             baseDiagramCode = moduleData[moduleId].diagram;
             currentDiagramCode = baseDiagramCode;
             
@@ -1941,9 +2390,6 @@
         }
         
         function goBack() {
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1784',message:'goBack() called',data:{currentModuleId,expandedNodesSize:expandedNodes.size,navigationHistoryLength:navigationHistory.length,stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
-            // #endregion
             // If there's navigation history, go back in history
             if (navigationHistory.length > 0) {
                 const prev = navigationHistory.pop();
@@ -1966,10 +2412,6 @@
                 }
                 console.log('[MODULE TRACKING] Went back, opened modules:', Array.from(openedModules));
                 
-                // #region debug log
-                fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1807',message:'goBack() branch: history pop',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
-                // #endregion
-                
                 updateSelection(currentModuleId);
                 renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
                 return;
@@ -1982,10 +2424,6 @@
                 openedModules.clear();
                 openedModules.add('overview');
                 console.log('[MODULE TRACKING] Reset to overview, opened modules:', Array.from(openedModules));
-                
-                // #region debug log
-                fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:1818',message:'goBack() branch: collapse all',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
-                // #endregion
                 
                 currentDiagramCode = baseDiagramCode;
                 updateSelection('overview');
@@ -2241,7 +2679,8 @@
             // Only start panning on left click and not on nodes
             if (e.button !== 0) return;
             if (e.target.closest('.view-tune-panel')) return;
-            if (e.target.closest('.clickable-node, .collapse-button')) return;
+            /* Any flowchart node: show pointer and don't start pan (not only .clickable-node) */
+            if (e.target.closest('g.node, .collapse-button')) return;
             
             isPanning = true;
             startMouseX = e.clientX;
@@ -2284,6 +2723,9 @@
             
             viewport.addEventListener('touchstart', (e) => {
                 if (e.target.closest && e.target.closest('.view-tune-panel')) return;
+                if (e.touches.length === 1 && e.target.closest && e.target.closest('g.node, .collapse-button')) {
+                    return;
+                }
                 if (e.touches.length === 2) {
                     // Two-finger pan start - use center point between two fingers
                     e.preventDefault();
@@ -2459,9 +2901,6 @@
         // ============================================================
         
         async function init() {
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2101',message:'init() called',data:{stack:new Error().stack.split('\n').slice(1,4).join('|')},timestamp:Date.now(),runId:'debug',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
             AVAILABLE_REPOS = await fetchAvailableRepos();
             
             // When no ?repo= in URL, redirect to first repo so something always loads
@@ -2505,32 +2944,19 @@
             // Initialize selection and breadcrumb
             updateSelection('overview');
             
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2149',message:'init() completed - state snapshot',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesSize:openedModules.size,openedModulesArray:Array.from(openedModules)},timestamp:Date.now(),runId:'debug',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
-            
             renderDiagram(currentDiagramCode, overviewLinks, 'overview');
         }
         
         // Track URL changes
         window.addEventListener('popstate', () => {
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2152',message:'popstate event (browser back/forward)',data:{url:window.location.href,currentModuleId,expandedNodesSize:expandedNodes.size},timestamp:Date.now(),runId:'debug',hypothesisId:'G'})}).catch(()=>{});
-            // #endregion
         });
         
         // Track hash changes
         window.addEventListener('hashchange', () => {
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2158',message:'hashchange event',data:{url:window.location.href,currentModuleId,expandedNodesSize:expandedNodes.size},timestamp:Date.now(),runId:'debug',hypothesisId:'G'})}).catch(()=>{});
-            // #endregion
         });
         
         // Periodic state snapshot to catch unexpected resets
         setInterval(() => {
-            // #region debug log
-            fetch('http://127.0.0.1:7252/ingest/89321c4d-4131-400e-85e5-638c214fd672',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'viewer.html:2165',message:'periodic state snapshot',data:{currentModuleId,expandedNodesSize:expandedNodes.size,openedModulesSize:openedModules.size,openedModulesArray:Array.from(openedModules),url:window.location.href},timestamp:Date.now(),runId:'debug',hypothesisId:'H'})}).catch(()=>{});
-            // #endregion
         }, 2000); // Every 2 seconds
         
         initZoomPan();
