@@ -252,7 +252,7 @@
         .diagram-viewport:active {
             cursor: grabbing;
         }
-
+        
         .diagram-canvas {
             transform-origin: 0 0;
             transition: transform 0.1s ease-out;
@@ -287,19 +287,25 @@
             flex-direction: column;
         }
 
-        /* Tooltip for hover */
+        /* Tooltip for hover — position/size finalized in JS (viewport + reflow); keep above panes */
         .module-tooltip {
             position: fixed;
+            left: 0;
+            top: 0;
             background: #1e293b;
             color: white;
             padding: 12px 16px;
             border-radius: 8px;
             font-size: 13px;
-            max-width: 320px;
-            z-index: 1000;
+            box-sizing: border-box;
+            z-index: 999999;
             pointer-events: none;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             display: none;
+            overflow-x: visible;
+            overflow-y: visible;
+            max-width: min(420px, calc(100vw - 24px));
+            min-width: 0;
         }
 
         .module-tooltip .tooltip-title {
@@ -307,11 +313,17 @@
             font-size: 14px;
             margin-bottom: 6px;
             color: #60a5fa;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            white-space: normal;
         }
 
         .module-tooltip .tooltip-desc {
             opacity: 0.9;
             line-height: 1.5;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            white-space: pre-wrap;
         }
 
         /* Node type styling */
@@ -618,7 +630,7 @@
                 stroke-dashoffset: -26;
             }
         }
-
+        
         /* Breadcrumb navigation */
         .breadcrumb {
             display: flex;
@@ -751,32 +763,6 @@
             align-self: flex-start;
             font-style: italic;
         }
-        .arch-group-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 8px;
-            font-size: 12px;
-            color: #475569;
-        }
-        .arch-group-row label {
-            flex-shrink: 0;
-            font-weight: 600;
-        }
-        .arch-group-select {
-            flex: 1;
-            min-width: 0;
-            padding: 6px 8px;
-            border: 2px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 12px;
-            font-family: inherit;
-            background: #fff;
-        }
-        .arch-group-select:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
         .chat-input-row {
             display: flex;
             gap: 8px;
@@ -903,13 +889,7 @@
         <div class="doc-pane open">
             <div class="chat-section">
                 <div class="chat-messages" id="chatMessages">
-                    <div class="chat-message assistant">Ask about this codebase's architecture. Use <strong>Arch agent focus</strong> to pick an overview subgraph (or None for the whole repo). Questions like &quot;what group is selected&quot; refer to that dropdown, not the module page you have open.</div>
-                </div>
-                <div class="arch-group-row">
-                    <label for="archAgentGroupSelect">Arch agent focus</label>
-                    <select class="arch-group-select" id="archAgentGroupSelect" title="Limit answers to one overview diagram group, or None for the whole repo">
-                        <option value="">None (full repo)</option>
-                    </select>
+                    <div class="chat-message assistant">Ask about this codebase's architecture. Select nodes, subgraphs, or edges on the diagram for context.</div>
                 </div>
                 <div class="chat-input-row">
                     <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="2"></textarea>
@@ -971,7 +951,6 @@
         let overviewDiagramClusterMeta = {};
         /** Per-edge title+description from DIAGRAM_JSON.edges (source/target; optional label/title/description). */
         let overviewDiagramEdgeMeta = {};
-        let architectureGroups = [];  // Overview diagram groups for arch-agent focus (DIAGRAM_JSON or mermaid subgraphs)
         /** Last object from buildDiagramLogicalIdRegistry() for the current render (hover + tooling). */
         let lastDiagramRegistry = null;
         
@@ -1008,22 +987,97 @@
                 descEl.textContent = metadata.title;
             }
             
-            // Position near cursor
-            const x = event.clientX + 15;
-            const y = event.clientY + 15;
-            
-            // Keep tooltip in viewport
-            const maxX = window.innerWidth - 340;
-            const maxY = window.innerHeight - 100;
-            
-            tooltip.style.left = Math.min(x, maxX) + 'px';
-            tooltip.style.top = Math.min(y, maxY) + 'px';
+            tooltip.style.maxHeight = '';
+            tooltip.style.overflowY = '';
+            tooltip.style.pointerEvents = 'none';
             tooltip.style.display = 'block';
+            const pad = 12;
+            const offset = 15;
+            tooltip.style.left = event.clientX + offset + 'px';
+            tooltip.style.top = event.clientY + offset + 'px';
+            
+            const vh = window.innerHeight - 2 * pad;
+            let rect = tooltip.getBoundingClientRect();
+            if (rect.height > vh) {
+                tooltip.style.maxHeight = vh + 'px';
+                tooltip.style.overflowY = 'auto';
+                tooltip.style.pointerEvents = 'auto';
+                rect = tooltip.getBoundingClientRect();
+            }
+            
+            let left = rect.left;
+            let top = rect.top;
+            if (rect.right > window.innerWidth - pad) {
+                left = window.innerWidth - rect.width - pad;
+            }
+            if (rect.bottom > window.innerHeight - pad) {
+                top = window.innerHeight - rect.height - pad;
+            }
+            if (left < pad) left = pad;
+            if (top < pad) top = pad;
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
         }
         
         function hideTooltip() {
             const tooltip = document.getElementById('moduleTooltip');
             tooltip.style.display = 'none';
+            tooltip.style.maxHeight = '';
+            tooltip.style.overflowY = '';
+            tooltip.style.pointerEvents = 'none';
+        }
+
+        const MODULE_DESCRIPTION_MAX_CHARS = 200;
+
+        /** Match codewiki extract_module_metadata_from_markdown: first paragraph after H1, ~200 char cap. */
+        function extractModuleIntroFromMarkdown(content) {
+            if (!content || typeof content !== 'string') return '';
+            const lines = content.split(/\n/);
+            const firstPara = [];
+            let pastTitle = false;
+            let inCode = false;
+            for (const line of lines) {
+                const trim = line.trim();
+                if (trim.startsWith('```')) {
+                    inCode = !inCode;
+                    continue;
+                }
+                if (inCode) continue;
+                if (!pastTitle) {
+                    if (line.startsWith('# ')) pastTitle = true;
+                    continue;
+                }
+                if (/^##\s/.test(line)) break;
+                if (!trim) {
+                    if (firstPara.length) break;
+                    continue;
+                }
+                firstPara.push(trim);
+            }
+            if (!firstPara.length) return '';
+            let description = firstPara.join(' ').replace(/\s+/g, ' ').trim();
+            if (description.length > MODULE_DESCRIPTION_MAX_CHARS) {
+                description = description.slice(0, MODULE_DESCRIPTION_MAX_CHARS - 3) + '...';
+            }
+            return description;
+        }
+
+        function moduleIntroFromDocsContent(moduleId) {
+            if (!moduleId) return '';
+            const fn = moduleId.endsWith('.md') ? moduleId : `${moduleId}.md`;
+            const raw = DOCS_CONTENT[fn];
+            return extractModuleIntroFromMarkdown(raw);
+        }
+
+        /** Prefer module_tree description; fallback to first paragraph parsed from cached *.md. */
+        function enrichModuleTooltipPayload(moduleId, base) {
+            const b = base || {};
+            const fromMd = moduleIntroFromDocsContent(moduleId);
+            const d = (b.description && String(b.description).trim()) || fromMd;
+            return {
+                title: b.title || '',
+                description: d
+            };
         }
 
         function resolveDiagramEdgeTooltipMetadata(src, tgt, rawLabel, diagramEdgeMeta) {
@@ -1257,13 +1311,14 @@
                     const gNode = nodeEl.closest('.node') || nodeEl;
                     gNode.classList.add(`node-${node.type}`);
                     
-                    // Add hover listeners for tooltips
+                    // Add hover listeners for tooltips (full intro from cached .md when available)
                     if (moduleMetadata[node.id]) {
+                        const tip = enrichModuleTooltipPayload(node.id, moduleMetadata[node.id]);
                         gNode.addEventListener('mouseenter', (e) => {
-                            showTooltip(e, moduleMetadata[node.id]);
+                            showTooltip(e, tip);
                         });
                         gNode.addEventListener('mousemove', (e) => {
-                            showTooltip(e, moduleMetadata[node.id]);
+                            showTooltip(e, tip);
                         });
                         gNode.addEventListener('mouseleave', hideTooltip);
                     }
@@ -2066,100 +2121,6 @@
             return map;
         }
         
-        function extractNodeIdsInsideSubgraph(mermaid, subgraphId) {
-            if (!mermaid || !subgraphId) return [];
-            const esc = String(subgraphId).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const re = new RegExp(
-                `subgraph\\s+${esc}\\s*\\[\"[^\"]*\"\\]\\s*\\r?\\n([\\s\\S]*?)\\r?\\n\\s*end\\b`,
-                'm'
-            );
-            const mm = mermaid.match(re);
-            if (!mm) return [];
-            const block = mm[1];
-            const skip = new Set(['class', 'classDef', 'direction', 'subgraph', 'linkStyle', 'style', 'end']);
-            const ids = [];
-            const nodeLine = /^\s*(\w+)\s*\[/gm;
-            let lm;
-            while ((lm = nodeLine.exec(block)) !== null) {
-                const id = lm[1];
-                if (skip.has(id)) continue;
-                ids.push(id);
-            }
-            return ids;
-        }
-        
-        function extractArchitectureGroupsFromOverview(overviewContent) {
-            const groups = [];
-            const dj = extractDiagramJsonFromMarkdown(overviewContent);
-            if (dj && Array.isArray(dj.groups) && dj.groups.length) {
-                for (const g of dj.groups) {
-                    if (g.id != null && g.label != null) {
-                        groups.push({
-                            id: String(g.id),
-                            label: String(g.label),
-                            nodeIds: Array.isArray(g.nodes) ? g.nodes.map(String) : []
-                        });
-                    }
-                }
-                return groups;
-            }
-            const mermaid = extractMermaidFromMarkdown(overviewContent);
-            if (!mermaid) return [];
-            const re = /subgraph\s+(\w+)\["([^"]+)"\]/g;
-            let m;
-            while ((m = re.exec(mermaid)) !== null) {
-                groups.push({ id: m[1], label: m[2], nodeIds: [] });
-            }
-            for (const g of groups) {
-                const inside = extractNodeIdsInsideSubgraph(mermaid, g.id);
-                if (inside.length) g.nodeIds = inside;
-            }
-            return groups;
-        }
-        
-        function moduleIdsForArchitectureGroup(group) {
-            const ids = [];
-            const seen = new Set();
-            for (const nodeId of group.nodeIds || []) {
-                const mid = overviewLinks[nodeId];
-                if (mid && !seen.has(mid)) {
-                    seen.add(mid);
-                    ids.push(mid);
-                }
-            }
-            return ids;
-        }
-        
-        function populateArchitectureGroupSelect() {
-            const sel = document.getElementById('archAgentGroupSelect');
-            if (!sel) return;
-            const overviewContent = DOCS_CONTENT['overview.md'] || '';
-            architectureGroups = extractArchitectureGroupsFromOverview(overviewContent);
-            sel.innerHTML = '';
-            const noneOpt = document.createElement('option');
-            noneOpt.value = '';
-            noneOpt.textContent = 'None (full repo)';
-            sel.appendChild(noneOpt);
-            for (const g of architectureGroups) {
-                const opt = document.createElement('option');
-                opt.value = g.id;
-                opt.textContent = g.label;
-                opt.dataset.label = g.label;
-                sel.appendChild(opt);
-            }
-        }
-        
-        function getArchitectureGroupPayload() {
-            const sel = document.getElementById('archAgentGroupSelect');
-            if (!sel || !sel.value) return null;
-            const g = architectureGroups.find(x => x.id === sel.value);
-            if (!g) return null;
-            const module_ids = moduleIdsForArchitectureGroup(g);
-            const payload = { id: g.id, label: g.label };
-            if (module_ids.length) payload.module_ids = module_ids;
-            return payload;
-        }
-        
         function stripClickStatements(diagram) {
             // Strip out click statements to allow custom click handling
             // Also strip :::className styling from node definitions
@@ -2269,8 +2230,6 @@
                 diagramClusterMeta: overviewDiagramClusterMeta,
                 diagramEdgeMeta: overviewDiagramEdgeMeta
             };
-            
-            populateArchitectureGroupSelect();
         }
         
         // Build EXACT module mappings - only map nodes that exactly match module keys
@@ -2473,20 +2432,20 @@
         
         function updateSelection(moduleId, nodeId = null) {
             selectedModuleId = moduleId;
-
+            
             // Build selection path
             selectionPath = [{id: 'overview', name: REPO_TITLE}];
-
+            
             if (moduleId && moduleId !== 'overview') {
                 const mod = moduleData[moduleId];
                 if (mod) {
                     selectionPath.push({id: moduleId, name: mod.name});
                 }
             }
-
+            
             // Update breadcrumb UI
             updateBreadcrumb();
-
+            
             if (nodeId != null) {
                 const svg = document.querySelector('#mermaid-diagram svg');
                 const el = svg && queryDiagramElementByLogicalId(svg, nodeId);
@@ -2499,7 +2458,7 @@
             } else {
                 setDiagramSelection({ kind: 'none', moduleId });
             }
-
+            
             // Update documentation
             if (moduleId && moduleData[moduleId]) {
                 renderDocumentation(moduleData[moduleId].documentation);
@@ -3209,7 +3168,11 @@
                 if (targetModule && moduleMetadata[targetModule]) {
                     const mm = moduleMetadata[targetModule];
                     if (!tooltipTitle) tooltipTitle = mm.title || '';
-                    if (!tooltipDesc) tooltipDesc = mm.description || '';
+                    if (!tooltipDesc) {
+                        tooltipDesc = mm.description || moduleIntroFromDocsContent(targetModule) || '';
+                    }
+                } else if (!tooltipDesc && targetModule) {
+                    tooltipDesc = moduleIntroFromDocsContent(targetModule) || '';
                 }
                 if (!tooltipTitle) tooltipTitle = nodeText || (nodeId ? formatModuleName(nodeId) : '');
                 if (!tooltipDesc) tooltipDesc = '';
@@ -3296,11 +3259,11 @@
         // ============================================================
         // EXPANSION LOGIC
         // ============================================================
-
+        
         function expandNodeInline(nodeId, targetModuleId, sourceNodeEl) {
             const targetModule = moduleData[targetModuleId];
             if (!targetModule) return;
-
+            
             // Compute whether we will inline-expand before updateSelection: breadcrumb/doc updates reflow
             // the layout and move the diagram, so viewport anchors must be read first (matches pre-click bbox).
             const newDiagram =
@@ -3330,20 +3293,20 @@
 
             // Breadcrumb + doc for the opened module; diagram selection moves to subgraph after render.
             updateSelection(targetModuleId);
-
+            
             // Add module to opened modules set
             openedModules.add(targetModuleId);
             console.log('[MODULE TRACKING] Module opened:', targetModuleId);
             console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
-
+            
             if (targetModule.diagram && targetModule.diagram.trim() && willExpandDiagram) {
                 const subgraphLabelHint =
                     extractNodeVisibleLabelFromDiagramBeforeExpand(currentDiagramCode, nodeId) ||
                     targetModule.name;
-                expandedNodes.add(nodeId);
+                    expandedNodes.add(nodeId);
                 expandedNodeToModule.set(nodeId, targetModuleId); // Track nodeId -> moduleId mapping
-                currentDiagramCode = newDiagram;
-
+                    currentDiagramCode = newDiagram;
+                    
                 const subClusterId = `${nodeId}_sub`;
                 renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId).then(() => {
                     if (scheduleEpoch !== expandDiagramSelectionEpoch) return;
@@ -3523,7 +3486,7 @@
                 document.getElementById('moduleTitle').textContent = moduleData['overview']?.name || REPO_TITLE + ' Overview';
                 renderDocumentation(moduleData['overview']?.documentation || '');
             }
-
+            
             clearDiagramShapeSelection();
             renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId).then(() => {
                 if (!preCollapseAnchorViewport) return;
@@ -4025,7 +3988,7 @@
             if (ep) ensureDiagramEdgePointerEvents(ep);
         }
         window.refreshDiagramEdgeHitAreas = refreshDiagramEdgeHitAreas;
-
+        
         function initViewTuneSliders() {
             const panIn = document.getElementById('tunePanMult');
             const panVal = document.getElementById('tunePanVal');
@@ -4488,10 +4451,7 @@
                     body: JSON.stringify({
                         job_id: jobId,
                         message: msg,
-                        current_page: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null) || (typeof currentModuleId !== 'undefined' ? currentModuleId : null),
-                        current_module: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null),
                         opened_modules: openedModulesArray,
-                        architecture_group: getArchitectureGroupPayload(),
                         diagram_selection: buildDiagramChatPayload(),
                         history: chatHistory
                     })

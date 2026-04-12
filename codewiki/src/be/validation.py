@@ -162,6 +162,13 @@ def validate_module_tree(
         elif len(module_data.get('description', '').split('.')) > 3:
             result.add(module_name, "DESCRIPTION_TOO_LONG", 
                       "Description should be 1-2 sentences", Severity.WARNING)
+        elif len(module_data.get('description', '')) > 240:
+            result.add(
+                module_name,
+                "DESCRIPTION_LONG",
+                "Description targets ~200 characters for module tree / hover (see generation prompts)",
+                Severity.WARNING,
+            )
         
         # 2. Check documentation file exists
         md_file = docs_path / f"{module_name}.md"

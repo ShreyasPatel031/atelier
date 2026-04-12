@@ -71,7 +71,7 @@ async def generate_sub_module_documentation(
     Args:
         sub_module_specs: The specs of the sub-modules to generate documentation for. Each entry must include:
             - title: Short 2-4 word title for the module (shown on hover)
-            - description: 1-2 sentence description (shown on hover)  
+            - description: ~200 characters (about 1-2 sentences) for module tree and hover tooltips
             - components: List of component IDs belonging to this module
             
         Example format:

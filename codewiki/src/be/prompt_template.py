@@ -45,7 +45,7 @@ Create documentation that helps new users and developers understand:
 Generate documentation following this structure:
 
 1. **Main Documentation File** (`{module_name}.md`):
-   - Brief introduction and purpose
+   - **Opening summary (required):** Immediately after the `#` title line, write **one paragraph** (target **~200 characters**, about 1–2 tight sentences). This exact blurb is stored for the module tree and viewer tooltips. After a **blank line**, continue with `##` sections and the rest of the doc (diagrams, detail).
    - Architecture overview with diagrams
    - High-level functionality of each sub-module including references to its documentation file
    - Link to other module documentation instead of duplicating information
@@ -56,13 +56,13 @@ Generate documentation following this structure:
    {{
        "sub_module_name": {{
            "title": "2-4 Word Title",
-           "description": "One or two sentence description shown on hover.",
+           "description": "One or two sentence description shown on hover (~200 characters).",
            "components": ["component.id.1", "component.id.2"]
-       }}
+   }}
    }}
    ```
    - title: Short 2-4 word summary (e.g., "User Authentication", "Database Layer")
-   - description: 1-2 sentences explaining what the module does (shown on hover in viewer)
+   - description: **~200 characters** (about 1–2 sentences) — same budget as the main file opening paragraph; shown on hover in the viewer and stored in `module_tree.json`
    - components: List of component IDs belonging to this sub-module
 
 3. **Visual Documentation**:
@@ -285,7 +285,7 @@ Create documentation that helps new users and developers understand:
 
 <DOCUMENTATION_REQUIREMENTS>
 Generate documentation following the following requirements:
-1. Structure: Brief introduction → comprehensive documentation with diagrams
+1. Structure: **First paragraph after `#` title** = concise summary (target **~200 characters**, 1–2 sentences) for module tree / tooltips; blank line; then `##` sections and comprehensive documentation with diagrams
 2. Diagrams: Use ONLY "graph TD" or "flowchart TD" for architecture diagrams. DO NOT use classDiagram or sequenceDiagram.
 3. References: Link to other module documentation instead of duplicating information
 

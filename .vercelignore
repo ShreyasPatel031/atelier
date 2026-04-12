@@ -1,15 +1,42 @@
-# Local git clones used for CodeWiki generation (not part of the static site)
-.tmp/
+# Vercel uploads the whole repo. Exclude everything not needed for the static viewer
+# or the /api serverless function (which imports codewiki.src.be/fe).
 
-test_repos/
+# Local scratch (often 50k+ files — main cause of "too many files" deploy failures)
+tmp/
+.tmp/
+.pytest_cache/
+
+# NOT needed for static viewer or serverless function
+benchmarking/
+tests/
+docker/
+docs/
+output/
+scripts/
+assets/
+codewiki.egg-info/
+
+# Tooling / CI / IDE
+.cursor/
+.agents/
+.github/
+.idea/
+.vscode/
+
+# Node / Playwright
 node_modules/
-*.png
-*.jpg
-*.jpeg
-test_*.js
+test-results/
+demo/playwright/
 package-lock.json
+
+# Repo metadata
 .git/
 
-# Python envs (never needed for static demo deploy)
+# Per-repo codegen: multi-MB JSON dependency graphs the viewer never loads
+demo/repos/**/temp/
+
+# Envs
 .venv/
 venv/
+.env*
+*.env

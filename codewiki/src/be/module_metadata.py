@@ -2,6 +2,13 @@
 Extract title, description, and DIAGRAM_JSON from generated module markdown.
 
 Shared by AgentOrchestrator (leaf agents) and DocumentationGenerator (parent/overview docs).
+
+Module-level title/description come from each ``*.md`` (``#`` heading + first paragraph, ~200 chars)
+and are written into ``module_tree`` via ``apply_metadata_to_tree_path``. Per–diagram-node tooltip
+text for the viewer lives under ``<!-- DIAGRAM_JSON -->`` → ``nodes[]`` with ``id``, ``title``, and
+``description`` (required for every shape, including non-module nodes); module links are optional.
+
+See ``codewiki/docs/diagram-and-module-metadata.md`` for the full pipeline.
 """
 
 from __future__ import annotations
@@ -14,10 +21,18 @@ from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
+# Stored on module_tree / metadata.json for navigation and viewer tooltips. Prompts ask the model
+# to write ~this much in the opening paragraph; we still cap when ingesting older or runaway text.
+MODULE_DESCRIPTION_MAX_CHARS = 200
+
 
 def extract_diagram_json_from_markdown(content: str) -> Optional[Dict[str, Any]]:
     """
     Extract structured diagram JSON from markdown <!-- DIAGRAM_JSON ... --> block.
+
+    For viewer tooltips, each entry in ``nodes`` should include ``id`` (Mermaid node id),
+    ``title``, and ``description``. ``label`` is optional; module ``link`` / click targets
+    are separate and optional.
     """
     pattern = r"<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->"
     match = re.search(pattern, content)
@@ -35,6 +50,9 @@ def extract_module_metadata_from_markdown(
 ) -> Tuple[str, str, Optional[Dict[str, Any]]]:
     """
     Extract title, description, and diagram from markdown string.
+
+    ``description`` is the first paragraph after the H1 (until a blank line or ``##``), capped at
+    ``MODULE_DESCRIPTION_MAX_CHARS``, matching the short summary prompts ask the model to write.
 
     Args:
         content: Full markdown body.
@@ -60,7 +78,7 @@ def extract_module_metadata_from_markdown(
         title = ""
 
     lines = content.split("\n")
-    description_lines: List[str] = []
+    first_para: List[str] = []
     in_code_block = False
     past_title = False
 
@@ -72,29 +90,26 @@ def extract_module_metadata_from_markdown(
         if in_code_block:
             continue
 
-        if not past_title and line.startswith("# "):
-            past_title = True
+        if not past_title:
+            if line.startswith("# "):
+                past_title = True
             continue
 
-        if line.startswith("#"):
-            continue
-
-        if not description_lines and not line.strip():
-            continue
-
-        if line.strip():
-            description_lines.append(line.strip())
-            if len(description_lines) >= 2:
-                break
-        elif description_lines:
+        # First subsection ends the summary region for tree/hover (same as prompts: short lead, then ## …).
+        if re.match(r"^##\s", line):
             break
 
-    if description_lines:
-        description = " ".join(description_lines)
-        sentences = re.split(r"(?<=[.!?])\s+", description)
-        description = " ".join(sentences[:2])
-        if len(description) > 200:
-            description = description[:197] + "..."
+        if not line.strip():
+            if first_para:
+                break
+            continue
+
+        first_para.append(line.strip())
+
+    if first_para:
+        description = re.sub(r"\s+", " ", " ".join(first_para)).strip()
+        if len(description) > MODULE_DESCRIPTION_MAX_CHARS:
+            description = description[: MODULE_DESCRIPTION_MAX_CHARS - 3] + "..."
     else:
         description = f"Documentation for the {title} module." if title else ""
 

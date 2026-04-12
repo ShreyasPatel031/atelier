@@ -15,13 +15,14 @@ But does NOT have access to:
 
 import logging
 import json
+import re
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
 from pydantic_core import to_jsonable_python
 from pydantic_ai import Agent
-from pydantic_ai.models import Model
 from pydantic_ai import ModelMessagesTypeAdapter
+from pydantic_ai.messages import ModelRequest, ModelResponse, UserPromptPart, TextPart
 
 from codewiki.src.file_manager import file_manager
 
@@ -38,6 +39,10 @@ When answering:
 - Use bullet points or short lists when listing multiple items.
 - Reference module names when relevant.
 - If you can't answer (e.g. no source access), say so briefly and suggest what you can provide instead.
+
+Viewer vs module diagrams:
+- A block labeled "VIEWER DIAGRAM SELECTION" describes which **node, cluster, or edge** is highlighted on the **interactive Mermaid diagram** (logical id from the viewer registry). Questions like "which diagram node is selected", "what did I click on the graph", "what's highlighted on the diagram" refer to **that** selection—not the open doc page title alone.
+- "[Context: Currently viewing module: …]" is which **documentation page** is open. That is separate from the diagram highlight.
 
 COMPLETE MODULE TREE (all modules in repository):
 {module_tree}
@@ -151,67 +156,156 @@ class ArchitecturalAgentRunner:
                 count += self._count_components(module_data['children'])
         return count
     
-    def _format_architecture_group_context(
-        self, architecture_group: Optional[Dict[str, Any]]
+    def _format_diagram_selection_system_block(
+        self, diagram_selection: Optional[Dict[str, Any]]
     ) -> str:
-        """Extra system context when the user selects an overview diagram group."""
-        if not architecture_group:
-            return ""
-        gid = str(architecture_group.get("id") or "").strip()
-        label = str(architecture_group.get("label") or gid).strip()
-        module_ids = architecture_group.get("module_ids") or []
+        """Interactive diagram highlight (node/cluster/edge)."""
+        if not diagram_selection:
+            return (
+                "VIEWER DIAGRAM SELECTION: None.\n"
+                "No interactive diagram shape is reported as selected (or selection was cleared)."
+            )
+        kind = str(diagram_selection.get("kind") or "none").lower().strip()
+        lid = str(diagram_selection.get("logical_id") or "").strip()
+        if kind == "none" or not lid:
+            return (
+                "VIEWER DIAGRAM SELECTION: None.\n"
+                "No node/cluster/edge is highlighted on the Mermaid diagram."
+            )
+        label = str(diagram_selection.get("label") or lid).strip()
+        mod = str(diagram_selection.get("module_id") or "").strip()
         lines = [
-            f"USER ARCHITECTURE FOCUS: The user selected diagram group \"{label}\" (id: {gid}).",
-            "Prioritize modules, dependencies, and explanations relevant to this functional area.",
+            "VIEWER DIAGRAM SELECTION (authoritative for 'what is selected on the diagram graph' questions):",
+            f"- Kind: {kind}",
+            f'- Logical id (registry / data-logical-id): {lid}',
+            f'- Visible label: "{label}"',
         ]
-        if module_ids:
-            uniq = [str(m) for m in module_ids if m]
-            if uniq:
-                lines.append(
-                    "Diagram nodes in this group map to these module entry points: "
-                    + ", ".join(uniq)
-                    + "."
-                )
+        if mod:
+            lines.append(f"- Module context (viewer page): {mod}")
+        lines.append(
+            "If the user asks which diagram node/cluster is selected or what is highlighted on the graph: "
+            f'state this logical id ({lid}) and label ("{label}").'
+        )
         return "\n".join(lines)
 
-    async def chat(
+    def _format_user_message_diagram_selection_prefix(
+        self, diagram_selection: Optional[Dict[str, Any]]
+    ) -> str:
+        """Short prefix: interactive diagram highlight."""
+        if not diagram_selection:
+            return "[Viewer diagram selection: none]\n"
+        kind = str(diagram_selection.get("kind") or "none").lower().strip()
+        lid = str(diagram_selection.get("logical_id") or "").strip()
+        if kind == "none" or not lid:
+            return "[Viewer diagram selection: none]\n"
+        label = str(diagram_selection.get("label") or lid).strip()
+        return f'[Viewer diagram selection: {kind} "{label}" (logical id: {lid})]\n'
+
+    def _is_viewer_ui_meta_question(self, message: str) -> bool:
+        """Questions about diagram highlight vs open doc — answer deterministically when clearly UI-meta."""
+        t = message.strip().lower()
+        if not t or len(t) > 280:
+            return False
+        if re.search(r"viewer\s+diagram\s+selection", t):
+            return True
+        if re.search(
+            r"(what|which).{0,40}(select|highlight).{0,40}(diagram|graph|mermaid)",
+            t,
+        ):
+            return True
+        if re.search(
+            r"(diagram|graph|mermaid).{0,40}(select|highlight|click)",
+            t,
+        ):
+            return True
+        if re.search(r"what\s+is\s+highlighted", t) and re.search(
+            r"diagram|graph|mermaid", t
+        ):
+            return True
+        return False
+
+    def _deterministic_viewer_ui_answer(
+        self,
+        diagram_selection: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Exact answer for interactive diagram UI state. Not codebase architecture."""
+        ds = diagram_selection or {}
+        open_doc = str(ds.get("module_id") or "").strip() or None
+        dkind = str(ds.get("kind") or "none").lower().strip()
+        dlid = str(ds.get("logical_id") or "").strip()
+        dlabel = str(ds.get("label") or dlid).strip()
+        lines = []
+        if dkind != "none" and dlid:
+            lines.append(
+                f'**Interactive diagram selection** (highlighted on the Mermaid graph): **"{dlabel}"** '
+                f"(logical id: `{dlid}`, kind: {dkind})."
+            )
+        else:
+            lines.append(
+                "**Interactive diagram selection:** none — no node/cluster/edge is highlighted on the diagram."
+            )
+        if open_doc:
+            lines.append(
+                f"**Diagram module context** (from selection): `{open_doc}`."
+            )
+        else:
+            lines.append(
+                "**Diagram module context:** not reported on this selection (or nothing selected)."
+            )
+        lines.append(
+            "*Diagram selection reports the highlighted shape and its module when applicable.*"
+        )
+        return "\n\n".join(lines)
+
+    def _append_turn_to_history(
+        self,
+        message_history: Optional[List[Any]],
+        enhanced_message: str,
+        assistant_text: str,
+    ) -> List[Any]:
+        """Append this user/assistant pair so multi-turn chat stays consistent."""
+        prior: List = []
+        if message_history:
+            try:
+                prior = list(ModelMessagesTypeAdapter.validate_python(message_history))
+            except Exception as e:
+                logger.warning("[ARCH-AGENT] Could not parse history for append: %s", e)
+                prior = []
+        req = ModelRequest(parts=[UserPromptPart(content=enhanced_message)])
+        resp = ModelResponse(parts=[TextPart(content=assistant_text)])
+        combined = prior + [req, resp]
+        return to_jsonable_python(combined)
+
+    def chat(
         self,
         message: str,
-        current_module: Optional[str] = None,
-        current_page: Optional[str] = None,
         opened_modules: Optional[list[str]] = None,
         message_history: Optional[List[Any]] = None,
-        architecture_group: Optional[Dict[str, Any]] = None,
+        diagram_selection: Optional[Dict[str, Any]] = None,
     ) -> tuple[str, List[Any]]:
         """
         Process a chat message and return a response plus updated message history.
 
         Args:
             message: User's question/message
-            current_module: Currently selected module (if any)
-            current_page: Currently viewed page (if any)
             opened_modules: List of opened module IDs (overview is always included)
             message_history: Optional list of prior messages (JSON-serializable form from
                 a previous chat() return). When provided, the agent continues the conversation.
-            architecture_group: Optional dict with id, label, and optional module_ids
-                when the user focuses the agent on one overview diagram group.
+            diagram_selection: Optional dict with kind, logical_id, label, module_id from the interactive diagram.
 
         Returns:
             Tuple of (assistant_response_text, updated_history). The client should store
             updated_history and send it back as message_history on the next turn.
         """
         logger.info(f"[ARCH-AGENT] Processing chat message: {message[:100]}...")
-        logger.info(f"[ARCH-AGENT] Current module: {current_module}")
-        logger.info(f"[ARCH-AGENT] Current page: {current_page}")
         logger.info(f"[ARCH-AGENT] Opened modules: {opened_modules}")
         logger.info(f"[ARCH-AGENT] History length: {len(message_history) if message_history else 0}")
+        logger.info(f"[ARCH-AGENT] diagram_selection: {diagram_selection!r}")
 
         # Format full module tree for prompt (used when no history, or for context in user message)
         module_tree_text = self._format_module_tree_for_prompt()
         system_prompt = ARCHITECTURAL_AGENT_SYSTEM_PROMPT_TEMPLATE.format(module_tree=module_tree_text)
-        group_ctx = self._format_architecture_group_context(architecture_group)
-        if group_ctx:
-            system_prompt = system_prompt + "\n\n" + group_ctx
+        system_prompt = system_prompt + "\n\n" + self._format_diagram_selection_system_block(diagram_selection)
 
         logger.info(f"[ARCH-AGENT] System prompt length: {len(system_prompt)} chars")
         logger.debug(f"[ARCH-AGENT] System prompt preview: {system_prompt[:500]}...")
@@ -222,15 +316,18 @@ class ArchitecturalAgentRunner:
             system_prompt=system_prompt
         )
 
-        # Enhance user message with current context
-        enhanced_message = message
-        if current_module or current_page:
-            context_parts = []
-            if current_module:
-                context_parts.append(f"Currently viewing module: {current_module}")
-            if current_page:
-                context_parts.append(f"Currently on page: {current_page}")
-            enhanced_message = f"[Context: {', '.join(context_parts)}]\n\n{message}"
+        # Restate diagram selection on every turn
+        diagram_prefix = self._format_user_message_diagram_selection_prefix(diagram_selection)
+        enhanced_message = diagram_prefix + message
+
+        # Deterministic answers for diagram UI questions. LLMs often confuse highlight vs open doc.
+        if self._is_viewer_ui_meta_question(message):
+            ans = self._deterministic_viewer_ui_answer(diagram_selection)
+            logger.info("[ARCH-AGENT] Viewer UI meta question — deterministic answer (no LLM)")
+            updated = self._append_turn_to_history(
+                message_history, enhanced_message, ans
+            )
+            return (ans, updated)
 
         # Parse history for pydantic-ai (list of dicts -> list[ModelMessage])
         history_messages = None
@@ -243,7 +340,8 @@ class ArchitecturalAgentRunner:
                 history_messages = None
 
         try:
-            result = await agent.run(
+            # run_sync avoids asyncio event-loop issues on reused serverless workers (e.g. Vercel).
+            result = agent.run_sync(
                 enhanced_message,
                 message_history=history_messages,
             )

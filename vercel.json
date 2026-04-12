@@ -2,7 +2,17 @@
   "version": 2,
   "buildCommand": null,
   "outputDirectory": "demo",
+  "functions": {
+    "api/**/*.py": {
+      "maxDuration": 60,
+      "includeFiles": "demo/repos/**"
+    }
+  },
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/chat.py"
+    },
     {
       "src": "/repos/(.*)",
       "dest": "/repos/$1"

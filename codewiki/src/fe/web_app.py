@@ -11,6 +11,7 @@ Features:
 """
 
 import argparse
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -18,7 +19,7 @@ from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict
 
 from .cache_manager import CacheManager
 from .background_worker import BackgroundWorker
@@ -150,22 +151,23 @@ async def serve_repo_raw_file(job_id: str, filename: str):
 
 
 # Chat API models
-class ArchitectureGroupSelection(BaseModel):
-    """Optional focus for the architectural agent: a diagram subgraph / group, or omit for none."""
+class DiagramSelectionPayload(BaseModel):
+    """Interactive Mermaid diagram selection (data-logical-id from viewer registry), or omit for none."""
 
-    id: str
-    label: str
-    module_ids: Optional[List[str]] = None
+    kind: str = "none"
+    logical_id: Optional[str] = None
+    label: Optional[str] = None
+    module_id: Optional[str] = None
+    dom_ref: Optional[str] = None
+    edge: Optional[Dict[str, Any]] = None
 
 
 class ArchAgentChatRequest(BaseModel):
     job_id: str
     message: str
-    current_module: Optional[str] = None
-    current_page: Optional[str] = None
     opened_modules: Optional[List[str]] = None
-    # When set, the agent prioritizes this overview diagram group (subgraph).
-    architecture_group: Optional[ArchitectureGroupSelection] = None
+    # Highlighted node/cluster/edge on the interactive diagram.
+    diagram_selection: Optional[DiagramSelectionPayload] = None
     # Message history from previous turns (returned as `history` in response). Send it back on the next request for multi-turn conversation.
     history: Optional[List[Any]] = None
 
@@ -227,13 +229,12 @@ async def arch_agent_chat(request: ArchAgentChatRequest) -> ArchAgentChatRespons
         if 'overview' not in opened_modules:
             opened_modules = ['overview'] + opened_modules
         
-        response, updated_history = await agent_runner.chat(
+        response, updated_history = await asyncio.to_thread(
+            agent_runner.chat,
             message=request.message,
-            current_module=request.current_module,
-            current_page=request.current_page,
             opened_modules=opened_modules,
             message_history=request.history,
-            architecture_group=request.architecture_group.model_dump() if request.architecture_group else None,
+            diagram_selection=request.diagram_selection.model_dump() if request.diagram_selection else None,
         )
 
         return ArchAgentChatResponse(response=response, history=updated_history)

@@ -172,7 +172,7 @@ New module_tree.json structure:
     "module_name": {
         "path": "string",
         "title": "Short Title",
-        "description": "1-2 sentence description for hover",
+        "description": "~200 char summary for tree / hover (1-2 sentences)",
         "components": ["component.id.1", "component.id.2"],
         "diagram": {                          # NEW: Structured diagram
             "direction": "TD",
