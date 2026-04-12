@@ -26,6 +26,51 @@ logger = logging.getLogger(__name__)
 MODULE_DESCRIPTION_MAX_CHARS = 200
 
 
+def _collect_opening_prose_lines(lines: List[str]) -> List[str]:
+    """
+    Lines of opening prose: after ``# Title`` until the next ATX heading; if there is no ``# `` line,
+    from the first line until the first ATX heading (docs that start with backticks or plain text).
+    Skips fenced code blocks.
+    """
+    in_code = False
+    past_h1 = False
+    out: List[str] = []
+    for line in lines:
+        if line.strip().startswith("```"):
+            in_code = not in_code
+            continue
+        if in_code:
+            continue
+        if not past_h1:
+            if line.startswith("# "):
+                past_h1 = True
+            continue
+        if re.match(r"^#{1,6}\s", line):
+            break
+        out.append(line.rstrip("\n"))
+    if out:
+        while out and not out[0].strip():
+            out.pop(0)
+        while out and not out[-1].strip():
+            out.pop()
+        return out
+    in_code = False
+    for line in lines:
+        if line.strip().startswith("```"):
+            in_code = not in_code
+            continue
+        if in_code:
+            continue
+        if re.match(r"^#{1,6}\s", line):
+            break
+        out.append(line.rstrip("\n"))
+    while out and not out[0].strip():
+        out.pop(0)
+    while out and not out[-1].strip():
+        out.pop()
+    return out
+
+
 def extract_diagram_json_from_markdown(content: str) -> Optional[Dict[str, Any]]:
     """
     Extract structured diagram JSON from markdown <!-- DIAGRAM_JSON ... --> block.
@@ -51,8 +96,8 @@ def extract_module_metadata_from_markdown(
     """
     Extract title, description, and diagram from markdown string.
 
-    ``description`` is the first paragraph after the H1 (until a blank line or ``##``), capped at
-    ``MODULE_DESCRIPTION_MAX_CHARS``, matching the short summary prompts ask the model to write.
+    ``description`` is the opening prose (after ``# Title`` if present, otherwise from the file start),
+    until the first ATX heading, capped at ``MODULE_DESCRIPTION_MAX_CHARS`` for JSON storage.
 
     Args:
         content: Full markdown body.
@@ -78,36 +123,9 @@ def extract_module_metadata_from_markdown(
         title = ""
 
     lines = content.split("\n")
-    first_para: List[str] = []
-    in_code_block = False
-    past_title = False
-
-    for line in lines:
-        if line.strip().startswith("```"):
-            in_code_block = not in_code_block
-            continue
-
-        if in_code_block:
-            continue
-
-        if not past_title:
-            if line.startswith("# "):
-                past_title = True
-            continue
-
-        # First subsection ends the summary region for tree/hover (same as prompts: short lead, then ## …).
-        if re.match(r"^##\s", line):
-            break
-
-        if not line.strip():
-            if first_para:
-                break
-            continue
-
-        first_para.append(line.strip())
-
-    if first_para:
-        description = re.sub(r"\s+", " ", " ".join(first_para)).strip()
+    opening_lines = _collect_opening_prose_lines(lines)
+    if opening_lines:
+        description = re.sub(r"\s+", " ", "\n".join(opening_lines).strip())
         if len(description) > MODULE_DESCRIPTION_MAX_CHARS:
             description = description[: MODULE_DESCRIPTION_MAX_CHARS - 3] + "..."
     else:

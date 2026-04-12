@@ -1027,15 +1027,16 @@
             tooltip.style.pointerEvents = 'none';
         }
 
-        const MODULE_DESCRIPTION_MAX_CHARS = 200;
-
-        /** Match codewiki extract_module_metadata_from_markdown: first paragraph after H1, ~200 char cap. */
-        function extractModuleIntroFromMarkdown(content) {
-            if (!content || typeof content !== 'string') return '';
-            const lines = content.split(/\n/);
-            const firstPara = [];
-            let pastTitle = false;
+        /**
+         * Opening prose from cached module *.md for hover (no character cap).
+         * - If the file has `# Title`, take everything after that line until the next ATX heading (## / ### / …).
+         * - If there is no `# ` line (many generated docs start with backticks or plain text), take from the
+         *   first content line until the first ATX heading.
+         */
+        function extractOpeningLinesForTooltip(lines) {
+            const collect = [];
             let inCode = false;
+            let pastH1 = false;
             for (const line of lines) {
                 const trim = line.trim();
                 if (trim.startsWith('```')) {
@@ -1043,23 +1044,41 @@
                     continue;
                 }
                 if (inCode) continue;
-                if (!pastTitle) {
-                    if (line.startsWith('# ')) pastTitle = true;
+                if (!pastH1) {
+                    if (line.startsWith('# ')) pastH1 = true;
                     continue;
                 }
-                if (/^##\s/.test(line)) break;
-                if (!trim) {
-                    if (firstPara.length) break;
+                if (/^#{1,6}\s/.test(line)) break;
+                collect.push(line.replace(/\r$/, ''));
+            }
+            if (collect.length) {
+                while (collect.length && !collect[0].trim()) collect.shift();
+                while (collect.length && !collect[collect.length - 1].trim()) collect.pop();
+                return collect;
+            }
+            // No `# ` title: lead is everything until first heading (e.g. swift_compiler_core.md).
+            inCode = false;
+            for (const line of lines) {
+                const trim = line.trim();
+                if (trim.startsWith('```')) {
+                    inCode = !inCode;
                     continue;
                 }
-                firstPara.push(trim);
+                if (inCode) continue;
+                if (/^#{1,6}\s/.test(line)) break;
+                collect.push(line.replace(/\r$/, ''));
             }
-            if (!firstPara.length) return '';
-            let description = firstPara.join(' ').replace(/\s+/g, ' ').trim();
-            if (description.length > MODULE_DESCRIPTION_MAX_CHARS) {
-                description = description.slice(0, MODULE_DESCRIPTION_MAX_CHARS - 3) + '...';
-            }
-            return description;
+            while (collect.length && !collect[0].trim()) collect.shift();
+            while (collect.length && !collect[collect.length - 1].trim()) collect.pop();
+            return collect;
+        }
+
+        function extractModuleIntroFromMarkdown(content) {
+            if (!content || typeof content !== 'string') return '';
+            const lines = content.split(/\n/);
+            const intro = extractOpeningLinesForTooltip(lines);
+            if (!intro.length) return '';
+            return intro.join('\n').trim().replace(/\n{3,}/g, '\n\n');
         }
 
         function moduleIntroFromDocsContent(moduleId) {
@@ -1069,14 +1088,12 @@
             return extractModuleIntroFromMarkdown(raw);
         }
 
-        /** Prefer module_tree description; fallback to first paragraph parsed from cached *.md. */
+        /** Hover body: opening prose from cached *.md only — never module_tree.description. */
         function enrichModuleTooltipPayload(moduleId, base) {
             const b = base || {};
-            const fromMd = moduleIntroFromDocsContent(moduleId);
-            const d = (b.description && String(b.description).trim()) || fromMd;
             return {
                 title: b.title || '',
-                description: d
+                description: moduleIntroFromDocsContent(moduleId) || ''
             };
         }
 
@@ -3164,15 +3181,18 @@
                     if (u) dm = diagramNodeMeta[u] || null;
                 }
                 let tooltipTitle = dm?.title || '';
-                let tooltipDesc = dm?.description || '';
-                if (targetModule && moduleMetadata[targetModule]) {
-                    const mm = moduleMetadata[targetModule];
-                    if (!tooltipTitle) tooltipTitle = mm.title || '';
-                    if (!tooltipDesc) {
-                        tooltipDesc = mm.description || moduleIntroFromDocsContent(targetModule) || '';
-                    }
-                } else if (!tooltipDesc && targetModule) {
+                // One source for body: linked module → opening prose from that *.md only. No module_tree.description, no chains.
+                let tooltipDesc = '';
+                if (targetModule) {
                     tooltipDesc = moduleIntroFromDocsContent(targetModule) || '';
+                    if (moduleMetadata[targetModule] && !tooltipTitle) {
+                        tooltipTitle = moduleMetadata[targetModule].title || '';
+                    }
+                } else {
+                    tooltipDesc =
+                        dm?.description != null && String(dm.description).trim() !== ''
+                            ? String(dm.description).trim()
+                            : '';
                 }
                 if (!tooltipTitle) tooltipTitle = nodeText || (nodeId ? formatModuleName(nodeId) : '');
                 if (!tooltipDesc) tooltipDesc = '';
