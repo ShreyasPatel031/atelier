@@ -252,7 +252,7 @@
         .diagram-viewport:active {
             cursor: grabbing;
         }
-        
+
         .diagram-canvas {
             transform-origin: 0 0;
             transition: transform 0.1s ease-out;
@@ -516,14 +516,34 @@
             stroke-width: 3px !important;
         }
 
-        /* Stroke transitions — hover doubling is applied in JS (attachDiagramNodeHoverStroke)
+        /* Stroke transitions — hover stroke width is toggled in JS (attachDiagramHoverStrokes)
            so classDef / Mermaid theme colors still respond; pure CSS :hover loses to injected styles. */
         #mermaid-diagram svg g.node rect,
         #mermaid-diagram svg g.node circle,
         #mermaid-diagram svg g.node polygon,
         #mermaid-diagram svg g.node ellipse,
-        #mermaid-diagram svg g.node .label-container path {
+        #mermaid-diagram svg g.node .label-container path,
+        #mermaid-diagram svg g.cluster rect,
+        #mermaid-diagram svg g.cluster path,
+        #mermaid-diagram svg g.edgePath path,
+        #mermaid-diagram svg g.edgePath line,
+        #mermaid-diagram svg g.edgePath polyline,
+        #mermaid-diagram svg g.edgePaths > path,
+        #mermaid-diagram svg g.edgePaths > line,
+        #mermaid-diagram svg g.edgePaths > polyline {
             transition: stroke-width 0.12s ease, stroke 0.12s ease;
+        }
+        
+        /* Mermaid often sets pointer-events so edges never receive hover — enable stroke hit-testing. */
+        #mermaid-diagram svg g.edgePath path,
+        #mermaid-diagram svg g.edgePath line,
+        #mermaid-diagram svg g.edgePath polyline,
+        #mermaid-diagram svg g.edgePath polygon,
+        #mermaid-diagram svg g.edgePaths > path,
+        #mermaid-diagram svg g.edgePaths > line,
+        #mermaid-diagram svg g.edgePaths > polyline,
+        #mermaid-diagram svg g.edgePaths > polygon {
+            pointer-events: stroke;
         }
 
         .clickable-node text,
@@ -541,10 +561,28 @@
             pointer-events: auto !important;
             cursor: pointer !important;
         }
+
+        /*
+         * HTML labels (foreignObject + div) sit above the node shape and steal hits — Playwright/a11y
+         * see a non-interactive div on top. Let events reach the rect/polygon underneath; g.node still receives bubble.
+         */
+        #diagramViewport #mermaid-diagram svg g.node.clickable-node foreignObject,
+        #diagramViewport #mermaid-diagram svg g.node.clickable-node foreignObject *,
+        #diagramViewport #mermaid-diagram svg g.node.clickable-node .nodeLabel,
+        #diagramViewport #mermaid-diagram svg g.node.clickable-node .label text,
+        #diagramViewport #mermaid-diagram svg g.node.clickable-node text {
+            pointer-events: none !important;
+        }
         
         .mermaid .edgePath path,
-        .mermaid .edgePath .path {
+        .mermaid .edgePath .path,
+        .mermaid .edgePaths > path {
             stroke: inherit !important;
+        }
+
+        #mermaid-diagram svg g.edgeLabels,
+        #mermaid-diagram svg g.edgeLabel {
+            pointer-events: auto;
         }
         
         /* Selection styling - light grey border */
@@ -570,7 +608,17 @@
             stroke: #94a3b8 !important;
             stroke-width: 3px !important;
         }
-        
+
+        /*
+         * Selected-edge dash march: @keyframes only. Dash + animation are applied in JS with !important
+         * so they override Mermaid inline styles. Period must match EDGE_SEL_DASH_PERIOD in script.
+         */
+        @keyframes diagram-edge-dash-flow {
+            to {
+                stroke-dashoffset: -26;
+            }
+        }
+
         /* Breadcrumb navigation */
         .breadcrumb {
             display: flex;
@@ -832,9 +880,19 @@
                         <div class="view-tune-row">
                             <label>
                                 Zoom step (⌘/Ctrl+scroll &amp; +/− buttons)
-                                <span class="view-tune-val" id="tuneZoomVal">0.20</span>
-                                <input type="range" id="tuneZoomStep" min="0.05" max="1" step="0.05" value="0.2" />
+                                <span class="view-tune-val" id="tuneZoomVal">0.10</span>
+                                <input type="range" id="tuneZoomStep" min="0.05" max="1" step="0.05" value="0.1" />
                             </label>
+                        </div>
+                        <div class="view-tune-row">
+                            <label>
+                                Edge hover tolerance (screen px)
+                                <span class="view-tune-val" id="tuneEdgeHitVal">14</span>
+                                <input type="range" id="tuneEdgeHit" min="6" max="120" step="1" value="14" />
+                            </label>
+                            <p class="view-tune-hint" style="margin:0.35rem 0 0;font-size:0.8rem">
+                                Target width on screen; invisible hit stroke scales as <code style="color:#94a3b8">1 / zoom</code> so it feels the same while you zoom the canvas.
+                            </p>
                         </div>
                         <p class="view-tune-hint">Console: <code style="color:#94a3b8">viewTune.panWheelMult = 1.2</code> then <code style="color:#94a3b8">syncViewTuneUI()</code> to refresh sliders.</p>
                     </div>
@@ -889,13 +947,33 @@
         let selectedModuleId = null;  // Currently selected module
         /** Last diagram shape id passed to updateSelectionHighlight (for clearing on background click). */
         let selectedDiagramNodeId = null;
+        /**
+         * Canonical diagram selection (logical ids from buildDiagramLogicalIdRegistry → data-logical-id).
+         * Use setDiagramSelection / queryDiagramElementByLogicalId — do not parse SVG text with regex for identity.
+         */
+        let diagramSelection = {
+            kind: 'none',
+            logicalId: null,
+            label: null,
+            moduleId: null,
+            domRef: null,
+            edge: null
+        };
+        /** Bumped on each expand so stale post-render setTimeouts cannot overwrite diagramSelection. */
+        let expandDiagramSelectionEpoch = 0;
         let openedModules = new Set(['overview']);  // Track opened modules (overview is always open)
         let selectionPath = [];       // Breadcrumb path: [{id, name}, ...]
         let docPanelOpen = true;     // Panel is always open (chat-only view)
         let moduleMetadata = {};      // Store title/description for tooltips (module docs / tree)
         /** Per-diagram-node title+description from DIAGRAM_JSON in markdown (nodes array; id/label keys). Module link is optional. */
         let overviewDiagramNodeMeta = {};
+        /** Per-subgraph title+description from DIAGRAM_JSON.groups (id/label keys; optional title/description). */
+        let overviewDiagramClusterMeta = {};
+        /** Per-edge title+description from DIAGRAM_JSON.edges (source/target; optional label/title/description). */
+        let overviewDiagramEdgeMeta = {};
         let architectureGroups = [];  // Overview diagram groups for arch-agent focus (DIAGRAM_JSON or mermaid subgraphs)
+        /** Last object from buildDiagramLogicalIdRegistry() for the current render (hover + tooling). */
+        let lastDiagramRegistry = null;
         
         // ============================================================
         // PANEL TOGGLE & TOOLTIPS
@@ -914,8 +992,21 @@
             if (!metadata || !metadata.title) return;
             
             const tooltip = document.getElementById('moduleTooltip');
-            tooltip.querySelector('.tooltip-title').textContent = metadata.title;
-            tooltip.querySelector('.tooltip-desc').textContent = metadata.description || '';
+            const titleEl = tooltip.querySelector('.tooltip-title');
+            const descEl = tooltip.querySelector('.tooltip-desc');
+            const descTrim =
+                metadata.description != null && String(metadata.description).trim() !== ''
+                    ? String(metadata.description).trim()
+                    : '';
+            if (descTrim) {
+                titleEl.style.display = '';
+                titleEl.textContent = metadata.title;
+                descEl.textContent = descTrim;
+            } else {
+                titleEl.style.display = 'none';
+                titleEl.textContent = '';
+                descEl.textContent = metadata.title;
+            }
             
             // Position near cursor
             const x = event.clientX + 15;
@@ -933,6 +1024,140 @@
         function hideTooltip() {
             const tooltip = document.getElementById('moduleTooltip');
             tooltip.style.display = 'none';
+        }
+
+        function resolveDiagramEdgeTooltipMetadata(src, tgt, rawLabel, diagramEdgeMeta) {
+            const map = diagramEdgeMeta || {};
+            const k = `${src}\0${tgt}`;
+            let em = map[k];
+            if (!em && rawLabel && String(rawLabel).trim()) {
+                em = map[`${k}\0${String(rawLabel).trim()}`];
+            }
+            if (em) {
+                const t = em.title != null && String(em.title).trim() ? String(em.title).trim() : '';
+                const d =
+                    em.description != null && String(em.description).trim() ? String(em.description).trim() : '';
+                if (t && d) return { title: t, description: d };
+                if (t) return { title: t, description: '' };
+                if (d) return { title: d, description: '' };
+            }
+            const label = rawLabel && String(rawLabel).trim() ? String(rawLabel).trim() : '';
+            if (label) return { title: label, description: '' };
+            return null;
+        }
+
+        /**
+         * Resolves stamped edge fields from a path under g.edgePaths / g.edgePath (including invisible hit-area paths).
+         */
+        function resolveDiagramEdgeStampFieldsFromPath(pathEl) {
+            if (!pathEl || !pathEl.tagName || pathEl.tagName.toLowerCase() !== 'path') return null;
+            if (pathEl.closest && pathEl.closest('defs')) return null;
+            let visible = pathEl;
+            if (visible.classList && visible.classList.contains('edge-hit-area')) {
+                const prev = visible.previousElementSibling;
+                if (
+                    prev &&
+                    prev.tagName &&
+                    prev.tagName.toLowerCase() === 'path' &&
+                    !prev.classList.contains('edge-hit-area')
+                ) {
+                    visible = prev;
+                }
+            }
+            let src = visible.getAttribute('data-edge-source');
+            let tgt = visible.getAttribute('data-edge-target');
+            let rawLabel = visible.getAttribute('data-edge-label') || '';
+            if (!src || !tgt) {
+                const leg = visible.closest && visible.closest('g.edgePath');
+                if (leg) {
+                    src = leg.getAttribute('data-edge-source') || src;
+                    tgt = leg.getAttribute('data-edge-target') || tgt;
+                    rawLabel = rawLabel || leg.getAttribute('data-edge-label') || '';
+                }
+            }
+            if (!src || !tgt) return null;
+            const domRef = visible.getAttribute('id') || visible.id || '';
+            return {
+                source: src,
+                target: tgt,
+                label: rawLabel ? rawLabel : null,
+                domRef: domRef || null,
+                visiblePathEl: visible,
+            };
+        }
+
+        function resolveDiagramEdgeTooltipMetaFromPointerPath(pathEl, diagramEdgeMeta) {
+            const fields = resolveDiagramEdgeStampFieldsFromPath(pathEl);
+            if (!fields) return null;
+            return resolveDiagramEdgeTooltipMetadata(
+                fields.source,
+                fields.target,
+                fields.label || '',
+                diagramEdgeMeta
+            );
+        }
+
+        function attachDiagramEdgeTooltips(svg, contextModuleId) {
+            const diagramEdgeMeta = moduleData[contextModuleId]?.diagramEdgeMeta || {};
+            function bindEdgeTooltip(el) {
+                if (!el || el.dataset.diagramTooltipBound === '1') return;
+                const src = el.getAttribute('data-edge-source');
+                const tgt = el.getAttribute('data-edge-target');
+                if (!src || !tgt) return;
+                const rawLabel = el.getAttribute('data-edge-label') || '';
+                const meta = resolveDiagramEdgeTooltipMetadata(src, tgt, rawLabel, diagramEdgeMeta);
+                if (!meta || !meta.title) return;
+                el.dataset.diagramTooltipBound = '1';
+                el.addEventListener('mouseenter', (e) => showTooltip(e, meta));
+                el.addEventListener('mousemove', (e) => showTooltip(e, meta));
+                el.addEventListener('mouseleave', hideTooltip);
+            }
+            /**
+             * Edge geometry: pointer targets the invisible wide hit path on top. Per-path tooltip
+             * listeners miss that, and mouseenter on the group does not fire for flat g.edgePaths.
+             * Delegate mouseover/move/out from the edge container so the hit area shows the same tooltip as the label.
+             */
+            function bindEdgePathTooltipDelegate(root) {
+                if (!root || root.dataset.diagramEdgePathTooltipDelegate === '1') return;
+                root.dataset.diagramEdgePathTooltipDelegate = '1';
+                let lastMeta = null;
+                root.addEventListener(
+                    'mouseover',
+                    (e) => {
+                        const t = e.target;
+                        if (!t || !t.tagName || t.tagName.toLowerCase() !== 'path') return;
+                        const meta = resolveDiagramEdgeTooltipMetaFromPointerPath(t, diagramEdgeMeta);
+                        lastMeta = meta;
+                        if (meta && meta.title) showTooltip(e, meta);
+                        else hideTooltip();
+                    },
+                    false
+                );
+                root.addEventListener(
+                    'mousemove',
+                    (e) => {
+                        if (!lastMeta || !lastMeta.title) return;
+                        showTooltip(e, lastMeta);
+                    },
+                    false
+                );
+                root.addEventListener(
+                    'mouseout',
+                    (e) => {
+                        const rt = e.relatedTarget;
+                        if (rt && root.contains(rt)) return;
+                        lastMeta = null;
+                        hideTooltip();
+                    },
+                    false
+                );
+            }
+            const flatEdgePaths = svg.querySelector('g.edgePaths');
+            if (flatEdgePaths) bindEdgePathTooltipDelegate(flatEdgePaths);
+            svg.querySelectorAll('g.edgePath').forEach((g) => bindEdgePathTooltipDelegate(g));
+            svg.querySelectorAll('g.edgeLabels > g.edgeLabel[data-edge-source][data-edge-target]').forEach(
+                bindEdgeTooltip
+            );
         }
         
         // Convert structured diagram to Mermaid code
@@ -1156,9 +1381,9 @@
 
         // ------------------------------------------------------------
         // RENDERER BOUNDARY — diagram engine is pluggable
-        // Today: Mermaid renders SVG with opaque internal ids. We parse the
-        // same source string used for render to build a logical-id registry,
-        // then stamp data-logical-id on g.node / g.cluster and data-edge-* on g.edgePath.
+        // Today: Mermaid renders SVG; we parse the same source to build a registry, then stamp
+        // data-logical-id on g.node / g.cluster (label queues) and data-edge-* on g.edgePath or edge path by
+        // matching Mermaid’s path element id (L_<src>_<tgt>_<n>), not by DOM index order.
         // Replacing Mermaid: change render + stamp; keep registry format + DOM contract.
         // ------------------------------------------------------------
 
@@ -1320,7 +1545,7 @@
                 nodeQueues: buildLabelQueues(nodeDefs),
                 clusterQueues: buildLabelQueues(clusterDefs),
                 edgeDefs,
-                duplicateLabelWarnings: warnings
+                duplicateLabelWarnings: warnings,
             };
         }
 
@@ -1345,12 +1570,70 @@
         }
 
         /**
+         * Mermaid assigns each edge path element `id` via getEdgeId(start, end, { counter, prefix: 'L' }).
+         * We replicate that from parsed edgeDefs (same order Mermaid adds edges) and map id → def.
+         * This avoids brittle DOM-index pairing; see mermaid flowchart addSingleLink + insertEdge.
+         */
+        function buildMermaidEdgePathIdToDefMap(edgeDefs) {
+            const idToDef = new Map();
+            if (!edgeDefs || !edgeDefs.length) return idToDef;
+            const pairCount = new Map();
+            for (const def of edgeDefs) {
+                if (!def || !def.source || !def.target) continue;
+                const pk = `${def.source}\0${def.target}`;
+                const prev = pairCount.get(pk) || 0;
+                const counter = prev === 0 ? 0 : prev + 1;
+                pairCount.set(pk, prev + 1);
+                const pathId = `L_${def.source}_${def.target}_${counter}`;
+                idToDef.set(pathId, def);
+            }
+            return idToDef;
+        }
+
+        /** Path id from legacy g.edgePath group or Mermaid 11+ direct path under g.edgePaths (insertEdge). */
+        function getFlowchartEdgePathDomId(edgePathEl) {
+            if (!edgePathEl) return '';
+            const tag = edgePathEl.tagName && edgePathEl.tagName.toLowerCase();
+            if (tag === 'path') {
+                return edgePathEl.getAttribute('id') || edgePathEl.id || '';
+            }
+            const p =
+                edgePathEl.querySelector('path.edge-thickness-normal[id], path.edge-thickness-thick[id], path[id]') ||
+                edgePathEl.querySelector('path');
+            if (!p) return '';
+            return p.getAttribute('id') || p.id || '';
+        }
+
+        /** Mermaid 11+ flowchart: paths are direct children of g.edgePaths (no g.edgePath wrapper). */
+        function getFlatFlowchartEdgePathElements(svg) {
+            const eps = svg && svg.querySelector('g.edgePaths');
+            if (!eps) return [];
+            return [...eps.querySelectorAll(':scope > path')].filter(
+                (p) => !p.classList.contains('edge-hit-area') && !(p.closest && p.closest('defs'))
+            );
+        }
+
+        function lookupEdgeDefByMermaidPathId(idToDef, rawPathId) {
+            if (!rawPathId || !idToDef.size) return null;
+            if (idToDef.has(rawPathId)) return idToDef.get(rawPathId);
+            for (const [k, def] of idToDef) {
+                if (rawPathId === k || rawPathId.endsWith(`-${k}`)) return def;
+            }
+            return null;
+        }
+
+        /**
          * Stamp data-logical-id on g.node and g.cluster by matching visible label text
          * to registry queues (source order × DOM order).
          */
         function stampLogicalIdsOntoSvg(svg, registry) {
             if (!svg || !registry) {
-                return { unstampedNodes: [], unstampedClusters: [], edgePathMismatch: null };
+                return {
+                    unstampedNodes: [],
+                    unstampedClusters: [],
+                    edgePathMismatch: null,
+                    unstampedEdgePathIds: []
+                };
             }
             const nq = cloneQueueMap(registry.nodeQueues);
             const cq = cloneQueueMap(registry.clusterQueues);
@@ -1385,24 +1668,35 @@
 
             const edgeDefs = registry.edgeDefs || [];
             let edgePathMismatch = null;
-            const edgePaths = svg.querySelectorAll('g.edgePath');
-            if (edgeDefs.length > 0) {
-                edgePaths.forEach((g, i) => {
-                    const def = edgeDefs[i];
+            const unstampedEdgePathIds = [];
+            const idToDef = buildMermaidEdgePathIdToDefMap(edgeDefs);
+            const legacyEdgeGroups = [...svg.querySelectorAll('g.edgePath')];
+            const flatEdgePaths = legacyEdgeGroups.length ? [] : getFlatFlowchartEdgePathElements(svg);
+            const domEdgeCount = legacyEdgeGroups.length || flatEdgePaths.length;
+            if (edgeDefs.length > 0 || domEdgeCount > 0) {
+                const stampEdgeEl = (el, pid) => {
+                    const def = lookupEdgeDefByMermaidPathId(idToDef, pid);
                     if (def) {
-                        g.setAttribute('data-edge-source', def.source);
-                        g.setAttribute('data-edge-target', def.target);
+                        el.setAttribute('data-edge-source', def.source);
+                        el.setAttribute('data-edge-target', def.target);
                         if (def.rawLabel) {
-                            g.setAttribute('data-edge-label', def.rawLabel);
+                            el.setAttribute('data-edge-label', def.rawLabel);
                         }
+                    } else if (pid) {
+                        unstampedEdgePathIds.push(pid);
                     }
-                });
-                if (edgePaths.length !== edgeDefs.length) {
-                    edgePathMismatch = { dom: edgePaths.length, parsed: edgeDefs.length };
+                };
+                if (legacyEdgeGroups.length) {
+                    legacyEdgeGroups.forEach((g) => stampEdgeEl(g, getFlowchartEdgePathDomId(g)));
+                } else {
+                    flatEdgePaths.forEach((p) => stampEdgeEl(p, getFlowchartEdgePathDomId(p)));
+                }
+                if (domEdgeCount !== edgeDefs.length) {
+                    edgePathMismatch = { dom: domEdgeCount, parsed: edgeDefs.length };
                 }
             }
 
-            return { unstampedNodes, unstampedClusters, edgePathMismatch };
+            return { unstampedNodes, unstampedClusters, edgePathMismatch, unstampedEdgePathIds };
         }
 
         function queryDiagramElementByLogicalId(svg, logicalId) {
@@ -1416,8 +1710,237 @@
         }
 
         function clearDiagramShapeSelection() {
-            selectedDiagramNodeId = null;
-            updateSelectionHighlight(null);
+            expandDiagramSelectionEpoch += 1;
+            setDiagramSelection({ kind: 'none', moduleId: selectedModuleId });
+        }
+
+        function refreshDiagramSelectionLabelFromDom() {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg || !diagramSelection.logicalId) return;
+            if (diagramSelection.kind === 'edge' && diagramSelection.edge) {
+                const lbl = diagramSelection.edge.label || diagramSelection.label;
+                if (lbl) diagramSelection.label = lbl;
+                return;
+            }
+            const el = queryDiagramElementByLogicalId(svg, diagramSelection.logicalId);
+            if (!el) return;
+            if (el.classList.contains('cluster')) {
+                diagramSelection.label = getClusterVisibleLabel(el) || diagramSelection.label;
+            } else if (el.classList.contains('node')) {
+                diagramSelection.label = getFlowchartNodeVisibleLabel(el) || diagramSelection.label;
+            }
+        }
+
+        function queryDiagramEdgeStampedElement(svg, sel) {
+            if (!svg || !sel || sel.kind !== 'edge' || !sel.edge) return null;
+            const src = String(sel.edge.source || '');
+            const tgt = String(sel.edge.target || '');
+            if (!src || !tgt) return null;
+            if (sel.domRef) {
+                try {
+                    let byId = null;
+                    if (typeof svg.getElementById === 'function') {
+                        byId = svg.getElementById(sel.domRef);
+                    }
+                    if (!byId && typeof document !== 'undefined' && document.getElementById) {
+                        const cand = document.getElementById(sel.domRef);
+                        if (cand && svg.contains(cand)) byId = cand;
+                    }
+                    if (byId && svg.contains(byId)) {
+                        if (byId.getAttribute && byId.getAttribute('data-edge-source') === src) {
+                            return byId.classList && byId.classList.contains('edgePath')
+                                ? byId
+                                : byId;
+                        }
+                        const parentG = byId.closest && byId.closest('g.edgePath');
+                        if (
+                            parentG &&
+                            parentG.getAttribute('data-edge-source') === src &&
+                            parentG.getAttribute('data-edge-target') === tgt
+                        ) {
+                            return parentG;
+                        }
+                    }
+                } catch (_) {
+                    /* ignore */
+                }
+            }
+            const esc = (s) =>
+                typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+                    ? CSS.escape(s)
+                    : String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+            let g = svg.querySelector(
+                `g.edgePath[data-edge-source="${esc(src)}"][data-edge-target="${esc(tgt)}"]`
+            );
+            if (g) return g;
+            const p = svg.querySelector(
+                `path[data-edge-source="${esc(src)}"][data-edge-target="${esc(tgt)}"]`
+            );
+            return p || null;
+        }
+
+        /** Same stroke shapes as edge hover — selection reuses that “thick” look (no separate grey stroke). */
+        function collectDiagramEdgeSelectionStrokeTargets(edgeEl) {
+            if (!edgeEl) return [];
+            if (edgeEl.classList && edgeEl.classList.contains('edgePath')) {
+                return collectDiagramEdgeHoverTargets(edgeEl);
+            }
+            if (edgeEl.tagName && edgeEl.tagName.toLowerCase() === 'path') {
+                return collectDiagramEdgeHoverTargetsForPathEl(edgeEl);
+            }
+            return [];
+        }
+
+        function diagramEdgeHoverShouldStayWide(visiblePathOrEdgePathGroup) {
+            if (diagramSelection.kind !== 'edge' || !diagramSelection.edge) return false;
+            const wantSrc = String(diagramSelection.edge.source || '');
+            const wantTgt = String(diagramSelection.edge.target || '');
+            if (!wantSrc || !wantTgt) return false;
+            const el = visiblePathOrEdgePathGroup;
+            if (!el) return false;
+            if (el.classList && el.classList.contains('edgePath')) {
+                const src = el.getAttribute('data-edge-source');
+                const tgt = el.getAttribute('data-edge-target');
+                return Boolean(src && tgt && String(src) === wantSrc && String(tgt) === wantTgt);
+            }
+            const { src, tgt } = readDiagramEdgeEndpointsFromHoverEl(el);
+            return Boolean(src && tgt && String(src) === wantSrc && String(tgt) === wantTgt);
+        }
+
+        /** Dash pattern; 14+12=26 must match @keyframes diagram-edge-dash-flow end stroke-dashoffset. */
+        const EDGE_SEL_DASH_SEG = 14;
+        const EDGE_SEL_DASH_GAP = 12;
+        const EDGE_SEL_ANIM_DURATION_S = 8;
+
+        function setDiagramEdgeSelectionDashAnim(elements, enabled) {
+            if (!elements || !elements.length) return;
+            const prefersReduced =
+                typeof window.matchMedia === 'function' &&
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const dashPat = `${EDGE_SEL_DASH_SEG} ${EDGE_SEL_DASH_GAP}`;
+            elements.forEach((el) => {
+                if (!el || !el.style) return;
+                if (!enabled) {
+                    el.style.removeProperty('animation');
+                    el.style.removeProperty('stroke-dasharray');
+                    el.style.removeProperty('stroke-dashoffset');
+                    el.style.removeProperty('stroke-linecap');
+                    el.style.removeProperty('stroke-linejoin');
+                    return;
+                }
+                el.style.setProperty('stroke-linecap', 'round', 'important');
+                el.style.setProperty('stroke-linejoin', 'round', 'important');
+                el.style.setProperty('stroke-dasharray', dashPat, 'important');
+                el.style.setProperty('stroke-dashoffset', '0', 'important');
+                if (prefersReduced) {
+                    el.style.removeProperty('animation');
+                } else {
+                    el.style.setProperty(
+                        'animation',
+                        `diagram-edge-dash-flow ${EDGE_SEL_ANIM_DURATION_S}s linear infinite`,
+                        'important'
+                    );
+                }
+            });
+        }
+
+        function applyDiagramSelectionHighlight(svg) {
+            if (!svg) svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            if (svg._diagramEdgeSelectionTargets && svg._diagramEdgeSelectionTargets.length) {
+                setDiagramEdgeSelectionDashAnim(svg._diagramEdgeSelectionTargets, false);
+                applyDiagramHoverStroke(svg._diagramEdgeSelectionTargets, false);
+                svg._diagramEdgeSelectionTargets = null;
+            }
+            svg.querySelectorAll('.selected-node, .selected-subgraph').forEach((el) => {
+                el.classList.remove('selected-node', 'selected-subgraph');
+            });
+            if (!diagramSelection.logicalId || diagramSelection.kind === 'none') return;
+            if (diagramSelection.kind === 'edge') {
+                let edgeEl = queryDiagramEdgeStampedElement(svg, diagramSelection);
+                if (edgeEl) {
+                    if (
+                        edgeEl.tagName &&
+                        edgeEl.tagName.toLowerCase() === 'path' &&
+                        edgeEl.closest &&
+                        edgeEl.closest('g.edgePath')
+                    ) {
+                        edgeEl = edgeEl.closest('g.edgePath');
+                    }
+                    const t = collectDiagramEdgeSelectionStrokeTargets(edgeEl);
+                    if (t.length) {
+                        applyDiagramHoverStroke(t, true);
+                        setDiagramEdgeSelectionDashAnim(t, true);
+                        svg._diagramEdgeSelectionTargets = t;
+                    }
+                }
+                return;
+            }
+            const el = queryDiagramElementByLogicalId(svg, diagramSelection.logicalId);
+            if (!el) return;
+            if (el.classList.contains('cluster')) {
+                el.classList.add('selected-subgraph');
+            } else if (el.classList.contains('node')) {
+                el.classList.add('selected-node');
+            }
+        }
+
+        function buildDiagramChatPayload() {
+            if (!diagramSelection || diagramSelection.kind === 'none') {
+                return null;
+            }
+            if (diagramSelection.kind === 'edge') {
+                if (!diagramSelection.edge) return null;
+                return {
+                    kind: 'edge',
+                    logical_id: diagramSelection.logicalId || null,
+                    label: diagramSelection.label || null,
+                    module_id: diagramSelection.moduleId || null,
+                    dom_ref: diagramSelection.domRef || null,
+                    edge: diagramSelection.edge
+                };
+            }
+            if (!diagramSelection.logicalId) return null;
+            return {
+                kind: diagramSelection.kind,
+                logical_id: diagramSelection.logicalId,
+                label: diagramSelection.label || null,
+                module_id: diagramSelection.moduleId || null,
+                dom_ref: diagramSelection.domRef || null,
+                edge: diagramSelection.edge || null
+            };
+        }
+
+        /**
+         * @param {object} sel kind: 'none'|'node'|'cluster'|'edge'; logicalId; optional label, moduleId, domRef, edge
+         */
+        function setDiagramSelection(sel) {
+            if (!sel || sel.kind === 'none' || sel.logicalId == null || sel.logicalId === '') {
+                diagramSelection = {
+                    kind: 'none',
+                    logicalId: null,
+                    label: null,
+                    moduleId: sel && sel.moduleId != null ? sel.moduleId : selectedModuleId,
+                    domRef: null,
+                    edge: null
+                };
+                selectedDiagramNodeId = null;
+                applyDiagramSelectionHighlight();
+                return;
+            }
+            diagramSelection = {
+                kind: sel.kind || 'node',
+                logicalId: sel.logicalId,
+                label: sel.label != null ? sel.label : null,
+                moduleId: sel.moduleId != null ? sel.moduleId : selectedModuleId,
+                domRef: sel.domRef != null ? sel.domRef : null,
+                edge: sel.edge || null
+            };
+            selectedDiagramNodeId = sel.logicalId;
+            applyDiagramSelectionHighlight();
+            if (!diagramSelection.label) {
+                refreshDiagramSelectionLabelFromDom();
+            }
         }
 
         function attachDiagramBackgroundDeselect(svg) {
@@ -1427,7 +1950,15 @@
                 'click',
                 (e) => {
                     const t = e.target;
-                    if (t && t.closest && (t.closest('g.node') || t.closest('g.cluster') || t.closest('g.edgePath'))) {
+                    if (
+                        t &&
+                        t.closest &&
+                        (t.closest('g.node') ||
+                            t.closest('g.cluster') ||
+                            t.closest('g.edgePath') ||
+                            t.closest('g.edgePaths') ||
+                            t.closest('g.edgeLabels'))
+                    ) {
                         return;
                     }
                     clearDiagramShapeSelection();
@@ -1459,6 +1990,7 @@
             return extractDiagramJsonFromMarkdown(markdown);
         }
         
+        /** Optional DIAGRAM_JSON.edges[] mirrors nodes/groups: { source, target, label?, title?, description? } for edge tooltips. */
         /** Build id/label -> { title, description } from DIAGRAM_JSON.nodes (title/description required in authored JSON; label fallback for title). */
         function buildDiagramNodeMetaMap(dj) {
             const map = {};
@@ -1478,6 +2010,58 @@
                 const entry = { title, description };
                 map[id] = entry;
                 if (label) map[label] = entry;
+            }
+            return map;
+        }
+        
+        /** Same pattern as nodes: DIAGRAM_JSON.groups[] with id, optional label, optional title/description. */
+        function buildDiagramClusterMetaMap(dj) {
+            const map = {};
+            if (!dj || !Array.isArray(dj.groups)) return map;
+            for (const g of dj.groups) {
+                if (!g || g.id == null) continue;
+                const id = String(g.id);
+                const label = g.label != null ? String(g.label) : '';
+                const title =
+                    g.title != null && String(g.title).trim() !== ''
+                        ? String(g.title).trim()
+                        : label || id;
+                const description =
+                    g.description != null && String(g.description).trim() !== ''
+                        ? String(g.description).trim()
+                        : '';
+                const entry = { title, description };
+                map[id] = entry;
+                if (label) map[label] = entry;
+            }
+            return map;
+        }
+
+        /** Optional DIAGRAM_JSON.edges[]: { source, target, label?, title?, description? } */
+        function buildDiagramEdgeMetaMap(dj) {
+            const map = {};
+            if (!dj || !Array.isArray(dj.edges)) return map;
+            for (const e of dj.edges) {
+                if (!e || e.source == null || e.target == null) continue;
+                const source = String(e.source);
+                const target = String(e.target);
+                const edgeLabel = e.label != null ? String(e.label) : '';
+                const title =
+                    e.title != null && String(e.title).trim() !== ''
+                        ? String(e.title).trim()
+                        : '';
+                const description =
+                    e.description != null && String(e.description).trim() !== ''
+                        ? String(e.description).trim()
+                        : edgeLabel
+                          ? edgeLabel
+                          : '';
+                const entry = { title, description };
+                if (!entry.title && !entry.description) continue;
+                map[`${source}\0${target}`] = entry;
+                if (edgeLabel) {
+                    map[`${source}\0${target}\0${edgeLabel}`] = entry;
+                }
             }
             return map;
         }
@@ -1642,7 +2226,10 @@
             // Build overview from overview.md
             const overviewContent = DOCS_CONTENT['overview.md'] || '';
             const overviewDiagram = extractMermaidFromMarkdown(overviewContent);
-            overviewDiagramNodeMeta = buildDiagramNodeMetaMap(extractDiagramJsonFromMarkdown(overviewContent));
+            const overviewDj = extractDiagramJsonFromMarkdown(overviewContent);
+            overviewDiagramNodeMeta = buildDiagramNodeMetaMap(overviewDj);
+            overviewDiagramClusterMeta = buildDiagramClusterMetaMap(overviewDj);
+            overviewDiagramEdgeMeta = buildDiagramEdgeMetaMap(overviewDj);
             
             // FIRST: Build module data from tree so we have all modules available
             buildModulesFromTree(MODULE_TREE, '');
@@ -1678,7 +2265,9 @@
                 diagram: stripClickStatements(overviewDiagram || ''),
                 documentation: overviewContent || '# Overview\n\nNo overview available.',
                 links: overviewLinks,
-                diagramNodeMeta: overviewDiagramNodeMeta
+                diagramNodeMeta: overviewDiagramNodeMeta,
+                diagramClusterMeta: overviewDiagramClusterMeta,
+                diagramEdgeMeta: overviewDiagramEdgeMeta
             };
             
             populateArchitectureGroupSelect();
@@ -1730,7 +2319,10 @@
                 // Extract diagram from markdown FIRST, then fallback to generated
                 const extractedDiagram = extractMermaidFromMarkdown(documentation);
                 const diagram = extractedDiagram || generateModuleDiagram(key, data);
-                const diagramNodeMeta = buildDiagramNodeMetaMap(extractDiagramJsonFromMarkdown(documentation));
+                const docDj = extractDiagramJsonFromMarkdown(documentation);
+                const diagramNodeMeta = buildDiagramNodeMetaMap(docDj);
+                const diagramClusterMeta = buildDiagramClusterMetaMap(docDj);
+                const diagramEdgeMeta = buildDiagramEdgeMetaMap(docDj);
                 
                 // Build links for children and from diagram click statements
                 const links = {};
@@ -1759,7 +2351,9 @@
                     documentation: documentation,
                     links: links,
                     path: data.path,
-                    diagramNodeMeta
+                    diagramNodeMeta,
+                    diagramClusterMeta,
+                    diagramEdgeMeta
                 };
                 
                 // Recursively process children
@@ -1777,6 +2371,7 @@
             const container = document.getElementById('mermaid-diagram');
             if (!code || !code.trim()) {
                 container.innerHTML = '<div class="loading">No diagram available</div>';
+                lastDiagramRegistry = null;
                 return;
             }
             
@@ -1784,12 +2379,12 @@
             const sanitizedCode = sanitizeMermaidDiagram(code);
             
             const diagramRegistry = buildDiagramLogicalIdRegistry(sanitizedCode);
+            lastDiagramRegistry = diagramRegistry;
             for (const w of diagramRegistry.duplicateLabelWarnings) {
                 console.warn(w);
             }
 
             try {
-                container.innerHTML = '';
                 const id = 'mermaid-' + Date.now();
                 const { svg } = await mermaid.render(id, sanitizedCode);
                 container.innerHTML = svg;
@@ -1810,9 +2405,14 @@
                             stamp.edgePathMismatch.parsed
                         );
                     }
+                    if (stamp.unstampedEdgePathIds && stamp.unstampedEdgePathIds.length) {
+                        console.warn(
+                            '[diagram] Edge path id(s) could not be matched to parsed edges (check edge syntax vs Mermaid):',
+                            stamp.unstampedEdgePathIds
+                        );
+                    }
                 }
                 
-                // Process nodes to make them clickable
                 setTimeout(() => processNodes(links, moduleId), 100);
             } catch (err) {
                 console.error('Mermaid render error:', err);
@@ -1820,6 +2420,7 @@
                 try {
                     const id2 = 'mermaid-fallback-' + Date.now();
                     const fallbackRegistry = buildDiagramLogicalIdRegistry(code);
+                    lastDiagramRegistry = fallbackRegistry;
                     for (const w of fallbackRegistry.duplicateLabelWarnings) {
                         console.warn(w);
                     }
@@ -1842,10 +2443,17 @@
                                 stamp.edgePathMismatch.parsed
                             );
                         }
+                        if (stamp.unstampedEdgePathIds && stamp.unstampedEdgePathIds.length) {
+                            console.warn(
+                                '[diagram] Edge path id(s) could not be matched to parsed edges:',
+                                stamp.unstampedEdgePathIds
+                            );
+                        }
                     }
                     setTimeout(() => processNodes(links, moduleId), 100);
                 } catch (err2) {
                     container.innerHTML = `<div class="error">Error rendering diagram.<br>${err2.message}</div>`;
+                    lastDiagramRegistry = null;
                     // Track mermaid error for reliability (Agent 3 hook)
                     if (window.trackMermaidError) {
                         window.trackMermaidError(err2.message, code.substring(0, 500));
@@ -1865,24 +2473,33 @@
         
         function updateSelection(moduleId, nodeId = null) {
             selectedModuleId = moduleId;
-            selectedDiagramNodeId = nodeId != null ? nodeId : null;
-            
+
             // Build selection path
             selectionPath = [{id: 'overview', name: REPO_TITLE}];
-            
+
             if (moduleId && moduleId !== 'overview') {
                 const mod = moduleData[moduleId];
                 if (mod) {
                     selectionPath.push({id: moduleId, name: mod.name});
                 }
             }
-            
+
             // Update breadcrumb UI
             updateBreadcrumb();
-            
-            // Update selection highlighting in diagram
-            updateSelectionHighlight(nodeId);
-            
+
+            if (nodeId != null) {
+                const svg = document.querySelector('#mermaid-diagram svg');
+                const el = svg && queryDiagramElementByLogicalId(svg, nodeId);
+                const kind = el?.classList.contains('cluster')
+                    ? 'cluster'
+                    : el?.classList.contains('node')
+                      ? 'node'
+                      : 'node';
+                setDiagramSelection({ kind, logicalId: nodeId, moduleId });
+            } else {
+                setDiagramSelection({ kind: 'none', moduleId });
+            }
+
             // Update documentation
             if (moduleId && moduleData[moduleId]) {
                 renderDocumentation(moduleData[moduleId].documentation);
@@ -1927,96 +2544,566 @@
         }
         
         function updateSelectionHighlight(nodeId) {
+            if (!nodeId) {
+                setDiagramSelection({ kind: 'none', moduleId: selectedModuleId });
+                return;
+            }
             const svg = document.querySelector('#mermaid-diagram svg');
-            if (!svg) return;
-
-            svg.querySelectorAll('.selected-node, .selected-subgraph').forEach(el => {
-                el.classList.remove('selected-node', 'selected-subgraph');
-            });
-
-            if (!nodeId) return;
-
-            // Inline expansion subgraph in source is named `${baseId}_sub`. If nodeId already
-            // ends with _sub, do not append again (avoids agent_def_sub_sub).
-            const expansionClusterId = nodeId.endsWith('_sub')
-                ? nodeId
-                : `${nodeId}_sub`;
-
-            const clusterEl = queryDiagramElementByLogicalId(svg, expansionClusterId);
-            if (clusterEl && clusterEl.classList.contains('cluster')) {
-                clusterEl.classList.add('selected-subgraph');
-            }
-
-            const nodeGroup = queryDiagramElementByLogicalId(svg, nodeId);
-            if (nodeGroup && nodeGroup.classList.contains('node')) {
-                nodeGroup.classList.add('selected-node');
-            }
-
-            if (!clusterEl && !nodeGroup) {
-                const onlyCluster = queryDiagramElementByLogicalId(svg, nodeId);
-                if (onlyCluster && onlyCluster.classList.contains('cluster')) {
-                    onlyCluster.classList.add('selected-subgraph');
-                }
-            }
+            const el = svg && queryDiagramElementByLogicalId(svg, nodeId);
+            const kind = el?.classList.contains('cluster')
+                ? 'cluster'
+                : el?.classList.contains('node')
+                  ? 'node'
+                  : 'node';
+            setDiagramSelection({ kind, logicalId: nodeId, moduleId: selectedModuleId });
         }
         
         // ============================================================
         // NODE PROCESSING & CLICK HANDLING
         // ============================================================
-        
-        /** Hover stroke: two fixed strings per shape (def / hov), set once; only toggle between them (no re-measuring = no stacking). */
+
+        /**
+         * Diagram hover: after stampLogicalIdsOntoSvg / edge attrs, listeners sit on stamped groups.
+         * On enter/leave we collect strokeable SVG shapes, cache default vs 2× hover stroke-width
+         * (dataset.diagramStrokeDef / diagramStrokeHov), apply with !important so theme stroke colors stay.
+         * Canvas zoom changes run syncDiagramHoverToCanvasZoom(): clear those caches and rebuild edge hit
+         * paths so 2× hover and hit slop track zoom like node/cluster hover.
+         */
+        const DIAGRAM_NODE_HOVER_SHAPE_SELECTOR =
+            'rect, circle, polygon, ellipse, path, use, .label-container rect, .label-container path, .basic rect, .basic path, g.shape rect, g.shape path';
+        const DIAGRAM_CLUSTER_HOVER_SHAPE_SELECTOR = 'rect, circle, polygon, ellipse, path';
+        const DIAGRAM_HOVER_WIDTH_FACTOR = 2;
+
+        function collectDiagramNodeHoverTargets(nodeGroup) {
+            return [...nodeGroup.querySelectorAll(DIAGRAM_NODE_HOVER_SHAPE_SELECTOR)].filter((el) => {
+                if (el.closest('g.edgePath') || el.closest('g.edgePaths')) return false;
+                if (el.closest('defs')) return false;
+                return true;
+            });
+        }
+
+        /** Shapes that draw this cluster’s frame/label chrome — not nested clusters or inner nodes. */
+        function collectDiagramClusterHoverTargets(clusterG) {
+            return [...clusterG.querySelectorAll(DIAGRAM_CLUSTER_HOVER_SHAPE_SELECTOR)].filter((el) => {
+                if (el.closest('defs')) return false;
+                if (el.closest('g.node')) return false;
+                const oc = el.closest('g.cluster');
+                return oc === clusterG;
+            });
+        }
+
+        function collectDiagramEdgeHoverTargets(edgeG) {
+            return [...edgeG.querySelectorAll('path, line, polyline, polygon')].filter((el) => {
+                if (el.closest('defs')) return false;
+                if (el.classList.contains('edge-hit-area')) return false;
+                return true;
+            });
+        }
+
+        /**
+         * Thin edge strokes miss pointer tests; add an invisible wide-stroke clone on top for hit-testing.
+         * Hover stroke still applies only to the real geometry (see collectDiagramEdgeHoverTargets).
+         */
+        function ensureDiagramEdgePointerEvents(edgeG) {
+            if (!edgeG) return;
+            edgeG.querySelectorAll('path.edge-hit-area').forEach((el) => el.remove());
+            edgeG.querySelectorAll('path, line, polyline, polygon').forEach((el) => {
+                if (el.closest('defs')) return;
+                if (el.classList.contains('edge-hit-area')) return;
+                el.style.setProperty('pointer-events', 'stroke');
+            });
+            const pathNodes = edgeG.classList && edgeG.classList.contains('edgePaths')
+                ? [...edgeG.querySelectorAll(':scope > path')].filter(
+                      (path) => !path.classList.contains('edge-hit-area') && !(path.closest && path.closest('defs'))
+                  )
+                : [...edgeG.querySelectorAll('path:not(.edge-hit-area)')].filter(
+                      (path) => !(path.closest && path.closest('defs'))
+                  );
+            pathNodes.forEach((path) => {
+                const hit = path.cloneNode(true);
+                hit.removeAttribute('id');
+                hit.removeAttribute('marker-start');
+                hit.removeAttribute('marker-end');
+                hit.removeAttribute('marker-mid');
+                hit.removeAttribute('style');
+                hit.setAttribute('class', 'edge-hit-area');
+                ['data-edge-source', 'data-edge-target', 'data-edge-label'].forEach((attr) => {
+                    const v = path.getAttribute(attr);
+                    if (v != null && v !== '') hit.setAttribute(attr, v);
+                });
+                const hitPx = getEdgePointerHitWidthPx();
+                hit.style.setProperty('stroke', 'transparent', 'important');
+                hit.style.setProperty('fill', 'none', 'important');
+                hit.style.setProperty('stroke-width', `${hitPx}px`, 'important');
+                hit.style.setProperty('pointer-events', 'stroke', 'important');
+                hit.style.setProperty('stroke-opacity', '0', 'important');
+                path.insertAdjacentElement('afterend', hit);
+            });
+        }
+
+        function ensureDiagramHoverStrokeWidthCache(el) {
+            if (el.dataset.diagramStrokeHov) return;
+            let defStr = window.getComputedStyle(el).strokeWidth || '';
+            if (!defStr || parseFloat(defStr) === 0) {
+                const a = el.getAttribute('stroke-width');
+                defStr = a ? `${parseFloat(a)}px` : '1px';
+            }
+            let w = parseFloat(defStr);
+            if (!w || Number.isNaN(w)) w = 1.5;
+            const suf = String(defStr).replace(/^[\d.\s-]+/, '').trim() || 'px';
+            el.dataset.diagramStrokeDef = defStr;
+            el.dataset.diagramStrokeHov = String(w * DIAGRAM_HOVER_WIDTH_FACTOR) + suf;
+        }
+
+        function applyDiagramHoverStroke(elements, useHoverWidth) {
+            elements.forEach((el) => {
+                if (!el || !el.isConnected) return;
+                ensureDiagramHoverStrokeWidthCache(el);
+                const key = useHoverWidth ? 'diagramStrokeHov' : 'diagramStrokeDef';
+                const val = el.dataset[key];
+                if (val) el.style.setProperty('stroke-width', val, 'important');
+            });
+        }
+
         function attachDiagramNodeHoverStroke(svg) {
             if (!svg) return;
-            function ensureStrokePair(el) {
-                if (el.dataset.nodeStrokeHov) return;
-                let defStr = window.getComputedStyle(el).strokeWidth || '';
-                if (!defStr || parseFloat(defStr) === 0) {
-                    const a = el.getAttribute('stroke-width');
-                    defStr = a ? `${parseFloat(a)}px` : '1px';
-                }
-                let w = parseFloat(defStr);
-                if (!w || Number.isNaN(w)) w = 1.5;
-                const suf = String(defStr).replace(/^[\d.\s-]+/, '').trim() || 'px';
-                el.dataset.nodeStrokeDef = defStr;
-                el.dataset.nodeStrokeHov = String(w * 2) + suf;
-            }
-
-            svg.querySelectorAll('g.node').forEach((g) => {
-                if (g.classList.contains('collapse-button')) return;
-
-                const collectShapes = () =>
-                    [...g.querySelectorAll(
-                        'rect, circle, polygon, ellipse, path, use, .label-container rect, .label-container path, .basic rect, .basic path, g.shape rect, g.shape path'
-                    )].filter((el) => {
-                        if (el.closest('.edgePath')) return false;
-                        if (el.closest('defs')) return false;
-                        return true;
-                    });
-
+            svg.querySelectorAll('g.node[data-logical-id]:not(.collapse-button)').forEach((g) => {
                 g.addEventListener('mouseenter', () => {
-                    const touched = [];
-                    collectShapes().forEach((el) => {
-                        ensureStrokePair(el);
-                        el.style.setProperty('stroke-width', el.dataset.nodeStrokeHov, 'important');
-                        touched.push(el);
-                    });
-                    g._hoverStrokeEls = touched;
+                    const targets = collectDiagramNodeHoverTargets(g);
+                    applyDiagramHoverStroke(targets, true);
+                    g._diagramNodeHoverTargets = targets;
                 });
-
                 g.addEventListener('mouseleave', () => {
-                    const els = g._hoverStrokeEls && g._hoverStrokeEls.length ? g._hoverStrokeEls : collectShapes();
-                    g._hoverStrokeEls = null;
-                    els.forEach((el) => {
-                        if (!el || !el.isConnected || !el.dataset.nodeStrokeDef) return;
-                        el.style.setProperty('stroke-width', el.dataset.nodeStrokeDef, 'important');
-                    });
+                    const targets =
+                        g._diagramNodeHoverTargets && g._diagramNodeHoverTargets.length
+                            ? g._diagramNodeHoverTargets
+                            : collectDiagramNodeHoverTargets(g);
+                    g._diagramNodeHoverTargets = null;
+                    applyDiagramHoverStroke(targets, false);
+                    if (g.classList.contains('selected-node')) {
+                        applyDiagramHoverStroke(targets, true);
+                    }
                 });
             });
+        }
+
+        function attachDiagramClusterHoverStroke(svg) {
+            if (!svg) return;
+            svg.querySelectorAll('g.cluster[data-logical-id]').forEach((g) => {
+                g.addEventListener(
+                    'mouseover',
+                    (e) => {
+                        if (!g.contains(e.target)) return;
+                        if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+                        const targets = collectDiagramClusterHoverTargets(g);
+                        applyDiagramHoverStroke(targets, true);
+                        g._diagramClusterHoverTargets = targets;
+                    },
+                    false
+                );
+                g.addEventListener(
+                    'mouseout',
+                    (e) => {
+                        if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+                        const targets =
+                            g._diagramClusterHoverTargets && g._diagramClusterHoverTargets.length
+                                ? g._diagramClusterHoverTargets
+                                : collectDiagramClusterHoverTargets(g);
+                        g._diagramClusterHoverTargets = null;
+                        applyDiagramHoverStroke(targets, false);
+                        if (g.classList.contains('selected-subgraph')) {
+                            applyDiagramHoverStroke(targets, true);
+                        }
+                    },
+                    false
+                );
+            });
+        }
+
+        /**
+         * Edge hover: mouseenter does NOT bubble from child <path>, so the group never sees hover
+         * when the pointer is only over the path. Use mouseover/mouseout + relatedTarget.
+         * Mermaid 11+ uses g.edgePaths with direct <path> children (no g.edgePath per edge).
+         */
+        function resolveVisibleEdgePathFromPointerTarget(t, edgePathsRoot) {
+            if (!t || !edgePathsRoot || !edgePathsRoot.contains(t)) return null;
+            if (t.closest && t.closest('defs')) return null;
+            if (!t.tagName || t.tagName.toLowerCase() !== 'path') return null;
+            if (t.classList.contains('edge-hit-area')) {
+                const prev = t.previousElementSibling;
+                if (
+                    prev &&
+                    prev.tagName &&
+                    prev.tagName.toLowerCase() === 'path' &&
+                    !prev.classList.contains('edge-hit-area')
+                )
+                    return prev;
+                return null;
+            }
+            return t;
+        }
+
+        function collectDiagramFlatEdgeHoverTargets(visiblePath) {
+            return visiblePath ? [visiblePath] : [];
+        }
+
+        /**
+         * Pair edge label groups with edge paths (same DOM order as Mermaid). Enables hover on labels.
+         */
+        function stampEdgeLabelPathLinks(svg) {
+            if (!svg) return;
+            const labels = [...svg.querySelectorAll('g.edgeLabels > g.edgeLabel')];
+            if (!labels.length) return;
+            const paths = [];
+            const flat = svg.querySelector('g.edgePaths');
+            if (flat && flat.querySelector(':scope > path')) {
+                flat.querySelectorAll(':scope > path').forEach((p) => {
+                    if (!p.classList.contains('edge-hit-area') && !(p.closest && p.closest('defs'))) paths.push(p);
+                });
+            } else {
+                svg.querySelectorAll('g.edgePath').forEach((g) => {
+                    const p =
+                        g.querySelector('path.edge-thickness-normal[id], path.edge-thickness-thick[id], path[id]') ||
+                        g.querySelector('path:not(.edge-hit-area)');
+                    if (p && !p.classList.contains('edge-hit-area')) paths.push(p);
+                });
+            }
+            const n = Math.min(paths.length, labels.length);
+            for (let i = 0; i < n; i++) {
+                const pathEl = paths[i];
+                const id = pathEl.id || pathEl.getAttribute('id') || '';
+                if (id) labels[i].setAttribute('data-mermaid-edge-path-id', id);
+                const edgeHost = (pathEl.closest && pathEl.closest('g.edgePath')) || pathEl;
+                ['data-edge-source', 'data-edge-target', 'data-edge-label'].forEach((attr) => {
+                    const v = edgeHost.getAttribute(attr);
+                    if (v != null && v !== '') labels[i].setAttribute(attr, v);
+                });
+            }
+        }
+
+        function getFlatHoverVisiblePath(t, svg) {
+            if (!t || !svg || !svg.contains(t)) return null;
+            if (t.closest && t.closest('defs')) return null;
+            const edgePathsRoot = svg.querySelector('g.edgePaths');
+            if (edgePathsRoot && edgePathsRoot.contains(t)) {
+                return resolveVisibleEdgePathFromPointerTarget(t, edgePathsRoot);
+            }
+            const legacyG = t.closest && t.closest('g.edgePath');
+            if (legacyG) {
+                return resolveVisibleEdgePathFromPointerTarget(t, legacyG);
+            }
+            const labelG = t.closest && t.closest('g.edgeLabel');
+            if (!labelG) return null;
+            const pid = labelG.getAttribute('data-mermaid-edge-path-id');
+            if (!pid) return null;
+            try {
+                if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+                    return svg.querySelector(`path#${CSS.escape(pid)}`);
+                }
+            } catch (_) {
+                /* ignore */
+            }
+            return svg.getElementById(pid);
+        }
+
+        function collectDiagramEdgeHoverTargetsForPathEl(pathEl) {
+            if (!pathEl) return [];
+            const legacyG = pathEl.closest && pathEl.closest('g.edgePath');
+            if (legacyG) return collectDiagramEdgeHoverTargets(legacyG);
+            return collectDiagramFlatEdgeHoverTargets(pathEl);
+        }
+
+        function readDiagramEdgeEndpointsFromHoverEl(el) {
+            if (!el) return { src: null, tgt: null };
+            const tag = el.tagName && el.tagName.toLowerCase();
+            if (tag === 'path') {
+                let s = el.getAttribute('data-edge-source');
+                let t = el.getAttribute('data-edge-target');
+                if (s && t) return { src: s, tgt: t };
+                const g = el.closest && el.closest('g.edgePath');
+                if (g) {
+                    return {
+                        src: g.getAttribute('data-edge-source'),
+                        tgt: g.getAttribute('data-edge-target'),
+                    };
+                }
+                return { src: s, tgt: t };
+            }
+            if (el.classList && el.classList.contains('edgePath')) {
+                return {
+                    src: el.getAttribute('data-edge-source'),
+                    tgt: el.getAttribute('data-edge-target'),
+                };
+            }
+            return { src: null, tgt: null };
+        }
+
+        /** Endpoint ids come from stamped edges; shapes must already have data-logical-id from stampLogicalIdsOntoSvg (registry-driven). No alternate DOM heuristics. */
+        function collectDiagramShapeHoverTargetsForLogicalId(svg, logicalId) {
+            const g = queryDiagramElementByLogicalId(svg, logicalId);
+            if (!g || !g.classList) return [];
+            if (g.classList.contains('node')) return collectDiagramNodeHoverTargets(g);
+            if (g.classList.contains('cluster')) return collectDiagramClusterHoverTargets(g);
+            return [];
+        }
+
+        function clearStoredDiagramEdgeEndpointHover(svg) {
+            const t = svg && svg._diagramEdgeEndpointHoverTargets;
+            if (t && t.length) applyDiagramHoverStroke(t, false);
+            if (svg) svg._diagramEdgeEndpointHoverTargets = null;
+        }
+
+        function applyDiagramEdgeEndpointHoverForEndpoints(svg, src, tgt) {
+            clearStoredDiagramEdgeEndpointHover(svg);
+            if (!svg) return;
+            const acc = [];
+            const seen = new Set();
+            [src, tgt].forEach((id) => {
+                if (!id) return;
+                collectDiagramShapeHoverTargetsForLogicalId(svg, id).forEach((shapeEl) => {
+                    if (!seen.has(shapeEl)) {
+                        seen.add(shapeEl);
+                        acc.push(shapeEl);
+                    }
+                });
+            });
+            if (acc.length) {
+                applyDiagramHoverStroke(acc, true);
+                svg._diagramEdgeEndpointHoverTargets = acc;
+            }
+        }
+
+        function attachDiagramEdgeHoverStrokeFlat(edgePathsRoot, svg) {
+            stampEdgeLabelPathLinks(svg);
+            ensureDiagramEdgePointerEvents(edgePathsRoot);
+            const onOver = (e) => {
+                const cur = getFlatHoverVisiblePath(e.target, svg);
+                if (!cur) return;
+                const prev = getFlatHoverVisiblePath(e.relatedTarget, svg);
+                if (prev === cur) return;
+                const { src, tgt } = readDiagramEdgeEndpointsFromHoverEl(cur);
+                applyDiagramEdgeEndpointHoverForEndpoints(svg, src, tgt);
+                const targets = collectDiagramEdgeHoverTargetsForPathEl(cur);
+                applyDiagramHoverStroke(targets, true);
+                svg._diagramEdgeHoverTargets = targets;
+            };
+            const onOut = (e) => {
+                const cur = getFlatHoverVisiblePath(e.target, svg);
+                if (!cur) return;
+                const next = getFlatHoverVisiblePath(e.relatedTarget, svg);
+                if (next === cur) return;
+                clearStoredDiagramEdgeEndpointHover(svg);
+                const targets =
+                    svg._diagramEdgeHoverTargets && svg._diagramEdgeHoverTargets.length
+                        ? svg._diagramEdgeHoverTargets
+                        : collectDiagramEdgeHoverTargetsForPathEl(cur);
+                svg._diagramEdgeHoverTargets = null;
+                applyDiagramHoverStroke(targets, diagramEdgeHoverShouldStayWide(cur));
+            };
+            edgePathsRoot.addEventListener('mouseover', onOver, false);
+            edgePathsRoot.addEventListener('mouseout', onOut, false);
+            const labelsRoot = svg.querySelector('g.edgeLabels');
+            if (labelsRoot) {
+                labelsRoot.addEventListener('mouseover', onOver, false);
+                labelsRoot.addEventListener('mouseout', onOut, false);
+            }
+        }
+
+        function attachDiagramEdgeHoverStroke(svg) {
+            if (!svg) return;
+            const legacy = svg.querySelectorAll('g.edgePath');
+            if (legacy.length) {
+                stampEdgeLabelPathLinks(svg);
+                legacy.forEach((g) => {
+                    ensureDiagramEdgePointerEvents(g);
+                    g.addEventListener(
+                        'mouseover',
+                        (e) => {
+                            if (!g.contains(e.target)) return;
+                            if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+                            const { src, tgt } = readDiagramEdgeEndpointsFromHoverEl(g);
+                            applyDiagramEdgeEndpointHoverForEndpoints(svg, src, tgt);
+                            const targets = collectDiagramEdgeHoverTargets(g);
+                            applyDiagramHoverStroke(targets, true);
+                            g._diagramEdgeHoverTargets = targets;
+                        },
+                        false
+                    );
+                    g.addEventListener(
+                        'mouseout',
+                        (e) => {
+                            if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+                            clearStoredDiagramEdgeEndpointHover(svg);
+                            const targets =
+                                g._diagramEdgeHoverTargets && g._diagramEdgeHoverTargets.length
+                                    ? g._diagramEdgeHoverTargets
+                                    : collectDiagramEdgeHoverTargets(g);
+                            g._diagramEdgeHoverTargets = null;
+                            applyDiagramHoverStroke(targets, diagramEdgeHoverShouldStayWide(g));
+                        },
+                        false
+                    );
+                });
+                const labelsRootLegacy = svg.querySelector('g.edgeLabels');
+                if (labelsRootLegacy) {
+                    const onLegacyLabelOver = (e) => {
+                        const cur = getFlatHoverVisiblePath(e.target, svg);
+                        if (!cur || !cur.closest('g.edgePath')) return;
+                        const prev = getFlatHoverVisiblePath(e.relatedTarget, svg);
+                        if (prev === cur) return;
+                        const lg = cur.closest('g.edgePath');
+                        const { src, tgt } = readDiagramEdgeEndpointsFromHoverEl(lg);
+                        applyDiagramEdgeEndpointHoverForEndpoints(svg, src, tgt);
+                        const targets = collectDiagramEdgeHoverTargets(lg);
+                        applyDiagramHoverStroke(targets, true);
+                        svg._diagramLegacyEdgeLabelTargets = targets;
+                    };
+                    const onLegacyLabelOut = (e) => {
+                        const cur = getFlatHoverVisiblePath(e.target, svg);
+                        if (!cur || !cur.closest('g.edgePath')) return;
+                        const next = getFlatHoverVisiblePath(e.relatedTarget, svg);
+                        if (next === cur) return;
+                        const lg = cur.closest('g.edgePath');
+                        clearStoredDiagramEdgeEndpointHover(svg);
+                        const targets =
+                            svg._diagramLegacyEdgeLabelTargets && svg._diagramLegacyEdgeLabelTargets.length
+                                ? svg._diagramLegacyEdgeLabelTargets
+                                : collectDiagramEdgeHoverTargets(lg);
+                        svg._diagramLegacyEdgeLabelTargets = null;
+                        applyDiagramHoverStroke(targets, diagramEdgeHoverShouldStayWide(lg));
+                    };
+                    labelsRootLegacy.addEventListener('mouseover', onLegacyLabelOver, false);
+                    labelsRootLegacy.addEventListener('mouseout', onLegacyLabelOut, false);
+                }
+                return;
+            }
+            const edgePathsRoot = svg.querySelector('g.edgePaths');
+            if (edgePathsRoot) attachDiagramEdgeHoverStrokeFlat(edgePathsRoot, svg);
+        }
+
+        function attachDiagramHoverStrokes(svg) {
+            attachDiagramNodeHoverStroke(svg);
+            attachDiagramClusterHoverStroke(svg);
+            attachDiagramEdgeHoverStroke(svg);
+        }
+
+        /**
+         * Edge clicks land on the invisible wide hit path (flat Mermaid), not the visible stroke.
+         * Delegate from g.edgePaths / g.edgePath; also allow selecting via edge labels.
+         */
+        function attachDiagramEdgeClickSelection(svg, contextModuleId) {
+            if (!svg) return;
+            function bindEdgePathClickDelegate(root) {
+                if (!root || root.dataset.diagramEdgeClickDelegate === '1') return;
+                root.dataset.diagramEdgeClickDelegate = '1';
+                root.addEventListener(
+                    'click',
+                    (e) => {
+                        const t = e.target;
+                        if (!t || !t.tagName || t.tagName.toLowerCase() !== 'path') return;
+                        const data = resolveDiagramEdgeStampFieldsFromPath(t);
+                        if (!data) return;
+                        e.stopPropagation();
+                        hideTooltip();
+                        expandDiagramSelectionEpoch += 1;
+                        setDiagramSelection({
+                            kind: 'edge',
+                            logicalId: `edge:${data.source}->${data.target}`,
+                            moduleId: contextModuleId,
+                            domRef: data.domRef || null,
+                            edge: {
+                                source: data.source,
+                                target: data.target,
+                                label: data.label != null ? data.label : null,
+                            },
+                            label: data.label || null,
+                        });
+                        refreshDiagramSelectionLabelFromDom();
+                    },
+                    false
+                );
+            }
+            const flatEp = svg.querySelector('g.edgePaths');
+            if (flatEp) bindEdgePathClickDelegate(flatEp);
+            svg.querySelectorAll('g.edgePath').forEach((g) => bindEdgePathClickDelegate(g));
+
+            const labelsRoot = svg.querySelector('g.edgeLabels');
+            if (labelsRoot && labelsRoot.dataset.diagramEdgeLabelClickDelegate !== '1') {
+                labelsRoot.dataset.diagramEdgeLabelClickDelegate = '1';
+                labelsRoot.addEventListener(
+                    'click',
+                    (e) => {
+                        const lab =
+                            e.target &&
+                            e.target.closest &&
+                            e.target.closest('g.edgeLabel[data-edge-source][data-edge-target]');
+                        if (!lab || !labelsRoot.contains(lab)) return;
+                        const src = lab.getAttribute('data-edge-source');
+                        const tgt = lab.getAttribute('data-edge-target');
+                        if (!src || !tgt) return;
+                        const lbl = lab.getAttribute('data-edge-label');
+                        e.stopPropagation();
+                        hideTooltip();
+                        expandDiagramSelectionEpoch += 1;
+                        const domRef = lab.getAttribute('data-mermaid-edge-path-id') || '';
+                        setDiagramSelection({
+                            kind: 'edge',
+                            logicalId: `edge:${src}->${tgt}`,
+                            moduleId: contextModuleId,
+                            domRef: domRef || null,
+                            edge: { source: src, target: tgt, label: lbl || null },
+                            label: lbl || null,
+                        });
+                        refreshDiagramSelectionLabelFromDom();
+                    },
+                    false
+                );
+            }
+        }
+
+        /**
+         * Clicks on clusters, edges, and nodes without module links must update diagramSelection.
+         * (makeNodeClickable uses stopPropagation, so it does not bubble to a single SVG delegate.)
+         */
+        function attachDiagramClickShapeSelection(svg, contextModuleId) {
+            if (!svg) return;
+
+            svg.querySelectorAll('g.cluster[data-logical-id]').forEach((clusterEl) => {
+                if (clusterEl.dataset.diagramClickSelBound === '1') return;
+                clusterEl.dataset.diagramClickSelBound = '1';
+                clusterEl.addEventListener(
+                    'click',
+                    (e) => {
+                        const t = e.target;
+                        if (t && t.closest) {
+                            const inner = t.closest('g.node');
+                            if (inner && clusterEl.contains(inner)) {
+                                return;
+                            }
+                        }
+                        const cid = clusterEl.getAttribute('data-logical-id') || '';
+                        if (!cid) return;
+                        e.stopPropagation();
+                        expandDiagramSelectionEpoch += 1;
+                        setDiagramSelection({
+                            kind: 'cluster',
+                            logicalId: cid,
+                            moduleId: contextModuleId
+                        });
+                        refreshDiagramSelectionLabelFromDom();
+                    },
+                    false
+                );
+            });
+
+            attachDiagramEdgeClickSelection(svg, contextModuleId);
         }
         
         function processNodes(links, contextModuleId) {
             const svg = document.querySelector('#mermaid-diagram svg');
             if (!svg) return;
+
+            attachDiagramClickShapeSelection(svg, contextModuleId);
             
             // Build a merged links object for top-level lookups
             const mergedLinks = {...links, ...overviewLinks};
@@ -2100,6 +3187,12 @@
                     if (window.trackBrokenLink) {
                         window.trackBrokenLink(nodeId, { contextModuleId, nodeText });
                     }
+                    node.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        expandDiagramSelectionEpoch += 1;
+                        setDiagramSelection({ kind: 'node', logicalId: nodeId, moduleId: contextModuleId });
+                        refreshDiagramSelectionLabelFromDom();
+                    });
                 }
                 
                 // Tooltip: DIAGRAM_JSON nodes[] supply title+description per shape; optional click → module fills gaps only
@@ -2131,7 +3224,31 @@
                     node.addEventListener('mouseleave', hideTooltip);
                 }
             });
-            attachDiagramNodeHoverStroke(svg);
+            
+            const diagramClusterMeta = moduleData[contextModuleId]?.diagramClusterMeta || {};
+            svg.querySelectorAll('g.cluster[data-logical-id]').forEach((clusterEl) => {
+                const cid = clusterEl.getAttribute('data-logical-id') || '';
+                const cLabel = getClusterVisibleLabel(clusterEl);
+                const nk = cLabel ? normalizeDiagramLabelKey(cLabel) : '';
+                let cm =
+                    (cid && diagramClusterMeta[cid]) ||
+                    (cLabel && diagramClusterMeta[cLabel]) ||
+                    (nk && diagramClusterMeta[nk]) ||
+                    null;
+                let tooltipTitle = cm?.title || '';
+                let tooltipDesc = cm?.description || '';
+                if (!tooltipTitle) tooltipTitle = cLabel || (cid ? formatModuleName(cid) : '');
+                if (!tooltipDesc) tooltipDesc = '';
+                const tooltipMetadata = tooltipTitle ? { title: tooltipTitle, description: tooltipDesc } : null;
+                if (tooltipMetadata) {
+                    clusterEl.addEventListener('mouseenter', (e) => showTooltip(e, tooltipMetadata));
+                    clusterEl.addEventListener('mousemove', (e) => showTooltip(e, tooltipMetadata));
+                    clusterEl.addEventListener('mouseleave', hideTooltip);
+                }
+            });
+            
+            attachDiagramHoverStrokes(svg);
+            attachDiagramEdgeTooltips(svg, contextModuleId);
             attachDiagramBackgroundDeselect(svg);
         }
         
@@ -2156,8 +3273,9 @@
                     
                     if (targetModuleData.diagram && targetModuleData.diagram.trim()) {
                         if (!expandedNodes.has(capturedNodeId)) {
-                            expandNodeInline(capturedNodeId, capturedTargetModule);
+                            expandNodeInline(capturedNodeId, capturedTargetModule, node);
                         } else {
+                            expandDiagramSelectionEpoch += 1;
                             selectNode(`${capturedNodeId}_sub`, capturedTargetModule);
                         }
                     } else {
@@ -2165,6 +3283,7 @@
                         openedModules.add(capturedTargetModule);
                         console.log('[MODULE TRACKING] Module opened (no diagram):', capturedTargetModule);
                         console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
+                        expandDiagramSelectionEpoch += 1;
                         selectNode(capturedNodeId, capturedTargetModule);
                     }
                 }
@@ -2177,32 +3296,80 @@
         // ============================================================
         // EXPANSION LOGIC
         // ============================================================
-        
-        function expandNodeInline(nodeId, targetModuleId) {
+
+        function expandNodeInline(nodeId, targetModuleId, sourceNodeEl) {
             const targetModule = moduleData[targetModuleId];
             if (!targetModule) return;
-            
-            // Update selection (this updates breadcrumb and documentation)
-            updateSelection(targetModuleId, nodeId);
-            
+
+            // Compute whether we will inline-expand before updateSelection: breadcrumb/doc updates reflow
+            // the layout and move the diagram, so viewport anchors must be read first (matches pre-click bbox).
+            const newDiagram =
+                targetModule.diagram && targetModule.diagram.trim()
+                    ? applyExpansionToDiagram(currentDiagramCode, nodeId, targetModuleId, targetModule.name)
+                    : null;
+            const willExpandDiagram = newDiagram && newDiagram !== currentDiagramCode;
+
+            let preExpandAnchorViewport = null;
+            if (willExpandDiagram) {
+                if (sourceNodeEl) {
+                    const r = sourceNodeEl.getBoundingClientRect();
+                    preExpandAnchorViewport = { left: r.left, top: r.top };
+                }
+                if (!preExpandAnchorViewport) {
+                    const svgBefore = document.querySelector('#mermaid-diagram svg');
+                    const nodeElBefore = svgBefore && queryDiagramElementByLogicalId(svgBefore, nodeId);
+                    if (nodeElBefore) {
+                        const r = nodeElBefore.getBoundingClientRect();
+                        preExpandAnchorViewport = { left: r.left, top: r.top };
+                    }
+                }
+            }
+
+            expandDiagramSelectionEpoch += 1;
+            const scheduleEpoch = expandDiagramSelectionEpoch;
+
+            // Breadcrumb + doc for the opened module; diagram selection moves to subgraph after render.
+            updateSelection(targetModuleId);
+
             // Add module to opened modules set
             openedModules.add(targetModuleId);
             console.log('[MODULE TRACKING] Module opened:', targetModuleId);
             console.log('[MODULE TRACKING] Opened modules:', Array.from(openedModules));
-            
-            // Try to expand diagram if module has one
-            if (targetModule.diagram && targetModule.diagram.trim()) {
-                const newDiagram = applyExpansionToDiagram(currentDiagramCode, nodeId, targetModuleId, targetModule.name);
-                if (newDiagram !== currentDiagramCode) {
-                    expandedNodes.add(nodeId);
-                    expandedNodeToModule.set(nodeId, targetModuleId);  // Track nodeId -> moduleId mapping
-                    currentDiagramCode = newDiagram;
-                    
-                    renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
-                    
-                    // Re-apply selection highlight after re-render
-                    setTimeout(() => updateSelectionHighlight(nodeId), 150);
-                }
+
+            if (targetModule.diagram && targetModule.diagram.trim() && willExpandDiagram) {
+                const subgraphLabelHint =
+                    extractNodeVisibleLabelFromDiagramBeforeExpand(currentDiagramCode, nodeId) ||
+                    targetModule.name;
+                expandedNodes.add(nodeId);
+                expandedNodeToModule.set(nodeId, targetModuleId); // Track nodeId -> moduleId mapping
+                currentDiagramCode = newDiagram;
+
+                const subClusterId = `${nodeId}_sub`;
+                renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId).then(() => {
+                    if (scheduleEpoch !== expandDiagramSelectionEpoch) return;
+                    const svg = document.querySelector('#mermaid-diagram svg');
+                    if (!svg) return;
+                    const clusterEl = findExpandedClusterElement(svg, nodeId, subClusterId, subgraphLabelHint);
+                    if (clusterEl && preExpandAnchorViewport) {
+                        const canvas = document.getElementById('diagramCanvas');
+                        if (canvas) canvas.classList.add('panning');
+                        for (let pass = 0; pass < 2; pass++) {
+                            const tl = getClusterFrameScreenTL(clusterEl);
+                            if (!tl) break;
+                            panX += preExpandAnchorViewport.left - tl.left;
+                            panY += preExpandAnchorViewport.top - tl.top;
+                            applyTransform();
+                            void clusterEl.getBoundingClientRect();
+                        }
+                        if (canvas) canvas.classList.remove('panning');
+                    }
+                    setDiagramSelection({
+                        kind: 'cluster',
+                        logicalId: subClusterId,
+                        moduleId: targetModuleId
+                    });
+                    refreshDiagramSelectionLabelFromDom();
+                });
             }
         }
         
@@ -2312,6 +3479,18 @@
         function collapseNode(nodeId) {
             // Get the module ID for this node before removing
             const targetModuleId = expandedNodeToModule.get(nodeId) || overviewLinks[nodeId];
+
+            // Capture cluster viewport position before collapse
+            const subClusterId = `${nodeId}_sub`;
+            const svgBefore = document.querySelector('#mermaid-diagram svg');
+            let preCollapseAnchorViewport = null;
+            if (svgBefore) {
+                const clusterEl = findExpandedClusterElement(svgBefore, nodeId, subClusterId, null);
+                if (clusterEl) {
+                    const r = clusterEl.getBoundingClientRect();
+                    preCollapseAnchorViewport = { left: r.left, top: r.top };
+                }
+            }
             
             // Remove from expanded set and mapping
             expandedNodes.delete(nodeId);
@@ -2344,8 +3523,26 @@
                 document.getElementById('moduleTitle').textContent = moduleData['overview']?.name || REPO_TITLE + ' Overview';
                 renderDocumentation(moduleData['overview']?.documentation || '');
             }
-            
-            renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
+
+            clearDiagramShapeSelection();
+            renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId).then(() => {
+                if (!preCollapseAnchorViewport) return;
+                const svg = document.querySelector('#mermaid-diagram svg');
+                if (!svg) return;
+                const nodeEl = queryDiagramElementByLogicalId(svg, nodeId);
+                if (!nodeEl) return;
+                const r = nodeEl.getBoundingClientRect();
+                const canvas = document.getElementById('diagramCanvas');
+                if (canvas) canvas.classList.add('panning');
+                for (let pass = 0; pass < 2; pass++) {
+                    const nr = nodeEl.getBoundingClientRect();
+                    panX += preCollapseAnchorViewport.left - nr.left;
+                    panY += preCollapseAnchorViewport.top - nr.top;
+                    applyTransform();
+                    void nodeEl.getBoundingClientRect();
+                }
+                if (canvas) canvas.classList.remove('panning');
+            });
         }
         
         // ============================================================
@@ -2378,6 +3575,9 @@
             currentDiagramCode = baseDiagramCode;
             
             document.getElementById('moduleTitle').textContent = moduleData[moduleId].name;
+
+            expandDiagramSelectionEpoch += 1;
+            setDiagramSelection({ kind: 'none', moduleId });
             
             renderDiagram(currentDiagramCode, moduleData[moduleId].links || {}, moduleId);
             renderDocumentation(moduleData[moduleId].documentation);
@@ -2523,10 +3723,20 @@
         
         const MIN_ZOOM = 0.25;
         const MAX_ZOOM = 4;
-        const VIEW_TUNE_STORAGE = { pan: 'atelier_view_tune_pan_v2', zoom: 'atelier_view_tune_zoom_v2' };
+        const VIEW_TUNE_STORAGE = {
+            pan: 'atelier_view_tune_pan_v2',
+            zoom: 'atelier_view_tune_zoom_v2',
+            edgeHit: 'atelier_view_tune_edge_hit_v1',
+        };
+        /** Slider + clamps for edge pointer hit (value = target width in CSS pixels on screen). */
+        const VIEW_TUNE_EDGE_HIT_MIN = 6;
+        const VIEW_TUNE_EDGE_HIT_MAX = 120;
+
         const viewTune = {
             panWheelMult: 2,
-            zoomStep: 0.2,
+            zoomStep: 0.1,
+            /** Target on-screen hit thickness (CSS px). Actual SVG stroke uses this ÷ canvas zoomScale. */
+            edgeHoverHitPx: 14,
         };
         window.viewTune = viewTune;
         
@@ -2537,6 +3747,161 @@
         function applyTransform() {
             const canvas = document.getElementById('diagramCanvas');
             canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+            syncDiagramHoverToCanvasZoom();
+        }
+
+        /** Visible label text for a flowchart node id in mermaid source (before expansion). */
+        function extractNodeVisibleLabelFromDiagramBeforeExpand(diagramCode, nodeId) {
+            if (!diagramCode || !nodeId) return '';
+            const esc = nodeId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            let m = diagramCode.match(new RegExp(`${esc}\\["([^"]*)\\"]`));
+            if (!m) m = diagramCode.match(new RegExp(`${esc}\\[([^\\]]+)\\]`));
+            return m ? String(m[1]).trim() : '';
+        }
+
+        /** Top-left of the node's visible shape (stroke box), not the whole g.node bbox — matches cluster frame. */
+        function getFlowchartNodeShapeScreenTL(nodeG) {
+            if (!nodeG || !nodeG.getBoundingClientRect) return null;
+            const inner =
+                nodeG.querySelector('.basic.label-container rect') ||
+                nodeG.querySelector('rect.basic') ||
+                nodeG.querySelector(':scope > .basic rect') ||
+                nodeG.querySelector(':scope > rect') ||
+                nodeG.querySelector('polygon') ||
+                nodeG.querySelector('circle') ||
+                nodeG.querySelector('ellipse') ||
+                nodeG;
+            const r = inner.getBoundingClientRect();
+            if (r.width < 0.5 && r.height < 0.5) return null;
+            return { left: r.left, top: r.top };
+        }
+
+        /**
+         * Cluster border box in viewport — use full g.cluster bbox. Mermaid nests multiple rects
+         * (frame vs label); first rect in DOM order is not the outer frame and breaks snap alignment.
+         */
+        function getClusterFrameScreenTL(clusterG) {
+            if (!clusterG || !clusterG.getBoundingClientRect) return null;
+            const r = clusterG.getBoundingClientRect();
+            return { left: r.left, top: r.top, width: r.width, height: r.height };
+        }
+
+        /**
+         * Find expanded subgraph cluster: registry id, then label match (stamping can miss id).
+         */
+        function findExpandedClusterElement(svg, nodeId, subClusterId, labelHint) {
+            const lid = subClusterId || `${nodeId}_sub`;
+            let el = queryDiagramElementByLogicalId(svg, lid);
+            if (el && el.classList && el.classList.contains('cluster')) {
+                return el;
+            }
+            try {
+                if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+                    el = svg.querySelector(`g.cluster[data-logical-id="${CSS.escape(lid)}"]`);
+                }
+            } catch (_) {
+                el = null;
+            }
+            if (el) return el;
+            for (const g of svg.querySelectorAll('g.cluster')) {
+                if ((g.getAttribute('data-logical-id') || '') === lid) {
+                    return g;
+                }
+            }
+            if (labelHint) {
+                const nk = normalizeDiagramLabelKey(labelHint);
+                for (const g of svg.querySelectorAll('g.cluster')) {
+                    if (normalizeDiagramLabelKey(getClusterVisibleLabel(g)) === nk) {
+                        return g;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /**
+         * After inline expansion, shift canvas pan so the expanded cluster frame top-left (viewport) matches
+         * the pre-expand node shape top-left. Retries layout + two correction passes for subpixel / syncDiagramHover.
+         */
+        function snapExpandedClusterToPreExpandNodeAnchor(
+            preAnchorViewport,
+            subClusterId,
+            scheduleEpoch,
+            afterPan,
+            nodeId,
+            subgraphLabelHint
+        ) {
+            function runAfter() {
+                if (typeof afterPan === 'function') afterPan();
+            }
+            if (!preAnchorViewport || scheduleEpoch !== expandDiagramSelectionEpoch) {
+                runAfter();
+                return;
+            }
+
+            const maxAttempts = 28;
+            let attempts = 0;
+
+            function tick() {
+                if (scheduleEpoch !== expandDiagramSelectionEpoch) {
+                    runAfter();
+                    return;
+                }
+                attempts += 1;
+                const svg = document.querySelector('#mermaid-diagram svg');
+                if (!svg) {
+                    if (attempts < maxAttempts) {
+                        requestAnimationFrame(tick);
+                    } else {
+                        runAfter();
+                    }
+                    return;
+                }
+                const clusterEl = findExpandedClusterElement(
+                    svg,
+                    nodeId,
+                    subClusterId,
+                    subgraphLabelHint
+                );
+                const tl = clusterEl ? getClusterFrameScreenTL(clusterEl) : null;
+                const ready = tl && tl.width > 0.5 && tl.height > 0.5;
+                if (!ready && attempts < maxAttempts) {
+                    requestAnimationFrame(tick);
+                    return;
+                }
+                if (!clusterEl || !tl) {
+                    runAfter();
+                    return;
+                }
+
+                const canvas = document.getElementById('diagramCanvas');
+                if (canvas) {
+                    canvas.classList.add('panning');
+                }
+
+                for (let pass = 0; pass < 2; pass++) {
+                    if (scheduleEpoch !== expandDiagramSelectionEpoch) {
+                        break;
+                    }
+                    const tln = getClusterFrameScreenTL(clusterEl);
+                    if (!tln) {
+                        break;
+                    }
+                    panX += preAnchorViewport.left - tln.left;
+                    panY += preAnchorViewport.top - tln.top;
+                    applyTransform();
+                    void clusterEl.getBoundingClientRect();
+                }
+
+                if (canvas) {
+                    canvas.classList.remove('panning');
+                }
+                runAfter();
+            }
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(tick);
+            });
         }
         
         function zoomIn() {
@@ -2622,19 +3987,67 @@
             applyTransform();
         }
         
+        /**
+         * Invisible edge hit stroke width in SVG user units. Canvas uses CSS transform scale(zoomScale),
+         * so stroke-width w in the diagram appears as w×zoomScale on screen. Using w = base/zoomScale
+         * keeps ~`base` CSS pixels of tolerance regardless of zoom (until capped for extreme zoom-out).
+         */
+        function getEdgePointerHitWidthPx() {
+            const raw = Number(viewTune && viewTune.edgeHoverHitPx);
+            const base = Math.max(
+                4,
+                Math.min(VIEW_TUNE_EDGE_HIT_MAX, Number.isFinite(raw) && raw > 0 ? raw : 14)
+            );
+            const z = typeof zoomScale === 'number' && zoomScale > 0 ? zoomScale : 1;
+            const unclamped = base / z;
+            /* Allow thick strokes when zoomed far out; cap avoids absurd SVG stroke values. */
+            return Math.max(2, Math.min(512, unclamped));
+        }
+
+        let _diagramHoverSyncZoom = null;
+        function syncDiagramHoverToCanvasZoom() {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            if (_diagramHoverSyncZoom === zoomScale) return;
+            _diagramHoverSyncZoom = zoomScale;
+            stampEdgeLabelPathLinks(svg);
+            svg.querySelectorAll('g.edgePath').forEach((g) => ensureDiagramEdgePointerEvents(g));
+            const ep = svg.querySelector('g.edgePaths');
+            if (ep) ensureDiagramEdgePointerEvents(ep);
+        }
+
+        function refreshDiagramEdgeHitAreas() {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            stampEdgeLabelPathLinks(svg);
+            svg.querySelectorAll('g.edgePath').forEach((g) => ensureDiagramEdgePointerEvents(g));
+            const ep = svg.querySelector('g.edgePaths');
+            if (ep) ensureDiagramEdgePointerEvents(ep);
+        }
+        window.refreshDiagramEdgeHitAreas = refreshDiagramEdgeHitAreas;
+
         function initViewTuneSliders() {
             const panIn = document.getElementById('tunePanMult');
             const panVal = document.getElementById('tunePanVal');
             const zoomIn = document.getElementById('tuneZoomStep');
             const zoomVal = document.getElementById('tuneZoomVal');
+            const edgeHitIn = document.getElementById('tuneEdgeHit');
+            const edgeHitVal = document.getElementById('tuneEdgeHitVal');
             try {
                 const sp = localStorage.getItem(VIEW_TUNE_STORAGE.pan);
                 const sz = localStorage.getItem(VIEW_TUNE_STORAGE.zoom);
+                const se = localStorage.getItem(VIEW_TUNE_STORAGE.edgeHit);
                 if (sp != null) {
                     viewTune.panWheelMult = Math.max(0.25, Math.min(3, parseFloat(sp)));
                 }
                 if (sz != null) {
                     viewTune.zoomStep = Math.max(0.05, Math.min(1, parseFloat(sz)));
+                }
+                if (se != null) {
+                    viewTune.edgeHoverHitPx = Math.max(
+                        VIEW_TUNE_EDGE_HIT_MIN,
+                        Math.min(VIEW_TUNE_EDGE_HIT_MAX, parseFloat(se))
+                    );
                 }
             } catch (e) { /* ignore */ }
             if (panIn && panVal) {
@@ -2655,6 +4068,18 @@
                     try { localStorage.setItem(VIEW_TUNE_STORAGE.zoom, String(viewTune.zoomStep)); } catch (e) {}
                 });
             }
+            if (edgeHitIn && edgeHitVal) {
+                edgeHitIn.value = String(viewTune.edgeHoverHitPx);
+                edgeHitVal.textContent = String(Math.round(viewTune.edgeHoverHitPx));
+                edgeHitIn.addEventListener('input', function () {
+                    viewTune.edgeHoverHitPx = parseFloat(edgeHitIn.value);
+                    edgeHitVal.textContent = String(Math.round(viewTune.edgeHoverHitPx));
+                    try {
+                        localStorage.setItem(VIEW_TUNE_STORAGE.edgeHit, String(viewTune.edgeHoverHitPx));
+                    } catch (e) {}
+                    refreshDiagramEdgeHitAreas();
+                });
+            }
             const tunePanel = document.getElementById('viewTunePanel');
             if (tunePanel) {
                 tunePanel.addEventListener('wheel', function (ev) { ev.stopPropagation(); }, { passive: true });
@@ -2664,13 +4089,24 @@
             console.info('[viewTune] Panel bottom-left on diagram. Console: viewTune.panWheelMult = 1.2; syncViewTuneUI()', viewTune);
             window.syncViewTuneUI = function () {
                 viewTune.panWheelMult = Math.max(0.25, Math.min(3, Number(viewTune.panWheelMult) || 2));
-                viewTune.zoomStep = Math.max(0.05, Math.min(1, Number(viewTune.zoomStep) || 0.2));
+                viewTune.zoomStep = Math.max(0.05, Math.min(1, Number(viewTune.zoomStep) || 0.1));
+                viewTune.edgeHoverHitPx = Math.max(
+                    VIEW_TUNE_EDGE_HIT_MIN,
+                    Math.min(VIEW_TUNE_EDGE_HIT_MAX, Number(viewTune.edgeHoverHitPx) || 14)
+                );
                 const pi = document.getElementById('tunePanMult');
                 const pv = document.getElementById('tunePanVal');
                 const zi = document.getElementById('tuneZoomStep');
                 const zv = document.getElementById('tuneZoomVal');
+                const ei = document.getElementById('tuneEdgeHit');
+                const ev = document.getElementById('tuneEdgeHitVal');
                 if (pi && pv) { pi.value = String(viewTune.panWheelMult); pv.textContent = viewTune.panWheelMult.toFixed(2); }
                 if (zi && zv) { zi.value = String(viewTune.zoomStep); zv.textContent = viewTune.zoomStep.toFixed(2); }
+                if (ei && ev) {
+                    ei.value = String(viewTune.edgeHoverHitPx);
+                    ev.textContent = String(Math.round(viewTune.edgeHoverHitPx));
+                }
+                refreshDiagramEdgeHitAreas();
             };
         }
         
@@ -2679,8 +4115,9 @@
             // Only start panning on left click and not on nodes
             if (e.button !== 0) return;
             if (e.target.closest('.view-tune-panel')) return;
-            /* Any flowchart node: show pointer and don't start pan (not only .clickable-node) */
-            if (e.target.closest('g.node, .collapse-button')) return;
+            /* Flowchart shapes: don’t start pan (edges/clusters don’t use g.node) */
+            if (e.target.closest('g.node, .collapse-button, g.edgePath, g.edgePaths, g.edgeLabels, g.cluster'))
+                return;
             
             isPanning = true;
             startMouseX = e.clientX;
@@ -2723,7 +4160,11 @@
             
             viewport.addEventListener('touchstart', (e) => {
                 if (e.target.closest && e.target.closest('.view-tune-panel')) return;
-                if (e.touches.length === 1 && e.target.closest && e.target.closest('g.node, .collapse-button')) {
+                if (
+                    e.touches.length === 1 &&
+                    e.target.closest &&
+                    e.target.closest('g.node, .collapse-button, g.edgePath, g.edgePaths, g.edgeLabels, g.cluster')
+                ) {
                     return;
                 }
                 if (e.touches.length === 2) {
@@ -2972,6 +4413,35 @@
         // ============================================================
         // CHAT PANEL (Architectural Agent)
         // ============================================================
+        window.getDiagramSelection = () => ({ ...diagramSelection });
+        window.getDiagramSelectionChatPayload = buildDiagramChatPayload;
+        window.setDiagramSelection = setDiagramSelection;
+        /** Console: inspect JSON sent as `diagram_selection` on the next arch-agent chat POST. */
+        window.debugLogChatDiagramSelection = function () {
+            const p = buildDiagramChatPayload();
+            console.log('[chat] diagram_selection payload (next POST):', p);
+            return p;
+        };
+
+        /** Playwright / automated tests: read pan zoom and measure node vs expanded cluster frame (viewport px). */
+        window.__diagramViewState = () => ({
+            panX,
+            panY,
+            zoomScale
+        });
+        window.__measureNodeShapeViewportTL = (logicalId) => {
+            const n = document.querySelector(`#mermaid-diagram svg g.node[data-logical-id="${CSS.escape(logicalId)}"]`);
+            if (!n) return null;
+            const r = n.getBoundingClientRect();
+            return { left: r.left, top: r.top, width: r.width, height: r.height };
+        };
+        window.__measureClusterFrameViewportTL = (logicalId) => {
+            const c = document.querySelector(`#mermaid-diagram svg g.cluster[data-logical-id="${CSS.escape(logicalId)}"]`);
+            if (!c) return null;
+            const r = c.getBoundingClientRect();
+            return { left: r.left, top: r.top, width: r.width, height: r.height };
+        };
+
         const chatInput = document.getElementById('chatInput');
         const chatSend = document.getElementById('chatSend');
         const chatMessages = document.getElementById('chatMessages');
@@ -3022,6 +4492,7 @@
                         current_module: (typeof selectedModuleId !== 'undefined' ? selectedModuleId : null),
                         opened_modules: openedModulesArray,
                         architecture_group: getArchitectureGroupPayload(),
+                        diagram_selection: buildDiagramChatPayload(),
                         history: chatHistory
                     })
                 });
