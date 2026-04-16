@@ -3,9 +3,9 @@
 Architectural Agent - Read-only agent for repository exploration and Q&A.
 
 This agent has access to:
-- Module tree + canonical diagram JSON
-- Documentation markdown
-- Component metadata (IDs, paths, types, dependencies)
+- Module tree + diagram JSON in the tree
+- Opened-module Mermaid excerpts in the system prompt; full module markdown via the read_module_documentation tool
+- Component metadata (IDs, paths, types, dependencies) where present in the tree
 
 But does NOT have access to:
 - Full source code reading (no read_code_components)
@@ -13,6 +13,7 @@ But does NOT have access to:
 - Sub-module generation (no generate_sub_module_documentation)
 """
 
+import asyncio
 import logging
 import json
 import re
@@ -20,13 +21,25 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List
 
 from pydantic_core import to_jsonable_python
-from pydantic_ai import Agent
+from pydantic_ai import Agent, Tool
 from pydantic_ai import ModelMessagesTypeAdapter
 from pydantic_ai.messages import ModelRequest, ModelResponse, UserPromptPart, TextPart
 
 from codewiki.src.file_manager import file_manager
 
 logger = logging.getLogger(__name__)
+
+
+async def _run_architectural_agent_llm(
+    agent: Agent,
+    enhanced_message: str,
+    history_messages: Optional[List[Any]],
+):
+    """Awaitable wrapper for pydantic-ai Agent.run (async)."""
+    return await agent.run(
+        enhanced_message,
+        message_history=history_messages,
+    )
 
 
 ARCHITECTURAL_AGENT_SYSTEM_PROMPT_TEMPLATE = """You are an architectural navigation assistant for exploring software repositories.
@@ -42,6 +55,10 @@ When answering:
 
 Viewer vs module diagrams:
 - A block labeled "VIEWER DIAGRAM SELECTION" describes which **node, cluster, or edge** is highlighted on the **interactive Mermaid diagram** (logical id from the viewer registry). Questions like "which diagram node is selected", "what did I click on the graph", "what's highlighted on the diagram" refer to **that** selection—not the open doc page title alone.
+- If **multiple** shapes are listed under viewer diagram selection, the user **multi-selected** those (⌘/Ctrl+Shift+click). Phrases like "the two groups", "between these", "common connections", or "edges between them" refer to **those selected logical ids**—use exact ids from VIEWER DIAGRAM SELECTION; do not invent different subgraph or node names.
+- **Two clusters can sit under the same parent module doc** (same `module_id`) and still be **two distinct subgraphs** on the diagram. Treat them as **separate groups** with the **exact `logical_id` strings** from VIEWER DIAGRAM SELECTION.
+- **Opened modules — Mermaid only:** The block **VIEWER OPENED MODULE MERMAID** below lists **all ```mermaid``` diagrams** from every opened module page (small prompt footprint). For **prose, lists, or full markdown**, call the tool **read_module_documentation** with the module id (e.g. `user_interface_and_integrations`).
+- Diagram selection still adds only **logical id + label (+ kind)** for highlights.
 - "[Context: Currently viewing module: …]" is which **documentation page** is open. That is separate from the diagram highlight.
 
 COMPLETE MODULE TREE (all modules in repository):
@@ -188,6 +205,186 @@ class ArchitecturalAgentRunner:
         )
         return "\n".join(lines)
 
+    @staticmethod
+    def _normalize_diagram_selections_list(
+        diagram_selection: Optional[Dict[str, Any]],
+        diagram_selections: Optional[List[Dict[str, Any]]],
+    ) -> List[Dict[str, Any]]:
+        if diagram_selections and isinstance(diagram_selections, list):
+            out = [x for x in diagram_selections if isinstance(x, dict)]
+            if out:
+                return out
+        if diagram_selection and isinstance(diagram_selection, dict):
+            return [diagram_selection]
+        return []
+
+    def _format_diagram_selections_system_block(self, selections: List[Dict[str, Any]]) -> str:
+        """Multi-select on the canvas: zero, one, or many highlighted shapes."""
+        if not selections:
+            return (
+                "VIEWER DIAGRAM SELECTION: None.\n"
+                "No interactive diagram shape is reported as selected (or selection was cleared)."
+            )
+        if len(selections) == 1:
+            return self._format_diagram_selection_system_block(selections[0])
+        lines = [
+            "VIEWER DIAGRAM SELECTION — MULTIPLE SHAPES (⌘/Ctrl/Shift+click in the viewer). "
+            "These are the only diagram anchors for this question:",
+        ]
+        for i, ds in enumerate(selections, start=1):
+            kind = str(ds.get("kind") or "none").lower().strip()
+            lid = str(ds.get("logical_id") or "").strip()
+            label = str(ds.get("label") or lid).strip()
+            mod = str(ds.get("module_id") or "").strip()
+            if kind == "none" or not lid:
+                continue
+            chunk = f'{i}. kind={kind}, logical id={lid}, label="{label}"'
+            if mod:
+                chunk += f", module context={mod}"
+            lines.append(chunk)
+        lines.append(
+            "If the user asks what is selected on the diagram, list these items (or summarize the set)."
+        )
+        if len(selections) >= 2:
+            lids = [
+                str(ds.get("logical_id") or "").strip()
+                for ds in selections
+                if str(ds.get("kind") or "none").lower().strip() != "none"
+                and str(ds.get("logical_id") or "").strip()
+            ]
+            lines.append(
+                "Multi-select interpretation: If the user asks about **edges between** selected groups "
+                "or similar, use the selected logical ids as anchors; ground answers in **VIEWER OPENED MODULE MERMAID** "
+                "and call **read_module_documentation** if you need full markdown for a module."
+            )
+            if lids:
+                lines.append(f"Selected logical ids (anchors): {', '.join(lids)}.")
+        return "\n".join(lines)
+
+    _MERMAID_FENCE_RE = re.compile(r"```mermaid\s*\r?\n[\s\S]*?```", re.IGNORECASE)
+    # Total budget for all concatenated mermaid from opened tabs (whole fences only).
+    _MAX_OPENED_MERMAID_CHARS = 120000
+    _TOOL_READ_MODULE_MAX_CHARS = 80000
+
+    def _safe_opened_module_stem(self, module_id: str) -> Optional[str]:
+        """Reject path components; allow typical doc ids like overview, user_interface_and_integrations."""
+        s = str(module_id).strip()
+        if not s or ".." in s or "/" in s or "\\" in s:
+            return None
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", s):
+            return None
+        return s
+
+    def _read_module_markdown_raw(self, module_id: str) -> Optional[str]:
+        stem = self._safe_opened_module_stem(module_id)
+        if not stem:
+            return None
+        path = self.docs_path / f"{stem}.md"
+        if not path.is_file():
+            return None
+        try:
+            return path.read_text(encoding="utf-8", errors="replace")
+        except OSError as e:
+            logger.warning("[ARCH-AGENT] Could not read %s: %s", path, e)
+            return None
+
+    def _extract_mermaid_fences(self, markdown: str) -> List[str]:
+        return self._MERMAID_FENCE_RE.findall(markdown or "")
+
+    def read_module_documentation(self, module_id: str) -> str:
+        """
+        Tool: full markdown for one module (sync; called by pydantic-ai).
+        Id must match a file `{id}.md` under the docs bundle.
+        """
+        mid = (module_id or "").strip()
+        logger.info("[ARCH-AGENT] tool read_module_documentation(%r)", mid)
+        text = self._read_module_markdown_raw(mid)
+        if text is None:
+            stem = self._safe_opened_module_stem(mid)
+            if not stem:
+                return (
+                    "Invalid module_id. Use a single module key from the module tree "
+                    "(letters, digits, underscores), e.g. `overview` or `user_interface_and_integrations`."
+                )
+            return f"No file `{stem}.md` in this documentation bundle."
+        cap = self._TOOL_READ_MODULE_MAX_CHARS
+        if len(text) > cap:
+            return text[:cap] + "\n\n... [truncated for tool output size] ..."
+        return text
+
+    def _format_opened_modules_system_block(
+        self, opened_modules: Optional[list[str]]
+    ) -> str:
+        """Only ```mermaid``` fences from each opened module .md (concatenated, budget-capped)."""
+        if not opened_modules:
+            return (
+                "VIEWER OPENED MODULE MERMAID: none — no module pages opened in the viewer.\n"
+            )
+        uniq: List[str] = []
+        seen: set = set()
+        for x in opened_modules:
+            s = str(x).strip()
+            if s and s not in seen:
+                seen.add(s)
+                uniq.append(s)
+        if not uniq:
+            return (
+                "VIEWER OPENED MODULE MERMAID: none — no module pages opened in the viewer.\n"
+            )
+        header = (
+            "VIEWER OPENED MODULE MERMAID — ```mermaid``` blocks from opened docs (tab order; whole fences only). "
+            "If truncated, use tool **read_module_documentation** for full markdown.\n"
+            f"Opened module ids: {', '.join(uniq)}\n"
+        )
+
+        # Flatten (module_id, fence) preserving file order, then pack into char budget.
+        queued: List[tuple[str, str]] = []
+        notes: List[str] = []
+        for mid in uniq:
+            raw = self._read_module_markdown_raw(mid)
+            if not raw:
+                notes.append(f"- `{mid}.md`: (file missing)")
+                continue
+            fences = self._extract_mermaid_fences(raw)
+            if not fences:
+                notes.append(f"- `{mid}.md`: (no mermaid blocks)")
+                continue
+            for fence in fences:
+                queued.append((mid, fence))
+
+        budget = self._MAX_OPENED_MERMAID_CHARS
+        used = 0
+        omitted = 0
+        body_parts: List[str] = []
+        cur_mid: Optional[str] = None
+        for mid, fence in queued:
+            sep = 2 if body_parts else 0
+            if used + sep + len(fence) > budget:
+                omitted += 1
+                continue
+            if mid != cur_mid:
+                body_parts.append(f"\n### `{mid}.md`\n")
+                cur_mid = mid
+            body_parts.append(fence)
+            used += sep + len(fence)
+
+        if notes:
+            header += "Notes:\n" + "\n".join(notes) + "\n"
+
+        if not body_parts and not queued:
+            return (
+                header
+                + "No mermaid content to show. Use read_module_documentation(module_id) for full text.\n"
+            )
+
+        out = header + "\n".join(body_parts)
+        if omitted:
+            out += (
+                f"\n\n... [{omitted} mermaid block(s) omitted — prompt size budget; "
+                "use read_module_documentation for the relevant module.] ...\n"
+            )
+        return out + "\n"
+
     def _format_user_message_diagram_selection_prefix(
         self, diagram_selection: Optional[Dict[str, Any]]
     ) -> str:
@@ -201,6 +398,24 @@ class ArchitecturalAgentRunner:
         label = str(diagram_selection.get("label") or lid).strip()
         return f'[Viewer diagram selection: {kind} "{label}" (logical id: {lid})]\n'
 
+    def _format_user_message_diagram_selections_prefix(self, selections: List[Dict[str, Any]]) -> str:
+        """Prefix for zero, one, or many diagram highlights."""
+        if not selections:
+            return "[Viewer diagram selection: none]\n"
+        if len(selections) == 1:
+            return self._format_user_message_diagram_selection_prefix(selections[0])
+        parts = []
+        for ds in selections:
+            kind = str(ds.get("kind") or "none").lower().strip()
+            lid = str(ds.get("logical_id") or "").strip()
+            if kind == "none" or not lid:
+                continue
+            label = str(ds.get("label") or lid).strip()
+            parts.append(f'{kind} "{label}" ({lid})')
+        if not parts:
+            return "[Viewer diagram selection: none]\n"
+        return "[Viewer diagram selection (multiple): " + "; ".join(parts) + "]\n"
+
     def _is_viewer_ui_meta_question(self, message: str) -> bool:
         """Questions about diagram highlight vs open doc — answer deterministically when clearly UI-meta."""
         t = message.strip().lower()
@@ -208,52 +423,67 @@ class ArchitecturalAgentRunner:
             return False
         if re.search(r"viewer\s+diagram\s+selection", t):
             return True
-        if re.search(
-            r"(what|which).{0,40}(select|highlight).{0,40}(diagram|graph|mermaid)",
-            t,
-        ):
+        # Word boundaries: avoid matching "graph" inside "subgraphs" or "select" inside "selected".
+        dg = r"\b(?:diagram|graph|mermaid)\b"
+        shc = r"\b(?:select|highlight|click)\b"
+        if re.search(rf"(what|which).{{0,40}}{shc}.{{0,40}}{dg}", t):
             return True
-        if re.search(
-            r"(diagram|graph|mermaid).{0,40}(select|highlight|click)",
-            t,
-        ):
+        if re.search(rf"{dg}.{{0,40}}{shc}", t):
             return True
-        if re.search(r"what\s+is\s+highlighted", t) and re.search(
-            r"diagram|graph|mermaid", t
-        ):
+        if re.search(r"what\s+is\s+highlighted", t) and re.search(rf"{dg}", t):
             return True
         return False
 
     def _deterministic_viewer_ui_answer(
         self,
         diagram_selection: Optional[Dict[str, Any]] = None,
+        diagram_selections: Optional[List[Dict[str, Any]]] = None,
     ) -> str:
         """Exact answer for interactive diagram UI state. Not codebase architecture."""
-        ds = diagram_selection or {}
-        open_doc = str(ds.get("module_id") or "").strip() or None
-        dkind = str(ds.get("kind") or "none").lower().strip()
-        dlid = str(ds.get("logical_id") or "").strip()
-        dlabel = str(ds.get("label") or dlid).strip()
+        selections = self._normalize_diagram_selections_list(diagram_selection, diagram_selections)
         lines = []
-        if dkind != "none" and dlid:
-            lines.append(
-                f'**Interactive diagram selection** (highlighted on the Mermaid graph): **"{dlabel}"** '
-                f"(logical id: `{dlid}`, kind: {dkind})."
-            )
-        else:
+        if not selections:
             lines.append(
                 "**Interactive diagram selection:** none — no node/cluster/edge is highlighted on the diagram."
             )
-        if open_doc:
-            lines.append(
-                f"**Diagram module context** (from selection): `{open_doc}`."
-            )
+        elif len(selections) == 1:
+            ds = selections[0]
+            open_doc = str(ds.get("module_id") or "").strip() or None
+            dkind = str(ds.get("kind") or "none").lower().strip()
+            dlid = str(ds.get("logical_id") or "").strip()
+            dlabel = str(ds.get("label") or dlid).strip()
+            if dkind != "none" and dlid:
+                lines.append(
+                    f'**Interactive diagram selection** (highlighted on the Mermaid graph): **"{dlabel}"** '
+                    f"(logical id: `{dlid}`, kind: {dkind})."
+                )
+            else:
+                lines.append(
+                    "**Interactive diagram selection:** none — no node/cluster/edge is highlighted on the diagram."
+                )
+            if open_doc:
+                lines.append(
+                    f"**Diagram module context** (from selection): `{open_doc}`."
+                )
+            else:
+                lines.append(
+                    "**Diagram module context:** not reported on this selection (or nothing selected)."
+                )
         else:
             lines.append(
-                "**Diagram module context:** not reported on this selection (or nothing selected)."
+                f"**Interactive diagram selection:** {len(selections)} shapes highlighted (⌘/Ctrl/Shift+click multi-select):"
             )
+            for i, ds in enumerate(selections, start=1):
+                dkind = str(ds.get("kind") or "none").lower().strip()
+                dlid = str(ds.get("logical_id") or "").strip()
+                dlabel = str(ds.get("label") or dlid).strip()
+                mod = str(ds.get("module_id") or "").strip()
+                if dkind == "none" or not dlid:
+                    continue
+                extra = f", module `{mod}`" if mod else ""
+                lines.append(f"{i}. **{dlabel}** — `{dlid}` ({dkind}){extra}.")
         lines.append(
-            "*Diagram selection reports the highlighted shape and its module when applicable.*"
+            "*Diagram selection reports the highlighted shape(s) and module when applicable.*"
         )
         return "\n\n".join(lines)
 
@@ -276,60 +506,61 @@ class ArchitecturalAgentRunner:
         combined = prior + [req, resp]
         return to_jsonable_python(combined)
 
-    def chat(
+    async def chat_async(
         self,
         message: str,
         opened_modules: Optional[list[str]] = None,
         message_history: Optional[List[Any]] = None,
         diagram_selection: Optional[Dict[str, Any]] = None,
+        diagram_selections: Optional[List[Dict[str, Any]]] = None,
     ) -> tuple[str, List[Any]]:
         """
-        Process a chat message and return a response plus updated message history.
-
-        Args:
-            message: User's question/message
-            opened_modules: List of opened module IDs (overview is always included)
-            message_history: Optional list of prior messages (JSON-serializable form from
-                a previous chat() return). When provided, the agent continues the conversation.
-            diagram_selection: Optional dict with kind, logical_id, label, module_id from the interactive diagram.
-
-        Returns:
-            Tuple of (assistant_response_text, updated_history). The client should store
-            updated_history and send it back as message_history on the next turn.
+        Async chat: run the LLM on the **current event loop**. Use this from FastAPI/async code.
+        Do not wrap in asyncio.to_thread — nested loops break Google GenAI / pydantic-ai.
         """
+        selections = self._normalize_diagram_selections_list(diagram_selection, diagram_selections)
+
         logger.info(f"[ARCH-AGENT] Processing chat message: {message[:100]}...")
         logger.info(f"[ARCH-AGENT] Opened modules: {opened_modules}")
         logger.info(f"[ARCH-AGENT] History length: {len(message_history) if message_history else 0}")
         logger.info(f"[ARCH-AGENT] diagram_selection: {diagram_selection!r}")
+        logger.info(f"[ARCH-AGENT] diagram_selections count: {len(selections)}")
 
-        # Format full module tree for prompt (used when no history, or for context in user message)
         module_tree_text = self._format_module_tree_for_prompt()
         system_prompt = ARCHITECTURAL_AGENT_SYSTEM_PROMPT_TEMPLATE.format(module_tree=module_tree_text)
-        system_prompt = system_prompt + "\n\n" + self._format_diagram_selection_system_block(diagram_selection)
+        system_prompt = system_prompt + "\n\n" + self._format_diagram_selections_system_block(selections)
+        system_prompt = system_prompt + "\n" + self._format_opened_modules_system_block(opened_modules)
 
         logger.info(f"[ARCH-AGENT] System prompt length: {len(system_prompt)} chars")
         logger.debug(f"[ARCH-AGENT] System prompt preview: {system_prompt[:500]}...")
 
-        # Create agent (no tools - conversational only)
         agent = Agent(
             self.model,
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
+            tools=[
+                Tool(
+                    function=self.read_module_documentation,
+                    name="read_module_documentation",
+                    description=(
+                        "Load full markdown for one module from this docs bundle (`{module_id}.md`). "
+                        "Use when you need prose, bullet lists, or sections not present in the opened Mermaid excerpts "
+                        "or the module tree (e.g. details about a submodule the user asked about)."
+                    ),
+                )
+            ],
         )
 
-        # Restate diagram selection on every turn
-        diagram_prefix = self._format_user_message_diagram_selection_prefix(diagram_selection)
+        diagram_prefix = self._format_user_message_diagram_selections_prefix(selections)
         enhanced_message = diagram_prefix + message
 
-        # Deterministic answers for diagram UI questions. LLMs often confuse highlight vs open doc.
         if self._is_viewer_ui_meta_question(message):
-            ans = self._deterministic_viewer_ui_answer(diagram_selection)
+            ans = self._deterministic_viewer_ui_answer(diagram_selection, diagram_selections)
             logger.info("[ARCH-AGENT] Viewer UI meta question — deterministic answer (no LLM)")
             updated = self._append_turn_to_history(
                 message_history, enhanced_message, ans
             )
             return (ans, updated)
 
-        # Parse history for pydantic-ai (list of dicts -> list[ModelMessage])
         history_messages = None
         if message_history:
             try:
@@ -340,19 +571,13 @@ class ArchitecturalAgentRunner:
                 history_messages = None
 
         try:
-            # run_sync avoids asyncio event-loop issues on reused serverless workers (e.g. Vercel).
-            result = agent.run_sync(
-                enhanced_message,
-                message_history=history_messages,
-            )
-            # Extract the actual text response from pydantic-ai result
+            result = await _run_architectural_agent_llm(agent, enhanced_message, history_messages)
             if hasattr(result, 'data'):
                 response = str(result.data)
             else:
                 response = getattr(result, 'output', str(result))
             logger.info(f"[ARCH-AGENT] Response generated: {len(response)} chars")
 
-            # Serialize full conversation so client can send it back next time
             all_messages = result.all_messages()
             updated_history = to_jsonable_python(all_messages)
             logger.info(f"[ARCH-AGENT] Updated history: {len(updated_history)} messages")
@@ -360,3 +585,25 @@ class ArchitecturalAgentRunner:
         except Exception as e:
             logger.error(f"[ARCH-AGENT] Agent execution failed: {e}")
             return (f"Error processing request: {str(e)}", message_history or [])
+
+    def chat(
+        self,
+        message: str,
+        opened_modules: Optional[list[str]] = None,
+        message_history: Optional[List[Any]] = None,
+        diagram_selection: Optional[Dict[str, Any]] = None,
+        diagram_selections: Optional[List[Dict[str, Any]]] = None,
+    ) -> tuple[str, List[Any]]:
+        """
+        Synchronous chat for non-async callers. Uses asyncio.run (own event loop).
+        From async servers (FastAPI), prefer await chat_async() instead of asyncio.to_thread(chat).
+        """
+        return asyncio.run(
+            self.chat_async(
+                message=message,
+                opened_modules=opened_modules,
+                message_history=message_history,
+                diagram_selection=diagram_selection,
+                diagram_selections=diagram_selections,
+            )
+        )

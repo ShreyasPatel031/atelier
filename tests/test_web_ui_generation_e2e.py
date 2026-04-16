@@ -2,12 +2,11 @@
 """
 Web UI E2E tests (FastAPI TestClient): form submit → pipeline stages → /repos + /viewer.
 
-Uses monkeypatched clone + CLI-equivalent pipeline so tests run without network or LLM.
+Uses monkeypatched clone + DocumentationGenerator.run so tests run without network or LLM.
 """
 
 from __future__ import annotations
 
-import inspect
 import json
 import time
 import uuid
@@ -15,9 +14,6 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-_CEP_PATH = _REPO_ROOT / "codewiki/src/fe/cli_equivalent_pipeline.py"
 
 
 def _drain_worker_queue(worker) -> None:
@@ -72,32 +68,29 @@ def _fake_clone_factory():
     return fake_clone
 
 
-def _fake_pipeline_factory():
-    async def fake_run_cli_equivalent(doc_generator):
-        import asyncio
+async def _fake_run(self):
+    """Stand-in for DocumentationGenerator.run() — writes minimal artifacts and emits stages."""
+    import asyncio
+    import os
 
-        wd = Path(doc_generator.config.docs_dir)
-        if not wd.is_absolute():
-            wd = Path.cwd() / wd
-        wd.mkdir(parents=True, exist_ok=True)
-        tree = {"main": {"path": "", "components": [], "children": {}}}
-        (wd / "module_tree.json").write_text(json.dumps(tree), encoding="utf-8")
-        (wd / "first_module_tree.json").write_text(json.dumps(tree), encoding="utf-8")
-        (wd / "overview.md").write_text(
-            '# Test\n\n```mermaid\ngraph TD\nA["A"] --> B["B"]\nclick A "main.md"\n```\n',
-            encoding="utf-8",
-        )
-        (wd / "main.md").write_text("# main\n", encoding="utf-8")
+    wd = Path(os.path.abspath(self.config.docs_dir))
+    wd.mkdir(parents=True, exist_ok=True)
+    tree = {"main": {"path": "", "components": [], "children": {}}}
+    (wd / "module_tree.json").write_text(json.dumps(tree), encoding="utf-8")
+    (wd / "first_module_tree.json").write_text(json.dumps(tree), encoding="utf-8")
+    (wd / "overview.md").write_text(
+        '# Test\n\n```mermaid\ngraph TD\nA["A"] --> B["B"]\nclick A "main.md"\n```\n',
+        encoding="utf-8",
+    )
+    (wd / "main.md").write_text("# main\n", encoding="utf-8")
 
-        doc_generator._emit_stage(1)
-        await asyncio.sleep(0.08)
-        doc_generator._emit_stage(2)
-        await asyncio.sleep(0.08)
-        doc_generator.create_documentation_metadata(str(wd), {}, 0)
-        await asyncio.sleep(0.08)
-        doc_generator._emit_stage(3)
-
-    return fake_run_cli_equivalent
+    self._emit_stage(1)
+    await asyncio.sleep(0.08)
+    self._emit_stage(2)
+    await asyncio.sleep(0.08)
+    self.create_documentation_metadata(str(wd), {}, 0)
+    await asyncio.sleep(0.08)
+    self._emit_stage(3)
 
 
 def _poll_job_until(
@@ -133,8 +126,8 @@ class TestWebUiGenerationE2E:
             staticmethod(_fake_clone_factory()),
         )
         monkeypatch.setattr(
-            "codewiki.src.fe.background_worker.run_cli_equivalent_generation",
-            _fake_pipeline_factory(),
+            "codewiki.src.be.documentation_generator.DocumentationGenerator.run",
+            _fake_run,
         )
 
         suffix = uuid.uuid4().hex[:10]
@@ -166,7 +159,13 @@ class TestWebUiGenerationE2E:
 
             idx = client.get("/repos/index.json")
             assert idx.status_code == 200
-            assert job_id in idx.json()
+            payload = idx.json()
+            assert isinstance(payload, list)
+            ids = [
+                x if isinstance(x, str) else (x.get("id") if isinstance(x, dict) else None)
+                for x in payload
+            ]
+            assert job_id in ids
 
             viewer = client.get("/viewer")
             assert viewer.status_code == 200
@@ -176,38 +175,13 @@ class TestWebUiGenerationE2E:
             assert home.status_code == 200
             assert "/viewer?repo=" in home.text
 
-    def test_cli_adapter_and_web_pipeline_share_backend_stage_order(self):
-        """UI stages map to the same backend sequence as `codewiki generate` (cluster → module docs → metadata)."""
-        assert _CEP_PATH.is_file(), f"expected {_CEP_PATH}"
-        from codewiki.cli.adapters import doc_generator as cli_dg
+    def test_web_ui_uses_documentation_generator_run_directly(self):
+        """Web UI calls DocumentationGenerator.run() — no separate pipeline copy to drift."""
+        import inspect
+        from codewiki.src.fe import background_worker as bw
 
-        cli_src = inspect.getsource(cli_dg.CLIDocumentationGenerator._run_backend_generation)
-        web_src = _CEP_PATH.read_text(encoding="utf-8")
-
-        def first_occurrence(hay: str, needle: str) -> int:
-            i = hay.find(needle)
-            assert i >= 0, f"missing {needle!r}"
-            return i
-
-        # Web UI: progress callbacks 1 → 2 → 3 in source order
-        assert (
-            web_src.find("_emit_stage(1)")
-            < web_src.find("_emit_stage(2)")
-            < web_src.find("_emit_stage(3)")
+        src = inspect.getsource(bw.BackgroundWorker._process_job)
+        assert "doc_generator.run()" in src, (
+            "background_worker should call doc_generator.run() directly, "
+            "not a separate pipeline function"
         )
-
-        # CLI: cluster_modules call before generate_module_documentation before create_documentation_metadata
-        o_cluster = first_occurrence(cli_src, "cluster_modules(leaf_nodes")
-        o_gen = first_occurrence(cli_src, "await doc_generator.generate_module_documentation")
-        o_meta = first_occurrence(cli_src, "doc_generator.create_documentation_metadata")
-        assert o_cluster < o_gen < o_meta
-
-        # Web pipeline: dependency graph → emit 1 → cluster → emit 2 → generate → metadata → emit 3
-        w_graph = first_occurrence(web_src, "build_dependency_graph()")
-        w_emit1 = first_occurrence(web_src, "_emit_stage(1)")
-        w_cluster = first_occurrence(web_src, "cluster_modules(leaf_nodes")
-        w_emit2 = first_occurrence(web_src, "_emit_stage(2)")
-        w_gen = first_occurrence(web_src, "await doc_generator.generate_module_documentation")
-        w_meta = first_occurrence(web_src, "doc_generator.create_documentation_metadata")
-        w_emit3 = first_occurrence(web_src, "_emit_stage(3)")
-        assert w_graph < w_emit1 < w_cluster < w_emit2 < w_gen < w_meta < w_emit3

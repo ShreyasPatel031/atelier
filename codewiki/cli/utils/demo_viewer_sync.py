@@ -2,8 +2,8 @@
 Sync generated documentation into demo/repos/<repo>/ for the static viewer.
 
 After each successful generation, copies the output tree to the demo viewer data
-directory (when discoverable) and refreshes demo/repos/index.json (same logic
-as demo/scripts/generate-repos-index.js).
+directory (when discoverable) and refreshes demo/repos/index.json (same merge
+logic as demo/scripts/generate-repos-index.js: preserve id/label/description).
 
 Discovery order:
   1. CODEWIKI_DEMO_REPOS — absolute path to the .../demo/repos directory
@@ -21,7 +21,7 @@ import os
 import re
 import shutil
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,32 @@ def _discover_demo_repos_dir() -> Optional[Path]:
     return None
 
 
+def _humanize_slug(name: str) -> str:
+    parts = re.split(r"[_-]+", name.strip())
+    return " ".join(p[:1].upper() + p[1:].lower() if p else "" for p in parts if p) or name
+
+
+def _load_repos_index_by_id(index_path: Path) -> Dict[str, Dict[str, str]]:
+    if not index_path.is_file():
+        return {}
+    try:
+        raw: Any = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(raw, list):
+        return {}
+    out: Dict[str, Dict[str, str]] = {}
+    for item in raw:
+        if isinstance(item, str):
+            out[item] = {"id": item, "label": _humanize_slug(item), "description": ""}
+        elif isinstance(item, dict) and isinstance(item.get("id"), str):
+            rid = item["id"]
+            label = item.get("label") if isinstance(item.get("label"), str) else _humanize_slug(rid)
+            desc = item.get("description") if isinstance(item.get("description"), str) else ""
+            out[rid] = {"id": rid, "label": label, "description": desc}
+    return out
+
+
 def _regenerate_repos_index(demo_repos: Path) -> None:
     names = sorted(
         p.name
@@ -69,7 +95,14 @@ def _regenerate_repos_index(demo_repos: Path) -> None:
         if p.is_dir() and not p.name.startswith(".")
     )
     index_path = demo_repos / "index.json"
-    index_path.write_text(json.dumps(names, indent=2) + "\n", encoding="utf-8")
+    by_id = _load_repos_index_by_id(index_path)
+    rows: List[Dict[str, str]] = []
+    for name in names:
+        if name in by_id:
+            rows.append(by_id[name])
+        else:
+            rows.append({"id": name, "label": _humanize_slug(name), "description": ""})
+    index_path.write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
 
 
 def sync_generated_docs_to_demo_viewer(

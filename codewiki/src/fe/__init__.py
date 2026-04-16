@@ -4,7 +4,7 @@ CodeWiki Frontend Module
 
 Web interface components for the documentation generation service.
 
-``app`` and ``main`` are loaded lazily so importing submodules (e.g. ``cli_equivalent_pipeline``)
+``app`` and ``main`` are loaded lazily so importing submodules
 does not import the full FastAPI stack or trigger import-time side effects.
 """
 

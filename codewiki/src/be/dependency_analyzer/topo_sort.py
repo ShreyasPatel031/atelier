@@ -300,7 +300,7 @@ def get_leaf_nodes(
     graph: Dict[str, Set[str]], 
     components: Dict[str, Node],
     max_context_tokens: int = 100_000
-) -> List[str]:
+) -> tuple[List[str], Dict[str, int]]:
     """
     Find entry point candidates using reachability-based ranking.
     
@@ -320,7 +320,7 @@ def get_leaf_nodes(
         max_context_tokens: Maximum tokens for clustering prompt (default 100K)
     
     Returns:
-        A list of entry point node IDs, sorted by reachability (highest first)
+        Tuple of (entry_point_ids sorted by reachability desc, reachability dict)
     """
     # First, resolve cycles to ensure we have a DAG
     acyclic_graph = resolve_cycles(graph)
@@ -428,4 +428,4 @@ def get_leaf_nodes(
         max_reach = reachability[result[0]]
         logger.info(f"[ENTRY_POINTS] Reachability range: {min_reach} - {max_reach}")
     
-    return result
+    return result, reachability

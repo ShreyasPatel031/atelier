@@ -3,10 +3,11 @@
 FastAPI route handlers for the CodeWiki web application.
 """
 
+import json
 from datetime import datetime, timedelta
 from pathlib import Path
 from dataclasses import asdict
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from traceback import format_exc
 
@@ -323,14 +324,51 @@ class WebRoutes:
             media = "application/octet-stream"
         return FileResponse(target, media_type=media)
 
+    def _atelier_root(self) -> Path:
+        # codewiki/src/fe/routes.py -> parents[3] = workspace root (e.g. atelier/)
+        return Path(__file__).resolve().parents[3]
+
+    def _load_static_demo_repos_index(self) -> List[Dict[str, str]]:
+        """Same entries as demo/repos/index.json (bundled demos for the static viewer)."""
+        p = self._atelier_root() / "demo" / "repos" / "index.json"
+        if not p.is_file():
+            return []
+        try:
+            raw: Any = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return []
+        if not isinstance(raw, list):
+            return []
+        out: List[Dict[str, str]] = []
+        for item in raw:
+            if isinstance(item, str):
+                out.append({"id": item, "label": item, "description": ""})
+            elif isinstance(item, dict) and item.get("id"):
+                rid = str(item["id"])
+                out.append(
+                    {
+                        "id": rid,
+                        "label": str(item.get("label") or rid),
+                        "description": str(item.get("description") or ""),
+                    }
+                )
+        return out
+
     async def serve_repos_index_json(self) -> JSONResponse:
-        """List job_ids with completed docs for the demo viewer dropdown."""
-        ids = []
+        """Demo viewer dropdown: bundled demo/repos/index.json plus completed web-app jobs."""
+        rows = self._load_static_demo_repos_index()
+        seen = {r["id"] for r in rows}
         for jid, j in self.background_worker.get_all_jobs().items():
-            if j.status == "completed" and j.docs_path and Path(j.docs_path).exists():
-                ids.append(jid)
-        ids.sort()
-        return JSONResponse(ids)
+            if j.status != "completed" or not j.docs_path:
+                continue
+            if not Path(j.docs_path).exists():
+                continue
+            if jid in seen:
+                continue
+            seen.add(jid)
+            rows.append({"id": jid, "label": jid, "description": ""})
+        rows.sort(key=lambda r: r["id"].lower())
+        return JSONResponse(rows)
 
     def _normalize_github_url(self, url: str) -> str:
         """Normalize GitHub URL for consistent comparison."""

@@ -597,14 +597,12 @@ This is a quick overview generated from the module structure. Detailed documenta
                     parent_content = parent_content.replace("<OVERVIEW>", "").replace("</OVERVIEW>", "").strip()
             
             # Remove markdown code block wrapper if present (e.g., ```markdown ... ```)
-            if parent_content.startswith("```"):
+            # but only if it's a simple outer wrapper — not if the content has inner fenced blocks
+            if parent_content.startswith("```") and parent_content.count("```") == 2:
                 logger.debug(f"[STAGE 3] Removing markdown code block wrapper")
-                # Find the closing ```
                 lines = parent_content.split("\n")
                 if len(lines) > 1 and lines[0].startswith("```"):
-                    # Remove first line (```markdown or ```)
                     lines = lines[1:]
-                    # Remove last line if it's just ```
                     if lines and lines[-1].strip() == "```":
                         lines = lines[:-1]
                     parent_content = "\n".join(lines).strip()
@@ -674,16 +672,26 @@ This is a quick overview generated from the module structure. Detailed documenta
         
         try:
             # Build dependency graph
-            components, leaf_nodes = self.graph_builder.build_dependency_graph()
+            components, leaf_nodes, reachability = self.graph_builder.build_dependency_graph()
             self._emit_stage(1)
 
             logger.debug(f"Found {len(leaf_nodes)} leaf nodes")
-            # logger.debug(f"Leaf nodes:\n{'\n'.join(sorted(leaf_nodes)[:200])}")
-            # exit()
             
-            # Cluster modules
+            # Persist ranked entry points for analysis
             working_dir = os.path.abspath(self.config.docs_dir)
             file_manager.ensure_directory(working_dir)
+            entry_points_path = os.path.join(working_dir, "entry_points.json")
+            entry_points_data = [
+                {"rank": i + 1, "id": ep, "reachability": reachability.get(ep, 0)}
+                for i, ep in enumerate(leaf_nodes)
+            ]
+            try:
+                file_manager.save_json(entry_points_data, entry_points_path)
+                logger.info(f"[STAGE 1] Saved {len(entry_points_data)} ranked entry points to {entry_points_path}")
+            except Exception as e:
+                logger.warning(f"[STAGE 1] Failed to save entry_points.json: {e}")
+            
+            # Cluster modules
             first_module_tree_path = os.path.join(working_dir, FIRST_MODULE_TREE_FILENAME)
             module_tree_path = os.path.join(working_dir, MODULE_TREE_FILENAME)
             

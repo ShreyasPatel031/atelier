@@ -5,7 +5,7 @@ import os
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Dict
+from typing import Dict, Optional
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.models.openai import OpenAIModelSettings
@@ -307,6 +307,97 @@ def create_openai_client(config: Config) -> OpenAI:
     )
 
 
+def _call_gemini_rest(
+    prompt: str,
+    config: Config,
+    model: str,
+    temperature: float,
+    thinking_budget: int,
+) -> str:
+    """
+    Gemini generateContent via REST so we can set thinkingConfig (thinkingBudget).
+    The deprecated google.generativeai client does not expose ThinkingConfig.
+    """
+    import requests
+
+    from codewiki.src.be.utils import count_tokens
+
+    tracker = get_token_tracker()
+    prompt_tokens_estimated = count_tokens(prompt)
+    api_key = os.getenv("GEMINI_API_KEY") or config.llm_api_key
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": temperature,
+            "maxOutputTokens": 65536,
+            "thinkingConfig": {"thinkingBudget": thinking_budget},
+        },
+    }
+    llm_start = time.time()
+    try:
+        r = requests.post(url, json=body, timeout=600)
+        llm_duration = time.time() - llm_start
+        data = r.json()
+        if r.status_code != 200:
+            err = data.get("error", {}).get("message", r.text)
+            logger.error(f"[LLM] Gemini REST error {r.status_code}: {err}")
+            stats = LLMCallStats(
+                model=model,
+                prompt_tokens=prompt_tokens_estimated,
+                completion_tokens=0,
+                duration_seconds=llm_duration,
+                success=False,
+                error=str(err)[:200],
+            )
+            tracker.add_call(stats)
+            raise RuntimeError(f"Gemini REST error {r.status_code}: {err}")
+
+        cands = data.get("candidates") or []
+        if not cands:
+            logger.error(f"[LLM] Gemini REST: no candidates: {data}")
+            raise RuntimeError("Gemini REST: empty candidates")
+
+        parts = (cands[0].get("content") or {}).get("parts") or []
+        response_text = "".join(p.get("text", "") for p in parts)
+        if not response_text.strip():
+            logger.error(f"[LLM] Gemini REST: empty text in parts")
+            raise RuntimeError("Gemini REST: empty response text")
+
+        um = data.get("usageMetadata") or {}
+        actual_prompt_tokens = um.get("promptTokenCount", prompt_tokens_estimated)
+        actual_completion_tokens = um.get("candidatesTokenCount", count_tokens(response_text))
+
+        stats = LLMCallStats(
+            model=model,
+            prompt_tokens=actual_prompt_tokens,
+            completion_tokens=actual_completion_tokens,
+            duration_seconds=llm_duration,
+            success=True,
+        )
+        tracker.add_call(stats)
+        logger.info(
+            f"[LLM] Gemini REST done in {llm_duration:.1f}s "
+            f"(thoughts={um.get('thoughtsTokenCount', 0)}, out={actual_completion_tokens})"
+        )
+        return response_text
+
+    except Exception as e:
+        llm_duration = time.time() - llm_start
+        if not isinstance(e, RuntimeError):
+            logger.error(f"[LLM] Gemini REST exception: {type(e).__name__}: {e}")
+            stats = LLMCallStats(
+                model=model,
+                prompt_tokens=prompt_tokens_estimated,
+                completion_tokens=0,
+                duration_seconds=llm_duration,
+                success=False,
+                error=str(e)[:200],
+            )
+            tracker.add_call(stats)
+        raise
+
+
 def _call_gemini_native(
     prompt: str,
     config: Config,
@@ -390,7 +481,8 @@ def call_llm(
     prompt: str,
     config: Config,
     model: str = None,
-    temperature: float = 0.0
+    temperature: float = 0.0,
+    thinking_budget: Optional[int] = None,
 ) -> str:
     """
     Call LLM with the given prompt.
@@ -400,6 +492,7 @@ def call_llm(
         config: Configuration containing LLM settings
         model: Model name (defaults to config.main_model)
         temperature: Temperature setting
+        thinking_budget: If set for Gemini, uses REST API with this thinking token budget.
         
     Returns:
         LLM response text
@@ -413,6 +506,8 @@ def call_llm(
     
     # Use native Gemini if available
     if _is_gemini_model(model) and GENAI_AVAILABLE:
+        if thinking_budget is not None:
+            return _call_gemini_rest(prompt, config, model, temperature, thinking_budget)
         return _call_gemini_native(prompt, config, model, temperature)
     
     # Calculate prompt token count

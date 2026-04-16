@@ -23,12 +23,14 @@ Usage:
     issues = get_sync_report(docs_dir)
 """
 
+import asyncio
 import json
 import logging
 import os
 import re
 import time
 from collections import Counter
+from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Set, Tuple
 from datetime import datetime
@@ -36,6 +38,9 @@ from dataclasses import dataclass, field, asdict
 from enum import Enum
 
 logger = logging.getLogger(__name__)
+
+# Written by generate_minimal_doc() when Stage 3 did not produce real docs for a tree leaf.
+AUTO_GENERATED_PLACEHOLDER_MARKER = "AUTO_GENERATED_PLACEHOLDER"
 
 
 class IssueType(Enum):
@@ -357,6 +362,8 @@ def audit_docs_state(docs_dir: str) -> Dict[str, Any]:
         "children_missing_from_diagram_nodes": 0,
         "parent_diagram_gaps_to_inject": 0,
         "mermaid_fence_blocks_total": 0,
+        # *.md files whose body is the sync fallback (not LLM-written module docs)
+        "placeholder_md_files": 0,
     }
     if not tree_path.exists():
         return out
@@ -424,11 +431,88 @@ def audit_docs_state(docs_dir: str) -> Dict[str, Any]:
             content = md_file.read_text(encoding="utf-8", errors="replace")
         except Exception:
             continue
+        if AUTO_GENERATED_PLACEHOLDER_MARKER in content:
+            out["placeholder_md_files"] += 1
         out["mermaid_fence_blocks_total"] += len(
             re.findall(r"```mermaid\s*([\s\S]*?)```", content, flags=re.IGNORECASE)
         )
 
     return out
+
+
+_MERMAID_VALIDATOR_PROBE = "flowchart TD\n    A-->B\n"
+
+
+@lru_cache(maxsize=1)
+def mermaid_validator_operational() -> bool:
+    """
+    True if validate_single_diagram reports no error for a minimal diagram.
+    When False (missing mermaid-parser / mermaid-py or broken install), counts from
+    audit_mermaid_syntax_state are not meaningful for syntax — every diagram may
+    look like an error.
+    """
+    from codewiki.src.be.utils import validate_single_diagram
+
+    async def _probe() -> bool:
+        err = await validate_single_diagram(_MERMAID_VALIDATOR_PROBE, 1, 1)
+        return not err
+
+    try:
+        return asyncio.run(_probe())
+    except Exception:
+        return False
+
+
+async def _audit_mermaid_syntax_state_async(
+    docs_dir: str, operational: bool
+) -> Dict[str, Any]:
+    """
+    Walk *.md in docs_dir, extract ```mermaid blocks with the same logic as the
+    generation pipeline, and validate each with validate_single_diagram.
+    """
+    from codewiki.src.be.utils import extract_mermaid_blocks, validate_single_diagram
+
+    docs_path = Path(docs_dir)
+    out: Dict[str, Any] = {
+        "md_files_scanned": 0,
+        "mermaid_diagrams_total": 0,
+        "mermaid_diagrams_syntax_errors": 0 if operational else None,
+        "mermaid_validator_operational": operational,
+    }
+    if not docs_path.is_dir():
+        return out
+
+    for md_file in sorted(docs_path.glob("*.md")):
+        out["md_files_scanned"] += 1
+        try:
+            content = md_file.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            continue
+        blocks = extract_mermaid_blocks(content)
+        for i, (line_start, diagram_content) in enumerate(blocks, 1):
+            out["mermaid_diagrams_total"] += 1
+            if not operational:
+                continue
+            err = await validate_single_diagram(diagram_content, i, line_start)
+            if err:
+                out["mermaid_diagrams_syntax_errors"] += 1
+    return out
+
+
+def audit_mermaid_syntax_state(docs_dir: str) -> Dict[str, Any]:
+    """
+    Read-only audit: count Mermaid fenced diagrams under docs_dir and how many fail
+    the same syntax check used during doc generation (mermaid-parser-py / mermaid-py).
+
+    Returns:
+        md_files_scanned: number of *.md files read
+        mermaid_diagrams_total: number of non-empty ```mermaid blocks
+        mermaid_diagrams_syntax_errors: blocks where validation returned an error string,
+            or None if mermaid_validator_operational() is False (install deps; otherwise counts are meaningless)
+        mermaid_validator_operational: whether a probe diagram passed validate_single_diagram
+    """
+    operational = mermaid_validator_operational()
+    return asyncio.run(_audit_mermaid_syntax_state_async(docs_dir, operational))
 
 
 def _metrics_delta(before: Dict[str, Any], after: Dict[str, Any]) -> Dict[str, Any]:
@@ -558,7 +642,7 @@ def generate_minimal_doc(module_name: str, module_data: Dict, module_path: str,
     component_ids = module_data.get("components", [])
     
     # START with clear auto-generated marker
-    content = f"<!-- AUTO_GENERATED_PLACEHOLDER\n"
+    content = f"<!-- {AUTO_GENERATED_PLACEHOLDER_MARKER}\n"
     content += f"  reason: LLM did not create .md file for this module\n"
     content += f"  module_path: {module_path}\n"
     content += f"  component_count: {len(component_ids)}\n"
@@ -1275,6 +1359,15 @@ def run_full_sync(docs_dir: str, components: Dict = None, repo_name: str = None)
         post = report.metrics.get("postsync_audit") or {}
         if isinstance(pre, dict) and isinstance(post, dict) and "error" not in pre:
             report.metrics["delta_presync_minus_postsync"] = _metrics_delta(pre, post)
+        # Single line for logs / CI: how many module .md files are still placeholders
+        if isinstance(pre, dict) and isinstance(post, dict):
+            logger.info(
+                "[DOC_SYNC] Audit: missing_md presync=%s postsync=%s | placeholder_md_files presync=%s postsync=%s",
+                pre.get("missing_md"),
+                post.get("missing_md"),
+                pre.get("placeholder_md_files"),
+                post.get("placeholder_md_files"),
+            )
     except Exception as e:
         logger.warning(f"[DOC_SYNC] postsync audit failed: {e}")
 

@@ -11,7 +11,6 @@ Features:
 """
 
 import argparse
-import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -168,6 +167,8 @@ class ArchAgentChatRequest(BaseModel):
     opened_modules: Optional[List[str]] = None
     # Highlighted node/cluster/edge on the interactive diagram.
     diagram_selection: Optional[DiagramSelectionPayload] = None
+    # Multi-select (⌘/Ctrl+click); when set, takes precedence over a single diagram_selection for the agent.
+    diagram_selections: Optional[List[DiagramSelectionPayload]] = None
     # Message history from previous turns (returned as `history` in response). Send it back on the next request for multi-turn conversation.
     history: Optional[List[Any]] = None
 
@@ -229,12 +230,18 @@ async def arch_agent_chat(request: ArchAgentChatRequest) -> ArchAgentChatRespons
         if 'overview' not in opened_modules:
             opened_modules = ['overview'] + opened_modules
         
-        response, updated_history = await asyncio.to_thread(
-            agent_runner.chat,
+        dss = None
+        if request.diagram_selections:
+            dss = [x.model_dump() for x in request.diagram_selections]
+
+        # Await chat_async on the FastAPI event loop — do not use asyncio.to_thread(agent_runner.chat):
+        # nested asyncio.run / thread pools break Google GenAI ("Event loop is closed").
+        response, updated_history = await agent_runner.chat_async(
             message=request.message,
             opened_modules=opened_modules,
             message_history=request.history,
             diagram_selection=request.diagram_selection.model_dump() if request.diagram_selection else None,
+            diagram_selections=dss,
         )
 
         return ArchAgentChatResponse(response=response, history=updated_history)

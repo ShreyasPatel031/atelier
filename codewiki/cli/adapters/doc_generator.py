@@ -6,7 +6,7 @@ and provides CLI-specific functionality like progress reporting.
 """
 
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict, Optional
 import time
 import asyncio
 import os
@@ -40,7 +40,8 @@ class CLIDocumentationGenerator:
         output_dir: Path,
         config: Dict[str, Any],
         verbose: bool = False,
-        generate_html: bool = False
+        generate_html: bool = False,
+        demo_slug: Optional[str] = None,
     ):
         """
         Initialize the CLI documentation generator.
@@ -51,12 +52,14 @@ class CLIDocumentationGenerator:
             config: LLM configuration
             verbose: Enable verbose output
             generate_html: Whether to generate HTML viewer
+            demo_slug: If set, sync static demo viewer to demo/repos/<slug>/
         """
         self.repo_path = repo_path
         self.output_dir = output_dir
         self.config = config
         self.verbose = verbose
         self.generate_html = generate_html
+        self.demo_slug = (demo_slug.strip() if demo_slug else None) or None
         self.progress_tracker = ProgressTracker(total_stages=5, verbose=verbose)
         self.job = DocumentationJob()
         
@@ -173,7 +176,7 @@ class CLIDocumentationGenerator:
                 )
 
                 sync_generated_docs_to_demo_viewer(
-                    self.output_dir, self.repo_path.name
+                    self.output_dir, self.demo_slug or self.repo_path.name
                 )
             except Exception as e:
                 _log.warning("Demo viewer sync failed (non-fatal): %s", e)
@@ -239,7 +242,7 @@ class CLIDocumentationGenerator:
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(STAGE_1_TIMEOUT)
         try:
-            components, leaf_nodes = doc_generator.graph_builder.build_dependency_graph()
+            components, leaf_nodes, _reachability = doc_generator.graph_builder.build_dependency_graph()
             signal.alarm(0)  # Cancel timeout
             stage_1_duration = time.time() - stage_1_start
             self.job.statistics.total_files_analyzed = len(components)

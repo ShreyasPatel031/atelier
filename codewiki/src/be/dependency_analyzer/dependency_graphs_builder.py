@@ -15,12 +15,12 @@ class DependencyGraphBuilder:
     def __init__(self, config: Config):
         self.config = config
     
-    def build_dependency_graph(self) -> tuple[Dict[str, Any], List[str]]:
+    def build_dependency_graph(self) -> tuple[Dict[str, Any], List[str], Dict[str, int]]:
         """
-        Build and save dependency graph, returning components and leaf nodes.
+        Build and save dependency graph, returning components, leaf nodes, and reachability scores.
         
         Returns:
-            Tuple of (components, leaf_nodes)
+            Tuple of (components, leaf_nodes, reachability_dict)
         """
         import time
         stage_start = time.time()
@@ -110,7 +110,7 @@ class DependencyGraphBuilder:
         max_tokens = get_max_clustering_tokens(self.config.cluster_model)
         logger.info(f"[STAGE 1] Extracting entry points (dynamic, max {max_tokens} tokens for {self.config.cluster_model})...")
         try:
-            entry_points = get_leaf_nodes(graph, components, max_context_tokens=max_tokens)
+            entry_points, reachability = get_leaf_nodes(graph, components, max_context_tokens=max_tokens)
             logger.info(f"[STAGE 1] Found {len(entry_points)} entry points (dynamically fit to context)")
         except Exception as e:
             logger.error(f"[STAGE 1] Failed to get entry points: {e}")
@@ -125,4 +125,4 @@ class DependencyGraphBuilder:
         logger.info(f"[STAGE 1: DEPENDENCY ANALYSIS] COMPLETE in {stage_duration:.1f}s")
         logger.info(f"[STAGE 1] Final result: {len(components)} components, {len(entry_points)} entry points")
         
-        return components, entry_points
+        return components, entry_points, reachability

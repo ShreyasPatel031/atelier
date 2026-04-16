@@ -18,9 +18,9 @@ OVERVIEW_FILENAME = 'overview.md'
 # =============================================================================
 
 # Clustering Thresholds (Stage 2)
-MAX_DEPTH = 10                          # Maximum recursion depth for clustering
-MIN_DEPTH = 3                           # Minimum depth - force sub-agents until this depth
-MAX_TOKEN_PER_MODULE = 32_768           # Paper: 32768 tokens per leaf module
+MAX_DEPTH = int(os.getenv("MAX_DEPTH", "1"))   # Max depth for Config / Stage 3–4 agent tree limits
+MIN_DEPTH = int(os.getenv("MIN_DEPTH", "1"))   # Minimum depth - force sub-agents until this depth
+CLUSTERING_THINKING_BUDGET = int(os.getenv("CLUSTERING_THINKING_BUDGET", "2048"))  # Gemini thinking tokens for one-shot clustering (REST API)
 MAX_TOKEN_PER_LEAF_MODULE = 16_000      # Threshold for sub-module delegation in Stage 4
 MIN_COMPONENTS_FOR_CLUSTERING = 3       # Don't try to cluster fewer than this many components
                                         # Fixes infinite nesting bug when 2 components have large files

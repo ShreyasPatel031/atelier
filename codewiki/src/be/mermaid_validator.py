@@ -391,16 +391,64 @@ def fix_mermaid_diagram(diagram: str) -> str:
     fixed_lines = []
     for line in lines:
         stripped = line.strip()
-        # If line starts with single % (not %%), fix it
         if stripped.startswith('%') and not stripped.startswith('%%'):
-            # Replace first % with %%
             line = line.replace('%', '%%', 1)
-        # Also fix inline % comments
         if ' % ' in line and not stripped.startswith('%%'):
             line = line.replace(' % ', ' %% ')
         fixed_lines.append(line)
     fixed = '\n'.join(fixed_lines)
     
+    # Fix 2: Unquoted parentheses in node labels — the #1 failure cause.
+    # Matches:  nodeId[Label (Thing)]  or  nodeId[func()]
+    # but NOT:  nodeId["already quoted"]  or  nodeId[("cylinder")]  or  nodeId(("circle"))
+    def _quote_unquoted_bracket_label(m):
+        prefix = m.group(1)   # e.g. "    nodeId"
+        label = m.group(2)    # e.g. "Label (Thing)"
+        suffix = m.group(3)   # e.g. "]" possibly with ":::class"
+        return f'{prefix}["{label}"]{suffix}'
+
+    fixed = re.sub(
+        r'^(\s*[A-Za-z_][A-Za-z0-9_]*)\[(?!["(])([^\]"]*\([^\]]*)\]((?:::[\w]+)?)',
+        _quote_unquoted_bracket_label,
+        fixed,
+        flags=re.MULTILINE,
+    )
+
+    # Fix 3: Space after pipe in edge labels  -->| "text" |  ->  -->|"text"|
+    fixed = re.sub(r'\|\s+"', '|"', fixed)
+    fixed = re.sub(r'"\s+\|', '"|', fixed)
+
+    # Fix 4: Reverse arrows  <--  <==  <-.->  — swap to forward direction.
+    # Only handles bare arrows (no labels) to avoid breaking edge-label syntax.
+    def _flip_reverse_arrow(m):
+        target = m.group(1).strip()
+        arrow_map = {'<--': '-->', '<==': '==>', '<-.->': '-.->'}
+        arrow = arrow_map.get(m.group(2), m.group(2))
+        source = m.group(3).strip()
+        return f'    {source} {arrow} {target}'
+
+    fixed = re.sub(
+        r'^(\s*[A-Za-z_][A-Za-z0-9_]*)\s+(<--|<==|<-\.->)\s+([A-Za-z_][A-Za-z0-9_]*)$',
+        _flip_reverse_arrow,
+        fixed,
+        flags=re.MULTILINE,
+    )
+
+    # Fix 5: Raw | inside unquoted node labels — replace with "or"
+    def _fix_pipe_in_label(m):
+        prefix = m.group(1)
+        label = m.group(2)
+        suffix = m.group(3)
+        label_fixed = label.replace(' | ', ' or ')
+        return f'{prefix}["{label_fixed}"]{suffix}'
+
+    fixed = re.sub(
+        r'^(\s*[A-Za-z_][A-Za-z0-9_]*)\[(?!")([^\]"]*\|[^\]]*)\]((?:::[\w]+)?)',
+        _fix_pipe_in_label,
+        fixed,
+        flags=re.MULTILINE,
+    )
+
     return fixed
 
 

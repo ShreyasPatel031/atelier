@@ -66,18 +66,12 @@ from codewiki.src.be.dependency_analyzer.models.core import Node
 
 def _log_pydantic_ai_failure_chain(exc: BaseException, log_prefix: str = "[STAGE 4.6] DIAG") -> None:
     """
-    pydantic-ai surfaces 'Exceeded maximum retries (1) for output validation' when the model
-    used up its retry budget. Common *underlying* reasons (see chained exceptions / group members):
-
-    - Model returned an empty turn → silent resubmit; still bad after 1 retry.
-    - Model returned only "thinking" / no text and no tool calls → ToolRetryError with
-      "Please return text or call a tool."
-    - Tool call arguments failed Pydantic validation → ToolRetryError with validation details.
-    - Tool call JSON truncated (output token limit) → IncompleteToolCall.
-    - Unknown tool name in response → retry exhausted similarly.
-
-    The leaf exception in this walk is usually the actionable message.
+    Walk the exception chain from pydantic-ai failures to find the actionable root cause.
+    Handles BaseExceptionGroup (Python 3.11+) gracefully on older Pythons.
     """
+    import sys
+    _has_exception_group = sys.version_info >= (3, 11)
+
     seen: set[int] = set()
 
     def walk(ex: BaseException, label: str, depth: int) -> None:
@@ -93,7 +87,11 @@ def _log_pydantic_ai_failure_chain(exc: BaseException, log_prefix: str = "[STAGE
             content = getattr(tool_retry, "content", None)
             if content is not None:
                 logger.error("%s   -> tool_retry.content: %s", log_prefix, repr(content)[:3000])
-        if isinstance(ex, BaseExceptionGroup):
+        if _has_exception_group and isinstance(ex, BaseExceptionGroup):
+            for i, sub in enumerate(ex.exceptions):
+                walk(sub, f"group[{i}]:", depth + 1)
+            return
+        if hasattr(ex, 'exceptions'):
             for i, sub in enumerate(ex.exceptions):
                 walk(sub, f"group[{i}]:", depth + 1)
             return
@@ -103,9 +101,6 @@ def _log_pydantic_ai_failure_chain(exc: BaseException, log_prefix: str = "[STAGE
     walk(exc, "failure-chain root:", 0)
 
 
-from codewiki.src.be.utils import make_response_logger_hooks
-
-
 class AgentOrchestrator:
     """Orchestrates the AI agents for documentation generation."""
     
@@ -113,6 +108,41 @@ class AgentOrchestrator:
         self.config = config
         self.fallback_models = create_fallback_models(config)
     
+    def _generate_fallback_doc(self, module_name: str, core_component_ids: List[str],
+                               components: Dict[str, Any], md_path: str) -> None:
+        """Direct LLM call to generate module docs when the agent didn't write the file."""
+        from codewiki.src.be.llm_services import call_llm
+
+        code_snippets = []
+        for cid in core_component_ids[:10]:
+            comp = components.get(cid)
+            if comp and hasattr(comp, 'source_code'):
+                snippet = comp.source_code[:3000]
+                code_snippets.append(f"### {cid}\n```python\n{snippet}\n```")
+
+        source_block = "\n\n".join(code_snippets) if code_snippets else "(no source available)"
+
+        prompt = (
+            f"Generate a minimal markdown file for a code module called **{module_name}**.\n\n"
+            f"The module contains {len(core_component_ids)} component(s).\n\n"
+            f"Source code:\n{source_block}\n\n"
+            "Requirements:\n"
+            "1. Start with `# <Title>` then a 1-2 sentence summary (~200 chars).\n"
+            "2. Include a <!-- DIAGRAM_JSON --> block with nodes, edges, and groups.\n"
+            "3. Include a matching ```mermaid flowchart TD``` diagram.\n"
+            "4. Do NOT add ## sections, narrative, or code examples.\n"
+            "Return ONLY the markdown content, no wrapping fences."
+        )
+
+        logger.info(f"[STAGE 4.7] Fallback LLM call for {module_name} ({len(prompt)} chars)")
+        content = call_llm(prompt, self.config)
+        if content and len(content.strip()) > 50:
+            with open(md_path, 'w') as f:
+                f.write(content)
+            logger.info(f"[STAGE 4.7] Wrote fallback doc: {md_path} ({len(content)} chars)")
+        else:
+            logger.error(f"[STAGE 4.7] Fallback LLM returned insufficient content ({len(content or '')} chars)")
+
     def create_agent(self, module_name: str, components: Dict[str, Any], 
                     core_component_ids: List[str], module_tree: Dict[str, Any] = None) -> Agent:
         """Create an appropriate agent based on module complexity and repo size."""
@@ -143,8 +173,6 @@ class AgentOrchestrator:
         # Force complex agent at root level to guarantee at least MIN_DEPTH levels
         force_complex = len(core_component_ids) >= 2  # Root level is always depth 0 < MIN_DEPTH
         
-        response_hooks = make_response_logger_hooks(module_name)
-
         if is_complex or force_complex:
             logger.debug(f"[STAGE 4.3] Module is complex or forced - creating complex agent with sub-module tool")
             logger.debug(f"[STAGE 4.3]   is_complex={is_complex}, force_complex={force_complex}")
@@ -155,7 +183,6 @@ class AgentOrchestrator:
                 deps_type=CodeWikiDeps,
                 tools=tools,
                 system_prompt=SYSTEM_PROMPT.format(module_name=module_name),
-                capabilities=response_hooks,
             )
             logger.debug(f"[STAGE 4.3] Complex agent created with {len(tools)} tools")
         else:
@@ -166,7 +193,6 @@ class AgentOrchestrator:
                 deps_type=CodeWikiDeps,
                 tools=base_tools,
                 system_prompt=LEAF_SYSTEM_PROMPT.format(module_name=module_name),
-                capabilities=response_hooks,
             )
             logger.debug(f"[STAGE 4.3] Leaf agent created with {len(base_tools)} tools")
         
@@ -663,6 +689,12 @@ class AgentOrchestrator:
             extracted_desc = None
             extracted_diagram = None
             md_path = os.path.join(working_dir, f"{doc_stem}.md")
+            if not os.path.exists(md_path):
+                logger.warning(f"[STAGE 4.7] Agent did not create {doc_stem}.md — running direct LLM fallback")
+                try:
+                    self._generate_fallback_doc(module_name, core_component_ids, components, md_path)
+                except Exception as fallback_err:
+                    logger.error(f"[STAGE 4.7] Fallback LLM call failed: {fallback_err}")
             if os.path.exists(md_path):
                 try:
                     extracted_title, extracted_desc, extracted_diagram = extract_module_metadata_from_file(

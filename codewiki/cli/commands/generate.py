@@ -90,6 +90,12 @@ def _clear_generated_docs_at_output_root(output_dir: Path, logger) -> None:
     is_flag=True,
     help="Overwrite existing documentation without prompting (for automation / CI)",
 )
+@click.option(
+    "--demo-slug",
+    type=str,
+    default=None,
+    help="Sync static demo viewer to demo/repos/<slug>/ (defaults to clone folder name)",
+)
 @click.pass_context
 def generate_command(
     ctx,
@@ -99,6 +105,7 @@ def generate_command(
     no_cache: bool,
     verbose: bool,
     force: bool,
+    demo_slug: Optional[str],
 ):
     """
     Generate comprehensive documentation for a code repository.
@@ -242,7 +249,8 @@ def generate_command(
                 'api_key': api_key,
             },
             verbose=verbose,
-            generate_html=github_pages
+            generate_html=github_pages,
+            demo_slug=demo_slug,
         )
         
         # Run generation

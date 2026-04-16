@@ -8,8 +8,8 @@ from codewiki.src.be.prompt_template import SYSTEM_PROMPT, LEAF_SYSTEM_PROMPT, f
 from codewiki.src.be.utils import is_complex_module, count_module_tokens
 from codewiki.src.config import MAX_TOKEN_PER_LEAF_MODULE, MIN_DEPTH, MODULE_TREE_FILENAME
 from codewiki.src.file_manager import file_manager
-from codewiki.src.be.utils import make_response_logger_hooks
-
+import asyncio
+import copy
 import logging
 import os
 from collections import defaultdict
@@ -170,17 +170,13 @@ async def generate_sub_module_documentation(
     for sub_module_name, spec in parsed_specs.items():
         core_component_ids = spec["components"]
 
-        # Create visual indentation for nested modules
         indent = "  " * deps.current_depth
         arrow = "└─" if deps.current_depth > 0 else "→"
 
         logger.info(f"{indent}{arrow} Generating documentation for sub-module: {sub_module_name}")
 
-        # Use centralized token counting that matches the actual LLM prompt format
         num_tokens = count_module_tokens(core_component_ids, ctx.deps.components)
         
-        # Force sub-agent creation until MIN_DEPTH is reached
-        # After MIN_DEPTH, apply normal criteria (complex module, token threshold)
         force_subagent = ctx.deps.current_depth < MIN_DEPTH and len(core_component_ids) >= 2
         normal_criteria = (
             is_complex_module(ctx.deps.components, core_component_ids) and 
@@ -188,8 +184,6 @@ async def generate_sub_module_documentation(
             num_tokens >= MAX_TOKEN_PER_LEAF_MODULE
         )
         
-        sub_caps = make_response_logger_hooks(sub_module_name)
-
         if force_subagent or normal_criteria:
             logger.info(f"{indent}  Using complex agent (force={force_subagent}, normal={normal_criteria}, depth={ctx.deps.current_depth}, min_depth={MIN_DEPTH})")
             sub_agent = Agent(
@@ -198,7 +192,6 @@ async def generate_sub_module_documentation(
                 deps_type=CodeWikiDeps,
                 system_prompt=SYSTEM_PROMPT.format(module_name=sub_module_name),
                 tools=[read_code_components_tool, str_replace_editor_tool, generate_sub_module_documentation_tool],
-                capabilities=sub_caps,
             )
         else:
             logger.info(f"{indent}  Using leaf agent (depth={ctx.deps.current_depth}, tokens={num_tokens})")
@@ -208,13 +201,10 @@ async def generate_sub_module_documentation(
                 deps_type=CodeWikiDeps,
                 system_prompt=LEAF_SYSTEM_PROMPT.format(module_name=sub_module_name),
                 tools=[read_code_components_tool, str_replace_editor_tool],
-                capabilities=sub_caps,
             )
         deps.current_module_name = sub_module_name
         deps.path_to_current_module.append(sub_module_name)
         deps.current_depth += 1
-        # log the current module tree
-        # print(f"Current module tree: {json.dumps(deps.module_tree, indent=4)}")
 
         result = await sub_agent.run(
             format_user_prompt(
@@ -225,24 +215,52 @@ async def generate_sub_module_documentation(
             ),
             deps=ctx.deps
         )
-        
+
+        sub_md_path = os.path.join(deps.absolute_docs_path, f"{sub_module_name}.md")
+        if not os.path.exists(sub_md_path):
+            logger.warning(f"{indent}  Sub-agent did not create {sub_module_name}.md — running direct LLM fallback")
+            try:
+                from codewiki.src.be.llm_services import call_llm
+                code_snippets = []
+                for cid in core_component_ids[:10]:
+                    comp = ctx.deps.components.get(cid)
+                    if comp and hasattr(comp, 'source_code'):
+                        snippet = comp.source_code[:3000]
+                        code_snippets.append(f"### {cid}\n```python\n{snippet}\n```")
+                source_block = "\n\n".join(code_snippets) if code_snippets else "(no source available)"
+                fallback_prompt = (
+                    f"Generate a minimal markdown file for a code module called **{sub_module_name}**.\n\n"
+                    f"The module contains {len(core_component_ids)} component(s).\n\n"
+                    f"Source code:\n{source_block}\n\n"
+                    "Requirements:\n"
+                    "1. Start with `# <Title>` then a 1-2 sentence summary (~200 chars).\n"
+                    "2. Include a <!-- DIAGRAM_JSON --> block with nodes, edges, and groups.\n"
+                    "3. Include a matching ```mermaid flowchart TD``` diagram.\n"
+                    "4. Do NOT add ## sections, narrative, or code examples.\n"
+                    "Return ONLY the markdown content, no wrapping fences."
+                )
+                content = call_llm(fallback_prompt, deps.config)
+                if content and len(content.strip()) > 50:
+                    with open(sub_md_path, 'w') as f:
+                        f.write(content)
+                    logger.info(f"{indent}  Fallback wrote {sub_module_name}.md ({len(content)} chars)")
+                else:
+                    logger.error(f"{indent}  Fallback LLM returned insufficient content for {sub_module_name}")
+            except Exception as fallback_err:
+                logger.error(f"{indent}  Fallback LLM call failed for {sub_module_name}: {fallback_err}")
+
         # FORCE sub-module creation if depth < MIN_DEPTH and agent didn't create any
-        # This ensures we always reach MIN_DEPTH levels
         current_module_children = value[sub_module_name].get("children", {})
         if force_subagent and len(current_module_children) == 0 and len(core_component_ids) >= 2:
             logger.info(f"{indent}  Agent did not create sub-modules, forcing directory-based split at depth {deps.current_depth}")
-            # Auto-split by directory path component at this depth
             auto_split = _auto_split_by_directory(core_component_ids, ctx.deps.components, deps.current_depth)
             if auto_split and len(auto_split) > 1:
                 logger.info(f"{indent}  Auto-split created {len(auto_split)} sub-modules: {list(auto_split.keys())}")
-                # Recursively process auto-split modules
                 await generate_sub_module_documentation(ctx, auto_split)
 
-        # remove the sub-module name from the path to current module and the module tree
         deps.path_to_current_module.pop()
         deps.current_depth -= 1
 
-    # restore the previous module name
     deps.current_module_name = previous_module_name
 
     return f"Generate successfully. Documentations: {', '.join([key + '.md' for key in sub_module_specs.keys()])} are saved in the working directory."

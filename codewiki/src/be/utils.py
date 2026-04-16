@@ -221,8 +221,13 @@ async def validate_single_diagram(diagram_content: str, diagram_num: int, line_s
             import mermaid as md
             # Create Mermaid object and check response
             render = md.Mermaid(diagram_content)
-            core_error = render.svg_response.text
-            
+            text = (render.svg_response.text or "").strip()
+            # Successful render returns SVG; only non-SVG text is a parse/diagram error string
+            if text.startswith("<svg"):
+                core_error = ""
+            else:
+                core_error = text
+
         except Exception as e:
             return f"  Diagram {diagram_num}: Exception during validation - {str(e)}"
 
@@ -243,7 +248,19 @@ async def validate_single_diagram(diagram_content: str, diagram_num: int, line_s
 
 def make_response_logger_hooks(module_name: str):
     """Create a Hooks capability that logs every Gemini ModelResponse for debugging empty-response failures."""
-    from pydantic_ai.capabilities.hooks import Hooks
+    try:
+        from pydantic_ai.capabilities.hooks import Hooks
+    except ImportError as e:
+        # Older pydantic-ai or minimal installs lack pydantic_ai.capabilities; agent must still run.
+        if not getattr(make_response_logger_hooks, "_import_warned", False):
+            logger.warning(
+                "pydantic_ai.capabilities.hooks unavailable (%s); model response hooks disabled. "
+                "Upgrade pydantic-ai if you need hook logging.",
+                e,
+            )
+            make_response_logger_hooks._import_warned = True
+        return []
+
     hooks = Hooks()
 
     @hooks.on.after_model_request

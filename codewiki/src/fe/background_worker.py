@@ -18,7 +18,6 @@ from dataclasses import asdict
 
 from codewiki.src.be.documentation_generator import DocumentationGenerator
 from codewiki.src.config import Config, MAIN_MODEL
-from codewiki.src.fe.cli_equivalent_pipeline import run_cli_equivalent_generation
 from .models import JobStatus
 from .cache_manager import CacheManager
 from .github_processor import GitHubRepoProcessor
@@ -389,8 +388,8 @@ class BackgroundWorker:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
-                logger.info(f"[STAGE 0] Running CLI-equivalent pipeline (same as codewiki generate)...")
-                loop.run_until_complete(run_cli_equivalent_generation(doc_generator))
+                logger.info(f"[STAGE 0] Running documentation generation (same as codewiki generate)...")
+                loop.run_until_complete(doc_generator.run())
                 doc_gen_duration = time.time() - doc_gen_start
                 logger.info(f"[STAGE 0] Documentation generation completed in {doc_gen_duration:.1f}s")
             except Exception as e:
