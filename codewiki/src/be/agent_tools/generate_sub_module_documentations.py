@@ -176,15 +176,17 @@ async def generate_sub_module_documentation(
         logger.info(f"{indent}{arrow} Generating documentation for sub-module: {sub_module_name}")
 
         num_tokens = count_module_tokens(core_component_ids, ctx.deps.components)
-        
+
+        can_delegate = ctx.deps.current_depth < ctx.deps.max_depth
         force_subagent = ctx.deps.current_depth < MIN_DEPTH and len(core_component_ids) >= 2
         normal_criteria = (
             is_complex_module(ctx.deps.components, core_component_ids) and 
             ctx.deps.current_depth < ctx.deps.max_depth and 
             num_tokens >= MAX_TOKEN_PER_LEAF_MODULE
         )
-        
-        if force_subagent or normal_criteria:
+        wants_nested = force_subagent or normal_criteria
+
+        if wants_nested and can_delegate:
             logger.info(f"{indent}  Using complex agent (force={force_subagent}, normal={normal_criteria}, depth={ctx.deps.current_depth}, min_depth={MIN_DEPTH})")
             sub_agent = Agent(
                 model=fallback_models,
@@ -194,7 +196,10 @@ async def generate_sub_module_documentation(
                 tools=[read_code_components_tool, str_replace_editor_tool, generate_sub_module_documentation_tool],
             )
         else:
-            logger.info(f"{indent}  Using leaf agent (depth={ctx.deps.current_depth}, tokens={num_tokens})")
+            if wants_nested and not can_delegate:
+                logger.info(f"{indent}  Using leaf agent (max_depth reached; depth={ctx.deps.current_depth}, max={ctx.deps.max_depth}, tokens={num_tokens})")
+            else:
+                logger.info(f"{indent}  Using leaf agent (depth={ctx.deps.current_depth}, tokens={num_tokens})")
             sub_agent = Agent(
                 model=fallback_models,
                 name=sub_module_name,
@@ -251,7 +256,7 @@ async def generate_sub_module_documentation(
 
         # FORCE sub-module creation if depth < MIN_DEPTH and agent didn't create any
         current_module_children = value[sub_module_name].get("children", {})
-        if force_subagent and len(current_module_children) == 0 and len(core_component_ids) >= 2:
+        if force_subagent and can_delegate and len(current_module_children) == 0 and len(core_component_ids) >= 2:
             logger.info(f"{indent}  Agent did not create sub-modules, forcing directory-based split at depth {deps.current_depth}")
             auto_split = _auto_split_by_directory(core_component_ids, ctx.deps.components, deps.current_depth)
             if auto_split and len(auto_split) > 1:

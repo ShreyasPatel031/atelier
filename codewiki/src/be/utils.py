@@ -183,6 +183,19 @@ async def validate_single_diagram(diagram_content: str, diagram_num: int, line_s
     import os
     from io import StringIO
 
+    # Fast structural checks (no JS parser) — catches common flowchart mistakes cheaply.
+    from codewiki.src.be.mermaid_validator import validate_mermaid as validate_mermaid_fast
+
+    fast = validate_mermaid_fast(diagram_content)
+    if not fast.valid:
+        msgs = [e.message for e in fast.errors]
+        return f"Diagram {diagram_num}: " + " | ".join(msgs)
+
+    # Deep validation (mermaid-parser-py / mermaid-py) is slow; optional for CI or strict checks.
+    deep = os.environ.get("CODEWIKI_MERMAID_DEEP_VALIDATE", "0").lower() in ("1", "true", "yes")
+    if not deep:
+        return ""
+
     core_error = ""
     
     try:

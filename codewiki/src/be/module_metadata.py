@@ -26,6 +26,11 @@ logger = logging.getLogger(__name__)
 MODULE_DESCRIPTION_MAX_CHARS = 200
 
 
+def _strip_html_comment_blocks(text: str) -> str:
+    """Remove ``<!-- ... -->`` blocks so DIAGRAM_JSON / prompts do not leak into descriptions."""
+    return re.sub(r"<!--[\s\S]*?-->", "", text)
+
+
 def _collect_opening_prose_lines(lines: List[str]) -> List[str]:
     """
     Lines of opening prose: after ``# Title`` until the next ATX heading; if there is no ``# `` line,
@@ -107,6 +112,7 @@ def extract_module_metadata_from_markdown(
         (title, description, diagram_dict_or_none)
     """
     diagram = extract_diagram_json_from_markdown(content)
+    content = _strip_html_comment_blocks(content)
 
     title_match = re.search(
         r"^#\s+(.+?)(?:\s+Module)?(?:\s+Documentation)?\s*$",

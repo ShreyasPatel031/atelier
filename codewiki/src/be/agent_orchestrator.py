@@ -143,9 +143,22 @@ class AgentOrchestrator:
         else:
             logger.error(f"[STAGE 4.7] Fallback LLM returned insufficient content ({len(content or '')} chars)")
 
-    def create_agent(self, module_name: str, components: Dict[str, Any], 
-                    core_component_ids: List[str], module_tree: Dict[str, Any] = None) -> Agent:
-        """Create an appropriate agent based on module complexity and repo size."""
+    def create_agent(
+        self,
+        module_name: str,
+        components: Dict[str, Any],
+        core_component_ids: List[str],
+        module_tree: Dict[str, Any] = None,
+        *,
+        current_depth: int = 1,
+    ) -> Agent:
+        """Create an appropriate agent based on module complexity and repo size.
+
+        ``current_depth`` is **agent delegation depth** (starts at 1 for each ``process_module``;
+        sub-agents increment it). We omit ``generate_sub_module_documentation`` when
+        ``current_depth >= max_depth`` so ``MAX_DEPTH`` caps delegation (previously
+        ``force_complex = len(components)>=2`` ignored ``max_depth``).
+        """
         logger.debug(f"[STAGE 4.3] Creating agent for module: {module_name}")
         logger.debug(f"[STAGE 4.3] Core component IDs: {len(core_component_ids)}")
         logger.debug(f"[STAGE 4.3] Total components: {len(components)}")
@@ -168,14 +181,15 @@ class AgentOrchestrator:
         if is_large_repo:
             base_tools.extend([list_module_components_tool, get_module_summary_tool])
         
-        # Root-level agents (depth=0) always get sub-module tool to ensure MIN_DEPTH
-        # This is the initial agent for each top-level module
-        # Force complex agent at root level to guarantee at least MIN_DEPTH levels
-        force_complex = len(core_component_ids) >= 2  # Root level is always depth 0 < MIN_DEPTH
-        
-        if is_complex or force_complex:
-            logger.debug(f"[STAGE 4.3] Module is complex or forced - creating complex agent with sub-module tool")
-            logger.debug(f"[STAGE 4.3]   is_complex={is_complex}, force_complex={force_complex}")
+        can_delegate = current_depth < self.config.max_depth
+        wants_split = is_complex or len(core_component_ids) >= 2
+        use_submodule_tool = can_delegate and wants_split
+
+        if use_submodule_tool:
+            logger.debug(
+                f"[STAGE 4.3] Complex agent with sub-module tool (depth={current_depth}, max_depth={self.config.max_depth}, "
+                f"is_complex={is_complex})"
+            )
             tools = base_tools + [generate_sub_module_documentation_tool]
             agent = Agent(
                 self.fallback_models,
@@ -185,6 +199,19 @@ class AgentOrchestrator:
                 system_prompt=SYSTEM_PROMPT.format(module_name=module_name),
             )
             logger.debug(f"[STAGE 4.3] Complex agent created with {len(tools)} tools")
+        elif wants_split:
+            logger.info(
+                f"[STAGE 4.3] Leaf agent (no sub-module tool: depth {current_depth} >= max_depth {self.config.max_depth}); "
+                f"single-pass doc for {module_name}"
+            )
+            agent = Agent(
+                self.fallback_models,
+                name=module_name,
+                deps_type=CodeWikiDeps,
+                tools=base_tools,
+                system_prompt=LEAF_SYSTEM_PROMPT.format(module_name=module_name),
+            )
+            logger.debug(f"[STAGE 4.3] Leaf agent created with {len(base_tools)} tools")
         else:
             logger.debug(f"[STAGE 4.3] Module is leaf - creating leaf agent without sub-module tool")
             agent = Agent(
@@ -457,7 +484,38 @@ class AgentOrchestrator:
             logger.info(f"[STAGE 4.2] Module docs already exists at {docs_path} ({file_size} bytes)")
             logger.info(f"[STAGE 4.2] Skipping module processing")
             return module_tree
-        
+
+        # Delegation depth for agents (not tree path length): each process_module starts at 1;
+        # generate_sub_module_documentation increments when entering sub-agents.
+        agent_depth = 1
+
+        # STAGE 4.4: Create dependencies (before agent so MAX_DEPTH matches deps)
+        logger.info(f"[STAGE 4.4: DEPENDENCIES] Creating dependencies...")
+        try:
+            deps = CodeWikiDeps(
+                absolute_docs_path=working_dir,
+                absolute_repo_path=str(os.path.abspath(self.config.repo_path)),
+                registry={},
+                components=components,
+                path_to_current_module=module_path,
+                current_module_name=module_name,
+                module_tree=module_tree,
+                max_depth=self.config.max_depth,
+                current_depth=agent_depth,
+                config=self.config
+            )
+            logger.info(f"[STAGE 4.4] Dependencies created successfully")
+            logger.info(f"[STAGE 4.4]   - Docs path: {deps.absolute_docs_path}")
+            logger.info(f"[STAGE 4.4]   - Repo path: {deps.absolute_repo_path}")
+            logger.info(f"[STAGE 4.4]   - Component count: {len(deps.components)}")
+            logger.info(f"[STAGE 4.4]   - Module tree size: {len(deps.module_tree) if isinstance(deps.module_tree, dict) else 'N/A'}")
+            logger.info(f"[STAGE 4.4]   - Agent delegation depth (current_depth): {agent_depth}")
+        except Exception as e:
+            logger.error(f"[STAGE 4.4] Dependencies creation FAILED: {type(e).__name__}: {str(e)}")
+            import traceback
+            logger.error(f"[STAGE 4.4] Traceback: {traceback.format_exc()}")
+            raise
+
         # STAGE 4.3: Create agent
         logger.info(f"[STAGE 4.3: AGENT CREATION] Creating agent for module: {module_name}")
         agent_start = time.time()
@@ -472,9 +530,11 @@ class AgentOrchestrator:
             logger.info(f"[STAGE 4.3]   - Fallback model: {self.config.fallback_model}")
             logger.info(f"[STAGE 4.3]   - LLM base URL: {self.config.llm_base_url}")
             logger.info(f"[STAGE 4.3]   - Max depth: {self.config.max_depth}")
-            logger.info(f"[STAGE 4.3]   - Current depth: 1")
+            logger.info(f"[STAGE 4.3]   - Current depth: {agent_depth}")
             
-            agent = self.create_agent(module_name, components, core_component_ids, module_tree)
+            agent = self.create_agent(
+                module_name, components, core_component_ids, module_tree, current_depth=agent_depth
+            )
             agent_duration = time.time() - agent_start
             
             agent_type = "complex" if is_complex else "leaf"
@@ -487,32 +547,6 @@ class AgentOrchestrator:
             logger.error(f"[STAGE 4.3] Agent creation FAILED after {agent_duration:.3f}s: {type(e).__name__}: {str(e)}")
             import traceback
             logger.error(f"[STAGE 4.3] Traceback: {traceback.format_exc()}")
-            raise
-        
-        # STAGE 4.4: Create dependencies
-        logger.info(f"[STAGE 4.4: DEPENDENCIES] Creating dependencies...")
-        try:
-            deps = CodeWikiDeps(
-                absolute_docs_path=working_dir,
-                absolute_repo_path=str(os.path.abspath(self.config.repo_path)),
-                registry={},
-                components=components,
-                path_to_current_module=module_path,
-                current_module_name=module_name,
-                module_tree=module_tree,
-                max_depth=self.config.max_depth,
-                current_depth=1,
-                config=self.config
-            )
-            logger.info(f"[STAGE 4.4] Dependencies created successfully")
-            logger.info(f"[STAGE 4.4]   - Docs path: {deps.absolute_docs_path}")
-            logger.info(f"[STAGE 4.4]   - Repo path: {deps.absolute_repo_path}")
-            logger.info(f"[STAGE 4.4]   - Component count: {len(deps.components)}")
-            logger.info(f"[STAGE 4.4]   - Module tree size: {len(deps.module_tree) if isinstance(deps.module_tree, dict) else 'N/A'}")
-        except Exception as e:
-            logger.error(f"[STAGE 4.4] Dependencies creation FAILED: {type(e).__name__}: {str(e)}")
-            import traceback
-            logger.error(f"[STAGE 4.4] Traceback: {traceback.format_exc()}")
             raise
         
         # STAGE 4.5: Format user prompt

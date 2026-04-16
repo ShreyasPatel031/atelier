@@ -18,7 +18,9 @@ OVERVIEW_FILENAME = 'overview.md'
 # =============================================================================
 
 # Clustering Thresholds (Stage 2)
-MAX_DEPTH = int(os.getenv("MAX_DEPTH", "1"))   # Max depth for Config / Stage 3–4 agent tree limits
+# Agent delegation: depth starts at 1 per module; sub-agents increment. Submodule tool is omitted when
+# current_depth >= MAX_DEPTH. Default 2 = one parent→sub-agent round (set MAX_DEPTH=1 for no delegation).
+MAX_DEPTH = int(os.getenv("MAX_DEPTH", "2"))
 MIN_DEPTH = int(os.getenv("MIN_DEPTH", "1"))   # Minimum depth - force sub-agents until this depth
 CLUSTERING_THINKING_BUDGET = int(os.getenv("CLUSTERING_THINKING_BUDGET", "2048"))  # Gemini thinking tokens for one-shot clustering (REST API)
 MAX_TOKEN_PER_LEAF_MODULE = 16_000      # Threshold for sub-module delegation in Stage 4

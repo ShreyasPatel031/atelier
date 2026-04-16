@@ -847,7 +847,7 @@
                 <span class="zoom-level" id="zoomLevel">100%</span>
                 <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
                 <button class="zoom-btn" onclick="fitToView()" title="Fit to View">⊡</button>
-                <span class="zoom-hint">Scroll / two-finger trackpad → pan • ⌘/Ctrl+scroll or pinch → zoom • Drag to pan</span>
+                <span class="zoom-hint">Scroll / two-finger trackpad → pan • ⌘/Ctrl+scroll or pinch → zoom • Drag to pan • ⌘/Ctrl/Shift+click diagram shapes to multi-select</span>
             </div>
             <div class="diagram-viewport" id="diagramViewport">
                 <div class="diagram-canvas" id="diagramCanvas">
@@ -939,6 +939,8 @@
             domRef: null,
             edge: null
         };
+        /** Ordered multi-select (⌘/Ctrl/Shift+click toggles). `diagramSelection` mirrors the last item. */
+        let diagramSelections = [];
         /** Bumped on each expand so stale post-render setTimeouts cannot overwrite diagramSelection. */
         let expandDiagramSelectionEpoch = 0;
         let openedModules = new Set(['overview']);  // Track opened modules (overview is always open)
@@ -1036,6 +1038,7 @@
         function extractOpeningLinesForTooltip(lines) {
             const collect = [];
             let inCode = false;
+            let inHtmlComment = false;
             let pastH1 = false;
             for (const line of lines) {
                 const trim = line.trim();
@@ -1044,6 +1047,15 @@
                     continue;
                 }
                 if (inCode) continue;
+                // Skip HTML blocks (e.g. <!-- DIAGRAM_JSON ... -->) — not fenced like ```mermaid
+                if (inHtmlComment) {
+                    if (trim.includes('-->')) inHtmlComment = false;
+                    continue;
+                }
+                if (trim.startsWith('<!--')) {
+                    if (!trim.includes('-->')) inHtmlComment = true;
+                    continue;
+                }
                 if (!pastH1) {
                     if (line.startsWith('# ')) pastH1 = true;
                     continue;
@@ -1058,6 +1070,7 @@
             }
             // No `# ` title: lead is everything until first heading (e.g. swift_compiler_core.md).
             inCode = false;
+            inHtmlComment = false;
             for (const line of lines) {
                 const trim = line.trim();
                 if (trim.startsWith('```')) {
@@ -1065,6 +1078,14 @@
                     continue;
                 }
                 if (inCode) continue;
+                if (inHtmlComment) {
+                    if (trim.includes('-->')) inHtmlComment = false;
+                    continue;
+                }
+                if (trim.startsWith('<!--')) {
+                    if (!trim.includes('-->')) inHtmlComment = true;
+                    continue;
+                }
                 if (/^#{1,6}\s/.test(line)) break;
                 collect.push(line.replace(/\r$/, ''));
             }
@@ -1073,9 +1094,13 @@
             return collect;
         }
 
+        function stripHtmlCommentBlocks(text) {
+            return (text || '').replace(/<!--[\s\S]*?-->/g, '');
+        }
+
         function extractModuleIntroFromMarkdown(content) {
             if (!content || typeof content !== 'string') return '';
-            const lines = content.split(/\n/);
+            const lines = stripHtmlCommentBlocks(content).split(/\n/);
             const intro = extractOpeningLinesForTooltip(lines);
             if (!intro.length) return '';
             return intro.join('\n').trim().replace(/\n{3,}/g, '\n\n');
@@ -1223,8 +1248,9 @@
                     false
                 );
             }
-            const flatEdgePaths = svg.querySelector('g.edgePaths');
-            if (flatEdgePaths) bindEdgePathTooltipDelegate(flatEdgePaths);
+            svg.querySelectorAll('g.edgePaths').forEach((flatEdgePaths) =>
+                bindEdgePathTooltipDelegate(flatEdgePaths)
+            );
             svg.querySelectorAll('g.edgePath').forEach((g) => bindEdgePathTooltipDelegate(g));
             svg.querySelectorAll('g.edgeLabels > g.edgeLabel[data-edge-source][data-edge-target]').forEach(
                 bindEdgeTooltip
@@ -1677,12 +1703,18 @@
         }
 
         /** Mermaid 11+ flowchart: paths are direct children of g.edgePaths (no g.edgePath wrapper). */
+        /** Multiple g.edgePaths roots can appear (e.g. edges inside subgraphs vs top-level). */
         function getFlatFlowchartEdgePathElements(svg) {
-            const eps = svg && svg.querySelector('g.edgePaths');
-            if (!eps) return [];
-            return [...eps.querySelectorAll(':scope > path')].filter(
-                (p) => !p.classList.contains('edge-hit-area') && !(p.closest && p.closest('defs'))
-            );
+            if (!svg) return [];
+            const out = [];
+            svg.querySelectorAll('g.edgePaths').forEach((eps) => {
+                eps.querySelectorAll(':scope > path').forEach((p) => {
+                    if (!p.classList.contains('edge-hit-area') && !(p.closest && p.closest('defs'))) {
+                        out.push(p);
+                    }
+                });
+            });
+            return out;
         }
 
         function lookupEdgeDefByMermaidPathId(idToDef, rawPathId) {
@@ -1743,8 +1775,9 @@
             const unstampedEdgePathIds = [];
             const idToDef = buildMermaidEdgePathIdToDefMap(edgeDefs);
             const legacyEdgeGroups = [...svg.querySelectorAll('g.edgePath')];
-            const flatEdgePaths = legacyEdgeGroups.length ? [] : getFlatFlowchartEdgePathElements(svg);
-            const domEdgeCount = legacyEdgeGroups.length || flatEdgePaths.length;
+            const flatEdgePathsAll = getFlatFlowchartEdgePathElements(svg);
+            const flatOnly = flatEdgePathsAll.filter((p) => !(p.closest && p.closest('g.edgePath')));
+            const domEdgeCount = legacyEdgeGroups.length ? legacyEdgeGroups.length + flatOnly.length : flatEdgePathsAll.length;
             if (edgeDefs.length > 0 || domEdgeCount > 0) {
                 const stampEdgeEl = (el, pid) => {
                     const def = lookupEdgeDefByMermaidPathId(idToDef, pid);
@@ -1758,10 +1791,11 @@
                         unstampedEdgePathIds.push(pid);
                     }
                 };
-                if (legacyEdgeGroups.length) {
-                    legacyEdgeGroups.forEach((g) => stampEdgeEl(g, getFlowchartEdgePathDomId(g)));
+                legacyEdgeGroups.forEach((g) => stampEdgeEl(g, getFlowchartEdgePathDomId(g)));
+                if (!legacyEdgeGroups.length) {
+                    flatEdgePathsAll.forEach((p) => stampEdgeEl(p, getFlowchartEdgePathDomId(p)));
                 } else {
-                    flatEdgePaths.forEach((p) => stampEdgeEl(p, getFlowchartEdgePathDomId(p)));
+                    flatOnly.forEach((p) => stampEdgeEl(p, getFlowchartEdgePathDomId(p)));
                 }
                 if (domEdgeCount !== edgeDefs.length) {
                     edgePathMismatch = { dom: domEdgeCount, parsed: edgeDefs.length };
@@ -1781,26 +1815,96 @@
             return svg.querySelector(`[data-logical-id="${String(logicalId).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"]`);
         }
 
+        function isMultiSelectModifier(ev) {
+            return !!(ev && (ev.metaKey || ev.ctrlKey || ev.shiftKey));
+        }
+
+        function diagramSelectionKey(sel) {
+            if (!sel || sel.kind === 'none' || sel.logicalId == null || sel.logicalId === '') return '';
+            if (sel.kind === 'edge' && sel.edge) {
+                return `edge:${String(sel.edge.source || '')}->${String(sel.edge.target || '')}`;
+            }
+            return `${sel.kind}:${String(sel.logicalId)}`;
+        }
+
+        function normalizeDiagramSel(sel) {
+            return {
+                kind: sel.kind || 'node',
+                logicalId: sel.logicalId,
+                label: sel.label != null ? sel.label : null,
+                moduleId: sel.moduleId != null ? sel.moduleId : selectedModuleId,
+                domRef: sel.domRef != null ? sel.domRef : null,
+                edge: sel.edge || null
+            };
+        }
+
+        function syncLegacyDiagramSelection() {
+            if (!diagramSelections.length) {
+                diagramSelection = {
+                    kind: 'none',
+                    logicalId: null,
+                    label: null,
+                    moduleId: selectedModuleId,
+                    domRef: null,
+                    edge: null
+                };
+            } else {
+                const last = diagramSelections[diagramSelections.length - 1];
+                diagramSelection = {
+                    kind: last.kind || 'node',
+                    logicalId: last.logicalId,
+                    label: last.label != null ? last.label : null,
+                    moduleId: last.moduleId != null ? last.moduleId : selectedModuleId,
+                    domRef: last.domRef != null ? last.domRef : null,
+                    edge: last.edge || null
+                };
+            }
+        }
+
+        function toggleDiagramSelection(sel) {
+            const n = normalizeDiagramSel(sel);
+            const k = diagramSelectionKey(n);
+            if (!k) return;
+            const idx = diagramSelections.findIndex((s) => diagramSelectionKey(s) === k);
+            if (idx >= 0) diagramSelections.splice(idx, 1);
+            else diagramSelections.push(n);
+            syncLegacyDiagramSelection();
+            selectedDiagramNodeId = diagramSelections.length
+                ? diagramSelections[diagramSelections.length - 1].logicalId
+                : null;
+            applyDiagramSelectionHighlight();
+            if (diagramSelections.length) {
+                refreshDiagramSelectionLabelFromDom();
+            }
+        }
+
         function clearDiagramShapeSelection() {
             expandDiagramSelectionEpoch += 1;
-            setDiagramSelection({ kind: 'none', moduleId: selectedModuleId });
+            diagramSelections = [];
+            syncLegacyDiagramSelection();
+            selectedDiagramNodeId = null;
+            applyDiagramSelectionHighlight();
         }
 
         function refreshDiagramSelectionLabelFromDom() {
             const svg = document.querySelector('#mermaid-diagram svg');
-            if (!svg || !diagramSelection.logicalId) return;
-            if (diagramSelection.kind === 'edge' && diagramSelection.edge) {
-                const lbl = diagramSelection.edge.label || diagramSelection.label;
-                if (lbl) diagramSelection.label = lbl;
-                return;
+            if (!svg) return;
+            for (const ds of diagramSelections) {
+                if (!ds.logicalId) continue;
+                if (ds.kind === 'edge' && ds.edge) {
+                    const lbl = ds.edge.label || ds.label;
+                    if (lbl) ds.label = lbl;
+                    continue;
+                }
+                const el = queryDiagramElementByLogicalId(svg, ds.logicalId);
+                if (!el) continue;
+                if (el.classList.contains('cluster')) {
+                    ds.label = getClusterVisibleLabel(el) || ds.label;
+                } else if (el.classList.contains('node')) {
+                    ds.label = getFlowchartNodeVisibleLabel(el) || ds.label;
+                }
             }
-            const el = queryDiagramElementByLogicalId(svg, diagramSelection.logicalId);
-            if (!el) return;
-            if (el.classList.contains('cluster')) {
-                diagramSelection.label = getClusterVisibleLabel(el) || diagramSelection.label;
-            } else if (el.classList.contains('node')) {
-                diagramSelection.label = getFlowchartNodeVisibleLabel(el) || diagramSelection.label;
-            }
+            syncLegacyDiagramSelection();
         }
 
         function queryDiagramEdgeStampedElement(svg, sel) {
@@ -1864,19 +1968,28 @@
         }
 
         function diagramEdgeHoverShouldStayWide(visiblePathOrEdgePathGroup) {
-            if (diagramSelection.kind !== 'edge' || !diagramSelection.edge) return false;
-            const wantSrc = String(diagramSelection.edge.source || '');
-            const wantTgt = String(diagramSelection.edge.target || '');
-            if (!wantSrc || !wantTgt) return false;
+            if (!diagramSelections.length) return false;
             const el = visiblePathOrEdgePathGroup;
             if (!el) return false;
+            let elSrc = null;
+            let elTgt = null;
             if (el.classList && el.classList.contains('edgePath')) {
-                const src = el.getAttribute('data-edge-source');
-                const tgt = el.getAttribute('data-edge-target');
-                return Boolean(src && tgt && String(src) === wantSrc && String(tgt) === wantTgt);
+                elSrc = el.getAttribute('data-edge-source');
+                elTgt = el.getAttribute('data-edge-target');
+            } else {
+                const ep = readDiagramEdgeEndpointsFromHoverEl(el);
+                elSrc = ep.src;
+                elTgt = ep.tgt;
             }
-            const { src, tgt } = readDiagramEdgeEndpointsFromHoverEl(el);
-            return Boolean(src && tgt && String(src) === wantSrc && String(tgt) === wantTgt);
+            if (!elSrc || !elTgt) return false;
+            for (const diagramSelection of diagramSelections) {
+                if (diagramSelection.kind !== 'edge' || !diagramSelection.edge) continue;
+                const wantSrc = String(diagramSelection.edge.source || '');
+                const wantTgt = String(diagramSelection.edge.target || '');
+                if (!wantSrc || !wantTgt) continue;
+                if (String(elSrc) === wantSrc && String(elTgt) === wantTgt) return true;
+            }
+            return false;
         }
 
         /** Dash pattern; 14+12=26 must match @keyframes diagram-edge-dash-flow end stroke-dashoffset. */
@@ -1927,90 +2040,96 @@
             svg.querySelectorAll('.selected-node, .selected-subgraph').forEach((el) => {
                 el.classList.remove('selected-node', 'selected-subgraph');
             });
-            if (!diagramSelection.logicalId || diagramSelection.kind === 'none') return;
-            if (diagramSelection.kind === 'edge') {
-                let edgeEl = queryDiagramEdgeStampedElement(svg, diagramSelection);
-                if (edgeEl) {
-                    if (
-                        edgeEl.tagName &&
-                        edgeEl.tagName.toLowerCase() === 'path' &&
-                        edgeEl.closest &&
-                        edgeEl.closest('g.edgePath')
-                    ) {
-                        edgeEl = edgeEl.closest('g.edgePath');
+            if (!diagramSelections.length) return;
+            const allEdgeTargets = [];
+            for (const ds of diagramSelections) {
+                if (ds.kind === 'edge' && ds.edge) {
+                    let edgeEl = queryDiagramEdgeStampedElement(svg, ds);
+                    if (edgeEl) {
+                        if (
+                            edgeEl.tagName &&
+                            edgeEl.tagName.toLowerCase() === 'path' &&
+                            edgeEl.closest &&
+                            edgeEl.closest('g.edgePath')
+                        ) {
+                            edgeEl = edgeEl.closest('g.edgePath');
+                        }
+                        const t = collectDiagramEdgeSelectionStrokeTargets(edgeEl);
+                        if (t.length) allEdgeTargets.push(...t);
                     }
-                    const t = collectDiagramEdgeSelectionStrokeTargets(edgeEl);
-                    if (t.length) {
-                        applyDiagramHoverStroke(t, true);
-                        setDiagramEdgeSelectionDashAnim(t, true);
-                        svg._diagramEdgeSelectionTargets = t;
-                    }
+                    continue;
                 }
-                return;
+                if (!ds.logicalId || ds.kind === 'none') continue;
+                const el = queryDiagramElementByLogicalId(svg, ds.logicalId);
+                if (!el) continue;
+                if (el.classList.contains('cluster')) {
+                    el.classList.add('selected-subgraph');
+                } else if (el.classList.contains('node')) {
+                    el.classList.add('selected-node');
+                }
             }
-            const el = queryDiagramElementByLogicalId(svg, diagramSelection.logicalId);
-            if (!el) return;
-            if (el.classList.contains('cluster')) {
-                el.classList.add('selected-subgraph');
-            } else if (el.classList.contains('node')) {
-                el.classList.add('selected-node');
+            if (allEdgeTargets.length) {
+                applyDiagramHoverStroke(allEdgeTargets, true);
+                setDiagramEdgeSelectionDashAnim(allEdgeTargets, true);
+                svg._diagramEdgeSelectionTargets = allEdgeTargets;
             }
         }
 
-        function buildDiagramChatPayload() {
-            if (!diagramSelection || diagramSelection.kind === 'none') {
-                return null;
-            }
-            if (diagramSelection.kind === 'edge') {
-                if (!diagramSelection.edge) return null;
+        function diagramSelToChatPayload(ds) {
+            if (!ds || ds.kind === 'none') return null;
+            if (ds.kind === 'edge') {
+                if (!ds.edge) return null;
                 return {
                     kind: 'edge',
-                    logical_id: diagramSelection.logicalId || null,
-                    label: diagramSelection.label || null,
-                    module_id: diagramSelection.moduleId || null,
-                    dom_ref: diagramSelection.domRef || null,
-                    edge: diagramSelection.edge
+                    logical_id: ds.logicalId || null,
+                    label: ds.label || null,
+                    module_id: ds.moduleId || null,
+                    dom_ref: ds.domRef || null,
+                    edge: ds.edge
                 };
             }
-            if (!diagramSelection.logicalId) return null;
+            if (!ds.logicalId) return null;
             return {
-                kind: diagramSelection.kind,
-                logical_id: diagramSelection.logicalId,
-                label: diagramSelection.label || null,
-                module_id: diagramSelection.moduleId || null,
-                dom_ref: diagramSelection.domRef || null,
-                edge: diagramSelection.edge || null
+                kind: ds.kind,
+                logical_id: ds.logicalId,
+                label: ds.label || null,
+                module_id: ds.moduleId || null,
+                dom_ref: ds.domRef || null,
+                edge: ds.edge || null
             };
+        }
+
+        function buildDiagramChatPayload() {
+            if (!diagramSelections.length) return null;
+            return diagramSelToChatPayload(diagramSelections[diagramSelections.length - 1]);
+        }
+
+        function buildDiagramChatPayloads() {
+            return diagramSelections.map((s) => diagramSelToChatPayload(s)).filter(Boolean);
         }
 
         /**
          * @param {object} sel kind: 'none'|'node'|'cluster'|'edge'; logicalId; optional label, moduleId, domRef, edge
+         * @param {MouseEvent} [ev] — if ⌘/Ctrl/Shift+click, toggles this shape in the multi-selection instead of replacing.
          */
-        function setDiagramSelection(sel) {
+        function setDiagramSelection(sel, ev) {
             if (!sel || sel.kind === 'none' || sel.logicalId == null || sel.logicalId === '') {
-                diagramSelection = {
-                    kind: 'none',
-                    logicalId: null,
-                    label: null,
-                    moduleId: sel && sel.moduleId != null ? sel.moduleId : selectedModuleId,
-                    domRef: null,
-                    edge: null
-                };
+                diagramSelections = [];
+                syncLegacyDiagramSelection();
                 selectedDiagramNodeId = null;
                 applyDiagramSelectionHighlight();
                 return;
             }
-            diagramSelection = {
-                kind: sel.kind || 'node',
-                logicalId: sel.logicalId,
-                label: sel.label != null ? sel.label : null,
-                moduleId: sel.moduleId != null ? sel.moduleId : selectedModuleId,
-                domRef: sel.domRef != null ? sel.domRef : null,
-                edge: sel.edge || null
-            };
+            const normalized = normalizeDiagramSel(sel);
+            if (ev && isMultiSelectModifier(ev)) {
+                toggleDiagramSelection(normalized);
+                return;
+            }
+            diagramSelections = [normalized];
+            syncLegacyDiagramSelection();
             selectedDiagramNodeId = sel.logicalId;
             applyDiagramSelectionHighlight();
-            if (!diagramSelection.label) {
+            if (!diagramSelections[diagramSelections.length - 1].label) {
                 refreshDiagramSelectionLabelFromDom();
             }
         }
@@ -2731,10 +2850,15 @@
             const labels = [...svg.querySelectorAll('g.edgeLabels > g.edgeLabel')];
             if (!labels.length) return;
             const paths = [];
-            const flat = svg.querySelector('g.edgePaths');
-            if (flat && flat.querySelector(':scope > path')) {
-                flat.querySelectorAll(':scope > path').forEach((p) => {
-                    if (!p.classList.contains('edge-hit-area') && !(p.closest && p.closest('defs'))) paths.push(p);
+            const flats = [...svg.querySelectorAll('g.edgePaths')];
+            const anyFlatChildPaths = flats.some((flat) => flat.querySelector(':scope > path'));
+            if (anyFlatChildPaths) {
+                flats.forEach((flat) => {
+                    flat.querySelectorAll(':scope > path').forEach((p) => {
+                        if (!p.classList.contains('edge-hit-area') && !(p.closest && p.closest('defs'))) {
+                            paths.push(p);
+                        }
+                    });
                 });
             } else {
                 svg.querySelectorAll('g.edgePath').forEach((g) => {
@@ -2760,9 +2884,12 @@
         function getFlatHoverVisiblePath(t, svg) {
             if (!t || !svg || !svg.contains(t)) return null;
             if (t.closest && t.closest('defs')) return null;
-            const edgePathsRoot = svg.querySelector('g.edgePaths');
-            if (edgePathsRoot && edgePathsRoot.contains(t)) {
-                return resolveVisibleEdgePathFromPointerTarget(t, edgePathsRoot);
+            const flatRoots = svg.querySelectorAll('g.edgePaths');
+            for (let i = 0; i < flatRoots.length; i++) {
+                const edgePathsRoot = flatRoots[i];
+                if (edgePathsRoot.contains(t)) {
+                    return resolveVisibleEdgePathFromPointerTarget(t, edgePathsRoot);
+                }
             }
             const legacyG = t.closest && t.closest('g.edgePath');
             if (legacyG) {
@@ -2850,7 +2977,9 @@
         }
 
         function attachDiagramEdgeHoverStrokeFlat(edgePathsRoot, svg) {
-            stampEdgeLabelPathLinks(svg);
+            if (!edgePathsRoot || !svg) return;
+            if (edgePathsRoot.dataset.diagramEdgeHoverFlatBound === '1') return;
+            edgePathsRoot.dataset.diagramEdgeHoverFlatBound = '1';
             ensureDiagramEdgePointerEvents(edgePathsRoot);
             const onOver = (e) => {
                 const cur = getFlatHoverVisiblePath(e.target, svg);
@@ -2887,9 +3016,9 @@
 
         function attachDiagramEdgeHoverStroke(svg) {
             if (!svg) return;
+            stampEdgeLabelPathLinks(svg);
             const legacy = svg.querySelectorAll('g.edgePath');
             if (legacy.length) {
-                stampEdgeLabelPathLinks(svg);
                 legacy.forEach((g) => {
                     ensureDiagramEdgePointerEvents(g);
                     g.addEventListener(
@@ -2951,10 +3080,12 @@
                     labelsRootLegacy.addEventListener('mouseover', onLegacyLabelOver, false);
                     labelsRootLegacy.addEventListener('mouseout', onLegacyLabelOut, false);
                 }
+                svg.querySelectorAll('g.edgePaths').forEach((root) =>
+                    attachDiagramEdgeHoverStrokeFlat(root, svg)
+                );
                 return;
             }
-            const edgePathsRoot = svg.querySelector('g.edgePaths');
-            if (edgePathsRoot) attachDiagramEdgeHoverStrokeFlat(edgePathsRoot, svg);
+            svg.querySelectorAll('g.edgePaths').forEach((root) => attachDiagramEdgeHoverStrokeFlat(root, svg));
         }
 
         function attachDiagramHoverStrokes(svg) {
@@ -2981,26 +3112,28 @@
                         if (!data) return;
                         e.stopPropagation();
                         hideTooltip();
-                        expandDiagramSelectionEpoch += 1;
-                        setDiagramSelection({
-                            kind: 'edge',
-                            logicalId: `edge:${data.source}->${data.target}`,
-                            moduleId: contextModuleId,
-                            domRef: data.domRef || null,
-                            edge: {
-                                source: data.source,
-                                target: data.target,
-                                label: data.label != null ? data.label : null,
+                        if (!isMultiSelectModifier(e)) expandDiagramSelectionEpoch += 1;
+                        setDiagramSelection(
+                            {
+                                kind: 'edge',
+                                logicalId: `edge:${data.source}->${data.target}`,
+                                moduleId: contextModuleId,
+                                domRef: data.domRef || null,
+                                edge: {
+                                    source: data.source,
+                                    target: data.target,
+                                    label: data.label != null ? data.label : null,
+                                },
+                                label: data.label || null,
                             },
-                            label: data.label || null,
-                        });
+                            e
+                        );
                         refreshDiagramSelectionLabelFromDom();
                     },
                     false
                 );
             }
-            const flatEp = svg.querySelector('g.edgePaths');
-            if (flatEp) bindEdgePathClickDelegate(flatEp);
+            svg.querySelectorAll('g.edgePaths').forEach((flatEp) => bindEdgePathClickDelegate(flatEp));
             svg.querySelectorAll('g.edgePath').forEach((g) => bindEdgePathClickDelegate(g));
 
             const labelsRoot = svg.querySelector('g.edgeLabels');
@@ -3020,16 +3153,19 @@
                         const lbl = lab.getAttribute('data-edge-label');
                         e.stopPropagation();
                         hideTooltip();
-                        expandDiagramSelectionEpoch += 1;
+                        if (!isMultiSelectModifier(e)) expandDiagramSelectionEpoch += 1;
                         const domRef = lab.getAttribute('data-mermaid-edge-path-id') || '';
-                        setDiagramSelection({
-                            kind: 'edge',
-                            logicalId: `edge:${src}->${tgt}`,
-                            moduleId: contextModuleId,
-                            domRef: domRef || null,
-                            edge: { source: src, target: tgt, label: lbl || null },
-                            label: lbl || null,
-                        });
+                        setDiagramSelection(
+                            {
+                                kind: 'edge',
+                                logicalId: `edge:${src}->${tgt}`,
+                                moduleId: contextModuleId,
+                                domRef: domRef || null,
+                                edge: { source: src, target: tgt, label: lbl || null },
+                                label: lbl || null,
+                            },
+                            e
+                        );
                         refreshDiagramSelectionLabelFromDom();
                     },
                     false
@@ -3060,12 +3196,15 @@
                         const cid = clusterEl.getAttribute('data-logical-id') || '';
                         if (!cid) return;
                         e.stopPropagation();
-                        expandDiagramSelectionEpoch += 1;
-                        setDiagramSelection({
-                            kind: 'cluster',
-                            logicalId: cid,
-                            moduleId: contextModuleId
-                        });
+                        if (!isMultiSelectModifier(e)) expandDiagramSelectionEpoch += 1;
+                        setDiagramSelection(
+                            {
+                                kind: 'cluster',
+                                logicalId: cid,
+                                moduleId: contextModuleId
+                            },
+                            e
+                        );
                         refreshDiagramSelectionLabelFromDom();
                     },
                     false
@@ -3157,7 +3296,7 @@
                 
                 // Check if target exists in moduleData
                 if (targetModule && moduleData[targetModule]) {
-                    makeNodeClickable(node, nodeId, targetModule);
+                    makeNodeClickable(node, nodeId, targetModule, contextModuleId);
                 } else if (nodeId && !nodeId.endsWith('_collapse')) {
                     // Track broken link for reliability (Agent 3 hook)
                     if (window.trackBrokenLink) {
@@ -3165,8 +3304,11 @@
                     }
                     node.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        expandDiagramSelectionEpoch += 1;
-                        setDiagramSelection({ kind: 'node', logicalId: nodeId, moduleId: contextModuleId });
+                        if (!isMultiSelectModifier(e)) expandDiagramSelectionEpoch += 1;
+                        setDiagramSelection(
+                            { kind: 'node', logicalId: nodeId, moduleId: contextModuleId },
+                            e
+                        );
                         refreshDiagramSelectionLabelFromDom();
                     });
                 }
@@ -3235,20 +3377,34 @@
             attachDiagramBackgroundDeselect(svg);
         }
         
-        function makeNodeClickable(node, nodeId, targetModuleId) {
+        function makeNodeClickable(node, nodeId, targetModuleId, diagramContextModuleId) {
             node.classList.add('clickable-node');
             
             // Capture values for closure
             const capturedNodeId = nodeId;
             const capturedTargetModule = targetModuleId;
-            
+            const capturedDiagramContext = diagramContextModuleId;
+
             const clickHandler = (e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                
+
                 // Hide tooltip when clicking
                 hideTooltip();
-                
+
+                if (isMultiSelectModifier(e)) {
+                    setDiagramSelection(
+                        {
+                            kind: 'node',
+                            logicalId: capturedNodeId,
+                            moduleId: capturedDiagramContext != null ? capturedDiagramContext : selectedModuleId
+                        },
+                        e
+                    );
+                    refreshDiagramSelectionLabelFromDom();
+                    return;
+                }
+
                 if (capturedNodeId && capturedTargetModule && moduleData[capturedTargetModule]) {
                     const targetModuleData = moduleData[capturedTargetModule];
                     
@@ -3995,8 +4151,7 @@
             _diagramHoverSyncZoom = zoomScale;
             stampEdgeLabelPathLinks(svg);
             svg.querySelectorAll('g.edgePath').forEach((g) => ensureDiagramEdgePointerEvents(g));
-            const ep = svg.querySelector('g.edgePaths');
-            if (ep) ensureDiagramEdgePointerEvents(ep);
+            svg.querySelectorAll('g.edgePaths').forEach((ep) => ensureDiagramEdgePointerEvents(ep));
         }
 
         function refreshDiagramEdgeHitAreas() {
@@ -4004,8 +4159,7 @@
             if (!svg) return;
             stampEdgeLabelPathLinks(svg);
             svg.querySelectorAll('g.edgePath').forEach((g) => ensureDiagramEdgePointerEvents(g));
-            const ep = svg.querySelector('g.edgePaths');
-            if (ep) ensureDiagramEdgePointerEvents(ep);
+            svg.querySelectorAll('g.edgePaths').forEach((ep) => ensureDiagramEdgePointerEvents(ep));
         }
         window.refreshDiagramEdgeHitAreas = refreshDiagramEdgeHitAreas;
         
@@ -4284,6 +4438,25 @@
         // ============================================================
         
         let AVAILABLE_REPOS = [];
+
+        /** Supports legacy string[] or { id, label?, description? }[] from repos/index.json */
+        function normalizeRepoEntry(raw) {
+            if (typeof raw === 'string') {
+                return { id: raw, label: raw, description: '' };
+            }
+            const id = raw && (raw.id || raw.repo);
+            if (!id) return null;
+            return {
+                id: String(id),
+                label: (raw.label != null && String(raw.label).trim()) || String(id),
+                description:
+                    raw.description != null && String(raw.description).trim()
+                        ? String(raw.description).trim()
+                        : raw.blurb != null && String(raw.blurb).trim()
+                          ? String(raw.blurb).trim()
+                          : ''
+            };
+        }
         
         async function fetchAvailableRepos() {
             try {
@@ -4291,10 +4464,13 @@
                 const res = await fetch(url.toString(), { cache: 'no-store' });
                 if (res.ok) {
                     const list = await res.json();
-                    if (Array.isArray(list) && list.length > 0) return list;
+                    if (Array.isArray(list) && list.length > 0) {
+                        const out = list.map(normalizeRepoEntry).filter(Boolean);
+                        if (out.length) return out;
+                    }
                 }
             } catch (e) { /* ignore */ }
-            return [repoPath];
+            return [normalizeRepoEntry(repoPath)];
         }
         
         function populateRepoDropdown() {
@@ -4302,11 +4478,14 @@
             if (!dropdown) return;
             
             dropdown.innerHTML = '<option value="">Switch Repo...</option>';
-            (AVAILABLE_REPOS.length ? AVAILABLE_REPOS : [repoPath]).forEach(repo => {
+            const rows = AVAILABLE_REPOS.length ? AVAILABLE_REPOS : [normalizeRepoEntry(repoPath)];
+            rows.forEach((entry) => {
+                if (!entry || !entry.id) return;
                 const option = document.createElement('option');
-                option.value = repo;
-                option.textContent = repo;
-                if (repo.toLowerCase() === repoPath.toLowerCase()) option.selected = true;
+                option.value = entry.id;
+                option.textContent = entry.label || entry.id;
+                if (entry.description) option.title = entry.description;
+                if (entry.id.toLowerCase() === repoPath.toLowerCase()) option.selected = true;
                 dropdown.appendChild(option);
             });
         }
@@ -4330,7 +4509,7 @@
             // When no ?repo= in URL, redirect to first repo so something always loads
             if (!urlParams.get('repo')) {
                 if (AVAILABLE_REPOS.length > 0) {
-                    const first = AVAILABLE_REPOS[0];
+                    const first = AVAILABLE_REPOS[0].id;
                     window.location.replace(window.location.pathname + '?repo=' + encodeURIComponent(first));
                     return;
                 }
@@ -4338,7 +4517,9 @@
             
             const success = await loadAllData();
             if (!success) {
-                const repoList = AVAILABLE_REPOS.length ? AVAILABLE_REPOS.join(', ') : 'none';
+                const repoList = AVAILABLE_REPOS.length
+                    ? AVAILABLE_REPOS.map((r) => r.id).join(', ')
+                    : 'none';
                 const errHtml = `<div class="error" style="padding:1rem;max-width:480px;">
                     <p><strong>Failed to load repository data</strong></p>
                     <p>Path tried: <code>${basePath}</code></p>
@@ -4397,13 +4578,16 @@
         // CHAT PANEL (Architectural Agent)
         // ============================================================
         window.getDiagramSelection = () => ({ ...diagramSelection });
+        window.getDiagramSelections = () => diagramSelections.map((s) => ({ ...s }));
         window.getDiagramSelectionChatPayload = buildDiagramChatPayload;
         window.setDiagramSelection = setDiagramSelection;
-        /** Console: inspect JSON sent as `diagram_selection` on the next arch-agent chat POST. */
+        /** Console: inspect JSON sent as `diagram_selection` / `diagram_selections` on the next arch-agent chat POST. */
         window.debugLogChatDiagramSelection = function () {
-            const p = buildDiagramChatPayload();
-            console.log('[chat] diagram_selection payload (next POST):', p);
-            return p;
+            const one = buildDiagramChatPayload();
+            const all = buildDiagramChatPayloads();
+            console.log('[chat] diagram_selection (primary):', one);
+            console.log('[chat] diagram_selections (all):', all);
+            return { diagram_selection: one, diagram_selections: all };
         };
 
         /** Playwright / automated tests: read pan zoom and measure node vs expanded cluster frame (viewport px). */
@@ -4439,6 +4623,45 @@
         // Conversation history for multi-turn chat (send back to API each time)
         let chatHistory = null;
 
+        /**
+         * Exact JSON body for POST /api/arch-agent/chat (same as Send). Use in console:
+         *   peekArchAgentChat()
+         *   peekArchAgentChat('what are common groups between them?')
+         */
+        function buildArchAgentChatRequestBody(message) {
+            const diagramPayloads = buildDiagramChatPayloads();
+            return {
+                job_id: getChatJobId(),
+                message: message,
+                opened_modules: Array.from(openedModules),
+                diagram_selection:
+                    diagramPayloads.length > 0
+                        ? diagramPayloads[diagramPayloads.length - 1]
+                        : null,
+                diagram_selections: diagramPayloads.length > 0 ? diagramPayloads : null,
+                history: chatHistory
+            };
+        }
+
+        window.peekArchAgentChat = function (message) {
+            const msg =
+                message !== undefined && String(message).length
+                    ? String(message)
+                    : (chatInput && chatInput.value.trim()) ||
+                      '(no message — type in the chat box or run peekArchAgentChat("your question"))';
+            const body = buildArchAgentChatRequestBody(msg);
+            const url = `${CHAT_API_BASE}/api/arch-agent/chat`;
+            console.log('[peekArchAgentChat] POST', url);
+            console.log('[peekArchAgentChat] body object:', body);
+            console.log('[peekArchAgentChat] JSON.stringify (exact wire payload):\n' + JSON.stringify(body, null, 2));
+            if (body.history && body.history.length) {
+                console.log('[peekArchAgentChat] history message count:', body.history.length);
+            } else {
+                console.log('[peekArchAgentChat] history: null (first turn)');
+            }
+            return body;
+        };
+
         function addChatMessage(content, type) {
             const el = document.createElement('div');
             el.className = `chat-message ${type}`;
@@ -4460,21 +4683,11 @@
             const loadingEl = addChatMessage('Thinking...', 'loading');
             chatSend.disabled = true;
             try {
-                const jobId = getChatJobId();
-                // Get opened modules as array (overview is always included)
-                const openedModulesArray = Array.from(openedModules);
-                console.log('[MODULE TRACKING] Sending chat request with opened modules:', openedModulesArray);
-                
+                console.log('[MODULE TRACKING] Sending chat request with opened modules:', Array.from(openedModules));
                 const res = await fetch(`${CHAT_API_BASE}/api/arch-agent/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        job_id: jobId,
-                        message: msg,
-                        opened_modules: openedModulesArray,
-                        diagram_selection: buildDiagramChatPayload(),
-                        history: chatHistory
-                    })
+                    body: JSON.stringify(buildArchAgentChatRequestBody(msg))
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();

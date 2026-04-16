@@ -196,7 +196,16 @@ def validate_mermaid(diagram: str, source_info: str = "") -> MermaidValidationRe
                         fix_suggestion="Use alphanumeric characters and underscores only"
                     ))
     
-    # Check 6: Malformed edge labels
+    # Check 6: Class-diagram inheritance arrows in flowchart/graph (invalid; use classDiagram or -->)
+    if re.search(r'--\|>', diagram) or re.search(r'\.\.\|>', diagram) or re.search(r'<\|--', diagram):
+        result.valid = False
+        result.errors.append(MermaidError(
+            error_type=MermaidErrorType.SYNTAX_ERROR,
+            message="Inheritance arrows (--|>, ..|>, <|--) are for classDiagram only; flowchart cannot parse them",
+            fix_suggestion="Use --> or -.-> with a text label, or switch to classDiagram",
+        ))
+
+    # Check 7: Malformed edge labels
     edge_label_pattern = r'\|([^|]*)\|'
     for i, line in enumerate(lines, 1):
         for match in re.finditer(edge_label_pattern, line):
