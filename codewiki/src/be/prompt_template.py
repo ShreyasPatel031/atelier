@@ -26,6 +26,7 @@ DIAGRAM_SYNTAX_RULES_SECTION = """
 - Put `%%` comments on separate lines above the statement; do not append `%%` or other tokens on the same line as an edge.
 
 **Nodes and labels:**
+- **Subgraph headers (Mermaid 11):** Every subgraph MUST be `subgraph unique_id["Title Here"]` on one line. Never write bare multi-word titles like `subgraph Agent Core` or `subgraph Foo & Bar` — the parser raises **Syntax error in text**. Use an id + quoted title, and use `and` instead of `&` in titles.
 - Subgraph labels must not use reserved words like "end".
 - **Parentheses (MOST COMMON ERROR — causes ~90% of parse failures):**
   Any label containing `(`, `)`, or function-call parens MUST use double-quoted brackets `["…"]`.
@@ -46,13 +47,32 @@ DIAGRAM_SYNTAX_RULES_SECTION = """
   CORRECT: `node1["Define Agent and Capabilities"]`
   WRONG:   `node1["Define Agent & Capabilities"]`
 - **Double colons:** Avoid raw `::` in unquoted node labels (e.g. C++/Rust paths). Use quoted labels `id["a::b"]` or rewrite (e.g. `a / b`, `-`).
+- **Single-line rule:** Node definitions and subgraph headers must be entirely on ONE line. Do NOT break `id[…]` or `subgraph id[…]` across multiple lines — the parser emits `got 'STR'` when the label starts on the next line.
+  CORRECT: `subgraph cli_ops["CLI Operations"]`
+  CORRECT: `provider_abc["Provider (Abstract Base Class)"]`
+  WRONG (multiline — PARSE ERROR):
+    ```
+    subgraph cli_ops[
+        "CLI Operations"
+    ]
+    ```
+  WRONG:
+    ```
+    provider_abc[
+        "Provider (Abstract Base Class)"
+    ]
+    ```
 - **Data artifacts:** Use cylinder shape `[("label")]` for stored data nodes.
 
 **Edges and arrows:**
 - Allowed arrow types: `-->` (normal), `-.->` (dashed/reference), `==>` (heavy/primary).
   Use `==>` for primary data pipeline, `-->` for normal flow, `-.->` for reads/references.
 - Do NOT use reverse arrows (`<--`, `<==`, `<-.->`) — they cause parse errors. Swap source and target instead.
-- Do NOT use activation-style arrows such as `--|>`.
+- Do NOT use activation-style arrows such as `--|>` or `---|>`.
+- Do NOT use class-diagram inheritance arrows (`<|--`, `<|..`) — these are `classDiagram` syntax and cause `got 'TAGSTART'` in flowcharts.
+  WRONG: `Model <|-- WrapperModel`   ← PARSE ERROR
+  WRONG: `StreamedResponse <|-- OpenAIStreamedResponse`
+  Rewrite as a normal edge with a label: `WrapperModel -->|"inherits"| Model`
 - **Edge labels:** Always wrap edge text in `|"…"|` with **no space** between the pipe and the quote:
   CORRECT: `A -->|"label"| B`   `C ==>|"label"| D`   `E -.->|"label"| F`
   WRONG:   `A -->| "label"| B`  (space after first pipe)
@@ -72,8 +92,13 @@ DIAGRAM_SYNTAX_RULES_SECTION = """
 Color meanings: Gold = human actor, Blue = interactive read surface, Green = persisted data, Orange = AI-driven creation, Purple = code analysis.
 
 **Styling: nodes only — NEVER style subgraphs:**
+- **classDef id must not be the reserved word `class`** — use e.g. `classDef modClass` / `classDef nodeStyle` (Mermaid.js parse error: got 'CLASS').
 - Apply `class` ONLY to **node IDs** (identifiers you declare for `id["label"]`, `id(("label"))`, or `id[("label")]`).
 - Do **NOT** write `class <subgraph_id> <className>` — that paints the entire group box one flat color and looks bad. Subgraphs are for layout only; leave them unstyled.
+- **Do NOT use `:::` inline class attachment** (e.g. `id["Label"]:::class`). It causes `got 'CLASS'` parse errors in flowcharts. Use separate `class` statements at the end of the diagram instead.
+  WRONG: `B[A2AConfig]:::class`        ← PARSE ERROR (got 'CLASS')
+  WRONG: `Flow[Flow]:::class`
+  CORRECT (use a class statement): `class B,Flow analytical`
 - After all nodes are defined, use comma-separated node lists: `class viewer,search surface` (correct), not `class ui surface` when `ui` is only a subgraph id (wrong).
 - Every colored node must appear in exactly one `class` line (or share a line with other nodes of the same semantic role).
 
@@ -120,6 +145,14 @@ Note: `parser["Parse Input (Streaming)"]` and `validator["validate_schema()"]` u
 
 These rules reflect automated validation of common Mermaid parse failures.
 </DIAGRAM_SYNTAX_RULES>
+"""
+
+# Stage 4.6 (doc sync): LLM repairs invalid or placeholder diagrams — prepended before DIAGRAM_SYNTAX_RULES_SECTION.
+MERMAID_DIAGRAM_FIX_INSTRUCTIONS = """
+<MERMAID_FIX_TASK>
+You repair Mermaid `flowchart` / `graph` diagrams so they pass structural validation and match the syntax rules below.
+Output ONLY the corrected Mermaid diagram body: no markdown fences, no explanation, no leading/trailing prose.
+</MERMAID_FIX_TASK>
 """
 
 SYSTEM_PROMPT = """
