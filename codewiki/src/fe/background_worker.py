@@ -6,6 +6,7 @@ Background worker for processing documentation generation jobs.
 import os
 import json
 import time
+import shutil
 import threading
 import subprocess
 import asyncio
@@ -154,6 +155,7 @@ class BackgroundWorker:
                     'main_model': job.main_model,
                     'commit_id': job.commit_id,
                     'generation_stage': job.generation_stage,
+                    'force_regenerate': getattr(job, 'force_regenerate', False),
                 }
             
             file_manager.save_json(data, self.jobs_file)
@@ -193,11 +195,15 @@ class BackgroundWorker:
             job.progress = "Starting repository clone..."
             job.main_model = MAIN_MODEL
             
-            # STAGE 0.1: Check cache first
-            logger.info(f"[STAGE 0.1: CACHE CHECK] Checking cache for {job.repo_url}")
+            # STAGE 0.1: Check cache first (skip when user chose "Regenerate")
+            skip_cache = getattr(job, 'force_regenerate', False)
+            if skip_cache:
+                logger.info(f"[STAGE 0.1: CACHE CHECK] Skipped (force_regenerate=True) for {job.repo_url}")
+            else:
+                logger.info(f"[STAGE 0.1: CACHE CHECK] Checking cache for {job.repo_url}")
             cache_check_start = time.time()
             try:
-                cached_docs = self.cache_manager.get_cached_docs(job.repo_url)
+                cached_docs = None if skip_cache else self.cache_manager.get_cached_docs(job.repo_url)
                 cache_check_duration = time.time() - cache_check_start
                 
                 if cached_docs:
@@ -283,7 +289,20 @@ class BackgroundWorker:
             job.progress = f"Cloning repository {repo_info['full_name']}..."
             
             try:
-                clone_success = GitHubRepoProcessor.clone_repository(repo_info['clone_url'], temp_repo_dir, job.commit_id)
+                clone_success = False
+                reused = GitHubRepoProcessor.sync_existing_clone(
+                    repo_info['clone_url'], temp_repo_dir, job.commit_id
+                )
+                if reused:
+                    clone_success = True
+                    logger.info(f"[STAGE 0.3] Reused existing clone under {temp_repo_dir} (no full clone)")
+                else:
+                    if os.path.exists(temp_repo_dir):
+                        logger.info(f"[STAGE 0.3] Removing stale or incomplete temp dir before clone: {temp_repo_dir}")
+                        shutil.rmtree(temp_repo_dir, ignore_errors=True)
+                    clone_success = GitHubRepoProcessor.clone_repository(
+                        repo_info['clone_url'], temp_repo_dir, job.commit_id
+                    )
                 clone_duration = time.time() - clone_start
                 
                 if clone_success:
@@ -476,25 +495,37 @@ class BackgroundWorker:
             logger.error("Job %s: Failed with error: %s", job_id, e)
         
         finally:
-            # Cleanup temporary repository
+            # Cleanup temp clone: always remove on failure; on success keep by default (regeneration reuses git fetch).
             cleanup_start = time.time()
-            if 'temp_repo_dir' in locals() and os.path.exists(temp_repo_dir):
-                try:
-                    logger.info(f"[STAGE 0] Cleaning up temporary repository: {temp_repo_dir}")
-                    subprocess.run(['rm', '-rf', temp_repo_dir], check=True, timeout=30)
-                    cleanup_duration = time.time() - cleanup_start
-                    logger.info(f"[STAGE 0] Cleanup completed in {cleanup_duration:.3f}s")
-                except subprocess.TimeoutExpired:
-                    cleanup_duration = time.time() - cleanup_start
-                    logger.warning(f"[STAGE 0] Cleanup TIMEOUT after {cleanup_duration:.1f}s (timeout: 30s)")
-                    logger.warning(f"[STAGE 0] Temporary directory may not be fully removed: {temp_repo_dir}")
-                except Exception as e:
-                    cleanup_duration = time.time() - cleanup_start
-                    logger.error(f"[STAGE 0] Cleanup FAILED after {cleanup_duration:.3f}s: {type(e).__name__}: {str(e)}")
-                    logger.error(f"[STAGE 0] Temporary directory not removed: {temp_repo_dir}")
-                    logger.warning("Failed to cleanup temp directory: %s", e)
-            else:
-                if 'temp_repo_dir' not in locals():
-                    logger.info(f"[STAGE 0] No temporary directory to cleanup (not created)")
+            st = self.job_status.get(job_id)
+            remove_temp = bool(st and st.status == "failed") or WebAppConfig.DELETE_TEMP_REPO_AFTER_SUCCESS
+            if "temp_repo_dir" in locals() and os.path.exists(temp_repo_dir):
+                if remove_temp:
+                    try:
+                        logger.info(f"[STAGE 0] Cleaning up temporary repository: {temp_repo_dir}")
+                        subprocess.run(["rm", "-rf", temp_repo_dir], check=True, timeout=30)
+                        cleanup_duration = time.time() - cleanup_start
+                        logger.info(f"[STAGE 0] Cleanup completed in {cleanup_duration:.3f}s")
+                    except subprocess.TimeoutExpired:
+                        cleanup_duration = time.time() - cleanup_start
+                        logger.warning(
+                            f"[STAGE 0] Cleanup TIMEOUT after {cleanup_duration:.1f}s (timeout: 30s)"
+                        )
+                    except Exception as e:
+                        cleanup_duration = time.time() - cleanup_start
+                        logger.warning(
+                            "[STAGE 0] Cleanup failed after %.3fs: %s — %s",
+                            cleanup_duration,
+                            type(e).__name__,
+                            e,
+                        )
                 else:
-                    logger.info(f"[STAGE 0] No temporary directory to cleanup (does not exist): {temp_repo_dir if 'temp_repo_dir' in locals() else 'N/A'}")
+                    logger.info(
+                        "[STAGE 0] Keeping temp clone for faster regeneration: %s "
+                        "(set CODEWIKI_DELETE_TEMP_REPO_AFTER_SUCCESS=1 to always delete after success)",
+                        temp_repo_dir,
+                    )
+            elif "temp_repo_dir" not in locals():
+                logger.info("[STAGE 0] No temporary directory to cleanup (not created)")
+            else:
+                logger.info("[STAGE 0] No temporary directory to cleanup (path missing)")

@@ -87,9 +87,14 @@ async def index_get(request: Request):
 
 
 @app.post("/", response_class=HTMLResponse)
-async def index_post(request: Request, repo_url: str = Form(...), commit_id: str = Form("")):
+async def index_post(
+    request: Request,
+    repo_url: str = Form(...),
+    commit_id: str = Form(""),
+    force_regenerate: Optional[str] = Form(None),
+):
     """Handle repository submission."""
-    return await web_routes.index_post(request, repo_url, commit_id)
+    return await web_routes.index_post(request, repo_url, commit_id, force_regenerate)
 
 
 @app.get("/api/job/{job_id}")

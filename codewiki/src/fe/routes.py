@@ -57,7 +57,13 @@ class WebRoutes:
         
         return HTMLResponse(content=render_template(WEB_INTERFACE_TEMPLATE, context))
     
-    async def index_post(self, request: Request, repo_url: str = Form(...), commit_id: str = Form("")) -> HTMLResponse:
+    async def index_post(
+        self,
+        request: Request,
+        repo_url: str = Form(...),
+        commit_id: str = Form(""),
+        force_regenerate: Optional[str] = Form(None),
+    ) -> HTMLResponse:
         """Handle repository submission."""
         # Clean up old jobs before processing
         self.cleanup_old_jobs()
@@ -68,7 +74,10 @@ class WebRoutes:
         
         repo_url = repo_url.strip()
         commit_id = commit_id.strip() if commit_id else ""
-        
+        want_regenerate = bool(
+            force_regenerate and str(force_regenerate).strip().lower() in ("1", "on", "true", "yes")
+        )
+
         if not repo_url:
             message = "Please enter a GitHub repository URL"
             message_type = "error"
@@ -103,8 +112,10 @@ class WebRoutes:
                     message = f"Repository recently failed processing. Please wait a few minutes before retrying (Job ID: {existing_job.job_id})"
                 message_type = "error"
             else:
-                # Check cache
-                cached_docs = self.cache_manager.get_cached_docs(normalized_repo_url)
+                # Check cache (skip when user asks to regenerate — run full pipeline again)
+                cached_docs = None
+                if not want_regenerate:
+                    cached_docs = self.cache_manager.get_cached_docs(normalized_repo_url)
                 if cached_docs and Path(cached_docs).exists():
                     message = "Documentation found in cache! Redirecting to view..."
                     message_type = "success"
@@ -131,11 +142,15 @@ class WebRoutes:
                             status='queued',
                             created_at=datetime.now(),
                             progress="Waiting in queue...",
-                            commit_id=commit_id if commit_id else None
+                            commit_id=commit_id if commit_id else None,
+                            force_regenerate=want_regenerate,
                         )
                         
                         self.background_worker.add_job(job_id, job)
-                        message = f"Repository added to processing queue! Job ID: {job_id}"
+                        if want_regenerate:
+                            message = f"Regenerating documentation (ignoring cache). Job ID: {job_id}"
+                        else:
+                            message = f"Repository added to processing queue! Job ID: {job_id}"
                         message_type = "success"
                         active_job_id = job_id
                         repo_url = ""  # Clear form

@@ -32,6 +32,10 @@ class WebAppConfig:
     # Git settings (clone uses subprocess timeout; large repos need higher than 300s)
     CLONE_TIMEOUT = int(os.environ.get("CODEWIKI_CLONE_TIMEOUT", "300"))
     CLONE_DEPTH = int(os.environ.get("CODEWIKI_CLONE_DEPTH", "1"))
+    # If false (default), keep ./output/temp/<job_id> after success so "Regenerate" can git fetch instead of cloning.
+    DELETE_TEMP_REPO_AFTER_SUCCESS = os.environ.get(
+        "CODEWIKI_DELETE_TEMP_REPO_AFTER_SUCCESS", ""
+    ).lower() in ("1", "true", "yes")
     
     @classmethod
     def ensure_directories(cls):

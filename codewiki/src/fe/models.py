@@ -29,6 +29,7 @@ class JobStatusResponse(BaseModel):
     commit_id: Optional[str] = None
     # 0 = not started / queued; 1–3 = pipeline stages; 3 also means docs phase done before job completion
     generation_stage: int = 0
+    force_regenerate: Optional[bool] = None
 
 
 class JobListResponse(BaseModel):
@@ -52,6 +53,8 @@ class JobStatus:
     main_model: Optional[str] = None
     commit_id: Optional[str] = None
     generation_stage: int = 0
+    # If True, skip cache and re-run generation; worker may reuse temp clone under TEMP_DIR/job_id
+    force_regenerate: bool = False
 
 
 @dataclass

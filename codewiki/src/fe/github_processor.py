@@ -173,3 +173,65 @@ class GitHubRepoProcessor:
             import traceback
             logger.error(f"[STAGE 0.3] Traceback: {traceback.format_exc()}")
             return False
+
+    @staticmethod
+    def sync_existing_clone(clone_url: str, target_dir: str, commit_id: str = None) -> bool:
+        """
+        Update an existing clone at ``target_dir`` (must contain ``.git``): fetch + checkout/pull.
+        Avoids a full re-clone when regenerating docs for the same repo.
+        """
+        git_dir = os.path.join(target_dir, ".git")
+        if not os.path.isdir(target_dir) or not os.path.isdir(git_dir):
+            return False
+        try:
+            logger.info(f"[STAGE 0.3] Reusing existing clone at {target_dir}")
+            fetch = subprocess.run(
+                ["git", "fetch", "origin"],
+                cwd=target_dir,
+                capture_output=True,
+                text=True,
+                timeout=min(WebAppConfig.CLONE_TIMEOUT, 600),
+            )
+            if fetch.returncode != 0:
+                logger.warning(
+                    "[STAGE 0.3] git fetch failed (will fall back to fresh clone): %s",
+                    (fetch.stderr or fetch.stdout or "")[:500],
+                )
+                return False
+            if commit_id:
+                co = subprocess.run(
+                    ["git", "checkout", commit_id],
+                    cwd=target_dir,
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                )
+                if co.returncode != 0:
+                    logger.warning(
+                        "[STAGE 0.3] git checkout %s failed (shallow clone may lack commit; will re-clone): %s",
+                        commit_id,
+                        (co.stderr or co.stdout or "")[:500],
+                    )
+                    return False
+            else:
+                pull = subprocess.run(
+                    ["git", "pull", "--ff-only"],
+                    cwd=target_dir,
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                )
+                if pull.returncode != 0:
+                    logger.warning(
+                        "[STAGE 0.3] git pull --ff-only failed: %s",
+                        (pull.stderr or pull.stdout or "")[:500],
+                    )
+                    return False
+            logger.info("[STAGE 0.3] Existing clone updated successfully")
+            return True
+        except subprocess.TimeoutExpired:
+            logger.warning("[STAGE 0.3] sync_existing_clone timed out")
+            return False
+        except Exception as e:
+            logger.warning("[STAGE 0.3] sync_existing_clone error: %s", e)
+            return False

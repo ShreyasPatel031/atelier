@@ -376,6 +376,22 @@ WEB_INTERFACE_TEMPLATE = """
                         title="Enter a valid commit hash (4-40 characters, hexadecimal)"
                     >
                 </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer;">
+                        <input
+                            type="checkbox"
+                            id="force_regenerate"
+                            name="force_regenerate"
+                            value="1"
+                            style="margin-top: 0.2rem;"
+                        >
+                        <span>
+                            <strong>Regenerate documentation</strong> — ignore cached docs and run the full pipeline again.
+                            If the repo was cloned before, the server will try <code>git fetch</code> instead of cloning from scratch.
+                        </span>
+                    </label>
+                </div>
                 
                 <button type="submit" class="btn">Generate Documentation</button>
             </form>
