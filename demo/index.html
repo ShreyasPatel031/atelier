@@ -1042,8 +1042,8 @@
                 <span class="zoom-hint">Scroll / two-finger trackpad → pan • ⌘/Ctrl+scroll or pinch → zoom • Drag to pan • ⌘/Ctrl/Shift+click diagram shapes to multi-select</span>
             </div>
             <div class="diagram-render-tabs" role="tablist" aria-label="Diagram renderer">
-                <button type="button" class="diagram-tab active" id="tabMermaid" role="tab" aria-selected="true" aria-controls="diagramViewport">Mermaid</button>
-                <button type="button" class="diagram-tab" id="tabReactFlow" role="tab" aria-selected="false" aria-controls="diagramViewport">React Flow</button>
+                <button type="button" class="diagram-tab" id="tabMermaid" role="tab" aria-selected="false" aria-controls="diagramViewport">Mermaid</button>
+                <button type="button" class="diagram-tab active" id="tabReactFlow" role="tab" aria-selected="true" aria-controls="diagramViewport">React Flow</button>
                 <button type="button" class="diagram-tab" id="tabElkSvg" role="tab" aria-selected="false" aria-controls="diagramViewport">ELK → SVG</button>
             </div>
             <div class="pipeline-panel" id="pipelinePanel">
@@ -1084,13 +1084,13 @@
                 </details>
             </div>
             <div class="diagram-viewport" id="diagramViewport">
-                <div class="diagram-canvas" id="diagramCanvas">
+                <div class="diagram-canvas" id="diagramCanvas" style="display: none">
                     <div id="mermaid-diagram" class="loading">Loading diagram...</div>
                     <div id="elkSvgPane" hidden>
                         <div id="elkSvgMount" class="elk-svg-mount"></div>
                     </div>
                 </div>
-                <div id="reactflowPlaceholder" class="reactflow-placeholder" hidden>
+                <div id="reactflowPlaceholder" class="reactflow-placeholder">
                     <div id="reactflowRoot" class="reactflow-root" aria-label="ELK layout in React Flow (R6)"></div>
                 </div>
                 <details class="view-tune-panel" id="viewTunePanel">
@@ -1165,7 +1165,7 @@
         let expandedNodeToModule = new Map();  // Maps nodeId -> moduleId for expanded nodes
         let currentModuleId = 'overview';
         /** R0 / R5 / R6: 'mermaid' | 'reactflow' | 'elk' */
-        let activeDiagramTab = 'mermaid';
+        let activeDiagramTab = 'reactflow';
         let elkSvgRequestEpoch = 0;
         let reactFlowRequestEpoch = 0;
         /** Full ELK graph JSON string for R4 "Copy" (ELK Live root object only). */
@@ -2968,6 +2968,7 @@
         document.getElementById('tabElkSvg')?.addEventListener('click', () =>
             setDiagramRenderTab('elk')
         );
+        setDiagramRenderTab('reactflow');
 
         // ============================================================
         // BUILD MODULE DATA
