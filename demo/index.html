@@ -10,7 +10,8 @@
     <script src="./pipeline-overview-mermaid.js"></script>
     <script src="./pipeline-ir-repair.js"></script>
     <script src="./pipeline-diagram-to-elk.js"></script>
-    <script src="../node_modules/elkjs/lib/elk.bundled.js"></script>
+    <!-- CDN: ../node_modules/… breaks when static server roots at demo/ (e.g. :8080/). -->
+    <script src="https://cdn.jsdelivr.net/npm/elkjs@0.9.3/lib/elk.bundled.js" crossorigin="anonymous"></script>
     <script src="./pipeline-elk-svg.js"></script>
     <style>
         * {
@@ -1084,7 +1085,10 @@
                     </div>
                 </div>
                 <div id="reactflowPlaceholder" class="reactflow-placeholder" hidden>
-                    <p><strong>React Flow + ELK</strong> will mount in this pane (R4+). The pipeline sections above show <strong>R0</strong> (source IR) and <strong>R1</strong> (overview Mermaid → DIAGRAM_JSON) so each step is verifiable before ELK.</p>
+                    <p>
+                        <strong>React Flow</strong> will mount here (next step after R5). Use the
+                        <strong>ELK → SVG</strong> tab for ELK layout preview from the same IR as R4; pipeline sections document R0–R4.
+                    </p>
                 </div>
                 <details class="view-tune-panel" id="viewTunePanel">
                     <summary>Pan / zoom tune (dev)</summary>

@@ -159,10 +159,11 @@
             '" height="' +
             vbH +
             '" fill="#fafafa"/>' +
-            '<g class="elk-layer-edges">' +
-            edgePaths +
-            '</g><g class="elk-layer-nodes">' +
+            /** Nodes first, edges last — SVG paint order so paths are not buried under rects. */
+            '<g class="elk-layer-nodes">' +
             nodeMarkup +
+            '</g><g class="elk-layer-edges" fill="none" stroke-linecap="round">' +
+            edgePaths +
             '</g></svg>'
         );
     }
