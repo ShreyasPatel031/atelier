@@ -1,36 +1,69 @@
-# List Parsers Module Documentation
-
-The `list_parsers` module is a crucial component within the `core_output_parsers` library, designed to effectively parse various list formats from raw text output, typically originating from Large Language Models (LLMs). This module provides specialized parsers to convert unstructured text lists into structured data, making it easier to integrate LLM outputs into applications.
-
-## Architecture Overview
-
-The `list_parsers` module primarily consists of a single sub-module, `list_format_parsers`, which encapsulates different strategies for parsing common list formats. These parsers inherit from a common `ListOutputParser` base class (defined in [base_output_parsers.md](base_output_parsers.md)) to ensure consistent behavior and a unified interface.
+# list_parsers
+This module provides various output parsers for converting model output into different list formats, including comma-separated, numbered, and Markdown lists.
 
 <!-- DIAGRAM_JSON
 {
-    "direction": "TD",
-    "nodes": [
-        {"id": "list_format_parsers", "label": "List Format Parsers", "type": "module", "link": "list_format_parsers.md"}
-    ],
-    "edges": [],
-    "groups": []
+  "nodes": [
+    {
+      "id": "ListOutputParser",
+      "label": "ListOutputParser",
+      "type": "class"
+    },
+    {
+      "id": "CommaSeparatedListOutputParser",
+      "label": "CommaSeparatedListOutputParser",
+      "type": "class"
+    },
+    {
+      "id": "NumberedListOutputParser",
+      "label": "NumberedListOutputParser",
+      "type": "class"
+    },
+    {
+      "id": "MarkdownListOutputParser",
+      "label": "MarkdownListOutputParser",
+      "type": "class"
+    }
+  ],
+  "edges": [
+    {
+      "source": "CommaSeparatedListOutputParser",
+      "target": "ListOutputParser",
+      "type": "inherits"
+    },
+    {
+      "source": "NumberedListOutputParser",
+      "target": "ListOutputParser",
+      "type": "inherits"
+    },
+    {
+      "source": "MarkdownListOutputParser",
+      "target": "ListOutputParser",
+      "type": "inherits"
+    }
+  ],
+  "groups": [
+    {
+      "id": "list_parsers_module",
+      "label": "list_parsers",
+      "nodes": [
+        "CommaSeparatedListOutputParser",
+        "NumberedListOutputParser",
+        "MarkdownListOutputParser"
+      ]
+    }
+  ]
 }
 -->
-
 ```mermaid
-graph TD
-    list_format_parsers[List Format Parsers]
+flowchart TD
+    subgraph list_parsers
+        A[CommaSeparatedListOutputParser]
+        B[NumberedListOutputParser]
+        C[MarkdownListOutputParser]
+    end
 
-    click list_format_parsers "list_format_parsers.md" "View List Format Parsers Module"
+    A -->|"implements"| D[ListOutputParser]
+    B -->|"implements"| D
+    C -->|"implements"| D
 ```
-
-## Sub-modules
-
-### [List Format Parsers](list_format_parsers.md)
-This sub-module contains the core logic for parsing different types of lists. It includes implementations for:
-
-*   `CommaSeparatedListOutputParser`: Handles lists where items are separated by commas.
-*   `NumberedListOutputParser`: Parses lists that follow a numbered format (e.g., `1. Item One`).
-*   `MarkdownListOutputParser`: Extracts items from Markdown-formatted lists (e.g., `- Item One`).
-
-Each parser is designed to extract list items robustly, handling variations in formatting and whitespace. This ensures that the output from LLMs can be reliably consumed and processed downstream.

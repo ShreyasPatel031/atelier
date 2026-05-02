@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Edge hover harness (Playwright)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11.9.0/dist/mermaid.min.js"></script>
+    <style>
+        #mermaid-diagram svg g.edgePath path,
+        #mermaid-diagram svg g.edgePath line,
+        #mermaid-diagram svg g.edgePath polyline,
+        #mermaid-diagram svg g.edgePaths > path,
+        #mermaid-diagram svg g.edgePaths > line,
+        #mermaid-diagram svg g.edgePaths > polyline {
+            transition: stroke-width 0.12s ease, stroke 0.12s ease;
+        }
+        #mermaid-diagram svg g.edgePath path,
+        #mermaid-diagram svg g.edgePath line,
+        #mermaid-diagram svg g.edgePath polyline,
+        #mermaid-diagram svg g.edgePath polygon,
+        #mermaid-diagram svg g.edgePaths > path,
+        #mermaid-diagram svg g.edgePaths > line,
+        #mermaid-diagram svg g.edgePaths > polyline,
+        #mermaid-diagram svg g.edgePaths > polygon {
+            pointer-events: stroke;
+        }
+    </style>
+</head>
+<body>
+    <div id="mermaid-diagram"></div>
+    <p id="status">Rendering…</p>
+    <script>
+        /** Keep behavior aligned with demo/index.html (edge hover only). */
+        const DIAGRAM_HOVER_WIDTH_FACTOR = 2;
+
+        function collectDiagramEdgeHoverTargets(edgeG) {
+            return [...edgeG.querySelectorAll('path, line, polyline, polygon')].filter((el) => {
+                if (el.closest('defs')) return false;
+                if (el.classList.contains('edge-hit-area')) return false;
+                return true;
+            });
+        }
+
+        function ensureDiagramEdgePointerEvents(edgeG) {
+            if (!edgeG) return;
+            edgeG.querySelectorAll('path.edge-hit-area').forEach((el) => el.remove());
+            edgeG.querySelectorAll('path, line, polyline, polygon').forEach((el) => {
+                if (el.closest('defs')) return;
+                if (el.classList.contains('edge-hit-area')) return;
+                el.style.setProperty('pointer-events', 'stroke');
+            });
+            const pathNodes = edgeG.classList && edgeG.classList.contains('edgePaths')
+                ? [...edgeG.querySelectorAll(':scope > path')].filter(
+                      (path) => !path.classList.contains('edge-hit-area') && !(path.closest && path.closest('defs'))
+                  )
+                : [...edgeG.querySelectorAll('path:not(.edge-hit-area)')].filter(
+                      (path) => !(path.closest && path.closest('defs'))
+                  );
+            pathNodes.forEach((path) => {
+                const hit = path.cloneNode(true);
+                hit.removeAttribute('id');
+                hit.removeAttribute('marker-start');
+                hit.removeAttribute('marker-end');
+                hit.removeAttribute('marker-mid');
+                hit.removeAttribute('style');
+                hit.setAttribute('class', 'edge-hit-area');
+                const hitPx = 14;
+                hit.style.setProperty('stroke', 'transparent', 'important');
+                hit.style.setProperty('fill', 'none', 'important');
+                hit.style.setProperty('stroke-width', `${hitPx}px`, 'important');
+                hit.style.setProperty('pointer-events', 'stroke', 'important');
+                hit.style.setProperty('stroke-opacity', '0', 'important');
+                path.insertAdjacentElement('afterend', hit);
+            });
+        }
+
+        function ensureDiagramHoverStrokeWidthCache(el) {
+            if (el.dataset.diagramStrokeHov) return;
+            let defStr = window.getComputedStyle(el).strokeWidth || '';
+            if (!defStr || parseFloat(defStr) === 0) {
+                const a = el.getAttribute('stroke-width');
+                defStr = a ? `${parseFloat(a)}px` : '1px';
+            }
+            let w = parseFloat(defStr);
+            if (!w || Number.isNaN(w)) w = 1.5;
+            const suf = String(defStr).replace(/^[\d.\s-]+/, '').trim() || 'px';
+            el.dataset.diagramStrokeDef = defStr;
+            el.dataset.diagramStrokeHov = String(w * DIAGRAM_HOVER_WIDTH_FACTOR) + suf;
+        }
+
+        function applyDiagramHoverStroke(elements, useHoverWidth) {
+            elements.forEach((el) => {
+                if (!el || !el.isConnected) return;
+                ensureDiagramHoverStrokeWidthCache(el);
+                const key = useHoverWidth ? 'diagramStrokeHov' : 'diagramStrokeDef';
+                const val = el.dataset[key];
+                if (val) el.style.setProperty('stroke-width', val, 'important');
+            });
+        }
+
+        function resolveVisibleEdgePathFromPointerTarget(t, edgePathsRoot) {
+            if (!t || !edgePathsRoot || !edgePathsRoot.contains(t)) return null;
+            if (t.closest && t.closest('defs')) return null;
+            if (!t.tagName || t.tagName.toLowerCase() !== 'path') return null;
+            if (t.classList.contains('edge-hit-area')) {
+                const prev = t.previousElementSibling;
+                if (
+                    prev &&
+                    prev.tagName &&
+                    prev.tagName.toLowerCase() === 'path' &&
+                    !prev.classList.contains('edge-hit-area')
+                )
+                    return prev;
+                return null;
+            }
+            return t;
+        }
+
+        function collectDiagramFlatEdgeHoverTargets(visiblePath) {
+            return visiblePath ? [visiblePath] : [];
+        }
+
+        function attachDiagramEdgeHoverStrokeFlat(edgePathsRoot) {
+            ensureDiagramEdgePointerEvents(edgePathsRoot);
+            edgePathsRoot.addEventListener(
+                'mouseover',
+                (e) => {
+                    const cur = resolveVisibleEdgePathFromPointerTarget(e.target, edgePathsRoot);
+                    if (!cur) return;
+                    const prev = resolveVisibleEdgePathFromPointerTarget(e.relatedTarget, edgePathsRoot);
+                    if (prev === cur) return;
+                    const targets = collectDiagramFlatEdgeHoverTargets(cur);
+                    applyDiagramHoverStroke(targets, true);
+                    edgePathsRoot._diagramEdgeHoverTargets = targets;
+                },
+                false
+            );
+            edgePathsRoot.addEventListener(
+                'mouseout',
+                (e) => {
+                    const cur = resolveVisibleEdgePathFromPointerTarget(e.target, edgePathsRoot);
+                    if (!cur) return;
+                    const next = resolveVisibleEdgePathFromPointerTarget(e.relatedTarget, edgePathsRoot);
+                    if (next === cur) return;
+                    const targets =
+                        edgePathsRoot._diagramEdgeHoverTargets && edgePathsRoot._diagramEdgeHoverTargets.length
+                            ? edgePathsRoot._diagramEdgeHoverTargets
+                            : collectDiagramFlatEdgeHoverTargets(cur);
+                    edgePathsRoot._diagramEdgeHoverTargets = null;
+                    applyDiagramHoverStroke(targets, false);
+                },
+                false
+            );
+        }
+
+        function attachDiagramEdgeHoverStroke(svg) {
+            if (!svg) return;
+            const legacy = svg.querySelectorAll('g.edgePath');
+            if (legacy.length) {
+                legacy.forEach((g) => {
+                    ensureDiagramEdgePointerEvents(g);
+                    g.addEventListener(
+                        'mouseover',
+                        (e) => {
+                            if (!g.contains(e.target)) return;
+                            if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+                            const targets = collectDiagramEdgeHoverTargets(g);
+                            applyDiagramHoverStroke(targets, true);
+                            g._diagramEdgeHoverTargets = targets;
+                        },
+                        false
+                    );
+                    g.addEventListener(
+                        'mouseout',
+                        (e) => {
+                            if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+                            const targets =
+                                g._diagramEdgeHoverTargets && g._diagramEdgeHoverTargets.length
+                                    ? g._diagramEdgeHoverTargets
+                                    : collectDiagramEdgeHoverTargets(g);
+                            g._diagramEdgeHoverTargets = null;
+                            applyDiagramHoverStroke(targets, false);
+                        },
+                        false
+                    );
+                });
+                return;
+            }
+            const edgePathsRoot = svg.querySelector('g.edgePaths');
+            if (edgePathsRoot) attachDiagramEdgeHoverStrokeFlat(edgePathsRoot);
+        }
+
+        async function main() {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'base',
+                securityLevel: 'loose',
+                themeVariables: {
+                    primaryColor: '#0039A6',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#002f85',
+                    lineColor: '#808183',
+                    clusterBkg: '#ebecee',
+                    clusterBorder: '#A7A9AC',
+                    edgeLabelBackground: '#ffffff',
+                    edgeLabelColor: '#000000',
+                    mainBkg: '#ffffff'
+                },
+                flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis', padding: 12, nodeSpacing: 56, rankSpacing: 64, diagramPadding: 16 },
+            });
+            const code = 'graph LR\n    A[A] --> B[B]';
+            const id = 'harness-' + Date.now();
+            const { svg } = await mermaid.render(id, code);
+            const container = document.getElementById('mermaid-diagram');
+            container.innerHTML = svg;
+            const svgEl = container.querySelector('svg');
+            attachDiagramEdgeHoverStroke(svgEl);
+            document.getElementById('status').textContent = 'Ready';
+            window.__edgeHarnessReady = true;
+        }
+        main().catch((e) => {
+            document.getElementById('status').textContent = 'Error: ' + e.message;
+            console.error(e);
+        });
+    </script>
+</body>
+</html>

@@ -1,56 +1,68 @@
-# LongT5 Models Documentation
-
-## Introduction and Purpose
-
-The `longt5_models` module provides various implementations of the LongT5 architecture, a transformer-based model specifically designed to efficiently handle longer input sequences compared to standard T5 models. It offers different configurations to support a range of natural language processing tasks, including conditional generation, generic encoder-decoder operations, and encoder-only functionalities.
-
-## Architecture Overview
-
-The LongT5 module is structured into three primary sub-modules, each catering to different use cases and offering distinct functionalities:
-*   **LongT5 Base Model**: Implements the fundamental encoder-decoder architecture.
-*   **LongT5 Conditional Generation**: Extends the base model with a language modeling head for sequence-to-sequence generation.
-*   **LongT5 Encoder Model**: Provides an encoder-only configuration for tasks requiring only encoding input sequences.
+# LongT5 Models
+This module provides the core LongT5 model implementations, including variants for conditional generation, the base encoder-decoder architecture, and an encoder-only model, all built upon a shared LongT5 transformer stack for processing long input sequences efficiently.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "longt5_base_model", "label": "LongT5 Base Model", "type": "module", "link": "longt5_base_model.md"},
-        {"id": "longt5_conditional_generation", "label": "LongT5 Conditional Generation", "type": "module", "link": "longt5_conditional_generation.md"},
-        {"id": "longt5_encoder_model", "label": "LongT5 Encoder Model", "type": "module", "link": "longt5_encoder_model.md"}
+        {"id": "conditional_generation", "label": "LongT5ForConditionalGeneration", "type": "component", "link": null},
+        {"id": "base_model", "label": "LongT5Model", "type": "component", "link": null},
+        {"id": "encoder_only_model", "label": "LongT5EncoderModel", "type": "component", "link": null},
+        {"id": "longt5_stack", "label": "LongT5Stack (Encoder/Decoder)", "type": "component", "link": null},
+        {"id": "lm_head", "label": "LM Head (Output Layer)", "type": "component", "link": null},
+        {"id": "shared_embeddings", "label": "Shared Token Embeddings", "type": "component", "link": null},
+        {"id": "longt5_config", "label": "LongT5Config", "type": "component", "link": null}
     ],
     "edges": [
-        {"source": "longt5_conditional_generation", "target": "longt5_base_model", "label": "utilizes"},
-        {"source": "longt5_base_model", "target": "longt5_encoder_model", "label": "includes"}
+        {"source": "conditional_generation", "target": "longt5_stack", "label": "uses encoder/decoder"},
+        {"source": "base_model", "target": "longt5_stack", "label": "uses encoder/decoder"},
+        {"source": "encoder_only_model", "target": "longt5_stack", "label": "uses encoder"},
+        {"source": "conditional_generation", "target": "lm_head", "label": "generates logits"},
+        {"source": "conditional_generation", "target": "shared_embeddings", "label": "initializes with"},
+        {"source": "base_model", "target": "shared_embeddings", "label": "initializes with"},
+        {"source": "encoder_only_model", "target": "shared_embeddings", "label": "initializes with"},
+        {"source": "conditional_generation", "target": "longt5_config", "label": "configures via"},
+        {"source": "base_model", "target": "longt5_config", "label": "configures via"},
+        {"source": "encoder_only_model", "target": "longt5_config", "label": "configures via"}
     ],
-    "groups": []
+    "groups": [
+        {"id": "longt5_model_implementations", "label": "LongT5 Model Implementations", "role": "generative", "nodes": ["conditional_generation", "base_model", "encoder_only_model"]},
+        {"id": "core_components", "label": "Core Building Blocks", "role": "analytical", "nodes": ["longt5_stack", "lm_head", "shared_embeddings", "longt5_config"]}
+    ]
 }
 -->
-
 ```mermaid
-graph TD
-    longt5_base_model[LongT5 Base Model]
-    longt5_conditional_generation[LongT5 Conditional Generation]
-    longt5_encoder_model[LongT5 Encoder Model]
+flowchart TD
+    subgraph longt5_model_implementations["LongT5 Model Implementations"]
+        conditional_generation[''LongT5ForConditionalGeneration'']
+        base_model[''LongT5Model'']
+        encoder_only_model[''LongT5EncoderModel'']
+    end
 
-    longt5_conditional_generation -- utilizes --> longt5_base_model
-    longt5_base_model -- includes --> longt5_encoder_model
+    subgraph core_components["Core Building Blocks"]
+        longt5_stack["LongT5Stack (Encoder/Decoder)"]
+        lm_head["LM Head (Output Layer)"]
+        shared_embeddings["Shared Token Embeddings"]
+        longt5_config["LongT5Config"]
+    end
 
-    click longt5_base_model "longt5_base_model.md" "View LongT5 Base Model Documentation"
-    click longt5_conditional_generation "longt5_conditional_generation.md" "View LongT5 Conditional Generation Documentation"
-    click longt5_encoder_model "longt5_encoder_model.md" "View LongT5 Encoder Model Documentation"
+    conditional_generation -->|''uses encoder/decoder''| longt5_stack
+    base_model -->|''uses encoder/decoder''| longt5_stack
+    encoder_only_model -->|''uses encoder''| longt5_stack
+
+    conditional_generation -->|''generates logits''| lm_head
+
+    conditional_generation -->|''initializes with''| shared_embeddings
+    base_model -->|''initializes with''| shared_embeddings
+    encoder_only_model -->|''initializes with''| shared_embeddings
+
+    conditional_generation -.->|''configures via''| longt5_config
+    base_model -.->|''configures via''| longt5_config
+    encoder_only_model -.->|''configures via''| longt5_config
+
+    classDef generative fill:#fed7aa,stroke:#ea580c,stroke-width:1px,color:#7c2d12
+    classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
+
+    class conditional_generation,base_model,encoder_only_model generative
+    class longt5_stack,lm_head,shared_embeddings,longt5_config analytical
 ```
-
-## High-Level Functionality of Sub-modules
-
-### LongT5 Conditional Generation
-This sub-module contains the `LongT5ForConditionalGeneration` class, which extends the base LongT5 model with a language modeling head for sequence-to-sequence conditional generation tasks such as summarization, translation, or text generation. It is designed for scenarios where the model needs to produce a coherent output sequence based on an input sequence.
-For more in-depth information, refer to [longt5_conditional_generation.md](longt5_conditional_generation.md).
-
-### LongT5 Base Model
-This sub-module houses the `LongT5Model` class, which implements the complete encoder-decoder architecture of LongT5. It serves as a foundational component for tasks that require both encoding an input sequence and decoding an output sequence but without an additional task-specific head.
-For more in-depth information, refer to [longt5_base_model.md](longt5_base_model.md).
-
-### LongT5 Encoder Model
-This sub-module includes the `LongT5EncoderModel` class, providing an encoder-only version of the LongT5 architecture. It is particularly useful for tasks like feature extraction, text embedding generation, or understanding input representations where no explicit decoding is required.
-For more in-depth information, refer to [longt5_encoder_model.md](longt5_encoder_model.md).

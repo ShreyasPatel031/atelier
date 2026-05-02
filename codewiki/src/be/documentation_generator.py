@@ -286,7 +286,7 @@ This is a quick overview generated from the module structure. Detailed documenta
         
         # Check for parallel mode (can be disabled via config if needed)
         use_parallel = getattr(self.config, 'parallel_processing', True)
-        max_concurrent = getattr(self.config, 'max_concurrent_modules', 10)  # High concurrency with paid API
+        max_concurrent = getattr(self.config, 'max_concurrent_modules', 16)
 
         if len(module_tree) > 0:
             if use_parallel:
@@ -790,7 +790,7 @@ This is a quick overview generated from the module structure. Detailed documenta
             # This ensures all modules in tree have corresponding .md files
             try:
                 from codewiki.src.be.doc_file_sync import run_full_sync
-                sync_result = run_full_sync(working_dir, components)
+                sync_result = run_full_sync(working_dir, components, config=self.config)
                 if sync_result['files_created'] > 0:
                     logger.info(f"[STAGE 4.5] Doc sync created {sync_result['files_created']} missing files")
                 if sync_result['diagrams_updated'] > 0:

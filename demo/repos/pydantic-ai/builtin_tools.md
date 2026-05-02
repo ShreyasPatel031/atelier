@@ -1,49 +1,59 @@
 # Built-in Tools Module
 
-## Introduction
-The `builtin_tools` module provides a collection of essential tools that agents can utilize to interact with their environment, execute code, manage memory, and search through files. These tools are fundamental for extending the capabilities of AI agents, allowing them to perform complex tasks by integrating with external functionalities and data sources.
+The `builtin_tools` module provides a collection of essential, pre-integrated functionalities that significantly extend the capabilities of AI agents. These tools allow agents to interact with their environment, manage information, execute code, and maintain conversational context, enabling more sophisticated and versatile AI applications.
 
-## Architecture
-The `builtin_tools` module is composed of several specialized tools, each designed to handle a specific type of interaction or data processing. Each tool functions as a distinct component that agents can invoke based on their requirements.
+## Architecture Overview
+
+The `builtin_tools` module is organized into two primary functional sub-modules: `data_retrieval_tools` and `agent_action_tools`. These sub-modules encapsulate different categories of tools, ensuring a clear separation of concerns and enhancing maintainability.
+
+- **Data Retrieval Tools**: Focuses on enabling agents to fetch information from external sources (like URLs) and perform intelligent searches within uploaded files for Retrieval-Augmented Generation (RAG).
+- **Agent Action Tools**: Provides agents with the ability to execute code and manage their internal memory for more dynamic and stateful interactions.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "code_execution_tool", "label": "Code Execution Tool", "type": "module", "link": "code_execution_tool.md"},
-        {"id": "file_search_tool", "label": "File Search Tool", "type": "module", "link": "file_search_tool.md"},
-        {"id": "memory_tool", "label": "Memory Tool", "type": "module", "link": "memory_tool.md"},
-        {"id": "url_context_tool", "label": "URL Context Tool", "type": "module", "link": "url_context_tool.md"}
+        {"id": "data_retrieval_tools", "label": "Data Retrieval Tools", "type": "module", "link": "data_retrieval_tools.md"},
+        {"id": "agent_action_tools", "label": "Agent Action Tools", "type": "module", "link": "agent_action_tools.md"}
     ],
-    "edges": [],
-    "groups": []
+    "edges": [
+        {"source": "data_retrieval_tools", "target": "agent_action_tools", "label": "provides context to"}
+    ],
+    "groups": [
+        {
+            "id": "information_gathering",
+            "label": "Information Gathering",
+            "role": "data",
+            "nodes": ["data_retrieval_tools"]
+        },
+        {
+            "id": "agent_capabilities",
+            "label": "Agent Capabilities",
+            "role": "generative",
+            "nodes": ["agent_action_tools"]
+        }
+    ]
 }
 -->
 ```mermaid
-graph TD
-    subgraph Built-in Tools
-        code_execution_tool[Code Execution Tool]
-        file_search_tool[File Search Tool]
-        memory_tool[Memory Tool]
-        url_context_tool[URL Context Tool]
+flowchart TD
+    subgraph information_gathering["Information Gathering"]
+        data_retrieval_tools["Data Retrieval Tools"]
     end
 
-    click code_execution_tool "code_execution_tool.md" "View Code Execution Tool Documentation"
-    click file_search_tool "file_search_tool.md" "View File Search Tool Documentation"
-    click memory_tool "memory_tool.md" "View Memory Tool Documentation"
-    click url_context_tool "url_context_tool.md" "View URL Context Tool Documentation"
+    subgraph agent_capabilities["Agent Capabilities"]
+        agent_action_tools["Agent Action Tools"]
+    end
+
+    data_retrieval_tools -->|"provides context to"| agent_action_tools
+
+    click data_retrieval_tools "data_retrieval_tools.md" "View Data Retrieval Tools"
+    click agent_action_tools "agent_action_tools.md" "View Agent Action Tools"
 ```
 
-## Sub-modules and Functionality
+### Sub-modules
 
-### [Code Execution Tool](code_execution_tool.md)
-This tool empowers agents to execute code, providing a powerful mechanism for dynamic problem-solving and interaction with computational environments. It is supported by several leading AI providers.
+This module contains the following sub-modules:
 
-### [File Search Tool](file_search_tool.md)
-The File Search Tool offers a fully managed Retrieval-Augmented Generation (RAG) system, enabling agents to search through uploaded files using vector search. It handles file storage, chunking, embedding generation, and context injection.
-
-### [Memory Tool](memory_tool.md)
-The Memory Tool provides agents with the capability to manage and utilize memory during their operations. This is crucial for maintaining context and improving performance in multi-turn interactions.
-
-### [URL Context Tool](url_context_tool.md)
-This tool is a deprecated alias for `WebFetchTool`. It is included for backward compatibility, allowing older serialized payloads to be deserialized correctly. Developers should use `WebFetchTool` for new implementations.
+*   [Agent Action Tools](agent_action_tools.md): Tools for agents to execute code and manage memory.
+*   [Data Retrieval Tools](data_retrieval_tools.md): Tools for fetching data from URLs and searching files.

@@ -2,7 +2,13 @@ from dataclasses import dataclass
 import argparse
 import os
 import sys
+from pathlib import Path
 from dotenv import load_dotenv
+
+# `config.py` lives at `codewiki/src/config.py` — repo root is three levels up.
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+# `override=True`: a stale `export GEMINI_API_KEY=...` in the shell must not win over the repo .env
+load_dotenv(_REPO_ROOT / ".env", override=True)
 load_dotenv()
 
 # Constants

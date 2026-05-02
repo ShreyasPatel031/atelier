@@ -1,74 +1,88 @@
 # Concurrency Management Module
 
-## Introduction
+The `concurrency_management` module provides robust mechanisms for controlling the number of simultaneous operations within the system. Its core component, `ConcurrencyLimiter`, is essential for preventing resource exhaustion, ensuring system stability under heavy load, and offering valuable observability into waiting and running tasks.
 
-The `concurrency_management` module is a critical component within the `pydantic_ai_slim` framework, primarily responsible for controlling the number of concurrent operations to prevent resource exhaustion and ensure stable system performance. It provides robust mechanisms for limiting ongoing tasks, queueing waiting operations, and offering observability into concurrency patterns.
+This module is particularly crucial in AI agents and model interactions, where multiple requests or tool calls might run concurrently. By managing concurrency, the system can gracefully handle peak loads and provide insights into bottlenecks.
 
-## Core Functionality
+## Core Component: ConcurrencyLimiter
 
-This module's core functionality revolves around the `ConcurrencyLimiter` class, which acts as a sophisticated wrapper around `anyio.CapacityLimiter`.
+The `ConcurrencyLimiter` class is a high-level concurrency control mechanism built upon `anyio`'s `CapacityLimiter`. It enhances basic capacity limiting with features specifically designed for observability and queue management.
 
-### `ConcurrencyLimiter`
+### Functionality
 
-The `ConcurrencyLimiter` class provides the following key features:
+*   **Limit Concurrent Operations**: Defines a `max_running` limit, ensuring that no more than a specified number of operations execute simultaneously.
+*   **Queue Management**: Optionally defines a `max_queued` limit, which prevents an unbounded queue of waiting operations. If the queue depth exceeds `max_queued`, a `ConcurrencyLimitExceeded` exception is raised, preventing the system from being overwhelmed.
+*   **Observability**: Integrates with OpenTelemetry to create spans when an operation has to wait for an available slot. This provides critical visibility into where time is spent waiting for resources within asynchronous workflows.
+*   **Dynamic Configuration**: Can be initialized directly with `max_running` and `max_queued`, or configured from a `ConcurrencyLimit` object (if a more complex configuration is needed, though `ConcurrencyLimit` itself is not defined in this module).
+*   **Metrics**: Provides properties (`waiting_count`, `running_count`, `available_count`, `max_running`) to programmatically monitor the current state of the limiter.
 
-*   **Concurrency Control**: Limits the maximum number of operations that can run simultaneously (`max_running`).
-*   **Queue Management**: Optionally limits the number of operations that can be queued while waiting for an available slot (`max_queued`). If this limit is exceeded, a `ConcurrencyLimitExceeded` exception is raised.
-*   **Observability**: Integrates with OpenTelemetry to create spans when operations are forced to wait, providing insights into potential bottlenecks and performance characteristics.
-*   **Dynamic Initialization**: Can be initialized directly with `max_running` and `max_queued` or via a `ConcurrencyLimit` configuration object using the `from_limit` class method.
-*   **Status Reporting**: Provides properties to query the current state, such as `waiting_count`, `running_count`, `available_count`, and `max_running`.
+### How It Works
 
-**Key Methods and Properties:**
+1.  **Initialization**: A `ConcurrencyLimiter` is created with a `max_running` value and optional `max_queued`, `name`, and an OpenTelemetry `tracer`.
+2.  **Acquiring a Slot**: When an operation needs to run, it calls `acquire(source)`.
+    *   It first attempts to acquire a slot immediately.
+    *   If no slot is available, it checks if the `max_queued` limit has been reached. If so, it raises `ConcurrencyLimitExceeded`.
+    *   The operation then registers itself as 'waiting' and creates an OpenTelemetry span before blocking until a slot becomes available.
+3.  **Releasing a Slot**: Once an operation completes (successfully or with an error), it calls `release()`, making its slot available for other waiting operations.
 
-*   `__init__(max_running, *, max_queued=None, name=None, tracer=None)`: Initializes the limiter with concurrency and queue limits, an optional name for identification, and an OpenTelemetry tracer.
-*   `from_limit(limit, *, name=None, tracer=None)`: A class method to create a `ConcurrencyLimiter` instance from either an integer (for `max_running`) or a `ConcurrencyLimit` object.
-*   `acquire(source)`: Attempts to acquire a concurrency slot. If no slot is immediately available, it increments the `waiting_count`, creates an OpenTelemetry span to track the waiting period, and blocks until a slot becomes free. If `max_queued` is set and exceeded, it raises `ConcurrencyLimitExceeded`.
-*   `release()`: Releases an acquired slot, making it available for other operations.
-*   `name`: (Property) The optional name given to the limiter.
-*   `waiting_count`: (Property) The current number of operations waiting to acquire a slot.
-*   `running_count`: (Property) The current number of operations actively using a slot.
-*   `available_count`: (Property) The number of slots currently available.
-*   `max_running`: (Property) The total number of concurrent operations allowed.
-
-## Architecture and Component Relationships
-
-The `ConcurrencyLimiter` internally leverages `anyio.CapacityLimiter` for the fundamental concurrency control and `anyio.Lock` to safely manage the `_waiting_count` and enforce `max_queued` limits in an asynchronous environment. It also interacts with the OpenTelemetry tracing system to provide detailed observability into operations that contend for resources.
+## Architecture Diagram
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "concurrency_limiter", "label": "ConcurrencyLimiter", "type": "component", "link": null},
-        {"id": "anyio_lib", "label": "anyio Library", "type": "external", "link": null},
-        {"id": "opentelemetry_lib", "label": "OpenTelemetry Library", "type": "external", "link": null},
-        {"id": "concurrency_limit_exceeded", "label": "ConcurrencyLimitExceeded", "type": "external", "link": "pydantic_ai_core.md"},
-        {"id": "model_concurrency_module", "label": "Model Concurrency Module", "type": "external", "link": "model_concurrency.md"}
+        {"id": "concurrency_limiter_class", "label": "ConcurrencyLimiter Class", "type": "component", "link": null},
+        {"id": "acquire_method", "label": "Acquire Slot", "type": "component", "link": null},
+        {"id": "release_method", "label": "Release Slot", "type": "component", "link": null},
+        {"id": "monitor_status", "label": "Monitor Limiter Status", "type": "component", "link": null},
+        {"id": "anyio_capacity_limiter", "label": "anyio.CapacityLimiter", "type": "external", "link": null},
+        {"id": "opentelemetry_tracer", "label": "OpenTelemetry Tracer", "type": "external", "link": null},
+        {"id": "concurrency_limit_exceeded", "label": "ConcurrencyLimitExceeded Exception", "type": "external", "link": "exceptions.md"},
+        {"id": "asynchronous_utilities", "label": "Asynchronous Utilities Module", "type": "external", "link": "asynchronous_utilities.md"},
+        {"id": "model_concurrency_limiting", "label": "Model Concurrency Limiting", "type": "external", "link": "model_utilities.md"}
     ],
     "edges": [
-        {"source": "concurrency_limiter", "target": "anyio_lib"},
-        {"source": "concurrency_limiter", "target": "opentelemetry_lib"},
-        {"source": "concurrency_limiter", "target": "concurrency_limit_exceeded"},
-        {"source": "model_concurrency_module", "target": "concurrency_limiter"}
+        {"source": "concurrency_limiter_class", "target": "anyio_capacity_limiter", "label": "wraps and manages"},
+        {"source": "acquire_method", "target": "concurrency_limiter_class", "label": "requests slot from"},
+        {"source": "release_method", "target": "concurrency_limiter_class", "label": "returns slot to"},
+        {"source": "monitor_status", "target": "concurrency_limiter_class", "label": "reads metrics from"},
+        {"source": "acquire_method", "target": "opentelemetry_tracer", "label": "emits waiting spans to"},
+        {"source": "acquire_method", "target": "concurrency_limit_exceeded", "label": "raises if queue full"},
+        {"source": "asynchronous_utilities", "target": "concurrency_limiter_class", "label": "utilizes for async ops"},
+        {"source": "concurrency_limiter_class", "target": "model_concurrency_limiting", "label": "provides limits for"}
     ],
-    "groups": []
+    "groups": [
+        {
+            "id": "concurrency_flow",
+            "label": "Concurrency Control Flow",
+            "role": "control",
+            "nodes": ["acquire_method", "release_method", "monitor_status"]
+        }
+    ]
 }
 -->
-```mermaid
-graph TD
-    concurrency_limiter[ConcurrencyLimiter]
-    anyio_lib[anyio Library]
-    opentelemetry_lib[OpenTelemetry Library]
-    concurrency_limit_exceeded[ConcurrencyLimitExceeded]
-    model_concurrency_module[Model Concurrency Module]
-
-    concurrency_limiter --> anyio_lib
-    concurrency_limiter --> opentelemetry_lib
-    concurrency_limiter --> concurrency_limit_exceeded
-    model_concurrency_module --> concurrency_limiter
 ```
+```mermaid
+flowchart TD
+    subgraph concurrency_flow["Concurrency Control Flow"]
+        acquire_method["Acquire Slot"]
+        release_method["Release Slot"]
+        monitor_status["Monitor Limiter Status"]
+    end
 
-## How the Module Fits into the Overall System
+    concurrency_limiter_class["ConcurrencyLimiter Class"]
+    anyio_capacity_limiter["anyio.CapacityLimiter"]
+    opentelemetry_tracer["OpenTelemetry Tracer"]
+    concurrency_limit_exceeded["ConcurrencyLimitExceeded Exception"]
+    asynchronous_utilities["Asynchronous Utilities Module"]
+    model_concurrency_limiting["Model Concurrency Limiting"]
 
-The `concurrency_management` module provides a foundational utility for resource governance across the `pydantic_ai_slim` ecosystem. Its `ConcurrencyLimiter` is designed to be integrated wherever asynchronous operations need to be controlled to prevent overload, particularly in scenarios involving external API calls or resource-intensive tasks.
-
-A prime example of its integration is within the [Model Concurrency Module](model_concurrency.md), where it is used to limit the number of simultaneous requests to large language models (LLMs) or other AI services. By centralizing concurrency logic, this module ensures consistent behavior, simplifies resource management, and enhances the reliability and performance of AI agents and applications built with `pydantic_ai_slim`.
+    concurrency_limiter_class --"wraps and manages"--> anyio_capacity_limiter
+    acquire_method --"requests slot from"--> concurrency_limiter_class
+    release_method --"returns slot to"--> concurrency_limiter_class
+    monitor_status --"reads metrics from"--> concurrency_limiter_class
+    acquire_method --"emits waiting spans to"--> opentelemetry_tracer
+    acquire_method --"raises if queue full"--> concurrency_limit_exceeded
+    asynchronous_utilities --"utilizes for async ops"--> concurrency_limiter_class
+    concurrency_limiter_class --"provides limits for"--> model_concurrency_limiting
+```

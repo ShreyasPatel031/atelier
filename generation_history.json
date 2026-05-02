@@ -1,0 +1,125 @@
+[
+  {
+    "timestamp": "2026-04-16T03:02:05.352571",
+    "repo": "crewai",
+    "total_modules": 19,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 2,
+    "issues_by_type": {
+      "missing_title": 1,
+      "missing_description": 1
+    }
+  },
+  {
+    "timestamp": "2026-04-16T05:38:13.230372",
+    "repo": "crewai_dep3",
+    "total_modules": 19,
+    "missing_files": 19,
+    "failure_rate_pct": 100.0,
+    "success_rate_pct": 0.0,
+    "errors": 36,
+    "warnings": 38,
+    "issues_by_type": {
+      "missing_title": 19,
+      "missing_description": 19,
+      "missing_md_file": 19,
+      "missing_diagram": 15,
+      "mermaid_unbalanced_brackets": 2
+    }
+  },
+  {
+    "timestamp": "2026-04-16T05:39:12.805684",
+    "repo": "crewai_dep4",
+    "total_modules": 19,
+    "missing_files": 19,
+    "failure_rate_pct": 100.0,
+    "success_rate_pct": 0.0,
+    "errors": 34,
+    "warnings": 38,
+    "issues_by_type": {
+      "missing_title": 19,
+      "missing_description": 19,
+      "missing_md_file": 19,
+      "missing_diagram": 15
+    }
+  },
+  {
+    "timestamp": "2026-04-16T05:49:38.037786",
+    "repo": "crewai",
+    "total_modules": 62,
+    "missing_files": 5,
+    "failure_rate_pct": 8.06,
+    "success_rate_pct": 91.94,
+    "errors": 21,
+    "warnings": 20,
+    "issues_by_type": {
+      "missing_title": 10,
+      "missing_description": 10,
+      "missing_md_file": 5,
+      "missing_diagram": 14,
+      "mermaid_unbalanced_brackets": 2
+    }
+  },
+  {
+    "timestamp": "2026-04-16T05:50:19.563394",
+    "repo": "crewai",
+    "total_modules": 62,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 2,
+    "warnings": 0,
+    "issues_by_type": {
+      "mermaid_unbalanced_brackets": 2
+    }
+  },
+  {
+    "timestamp": "2026-04-16T06:12:55.672995",
+    "repo": "crewai",
+    "total_modules": 40,
+    "missing_files": 8,
+    "failure_rate_pct": 20.0,
+    "success_rate_pct": 80.0,
+    "errors": 26,
+    "warnings": 18,
+    "issues_by_type": {
+      "missing_title": 9,
+      "missing_description": 9,
+      "missing_md_file": 8,
+      "missing_diagram": 18
+    }
+  },
+  {
+    "timestamp": "2026-04-16T07:14:57.378212",
+    "repo": "crewai",
+    "total_modules": 51,
+    "missing_files": 2,
+    "failure_rate_pct": 3.92,
+    "success_rate_pct": 96.08,
+    "errors": 35,
+    "warnings": 8,
+    "issues_by_type": {
+      "missing_title": 4,
+      "missing_description": 4,
+      "missing_md_file": 2,
+      "missing_diagram": 33
+    }
+  },
+  {
+    "timestamp": "2026-04-16T07:53:35.430742",
+    "repo": "crewai",
+    "total_modules": 71,
+    "missing_files": 1,
+    "failure_rate_pct": 1.41,
+    "success_rate_pct": 98.59,
+    "errors": 2,
+    "warnings": 0,
+    "issues_by_type": {
+      "missing_md_file": 1,
+      "missing_diagram": 1
+    }
+  }
+]

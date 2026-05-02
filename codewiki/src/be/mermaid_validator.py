@@ -1,38 +1,58 @@
 """
 Mermaid Diagram Validator
 
-Validates Mermaid syntax BEFORE rendering to catch errors early in the pipeline.
-Catches issues that would cause the viewer to fail.
-
-Common errors:
-- Wrong comment syntax (% instead of %%)
-- Unbalanced brackets/subgraphs
-- Invalid node IDs
-- Malformed edge labels
+Single source of truth for diagram validity: a long-running Mermaid.js 11
+parser subprocess (the same stack the viewer uses). No regex / character-counting
+heuristics — if ``mermaid.parse`` accepts the diagram, it's valid; if not,
+it's not. The two non-parser checks left are categorical product policy:
+empty input and forbidden diagram types (which Mermaid renders fine but our
+viewer does not).
 """
 
-import re
-import subprocess
+import atexit
 import json
-from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
-from pathlib import Path
-from enum import Enum
 import logging
+import re
+import shutil
+import subprocess
+import threading
+from dataclasses import dataclass, field
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
 
+# ---------------------------------------------------------------------------
+# Error model — only states the real parser (or product policy) can produce.
+# ---------------------------------------------------------------------------
+
+
 class MermaidErrorType(Enum):
-    INVALID_COMMENT = "invalid_comment"       # % instead of %%
-    UNBALANCED_BRACKETS = "unbalanced_brackets"
-    UNBALANCED_SUBGRAPH = "unbalanced_subgraph"
-    INVALID_NODE_ID = "invalid_node_id"       # Special chars in node ID
-    MALFORMED_EDGE_LABEL = "malformed_edge_label"
-    MISSING_DIAGRAM_TYPE = "missing_diagram_type"
-    FORBIDDEN_DIAGRAM_TYPE = "forbidden_diagram_type"
-    SYNTAX_ERROR = "syntax_error"
-    EMPTY_DIAGRAM = "empty_diagram"
+    PARSE_ERROR = "parse_error"                    # Real mermaid.parse failure
+    EMPTY_DIAGRAM = "empty_diagram"                # No content at all
+    FORBIDDEN_DIAGRAM_TYPE = "forbidden_diagram_type"  # Renders in Mermaid, not in our viewer
+    PARSER_UNAVAILABLE = "parser_unavailable"      # Node/script missing
+
+
+# Diagram types our viewer does not render. Categorical, not heuristic.
+FORBIDDEN_DIAGRAM_TYPES: Tuple[str, ...] = (
+    "sequenceDiagram",
+    "classDiagram",
+    "stateDiagram-v2",
+    "stateDiagram",
+    "erDiagram",
+    "pie",
+    "gantt",
+    "journey",
+    "gitGraph",
+    "mindmap",
+    "timeline",
+    "quadrantChart",
+    "requirementDiagram",
+    "C4Context",
+)
 
 
 @dataclass
@@ -42,14 +62,14 @@ class MermaidError:
     line_number: Optional[int] = None
     line_content: Optional[str] = None
     fix_suggestion: Optional[str] = None
-    
-    def to_dict(self) -> Dict:
+
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "error_type": self.error_type.value,
             "message": self.message,
             "line_number": self.line_number,
             "line_content": self.line_content,
-            "fix_suggestion": self.fix_suggestion
+            "fix_suggestion": self.fix_suggestion,
         }
 
 
@@ -58,203 +78,272 @@ class MermaidValidationResult:
     valid: bool
     errors: List[MermaidError] = field(default_factory=list)
     warnings: List[MermaidError] = field(default_factory=list)
-    
-    def to_dict(self) -> Dict:
+
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "valid": self.valid,
             "error_count": len(self.errors),
             "warning_count": len(self.warnings),
             "errors": [e.to_dict() for e in self.errors],
-            "warnings": [w.to_dict() for w in self.warnings]
+            "warnings": [w.to_dict() for w in self.warnings],
         }
 
 
-def validate_mermaid(diagram: str, source_info: str = "") -> MermaidValidationResult:
+# ---------------------------------------------------------------------------
+# Long-running Mermaid.js parser subprocess
+# ---------------------------------------------------------------------------
+
+
+def _resolve_batch_script() -> Optional[Path]:
+    """Locate ``scripts/parse_mermaid_batch.mjs`` next to the codewiki checkout."""
+    here = Path(__file__).resolve()
+    for i in range(min(8, len(here.parents))):
+        cand = here.parents[i] / "scripts" / "parse_mermaid_batch.mjs"
+        if cand.is_file():
+            return cand
+    return None
+
+
+class MermaidJsParser:
+    """Long-running Mermaid.js 11 parser subprocess (NDJSON over stdin/stdout).
+
+    Same Mermaid 11.9.0 + happy-dom stack that the viewer uses, so ``parse()``
+    is the only check that can ever disagree with what users actually see.
+    Thread-safe — concurrent callers serialize on a single lock around the pipe.
     """
-    Validate a Mermaid diagram for common syntax errors.
-    
-    Args:
-        diagram: The Mermaid diagram code
-        source_info: Where this diagram came from (for logging)
-    
-    Returns:
-        MermaidValidationResult with any errors found
+
+    def __init__(self) -> None:
+        if not shutil.which("node"):
+            raise RuntimeError(
+                "Node.js is not on PATH; the Mermaid validator needs `node` to run mermaid.parse."
+            )
+        script = _resolve_batch_script()
+        if not script:
+            raise RuntimeError(
+                "scripts/parse_mermaid_batch.mjs not found; cannot start the Mermaid.js parser."
+            )
+        self._script = script
+        self._lock = threading.Lock()
+        # ``stderr=DEVNULL`` so the subprocess never hands a pipe back to the
+        # host — keeps Mermaid's noisy boot warnings out of pytest capture
+        # and avoids dangling fds when the parent exits.
+        self._proc: Optional[subprocess.Popen] = subprocess.Popen(
+            ["node", str(self._script)],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            bufsize=0,
+            cwd=str(script.parent.parent),
+        )
+        ok, err = self.parse("__probe__", "flowchart TD\n    a-->b\n")
+        if not ok:
+            self._shutdown()
+            raise RuntimeError(f"Mermaid.js probe parse failed: {err}")
+
+    def _shutdown(self) -> None:
+        proc = self._proc
+        self._proc = None
+        if proc is None:
+            return
+        try:
+            if proc.stdin:
+                proc.stdin.close()
+        except Exception:
+            pass
+        try:
+            proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            try:
+                proc.wait(timeout=5)
+            except Exception:
+                pass
+
+    def __enter__(self) -> "MermaidJsParser":
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        self._shutdown()
+        return None  # do not suppress exceptions
+
+    def parse(self, diagram_id: str, diagram: str) -> Tuple[bool, Optional[str]]:
+        """Return ``(True, None)`` on success, ``(False, error_message)`` on parse failure."""
+        with self._lock:
+            proc = self._proc
+            if proc is None or proc.stdin is None or proc.stdout is None:
+                raise RuntimeError("Mermaid parser subprocess is not running")
+            payload = json.dumps({"id": diagram_id, "diagram": diagram}, ensure_ascii=False) + "\n"
+            try:
+                proc.stdin.write(payload.encode("utf-8"))
+                proc.stdin.flush()
+            except BrokenPipeError as e:
+                raise RuntimeError("Mermaid parser stdin broken (process dead?)") from e
+
+            line = proc.stdout.readline()
+            if not line:
+                raise RuntimeError("Mermaid parser returned no stdout (process exited?)")
+            try:
+                data = json.loads(line.decode("utf-8", errors="replace"))
+            except json.JSONDecodeError as e:
+                raise RuntimeError(f"Bad JSON from mermaid parser: {line[:400]!r}") from e
+            if data.get("ok"):
+                return True, None
+            return False, data.get("error") or "parse failed"
+
+
+# ---------------------------------------------------------------------------
+# Shared parser singleton — survives until process exit.
+# ---------------------------------------------------------------------------
+
+_shared_parser: Optional[MermaidJsParser] = None
+_shared_parser_error: Optional[Exception] = None
+_shared_parser_lock = threading.Lock()
+
+
+def get_shared_parser() -> MermaidJsParser:
+    """Return the lazily-initialized module-level Mermaid.js parser.
+
+    Raises ``RuntimeError`` if Node or the batch script is unavailable; the
+    failure is cached so subsequent calls don't re-attempt the spawn.
+    """
+    global _shared_parser, _shared_parser_error
+    if _shared_parser is not None:
+        return _shared_parser
+    if _shared_parser_error is not None:
+        raise _shared_parser_error
+    with _shared_parser_lock:
+        if _shared_parser is not None:
+            return _shared_parser
+        if _shared_parser_error is not None:
+            raise _shared_parser_error
+        try:
+            _shared_parser = MermaidJsParser()
+        except RuntimeError as e:
+            _shared_parser_error = e
+            raise
+    return _shared_parser
+
+
+def shutdown_shared_parser() -> None:
+    """Tear down the shared parser (mostly for tests / explicit cleanup)."""
+    global _shared_parser, _shared_parser_error
+    with _shared_parser_lock:
+        if _shared_parser is not None:
+            try:
+                _shared_parser._shutdown()
+            except Exception:
+                pass
+        _shared_parser = None
+        _shared_parser_error = None
+
+
+# Always reap the Node subprocess at interpreter exit so test runners and
+# short-lived CLIs don't leave orphans hanging around.
+atexit.register(shutdown_shared_parser)
+
+
+# ---------------------------------------------------------------------------
+# Public validation API — backed by the real parser only.
+# ---------------------------------------------------------------------------
+
+
+def _first_content_line(diagram: str) -> str:
+    for line in diagram.splitlines():
+        s = line.strip()
+        if s and not s.startswith("%%"):
+            return s
+    return ""
+
+
+def validate_mermaid(diagram: str, source_info: str = "") -> MermaidValidationResult:
+    """Validate a single Mermaid diagram body using the real Mermaid.js 11 parser.
+
+    The only non-parser checks are policy:
+      * empty input → ``EMPTY_DIAGRAM``;
+      * forbidden diagram types (``classDiagram``, ``sequenceDiagram``, …) →
+        ``FORBIDDEN_DIAGRAM_TYPE`` warning. Mermaid renders these, but our viewer
+        does not, so we report them even when ``mermaid.parse`` is happy.
+
+    Everything else flows through ``mermaid.parse`` — the histogram only ever
+    contains states the real parser produced.
     """
     result = MermaidValidationResult(valid=True)
-    
+
     if not diagram or not diagram.strip():
         result.valid = False
         result.errors.append(MermaidError(
             error_type=MermaidErrorType.EMPTY_DIAGRAM,
-            message="Empty diagram"
+            message="Empty diagram",
         ))
         return result
-    
-    lines = diagram.split('\n')
-    
-    # Check 1: Diagram type
-    first_content_line = ""
-    for line in lines:
-        stripped = line.strip()
-        if stripped and not stripped.startswith('%%'):
-            first_content_line = stripped
-            break
-    
-    valid_types = ['graph', 'flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram', 'erDiagram', 'pie']
-    forbidden_types = ['sequenceDiagram', 'classDiagram', 'stateDiagram', 'erDiagram', 'pie']  # For our use case
-    
-    has_valid_type = any(first_content_line.startswith(t) for t in valid_types)
-    if not has_valid_type:
-        result.valid = False
-        result.errors.append(MermaidError(
-            error_type=MermaidErrorType.MISSING_DIAGRAM_TYPE,
-            message="Diagram must start with 'graph TD' or 'flowchart TD'",
-            line_number=1,
-            line_content=first_content_line[:50],
-            fix_suggestion="Add 'graph TD' at the start"
-        ))
-    
-    # Check for forbidden types
-    for ftype in forbidden_types:
-        if first_content_line.startswith(ftype):
+
+    first = _first_content_line(diagram)
+    for ftype in FORBIDDEN_DIAGRAM_TYPES:
+        if first.startswith(ftype):
             result.warnings.append(MermaidError(
                 error_type=MermaidErrorType.FORBIDDEN_DIAGRAM_TYPE,
-                message=f"Diagram type '{ftype}' may not render correctly in viewer",
-                line_number=1
+                message=(
+                    f"Diagram type '{ftype}' is not rendered by the viewer "
+                    "(use 'graph' or 'flowchart')"
+                ),
+                line_number=1,
+                line_content=first[:80],
             ))
-    
-    # Check 2: Invalid comments (% instead of %%)
-    for i, line in enumerate(lines, 1):
-        stripped = line.strip()
-        # Check for % that's not %%
-        if stripped.startswith('%') and not stripped.startswith('%%'):
-            result.valid = False
-            result.errors.append(MermaidError(
-                error_type=MermaidErrorType.INVALID_COMMENT,
-                message="Single % is invalid. Use %% for comments",
-                line_number=i,
-                line_content=stripped[:50],
-                fix_suggestion=f"Change '%' to '%%': {stripped.replace('%', '%%', 1)[:50]}"
-            ))
-        
-        # Also check for % in the middle of a line (outside strings)
-        # Look for patterns like "edge1 --> edge2 % comment" 
-        if ' % ' in stripped and not stripped.startswith('%%'):
-            result.valid = False
-            result.errors.append(MermaidError(
-                error_type=MermaidErrorType.INVALID_COMMENT,
-                message="Inline comment with single % is invalid. Use %%",
-                line_number=i,
-                line_content=stripped[:50],
-                fix_suggestion="Use %% for comments or put on separate line"
-            ))
-    
-    # Check 3: Unbalanced brackets
-    open_brackets = diagram.count('[')
-    close_brackets = diagram.count(']')
-    if open_brackets != close_brackets:
-        result.valid = False
-        result.errors.append(MermaidError(
-            error_type=MermaidErrorType.UNBALANCED_BRACKETS,
-            message=f"Unbalanced square brackets: {open_brackets} '[' vs {close_brackets} ']'"
-        ))
-    
-    open_parens = diagram.count('(')
-    close_parens = diagram.count(')')
-    if open_parens != close_parens:
-        result.valid = False
-        result.errors.append(MermaidError(
-            error_type=MermaidErrorType.UNBALANCED_BRACKETS,
-            message=f"Unbalanced parentheses: {open_parens} '(' vs {close_parens} ')'"
-        ))
-    
-    # Check 4: Unbalanced subgraph/end
-    subgraph_count = len(re.findall(r'\bsubgraph\b', diagram, re.IGNORECASE))
-    end_count = len(re.findall(r'^\s*end\s*$', diagram, re.MULTILINE | re.IGNORECASE))
-    if subgraph_count != end_count:
-        result.valid = False
-        result.errors.append(MermaidError(
-            error_type=MermaidErrorType.UNBALANCED_SUBGRAPH,
-            message=f"Unbalanced subgraph/end: {subgraph_count} subgraph vs {end_count} end"
-        ))
-    
-    # Check 5: Invalid node IDs (special characters)
-    node_pattern = r'^\s*([^\[\s\-\>]+)\s*[\[\(]'
-    for i, line in enumerate(lines, 1):
-        match = re.match(node_pattern, line)
-        if match:
-            node_id = match.group(1)
-            # Valid node IDs: alphanumeric and underscores
-            if not re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', node_id):
-                # Skip keywords
-                if node_id.lower() not in ['graph', 'flowchart', 'subgraph', 'end', 'click', 'style']:
-                    result.warnings.append(MermaidError(
-                        error_type=MermaidErrorType.INVALID_NODE_ID,
-                        message=f"Node ID '{node_id}' contains special characters",
-                        line_number=i,
-                        line_content=line.strip()[:50],
-                        fix_suggestion="Use alphanumeric characters and underscores only"
-                    ))
-    
-    # Check 6: Class-diagram inheritance arrows in flowchart/graph (invalid; use classDiagram or -->)
-    if re.search(r'--\|>', diagram) or re.search(r'\.\.\|>', diagram) or re.search(r'<\|--', diagram):
-        result.valid = False
-        result.errors.append(MermaidError(
-            error_type=MermaidErrorType.SYNTAX_ERROR,
-            message="Inheritance arrows (--|>, ..|>, <|--) are for classDiagram only; flowchart cannot parse them",
-            fix_suggestion="Use --> or -.-> with a text label, or switch to classDiagram",
-        ))
+            break
 
-    # Check 7: Malformed edge labels
-    edge_label_pattern = r'\|([^|]*)\|'
-    for i, line in enumerate(lines, 1):
-        for match in re.finditer(edge_label_pattern, line):
-            label = match.group(1)
-            # Check for problematic characters
-            if '"' in label and label.count('"') % 2 != 0:
-                result.warnings.append(MermaidError(
-                    error_type=MermaidErrorType.MALFORMED_EDGE_LABEL,
-                    message=f"Unbalanced quotes in edge label",
-                    line_number=i,
-                    line_content=line.strip()[:50]
-                ))
-    
+    try:
+        parser = get_shared_parser()
+    except RuntimeError as e:
+        result.valid = False
+        result.errors.append(MermaidError(
+            error_type=MermaidErrorType.PARSER_UNAVAILABLE,
+            message=str(e),
+        ))
+        return result
+
+    try:
+        ok, err = parser.parse(source_info or "validate_mermaid", diagram)
+    except RuntimeError as e:
+        result.valid = False
+        result.errors.append(MermaidError(
+            error_type=MermaidErrorType.PARSER_UNAVAILABLE,
+            message=str(e),
+        ))
+        return result
+
+    if not ok:
+        msg = (err or "mermaid.parse failed").strip()
+        line_no: Optional[int] = None
+        m = re.search(r"line\s+(\d+)", msg)
+        if m:
+            try:
+                line_no = int(m.group(1))
+            except ValueError:
+                line_no = None
+        result.valid = False
+        result.errors.append(MermaidError(
+            error_type=MermaidErrorType.PARSE_ERROR,
+            message=msg,
+            line_number=line_no,
+        ))
     return result
 
 
 def validate_markdown_mermaid(markdown: str, source_file: str = "") -> List[MermaidValidationResult]:
-    """
-    Extract and validate all Mermaid diagrams in a markdown file.
-    
-    Returns list of validation results, one per diagram found.
-    """
-    results = []
-    
-    # Find all mermaid code blocks
-    pattern = r'```mermaid\s*([\s\S]*?)```'
-    for i, match in enumerate(re.finditer(pattern, markdown)):
+    """Validate every ```mermaid block in a markdown document."""
+    results: List[MermaidValidationResult] = []
+    pattern = re.compile(r"```mermaid\s*([\s\S]*?)```", re.IGNORECASE)
+    for i, match in enumerate(pattern.finditer(markdown)):
         diagram = match.group(1).strip()
-        result = validate_mermaid(diagram, f"{source_file}:diagram_{i+1}")
-        results.append(result)
-    
+        results.append(validate_mermaid(diagram, f"{source_file}:diagram_{i+1}"))
     return results
 
 
 def validate_module_tree_diagrams(tree_path: Path) -> Dict[str, MermaidValidationResult]:
-    """
-    Validate all diagrams in a module_tree.json file.
-    
-    Args:
-        tree_path: Path to module_tree.json
-    
-    Returns:
-        Dict mapping module path to validation result
-    """
-    results = {}
-    
+    """Validate every Mermaid diagram embedded in a ``module_tree.json``."""
+    results: Dict[str, MermaidValidationResult] = {}
     if not tree_path.exists():
         return results
-    
     try:
         with open(tree_path) as f:
             tree = json.load(f)
@@ -262,49 +351,35 @@ def validate_module_tree_diagrams(tree_path: Path) -> Dict[str, MermaidValidatio
         results["_parse_error"] = MermaidValidationResult(
             valid=False,
             errors=[MermaidError(
-                error_type=MermaidErrorType.SYNTAX_ERROR,
-                message=f"JSON parse error: {e}"
-            )]
+                error_type=MermaidErrorType.PARSE_ERROR,
+                message=f"module_tree.json JSON parse error: {e}",
+            )],
         )
         return results
-    
-    def validate_tree(t, path=""):
-        for name, node in t.items():
+
+    def walk(node_dict: Dict[str, Any], path: str = "") -> None:
+        for name, node in node_dict.items():
             current_path = f"{path}/{name}" if path else name
-            
-            # Check for mermaid field in diagram
-            diagram = node.get("diagram")
-            if diagram:
-                if isinstance(diagram, dict) and "mermaid" in diagram:
-                    mermaid_code = diagram["mermaid"]
-                    result = validate_mermaid(mermaid_code, current_path)
-                    if not result.valid or result.warnings:
-                        results[current_path] = result
-                elif isinstance(diagram, str):
-                    # Raw mermaid string
-                    result = validate_mermaid(diagram, current_path)
-                    if not result.valid or result.warnings:
-                        results[current_path] = result
-            
-            # Recurse into children
-            if "children" in node:
-                validate_tree(node["children"], current_path)
-    
-    validate_tree(tree)
+            diagram = node.get("diagram") if isinstance(node, dict) else None
+            if isinstance(diagram, dict) and "mermaid" in diagram:
+                vr = validate_mermaid(diagram["mermaid"], current_path)
+                if not vr.valid or vr.warnings:
+                    results[current_path] = vr
+            elif isinstance(diagram, str):
+                vr = validate_mermaid(diagram, current_path)
+                if not vr.valid or vr.warnings:
+                    results[current_path] = vr
+            children = node.get("children") if isinstance(node, dict) else None
+            if isinstance(children, dict):
+                walk(children, current_path)
+
+    walk(tree)
     return results
 
 
 def validate_docs_directory(docs_path: Path) -> Dict[str, Any]:
-    """
-    Validate all Mermaid diagrams in a docs directory.
-    
-    Checks:
-    - module_tree.json diagrams
-    - All .md files for embedded mermaid blocks
-    
-    Returns comprehensive validation report.
-    """
-    report = {
+    """Validate every Mermaid diagram in a docs directory (tree + .md files)."""
+    report: Dict[str, Any] = {
         "docs_path": str(docs_path),
         "total_diagrams": 0,
         "valid_diagrams": 0,
@@ -312,39 +387,27 @@ def validate_docs_directory(docs_path: Path) -> Dict[str, Any]:
         "total_errors": 0,
         "total_warnings": 0,
         "errors_by_type": {},
-        "issues": []
+        "issues": [],
     }
-    
-    # Validate module_tree.json diagrams
-    tree_path = docs_path / "module_tree.json"
-    tree_results = validate_module_tree_diagrams(tree_path)
-    
-    for path, result in tree_results.items():
+
+    def absorb(source: str, vr: MermaidValidationResult) -> None:
         report["total_diagrams"] += 1
-        if result.valid:
+        if vr.valid:
             report["valid_diagrams"] += 1
         else:
             report["invalid_diagrams"] += 1
-        
-        for error in result.errors:
+        for e in vr.errors:
             report["total_errors"] += 1
-            error_type = error.error_type.value
-            report["errors_by_type"][error_type] = report["errors_by_type"].get(error_type, 0) + 1
-            report["issues"].append({
-                "source": f"module_tree:{path}",
-                "severity": "error",
-                **error.to_dict()
-            })
-        
-        for warning in result.warnings:
+            t = e.error_type.value
+            report["errors_by_type"][t] = report["errors_by_type"].get(t, 0) + 1
+            report["issues"].append({"source": source, "severity": "error", **e.to_dict()})
+        for w in vr.warnings:
             report["total_warnings"] += 1
-            report["issues"].append({
-                "source": f"module_tree:{path}",
-                "severity": "warning",
-                **warning.to_dict()
-            })
-    
-    # Validate .md files
+            report["issues"].append({"source": source, "severity": "warning", **w.to_dict()})
+
+    for path, vr in validate_module_tree_diagrams(docs_path / "module_tree.json").items():
+        absorb(f"module_tree:{path}", vr)
+
     for md_file in docs_path.glob("*.md"):
         try:
             content = md_file.read_text()
@@ -353,178 +416,59 @@ def validate_docs_directory(docs_path: Path) -> Dict[str, Any]:
                 "source": str(md_file),
                 "severity": "error",
                 "error_type": "file_read_error",
-                "message": str(e)
+                "message": str(e),
             })
             continue
-        
-        results = validate_markdown_mermaid(content, md_file.name)
-        
-        for i, result in enumerate(results):
-            report["total_diagrams"] += 1
-            if result.valid:
-                report["valid_diagrams"] += 1
-            else:
-                report["invalid_diagrams"] += 1
-            
-            for error in result.errors:
-                report["total_errors"] += 1
-                error_type = error.error_type.value
-                report["errors_by_type"][error_type] = report["errors_by_type"].get(error_type, 0) + 1
-                report["issues"].append({
-                    "source": f"{md_file.name}:diagram_{i+1}",
-                    "severity": "error",
-                    **error.to_dict()
-                })
-            
-            for warning in result.warnings:
-                report["total_warnings"] += 1
-                report["issues"].append({
-                    "source": f"{md_file.name}:diagram_{i+1}",
-                    "severity": "warning",
-                    **warning.to_dict()
-                })
-    
+        for i, vr in enumerate(validate_markdown_mermaid(content, md_file.name)):
+            absorb(f"{md_file.name}:diagram_{i+1}", vr)
+
     return report
 
 
-def fix_mermaid_diagram(diagram: str) -> str:
-    """
-    Attempt to auto-fix common Mermaid syntax errors.
-    
-    Returns the fixed diagram.
-    """
-    fixed = diagram
-    
-    # Fix 1: Single % comments -> %%
-    lines = fixed.split('\n')
-    fixed_lines = []
-    for line in lines:
-        stripped = line.strip()
-        if stripped.startswith('%') and not stripped.startswith('%%'):
-            line = line.replace('%', '%%', 1)
-        if ' % ' in line and not stripped.startswith('%%'):
-            line = line.replace(' % ', ' %% ')
-        fixed_lines.append(line)
-    fixed = '\n'.join(fixed_lines)
-    
-    # Fix 2: Unquoted parentheses in node labels — the #1 failure cause.
-    # Matches:  nodeId[Label (Thing)]  or  nodeId[func()]
-    # but NOT:  nodeId["already quoted"]  or  nodeId[("cylinder")]  or  nodeId(("circle"))
-    def _quote_unquoted_bracket_label(m):
-        prefix = m.group(1)   # e.g. "    nodeId"
-        label = m.group(2)    # e.g. "Label (Thing)"
-        suffix = m.group(3)   # e.g. "]" possibly with ":::class"
-        return f'{prefix}["{label}"]{suffix}'
-
-    fixed = re.sub(
-        r'^(\s*[A-Za-z_][A-Za-z0-9_]*)\[(?!["(])([^\]"]*\([^\]]*)\]((?:::[\w]+)?)',
-        _quote_unquoted_bracket_label,
-        fixed,
-        flags=re.MULTILINE,
-    )
-
-    # Fix 3: Space after pipe in edge labels  -->| "text" |  ->  -->|"text"|
-    fixed = re.sub(r'\|\s+"', '|"', fixed)
-    fixed = re.sub(r'"\s+\|', '"|', fixed)
-
-    # Fix 4: Reverse arrows  <--  <==  <-.->  — swap to forward direction.
-    # Only handles bare arrows (no labels) to avoid breaking edge-label syntax.
-    def _flip_reverse_arrow(m):
-        target = m.group(1).strip()
-        arrow_map = {'<--': '-->', '<==': '==>', '<-.->': '-.->'}
-        arrow = arrow_map.get(m.group(2), m.group(2))
-        source = m.group(3).strip()
-        return f'    {source} {arrow} {target}'
-
-    fixed = re.sub(
-        r'^(\s*[A-Za-z_][A-Za-z0-9_]*)\s+(<--|<==|<-\.->)\s+([A-Za-z_][A-Za-z0-9_]*)$',
-        _flip_reverse_arrow,
-        fixed,
-        flags=re.MULTILINE,
-    )
-
-    # Fix 5: Raw | inside unquoted node labels — replace with "or"
-    def _fix_pipe_in_label(m):
-        prefix = m.group(1)
-        label = m.group(2)
-        suffix = m.group(3)
-        label_fixed = label.replace(' | ', ' or ')
-        return f'{prefix}["{label_fixed}"]{suffix}'
-
-    fixed = re.sub(
-        r'^(\s*[A-Za-z_][A-Za-z0-9_]*)\[(?!")([^\]"]*\|[^\]]*)\]((?:::[\w]+)?)',
-        _fix_pipe_in_label,
-        fixed,
-        flags=re.MULTILINE,
-    )
-
-    return fixed
+# ---------------------------------------------------------------------------
+# CLI: validate a docs directory.
+# ---------------------------------------------------------------------------
 
 
-# CLI interface
 if __name__ == "__main__":
     import sys
-    
+
     logging.basicConfig(level=logging.INFO)
-    
+
     if len(sys.argv) < 2:
-        print("Usage:")
-        print("  python mermaid_validator.py <docs_dir>     - Validate docs directory")
-        print("  python mermaid_validator.py --fix <file>   - Fix and print a .md file")
+        print("Usage: python mermaid_validator.py <docs_dir>")
         sys.exit(1)
-    
-    if sys.argv[1] == "--fix" and len(sys.argv) > 2:
-        # Fix mode
-        file_path = Path(sys.argv[2])
-        content = file_path.read_text()
-        
-        # Find and fix mermaid blocks
-        def fix_block(match):
-            diagram = match.group(1)
-            fixed = fix_mermaid_diagram(diagram)
-            return f"```mermaid\n{fixed}\n```"
-        
-        fixed_content = re.sub(r'```mermaid\n([\s\S]*?)```', fix_block, content)
-        print(fixed_content)
-    else:
-        # Validate mode
-        docs_path = Path(sys.argv[1])
-        
-        if not docs_path.exists():
-            print(f"Error: Path not found: {docs_path}")
-            sys.exit(1)
-        
-        report = validate_docs_directory(docs_path)
-        
-        print("\n" + "="*70)
-        print("           MERMAID DIAGRAM VALIDATION REPORT")
-        print("="*70)
-        print(f"Docs path: {report['docs_path']}")
-        print(f"\nDiagrams checked: {report['total_diagrams']}")
-        print(f"  Valid: {report['valid_diagrams']}")
-        print(f"  Invalid: {report['invalid_diagrams']}")
-        print(f"\nErrors: {report['total_errors']}")
-        print(f"Warnings: {report['total_warnings']}")
-        
-        if report['errors_by_type']:
-            print("\nErrors by type:")
-            for error_type, count in sorted(report['errors_by_type'].items(), key=lambda x: -x[1]):
-                print(f"  {error_type}: {count}")
-        
-        if report['issues']:
-            print("\nIssues:")
-            for issue in report['issues'][:20]:
-                marker = "❌" if issue['severity'] == 'error' else "⚠️"
-                print(f"  {marker} [{issue['source']}] {issue.get('error_type', 'unknown')}")
-                print(f"     {issue.get('message', '')}")
-                if issue.get('line_number'):
-                    print(f"     Line {issue['line_number']}: {issue.get('line_content', '')}")
-                if issue.get('fix_suggestion'):
-                    print(f"     💡 Fix: {issue['fix_suggestion']}")
-            
-            if len(report['issues']) > 20:
-                print(f"\n  ... and {len(report['issues']) - 20} more issues")
-        
-        print("="*70)
-        
-        sys.exit(1 if report['total_errors'] > 0 else 0)
+
+    docs_path = Path(sys.argv[1])
+    if not docs_path.exists():
+        print(f"Error: Path not found: {docs_path}")
+        sys.exit(1)
+
+    report = validate_docs_directory(docs_path)
+
+    print("\n" + "=" * 70)
+    print("           MERMAID DIAGRAM VALIDATION REPORT (Mermaid.js 11.9)")
+    print("=" * 70)
+    print(f"Docs path: {report['docs_path']}")
+    print(f"\nDiagrams checked: {report['total_diagrams']}")
+    print(f"  Valid:   {report['valid_diagrams']}")
+    print(f"  Invalid: {report['invalid_diagrams']}")
+    print(f"\nErrors:   {report['total_errors']}")
+    print(f"Warnings: {report['total_warnings']}")
+
+    if report["errors_by_type"]:
+        print("\nErrors by type:")
+        for t, c in sorted(report["errors_by_type"].items(), key=lambda x: -x[1]):
+            print(f"  {t}: {c}")
+
+    if report["issues"]:
+        print("\nIssues (first 20):")
+        for issue in report["issues"][:20]:
+            marker = "ERR " if issue["severity"] == "error" else "WARN"
+            print(f"  [{marker}] [{issue['source']}] {issue.get('error_type', 'unknown')}")
+            print(f"        {issue.get('message', '')}")
+            if issue.get("line_number"):
+                print(f"        line {issue['line_number']}")
+
+    shutdown_shared_parser()
+    sys.exit(1 if report["total_errors"] > 0 else 0)

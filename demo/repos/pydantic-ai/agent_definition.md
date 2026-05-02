@@ -1,44 +1,52 @@
-The `agent_definition` module is a foundational component within the `pydantic_ai_agent_core` system, responsible for establishing the core structure, configuration, and capabilities of AI agents. It provides the abstract base for all agent implementations, manages their specifications, and facilitates the dynamic instantiation and validation of their functionalities. This module ensures a consistent and extensible framework for defining diverse agent types.
+The `agent_definition` module (located at `pydantic_ai_slim/pydantic_ai/agent`) is the foundational layer for creating and managing AI agents within the system. Its primary purpose is to provide the abstract interface for agents, define their structured configuration, and handle the initial instantiation of their capabilities. For users, this module simplifies the process of defining complex AI behaviors by allowing them to specify an agent's model, instructions, and tools through a clear, declarative blueprint. It ensures consistency and reusability across different agent implementations by providing a standardized way to describe an agent's core characteristics and how it comes to life.
 
-### Architecture Overview
+### How Components Work Together
 
-The `agent_definition` module is composed of several key sub-modules that work in concert to define and manage agents:
+The module's components collaborate to establish the agent's identity and prepare it for execution. The `AbstractAgent` sets the fundamental contract that all agents must adhere to. The `AgentSpec` then takes this abstract definition and provides a concrete, serializable configuration for a specific agent, detailing its model, instructions, and the capabilities it possesses. During the agent's setup, `_get_schema_target` assists in dynamically resolving the correct schema for these capabilities, ensuring proper validation and integration. Finally, `_instantiate_cap` uses the `AgentSpec` to bring the agent's defined capabilities into existence, making the agent ready to process requests. The `_save_schema` utility allows for the persistence of these agent configurations, enabling easy sharing and versioning.
 
 ```mermaid
-graph TD
-    A[agent_definition Module]
+flowchart TD
+    subgraph agent_core["Agent Core Definition"]
+        A[Define Agent Interface]
+    end
 
-    B[agent_abstract_base]
-    C[agent_spec_management]
-    D[capability_spec_definition]
-    E[agent_capability_init]
+    subgraph agent_config["Agent Configuration"]
+        B[Specify Agent Configuration]
+        C[Save Agent Schema]
+        D[Resolve Schema Target]
+    end
 
-    A --> B
-    A --> C
-    A --> D
-    A --> E
+    subgraph agent_lifecycle["Agent Lifecycle"]
+        E[Instantiate Agent Capabilities]
+    end
 
-    C -- "Defines capabilities using" --> D
-    E -- "Instantiates capabilities from" --> D
-    B -- "Configured by" --> C
-    B -- "Manages capabilities via" --> E
+    A -.->|"provides base for"| B
+    B ==>|"agent blueprint"| E
+    B -->|"persists configuration"| C
+    B -.->|"uses for schema validation/generation"| D
 
-    click B "agent_abstract_base.md" "View agent_abstract_base Module"
-    click C "agent_spec_management.md" "View agent_spec_management Module"
-    click D "capability_spec_definition.md" "View capability_spec_definition Module"
-    click E "agent_capability_init.md" "View agent_capability_init Module"
+    classDef surface fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
+    classDef generative fill:#fed7aa,stroke:#ea580c,stroke-width:1px,color:#7c2d12
+    classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
+
+    class A surface
+    class B data
+    class C data
+    class D analytical
+    class E generative
+
+    click A "pydantic_ai_slim.pydantic_ai.agent.abstract.AbstractAgent.md" "View AbstractAgent Documentation"
+    click B "pydantic_ai_slim.pydantic_ai.agent.spec.AgentSpec.md" "View AgentSpec Documentation"
+    click C "pydantic_ai_slim.pydantic_ai.agent.spec._save_schema.md" "View _save_schema Documentation"
+    click D "pydantic_ai_slim.pydantic_ai.agent.spec._get_schema_target.md" "View _get_schema_target Documentation"
+    click E "pydantic_ai_slim.pydantic_ai.agent.__init__._instantiate_cap.md" "View _instantiate_cap Documentation"
 ```
 
 ### Core Components Documentation
 
-*   **`AbstractAgent`**: Defined in the `agent_abstract_base` module, this is the foundational abstract class that outlines the core interface, execution methods, and behaviors for all AI agents. It serves as a blueprint for concrete agent implementations.
-    *   [View `agent_abstract_base` documentation](agent_abstract_base.md)
-
-*   **`AgentSpec`**: Located within the `agent_spec_management` module, `AgentSpec` provides a structured way to define an agent's configuration, including its model, instructions, and a list of capabilities. It supports loading, saving, and validating agent definitions.
-    *   [View `agent_spec_management` documentation](agent_spec_management.md)
-
-*   **`CapabilitySpec`**: This specialized specification, found in the `capability_spec_definition` module, is crucial for defining agent capabilities. It acts as a placeholder in JSON schemas, which is expanded into a union of all available capability types during schema generation.
-    *   [View `capability_spec_definition` documentation](capability_spec_definition.md)
-
-*   **`_instantiate_cap`**: A utility function within the `agent_capability_init` module, responsible for the dynamic instantiation and validation of agent capabilities. It ensures that capabilities are properly constructed with validated arguments before being used by an agent.
-    *   [View `agent_capability_init` documentation](agent_capability_init.md)
+*   **Define Agent Interface**: [`pydantic_ai_slim.pydantic_ai.agent.abstract.AbstractAgent`](pydantic_ai_slim.pydantic_ai.agent.abstract.AbstractAgent.md)
+*   **Specify Agent Configuration**: [`pydantic_ai_slim.pydantic_ai.agent.spec.AgentSpec`](pydantic_ai_slim.pydantic_ai.agent.spec.AgentSpec.md)
+*   **Save Agent Schema**: [`pydantic_ai_slim.pydantic_ai.agent.spec._save_schema`](pydantic_ai_slim.pydantic_ai.agent.spec._save_schema.md)
+*   **Resolve Schema Target**: [`pydantic_ai_slim.pydantic_ai.agent.spec._get_schema_target`](pydantic_ai_slim.pydantic_ai.agent.spec._get_schema_target.md)
+*   **Instantiate Agent Capabilities**: [`pydantic_ai_slim.pydantic_ai.agent.__init__._instantiate_cap`](pydantic_ai_slim.pydantic_ai.agent.__init__._instantiate_cap.md)

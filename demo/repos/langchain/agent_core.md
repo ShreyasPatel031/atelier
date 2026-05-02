@@ -1,40 +1,65 @@
-# Agent Core Module
-
-## Introduction
-
-The `agent_core` module serves as the foundational layer for managing and interacting with agents within the classic LangChain framework. It defines the basic structure of agents, handles their initialization, enumerates available agent types, and includes utilities for deprecation warnings. This module is crucial for understanding how agents are constructed, planned, and executed in the classic LangChain architecture.
-
-## Architecture Overview
-
-The `agent_core` module is composed of several key sub-modules that work together to provide a robust agent framework.
+# agent_core Module
+This module defines core agent functionalities, including single and multi-action agents, utility functions for agent actions, and an enumeration of agent types.
 
 <!-- DIAGRAM_JSON
 {
-    "direction": "TD",
-    "nodes": [
-        {"id": "agent_definitions", "label": "Agent Definitions", "type": "module", "link": "agent_definitions.md"},
-        {"id": "agent_management", "label": "Agent Management and Utilities", "type": "module", "link": "agent_management.md"}
-    ],
-    "edges": [
-        {"source": "agent_management", "target": "agent_definitions"}
-    ],
-    "groups": []
+  "nodes": [
+    {"id": "_convert_agent_action_to_messages", "label": "_convert_agent_action_to_messages", "type": "function"},
+    {"id": "_create_function_message", "label": "_create_function_message", "type": "function"},
+    {"id": "Agent", "label": "Agent", "type": "class"},
+    {"id": "LLMSingleActionAgent", "label": "LLMSingleActionAgent", "type": "class"},
+    {"id": "AgentType", "label": "AgentType", "type": "enum"},
+    {"id": "OpenAIMultiFunctionsAgent", "label": "OpenAIMultiFunctionsAgent", "type": "class"},
+    {"id": "AgentAction", "label": "AgentAction", "type": "type", "isExternal": true},
+    {"id": "BaseSingleActionAgent", "label": "BaseSingleActionAgent", "type": "class", "isExternal": true},
+    {"id": "BaseMultiActionAgent", "label": "BaseMultiActionAgent", "type": "class", "isExternal": true}
+  ],
+  "edges": [
+    {"source": "_convert_agent_action_to_messages", "target": "AgentAction", "label": "uses"},
+    {"source": "_create_function_message", "target": "AgentAction", "label": "uses"},
+    {"source": "Agent", "target": "BaseSingleActionAgent", "label": "inherits", "type": "inheritance"},
+    {"source": "Agent", "target": "AgentAction", "label": "uses"},
+    {"source": "LLMSingleActionAgent", "target": "BaseSingleActionAgent", "label": "inherits", "type": "inheritance"},
+    {"source": "LLMSingleActionAgent", "target": "AgentAction", "label": "uses"},
+    {"source": "OpenAIMultiFunctionsAgent", "target": "BaseMultiActionAgent", "label": "inherits", "type": "inheritance"}
+  ],
+  "groups": [
+    {"id": "Agents", "label": "Agents", "nodes": ["Agent", "LLMSingleActionAgent", "OpenAIMultiFunctionsAgent"]},
+    {"id": "Utilities", "label": "Utilities", "nodes": ["_convert_agent_action_to_messages", "_create_function_message"]},
+    {"id": "Definitions", "label": "Definitions", "nodes": ["AgentType"]}
+  ]
 }
 -->
-```mermaid
-graph TD
-    agent_management[Agent Management and Utilities] --> agent_definitions[Agent Definitions]
-
-    click agent_definitions "agent_definitions.md" "View Agent Definitions Documentation"
-    click agent_management "agent_management.md" "View Agent Management and Utilities Documentation"
 ```
+```mermaid
+flowchart TD
+    subgraph Agents
+        C[Agent]
+        D[LLMSingleActionAgent]
+        F[OpenAIMultiFunctionsAgent]
+    end
 
-## Sub-modules
+    subgraph Utilities
+        A[_convert_agent_action_to_messages]
+        B[_create_function_message]
+    end
 
-### [Agent Definitions](agent_definitions.md)
+    subgraph Definitions
+        E[AgentType]
+    end
 
-This sub-module contains the fundamental classes for defining agents. It includes abstract base classes such as `Agent` and `LLMSingleActionAgent`, which outline the core planning and execution logic for different agent behaviors.
+    G((AgentAction))
+    H[BaseSingleActionAgent]
+    I[BaseMultiActionAgent]
 
-### [Agent Management and Utilities](agent_management.md)
+    A --> G
+    B --> G
 
-This sub-module is responsible for the overall management of agents. It provides mechanisms for initializing agents from configurations, enumerating various `AgentType`s, and handling internal deprecation warnings through `__getattr__` to guide developers towards updated practices.
+    C -->|"inherits"| H
+    C --> G
+
+    D -->|"inherits"| H
+    D --> G
+
+    F -->|"inherits"| I
+```

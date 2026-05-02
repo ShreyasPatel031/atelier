@@ -350,6 +350,8 @@ WEB_INTERFACE_TEMPLATE = """
                 {{ message }}
             </div>
             {% endif %}
+
+            <div id="llm-health-banner" class="alert alert-error" style="display: none;" role="status" aria-live="polite"></div>
             
             <form method="POST" action="/">
                 <div class="form-group">
@@ -492,7 +494,13 @@ WEB_INTERFACE_TEMPLATE = """
             }
 
             function renderJob(job) {
-                const stage = job.generation_stage || 0;
+                // API generation_stage (from progress helper): 0/1=early+dep, 2=module tree,
+                // 3=doc/overview/Late. Step 3 is only "Complete" when status is completed, not
+                // whenever stage is 3 while still processing (avoids "all done" on regenerate
+                // when old artifacts or late pipeline stage number made every step look complete).
+                const s = (job.generation_stage !== undefined && job.generation_stage !== null)
+                    ? job.generation_stage
+                    : 0;
                 const st = job.status;
                 const progressEl = document.getElementById('pipeline-progress-text');
                 if (progressEl) {
@@ -504,12 +512,16 @@ WEB_INTERFACE_TEMPLATE = """
                     const stEl = document.getElementById('step-' + i + '-status');
                     if (!el || !stEl) continue;
                     el.classList.remove('done', 'active');
-                    const done = st === 'completed' || stage >= i;
-                    const active = (st === 'processing' && (
-                        (stage === 0 && i === 1) ||
-                        (stage === 1 && i === 2) ||
-                        (stage === 2 && i === 3)
-                    )) || (st === 'queued' && i === 1);
+
+                    const step1Or2Done = (st === 'completed' || s >= 2);
+                    const step3Done = (st === 'completed');
+                    const done = (i < 3) ? step1Or2Done : step3Done;
+
+                    const inEarlyPipeline = (st === 'processing' && s < 2);
+                    const inDocPipeline = (st === 'processing' && s >= 2);
+                    const active = (st === 'queued' && i === 1) ||
+                        (inEarlyPipeline && (i === 1 || i === 2)) ||
+                        (inDocPipeline && i === 3);
                     if (done) {
                         el.classList.add('done');
                         stEl.textContent = 'Complete';
@@ -592,6 +604,19 @@ WEB_INTERFACE_TEMPLATE = """
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/llm-health')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data && data.ok) return;
+                    var el = document.getElementById('llm-health-banner');
+                    if (!el) return;
+                    el.style.display = 'block';
+                    el.textContent = 'CodeWiki CLI configuration check failed (same as `codewiki config validate --quick`): '
+                        + (data && data.detail ? data.detail : 'unknown error')
+                        + ' Run: codewiki config set --base-url ... --main-model ... --cluster-model ... and ensure GEMINI_API_KEY or LLM_API_KEY is set, then restart the server.';
+                })
+                .catch(function() {});
+
             const form = document.querySelector('form');
             const submitButton = document.querySelector('button[type="submit"]');
             
@@ -867,6 +892,15 @@ DOCS_VIEW_TEMPLATE = """
         .markdown-content a:hover {
             text-decoration: none;
         }
+
+        /* Edge labels: span.edgeLabel matches `.edgeLabel { color: classText }` (= primaryTextColor for nodes); force black on white */
+        .markdown-content svg g.edgeLabel span.edgeLabel {
+            color: #000000 !important;
+        }
+        .markdown-content svg g.edgeLabel foreignObject div.labelBkg {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+        }
         
         @media (max-width: 768px) {
             .sidebar {
@@ -949,24 +983,40 @@ DOCS_VIEW_TEMPLATE = """
     </div>
     
     <script>
-        // Initialize mermaid with configuration
+        // Initialize mermaid — NYC Subway (MTA) palette aligned with demo viewer
         mermaid.initialize({
             startOnLoad: true,
-            theme: 'default',
+            theme: 'base',
             themeVariables: {
-                primaryColor: '#2563eb',
-                primaryTextColor: '#334155',
-                primaryBorderColor: '#e2e8f0',
-                lineColor: '#64748b',
-                sectionBkgColor: '#f8fafc',
-                altSectionBkgColor: '#f1f5f9',
-                gridColor: '#e2e8f0',
-                secondaryColor: '#f1f5f9',
-                tertiaryColor: '#f8fafc'
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontSize: '14px',
+                primaryColor: '#0039A6',
+                primaryTextColor: '#ffffff',
+                primaryBorderColor: '#002f85',
+                secondaryColor: '#ffffff',
+                secondaryTextColor: '#0039A6',
+                secondaryBorderColor: '#FF6319',
+                tertiaryColor: '#f9fafb',
+                tertiaryTextColor: '#1e293b',
+                tertiaryBorderColor: '#00933C',
+                lineColor: '#808183',
+                clusterBkg: '#ebecee',
+                clusterBorder: '#A7A9AC',
+                edgeLabelBackground: '#ffffff',
+                edgeLabelColor: '#000000',
+                mainBkg: '#ffffff',
+                secondBkg: '#fff5f0',
+                sectionBkgColor: '#ebecee',
+                altSectionBkgColor: '#f5f5f6',
+                gridColor: '#A7A9AC'
             },
             flowchart: {
                 htmlLabels: true,
-                curve: 'basis'
+                curve: 'basis',
+                padding: 12,
+                nodeSpacing: 56,
+                rankSpacing: 64,
+                diagramPadding: 16
             },
             sequence: {
                 diagramMarginX: 50,

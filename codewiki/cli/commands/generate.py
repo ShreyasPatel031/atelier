@@ -34,6 +34,8 @@ def _clear_generated_docs_at_output_root(output_dir: Path, logger) -> None:
     """
     Remove top-level *.md and *.json so Stage 3 agents run and metadata extraction applies.
     Preserves subdirectories (e.g. temp/dependency_graphs).
+    Used for --force and --no-cache so stale AUTO_GENERATED placeholders and cached
+    module trees cannot survive a full regeneration.
     """
     if not output_dir.exists():
         return
@@ -76,7 +78,7 @@ def _clear_generated_docs_at_output_root(output_dir: Path, logger) -> None:
 @click.option(
     "--no-cache",
     is_flag=True,
-    help="Force full regeneration, ignoring cache",
+    help="Full regeneration: clear output *.md/*.json first (same as stale-doc wipe), then ignore cached trees",
 )
 @click.option(
     "--verbose",
@@ -187,8 +189,15 @@ def generate_command(
         
         # Check for existing documentation
         if output_dir.exists() and list(output_dir.glob("*.md")):
-            if force:
-                logger.info(f"Overwriting existing documentation in {output_dir} (--force).")
+            if force or no_cache:
+                tag_parts = []
+                if force:
+                    tag_parts.append("--force")
+                if no_cache:
+                    tag_parts.append("--no-cache")
+                logger.info(
+                    f"Overwriting existing documentation in {output_dir} ({', '.join(tag_parts)})."
+                )
             elif not click.confirm(
                 f"\n{output_dir} already contains documentation. Overwrite?",
                 default=True
@@ -196,8 +205,9 @@ def generate_command(
                 logger.info("Generation cancelled by user.")
                 sys.exit(EXIT_SUCCESS)
 
-        # --force: remove stale .md/.json at output root so agents are not skipped and tree matches files
-        if force:
+        # Full regeneration: remove stale .md/.json at output root (tree cache, placeholders, old module docs).
+        # --no-cache must wipe the same way as --force so AUTO_GENERATED files from prior runs cannot remain.
+        if force or no_cache:
             _clear_generated_docs_at_output_root(output_dir, logger)
 
         # Git branch creation (if requested)

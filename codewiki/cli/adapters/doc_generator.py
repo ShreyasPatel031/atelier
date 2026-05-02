@@ -354,7 +354,9 @@ class CLIDocumentationGenerator:
                 from codewiki.src.be.doc_file_sync import run_full_sync
 
                 repo_name = os.path.basename(os.path.normpath(self.repo_path))
-                sync_result = run_full_sync(working_dir, components, repo_name=repo_name)
+                sync_result = run_full_sync(
+                    working_dir, components, repo_name=repo_name, config=backend_config
+                )
                 click.echo(
                     f"[DEBUG] Doc sync wrote sync_issues.json (issues={sync_result.get('issues', 0)})",
                     err=True,

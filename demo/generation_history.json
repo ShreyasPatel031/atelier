@@ -82,5 +82,406 @@
       "missing_diagram": 89,
       "mermaid_unbalanced_subgraph": 1
     }
+  },
+  {
+    "timestamp": "2026-04-07T02:47:28.595134",
+    "repo": "react-src",
+    "total_modules": 63,
+    "missing_files": 14,
+    "failure_rate_pct": 22.22,
+    "success_rate_pct": 77.78,
+    "errors": 28,
+    "warnings": 6,
+    "issues_by_type": {
+      "missing_title": 3,
+      "missing_description": 3,
+      "missing_md_file": 14,
+      "missing_diagram": 14
+    }
+  },
+  {
+    "timestamp": "2026-04-07T03:32:16.731937",
+    "repo": "swift-src",
+    "total_modules": 282,
+    "missing_files": 93,
+    "failure_rate_pct": 32.98,
+    "success_rate_pct": 67.02,
+    "errors": 200,
+    "warnings": 104,
+    "issues_by_type": {
+      "missing_title": 52,
+      "missing_description": 52,
+      "missing_md_file": 93,
+      "missing_diagram": 104,
+      "mermaid_unbalanced_brackets": 3
+    }
+  },
+  {
+    "timestamp": "2026-04-15T16:54:52.214353",
+    "repo": "crewai",
+    "total_modules": 64,
+    "missing_files": 56,
+    "failure_rate_pct": 87.5,
+    "success_rate_pct": 12.5,
+    "errors": 113,
+    "warnings": 112,
+    "issues_by_type": {
+      "missing_title": 56,
+      "missing_description": 56,
+      "missing_md_file": 56,
+      "missing_diagram": 56,
+      "mermaid_unbalanced_subgraph": 1
+    }
+  },
+  {
+    "timestamp": "2026-04-15T16:58:21.519723",
+    "repo": "dspy",
+    "total_modules": 18,
+    "missing_files": 15,
+    "failure_rate_pct": 83.33,
+    "success_rate_pct": 16.67,
+    "errors": 30,
+    "warnings": 30,
+    "issues_by_type": {
+      "missing_title": 15,
+      "missing_description": 15,
+      "missing_md_file": 15,
+      "missing_diagram": 15
+    }
+  },
+  {
+    "timestamp": "2026-04-15T17:02:06.996884",
+    "repo": "ollama",
+    "total_modules": 19,
+    "missing_files": 16,
+    "failure_rate_pct": 84.21,
+    "success_rate_pct": 15.79,
+    "errors": 32,
+    "warnings": 32,
+    "issues_by_type": {
+      "missing_title": 16,
+      "missing_description": 16,
+      "missing_md_file": 16,
+      "missing_diagram": 16
+    }
+  },
+  {
+    "timestamp": "2026-04-15T17:03:42.213188",
+    "repo": "transformers",
+    "total_modules": 4,
+    "missing_files": 4,
+    "failure_rate_pct": 100.0,
+    "success_rate_pct": 0.0,
+    "errors": 9,
+    "warnings": 8,
+    "issues_by_type": {
+      "missing_title": 4,
+      "missing_description": 4,
+      "missing_md_file": 4,
+      "missing_diagram": 4,
+      "mermaid_unbalanced_subgraph": 1
+    }
+  },
+  {
+    "timestamp": "2026-04-15T17:15:32.147926",
+    "repo": "langchain",
+    "total_modules": 83,
+    "missing_files": 72,
+    "failure_rate_pct": 86.75,
+    "success_rate_pct": 13.25,
+    "errors": 147,
+    "warnings": 144,
+    "issues_by_type": {
+      "missing_title": 72,
+      "missing_description": 72,
+      "missing_md_file": 72,
+      "missing_diagram": 72,
+      "mermaid_unbalanced_subgraph": 3
+    }
+  },
+  {
+    "timestamp": "2026-04-15T17:26:52.584428",
+    "repo": "pydantic-ai",
+    "total_modules": 54,
+    "missing_files": 44,
+    "failure_rate_pct": 81.48,
+    "success_rate_pct": 18.52,
+    "errors": 89,
+    "warnings": 88,
+    "issues_by_type": {
+      "missing_title": 44,
+      "missing_description": 44,
+      "missing_md_file": 44,
+      "missing_diagram": 44,
+      "mermaid_unbalanced_subgraph": 1
+    }
+  },
+  {
+    "timestamp": "2026-04-15T23:37:56.783593",
+    "repo": "langchain",
+    "total_modules": 89,
+    "missing_files": 76,
+    "failure_rate_pct": 85.39,
+    "success_rate_pct": 14.61,
+    "errors": 152,
+    "warnings": 152,
+    "issues_by_type": {
+      "missing_title": 76,
+      "missing_description": 76,
+      "missing_md_file": 76,
+      "missing_diagram": 76
+    }
+  },
+  {
+    "timestamp": "2026-04-15T23:41:07.664630",
+    "repo": "ollama",
+    "total_modules": 20,
+    "missing_files": 17,
+    "failure_rate_pct": 85.0,
+    "success_rate_pct": 15.0,
+    "errors": 34,
+    "warnings": 34,
+    "issues_by_type": {
+      "missing_title": 17,
+      "missing_description": 17,
+      "missing_md_file": 17,
+      "missing_diagram": 17
+    }
+  },
+  {
+    "timestamp": "2026-04-15T23:50:01.451818",
+    "repo": "pydantic-ai",
+    "total_modules": 39,
+    "missing_files": 32,
+    "failure_rate_pct": 82.05,
+    "success_rate_pct": 17.95,
+    "errors": 64,
+    "warnings": 64,
+    "issues_by_type": {
+      "missing_title": 32,
+      "missing_description": 32,
+      "missing_md_file": 32,
+      "missing_diagram": 32
+    }
+  },
+  {
+    "timestamp": "2026-04-16T00:26:07.098211",
+    "repo": "pydantic-ai",
+    "total_modules": 59,
+    "missing_files": 49,
+    "failure_rate_pct": 83.05,
+    "success_rate_pct": 16.95,
+    "errors": 99,
+    "warnings": 98,
+    "issues_by_type": {
+      "missing_title": 49,
+      "missing_description": 49,
+      "missing_md_file": 49,
+      "missing_diagram": 49,
+      "mermaid_unbalanced_subgraph": 1
+    }
+  },
+  {
+    "timestamp": "2026-04-16T00:54:00.495537",
+    "repo": "pydantic-ai",
+    "total_modules": 57,
+    "missing_files": 8,
+    "failure_rate_pct": 14.04,
+    "success_rate_pct": 85.96,
+    "errors": 16,
+    "warnings": 10,
+    "issues_by_type": {
+      "missing_title": 5,
+      "missing_description": 5,
+      "missing_md_file": 8,
+      "missing_diagram": 8
+    }
+  },
+  {
+    "timestamp": "2026-04-16T01:42:00.264857",
+    "repo": "pydantic-ai",
+    "total_modules": 60,
+    "missing_files": 16,
+    "failure_rate_pct": 26.67,
+    "success_rate_pct": 73.33,
+    "errors": 31,
+    "warnings": 14,
+    "issues_by_type": {
+      "missing_title": 7,
+      "missing_description": 7,
+      "missing_md_file": 16,
+      "missing_diagram": 15
+    }
+  },
+  {
+    "timestamp": "2026-04-16T02:12:00.151748",
+    "repo": "pydantic-ai",
+    "total_modules": 56,
+    "missing_files": 3,
+    "failure_rate_pct": 5.36,
+    "success_rate_pct": 94.64,
+    "errors": 14,
+    "warnings": 0,
+    "issues_by_type": {
+      "missing_md_file": 3,
+      "missing_diagram": 10,
+      "mermaid_unbalanced_subgraph": 1
+    }
+  },
+  {
+    "timestamp": "2026-04-16T02:45:23.606581",
+    "repo": "pydantic-ai",
+    "total_modules": 47,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 8,
+    "warnings": 12,
+    "issues_by_type": {
+      "missing_title": 6,
+      "missing_description": 6,
+      "missing_diagram": 8
+    }
+  },
+  {
+    "timestamp": "2026-04-16T10:26:19.768548",
+    "repo": "crewai",
+    "total_modules": 45,
+    "missing_files": 6,
+    "failure_rate_pct": 13.33,
+    "success_rate_pct": 86.67,
+    "errors": 13,
+    "warnings": 14,
+    "issues_by_type": {
+      "missing_title": 7,
+      "missing_description": 7,
+      "missing_md_file": 6,
+      "missing_diagram": 7
+    }
+  },
+  {
+    "timestamp": "2026-04-16T11:42:34.275883",
+    "repo": "crewai",
+    "total_modules": 46,
+    "missing_files": 2,
+    "failure_rate_pct": 4.35,
+    "success_rate_pct": 95.65,
+    "errors": 4,
+    "warnings": 6,
+    "issues_by_type": {
+      "missing_title": 3,
+      "missing_description": 3,
+      "missing_md_file": 2,
+      "missing_diagram": 2
+    }
+  },
+  {
+    "timestamp": "2026-04-16T12:03:34.510350",
+    "repo": "pydantic-ai",
+    "total_modules": 59,
+    "missing_files": 15,
+    "failure_rate_pct": 25.42,
+    "success_rate_pct": 74.58,
+    "errors": 28,
+    "warnings": 32,
+    "issues_by_type": {
+      "missing_title": 16,
+      "missing_description": 16,
+      "missing_md_file": 15,
+      "missing_diagram": 13
+    }
+  },
+  {
+    "timestamp": "2026-04-17T03:21:10.397595",
+    "repo": "pydantic-ai",
+    "total_modules": 81,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 4,
+    "issues_by_type": {
+      "missing_title": 2,
+      "missing_description": 2
+    }
+  },
+  {
+    "timestamp": "2026-04-17T03:28:15.852904",
+    "repo": "crewai",
+    "total_modules": 54,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 1,
+    "warnings": 0,
+    "issues_by_type": {
+      "missing_diagram": 1
+    }
+  },
+  {
+    "timestamp": "2026-04-17T03:53:44.495071",
+    "repo": "pydantic-ai",
+    "total_modules": 75,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 1,
+    "warnings": 6,
+    "issues_by_type": {
+      "missing_title": 3,
+      "missing_description": 3,
+      "missing_diagram": 1
+    }
+  },
+  {
+    "timestamp": "2026-04-17T04:13:34.530720",
+    "repo": "dspy",
+    "total_modules": 66,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-04-17T04:39:11.005279",
+    "repo": "langchain",
+    "total_modules": 83,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 2,
+    "issues_by_type": {
+      "missing_title": 1,
+      "missing_description": 1
+    }
+  },
+  {
+    "timestamp": "2026-04-17T04:58:35.815026",
+    "repo": "ollama",
+    "total_modules": 50,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-04-17T05:34:50.047048",
+    "repo": "transformers",
+    "total_modules": 99,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 14,
+    "warnings": 50,
+    "issues_by_type": {
+      "missing_title": 25,
+      "missing_description": 25,
+      "missing_diagram": 14
+    }
   }
 ]

@@ -1,45 +1,62 @@
-# Zamba2 Models Module Documentation
-
-## Introduction
-
-The `zamba2_models` module provides implementations of the Zamba2 model for various natural language processing tasks, including causal language modeling and sequence classification. It offers both standard and modular architectures to support flexible integration and experimentation.
-
-## Architecture Overview
-
-The `zamba2_models` module is structured into sub-modules based on their primary functionality. This design promotes code reusability and clear separation of concerns, allowing developers to easily understand and extend specific aspects of the Zamba2 model.
+# zamba2_models
+The `zamba2_models` module offers Zamba2 model heads for sequence classification and causal language modeling. It includes implementations in `modeling_zamba2` and `modular_zamba2`, all leveraging the core `Zamba2Model`.
 
 <!-- DIAGRAM_JSON
 {
-    "direction": "TD",
-    "nodes": [
-        {"id": "causal_lm_models", "label": "Causal Language Models", "type": "module", "link": "causal_lm_models.md"},
-        {"id": "sequence_classification_models", "label": "Sequence Classification Models", "type": "module", "link": "sequence_classification_models.md"}
-    ],
-    "edges": [
-        {"source": "zamba2_models", "target": "causal_lm_models"},
-        {"source": "zamba2_models", "target": "sequence_classification_models"}
-    ],
-    "groups": []
+  "nodes": [
+    {"id": "Z2SC_M", "label": "Zamba2ForSequenceClassification"},
+    {"id": "Z2CL_M", "label": "Zamba2ForCausalLM"},
+    {"id": "Z2SC_MOD", "label": "Zamba2ForSequenceClassification"},
+    {"id": "Z2CL_MOD", "label": "Zamba2ForCausalLM"},
+    {"id": "Z2Model", "label": "Zamba2Model"},
+    {"id": "Z2PTM", "label": "Zamba2PreTrainedModel"},
+    {"id": "GM", "label": "GenerationMixin"},
+    {"id": "ZSC", "label": "ZambaForSequenceClassification"},
+    {"id": "ZCL", "label": "ZambaForCausalLM"}
+  ],
+  "edges": [
+    {"source": "Z2SC_M", "target": "Z2PTM", "type": "inheritance"},
+    {"source": "Z2CL_M", "target": "Z2PTM", "type": "inheritance"},
+    {"source": "Z2CL_M", "target": "GM", "type": "inheritance"},
+    {"source": "Z2SC_MOD", "target": "ZSC", "type": "inheritance"},
+    {"source": "Z2CL_MOD", "target": "ZCL", "type": "inheritance"},
+    {"source": "Z2SC_M", "target": "Z2Model", "type": "composition"},
+    {"source": "Z2CL_M", "target": "Z2Model", "type": "composition"},
+    {"source": "Z2SC_MOD", "target": "Z2Model", "type": "composition"},
+    {"source": "Z2CL_MOD", "target": "Z2Model", "type": "composition"}
+  ],
+  "groups": [
+    {"id": "modeling_zamba2", "label": "modeling_zamba2", "nodes": ["Z2SC_M", "Z2CL_M"]},
+    {"id": "modular_zamba2", "label": "modular_zamba2", "nodes": ["Z2SC_MOD", "Z2CL_MOD"]}
+  ]
 }
 -->
-
 ```mermaid
-graph TD
-    zamba2_models[Zamba2 Models]
-    causal_lm_models[Causal Language Models]
-    sequence_classification_models[Sequence Classification Models]
+flowchart TD
+    subgraph modeling_zamba2
+        Z2SC_M[Zamba2ForSequenceClassification]
+        Z2CL_M[Zamba2ForCausalLM]
+    end
 
-    zamba2_models --> causal_lm_models
-    zamba2_models --> sequence_classification_models
+    subgraph modular_zamba2
+        Z2SC_MOD[Zamba2ForSequenceClassification]
+        Z2CL_MOD[Zamba2ForCausalLM]
+    end
 
-    click causal_lm_models "causal_lm_models.md" "View Causal Language Models Documentation"
-    click sequence_classification_models "sequence_classification_models.md" "View Sequence Classification Models Documentation"
+    Z2PTM[Zamba2PreTrainedModel]
+    GM[GenerationMixin]
+    ZSC[ZambaForSequenceClassification]
+    ZCL[ZambaForCausalLM]
+    Z2Model[Zamba2Model]
+
+    Z2SC_M -->|"inherits"| Z2PTM
+    Z2CL_M -->|"inherits"| Z2PTM
+    Z2CL_M -->|"mixes in"| GM
+    Z2SC_MOD -->|"inherits"| ZSC
+    Z2CL_MOD -->|"inherits"| ZCL
+
+    Z2SC_M -->|"uses"| Z2Model
+    Z2CL_M -->|"uses"| Z2Model
+    Z2SC_MOD -->|"uses"| Z2Model
+    Z2CL_MOD -->|"uses"| Z2Model
 ```
-
-## Sub-modules
-
-### [Causal Language Models](causal_lm_models.md)
-This sub-module provides implementations of the Zamba2 model specifically designed for causal language modeling tasks. It includes components for generating text and handling various aspects of language generation.
-
-### [Sequence Classification Models](sequence_classification_models.md)
-This sub-module focuses on Zamba2 model implementations tailored for sequence classification tasks. It contains components that enable the model to classify sequences based on predefined labels.

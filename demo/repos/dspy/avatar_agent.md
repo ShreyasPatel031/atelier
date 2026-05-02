@@ -1,33 +1,29 @@
-# `avatar_agent` Module Documentation
-
-## Introduction
-The `avatar_agent` module provides the core components for implementing an AI agent that can interact with various tools to accomplish a given goal. It includes the `Avatar` class, which orchestrates the agent's decision-making and tool usage, and the `Actor` signature, which defines the agent's expected inputs and outputs.
-
-## Architecture Overview
-The `avatar_agent` module is structured around two main components: the `Avatar` class, which serves as the agent's brain, and the `Actor` signature, which formalizes the communication contract for the agent's actions. The `Avatar` class leverages the `Actor` signature to guide its interaction with a predefined set of tools, iteratively refining its actions based on tool outputs until the goal is achieved.
-
-## Sub-modules
-
-*   **[Avatar Core Logic](avatar_core_logic.md)**: This sub-module contains the primary implementation of the `Avatar` agent, detailing how it manages tool interactions and executes tasks.
-*   **[Agent Action Signature](agent_signature.md)**: This sub-module defines the structural contract for the agent's actions, outlining the necessary inputs (goal, tools) and the expected output (the next action).
+# avatar_agent
+The `avatar_agent` module defines an `Avatar` class for orchestrating multi-step agentic reasoning using a specified signature and tools, and an `Actor` signature for defining the agent's decision-making process.
 
 <!-- DIAGRAM_JSON
 {
-    "direction": "TD",
-    "nodes": [
-        {"id": "avatar_core_logic", "label": "Avatar Core Logic", "type": "module", "link": "avatar_core_logic.md"},
-        {"id": "agent_signature", "label": "Agent Action Signature", "type": "module", "link": "agent_signature.md"}
-    ],
-    "edges": [
-        {"source": "avatar_core_logic", "target": "agent_signature", "label": "uses"}
-    ],
-    "groups": []
+  "nodes": [
+    {"id": "Avatar", "label": "Avatar", "type": "class"},
+    {"id": "Actor", "label": "Actor", "type": "class"}
+  ],
+  "edges": [
+    {"source": "Avatar", "target": "Actor", "label": "uses"}
+  ],
+  "groups": [
+    {"id": "avatar_agent", "label": "avatar_agent", "nodes": ["Avatar", "Actor"]}
+  ]
 }
 -->
-
 ```mermaid
-graph TD
-    avatar_core_logic[Avatar Core Logic] --> agent_signature[Agent Action Signature]
-    click avatar_core_logic "avatar_core_logic.md" "View Avatar Core Logic Module"
-    click agent_signature "agent_signature.md" "View Agent Action Signature Module"
+flowchart TD
+    subgraph avatar_agent
+        Avatar[Avatar]
+        Actor[Actor]
+    end
+
+    Avatar -->|uses| Actor
+
+    classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
+    class Avatar,Actor analytical
 ```

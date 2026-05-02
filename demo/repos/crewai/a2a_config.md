@@ -1,55 +1,74 @@
-# A2A Config Module
-
-The `a2a_config` module is responsible for managing the configuration settings for Agent-to-Agent (A2A) communication within CrewAI. It defines how agents connect, authenticate, handle timeouts, and manage updates and extensions for seamless interaction between different agent instances.
-
-## Architecture
-
-The module is structured to provide clear separation between configuration models and the logic for generating default configurations. It integrates with authentication schemes and update handlers to ensure robust and secure A2A communication.
-
+# A2A Configuration
+This module provides configurations for Agent-to-Agent (A2A) communication, handling connection parameters, authentication, update mechanisms, and client-side extensions for seamless inter-agent interactions.
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "a2a_config", "label": "A2A Config", "type": "module", "link": "a2a_config.md"},
-        {"id": "a2a_configuration_models", "label": "A2A Configuration Models", "type": "module", "link": "a2a_configuration_models.md"},
-        {"id": "a2a_update_config_factory", "label": "A2A Update Configuration Factory", "type": "module", "link": "a2a_update_config_factory.md"},
-        {"id": "a2a_auth_schemes", "label": "A2A Auth Schemes", "type": "module", "link": "a2a_auth_schemes.md"},
-        {"id": "a2a_update_handlers", "label": "A2A Update Handlers", "type": "module", "link": "a2a_update_handlers.md"}
+        {"id": "a2a_client_config", "label": "A2AClientConfig", "type": "component", "link": null},
+        {"id": "a2a_config_deprecated", "label": "A2AConfig (Deprecated)", "type": "component", "link": null},
+        {"id": "get_default_update_config", "label": "_get_default_update_config()", "type": "component", "link": null},
+        {"id": "client_auth_scheme", "label": "ClientAuthScheme", "type": "external", "link": "a2a_auth.md"},
+        {"id": "update_config", "label": "UpdateConfig", "type": "external", "link": "a2a_updates.md"},
+        {"id": "streaming_config", "label": "StreamingConfig", "type": "external", "link": "a2a_updates.md"},
+        {"id": "validated_a2a_extension", "label": "ValidatedA2AExtension", "type": "external", "link": "a2a_extensions.md"},
+        {"id": "client_transport_config", "label": "ClientTransportConfig", "type": "component", "link": null}
     ],
     "edges": [
-        {"source": "a2a_config", "target": "a2a_configuration_models"},
-        {"source": "a2a_config", "target": "a2a_update_config_factory"},
-        {"source": "a2a_configuration_models", "target": "a2a_auth_schemes"},
-        {"source": "a2a_configuration_models", "target": "a2a_update_handlers"},
-        {"source": "a2a_update_config_factory", "target": "a2a_update_handlers"}
+        {"source": "a2a_client_config", "target": "client_auth_scheme", "label": "configures authentication"},
+        {"source": "a2a_client_config", "target": "update_config", "label": "defines update mechanism"},
+        {"source": "a2a_client_config", "target": "validated_a2a_extension", "label": "uses client extensions"},
+        {"source": "a2a_client_config", "target": "client_transport_config", "label": "specifies transport"},
+        {"source": "a2a_config_deprecated", "target": "client_auth_scheme", "label": "configures authentication"},
+        {"source": "a2a_config_deprecated", "target": "update_config", "label": "defines update mechanism"},
+        {"source": "a2a_config_deprecated", "target": "validated_a2a_extension", "label": "uses client extensions"},
+        {"source": "a2a_config_deprecated", "target": "client_transport_config", "label": "specifies transport"},
+        {"source": "get_default_update_config", "target": "streaming_config", "label": "returns default"},
+        {"source": "a2a_client_config", "target": "get_default_update_config", "label": "default update config from"},
+        {"source": "a2a_config_deprecated", "target": "get_default_update_config", "label": "default update config from"}
     ],
-    "groups": []
+    "groups": [
+        {"id": "main_configs", "label": "A2A Configurations", "role": "analytical", "nodes": ["a2a_client_config", "a2a_config_deprecated"]}
+    ]
 }
 -->
 ```mermaid
-graph TD
-    a2a_config[A2A Config]
-    a2a_configuration_models[A2A Configuration Models]
-    a2a_update_config_factory[A2A Update Configuration Factory]
-    a2a_auth_schemes[A2A Auth Schemes]
-    a2a_update_handlers[A2A Update Handlers]
+flowchart TD
+    subgraph main_configs["A2A Configurations"]
+        a2a_client_config["A2AClientConfig"]
+        a2a_config_deprecated["A2AConfig (Deprecated)"]
+    end
 
-    a2a_config --> a2a_configuration_models
-    a2a_config --> a2a_update_config_factory
-    a2a_configuration_models --> a2a_auth_schemes
-    a2a_configuration_models --> a2a_update_handlers
-    a2a_update_config_factory --> a2a_update_handlers
+    get_default_update_config["_get_default_update_config()"]
 
-    click a2a_configuration_models "a2a_configuration_models.md" "View A2A Configuration Models Documentation"
-    click a2a_update_config_factory "a2a_update_config_factory.md" "View A2A Update Configuration Factory Documentation"
-    click a2a_auth_schemes "a2a_auth_schemes.md" "View A2A Auth Schemes Documentation"
-    click a2a_update_handlers "a2a_update_handlers.md" "View A2A Update Handlers Documentation"
+    client_auth_scheme["ClientAuthScheme"]
+    update_config["UpdateConfig"]
+    streaming_config["StreamingConfig"]
+    validated_a2a_extension["ValidatedA2AExtension"]
+    client_transport_config["ClientTransportConfig"]
+
+    a2a_client_config -->|"configures authentication"| client_auth_scheme
+    a2a_client_config -->|"defines update mechanism"| update_config
+    a2a_client_config -->|"uses client extensions"| validated_a2a_extension
+    a2a_client_config -->|"specifies transport"| client_transport_config
+
+    a2a_config_deprecated -->|"configures authentication"| client_auth_scheme
+    a2a_config_deprecated -->|"defines update mechanism"| update_config
+    a2a_config_deprecated -->|"uses client extensions"| validated_a2a_extension
+    a2a_config_deprecated -->|"specifies transport"| client_transport_config
+
+    get_default_update_config -->|"returns default"| streaming_config
+
+    a2a_client_config -.->|"default update config from"| get_default_update_config
+    a2a_config_deprecated -.->|"default update config from"| get_default_update_config
+
+    classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
+    classDef external fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+
+    class a2a_client_config,a2a_config_deprecated,get_default_update_config,client_transport_config analytical
+    class client_auth_scheme,update_config,streaming_config,validated_a2a_extension external
+
+    click client_auth_scheme "a2a_auth.md" "View A2A Auth Module"
+    click update_config "a2a_updates.md" "View A2A Updates Module"
+    click streaming_config "a2a_updates.md" "View A2A Updates Module"
+    click validated_a2a_extension "a2a_extensions.md" "View A2A Extensions Module"
 ```
-
-## Sub-modules
-
-### [A2A Configuration Models](a2a_configuration_models.md)
-This sub-module defines the data models for A2A client and server configurations, including authentication, timeouts, and extension handling. It contains the core classes for configuring A2A interactions.
-
-### [A2A Update Configuration Factory](a2a_update_config_factory.md)
-This sub-module provides a factory method to generate default update configurations for A2A communications, primarily for streaming updates. It ensures that update mechanisms are properly initialized.

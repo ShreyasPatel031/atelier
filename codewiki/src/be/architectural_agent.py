@@ -536,6 +536,7 @@ class ArchitecturalAgentRunner:
 
         agent = Agent(
             self.model,
+            retries=3,
             system_prompt=system_prompt,
             tools=[
                 Tool(

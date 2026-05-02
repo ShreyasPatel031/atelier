@@ -1,115 +1,89 @@
 # OpenAI Compatible Providers
 
-This module provides a unified interface for interacting with various AI model providers that offer an OpenAI-compatible API. It abstracts away the specifics of each provider's authentication, base URLs, and model profiling, allowing developers to use a consistent `AsyncOpenAI` client across different services.
+The `openai_compatible_providers` module serves as a crucial abstraction layer, providing a unified interface to interact with various Large Language Model (LLM) providers that adhere to the OpenAI API specification. This module simplifies the integration of diverse AI models into applications by standardizing how they are accessed and configured, regardless of the underlying vendor.
 
-## Architecture
+## Purpose
 
-The `openai_compatible_providers` module is designed around a set of `Provider` classes, each responsible for integrating with a specific third-party AI service. Each provider class encapsulates the necessary logic to:
-- Define the provider's name and base URL.
-- Instantiate and manage an `AsyncOpenAI` client configured for the specific provider.
-- Provide a static `model_profile` method to map generic model names to provider-specific profiles, including necessary transformations for OpenAI-compatible schema.
-- Handle API key retrieval, often supporting environment variables for configuration.
+The primary purpose of this module is to enable seamless swapping between different OpenAI-compatible LLM providers. It encapsulates the specific initialization parameters, API keys, and model profile adaptations required for each provider, offering a consistent `Provider` interface. This modular design enhances flexibility, allowing developers to experiment with different models or switch providers without extensive code changes.
 
-This architecture ensures that new providers can be easily added by implementing a new `Provider` class, maintaining a modular and extensible system.
+## Architecture Overview
+
+The `openai_compatible_providers` module is structured around individual provider implementations, each extending a common `Provider` interface. These providers are responsible for:
+*   Initializing an `AsyncOpenAI` client (or a compatible client).
+*   Defining their base URL and authentication mechanisms.
+*   Adapting model-specific settings and profiles to conform to the OpenAI-compatible interface.
+
+The various provider sub-modules within this component feed into the broader [model core interfaces](model_core_interfaces.md) and leverage [model provider configurations](model_provider_configurations.md) for model-specific behaviors.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "alibaba_provider", "label": "Alibaba Provider", "type": "module", "link": "alibaba_provider.md"},
-        {"id": "azure_provider", "label": "Azure Provider", "type": "module", "link": "azure_provider.md"},
-        {"id": "cerebras_provider", "label": "Cerebras Provider", "type": "module", "link": "cerebras_provider.md"},
-        {"id": "deepseek_provider", "label": "DeepSeek Provider", "type": "module", "link": "deepseek_provider.md"},
-        {"id": "fireworks_provider", "label": "Fireworks Provider", "type": "module", "link": "fireworks_provider.md"},
-        {"id": "github_provider", "label": "GitHub Provider", "type": "module", "link": "github_provider.md"},
-        {"id": "grok_provider", "label": "Grok Provider", "type": "module", "link": "grok_provider.md"},
-        {"id": "heroku_provider", "label": "Heroku Provider", "type": "module", "link": "heroku_provider.md"},
-        {"id": "litellm_provider", "label": "LiteLLM Provider", "type": "module", "link": "litellm_provider.md"},
-        {"id": "moonshot_ai_provider", "label": "MoonshotAI Provider", "type": "module", "link": "moonshot_ai_provider.md"},
-        {"id": "nebius_provider", "label": "Nebius Provider", "type": "module", "link": "nebius_provider.md"},
-        {"id": "ollama_provider", "label": "Ollama Provider", "type": "module", "link": "ollama_provider.md"},
-        {"id": "ovhcloud_provider", "label": "OVHcloud Provider", "type": "module", "link": "ovhcloud_provider.md"},
-        {"id": "sambanova_provider", "label": "SambaNova Provider", "type": "module", "link": "sambanova_provider.md"},
-        {"id": "together_provider", "label": "Together Provider", "type": "module", "link": "together_provider.md"},
-        {"id": "vercel_provider", "label": "Vercel Provider", "type": "module", "link": "vercel_provider.md"}
+        {"id": "cloud_based_providers", "label": "Cloud-Based Providers", "type": "module", "link": "cloud_based_providers.md"},
+        {"id": "ai_platform_providers", "label": "AI Platform Integrations", "type": "module", "link": "ai_platform_providers.md"},
+        {"id": "local_inference_providers", "label": "Local Inference Providers", "type": "module", "link": "local_inference_providers.md"},
+        {"id": "model_core_interfaces", "label": "Core Model Interfaces", "type": "external", "link": "model_core_interfaces.md"},
+        {"id": "model_provider_configurations", "label": "Model Configurations", "type": "external", "link": "model_provider_configurations.md"}
     ],
     "edges": [
-        {"source": "openai_compatible_providers", "target": "alibaba_provider"},
-        {"source": "openai_compatible_providers", "target": "azure_provider"},
-        {"source": "openai_compatible_providers", "target": "cerebras_provider"},
-        {"source": "openai_compatible_providers", "target": "deepseek_provider"},
-        {"source": "openai_compatible_providers", "target": "fireworks_provider"},
-        {"source": "openai_compatible_providers", "target": "github_provider"},
-        {"source": "openai_compatible_providers", "target": "grok_provider"},
-        {"source": "openai_compatible_providers", "target": "heroku_provider"},
-        {"source": "openai_compatible_providers", "target": "litellm_provider"},
-        {"source": "openai_compatible_providers", "target": "moonshot_ai_provider"},
-        {"source": "openai_compatible_providers", "target": "nebius_provider"},
-        {"source": "openai_compatible_providers", "target": "ollama_provider"},
-        {"source": "openai_compatible_providers", "target": "ovhcloud_provider"},
-        {"source": "openai_compatible_providers", "target": "sambanova_provider"},
-        {"source": "openai_compatible_providers", "target": "together_provider"},
-        {"source": "openai_compatible_providers", "target": "vercel_provider"}
+        {"source": "cloud_based_providers", "target": "model_core_interfaces", "label": "provides client"},
+        {"source": "cloud_based_providers", "target": "model_provider_configurations", "label": "utilizes profiles"},
+        {"source": "ai_platform_providers", "target": "model_core_interfaces", "label": "provides client"},
+        {"source": "ai_platform_providers", "target": "model_provider_configurations", "label": "utilizes profiles"},
+        {"source": "local_inference_providers", "target": "model_core_interfaces", "label": "provides client"},
+        {"source": "local_inference_providers", "target": "model_provider_configurations", "label": "utilizes profiles"}
     ],
-    "groups": []
+    "groups": [
+        {
+            "id": "openai_compatible_providers",
+            "label": "OpenAI-Compatible Providers",
+            "role": "surface",
+            "nodes": ["cloud_based_providers", "ai_platform_providers", "local_inference_providers"]
+        },
+        {
+            "id": "core_model_integration",
+            "label": "Core Model Integration",
+            "role": "generative",
+            "nodes": ["model_core_interfaces", "model_provider_configurations"]
+        }
+    ]
 }
 -->
 ```mermaid
-graph TD
-    sub_module_openai_compatible_providers[OpenAI Compatible Providers]
+flowchart TD
+    subgraph openai_compatible_providers["OpenAI-Compatible Providers"]
+        cloud_based_providers["Cloud-Based Providers"]
+        ai_platform_providers["AI Platform Integrations"]
+        local_inference_providers["Local Inference Providers"]
+    end
 
-    sub_module_openai_compatible_providers --> alibaba_provider[Alibaba Provider]
-    sub_module_openai_compatible_providers --> azure_provider[Azure Provider]
-    sub_module_openai_compatible_providers --> cerebras_provider[Cerebras Provider]
-    sub_module_openai_compatible_providers --> deepseek_provider[DeepSeek Provider]
-    sub_module_openai_compatible_providers --> fireworks_provider[Fireworks Provider]
-    sub_module_openai_compatible_providers --> github_provider[GitHub Provider]
-    sub_module_openai_compatible_providers --> grok_provider[Grok Provider]
-    sub_module_openai_compatible_providers --> heroku_provider[Heroku Provider]
-    sub_module_openai_compatible_providers --> litellm_provider[LiteLLM Provider]
-    sub_module_openai_compatible_providers --> moonshot_ai_provider[MoonshotAI Provider]
-    sub_module_openai_compatible_providers --> nebius_provider[Nebius Provider]
-    sub_module_openai_compatible_providers --> ollama_provider[Ollama Provider]
-    sub_module_openai_compatible_providers --> ovhcloud_provider[OVHcloud Provider]
-    sub_module_openai_compatible_providers --> sambanova_provider[SambaNova Provider]
-    sub_module_openai_compatible_providers --> together_provider[Together Provider]
-    sub_module_openai_compatible_providers --> vercel_provider[Vercel Provider]
+    subgraph core_model_integration["Core Model Integration"]
+        model_core_interfaces["Core Model Interfaces"]
+        model_provider_configurations["Model Configurations"]
+    end
 
-    click alibaba_provider "alibaba_provider.md" "View Alibaba Provider Module"
-    click azure_provider "azure_provider.md" "View Azure Provider Module"
-    click cerebras_provider "cerebras_provider.md" "View Cerebras Provider Module"
-    click deepseek_provider "deepseek_provider.md" "View DeepSeek Provider Module"
-    click fireworks_provider "fireworks_provider.md" "View Fireworks Provider Module"
-    click github_provider "github_provider.md" "View GitHub Provider Module"
-    click grok_provider "grok_provider.md" "View Grok Provider Module"
-    click heroku_provider "heroku_provider.md" "View Heroku Provider Module"
-    click litellm_provider "litellm_provider.md" "View LiteLLM Provider Module"
-    click moonshot_ai_provider "moonshot_ai_provider.md" "View MoonshotAI Provider Module"
-    click nebius_provider "nebius_provider.md" "View Nebius Provider Module"
-    click ollama_provider "ollama_provider.md" "View Ollama Provider Module"
-    click ovhcloud_provider "ovhcloud_provider.md" "View OVHcloud Provider Module"
-    click sambanova_provider "sambanova_provider.md" "View SambaNova Provider Module"
-    click together_provider "together_provider.md" "View Together Provider Module"
-    click vercel_provider "vercel_provider.md" "View Vercel Provider Module"
+    cloud_based_providers -->|"provides client"| model_core_interfaces
+    cloud_based_providers -->|"utilizes profiles"| model_provider_configurations
+    ai_platform_providers -->|"provides client"| model_core_interfaces
+    ai_platform_providers -->|"utilizes profiles"| model_provider_configurations
+    local_inference_providers -->|"provides client"| model_core_interfaces
+    local_inference_providers -->|"utilizes profiles"| model_provider_configurations
+
+    click cloud_based_providers "cloud_based_providers.md" "View Cloud-Based Providers"
+    click ai_platform_providers "ai_platform_providers.md" "View AI Platform Integrations"
+    click local_inference_providers "local_inference_providers.md" "View Local Inference Providers"
+    click model_core_interfaces "model_core_interfaces.md" "View Core Model Interfaces"
+    click model_provider_configurations "model_provider_configurations.md" "View Model Configurations"
 ```
 
 ## Sub-modules
 
-This module is composed of several sub-modules, each providing integration with a specific OpenAI-compatible AI service:
+This module organizes OpenAI-compatible providers into the following sub-modules:
 
-*   **[Alibaba Provider](alibaba_provider.md)**: Integrates with Alibaba Cloud Model Studio (DashScope) OpenAI-compatible API.
-*   **[Azure Provider](azure_provider.md)**: Integrates with the Azure OpenAI API, supporting various models.
-*   **[Cerebras Provider](cerebras_provider.md)**: Integrates with the Cerebras AI API, offering access to their models.
-*   **[DeepSeek Provider](deepseek_provider.md)**: Integrates with the DeepSeek API, providing access to DeepSeek models.
-*   **[Fireworks Provider](fireworks_provider.md)**: Integrates with Fireworks AI API for various AI models.
-*   **[GitHub Provider](github_provider.md)**: Integrates with GitHub Models API, supporting multiple AI models.
-*   **[Grok Provider](grok_provider.md)**: Integrates with Grok API, providing OpenAI-compatible access to Grok models.
-*   **[Heroku Provider](heroku_provider.md)**: Integrates with Heroku AI inference API for OpenAI-compatible models.
-*   **[LiteLLM Provider](litellm_provider.md)**: Integrates with LiteLLM API, allowing access to a wide range of LLMs through a unified interface.
-*   **[MoonshotAI Provider](moonshot_ai_provider.md)**: Integrates with MoonshotAI platform (Kimi models) offering OpenAI-compatible API.
-*   **[Nebius Provider](nebius_provider.md)**: Integrates with Nebius AI Studio API for diverse AI models.
-*   **[Ollama Provider](ollama_provider.md)**: Integrates with local or remote Ollama API for running open-source models.
-*   **[OVHcloud Provider](ovhcloud_provider.md)**: Integrates with OVHcloud AI Endpoints, providing access to various AI models.
-*   **[SambaNova Provider](sambanova_provider.md)**: Integrates with SambaNova AI models through an OpenAI-compatible API.
-*   **[Together Provider](together_provider.md)**: Integrates with Together AI API, offering access to various models.
-*   **[Vercel Provider](vercel_provider.md)**: Integrates with Vercel AI Gateway API for flexible AI model access.
+*   **[AI Platform Integrations](ai_platform_providers.md)**: This sub-module contains integrations for various specialized AI model inference platforms that offer OpenAI-compatible endpoints. It includes providers like Cerebras, DeepSeek, Fireworks, Grok, MoonshotAI, Nebius, SambaNova, and Together, enabling access to their unique model offerings through a familiar API.
+
+*   **[Cloud-Based Providers](cloud_based_providers.md)**: This sub-module encompasses integrations for OpenAI-compatible APIs offered by major cloud platforms and hosted services. It includes providers such as Alibaba, Azure, GitHub, Heroku, and OVHcloud, facilitating the use of their extensive infrastructure and diverse models.
+
+*   **[Local Inference Providers](local_inference_providers.md)**: This sub-module provides the necessary components for integrating with local or self-hosted OpenAI-compatible inference solutions, such as Ollama. It allows for the use of local models with the same `Provider` interface, ideal for development, privacy-sensitive applications, or environments with limited internet connectivity.
+
+Each sub-module's documentation provides detailed information on specific providers, their configurations, and any unique characteristics.

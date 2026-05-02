@@ -1,4 +1,7 @@
 {
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "test:e2e": "playwright test",
     "test:e2e:edge": "playwright test demo/playwright/edge-hover.spec.ts"

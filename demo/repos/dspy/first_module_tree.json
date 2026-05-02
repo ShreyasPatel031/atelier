@@ -1,314 +1,276 @@
 {
-    "documentation_utilities": {
-        "path": "docs",
-        "components": [
-            "docs.docs.js.copy-as-markdown.createButton",
-            "docs.scripts.generate_api_docs.generate_md_docs",
-            "docs.scripts.generate_api_summary.main"
-        ],
-        "children": {}
-    },
-    "dspy_adapters": {
-        "path": "dspy/adapters",
-        "components": [
-            "dspy.adapters.baml_adapter.BAMLAdapter",
-            "dspy.adapters.base.Adapter",
-            "dspy.adapters.two_step_adapter.TwoStepAdapter",
-            "dspy.adapters.types.audio.Audio",
-            "dspy.adapters.types.base_type.Type",
-            "dspy.adapters.types.citation.from_dict_list",
-            "dspy.adapters.types.citation.format",
-            "dspy.adapters.types.citation.validate_input",
-            "dspy.adapters.types.code.Code",
-            "dspy.adapters.types.document.Document",
-            "dspy.adapters.types.file.File",
-            "dspy.adapters.types.image.Image",
-            "dspy.adapters.types.image._get_file_extension",
-            "dspy.adapters.types.image.is_image",
-            "dspy.adapters.types.tool.Tool",
-            "dspy.adapters.types.tool.validate_input"
-        ],
-        "children": {}
-    },
-    "dspy_clients": {
-        "path": "dspy/clients",
-        "components": [
-            "dspy.clients.__init__._get_dspy_cache",
-            "dspy.clients.__init__.configure_cache",
-            "dspy.clients.__init__.enable_litellm_logging",
-            "dspy.clients.__init__.disable_litellm_logging",
-            "dspy.clients.base_lm.BaseLM",
-            "dspy.clients.cache.sync_wrapper",
-            "dspy.clients.cache.async_wrapper",
-            "dspy.clients.databricks.DatabricksProvider",
-            "dspy.clients.databricks.TrainingJobDatabricks",
-            "dspy.clients.embedding._cached_compute_embeddings",
-            "dspy.clients.embedding._cached_acompute_embeddings",
-            "dspy.clients.lm.litellm_responses_completion",
-            "dspy.clients.lm.alitellm_responses_completion",
-            "dspy.clients.lm.litellm_completion",
-            "dspy.clients.lm.alitellm_completion",
-            "dspy.clients.lm.sync_stream_completion",
-            "dspy.clients.lm.async_stream_completion",
-            "dspy.clients.lm.litellm_text_completion",
-            "dspy.clients.lm.alitellm_text_completion",
-            "dspy.clients.lm_local.LocalProvider",
-            "dspy.clients.lm_local.tokenize_function",
-            "dspy.clients.openai.TrainingJobOpenAI"
-        ],
-        "children": {}
-    },
-    "dspy_datasets": {
-        "path": "dspy/datasets",
-        "components": [
-            "dspy.datasets.alfworld.alfworld.AlfWorld",
-            "dspy.datasets.alfworld.alfworld.env_worker",
-            "dspy.datasets.dataloader.DataLoader",
-            "dspy.datasets.dataset.Dataset",
-            "dspy.datasets.gsm8k.GSM8K",
-            "dspy.datasets.gsm8k.gsm8k_metric",
-            "dspy.datasets.math.MATH"
-        ],
-        "children": {}
-    },
-    "dspy_dsp_utilities": {
-        "path": "dspy/dsp",
-        "components": [
-            "dspy.dsp.colbertv2.ColBERTv2RetrieverLocal",
-            "dspy.dsp.colbertv2.colbertv2_get_request_v2_wrapped",
-            "dspy.dsp.colbertv2.colbertv2_post_request_v2_wrapped",
-            "dspy.dsp.colbertv2.ColBERTv2RerankerLocal",
-            "dspy.dsp.colbertv2.ColBERTv2",
-            "dspy.dsp.utils.dpr.SimpleTokenizer",
-            "dspy.dsp.utils.dpr.locate_answers",
-            "dspy.dsp.utils.settings.Settings",
-            "dspy.dsp.utils.utils.load_batch_backgrounds"
-        ],
-        "children": {}
-    },
-    "dspy_evaluation": {
-        "path": "dspy/evaluate",
-        "components": [
-            "dspy.evaluate.auto_evaluation.SemanticF1",
-            "dspy.evaluate.auto_evaluation.CompleteAndGrounded",
-            "dspy.evaluate.auto_evaluation.SemanticRecallPrecision",
-            "dspy.evaluate.auto_evaluation.DecompositionalSemanticRecallPrecision",
-            "dspy.evaluate.auto_evaluation.AnswerCompleteness",
-            "dspy.evaluate.auto_evaluation.AnswerGroundedness",
-            "dspy.evaluate.metrics.answer_exact_match",
-            "dspy.evaluate.metrics.passage_has_answers",
-            "dspy.evaluate.metrics.precision_score",
-            "dspy.evaluate.metrics.HotPotF1",
-            "dspy.evaluate.metrics.answer_passage_match"
-        ],
-        "children": {}
-    },
-    "dspy_prediction_strategies": {
-        "path": "dspy/predict",
-        "components": [
-            "dspy.predict.aggregation.majority",
-            "dspy.predict.aggregation.default_normalize",
-            "dspy.predict.avatar.avatar.Avatar",
-            "dspy.predict.avatar.signatures.Actor",
-            "dspy.predict.best_of_n.BestOfN",
-            "dspy.predict.code_act.CodeAct",
-            "dspy.predict.multi_chain_comparison.MultiChainComparison",
-            "dspy.predict.program_of_thought.ProgramOfThought",
-            "dspy.predict.react.ReAct",
-            "dspy.predict.refine.Refine",
-            "dspy.predict.refine.WrapperAdapter",
-            "dspy.predict.refine.inspect_modules",
-            "dspy.predict.refine.OfferFeedback",
-            "dspy.predict.rlm.RLM"
-        ],
-        "children": {}
-    },
-    "dspy_primitives": {
-        "path": "dspy/primitives",
-        "components": [
-            "dspy.primitives.base_module.BaseModule",
-            "dspy.primitives.module.Module",
-            "dspy.primitives.repl_types.REPLVariable",
-            "dspy.primitives.runner.makeToolWrapper",
-            "dspy.primitives.runner.toolCallBridge"
-        ],
-        "children": {}
-    },
-    "dspy_program_proposal": {
-        "path": "dspy/propose",
-        "components": [
-            "dspy.propose.dataset_summary_generator.ObservationSummarizer",
-            "dspy.propose.dataset_summary_generator.DatasetDescriptor",
-            "dspy.propose.dataset_summary_generator.DatasetDescriptorWithPriorObservations",
-            "dspy.propose.grounded_proposer.DescribeProgram",
-            "dspy.propose.grounded_proposer.DescribeModule",
-            "dspy.propose.grounded_proposer.GenerateSingleModuleInstruction",
-            "dspy.propose.utils.create_instruction_set_history_string"
-        ],
-        "children": {}
-    },
-    "dspy_retrievers": {
-        "path": "dspy/retrievers",
-        "components": [
-            "dspy.retrievers.databricks_rm.DatabricksRM",
-            "dspy.retrievers.embeddings.EmbeddingsWithScores",
-            "dspy.retrievers.retrieve.Retrieve",
-            "dspy.retrievers.retrieve.single_query_passage",
-            "dspy.retrievers.weaviate_rm.WeaviateRM"
-        ],
-        "children": {}
-    },
-    "dspy_signatures": {
-        "path": "dspy/signatures",
-        "components": [
-            "dspy.signatures.field.new_to_old_field",
-            "dspy.signatures.field.OldInputField",
-            "dspy.signatures.field.OldOutputField",
-            "dspy.signatures.signature.SignatureMeta"
-        ],
-        "children": {}
-    },
-    "dspy_streaming": {
-        "path": "dspy/streaming",
-        "components": [
-            "dspy.streaming.messages.run_in_new_loop",
-            "dspy.streaming.streamify.streamify",
-            "dspy.streaming.streamify.sync_streamer",
-            "dspy.streaming.streaming_listener.StreamListener"
-        ],
-        "children": {}
-    },
-    "dspy_teleprompting_optimizers": {
-        "path": "dspy/teleprompt",
-        "components": [
-            "dspy.teleprompt.avatar_optimizer.AvatarOptimizer",
-            "dspy.teleprompt.avatar_optimizer.Comparator",
-            "dspy.teleprompt.avatar_optimizer.FeedbackBasedInstruction",
-            "dspy.teleprompt.bettertogether.BetterTogether",
-            "dspy.teleprompt.bootstrap_trace.patched_forward",
-            "dspy.teleprompt.copro_optimizer.COPRO",
-            "dspy.teleprompt.copro_optimizer.BasicGenerateInstruction",
-            "dspy.teleprompt.copro_optimizer.GenerateInstructionGivenAttempts",
-            "dspy.teleprompt.gepa.gepa.GEPA",
-            "dspy.teleprompt.gepa.gepa.GEPAFeedbackMetric",
-            "dspy.teleprompt.gepa.instruction_proposal.MultiModalInstructionProposer",
-            "dspy.teleprompt.gepa.instruction_proposal.GenerateEnhancedMultimodalInstructionFromFeedback",
-            "dspy.teleprompt.grpo.GRPO",
-            "dspy.teleprompt.infer_rules.InferRules",
-            "dspy.teleprompt.infer_rules.CustomRulesInduction",
-            "dspy.teleprompt.knn_fewshot.KNNFewShot",
-            "dspy.teleprompt.mipro_optimizer_v2.MIPROv2",
-            "dspy.teleprompt.simba.SIMBA",
-            "dspy.teleprompt.simba_utils.append_a_rule",
-            "dspy.teleprompt.simba_utils.append_a_demo_",
-            "dspy.teleprompt.simba_utils.OfferFeedback",
-            "dspy.teleprompt.teleprompt_optuna.BootstrapFewShotWithOptuna",
-            "dspy.teleprompt.utils.get_task_model_history_for_full_example",
-            "dspy.teleprompt.utils.log_token_usage",
-            "dspy.teleprompt.utils.calculate_last_n_proposed_quality"
-        ],
+    "core_program_building": {
+        "path": "dspy/primitives, dspy/predict, dspy/signatures",
+        "components": [],
         "children": {
-            "avatar_optimizer": {
+            "base_modules": {
+                "path": "dspy/primitives",
                 "components": [
-                    "dspy.teleprompt.avatar_optimizer.AvatarOptimizer",
-                    "dspy.teleprompt.avatar_optimizer.Comparator",
-                    "dspy.teleprompt.avatar_optimizer.FeedbackBasedInstruction"
-                ],
-                "children": {}
+                    "dspy.primitives.base_module.BaseModule",
+                    "dspy.primitives.module.Module",
+                    "dspy.primitives.repl_types.REPLVariable"
+                ]
             },
-            "better_together": {
+            "prediction_strategies": {
+                "path": "dspy/predict",
                 "components": [
-                    "dspy.teleprompt.bettertogether.BetterTogether"
-                ],
-                "children": {}
+                    "dspy.predict.aggregation.majority",
+                    "dspy.predict.aggregation.default_normalize",
+                    "dspy.predict.best_of_n.BestOfN",
+                    "dspy.predict.code_act.CodeAct",
+                    "dspy.predict.program_of_thought.ProgramOfThought",
+                    "dspy.predict.react.ReAct",
+                    "dspy.predict.refine.Refine",
+                    "dspy.predict.refine.WrapperAdapter",
+                    "dspy.predict.refine.inspect_modules",
+                    "dspy.predict.refine.OfferFeedback",
+                    "dspy.predict.rlm.RLM"
+                ]
             },
-            "bootstrap_trace": {
+            "signatures_and_fields": {
+                "path": "dspy/signatures",
                 "components": [
-                    "dspy.teleprompt.bootstrap_trace.patched_forward"
-                ],
-                "children": {}
+                    "dspy.signatures.field.new_to_old_field",
+                    "dspy.signatures.field.OldInputField",
+                    "dspy.signatures.field.OldOutputField",
+                    "dspy.signatures.signature.SignatureMeta"
+                ]
             },
-            "copro_optimizer": {
+            "advanced_prediction": {
+                "path": "dspy/predict",
                 "components": [
-                    "dspy.teleprompt.copro_optimizer.COPRO",
-                    "dspy.teleprompt.copro_optimizer.BasicGenerateInstruction",
-                    "dspy.teleprompt.copro_optimizer.GenerateInstructionGivenAttempts"
-                ],
-                "children": {}
-            },
-            "gepa_optimizer": {
-                "components": [
-                    "dspy.teleprompt.gepa.gepa.GEPA",
-                    "dspy.teleprompt.gepa.gepa.GEPAFeedbackMetric",
-                    "dspy.teleprompt.gepa.instruction_proposal.MultiModalInstructionProposer",
-                    "dspy.teleprompt.gepa.instruction_proposal.GenerateEnhancedMultimodalInstructionFromFeedback"
-                ],
-                "children": {}
-            },
-            "grpo_optimizer": {
-                "components": [
-                    "dspy.teleprompt.grpo.GRPO"
-                ],
-                "children": {}
-            },
-            "infer_rules": {
-                "components": [
-                    "dspy.teleprompt.infer_rules.InferRules",
-                    "dspy.teleprompt.infer_rules.CustomRulesInduction"
-                ],
-                "children": {}
-            },
-            "knn_fewshot": {
-                "components": [
-                    "dspy.teleprompt.knn_fewshot.KNNFewShot"
-                ],
-                "children": {}
-            },
-            "mipro_optimizer_v2": {
-                "components": [
-                    "dspy.teleprompt.mipro_optimizer_v2.MIPROv2"
-                ],
-                "children": {}
-            },
-            "simba_optimizer": {
-                "components": [
-                    "dspy.teleprompt.simba.SIMBA",
-                    "dspy.teleprompt.simba_utils.append_a_rule",
-                    "dspy.teleprompt.simba_utils.append_a_demo_",
-                    "dspy.teleprompt.simba_utils.OfferFeedback"
-                ],
-                "children": {}
-            },
-            "teleprompt_optuna": {
-                "components": [
-                    "dspy.teleprompt.teleprompt_optuna.BootstrapFewShotWithOptuna"
-                ],
-                "children": {}
-            },
-            "teleprompt_utils": {
-                "components": [
-                    "dspy.teleprompt.utils.get_task_model_history_for_full_example",
-                    "dspy.teleprompt.utils.log_token_usage",
-                    "dspy.teleprompt.utils.calculate_last_n_proposed_quality"
-                ],
-                "children": {}
+                    "dspy.predict.avatar.avatar.Avatar",
+                    "dspy.predict.avatar.signatures.Actor",
+                    "dspy.predict.multi_chain_comparison.MultiChainComparison"
+                ]
             }
         }
     },
-    "dspy_utilities": {
-        "path": "dspy/utils",
-        "components": [
-            "dspy.utils.__init__.download",
-            "dspy.utils.annotation.decorator",
-            "dspy.utils.asyncify.wrapped_program",
-            "dspy.utils.asyncify.async_program",
-            "dspy.utils.asyncify.get_limiter",
-            "dspy.utils.callback.async_wrapper",
-            "dspy.utils.callback.sync_wrapper",
-            "dspy.utils.dummies.DummyLM",
-            "dspy.utils.dummies.inner",
-            "dspy.utils.syncify.SyncWrapper"
-        ],
-        "children": {}
+    "language_model_integration": {
+        "path": "dspy/clients, dspy/retrievers, dspy/dsp",
+        "components": [],
+        "children": {
+            "lm_clients": {
+                "path": "dspy/clients",
+                "components": [
+                    "dspy.clients.__init__._get_dspy_cache",
+                    "dspy.clients.__init__.configure_cache",
+                    "dspy.clients.__init__.enable_litellm_logging",
+                    "dspy.clients.__init__.disable_litellm_logging",
+                    "dspy.clients.base_lm.BaseLM",
+                    "dspy.clients.cache.sync_wrapper",
+                    "dspy.clients.cache.async_wrapper",
+                    "dspy.clients.lm.litellm_responses_completion",
+                    "dspy.clients.lm.alitellm_responses_completion",
+                    "dspy.clients.lm.litellm_completion",
+                    "dspy.clients.lm.alitellm_completion",
+                    "dspy.clients.lm.sync_stream_completion",
+                    "dspy.clients.lm.async_stream_completion",
+                    "dspy.clients.lm.litellm_text_completion",
+                    "dspy.clients.lm.alitellm_text_completion"
+                ]
+            },
+            "retrievers": {
+                "path": "dspy/retrievers, dspy/dsp",
+                "components": [
+                    "dspy.dsp.colbertv2.ColBERTv2RetrieverLocal",
+                    "dspy.dsp.colbertv2.colbertv2_get_request_v2_wrapped",
+                    "dspy.dsp.colbertv2.colbertv2_post_request_v2_wrapped",
+                    "dspy.dsp.colbertv2.ColBERTv2RerankerLocal",
+                    "dspy.dsp.colbertv2.ColBERTv2",
+                    "dspy.retrievers.databricks_rm.DatabricksRM",
+                    "dspy.retrievers.retrieve.Retrieve",
+                    "dspy.retrievers.retrieve.single_query_passage",
+                    "dspy.retrievers.weaviate_rm.WeaviateRM"
+                ]
+            },
+            "lm_providers": {
+                "path": "dspy/clients",
+                "components": [
+                    "dspy.clients.databricks.DatabricksProvider",
+                    "dspy.clients.databricks.TrainingJobDatabricks",
+                    "dspy.clients.lm_local.LocalProvider",
+                    "dspy.clients.lm_local.tokenize_function",
+                    "dspy.clients.openai.TrainingJobOpenAI"
+                ]
+            },
+            "embedding_services": {
+                "path": "dspy/clients, dspy/retrievers",
+                "components": [
+                    "dspy.clients.embedding._cached_compute_embeddings",
+                    "dspy.clients.embedding._cached_acompute_embeddings",
+                    "dspy.retrievers.embeddings.EmbeddingsWithScores"
+                ]
+            }
+        }
+    },
+    "program_optimization": {
+        "path": "dspy/teleprompt, dspy/propose",
+        "components": [],
+        "children": {
+            "optimizers": {
+                "path": "dspy/teleprompt",
+                "components": [
+                    "dspy.teleprompt.avatar_optimizer.AvatarOptimizer",
+                    "dspy.teleprompt.bettertogether.BetterTogether",
+                    "dspy.teleprompt.copro_optimizer.COPRO",
+                    "dspy.teleprompt.gepa.gepa.GEPA",
+                    "dspy.teleprompt.grpo.GRPO",
+                    "dspy.teleprompt.infer_rules.InferRules",
+                    "dspy.teleprompt.knn_fewshot.KNNFewShot",
+                    "dspy.teleprompt.mipro_optimizer_v2.MIPROv2",
+                    "dspy.teleprompt.simba.SIMBA",
+                    "dspy.teleprompt.teleprompt_optuna.BootstrapFewShotWithOptuna"
+                ]
+            },
+            "instruction_generation": {
+                "path": "dspy/teleprompt, dspy/propose",
+                "components": [
+                    "dspy.propose.grounded_proposer.DescribeProgram",
+                    "dspy.propose.grounded_proposer.DescribeModule",
+                    "dspy.propose.grounded_proposer.GenerateSingleModuleInstruction",
+                    "dspy.teleprompt.copro_optimizer.BasicGenerateInstruction",
+                    "dspy.teleprompt.copro_optimizer.GenerateInstructionGivenAttempts",
+                    "dspy.teleprompt.gepa.instruction_proposal.MultiModalInstructionProposer",
+                    "dspy.teleprompt.gepa.instruction_proposal.GenerateEnhancedMultimodalInstructionFromFeedback",
+                    "dspy.teleprompt.infer_rules.CustomRulesInduction"
+                ]
+            },
+            "feedback_and_rules": {
+                "path": "dspy/teleprompt",
+                "components": [
+                    "dspy.teleprompt.avatar_optimizer.Comparator",
+                    "dspy.teleprompt.avatar_optimizer.FeedbackBasedInstruction",
+                    "dspy.teleprompt.gepa.gepa.GEPAFeedbackMetric",
+                    "dspy.teleprompt.simba_utils.append_a_rule",
+                    "dspy.teleprompt.simba_utils.append_a_demo_",
+                    "dspy.teleprompt.simba_utils.OfferFeedback"
+                ]
+            },
+            "optimization_utilities": {
+                "path": "dspy/teleprompt, dspy/propose",
+                "components": [
+                    "dspy.propose.dataset_summary_generator.ObservationSummarizer",
+                    "dspy.propose.dataset_summary_generator.DatasetDescriptor",
+                    "dspy.propose.dataset_summary_generator.DatasetDescriptorWithPriorObservations",
+                    "dspy.propose.utils.create_instruction_set_history_string",
+                    "dspy.teleprompt.bootstrap_trace.patched_forward",
+                    "dspy.teleprompt.utils.get_task_model_history_for_full_example",
+                    "dspy.teleprompt.utils.log_token_usage",
+                    "dspy.teleprompt.utils.calculate_last_n_proposed_quality"
+                ]
+            }
+        }
+    },
+    "data_and_evaluation": {
+        "path": "dspy/datasets, dspy/evaluate",
+        "components": [],
+        "children": {
+            "dataset_management": {
+                "path": "dspy/datasets",
+                "components": [
+                    "dspy.datasets.dataloader.DataLoader",
+                    "dspy.datasets.dataset.Dataset"
+                ]
+            },
+            "example_datasets": {
+                "path": "dspy/datasets",
+                "components": [
+                    "dspy.datasets.alfworld.alfworld.AlfWorld",
+                    "dspy.datasets.alfworld.alfworld.env_worker",
+                    "dspy.datasets.gsm8k.GSM8K",
+                    "dspy.datasets.math.MATH"
+                ]
+            },
+            "evaluation_metrics": {
+                "path": "dspy/evaluate",
+                "components": [
+                    "dspy.evaluate.metrics.answer_exact_match",
+                    "dspy.evaluate.metrics.passage_has_answers",
+                    "dspy.evaluate.metrics.precision_score",
+                    "dspy.evaluate.metrics.HotPotF1",
+                    "dspy.evaluate.metrics.answer_passage_match",
+                    "dspy.datasets.gsm8k.gsm8k_metric"
+                ]
+            },
+            "auto_evaluation": {
+                "path": "dspy/evaluate",
+                "components": [
+                    "dspy.evaluate.auto_evaluation.SemanticF1",
+                    "dspy.evaluate.auto_evaluation.CompleteAndGrounded",
+                    "dspy.evaluate.auto_evaluation.SemanticRecallPrecision",
+                    "dspy.evaluate.auto_evaluation.DecompositionalSemanticRecallPrecision",
+                    "dspy.evaluate.auto_evaluation.AnswerCompleteness",
+                    "dspy.evaluate.auto_evaluation.AnswerGroundedness"
+                ]
+            }
+        }
+    },
+    "utilities_and_adapters": {
+        "path": "dspy/adapters, dspy/streaming, dspy/utils, docs/scripts, dspy/dsp/utils",
+        "components": [],
+        "children": {
+            "external_adapters": {
+                "path": "dspy/adapters",
+                "components": [
+                    "dspy.adapters.baml_adapter.BAMLAdapter",
+                    "dspy.adapters.base.Adapter",
+                    "dspy.adapters.two_step_adapter.TwoStepAdapter"
+                ]
+            },
+            "type_system": {
+                "path": "dspy/adapters/types",
+                "components": [
+                    "dspy.adapters.types.audio.Audio",
+                    "dspy.adapters.types.base_type.Type",
+                    "dspy.adapters.types.citation.from_dict_list",
+                    "dspy.adapters.types.citation.format",
+                    "dspy.adapters.types.citation.validate_input",
+                    "dspy.adapters.types.code.Code",
+                    "dspy.adapters.types.document.Document",
+                    "dspy.adapters.types.file.File",
+                    "dspy.adapters.types.image.Image",
+                    "dspy.adapters.types.image._get_file_extension",
+                    "dspy.adapters.types.image.is_image",
+                    "dspy.adapters.types.tool.Tool",
+                    "dspy.adapters.types.tool.validate_input"
+                ]
+            },
+            "streaming_and_async": {
+                "path": "dspy/streaming, dspy/utils",
+                "components": [
+                    "dspy.streaming.messages.run_in_new_loop",
+                    "dspy.streaming.streamify.streamify",
+                    "dspy.streaming.streamify.sync_streamer",
+                    "dspy.streaming.streaming_listener.StreamListener",
+                    "dspy.utils.asyncify.wrapped_program",
+                    "dspy.utils.asyncify.async_program",
+                    "dspy.utils.asyncify.get_limiter",
+                    "dspy.utils.syncify.SyncWrapper"
+                ]
+            },
+            "general_utilities": {
+                "path": "dspy/utils, dspy/dsp/utils",
+                "components": [
+                    "dspy.dsp.utils.dpr.SimpleTokenizer",
+                    "dspy.dsp.utils.dpr.locate_answers",
+                    "dspy.dsp.utils.settings.Settings",
+                    "dspy.dsp.utils.utils.load_batch_backgrounds",
+                    "dspy.utils.__init__.download",
+                    "dspy.utils.annotation.decorator",
+                    "dspy.utils.callback.async_wrapper",
+                    "dspy.utils.callback.sync_wrapper",
+                    "dspy.utils.dummies.DummyLM",
+                    "dspy.utils.dummies.inner"
+                ]
+            },
+            "documentation_tools": {
+                "path": "docs/scripts",
+                "components": [
+                    "docs.scripts.generate_api_docs.generate_md_docs",
+                    "docs.scripts.generate_api_summary.main"
+                ]
+            }
+        }
     }
 }

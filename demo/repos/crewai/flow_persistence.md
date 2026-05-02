@@ -1,30 +1,74 @@
-# Flow Persistence Module
-
-## Introduction
-The `flow_persistence` module is responsible for enabling and managing the persistence of flow states within the CrewAI framework. It provides decorators to automatically save the state of a flow at various points during its execution, ensuring that progress can be recovered even if the application is interrupted. This module leverages a configurable persistence backend to store flow data.
-
-## Architecture
-The module's architecture revolves around a decorator system that integrates with flow methods and a dedicated class for handling the actual state persistence.
+# flow_persistence
+Provides an abstract interface for persisting flow states and includes decorators and wrappers for managing state persistence and human feedback interactions within a flow.
 
 <!-- DIAGRAM_JSON
 {
-    "direction": "TD",
-    "nodes": [
-        {"id": "persistence_handlers", "label": "Persistence Handlers", "type": "module", "link": "persistence_handlers.md"}
-    ],
-    "edges": [],
-    "groups": []
+  "nodes": [
+    {
+      "id": "FlowPersistence",
+      "label": "FlowPersistence",
+      "description": "Abstract base class for flow state persistence, defining save/load methods and optional pending feedback handling."
+    },
+    {
+      "id": "PersistenceDecorator",
+      "label": "PersistenceDecorator",
+      "description": "Decorator that wraps flow classes and methods to automatically persist state after execution."
+    },
+    {
+      "id": "AsyncFeedbackWrapper",
+      "label": "AsyncFeedbackWrapper",
+      "description": "Asynchronous wrapper for methods requiring human feedback, handling pre-review, feedback request, and lesson distillation."
+    },
+    {
+      "id": "SyncFeedbackWrapper",
+      "label": "SyncFeedbackWrapper",
+      "description": "Synchronous wrapper for methods requiring human feedback, handling pre-review, feedback request, and lesson distillation."
+    }
+  ],
+  "edges": [
+    {
+      "source": "PersistenceDecorator",
+      "target": "FlowPersistence",
+      "label": "Uses for state saving"
+    },
+    {
+      "source": "AsyncFeedbackWrapper",
+      "target": "FlowPersistence",
+      "label": "Manages pending state via"
+    },
+    {
+      "source": "SyncFeedbackWrapper",
+      "target": "FlowPersistence",
+      "label": "Manages pending state via"
+    }
+  ],
+  "groups": [
+    {
+      "id": "Persistence Core",
+      "label": "Persistence Core",
+      "nodes": ["FlowPersistence", "PersistenceDecorator"]
+    },
+    {
+      "id": "Human Feedback Wrappers",
+      "label": "Human Feedback Wrappers",
+      "nodes": ["AsyncFeedbackWrapper", "SyncFeedbackWrapper"]
+    }
+  ]
 }
 -->
-
 ```mermaid
-graph TD
-    persistence_handlers[Persistence Handlers]
+flowchart TD
+    subgraph Persistence Core
+        FlowPersistence[FlowPersistence]
+        PersistenceDecorator[PersistenceDecorator]
+    end
 
-    click persistence_handlers "persistence_handlers.md" "View Persistence Handlers Documentation"
+    subgraph Human Feedback Wrappers
+        AsyncFeedbackWrapper[AsyncFeedbackWrapper]
+        SyncFeedbackWrapper[SyncFeedbackWrapper]
+    end
+
+    PersistenceDecorator -->|"Uses for state saving"| FlowPersistence
+    AsyncFeedbackWrapper -->|"Manages pending state via"| FlowPersistence
+    SyncFeedbackWrapper -->|"Manages pending state via"| FlowPersistence
 ```
-
-## Sub-modules
-
-### [Persistence Handlers](persistence_handlers.md)
-This sub-module contains the core logic for applying persistence decorators to flow classes and methods, and the `PersistenceDecorator` class which manages the saving of flow state data to the configured persistence backend. It ensures that the flow's state is captured at critical junctures, facilitating recovery and continuation of long-running processes.

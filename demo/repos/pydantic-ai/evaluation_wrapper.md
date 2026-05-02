@@ -1,132 +1,107 @@
 # evaluation_wrapper
 
-The `evaluation_wrapper` module provides a decorator function that enables automatic online evaluation for arbitrary functions. It transparently instruments function calls, captures inputs and outputs, extracts metrics, and dispatches configured evaluators to assess the function's performance and behavior in real-time.
+The `evaluation_wrapper` module provides a powerful decorator for enabling online evaluation of functions within the `pydantic_evals_framework`. It transparently intercepts function calls, captures critical runtime data, and dispatches various evaluators to assess the function's performance and behavior in real-time. This module is crucial for integrating continuous feedback and quality assurance directly into the application's execution flow.
 
-## Purpose and Core Functionality
+## Overview
 
-The primary purpose of the `evaluation_wrapper` module is to offer a non-intrusive way to integrate online evaluation into existing Python functions. By simply decorating a function with the `wrapper`, developers can automatically enable:
+At its core, `evaluation_wrapper` acts as an orchestration layer for online evaluations. When a function decorated with this wrapper is called, it performs several key steps:
 
-*   **Conditional Evaluation**: The wrapper intelligently determines whether evaluation should proceed based on a global configuration (`config.enabled`) and whether the function is already operating within an existing evaluation context. If evaluation is disabled or already active, the original function is called directly without overhead.
-*   **Input and Output Capture**: It captures the arguments passed to the wrapped function and its return value, forming the basis for the `EvaluatorContext`.
-*   **Evaluator Sampling**: Before execution, the wrapper consults the evaluation configuration to determine which evaluators should be applied to the current function call. This allows for dynamic and condition-based evaluation.
-*   **Observability Integration**: The wrapped function's execution is instrumented using `logfire_span`, capturing detailed trace information and a span tree. This span tree is then used to extract standard metrics such as LLM requests, cost, and token usage. This leverages the [pydantic_evals_reporting](pydantic_evals_reporting.md) module for detailed span context management.
-*   **Context Building**: An `EvaluatorContext` is constructed, encapsulating all relevant data for evaluators, including inputs, outputs, execution duration, metadata, and extracted metrics/span trees.
-*   **Asynchronous Dispatch**: Evaluators are dispatched asynchronously to avoid blocking the main execution thread. The dispatch mechanism intelligently adapts to the environment, either using an existing `asyncio` event loop or spawning a new background thread for synchronous contexts. This dispatch logic relies on components from [evaluation_dispatch_and_sinking](evaluation_dispatch_and_sinking.md).
+1.  **Conditional Activation**: It first checks if online evaluation is globally enabled or if the current execution context permits evaluation. If not, it gracefully bypasses the evaluation logic and simply executes the original function.
+2.  **Input and Output Capture**: Before and after the original function's execution, it captures the function's input arguments and its returned output.
+3.  **Evaluator Sampling**: Based on configured rules and the captured inputs, it determines which specific evaluators should be run for the current function call. This allows for flexible and efficient evaluation, avoiding unnecessary computations.
+4.  **Runtime Data Collection**: During the function's execution, it leverages tracing and logging systems (e.g., Logfire) to capture detailed runtime data, including span trees, execution duration, and extracted metrics like token usage and cost.
+5.  **Context Assembly**: All captured data—inputs, outputs, metrics, span trees—are consolidated into a comprehensive `EvaluatorContext` object.
+6.  **Asynchronous Dispatch**: The prepared `EvaluatorContext` and the sampled evaluators are then dispatched asynchronously. This ensures that the evaluation process does not block the main application thread, maintaining responsiveness. Depending on the environment, it either dispatches on an existing event loop or spawns a background thread.
 
-## Architecture and Component Relationships
+This module ensures that evaluations are integrated seamlessly without altering the core business logic of the decorated functions, providing valuable insights into their operational characteristics.
 
-The `evaluation_wrapper` module's core `wrapper` function orchestrates several internal processes and interacts with external modules to achieve its functionality.
+## Architecture
+
+The following diagram illustrates the internal workings of the `evaluation_wrapper` and its interactions with other modules.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "wrapper", "label": "pydantic_evals.online.wrapper", "type": "component", "link": null},
-        {"id": "online_eval_config", "label": "OnlineEvalConfig", "type": "external", "link": "online_evaluation_config.md"},
-        {"id": "eval_dispatch", "label": "Evaluator Dispatch and Sinking", "type": "external", "link": "evaluation_dispatch_and_sinking.md"},
-        {"id": "span_reporting", "label": "Span Reporting", "type": "external", "link": "pydantic_evals_reporting.md"},
-        {"id": "task_run_management", "label": "Task Run Management", "type": "external", "link": "task_run_management.md"},
-        {"id": "capture_inputs", "label": "Input Capture Logic", "type": "component", "link": null},
-        {"id": "sample_evaluators", "label": "Evaluator Sampling Logic", "type": "component", "link": null},
-        {"id": "extract_metrics", "label": "Metric Extraction Logic", "type": "component", "link": null},
-        {"id": "extract_span_ref", "label": "Span Reference Extraction Logic", "type": "component", "link": null},
-        {"id": "async_dispatch_logic", "label": "Async Dispatch Logic", "type": "component", "link": null},
-        {"id": "sync_dispatch_logic", "label": "Sync Dispatch Logic", "type": "component", "link": null},
-        {"id": "evaluator_context", "label": "EvaluatorContext Building", "type": "component", "link": null},
-        {"id": "wrapped_func", "label": "Original Function Execution", "type": "component", "link": null}
+        {"id": "evaluation_wrapper", "label": "Intercept Function Call", "type": "component", "link": null},
+        {"id": "check_evaluation_status", "label": "Check Evaluation Status", "type": "component", "link": null},
+        {"id": "capture_function_inputs", "label": "Capture Function Inputs", "type": "component", "link": null},
+        {"id": "determine_evaluators", "label": "Sample Evaluators to Run", "type": "component", "link": null},
+        {"id": "execute_original_function", "label": "Execute Original Function", "type": "component", "link": null},
+        {"id": "capture_runtime_data", "label": "Capture Runtime Data (Spans, Metrics)", "type": "component", "link": null},
+        {"id": "create_evaluation_context", "label": "Assemble Evaluation Context", "type": "component", "link": null},
+        {"id": "dispatch_evaluators_async", "label": "Dispatch Evaluators Asynchronously", "type": "component", "link": null},
+        {"id": "evaluation_config", "label": "Evaluation Configuration", "type": "external", "link": "evaluation_configuration.md"},
+        {"id": "evaluator_definitions", "label": "Evaluator Core Definitions", "type": "external", "link": "evaluator_core.md"},
+        {"id": "evaluator_dispatcher", "label": "Evaluator Execution Dispatcher", "type": "external", "link": "evaluator_execution_and_dispatch.md"},
+        {"id": "tracing_library", "label": "Logging/Tracing System", "type": "external", "link": null}
     ],
     "edges": [
-        {"source": "wrapper", "target": "online_eval_config"},
-        {"source": "wrapper", "target": "wrapped_func"},
-        {"source": "wrapper", "target": "capture_inputs"},
-        {"source": "capture_inputs", "target": "wrapped_func"},
-        {"source": "wrapper", "target": "sample_evaluators"},
-        {"source": "sample_evaluators", "target": "online_eval_config"},
-        {"source": "sample_evaluators", "target": "capture_inputs"},
-        {"source": "wrapper", "target": "span_reporting"},
-        {"source": "wrapper", "target": "task_run_management"},
-        {"source": "wrapper", "target": "extract_metrics"},
-        {"source": "extract_metrics", "target": "span_reporting"},
-        {"source": "wrapper", "target": "extract_span_ref"},
-        {"source": "extract_span_ref", "target": "span_reporting"},
-        {"source": "wrapper", "target": "evaluator_context"},
-        {"source": "evaluator_context", "target": "capture_inputs"},
-        {"source": "evaluator_context", "target": "wrapped_func"},
-        {"source": "evaluator_context", "target": "span_reporting"},
-        {"source": "wrapper", "target": "eval_dispatch"},
-        {"source": "eval_dispatch", "target": "evaluator_context"},
-        {"source": "eval_dispatch", "target": "online_eval_config"},
-        {"source": "eval_dispatch", "target": "extract_span_ref"},
-        {"source": "eval_dispatch", "target": "sample_evaluators"},
-        {"source": "wrapper", "target": "async_dispatch_logic"},
-        {"source": "wrapper", "target": "sync_dispatch_logic"},
-        {"source": "async_dispatch_logic", "target": "eval_dispatch"},
-        {"source": "sync_dispatch_logic", "target": "eval_dispatch"}
+        {"source": "evaluation_wrapper", "target": "check_evaluation_status", "label": "starts process"},
+        {"source": "check_evaluation_status", "target": "evaluation_config", "label": "reads settings", "style": "dotted"},
+        {"source": "check_evaluation_status", "target": "capture_function_inputs", "label": "if enabled"},
+        {"source": "check_evaluation_status", "target": "execute_original_function", "label": "if disabled/skipped"},
+        {"source": "capture_function_inputs", "target": "determine_evaluators", "label": "provides inputs"},
+        {"source": "determine_evaluators", "target": "evaluation_config", "label": "applies sampling logic", "style": "dotted"},
+        {"source": "determine_evaluators", "target": "execute_original_function", "label": "triggers function run (if sampled)"},
+        {"source": "execute_original_function", "target": "capture_runtime_data", "label": "generates span tree, metrics"},
+        {"source": "capture_runtime_data", "target": "tracing_library", "label": "integrates with", "style": "dotted"},
+        {"source": "capture_function_inputs", "target": "create_evaluation_context", "label": "provides inputs"},
+        {"source": "execute_original_function", "target": "create_evaluation_context", "label": "provides output"},
+        {"source": "capture_runtime_data", "target": "create_evaluation_context", "label": "provides metrics, span tree"},
+        {"source": "create_evaluation_context", "target": "evaluator_definitions", "label": "uses data structures", "style": "dotted"},
+        {"source": "create_evaluation_context", "target": "dispatch_evaluators_async", "label": "prepared context"},
+        {"source": "dispatch_evaluators_async", "target": "evaluator_dispatcher", "label": "delegates execution", "style": "thick"},
+        {"source": "execute_original_function", "target": "evaluation_wrapper", "label": "returns result"}
     ],
-    "groups": []
+    "groups": [
+        {
+            "id": "evaluation_flow",
+            "label": "Online Evaluation Flow",
+            "role": "process",
+            "nodes": ["check_evaluation_status", "capture_function_inputs", "determine_evaluators", "execute_original_function", "capture_runtime_data", "create_evaluation_context", "dispatch_evaluators_async"]
+        }
+    ]
 }
 -->
 ```mermaid
-graph TD
-    wrapper[pydantic_evals.online.wrapper]
-    online_eval_config[OnlineEvalConfig]
-    eval_dispatch[Evaluator Dispatch and Sinking]
-    span_reporting[Span Reporting]
-    task_run_management[Task Run Management]
-    capture_inputs[Input Capture Logic]
-    sample_evaluators[Evaluator Sampling Logic]
-    extract_metrics[Metric Extraction Logic]
-    extract_span_ref[Span Reference Extraction Logic]
-    async_dispatch_logic[Async Dispatch Logic]
-    sync_dispatch_logic[Sync Dispatch Logic]
-    evaluator_context[EvaluatorContext Building]
-    wrapped_func[Original Function Execution]
+flowchart TD
+    subgraph evaluation_flow["Online Evaluation Flow"]
+        check_evaluation_status["Check Evaluation Status"]
+        capture_function_inputs["Capture Function Inputs"]
+        determine_evaluators["Sample Evaluators to Run"]
+        execute_original_function["Execute Original Function"]
+        capture_runtime_data["Capture Runtime Data (Spans, Metrics)"]
+        create_evaluation_context["Assemble Evaluation Context"]
+        dispatch_evaluators_async["Dispatch Evaluators Asynchronously"]
+    end
 
-    wrapper --> online_eval_config
-    wrapper --> wrapped_func
-    wrapper --> capture_inputs
-    capture_inputs --> wrapped_func
-    wrapper --> sample_evaluators
-    sample_evaluators --> online_eval_config
-    sample_evaluators --> capture_inputs
-    wrapper --> span_reporting
-    wrapper --> task_run_management
-    wrapper --> extract_metrics
-    extract_metrics --> span_reporting
-    wrapper --> extract_span_ref
-    extract_span_ref --> span_reporting
-    wrapper --> evaluator_context
-    evaluator_context --> capture_inputs
-    evaluator_context --> wrapped_func
-    evaluator_context --> span_reporting
-    wrapper --> eval_dispatch
-    eval_dispatch --> evaluator_context
-    eval_dispatch --> online_eval_config
-    eval_dispatch --> extract_span_ref
-    eval_dispatch --> sample_evaluators
-    wrapper --> async_dispatch_logic
-    wrapper --> sync_dispatch_logic
-    async_dispatch_logic --> eval_dispatch
-    sync_dispatch_logic --> eval_dispatch
+    evaluation_wrapper["Intercept Function Call"]
+    evaluation_config["Evaluation Configuration"]
+    evaluator_definitions["Evaluator Core Definitions"]
+    evaluator_dispatcher["Evaluator Execution Dispatcher"]
+    tracing_library["Logging/Tracing System"]
+
+    evaluation_wrapper -->|"starts process"| check_evaluation_status
+    check_evaluation_status -.->|"reads settings"| evaluation_config
+    check_evaluation_status -->|"if enabled"| capture_function_inputs
+    check_evaluation_status -->|"if disabled/skipped"| execute_original_function
+    capture_function_inputs -->|"provides inputs"| determine_evaluators
+    determine_evaluators -.->|"applies sampling logic"| evaluation_config
+    determine_evaluators -->|"triggers function run (if sampled)"| execute_original_function
+    execute_original_function -->|"generates span tree, metrics"| capture_runtime_data
+    capture_runtime_data -.->|"integrates with"| tracing_library
+    capture_function_inputs -->|"provides inputs"| create_evaluation_context
+    execute_original_function -->|"provides output"| create_evaluation_context
+    capture_runtime_data -->|"provides metrics, span tree"| create_evaluation_context
+    create_evaluation_context -.->|"uses data structures"| evaluator_definitions
+    create_evaluation_context -->|"prepared context"| dispatch_evaluators_async
+    dispatch_evaluators_async ==>|"delegates execution"| evaluator_dispatcher
+    execute_original_function -->|"returns result"| evaluation_wrapper
 ```
 
-**Component Relationships:**
+## Related Modules
 
-*   **`pydantic_evals.online.wrapper`**: This is the central component, acting as a decorator.
-*   **`online_evaluation_config`**: The `wrapper` consults `OnlineEvalConfig` (from `online_evaluation_config.md`) to check if evaluations are enabled and to determine evaluator sampling rates.
-*   **`evaluation_dispatch_and_sinking`**: After collecting all necessary context, the `wrapper` delegates the actual asynchronous dispatch of evaluators to components within `evaluation_dispatch_and_sinking.md`.
-*   **`pydantic_evals_reporting`**: The `wrapper` utilizes functionality from `pydantic_evals_reporting.md` (specifically `context_subtree` and related span extraction logic) for capturing detailed telemetry and metrics during the wrapped function's execution.
-*   **`task_run_management`**: The `wrapper` interacts with task run management mechanisms (conceptually linked to `task_run_management.md` through `_CURRENT_TASK_RUN` and `_TaskRun`) to ensure evaluations are not recursively triggered and to track the current evaluation context.
-*   **Internal Logic Components**: `Input Capture Logic`, `Evaluator Sampling Logic`, `Metric Extraction Logic`, `Span Reference Extraction Logic`, `EvaluatorContext Building`, `Async Dispatch Logic`, `Sync Dispatch Logic`, and `Original Function Execution` represent the sequential internal operations performed by the `wrapper`. These components abstract the helper functions and internal state management within the `online_evaluation_core` module.
-
-## How the Module Fits into the Overall System
-
-The `evaluation_wrapper` module is a crucial part of the `pydantic_evals` online evaluation framework. It provides the primary mechanism for developers to instrument their code for real-time evaluation with minimal effort.
-
-It acts as an **entry point for online evaluations**, seamlessly integrating into the execution flow of any function it decorates. By automating the capture of execution context, metrics, and the dispatch of evaluators, it allows the `pydantic_evals` system to:
-
-1.  **Collect rich data**: Without manual boilerplate, the system gathers inputs, outputs, performance metrics, and detailed span information for every evaluated run.
-2.  **Trigger evaluations**: Based on defined criteria and sampling rates, it initiates the evaluation process, leveraging the evaluators defined in modules like `pydantic_evals_evaluators`.
-3.  **Provide feedback**: The collected evaluation results can then be used for monitoring, A/B testing, and continuous improvement of models and agents.
-
-This module fundamentally enables the "online" aspect of `pydantic_evals` by bridging the gap between an executing function and the evaluation system, ensuring that relevant data is always available for analysis and assessment. It is a key enabler for observability and automated quality assurance within systems utilizing pydantic-ai-slim.
+*   **[evaluation_configuration.md](evaluation_configuration.md)**: Defines the settings and parameters that control how online evaluations are enabled, sampled, and executed. The `evaluation_wrapper` directly consumes these configurations.
+*   **[evaluator_core.md](evaluator_core.md)**: Contains the fundamental definitions for evaluators and the `EvaluatorContext` data structure. The `evaluation_wrapper` creates and populates instances of `EvaluatorContext`.
+*   **[evaluator_execution_and_dispatch.md](evaluator_execution_and_dispatch.md)**: Manages the actual asynchronous execution and dispatching of evaluators, which `evaluation_wrapper` delegates to after preparing the evaluation context.

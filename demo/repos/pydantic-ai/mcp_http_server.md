@@ -1,70 +1,54 @@
 # `mcp_http_server`
 
-## Introduction
+The `mcp_http_server` module provides the foundational components for establishing HTTP-based Server-Sent Events (SSE) communication within the Model Context Protocol (MCP) ecosystem. This module is critical for enabling agents to interact with MCP servers using a standard HTTP transport layer, ensuring robust and real-time data exchange.
 
-The `mcp_http_server` module provides the `MCPServerHTTP` class, an implementation of the Model Context Protocol (MCP) server that utilizes HTTP with Server-Sent Events (SSE) for communication. This module enables Pydantic AI agents to connect to and interact with existing MCP servers, leveraging them as toolsets within their operational flow.
+### Comprehensive Documentation
 
-## Core Functionality
+The core of this module is the `MCPServerHTTP` class, which extends `MCPServerSSE` (indicating its role in handling Server-Sent Events). It's designed to implement the SSE transport mechanism as defined by the MCP specification. This class acts as a client-side component, allowing `Agent` instances to connect to an already running MCP server via HTTP SSE.
 
-The primary component of this module is `MCPServerHTTP`.
+From a user's perspective, `MCPServerHTTP` simplifies the integration of agents with MCP servers. Developers can instantiate `MCPServerHTTP` with the server's SSE endpoint and then include this server instance as a toolset within their `Agent` definition. This setup enables the agent to send and receive messages, execute tools, and participate in the broader MCP communication flow over a persistent HTTP connection.
 
-### `MCPServerHTTP`
-
-`MCPServerHTTP` acts as a client-side representation of an MCP server, specifically designed for communication over HTTP using the SSE transport mechanism. It allows agents to register and utilize tools or resources exposed by an MCP server. By treating an `MCPServerHTTP` instance as a toolset, agents can seamlessly integrate external MCP capabilities into their execution graph.
-
-Key features:
-
-*   **SSE Transport**: Implements the Server-Sent Events (SSE) transport specified by the MCP, ensuring real-time communication for agent interactions.
-*   **Toolset Integration**: Can be instantiated and directly used as a `toolset` for Pydantic AI `Agent` instances, facilitating the execution of remote MCP-defined capabilities.
-*   **Async Context Management**: Designed to be used as an asynchronous context manager to manage HTTP connection pools to the target MCP server.
-
-## Architecture and Component Relationships
-
-The `mcp_http_server` module is a leaf module within the broader `mcp_integration` component of the `pydantic_ai_misc` module. It focuses specifically on the HTTP/SSE transport layer for MCP.
-
-It interacts with several other modules:
-
-*   **`mcp_server_sse_base`**: `MCPServerHTTP` inherits from `MCPServerSSE`, which provides the foundational SSE transport logic. This base class is an internal component within the same `mcp` package.
-*   **`pydantic_ai_agent_core`**: Agents defined in `pydantic_ai_agent_core` utilize `MCPServerHTTP` instances as toolsets to extend their capabilities by connecting to external MCP services.
-*   **`mcp_config_loader`**: While `MCPServerHTTP` directly handles connections, the overall management and discovery of MCP servers might involve configurations loaded by the `mcp_config_loader` module.
-*   **`mcp_resource_models`**: As an MCP-related component, `MCPServerHTTP` likely interacts with or processes `Resource` and `ResourceTemplate` objects defined in the `mcp_resource_models` module.
+The module integrates closely with the `agent_definition` module, as `MCPServerHTTP` instances are typically passed into an `Agent` as part of its `toolsets`. It also relies on the broader `mcp_core` functionality, adhering to the Model Context Protocol specification for its communication patterns. The `mcp_server_loader` module would typically be responsible for loading and managing instances of `MCPServerHTTP` or similar server components.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mcp_server_http", "label": "MCPServerHTTP", "type": "component", "link": null},
-        {"id": "mcp_server_sse_base", "label": "MCPServerSSE (Base)", "type": "component", "link": null},
-        {"id": "pydantic_ai_agent_core", "label": "Pydantic AI Agent Core", "type": "external", "link": "pydantic_ai_agent_core.md"},
-        {"id": "mcp_config_loader", "label": "MCP Config Loader", "type": "external", "link": "mcp_config_loader.md"},
-        {"id": "mcp_resource_models", "label": "MCP Resource Models", "type": "external", "link": "mcp_resource_models.md"}
+        {"id": "mcp_http_server_component", "label": "MCPServerHTTP (HTTP SSE Transport)", "type": "component", "link": null},
+        {"id": "mcp_server_loader", "label": "Load MCP Servers", "type": "external", "link": "mcp_server_loader.md"},
+        {"id": "agent_definition", "label": "Agent Definition", "type": "external", "link": "agent_definition.md"},
+        {"id": "toolset_management", "label": "Toolset Management", "type": "external", "link": "toolset_management.md"},
+        {"id": "mcp_core", "label": "MCP Core Functionality", "type": "external", "link": "mcp_core.md"}
     ],
     "edges": [
-        {"source": "mcp_server_http", "target": "mcp_server_sse_base"},
-        {"source": "pydantic_ai_agent_core", "target": "mcp_server_http"},
-        {"source": "mcp_server_http", "target": "mcp_config_loader"},
-        {"source": "mcp_server_http", "target": "mcp_resource_models"}
+        {"source": "mcp_server_loader", "target": "mcp_http_server_component", "label": "provides server instance"},
+        {"source": "mcp_http_server_component", "target": "toolset_management", "label": "integrated as"},
+        {"source": "agent_definition", "target": "mcp_http_server_component", "label": "communicates via"},
+        {"source": "mcp_http_server_component", "target": "mcp_core", "label": "implements MCP Spec"}
     ],
-    "groups": []
+    "groups": [
+        {
+            "id": "http_communication_layer",
+            "label": "HTTP SSE Communication Layer",
+            "role": "technical",
+            "nodes": ["mcp_http_server_component"]
+        }
+    ]
 }
 -->
-
 ```mermaid
-graph TD
-    mcp_server_http[MCPServerHTTP]
-    mcp_server_sse_base[MCPServerSSE (Base)]
-    pydantic_ai_agent_core[Pydantic AI Agent Core]
-    mcp_config_loader[MCP Config Loader]
-    mcp_resource_models[MCP Resource Models]
+flowchart TD
+    subgraph http_communication_layer["HTTP SSE Communication Layer"]
+        mcp_http_server_component["MCPServerHTTP (HTTP SSE Transport)"]
+    end
 
-    mcp_server_http --> mcp_server_sse_base
-    pydantic_ai_agent_core --> mcp_server_http
-    mcp_server_http --> mcp_config_loader
-    mcp_server_http --> mcp_resource_models
+    mcp_server_loader["Load MCP Servers"]
+    agent_definition["Agent Definition"]
+    toolset_management["Toolset Management"]
+    mcp_core["MCP Core Functionality"]
+
+    mcp_server_loader -->|"provides server instance"| mcp_http_server_component
+    mcp_http_server_component -->|"integrated as"| toolset_management
+    agent_definition -->|"communicates via"| mcp_http_server_component
+    mcp_http_server_component -.->|"implements MCP Spec"| mcp_core
 ```
-
-## How it Fits into the Overall System
-
-The `mcp_http_server` module is crucial for enabling external communication and extensibility within the Pydantic AI ecosystem. By providing an HTTP/SSE-based MCP client, it allows Pydantic AI agents to seamlessly integrate with and utilize capabilities exposed by any compliant MCP server. This facilitates a modular architecture where specialized tools and services can be hosted externally and dynamically made available to agents, significantly expanding their operational scope without requiring tight coupling or direct code integration.
-
-It specifically supports the `pydantic_ai_misc` module's `mcp_integration` efforts, acting as the concrete transport layer that allows agents to "talk" to the broader MCP world. This separation of concerns ensures that core agent logic remains clean, while complex external interactions are handled by dedicated transport implementations like `MCPServerHTTP`.

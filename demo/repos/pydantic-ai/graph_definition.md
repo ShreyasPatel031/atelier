@@ -1,105 +1,128 @@
 # Graph Definition Module
 
+The `graph_definition` module, centered around the `Graph` class, is the core component for defining and orchestrating directed graphs within the `pydantic-graph` framework. It provides the mechanisms to structure complex workflows as a series of interconnected nodes, manage their execution, and visualize their structure.
 
-## Architecture Overview
+This module is fundamental for building agent behaviors, data processing pipelines, or any system that benefits from a clear, sequential, or branching execution flow based on a defined state and dependencies.
 
-The `graph_definition` module is composed of several key sub-modules that work together to provide a robust framework for graph construction.
+## Key Features
 
-<!-- DIAGRAM_JSON
-{
-    "direction": "TD",
-    "nodes": [
-        {"id": "graph_structure_definition", "label": "Graph Structure Definition", "type": "module", "link": "graph_structure_definition.md"},
-        {"id": "graph_path_and_flow", "label": "Graph Path and Flow Control", "type": "module", "link": "graph_path_and_flow.md"}
-    ],
-    "edges": [
-        {"source": "graph_structure_definition", "target": "graph_path_and_flow"}
-    ],
-    "groups": []
-}
--->
+*   **Node-based Graph Construction**: Define graphs by providing a sequence of `BaseNode` instances, where each node encapsulates a specific unit of work.
+*   **Edge Validation**: Automatically validates the connections between nodes to ensure a coherent graph structure, preventing references to undefined nodes.
+*   **Flexible Execution**: Supports both synchronous and asynchronous execution patterns, allowing integration into various application environments.
+*   **Iterative Execution Control**: Provides an advanced API (`iter`) for fine-grained control over graph execution, enabling monitoring, pausing, and resuming of workflows.
+*   **State Persistence Integration**: Seamlessly integrates with state persistence mechanisms (`BaseStatePersistence`) to save and restore graph execution progress.
+*   **Visual Diagram Generation**: Generates Mermaid diagrams to visually represent the graph's architecture, aiding in understanding and debugging.
+*   **Auto-instrumentation**: Integrates with observability tools (like Logfire) to automatically instrument graph runs and node executions, providing insights into performance and flow.
 
-```mermaid
-graph TD
-    gsd[Graph Structure Definition] --> gpf[Graph Path and Flow Control]
+## How it Works
 
-    click gsd "graph_structure_definition.md" "View Graph Structure Definition Module"
-    click gpf "graph_path_and_flow.md" "View Graph Path and Flow Control Module"
-```
+The `Graph` class acts as a blueprint for an executable workflow. When initialized, it takes a collection of `BaseNode` types. Each `BaseNode` defines its logic (via the `run` method) and specifies which other nodes it can transition to (its outgoing edges).
 
-## Sub-modules
+During execution, the `Graph` traverses these nodes, managing the shared `StateT` object and injecting `DepsT` dependencies into each node's `run` method. The execution continues until a node returns an `End` signal, indicating the graph's completion. The `iter` method offers a powerful way to observe and control this traversal step-by-step.
 
-### Graph Structure Definition
-This sub-module contains the foundational elements for defining the overall graph structure and its atomic execution units. It includes the `Graph` class, which encapsulates the entire workflow, and the `Step` class, which represents individual operations within the graph.
-*   [View `graph_structure_definition` documentation](graph_structure_definition.md)
+For visualization, the `Graph` can generate Mermaid syntax, allowing developers to render clear diagrams of their workflows.
 
-### Graph Path and Flow Control
-This sub-module focuses on controlling the flow of data and execution paths within the graph. It provides mechanisms for building complex sequences of operations, handling parallel execution with forks, and synchronizing these paths using join operations.
-*   [View `graph_path_and_flow` documentation](graph_path_and_flow.md)
-
-
-This module defines the core `Graph` class, which serves as the fundamental building block for creating and executing directed graphs of operations within the `pydantic-graph` framework. It enables developers to model complex workflows as a sequence of interconnected nodes, facilitating structured and observable execution.
-
-## Architecture and Component Relationships
-
-The `Graph` module is central to `pydantic-graph_core`, providing the means to define and manage graph structures. It interacts with several other key modules to handle node definitions, graph execution, state persistence, and visualization.
+## Architecture Diagram
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "graph", "label": "Graph", "type": "component", "link": null},
-        {"id": "node_abstractions", "label": "Node Abstractions", "type": "external", "link": "node_abstractions.md"},
-        {"id": "graph_run_management", "label": "Graph Run Management", "type": "external", "link": "graph_run_management.md"},
-        {"id": "graph_run_results", "label": "Graph Run Results", "type": "external", "link": "graph_run_results.md"},
-        {"id": "pydantic_graph_persistence", "label": "Graph Persistence", "type": "external", "link": "pydantic_graph_persistence.md"},
-        {"id": "pydantic_graph_beta", "label": "Pydantic Graph Beta", "type": "external", "link": "pydantic_graph_beta.md"}
+        {"id": "graph_class", "label": "Graph Class", "type": "component", "link": null},
+        {"id": "init_graph", "label": "Initialize Graph", "type": "component", "link": null},
+        {"id": "run_async", "label": "Run Graph (Async)", "type": "component", "link": null},
+        {"id": "run_sync", "label": "Run Graph (Sync)", "type": "component", "link": null},
+        {"id": "iterate_graph", "label": "Iterate Graph", "type": "component", "link": null},
+        {"id": "initialize_persistence", "label": "Initialize Persistence", "type": "component", "link": null},
+        {"id": "generate_mermaid_code", "label": "Generate Mermaid Code", "type": "component", "link": null},
+        {"id": "generate_mermaid_image", "label": "Generate Mermaid Image/Save", "type": "component", "link": null},
+        {"id": "base_node", "label": "BaseNode", "type": "external", "link": "node_abstraction.md"},
+        {"id": "graph_run", "label": "GraphRun / GraphRunResult", "type": "external", "link": "graph_runtime.md"},
+        {"id": "state_persistence", "label": "BaseStatePersistence", "type": "external", "link": "graph_persistence.md"},
+        {"id": "mermaid_utils", "label": "Mermaid Utilities", "type": "external", "link": "graph_visualization.md"},
+        {"id": "observability", "label": "Observability (Logfire)", "type": "external", "link": "async_execution_primitives.md"}
     ],
     "edges": [
-        {"source": "graph", "target": "node_abstractions", "label": "uses BaseNode"},
-        {"source": "graph", "target": "graph_run_management", "label": "manages GraphRun"},
-        {"source": "graph", "target": "graph_run_results", "label": "returns GraphRunResult"},
-        {"source": "graph", "target": "pydantic_graph_persistence", "label": "uses persistence"},
-        {"source": "graph", "target": "pydantic_graph_beta", "label": "uses Mermaid utilities"}
+        {"source": "init_graph", "target": "graph_class", "label": "creates"},
+        {"source": "init_graph", "target": "base_node", "label": "defines graph nodes"},
+        {"source": "graph_class", "target": "run_async", "label": "executes via"},
+        {"source": "graph_class", "target": "run_sync", "label": "executes via (sync)"},
+        {"source": "graph_class", "target": "iterate_graph", "label": "iterates via"},
+        {"source": "graph_class", "target": "initialize_persistence", "label": "prepares run via"},
+        {"source": "graph_class", "target": "generate_mermaid_code", "label": "visualizes via"},
+        {"source": "graph_class", "target": "generate_mermaid_image", "label": "renders/saves via"},
+        {"source": "run_async", "target": "base_node", "label": "starts with"},
+        {"source": "run_async", "target": "state_persistence", "label": "manages state with"},
+        {"source": "run_async", "target": "graph_run", "label": "returns"},
+        {"source": "run_async", "target": "observability", "label": "instruments with"},
+        {"source": "run_sync", "target": "run_async", "label": "delegates to"},
+        {"source": "iterate_graph", "target": "base_node", "label": "starts with / executes"},
+        {"source": "iterate_graph", "target": "state_persistence", "label": "manages state with"},
+        {"source": "iterate_graph", "target": "graph_run", "label": "yields"},
+        {"source": "iterate_graph", "target": "observability", "label": "instruments with"},
+        {"source": "initialize_persistence", "target": "base_node", "label": "stores start node"},
+        {"source": "initialize_persistence", "target": "state_persistence", "label": "uses"},
+        {"source": "generate_mermaid_code", "target": "mermaid_utils", "label": "uses to generate code"},
+        {"source": "generate_mermaid_image", "target": "mermaid_utils", "label": "uses to render image"}
     ],
     "groups": []
 }
 -->
 ```mermaid
-graph TD
-    graph[Graph]
-    node_abstractions[Node Abstractions]
-    graph_run_management[Graph Run Management]
-    graph_run_results[Graph Run Results]
-    pydantic_graph_persistence[Graph Persistence]
-    pydantic_graph_beta[Pydantic Graph Beta]
+flowchart TD
+    %% Main Graph component
+    graph_class["Graph Class"]
 
-    graph -- "uses BaseNode" --> node_abstractions
-    graph -- "manages GraphRun" --> graph_run_management
-    graph -- "returns GraphRunResult" --> graph_run_results
-    graph -- "uses persistence" --> pydantic_graph_persistence
-    graph -- "uses Mermaid utilities" --> pydantic_graph_beta
+    %% Internal Components/Methods
+    subgraph Graph Lifecycle
+        init_graph["Initialize Graph"]
+        run_async["Run Graph (Async)"]
+        run_sync["Run Graph (Sync)"]
+        iterate_graph["Iterate Graph (iter, iter_from_persistence)"]
+        initialize_persistence["Initialize Persistence"]
+    end
+
+    subgraph Visualization
+        generate_mermaid_code["Generate Mermaid Code"]
+        generate_mermaid_image["Generate Mermaid Image/Save"]
+    end
+
+    %% External Dependencies
+    base_node["BaseNode"]:::external
+    graph_run["GraphRun / GraphRunResult"]:::external
+    state_persistence["BaseStatePersistence"]:::external
+    mermaid_utils["Mermaid Utilities"]:::external
+    observability["Observability (Logfire)"]:::external
+
+    %% Connections
+    init_graph -->|"creates"| graph_class
+    init_graph -->|"defines graph nodes"| base_node
+
+    graph_class -->|"executes via"| run_async
+    graph_class -->|"executes via (sync)"| run_sync
+    graph_class -->|"iterates via"| iterate_graph
+    graph_class -->|"prepares run via"| initialize_persistence
+    graph_class -->|"visualizes via"| generate_mermaid_code
+    graph_class -->|"renders/saves via"| generate_mermaid_image
+
+    run_async -->|"starts with"| base_node
+    run_async -.->|"manages state with"| state_persistence
+    run_async -->|"returns"| graph_run
+    run_async -.->|"instruments with"| observability
+
+    run_sync -->|"delegates to"| run_async
+
+    iterate_graph -->|"starts with / executes"| base_node
+    iterate_graph -.->|"manages state with"| state_persistence
+    iterate_graph -->|"yields"| graph_run
+    iterate_graph -.->|"instruments with"| observability
+
+    initialize_persistence -->|"stores start node"| base_node
+    initialize_persistence -.->|"uses"| state_persistence
+
+    generate_mermaid_code -->|"uses to generate code"| mermaid_utils
+    generate_mermaid_image -->|"uses to render image"| mermaid_utils
+
+    %% Styling
+    classDef external fill:#f9f,stroke:#333,stroke-width:2px;
 ```
-
-### `Graph` Class
-
-The `Graph` class is the primary component of this module, responsible for:
-
-*   **Definition**: Collecting and validating a sequence of `BaseNode` instances to form a cohesive graph structure.
-*   **Execution**: Providing methods to asynchronously (`run`) or synchronously (`run_sync`) execute the defined graph from a specified starting node. It supports initial state, dependencies, and optional state persistence.
-*   **Iteration**: Offering an `iter` context manager for step-by-step asynchronous iteration through graph node execution, allowing for real-time interaction and observation.
-*   **Persistence Integration**: Enabling initialization of graph runs into a persistence layer (`initialize`) and resuming runs from persistence (`iter_from_persistence`). This is crucial for long-running or fault-tolerant workflows.
-*   **Visualization**: Generating [Mermaid](https://mermaid.js.org/) diagrams of the graph structure using `mermaid_code`, `mermaid_image`, and `mermaid_save` methods, aiding in understanding and debugging complex graphs.
-*   **Type Inference**: Automatically inferring the state and run end types (`inferred_types`) based on the provided nodes, simplifying graph definition.
-*   **Validation**: Ensuring the integrity of the graph by validating node uniqueness and edge connectivity during initialization (`_register_node`, `_validate_edges`).
-
-### How `graph_definition` Fits into the Overall System
-
-The `graph_definition` module, specifically the `Graph` class, is a foundational element within the `pydantic_graph_core` package. It provides the abstract mechanism for defining executable workflows as directed graphs. Other modules build upon this foundation:
-
-*   **[Node Abstractions](node_abstractions.md)**: The `Graph` relies on `BaseNode` from the `node_abstractions` module as the fundamental unit of work within the graph.
-*   **[Graph Run Management](graph_run_management.md)** and **[Graph Run Results](graph_run_results.md)**: The `Graph` class orchestrates graph execution, producing `GraphRunResult` and managing `GraphRun` instances, which are detailed in their respective modules.
-*   **[Graph Persistence](pydantic_graph_persistence.md)**: Integration with the `pydantic_graph_persistence` module allows `Graph` runs to be persisted and resumed, enabling durable and recoverable workflows.
-*   **[Pydantic Graph Beta](pydantic_graph_beta.md)**: The `Graph` module leverages functionality from `pydantic_graph_beta` for advanced features like Mermaid diagram generation, providing powerful visualization capabilities.
-
-In essence, `graph_definition` provides the blueprint and execution engine for `pydantic-graph`, making it possible to define, run, and visualize complex, stateful processes in a clear and maintainable way.

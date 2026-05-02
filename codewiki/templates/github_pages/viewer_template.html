@@ -252,6 +252,15 @@
             font-weight: 600 !important;
         }
 
+        /* Edge labels: span.edgeLabel inherits .edgeLabel { color: classText } (= primaryTextColor white) — unreadable on white bg */
+        #mermaid-diagram svg g.edgeLabel span.edgeLabel {
+            color: #000000 !important;
+        }
+        #mermaid-diagram svg g.edgeLabel foreignObject div.labelBkg {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+        }
+
         .clickable-node,
         g.node.clickable-node {
             cursor: pointer !important;
@@ -364,14 +373,39 @@
             mangle: false
         });
         
-        // Initialize mermaid
+        // Initialize mermaid — NYC Subway (MTA) palette (same as codewiki/src/fe/templates.py)
         mermaid.initialize({
             startOnLoad: false,
-            theme: 'default',
+            theme: 'base',
+            securityLevel: 'loose',
+            themeVariables: {
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontSize: '14px',
+                primaryColor: '#0039A6',
+                primaryTextColor: '#ffffff',
+                primaryBorderColor: '#002f85',
+                secondaryColor: '#ffffff',
+                secondaryTextColor: '#0039A6',
+                secondaryBorderColor: '#FF6319',
+                tertiaryColor: '#f9fafb',
+                tertiaryTextColor: '#1e293b',
+                tertiaryBorderColor: '#00933C',
+                lineColor: '#808183',
+                clusterBkg: '#ebecee',
+                clusterBorder: '#A7A9AC',
+                edgeLabelBackground: '#ffffff',
+                edgeLabelColor: '#000000',
+                mainBkg: '#ffffff',
+                secondBkg: '#fff5f0'
+            },
             flowchart: {
                 useMaxWidth: true,
                 htmlLabels: true,
-                curve: 'basis'
+                curve: 'basis',
+                padding: 12,
+                nodeSpacing: 56,
+                rankSpacing: 64,
+                diagramPadding: 16
             }
         });
 

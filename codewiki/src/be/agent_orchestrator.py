@@ -193,6 +193,7 @@ class AgentOrchestrator:
             tools = base_tools + [generate_sub_module_documentation_tool]
             agent = Agent(
                 self.fallback_models,
+                retries=3,
                 name=module_name,
                 deps_type=CodeWikiDeps,
                 tools=tools,
@@ -206,6 +207,7 @@ class AgentOrchestrator:
             )
             agent = Agent(
                 self.fallback_models,
+                retries=3,
                 name=module_name,
                 deps_type=CodeWikiDeps,
                 tools=base_tools,
@@ -216,6 +218,7 @@ class AgentOrchestrator:
             logger.debug(f"[STAGE 4.3] Module is leaf - creating leaf agent without sub-module tool")
             agent = Agent(
                 self.fallback_models,
+                retries=3,
                 name=module_name,
                 deps_type=CodeWikiDeps,
                 tools=base_tools,
@@ -633,7 +636,8 @@ class AgentOrchestrator:
             # Recursively process each sub-module
             for sub_name, sub_info in sub_modules.items():
                 sub_components = sub_info["components"]
-                new_module_path = module_path + [module_name]
+                # Must append sub_name so doc_stem and tree path match the child module (not duplicate parent key).
+                new_module_path = module_path + [sub_name]
                 logger.info(f"[STAGE 4.5.5] Recursively processing sub-module: {sub_name}")
                 await self.process_module(
                     sub_name, 
@@ -906,7 +910,86 @@ class AgentOrchestrator:
             logger.error(f"[STAGE 4.6] Full traceback:\n{full_tb}")
             logger.error(f"[STAGE 4: AGENT MODULE PROCESSING] FAILED in {module_duration:.1f}s for module: {module_name}")
             print(f"=== END ERROR INFO ===\n", file=sys.stderr)
-            
+
+            # Last-resort: direct LLM doc when agent.run crashed before writing {doc_stem}.md
+            if not os.path.exists(fail_md):
+                try:
+                    logger.warning(
+                        "[STAGE 4.6] Post-failure fallback: direct LLM for %s → %s",
+                        module_name,
+                        fail_md,
+                    )
+                    self._generate_fallback_doc(module_name, core_component_ids, components, fail_md)
+                except Exception as fb_err:
+                    logger.error("[STAGE 4.6] Post-failure fallback LLM failed: %s", fb_err)
+
+            if os.path.exists(fail_md) and os.path.getsize(fail_md) > 50:
+                try:
+                    extracted_title, extracted_desc, extracted_diagram = extract_module_metadata_from_file(
+                        fail_md
+                    )
+                    logger.info(
+                        "[STAGE 4.6] Recovered via post-failure fallback for %r: title=%r diagram=%s",
+                        module_name,
+                        extracted_title,
+                        "yes" if extracted_diagram else "no",
+                    )
+                    save_start = time.time()
+                    if module_tree_lock:
+                        async with module_tree_lock:
+                            current_tree = file_manager.load_json(module_tree_path)
+                            self._merge_module_tree(current_tree, deps.module_tree)
+                            if extracted_title:
+                                apply_metadata_to_tree_path(
+                                    current_tree,
+                                    module_path,
+                                    extracted_title,
+                                    extracted_desc,
+                                    extracted_diagram,
+                                )
+                            file_manager.save_json(current_tree, module_tree_path)
+                            deps.module_tree = current_tree
+                    else:
+                        if extracted_title:
+                            apply_metadata_to_tree_path(
+                                deps.module_tree,
+                                module_path,
+                                extracted_title,
+                                extracted_desc,
+                                extracted_diagram,
+                            )
+                        file_manager.save_json(deps.module_tree, module_tree_path)
+                    logger.info(
+                        "[STAGE 4.6] Module tree saved after recovery in %.3fs",
+                        time.time() - save_start,
+                    )
+                    module_duration = time.time() - module_start
+                    logger.info(
+                        "[STAGE 4: AGENT MODULE PROCESSING] RECOVERED (post-failure fallback) in %.1fs for module: %s",
+                        module_duration,
+                        module_name,
+                    )
+                    try:
+                        from codewiki.src.be.generation_tracker import get_generation_tracker
+
+                        get_generation_tracker().track_module_complete(
+                            module_name=module_name,
+                            success=True,
+                            md_file_created=True,
+                            in_module_tree=True,
+                            has_diagram=extracted_diagram is not None,
+                            has_title=extracted_title is not None,
+                            has_description=extracted_desc is not None,
+                        )
+                    except Exception:
+                        pass
+                    return deps.module_tree
+                except Exception as recovery_err:
+                    logger.error(
+                        "[STAGE 4.6] Post-failure recovery (metadata/tree save) failed: %s",
+                        recovery_err,
+                    )
+
             # Track module failure in generation tracker
             try:
                 from codewiki.src.be.generation_tracker import get_generation_tracker

@@ -17,7 +17,7 @@ import pytest
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from codewiki.src.be.mermaid_validator import validate_mermaid, fix_mermaid_diagram
+from codewiki.src.be.mermaid_validator import validate_mermaid
 
 
 # ============================================================
@@ -323,16 +323,6 @@ class TestInvalidCommentDetection:
         diagram = "graph TD\n    %% good comment\n    A[Node] --> B[Other]"
         valid, msg = validate_no_syntax_issues(diagram)
         assert valid, msg
-
-
-class TestFixMermaidDiagram:
-    """Optional CLI helper still normalizes the most common LLM mistake."""
-
-    def test_fix_converts_single_percent_comments(self):
-        bad = "graph TD\n    % Core deps\n    A --> B"
-        fixed = fix_mermaid_diagram(bad)
-        res = validate_mermaid(fixed)
-        assert res.valid, res.errors
 
 
 class TestOverviewValidation:

@@ -168,95 +168,26 @@ def extract_mermaid_blocks(content: str) -> List[Tuple[int, str]]:
 
 
 async def validate_single_diagram(diagram_content: str, diagram_num: int, line_start: int) -> str:
+    """Validate a single mermaid diagram via the shared Mermaid.js 11 parser.
+
+    Returns an empty string when the diagram parses, otherwise a formatted
+    error message that maps the parser's intra-diagram line back to the
+    enclosing markdown file's line.
     """
-    Validate a single mermaid diagram.
-    
-    Args:
-        diagram_content: The mermaid diagram content
-        diagram_num: Diagram number for error reporting
-        line_start: Starting line number in the file
-        
-    Returns:
-        Error message if invalid, empty string if valid
-    """
-    import sys
-    import os
-    from io import StringIO
+    from codewiki.src.be.mermaid_validator import validate_mermaid
 
-    # Fast structural checks (no JS parser) — catches common flowchart mistakes cheaply.
-    from codewiki.src.be.mermaid_validator import validate_mermaid as validate_mermaid_fast
-
-    fast = validate_mermaid_fast(diagram_content)
-    if not fast.valid:
-        msgs = [e.message for e in fast.errors]
-        return f"Diagram {diagram_num}: " + " | ".join(msgs)
-
-    # Deep validation (mermaid-parser-py / mermaid-py) is slow; optional for CI or strict checks.
-    deep = os.environ.get("CODEWIKI_MERMAID_DEEP_VALIDATE", "0").lower() in ("1", "true", "yes")
-    if not deep:
+    vr = validate_mermaid(diagram_content, source_info=f"diagram_{diagram_num}")
+    if vr.valid:
         return ""
 
-    core_error = ""
-    
-    try:
-        from mermaid_parser.parser import parse_mermaid_py
-        # logger.debug("Using mermaid-parser-py to validate mermaid diagrams")
-    
-        try:
-            # Redirect stderr to suppress mermaid parser JavaScript errors
-            old_stderr = sys.stderr
-            sys.stderr = open(os.devnull, 'w')
-            
-            try:
-                json_output = await parse_mermaid_py(diagram_content)
-            finally:
-                # Restore stderr
-                sys.stderr.close()
-                sys.stderr = old_stderr
-        except Exception as e:
-            error_str = str(e)
-            
-            # Extract the core error information from the exception message
-            # Look for the pattern that contains "Parse error on line X:"
-            error_pattern = r"Error:(.*?)(?=Stack Trace:|$)"
-            match = re.search(error_pattern, error_str, re.DOTALL)
-            
-            if match:
-                core_error = match.group(0).strip()
-                core_error = core_error
-            else:
-                logger.error(f"No match found for error pattern, fallback to mermaid-py\n{error_str}")
-                raise Exception(error_str)
-
-    except Exception as e:
-        logger.warning("Using mermaid-py to validate mermaid diagrams")
-        try:
-            import mermaid as md
-            # Create Mermaid object and check response
-            render = md.Mermaid(diagram_content)
-            text = (render.svg_response.text or "").strip()
-            # Successful render returns SVG; only non-SVG text is a parse/diagram error string
-            if text.startswith("<svg"):
-                core_error = ""
-            else:
-                core_error = text
-
-        except Exception as e:
-            return f"  Diagram {diagram_num}: Exception during validation - {str(e)}"
-
-    # Check if response indicates a parse error
-    if core_error:
-        # Extract line number from parse error and calculate actual line in markdown file
-        line_match = re.search(r'line (\d+)', core_error)
-        if line_match:
-            error_line_in_diagram = int(line_match.group(1))
-            actual_line_in_file = line_start + error_line_in_diagram
-            newline = '\n'
-            return f"Diagram {diagram_num}: Parse error on line {actual_line_in_file}:{newline}{newline.join(core_error.split(newline)[1:])}"
+    parts: List[str] = []
+    for err in vr.errors:
+        if err.line_number is not None:
+            actual_line = line_start + err.line_number
+            parts.append(f"line {actual_line}: {err.message}")
         else:
-            return f"Diagram {diagram_num}: {core_error}"
-    
-    return ""  # No error
+            parts.append(err.message)
+    return f"Diagram {diagram_num}: " + " | ".join(parts)
 
 
 def make_response_logger_hooks(module_name: str):

@@ -1,40 +1,62 @@
-# Dataset Management Module
+# Dataset Management Module Documentation
 
-The `dataset_management` module is responsible for defining, creating, and managing datasets used in evaluation processes within the `pydantic_evals` framework. It provides functionalities to structure evaluation cases and to leverage Large Language Models (LLMs) for generating synthetic datasets.
+The `dataset_management` module is a crucial part of the Pydantic Evals framework, responsible for defining, generating, and managing datasets used in evaluating AI models. It provides structured ways to represent test cases, integrate evaluators, and leverage LLMs for automated dataset creation.
 
 ## Architecture Overview
 
-This module is composed of two primary sub-modules: `dataset_definition` and `dataset_generation`. The `dataset_definition` sub-module establishes the fundamental structure for datasets, including how test cases and evaluators are represented. Building upon this, the `dataset_generation` sub-module uses LLMs to populate these defined dataset structures with generated content.
+The module is composed of three primary sub-modules: [Dataset Structure Definition](dataset_structure.md), [Dataset Generation Logic](dataset_generation_logic.md), and [Task Execution Runtime](task_execution_runtime.md). These sub-modules work in concert to allow users to define their dataset schema, generate synthetic data, and execute evaluation tasks efficiently.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "dataset_definition", "label": "Dataset Definition", "type": "module", "link": "dataset_definition.md"},
-        {"id": "dataset_generation", "label": "Dataset Generation", "type": "module", "link": "dataset_generation.md"}
+        {"id": "dataset_structure", "label": "Dataset Structure Definition", "type": "module", "link": "dataset_structure.md"},
+        {"id": "dataset_generation_logic", "label": "Dataset Generation Logic", "type": "module", "link": "dataset_generation_logic.md"},
+        {"id": "task_execution_runtime", "label": "Task Execution Runtime", "type": "module", "link": "task_execution_runtime.md"}
     ],
     "edges": [
-        {"source": "dataset_generation", "target": "dataset_definition"}
+        {"source": "dataset_generation_logic", "target": "dataset_structure", "label": "creates"},
+        {"source": "dataset_structure", "target": "task_execution_runtime", "label": "executes tasks with"}
     ],
-    "groups": []
+    "groups": [
+        {
+            "id": "definition",
+            "label": "Dataset Definition",
+            "role": "data",
+            "nodes": ["dataset_structure"]
+        },
+        {
+            "id": "operations",
+            "label": "Operations",
+            "role": "generative",
+            "nodes": ["dataset_generation_logic", "task_execution_runtime"]
+        }
+    ]
 }
 -->
-
 ```mermaid
-graph TD
-    dataset_generation[Dataset Generation]
-    dataset_definition[Dataset Definition]
+flowchart TD
+    subgraph definition["Dataset Definition"]
+        dataset_structure["Dataset Structure Definition"]
+    end
 
-    dataset_generation --> dataset_definition
+    subgraph operations["Operations"]
+        dataset_generation_logic["Dataset Generation Logic"]
+        task_execution_runtime["Task Execution Runtime"]
+    end
 
-    click dataset_generation "dataset_generation.md" "View Dataset Generation Documentation"
-    click dataset_definition "dataset_definition.md" "View Dataset Definition Documentation"
+    dataset_generation_logic -->|"creates"| dataset_structure
+    dataset_structure -->|"executes tasks with"| task_execution_runtime
+
+    click dataset_structure "dataset_structure.md" "View Dataset Structure Definition"
+    click dataset_generation_logic "dataset_generation_logic.md" "View Dataset Generation Logic"
+    click task_execution_runtime "task_execution_runtime.md" "View Task Execution Runtime"
 ```
 
-## Sub-modules
+## High-Level Functionality of Each Sub-module
 
-### [Dataset Definition](dataset_definition.md)
-This sub-module focuses on the programmatic definition of datasets, including the schema for input, output, metadata, and associated evaluators. It provides the `Dataset` class, which serves as the blueprint for all evaluation datasets.
+*   **[Dataset Structure Definition](dataset_structure.md)**: This sub-module focuses on the `Dataset` Pydantic model, which serves as the blueprint for all evaluation datasets. It encapsulates test cases, input/output types, and integrates evaluator definitions, providing a robust and type-safe way to define evaluation criteria.
 
-### [Dataset Generation](dataset_generation.md)
-This sub-module provides tools for automatically generating synthetic datasets. It leverages LLMs to create test cases that conform to a specified `Dataset` schema, facilitating the rapid creation of evaluation data.
+*   **[Dataset Generation Logic](dataset_generation_logic.md)**: This sub-module leverages Large Language Models (LLMs) to automatically generate diverse and structured test cases for a given dataset schema. It simplifies the process of populating datasets with realistic examples, significantly reducing manual effort in creating evaluation data.
+
+*   **[Task Execution Runtime](task_execution_runtime.md)**: This sub-module provides the foundational runtime for executing individual evaluation tasks within a dataset. It handles the asynchronous execution of tasks, ensuring proper context management, performance tracking, and error handling during the evaluation process.

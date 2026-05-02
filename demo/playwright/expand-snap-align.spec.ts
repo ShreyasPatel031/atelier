@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Full viewer: load react repo overview, expand "React Developer Tools" (devtools),
+ * Full viewer: load CrewAI overview, expand "CLI Commands" (has child modules),
  * assert expanded g.cluster bbox top-left matches pre-expand g.node bbox (viewport px).
  */
 test.describe('Expand snap alignment', () => {
-    test('react overview devtools: cluster bbox TL matches node bbox TL within 4px', async ({ page }) => {
-        await page.goto('/?repo=react');
+    test('crewai overview cli_commands: cluster bbox TL matches node bbox TL within 4px', async ({ page }) => {
+        await page.goto('/?repo=crewai');
 
         await expect
             .poll(
@@ -14,17 +14,17 @@ test.describe('Expand snap alignment', () => {
                     page.evaluate(
                         () =>
                             !!document.querySelector(
-                                '#mermaid-diagram svg g.node.clickable-node[data-logical-id="devtools"]'
+                                '#mermaid-diagram svg g.node.clickable-node[data-logical-id="cli_commands"]'
                             )
                     ),
-                { timeout: 90_000, message: 'devtools node rendered and clickable' }
+                { timeout: 90_000, message: 'cli_commands node rendered and clickable' }
             )
             .toBe(true);
 
         const before = await page.evaluate(() => {
             const fn = (window as unknown as { __measureNodeShapeViewportTL?: (id: string) => unknown })
                 .__measureNodeShapeViewportTL;
-            return typeof fn === 'function' ? fn('devtools') : null;
+            return typeof fn === 'function' ? fn('cli_commands') : null;
         });
         expect(before, 'pre-expand g.node bbox TL').toEqual(
             expect.objectContaining({
@@ -35,7 +35,7 @@ test.describe('Expand snap alignment', () => {
 
         await page.evaluate(() => {
             const el = document.querySelector<SVGGElement>(
-                '#mermaid-diagram svg g.node[data-logical-id="devtools"]'
+                '#mermaid-diagram svg g.node[data-logical-id="cli_commands"]'
             );
             el?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
         });
@@ -46,7 +46,7 @@ test.describe('Expand snap alignment', () => {
                     page.evaluate(
                         () =>
                             !!document.querySelector(
-                                '#mermaid-diagram svg g.cluster[data-logical-id="devtools_sub"]'
+                                '#mermaid-diagram svg g.cluster[data-logical-id="cli_commands_sub"]'
                             )
                     ),
                 { timeout: 45_000, message: 'expanded subgraph cluster present' }
@@ -60,7 +60,7 @@ test.describe('Expand snap alignment', () => {
                         const fn = (window as unknown as { __measureClusterFrameViewportTL?: (id: string) => unknown })
                             .__measureClusterFrameViewportTL;
                         const tl =
-                            typeof fn === 'function' ? fn('devtools_sub') : null;
+                            typeof fn === 'function' ? fn('cli_commands_sub') : null;
                         const o = tl as { width?: number; height?: number } | null;
                         return o && (o.width ?? 0) > 0.5 && (o.height ?? 0) > 0.5;
                     });
@@ -87,7 +87,7 @@ test.describe('Expand snap alignment', () => {
                                 Math.abs(o.left - refLeft) <= tolerance && Math.abs(o.top - refTop) <= tolerance
                             );
                         },
-                        ['devtools_sub', b.left, b.top, eps] as const
+                        ['cli_commands_sub', b.left, b.top, eps] as const
                     );
                 },
                 { timeout: 15_000, message: 'expanded cluster TL snapped to pre-expand node bbox' }
@@ -97,7 +97,7 @@ test.describe('Expand snap alignment', () => {
         const after = (await page.evaluate(() => {
             const fn = (window as unknown as { __measureClusterFrameViewportTL?: (id: string) => unknown })
                 .__measureClusterFrameViewportTL;
-            return typeof fn === 'function' ? fn('devtools_sub') : null;
+            return typeof fn === 'function' ? fn('cli_commands_sub') : null;
         })) as { left: number; top: number };
 
         expect(Math.abs(after.left - b.left), `cluster frame left ${after.left} vs node ${b.left}`).toBeLessThanOrEqual(

@@ -1,110 +1,86 @@
-# `base_persistence_interface` Module Documentation
+The `base_persistence_interface` module defines the foundational abstract interface for managing the state and execution history of graph-based processes. It provides a robust and flexible contract for how graph states, node executions, and completion events are recorded, retrieved, and managed, ensuring that different persistence mechanisms can be seamlessly integrated into the system. This module is critical for enabling features like fault tolerance, debugging, and historical analysis of graph runs.
 
-The `base_persistence_interface` module provides the abstract foundation for managing and persisting the state of graph runs within the `pydantic_graph` system. It defines a common interface that all concrete state persistence implementations must adhere to, ensuring consistent interaction with graph run states regardless of the underlying storage mechanism.
+### Core Functionality
 
-### Purpose and Core Functionality
+The central component of this module is the `BaseStatePersistence` abstract base class. This class outlines a set of asynchronous methods that any concrete persistence implementation must provide to interact with the graph's state. Each instance of a `BaseStatePersistence` subclass is intended to manage a single graph run, ensuring isolation and clarity of state.
 
-The primary purpose of `base_persistence_interface` is to establish a clear contract for how graph states are saved, loaded, and managed throughout the lifecycle of a graph execution. This module introduces the `BaseStatePersistence` abstract class, which outlines a set of methods for:
+Key responsibilities defined by this interface include:
 
-*   **Snapshotting Graph State**: Recording the state of a graph at specific points, such as before running a node (`snapshot_node`, `snapshot_node_if_new`) or when the graph run concludes (`snapshot_end`). These snapshots typically involve capturing the current graph state and information about the next node to be executed or the final result.
-*   **Recording Node Execution**: Marking the start and end of a node's execution, including status updates (e.g., `'running'`, `'success'`, `'error'`) and duration, through the `record_run` method. This is crucial for tracking the progress and outcome of individual graph steps.
-*   **Loading Snapshots**: Retrieving snapshots from persistence, either to find the next pending node to run (`load_next`) or to retrieve the entire history of a graph run (`load_all`).
-*   **Type Management**: Providing mechanisms to inform the persistence layer about the types of the graph's state and run end, which can be used for serialization and deserialization purposes (e.g., creating Pydantic `TypeAdapter` instances).
+*   **Snapshotting Node States**: Recording the state of the graph before a node executes, capturing all relevant data for potential re-runs or analysis.
+*   **Snapshotting Graph End States**: Storing the final state and output when a graph run concludes, whether successfully or with an error.
+*   **Recording Node Execution Lifecycle**: Tracking the status (created, pending, running, success, error) and duration of individual node executions within the graph. This is achieved through an asynchronous context manager, ensuring proper start and end timestamps.
+*   **Loading Next Nodes**: Efficiently retrieving the next eligible node for execution from persistent storage, facilitating continuation of interrupted runs or distributed execution.
+*   **Loading Full History**: Providing a mechanism to retrieve all recorded snapshots for a given graph run, useful for debugging, visualization, or auditing.
+*   **Type Management**: Allowing persistence layers to understand and apply Pydantic types for proper serialization and deserialization of graph states, ensuring data integrity across storage and retrieval.
 
-By defining these abstract methods, the `base_persistence_interface` ensures that any persistence backend (like file-based or in-memory) can be seamlessly integrated with the `pydantic_graph` framework, promoting modularity and interchangeability of storage solutions.
+### How it Fits into the System
 
-### Architecture and Component Relationships
+The `base_persistence_interface` acts as the contract that decouples the graph execution logic from the specifics of how state is stored. Modules responsible for executing graphs, such as [graph_core_execution](graph_core_execution.md), interact solely with this abstract interface. This allows developers to swap out persistence implementations—such as in-memory, file-based, or database-backed solutions—without altering the core graph execution engine.
 
-The `base_persistence_interface` module centers around the `BaseStatePersistence` abstract base class. This class serves as the blueprint for all state persistence implementations.
+Concrete implementations, like [in_memory_state_persistence](in_memory_state_persistence.md) and [file_state_persistence](file_state_persistence.md), build upon this interface to provide actual storage mechanisms.
 
-**Key Components:**
-
-*   **`BaseStatePersistence`**: The core abstract class defining the contract for state persistence. It's generic, allowing it to work with different `StateT` (graph state type) and `RunEndT` (run end result type).
-
-**Relationships:**
-
-*   **Implementations**: Concrete persistence modules like [file_state_persistence](file_state_persistence.md) and [in_memory_state_persistence](in_memory_state_persistence.md) inherit from and implement the abstract methods defined in `BaseStatePersistence`.
-*   **Graph Interaction**: `BaseStatePersistence` interacts directly with components from the [pydantic_graph_core](pydantic_graph_core.md) module, particularly `Graph` (to get node types and structure) and `BaseNode` (to represent individual steps in the graph).
-*   **Data Models**: While not explicitly defined in this module's core component code, the docstrings refer to `NodeSnapshot`, `EndSnapshot`, and `Snapshot` data models. These are implicitly part of the persistence data structure, likely defined elsewhere within the `pydantic_graph.persistence` package, which concrete implementations would use.
-*   **Type Adapters**: The `set_types` method hints at a dependency on the `pydantic` library for creating `TypeAdapter` instances to handle serialization/deserialization of graph states and run end types.
-
-### How the Module Fits into the Overall System
-
-The `base_persistence_interface` module is a critical infrastructural component within `pydantic_graph.persistence`. It provides the necessary abstraction layer that allows the `pydantic_graph` core to interact with various persistence backends uniformly.
-
-In the broader `pydantic_graph` system, this module enables:
-
-*   **Durable Execution**: By defining how graph states are saved, it facilitates the interruption and resumption of long-running graph computations.
-*   **Debugging and Observability**: Snapshots and run records provide a historical trace of a graph's execution, invaluable for debugging, auditing, and understanding complex workflows.
-
-*   **Flexibility**: Developers can easily swap out persistence strategies (e.g., from in-memory for testing to a file system or database for production) by simply using a different concrete implementation of `BaseStatePersistence`.
-
-It acts as the "plug-in" point for persistence solutions, ensuring that the core graph execution logic remains decoupled from the specifics of data storage.
+### Architecture Diagram
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "BaseStatePersistence", "label": "BaseStatePersistence (Abstract Class)", "type": "component", "link": null},
-        {"id": "snapshot_node_method", "label": "snapshot_node()", "type": "component", "link": null},
-        {"id": "snapshot_node_if_new_method", "label": "snapshot_node_if_new()", "type": "component", "link": null},
-        {"id": "snapshot_end_method", "label": "snapshot_end()", "type": "component", "link": null},
-        {"id": "record_run_method", "label": "record_run()", "type": "component", "link": null},
-        {"id": "load_next_method", "label": "load_next()", "type": "component", "link": null},
-        {"id": "load_all_method", "label": "load_all()", "type": "component", "link": null},
-        {"id": "set_graph_types_method", "label": "set_graph_types()", "type": "component", "link": null},
-        {"id": "should_set_types_method", "label": "should_set_types()", "type": "component", "link": null},
-        {"id": "set_types_method", "label": "set_types()", "type": "component", "link": null},
-        {"id": "file_state_persistence", "label": "FileStatePersistence", "type": "external", "link": "file_state_persistence.md"},
-        {"id": "in_memory_state_persistence", "label": "FullStatePersistence", "type": "external", "link": "in_memory_state_persistence.md"},
-        {"id": "pydantic_graph_core", "label": "pydantic_graph_core", "type": "external", "link": "pydantic_graph_core.md"},
-        {"id": "pydantic", "label": "Pydantic Library", "type": "external", "link": null}
+        {"id": "base_persistence_interface", "label": "Base State Persistence Interface", "type": "component", "link": null},
+        {"id": "snapshot_node_method", "label": "Snapshot Node State", "type": "component", "link": null},
+        {"id": "snapshot_end_method", "label": "Snapshot Graph End", "type": "component", "link": null},
+        {"id": "record_run_method", "label": "Record Node Execution Lifecycle", "type": "component", "link": null},
+        {"id": "load_next_method", "label": "Load Next Pending Node", "type": "component", "link": null},
+        {"id": "load_all_method", "label": "Load All Snapshots", "type": "component", "link": null},
+        {"id": "set_types_method", "label": "Set Serialization Types", "type": "component", "link": null},
+        {"id": "in_memory_state_persistence", "label": "In-Memory Persistence", "type": "external", "link": "in_memory_state_persistence.md"},
+        {"id": "file_state_persistence", "label": "File State Persistence", "type": "external", "link": "file_state_persistence.md"},
+        {"id": "graph_core_execution", "label": "Graph Core Execution", "type": "external", "link": "graph_core_execution.md"}
     ],
     "edges": [
-        {"source": "BaseStatePersistence", "target": "snapshot_node_method"},
-        {"source": "BaseStatePersistence", "target": "snapshot_node_if_new_method"},
-        {"source": "BaseStatePersistence", "target": "snapshot_end_method"},
-        {"source": "BaseStatePersistence", "target": "record_run_method"},
-        {"source": "BaseStatePersistence", "target": "load_next_method"},
-        {"source": "BaseStatePersistence", "target": "load_all_method"},
-        {"source": "BaseStatePersistence", "target": "set_graph_types_method"},
-        {"source": "BaseStatePersistence", "target": "should_set_types_method"},
-        {"source": "BaseStatePersistence", "target": "set_types_method"},
-        {"source": "file_state_persistence", "target": "BaseStatePersistence", "label": "implements"},
-        {"source": "in_memory_state_persistence", "target": "BaseStatePersistence", "label": "implements"},
-        {"source": "BaseStatePersistence", "target": "pydantic_graph_core", "label": "uses (Graph, BaseNode)"},
-        {"source": "BaseStatePersistence", "target": "pydantic", "label": "uses (TypeAdapter)"}
+        {"source": "base_persistence_interface", "target": "snapshot_node_method", "label": "defines"},
+        {"source": "base_persistence_interface", "target": "snapshot_end_method", "label": "defines"},
+        {"source": "base_persistence_interface", "target": "record_run_method", "label": "defines"},
+        {"source": "base_persistence_interface", "target": "load_next_method", "label": "defines"},
+        {"source": "base_persistence_interface", "target": "load_all_method", "label": "defines"},
+        {"source": "base_persistence_interface", "target": "set_types_method", "label": "defines"},
+        {"source": "in_memory_state_persistence", "target": "base_persistence_interface", "label": "implements"},
+        {"source": "file_state_persistence", "target": "base_persistence_interface", "label": "implements"},
+        {"source": "graph_core_execution", "target": "base_persistence_interface", "label": "utilizes interface"}
     ],
-    "groups": []
+    "groups": [
+        {
+            "id": "persistence_interface_details",
+            "label": "Base Persistence Interface Methods",
+            "role": "core",
+            "nodes": ["snapshot_node_method", "snapshot_end_method", "record_run_method", "load_next_method", "load_all_method", "set_types_method"]
+        }
+    ]
 }
 -->
 ```mermaid
-graph TD
-    BaseStatePersistence[BaseStatePersistence (Abstract Class)]
-    snapshot_node_method[snapshot_node()]
-    snapshot_node_if_new_method[snapshot_node_if_new()]
-    snapshot_end_method[snapshot_end()]
-    record_run_method[record_run()]
-    load_next_method[load_next()]
-    load_all_method[load_all()]
-    set_graph_types_method[set_graph_types()]
-    should_set_types_method[should_set_types()]
-    set_types_method[set_types()]
-    file_state_persistence[FileStatePersistence]
-    in_memory_state_persistence[FullStatePersistence]
-    pydantic_graph_core[pydantic_graph_core]
-    pydantic[Pydantic Library]
-    BaseStatePersistence --> snapshot_node_method
-    BaseStatePersistence --> snapshot_node_if_new_method
-    BaseStatePersistence --> snapshot_end_method
-    BaseStatePersistence --> record_run_method
-    BaseStatePersistence --> load_next_method
-    BaseStatePersistence --> load_all_method
-    BaseStatePersistence --> set_graph_types_method
-    BaseStatePersistence --> should_set_types_method
-    BaseStatePersistence --> set_types_method
-    file_state_persistence -- implements --> BaseStatePersistence
-    in_memory_state_persistence -- implements --> BaseStatePersistence
-    BaseStatePersistence -- uses (Graph, BaseNode) --> pydantic_graph_core
-    BaseStatePersistence -- uses (TypeAdapter) --> pydantic
+flowchart TD
+    subgraph persistence_interface_details["Base Persistence Interface Methods"]
+        snapshot_node_method["Snapshot Node State"]
+        snapshot_end_method["Snapshot Graph End"]
+        record_run_method["Record Node Execution Lifecycle"]
+        load_next_method["Load Next Pending Node"]
+        load_all_method["Load All Snapshots"]
+        set_types_method["Set Serialization Types"]
+    end
+
+    base_persistence_interface["Base State Persistence Interface"]
+    in_memory_state_persistence["In-Memory Persistence"]
+    file_state_persistence["File State Persistence"]
+    graph_core_execution["Graph Core Execution"]
+
+    base_persistence_interface -->|"defines"| snapshot_node_method
+    base_persistence_interface -->|"defines"| snapshot_end_method
+    base_persistence_interface -->|"defines"| record_run_method
+    base_persistence_interface -->|"defines"| load_next_method
+    base_persistence_interface -->|"defines"| load_all_method
+    base_persistence_interface -->|"defines"| set_types_method
+
+    in_memory_state_persistence -->|"implements"| base_persistence_interface
+    file_state_persistence -->|"implements"| base_persistence_interface
+    graph_core_execution -->|"utilizes interface"| base_persistence_interface
 ```

@@ -1,114 +1,103 @@
-# mistral_provider
+# Mistral Provider Module
 
-The `mistral_provider` module serves as the dedicated interface for integrating Mistral AI models within the `pydantic_ai` framework. It provides the necessary components to authenticate, initialize clients, and manage interactions with the Mistral API, ensuring seamless access to Mistral's language models.
 
-## Architecture and Core Components
+The `mistral_provider` module provides the integration layer for interacting with the Mistral AI platform. It encapsulates the necessary logic to configure and use Mistral models within the larger system, acting as a bridge between the core model handling and the Mistral API. This module is crucial for applications that leverage Mistral's generative AI capabilities, offering a standardized way to authenticate, manage clients, and retrieve model-specific configurations.
 
-The core of this module is the `MistralProvider` class, which abstracts the complexities of interacting with the Mistral API. It manages the underlying Mistral SDK client, handles API key management, and facilitates the integration of Mistral models into the broader `pydantic_ai` model ecosystem.
+## `MistralProvider` Class
+
+The `MistralProvider` class is the primary component of this module, responsible for establishing and managing the connection to the Mistral API. It extends a generic `Provider` class, adapting it specifically for Mistral's services.
+
+### Core Components and Functionality
+
+*   **`MistralProvider(Provider[Mistral])`**: This class facilitates the interaction with the Mistral API.
+    *   **`name` property**: Returns the string identifier 'mistral' for this provider.
+    *   **`base_url` property**: Dynamically retrieves the base URL configured for the Mistral client.
+    *   **`client` property**: Provides access to the underlying `Mistral` SDK client instance, which is used for making API requests.
+    *   **`model_profile(model_name: str)` static method**: This method is responsible for fetching model-specific configurations by delegating to the `mistral_model_profile` function. This ensures that models from Mistral are used with their appropriate settings.
+    *   **`__init__` constructor**: Initializes the `MistralProvider`.
+        *   It can be initialized with an existing `Mistral` SDK client instance (`mistral_client`).
+        *   Alternatively, it can create a new `Mistral` client by accepting an `api_key`, an optional `base_url`, and an optional `http_client`.
+        *   If `api_key` is not explicitly provided, it attempts to read it from the `MISTRAL_API_KEY` environment variable. A `UserError` is raised if no API key is found.
+        *   It utilizes a `cached_async_http_client` for efficient management of HTTP connections, especially when an `http_client` is not explicitly provided.
+
+### How it Works
+
+The `MistralProvider` acts as an adapter. When instantiated, it sets up a `Mistral` client, either by taking an already configured client or by creating one using an API key (from parameters or environment variables) and an optional custom HTTP client. This client is then used for all subsequent interactions with the Mistral API. The `model_profile` method ensures that any model requested through this provider adheres to the specific configurations defined for Mistral models, linking directly to the [model_profile_definitions.md](model_profile_definitions.md) module for these profiles.
+
+### Relationship to Other Modules
+
+*   **[model_core_interfaces.md](model_core_interfaces.md)**: The `MistralProvider` integrates with the generic `Model` and `ModelProfile` interfaces defined in this module, ensuring compatibility across different AI model providers.
+*   **[model_profile_definitions.md](model_profile_definitions.md)**: This module contains the `mistral_model_profile` function, which `MistralProvider` uses to retrieve specific configurations for Mistral models.
+*   **[model_utilities.md](model_utilities.md)**: The `MistralProvider` uses shared utilities like `cached_async_http_client` for managing HTTP connections, which would be defined or managed in a module handling common model utilities.
+*   **[agent_utilities.md](agent_utilities.md)**: The `UserError` class, used for raising configuration errors, is considered a general utility and would reside in the `agent_utilities` module.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mistral_provider_class", "label": "MistralProvider Class", "type": "component", "link": null},
-        {"id": "mistral_api", "label": "Mistral API", "type": "external", "link": null},
-        {"id": "pydantic_ai_models", "label": "pydantic_ai_models", "type": "external", "link": "pydantic_ai_models.md"},
-        {"id": "pydantic_ai_providers", "label": "pydantic_ai_providers", "type": "external", "link": "pydantic_ai_providers.md"}
+        {"id": "mistral_provider_init", "label": "Initialize MistralProvider", "type": "component", "link": null},
+        {"id": "get_api_key", "label": "Get MISTRAL_API_KEY", "type": "component", "link": null},
+        {"id": "create_mistral_client", "label": "Create Mistral SDK Client", "type": "component", "link": null},
+        {"id": "mistral_sdk", "label": "Mistral SDK", "type": "external", "link": null},
+        {"id": "model_profile_retrieval", "label": "Retrieve Model Profile", "type": "component", "link": null},
+        {"id": "model_profile_defs", "label": "Model Profile Definitions", "type": "external", "link": "model_profile_definitions.md"},
+        {"id": "model_core_int", "label": "Model Core Interfaces", "type": "external", "link": "model_core_interfaces.md"},
+        {"id": "http_client_util", "label": "HTTP Client Utility", "type": "external", "link": "model_utilities.md"},
+        {"id": "agent_utilities", "label": "Agent Utilities (UserError)", "type": "external", "link": "agent_utilities.md"}
     ],
     "edges": [
-        {"source": "mistral_provider_class", "target": "mistral_api"},
-        {"source": "mistral_provider_class", "target": "pydantic_ai_models"},
-        {"source": "pydantic_ai_providers", "target": "mistral_provider_class"}
+        {"source": "mistral_provider_init", "target": "get_api_key", "label": "initialization flow"},
+        {"source": "get_api_key", "target": "create_mistral_client", "label": "API Key"},
+        {"source": "create_mistral_client", "target": "mistral_sdk", "label": "uses"},
+        {"source": "create_mistral_client", "target": "http_client_util", "label": "requests cached client"},
+        {"source": "mistral_provider_init", "target": "model_profile_retrieval", "label": "requests profile"},
+        {"source": "model_profile_retrieval", "target": "model_profile_defs", "label": "reads mistral_model_profile from"},
+        {"source": "mistral_provider_init", "target": "model_core_int", "label": "implements ModelProvider"},
+        {"source": "get_api_key", "target": "agent_utilities", "label": "raises UserError"}
     ],
-    "groups": []
+    "groups": [
+        {
+            "id": "provider_setup",
+            "label": "Mistral Provider Setup",
+            "role": "analytical",
+            "nodes": ["mistral_provider_init", "get_api_key", "create_mistral_client", "model_profile_retrieval"]
+        }
+    ]
 }
 -->
+
 ```mermaid
-graph TD
-    mistral_provider_class[MistralProvider Class]
-    mistral_api((Mistral API))
-    pydantic_ai_models[pydantic_ai_models]:::external_node
-    pydantic_ai_providers[pydantic_ai_providers]:::external_node
+flowchart TD
+    subgraph provider_setup["Mistral Provider Setup"]
+        mistral_provider_init["Initialize MistralProvider"]
+        get_api_key["Get MISTRAL_API_KEY"]
+        create_mistral_client["Create Mistral SDK Client"]
+        model_profile_retrieval["Retrieve Model Profile"]
+    end
 
-    mistral_provider_class --> mistral_api
-    mistral_provider_class --> pydantic_ai_models
-    pydantic_ai_providers --> mistral_provider_class
+    mistral_sdk["Mistral SDK"]
+    model_profile_defs["Model Profile Definitions"]:::external
+    model_core_int["Model Core Interfaces"]:::external
+    http_client_util["HTTP Client Utility"]:::external
+    agent_utilities["Agent Utilities (UserError)"]:::external
 
-    classDef external_node fill:#f9f,stroke:#333,stroke-width:2px;
+    mistral_provider_init -->|"initialization flow"| get_api_key
+    get_api_key -->|"API Key"| create_mistral_client
+    create_mistral_client -->|"uses"| mistral_sdk
+    create_mistral_client -.->|"requests cached client"| http_client_util
+    mistral_provider_init -->|"requests profile"| model_profile_retrieval
+    model_profile_retrieval -.->|"reads mistral_model_profile from"| model_profile_defs
+    mistral_provider_init -.->|"implements ModelProvider"| model_core_int
+    get_api_key -->|"raises UserError"| agent_utilities
+
+    linkStyle 0 stroke:#333,stroke-width:2px;
+    linkStyle 1 stroke:#333,stroke-width:2px;
+    linkStyle 2 stroke:#333,stroke-width:2px;
+    linkStyle 3 stroke:#333,stroke-width:2px;
+    linkStyle 4 stroke:#333,stroke-width:2px;
+    linkStyle 5 stroke:#333,stroke-width:2px;
+    linkStyle 6 stroke:#333,stroke-width:2px;
+    linkStyle 7 stroke:#333,stroke-width:2px;
+
+    classDef external fill:#f9f,stroke:#333,stroke-width:2px,color:#000;
 ```
-
-### `MistralProvider` Class
-
-The `MistralProvider` class is responsible for:
-*   **Initialization**: It can be initialized with an API key, an existing Mistral client, or it can automatically retrieve the API key from the `MISTRAL_API_KEY` environment variable. It also supports custom base URLs and HTTP clients.
-*   **Client Management**: Provides access to the underlying `Mistral` SDK client, which is used for making API requests.
-*   **Model Profiling**: Integrates with the `mistral_model_profile` function (likely from [pydantic_ai_models](pydantic_ai_models.md) or a related sub-module) to provide metadata and configuration specific to Mistral models.
-
-```python
-class MistralProvider(Provider[Mistral]):
-    """Provider for Mistral API."""
-
-    @property
-    def name(self) -> str:
-        return 'mistral'
-
-    @property
-    def base_url(self) -> str:
-        return self.client.sdk_configuration.get_server_details()[0]
-
-    @property
-    def client(self) -> Mistral:
-        return self._client
-
-    @staticmethod
-    def model_profile(model_name: str) -> ModelProfile | None:
-        return mistral_model_profile(model_name)
-
-    @overload
-    def __init__(self, *, mistral_client: Mistral | None = None) -> None: ...
-
-    @overload
-    def __init__(self, *, api_key: str | None = None, http_client: httpx.AsyncClient | None = None) -> None: ...
-
-    def __init__(
-        self,
-        *,
-        api_key: str | None = None,
-        mistral_client: Mistral | None = None,
-        base_url: str | None = None,
-        http_client: httpx.AsyncClient | None = None,
-    ) -> None:
-        """Create a new Mistral provider.
-
-        Args:
-            api_key: The API key to use for authentication, if not provided, the `MISTRAL_API_KEY` environment variable
-                will be used if available.
-            mistral_client: An existing `Mistral` client to use, if provided, `api_key` and `http_client` must be `None`.
-            base_url: The base url for the Mistral requests.
-            http_client: An existing async client to use for making HTTP requests.
-        """
-        if mistral_client is not None:
-            assert http_client is None, 'Cannot provide both `mistral_client` and `http_client`'
-            assert api_key is None, 'Cannot provide both `mistral_client` and `api_key`'
-            assert base_url is None, 'Cannot provide both `mistral_client` and `base_url`'
-            self._client = mistral_client
-        else:
-            api_key = api_key or os.getenv('MISTRAL_API_KEY')
-
-            if not api_key:
-                raise UserError(
-                    'Set the `MISTRAL_API_KEY` environment variable or pass it via `MistralProvider(api_key=...)`'
-                    'to use the Mistral provider.'
-                )
-            elif http_client is not None:
-                self._client = Mistral(api_key=api_key, async_client=http_client, server_url=base_url)
-            else:
-                http_client = cached_async_http_client(provider='mistral')
-                self._client = Mistral(api_key=api_key, async_client=http_client, server_url=base_url)
-```
-
-## How it Fits into the Overall System
-
-The `mistral_provider` module is a crucial part of the [pydantic_ai_providers](pydantic_ai_providers.md) ecosystem, specifically categorized under [native_providers](native_providers.md). It enables the `pydantic_ai` framework to communicate with Mistral AI, allowing users to leverage Mistral models for various AI tasks.
-
-It interacts with the [pydantic_ai_models](pydantic_ai_models.md) module by providing model-specific configurations and handling usage mapping, ensuring that Mistral models behave consistently within the `pydantic_ai`'s unified model interface. This separation of concerns allows `pydantic_ai` to support multiple AI providers by simply integrating new provider modules like `mistral_provider`.

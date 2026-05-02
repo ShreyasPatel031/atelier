@@ -6,7 +6,7 @@ Default: read-only presync audit for each repo folder under --base (no file chan
 
 With --run-sync: runs run_full_sync (mutates module_tree.json, creates placeholders, etc.).
 
-With --deep-mermaid: sets CODEWIKI_SYNC_DEEP_MERMAID=1 for full sync so mermaid_validator runs per block.
+Note: --deep-mermaid is deprecated (sync always uses validate_mermaid per block); flag kept for no-op compatibility.
 
 Example (local demo bundles, no API calls):
 
@@ -75,10 +75,7 @@ def main() -> int:
 
     sys.path.insert(0, str(_repo_root()))
 
-    from datetime import datetime
-
     from codewiki.src.be.doc_file_sync import (
-        SyncReport,
         audit_docs_state,
         run_full_sync,
         validate_mermaid_diagrams,
@@ -98,15 +95,7 @@ def main() -> int:
         row["presync_audit"] = audit_docs_state(str(docs_dir))
 
         if args.mermaid_bench:
-            bench_report = SyncReport(
-                docs_dir=str(docs_dir),
-                timestamp=datetime.now().isoformat(),
-            )
-            row["mermaid_bench"] = validate_mermaid_diagrams(
-                str(docs_dir),
-                bench_report,
-                deep_validate=args.deep_mermaid or None,
-            )
+            row["mermaid_bench"] = validate_mermaid_diagrams(str(docs_dir))
 
         if args.run_sync:
             row["sync_result"] = run_full_sync(str(docs_dir), components=None, repo_name=slug)

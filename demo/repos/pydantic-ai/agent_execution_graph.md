@@ -1,51 +1,63 @@
-# `agent_execution_graph`
+# Agent Execution Graph
 
-The `agent_execution_graph` module is central to orchestrating the execution flow of an AI agent. It defines the core nodes and mechanisms for processing user prompts, making model requests, handling tool calls, and managing the agent's message history and state.
+The `agent_execution_graph` module is a core component responsible for orchestrating the flow of an AI agent's execution. It defines the nodes within the agent's operational graph, managing interactions with the language model, processing user prompts, and handling tool invocations and their results.
+
+This module is crucial for defining how an agent processes inputs, makes decisions, executes actions via tools, and generates responses, forming the backbone of the agent's operational logic.
 
 ## Architecture Overview
 
-The module comprises several key sub-modules that work in concert to manage the agent's lifecycle and interactions. The primary nodes (`Agent Execution Nodes`) drive the conversation flow, which can lead to the invocation of external functions or tools managed by the `Tool Execution Handlers`. Throughout this process, the agent's conversational context and messages are managed by the `Run Message Capture` utility.
+The agent execution graph is composed of several key sub-modules that work in concert to manage the agent's runtime behavior:
+
+*   **[Agent Interaction Nodes](agent_interaction_nodes.md)**: Manages the direct interaction nodes within the agent's graph, handling model requests and user prompts.
+*   **[Tool Execution Logic](tool_execution_logic.md)**: Manages the execution and results of tool calls initiated by the agent.
+*   **[Message Capture Utility](message_capture_utility.md)**: Provides utilities for observing and capturing messages during an agent's run.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "agent_execution_graph", "label": "Agent Execution Graph", "type": "module", "link": "agent_execution_graph.md"},
-        {"id": "agent_nodes", "label": "Agent Execution Nodes", "type": "module", "link": "agent_nodes.md"},
-        {"id": "tool_execution_handlers", "label": "Tool Execution Handlers", "type": "module", "link": "tool_execution_handlers.md"},
-        {"id": "message_capture", "label": "Run Message Capture", "type": "module", "link": "message_capture.md"}
+        {"id": "agent_interaction_nodes", "label": "Agent Interaction Nodes", "type": "module", "link": "agent_interaction_nodes.md"},
+        {"id": "tool_execution_logic", "label": "Tool Execution Logic", "type": "module", "link": "tool_execution_logic.md"},
+        {"id": "message_capture_utility", "label": "Message Capture Utility", "type": "module", "link": "message_capture_utility.md"}
     ],
     "edges": [
-        {"source": "agent_execution_graph", "target": "agent_nodes"},
-        {"source": "agent_nodes", "target": "tool_execution_handlers"},
-        {"source": "agent_nodes", "target": "message_capture"}
+        {"source": "agent_interaction_nodes", "target": "tool_execution_logic", "label": "initiates tool calls"},
+        {"source": "tool_execution_logic", "target": "agent_interaction_nodes", "label": "returns results"},
+        {"source": "agent_interaction_nodes", "target": "message_capture_utility", "label": "generates messages"}
     ],
-    "groups": []
+    "groups": [
+        {
+            "id": "agent_core_flow",
+            "label": "Agent Core Flow",
+            "role": "generative",
+            "nodes": ["agent_interaction_nodes", "tool_execution_logic"]
+        },
+        {
+            "id": "observability",
+            "label": "Observability",
+            "role": "data",
+            "nodes": ["message_capture_utility"]
+        }
+    ]
 }
 -->
+
 ```mermaid
-graph TD
-    aeg[Agent Execution Graph]
-    an[Agent Execution Nodes]
-    teh[Tool Execution Handlers]
-    mc[Run Message Capture]
+flowchart TD
+    subgraph agent_core_flow["Agent Core Flow"]
+        agent_interaction_nodes["Agent Interaction Nodes"]
+        tool_execution_logic["Tool Execution Logic"]
+    end
 
-    aeg --> an
-    an --> teh
-    an --> mc
+    subgraph observability["Observability"]
+        message_capture_utility["Message Capture Utility"]
+    end
 
-    click an "agent_nodes.md" "View Agent Execution Nodes"
-    click teh "tool_execution_handlers.md" "View Tool Execution Handlers"
-    click mc "message_capture.md" "View Run Message Capture"
+    agent_interaction_nodes -->|"initiates tool calls"| tool_execution_logic
+    tool_execution_logic -->|"returns results"| agent_interaction_nodes
+    agent_interaction_nodes -->|"generates messages"| message_capture_utility
+
+    click agent_interaction_nodes "agent_interaction_nodes.md" "View Agent Interaction Nodes documentation"
+    click tool_execution_logic "tool_execution_logic.md" "View Tool Execution Logic documentation"
+    click message_capture_utility "message_capture_utility.md" "View Message Capture Utility documentation"
 ```
-
-## Sub-modules
-
-### [Agent Execution Nodes](agent_nodes.md)
-This sub-module defines the fundamental building blocks of the agent's execution flow, including `ModelRequestNode` for making requests to language models and `UserPromptNode` for processing user input and initial instructions.
-
-### [Tool Execution Handlers](tool_execution_handlers.md)
-This sub-module is responsible for managing the invocation and processing of tool calls. It handles the execution of tools and the subsequent integration of their results back into the agent's message history, allowing the agent to react appropriately to tool outputs or retries.
-
-### [Run Message Capture](message_capture.md)
-This sub-module provides utilities for capturing and accessing the ongoing message history of an agent run. It is crucial for maintaining conversational context and for debugging or analyzing agent interactions, especially in scenarios involving errors or complex flows.

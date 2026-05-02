@@ -1,95 +1,118 @@
-# exa_integration Module Documentation
+The `exa_integration` module provides a powerful and efficient way to integrate Exa's search capabilities into AI agents. It does this through the `ExaToolset`, which centralizes the management of various Exa tools and ensures optimal resource usage by sharing a single Exa API client across them. This module is essential for agents requiring robust web search and content retrieval functionalities.
 
-The `exa_integration` module provides a comprehensive toolset for interacting with the Exa AI search API within the Pydantic AI framework. It enables agents to perform various search operations efficiently by leveraging a shared Exa API client.
+### **Exa Integration Module**
 
-## Purpose and Core Functionality
+The `exa_integration` module facilitates seamless interaction with the Exa.ai search API. Its primary component, `ExaToolset`, acts as a consolidated interface for creating and managing different Exa-powered tools, such as searching, finding similar content, retrieving document contents, and answering questions. By encapsulating these functionalities within a single toolset, it streamlines development and enhances performance for AI agents that rely on Exa for information gathering.
 
-The primary purpose of the `exa_integration` module is to offer a streamlined and efficient way to integrate Exa's powerful search capabilities into AI agents. It does this by encapsulating multiple Exa tools within a single [ExaToolset](#exatoolset-class) that shares an underlying `AsyncExa` client. This design optimizes API key management and reduces overhead when using multiple Exa-related functionalities.
+#### **Key Features:**
 
-Key functionalities provided by this module include:
--   **Configurable Search**: Performing searches with a specified number of results and character limits.
--   **Find Similar**: Identifying content similar to a given piece of text or URL.
--   **Get Contents**: Retrieving the full content of a specified URL.
--   **Answering Questions**: Utilizing Exa's capabilities to answer questions based on search results.
+*   **Shared Client for Efficiency:** The `ExaToolset` initializes a single `AsyncExa` client, which is then reused by all Exa tools within the toolset. This significantly reduces overhead and improves efficiency compared to creating individual clients for each tool.
+*   **Configurable Tools:** Users can enable or disable specific Exa tools (search, find similar, get contents, answer) based on their agent's requirements, allowing for flexible and tailored integrations.
+*   **Result Customization:** Parameters like `num_results` and `max_characters` provide fine-grained control over the volume and length of the search results, helping to manage token usage and focus on relevant information.
+*   **Simplified Agent Integration:** Designed to be easily integrated into `pydantic_ai` agents by simply passing an `ExaToolset` instance to the agent's toolsets.
 
-## Architecture and Component Relationships
+#### **Core Components**
 
-The `exa_integration` module is centered around the `ExaToolset` class. This toolset acts as a container for various Exa-specific tools, all sharing the same `AsyncExa` client instance for efficient API interaction.
+##### `ExaToolset`
 
-The `ExaToolset` inherits from the `FunctionToolset` base class (defined in [toolset_architecture.md](toolset_architecture.md)), providing a standardized interface for integrating with the Pydantic AI agent system.
+The `ExaToolset` class is the central component of this module. It inherits from `FunctionToolset` (refer to [toolset_management.md](toolset_management.md) for more details on toolsets) and is responsible for:
+
+1.  **Initializing the Exa API Client:** Upon instantiation, it creates an `AsyncExa` client using the provided API key.
+2.  **Tool Creation:** It dynamically creates and configures individual Exa tools (e.g., `exa_search_tool`, `exa_find_similar_tool`) based on the constructor parameters. These tools then share the single `AsyncExa` client.
+3.  **Tool Management:** It bundles these configured tools into a `FunctionToolset`, making them readily available for use by an AI agent.
+
+**Example Usage:**
+
+```python
+from pydantic_ai import Agent
+from pydantic_ai.common_tools.exa import ExaToolset
+
+# Initialize the ExaToolset with your API key
+# You can get one by signing up at https://dashboard.exa.ai
+toolset = ExaToolset(api_key='your-api-key', num_results=3, include_get_contents=True)
+
+# Create an agent and provide the ExaToolset
+agent = Agent('openai:gpt-5.2', toolsets=[toolset])
+
+# Now the agent can use the 'search', 'find_similar', 'get_contents', and 'answer' tools
+# if they were enabled during toolset initialization.
+```
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "exa_toolset", "label": "ExaToolset", "type": "component", "link": null},
-        {"id": "exa_search_tool_func", "label": "exa_search_tool", "type": "component", "link": null},
-        {"id": "exa_find_similar_tool_func", "label": "exa_find_similar_tool", "type": "component", "link": null},
-        {"id": "exa_get_contents_tool_func", "label": "exa_get_contents_tool", "type": "component", "link": null},
-        {"id": "exa_answer_tool_func", "label": "exa_answer_tool", "type": "component", "link": null},
-        {"id": "async_exa_client", "label": "AsyncExa Client", "type": "external", "link": null},
-        {"id": "function_toolset", "label": "FunctionToolset", "type": "external", "link": "toolset_architecture.md"},
-        {"id": "pydantic_ai_agent_core", "label": "Agent (from pydantic_ai_agent_core)", "type": "external", "link": "pydantic_ai_agent_core.md"}
+        {"id": "ExaToolset_component", "label": "ExaToolset", "type": "component", "link": null},
+        {"id": "FunctionToolset_ext", "label": "FunctionToolset (from Toolset Management)", "type": "external", "link": "toolset_management.md"},
+        {"id": "AsyncExa_ext", "label": "Exa.ai API Client (AsyncExa)", "type": "external", "link": "https://pypi.org/project/exa-py/"},
+        {"id": "create_search_tool", "label": "Create Exa Search Tool (exa_search_tool)", "type": "component", "link": null},
+        {"id": "create_find_similar_tool", "label": "Create Exa Find Similar Tool (exa_find_similar_tool)", "type": "component", "link": null},
+        {"id": "create_get_contents_tool", "label": "Create Exa Get Contents Tool (exa_get_contents_tool)", "type": "component", "link": null},
+        {"id": "create_answer_tool", "label": "Create Exa Answer Tool (exa_answer_tool)", "type": "component", "link": null}
     ],
     "edges": [
-        {"source": "exa_toolset", "target": "async_exa_client", "label": "initializes & uses"},
-        {"source": "exa_toolset", "target": "function_toolset", "label": "inherits from"},
-        {"source": "exa_toolset", "target": "exa_search_tool_func", "label": "creates & includes"},
-        {"source": "exa_toolset", "target": "exa_find_similar_tool_func", "label": "creates & includes"},
-        {"source": "exa_toolset", "target": "exa_get_contents_tool_func", "label": "creates & includes"},
-        {"source": "exa_toolset", "target": "exa_answer_tool_func", "label": "creates & includes"},
-        {"source": "pydantic_ai_agent_core", "target": "exa_toolset", "label": "uses"}
+        {"source": "ExaToolset_component", "target": "FunctionToolset_ext", "label": "inherits from"},
+        {"source": "ExaToolset_component", "target": "AsyncExa_ext", "label": "initializes with API key"},
+        {"source": "ExaToolset_component", "target": "create_search_tool", "label": "configures & instantiates if enabled"},
+        {"source": "ExaToolset_component", "target": "create_find_similar_tool", "label": "configures & instantiates if enabled"},
+        {"source": "ExaToolset_component", "target": "create_get_contents_tool", "label": "configures & instantiates if enabled"},
+        {"source": "ExaToolset_component", "target": "create_answer_tool", "label": "configures & instantiates if enabled"},
+        {"source": "create_search_tool", "target": "AsyncExa_ext", "label": "uses client"},
+        {"source": "create_find_similar_tool", "target": "AsyncExa_ext", "label": "uses client"},
+        {"source": "create_get_contents_tool", "target": "AsyncExa_ext", "label": "uses client"},
+        {"source": "create_answer_tool", "target": "AsyncExa_ext", "label": "uses client"}
     ],
-    "groups": []
+    "groups": [
+        {
+            "id": "exa_tool_creation",
+            "label": "Exa Tool Creation Process",
+            "role": "analytical",
+            "nodes": ["create_search_tool", "create_find_similar_tool", "create_get_contents_tool", "create_answer_tool"]
+        }
+    ]
 }
 -->
 ```mermaid
-graph TD
-    exa_toolset[ExaToolset]
-    exa_search_tool_func[exa_search_tool]
-    exa_find_similar_tool_func[exa_find_similar_tool]
-    exa_get_contents_tool_func[exa_get_contents_tool]
-    exa_answer_tool_func[exa_answer_tool]
-    async_exa_client(AsyncExa Client)
-    function_toolset[FunctionToolset]:::external
-    pydantic_ai_agent_core[Agent (from pydantic_ai_agent_core)]:::external
+flowchart TD
+    %% Module Components
+    ExaToolset_component["ExaToolset"]
 
-    exa_toolset -- "initializes & uses" --> async_exa_client
-    exa_toolset -- "inherits from" --> function_toolset
-    exa_toolset -- "creates & includes" --> exa_search_tool_func
-    exa_toolset -- "creates & includes" --> exa_find_similar_tool_func
-    exa_toolset -- "creates & includes" --> exa_get_contents_tool_func
-    exa_toolset -- "creates & includes" --> exa_answer_tool_func
-    pydantic_ai_agent_core -- "uses" --> exa_toolset
+    %% External Dependencies
+    FunctionToolset_ext["FunctionToolset (from Toolset Management)"]
+    AsyncExa_ext["Exa.ai API Client (AsyncExa)"]
 
-    classDef external fill:#f9f,stroke:#333,stroke-width:2px;
+    %% Internal Helper Components/Functions
+    subgraph exa_tool_creation["Exa Tool Creation Process"]
+        create_search_tool["Create Exa Search Tool (exa_search_tool)"]
+        create_find_similar_tool["Create Exa Find Similar Tool (exa_find_similar_tool)"]
+        create_get_contents_tool["Create Exa Get Contents Tool (exa_get_contents_tool)"]
+        create_answer_tool["Create Exa Answer Tool (exa_answer_tool)"]
+    end
+
+    %% Relationships
+    ExaToolset_component --|> FunctionToolset_ext: "inherits from"
+    ExaToolset_component --> AsyncExa_ext: "initializes with API key"
+    ExaToolset_component --> create_search_tool: "configures & instantiates if enabled"
+    ExaToolset_component --> create_find_similar_tool: "configures & instantiates if enabled"
+    ExaToolset_component --> create_get_contents_tool: "configures & instantiates if enabled"
+    ExaToolset_component --> create_answer_tool: "configures & instantiates if enabled"
+
+    create_search_tool -.-> AsyncExa_ext: "uses client"
+    create_find_similar_tool -.-> AsyncExa_ext: "uses client"
+    create_get_contents_tool -.-> AsyncExa_ext: "uses client"
+    create_answer_tool -.-> AsyncExa_ext: "uses client"
+
+    %% Links for external dependencies
+    click FunctionToolset_ext "toolset_management.md"
+    click AsyncExa_ext "https://pypi.org/project/exa-py/"
 ```
 
-### ExaToolset Class
+#### **How it Connects to the Rest of the System**
 
-The `ExaToolset` class is the main entry point for using Exa AI tools. It initializes an `AsyncExa` client with the provided API key and then dynamically creates and adds specific Exa tools (e.g., `exa_search_tool`, `exa_find_similar_tool`) based on the configuration parameters during its instantiation. This allows for flexible inclusion of Exa functionalities as needed by an agent.
+The `exa_integration` module primarily interacts with:
 
-#### `__init__(self, api_key: str, *, num_results: int = 5, max_characters: int | None = None, include_search: bool = True, include_find_similar: bool = True, include_get_contents: bool = True, include_answer: bool = True, id: str | None = None)`
+*   **`toolset_management` module**: `ExaToolset` extends `FunctionToolset`, integrating Exa's capabilities into the broader tool management system of the `pydantic_ai_agent_core`. This allows agents to discover and utilize Exa tools like any other registered tool.
+*   **AI Agents**: Agents (defined in modules like `agent_definition`) consume `ExaToolset` instances. By providing an `ExaToolset` during agent initialization, the agent gains the ability to perform searches, retrieve web content, and answer questions using Exa's powerful API.
+*   **External Exa.ai API**: The module directly communicates with the Exa.ai service through the `AsyncExa` client to execute search queries and retrieve data.
 
-**Parameters**:
--   `api_key` (str): The Exa API key, obtainable from [https://dashboard.exa.ai](https://dashboard.exa.ai).
--   `num_results` (int, optional): The maximum number of results to return for search and find_similar queries. Defaults to 5.
--   `max_characters` (int | None, optional): The maximum characters of text content per result. This helps limit token usage. Defaults to `None` (no limit).
--   `include_search` (bool, optional): If `True`, the search tool will be included in the toolset. Defaults to `True`.
--   `include_find_similar` (bool, optional): If `True`, the find_similar tool will be included. Defaults to `True`.
--   `include_get_contents` (bool, optional): If `True`, the get_contents tool will be included. Defaults to `True`.
--   `include_answer` (bool, optional): If `True`, the answer tool will be included. Defaults to `True`.
--   `id` (str | None, optional): An optional ID for the toolset, particularly useful in durable execution environments.
-
-**Functionality**:
--   Instantiates an `AsyncExa` client using the provided `api_key`.
--   Conditionally creates and appends `Tool` instances for `exa_search_tool`, `exa_find_similar_tool`, `exa_get_contents_tool`, and `exa_answer_tool` to an internal list, based on the respective `include_` boolean flags.
--   Calls the `super().__init__` method of `FunctionToolset` with the constructed list of tools and the optional `id`.
-
-## How the Module Fits into the Overall System
-
-The `exa_integration` module is a vital part of the `pydantic_ai_tools` ecosystem, specifically falling under the [third_party_toolsets](third_party_toolsets.md) category. It provides concrete implementations for integrating external services like Exa AI.
-
--   **Integration with Agents**: Instances of `ExaToolset` are passed to an [Agent](pydantic_ai_agent_core.md) from the `pydantic_ai_agent_core` module, allowing the agent to leverage Exa's search capabilities during its operation.
--   **Extensibility**: By adhering to the `FunctionToolset` interface, `exa_integration` demonstrates how new external tools can be seamlessly added and managed within the Pydantic AI framework.
--   **Tool Management**: It relies on the broader [tool_output_management](tool_output_management.md) components for handling tool invocation, output processing, and validation within the agent's workflow.
+This integration point ensures that agents have a robust and efficient mechanism for accessing external web knowledge, significantly enhancing their ability to respond to information-seeking queries.

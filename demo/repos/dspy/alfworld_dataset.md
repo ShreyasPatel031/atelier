@@ -1,44 +1,40 @@
-# AlfWorld Dataset Module
-
-## Introduction
-
-The `alfworld_dataset` module provides functionalities for integrating and managing the AlfWorld environment within DSPy. It includes components for loading and preparing the AlfWorld dataset and an environment worker for interacting with the AlfredTWEnv instances.
-
-## Architecture Overview
-
-The `alfworld_dataset` module is composed of two primary sub-modules:
-
-1.  **AlfWorld Data Loader**: Responsible for initializing the AlfWorld dataset, shuffling, and splitting it into training and development sets.
-2.  **AlfWorld Environment Worker**: Manages individual AlfredTWEnv instances, handling commands for environment initialization and step-by-step interactions.
-
-These components work together to provide a robust framework for running agents in the AlfWorld environment and evaluating their performance.
+## AlfWorld Dataset Module
+This module provides the `AlfWorld` dataset, including an `AlfWorld` class for managing the dataset creation and an `env_worker` function to interact with the external `AlfredTWEnv` for environment steps.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "alfworld_data_loader", "label": "AlfWorld Data Loader", "type": "module", "link": "alfworld_data_loader.md"},
-        {"id": "alfworld_environment_worker", "label": "AlfWorld Environment Worker", "type": "module", "link": "alfworld_environment_worker.md"}
+        {"id": "alfworld_manager", "label": "AlfWorld Dataset Manager", "type": "component", "link": null},
+        {"id": "env_worker", "label": "Environment Interaction Worker", "type": "component", "link": null},
+        {"id": "alfworld_env", "label": "AlfredTWEnv (External)", "type": "external", "link": null},
+        {"id": "dataset_management", "label": "Dataset Management", "type": "external", "link": "dataset_management.md"}
     ],
     "edges": [
-        {"source": "alfworld_data_loader", "target": "alfworld_environment_worker"}
+        {"source": "alfworld_manager", "target": "dataset_management", "label": "generates train/dev sets"},
+        {"source": "alfworld_manager", "target": "env_worker", "label": "manages via EnvPool"},
+        {"source": "env_worker", "target": "alfworld_env", "label": "interacts with environment"}
     ],
-    "groups": []
+    "groups": [
+        {"id": "alfworld_data_pipeline", "label": "AlfWorld Data Pipeline", "role": "data", "nodes": ["alfworld_manager", "env_worker"]}
+    ]
 }
 -->
 
 ```mermaid
-graph TD
-    alfworld_data_loader[AlfWorld Data Loader]
-    alfworld_environment_worker[AlfWorld Environment Worker]
+flowchart TD
+    subgraph alfworld_data_pipeline["AlfWorld Data Pipeline"]
+        alfworld_manager["AlfWorld Dataset Manager"]
+        env_worker["Environment Interaction Worker"]
+    end
 
-    alfworld_data_loader --> alfworld_environment_worker
+    alfworld_env["AlfredTWEnv (External)"]
+    dataset_management["Dataset Management"]
 
-    click alfworld_data_loader "alfworld_data_loader.md" "View AlfWorld Data Loader Module"
-    click alfworld_environment_worker "alfworld_environment_worker.md" "View AlfWorld Environment Worker Module"
+    alfworld_manager -->|'''generates train/dev sets'''| dataset_management
+    alfworld_manager -->|'''manages via EnvPool'''| env_worker
+    env_worker -->|'''interacts with environment'''| alfworld_env
+
+    classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
+    class alfworld_manager,env_worker data
 ```
-
-## Sub-modules
-
-*   [AlfWorld Data Loader](alfworld_data_loader.md): Initializes and manages the AlfWorld dataset.
-*   [AlfWorld Environment Worker](alfworld_environment_worker.md): Manages interactions with the AlfredTWEnv instances.

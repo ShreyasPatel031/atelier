@@ -1,42 +1,90 @@
-# Flow Management Module
+# flow_management
+The `flow_management` module defines the core `Flow` class for orchestrating complex, stateful execution flows, including mechanisms for human feedback, checkpointing, state persistence, and method routing.
 
-## Introduction and Purpose
-The `flow_management` module, a sub-module of `crewai_cli.flow_orchestration`, provides command-line interface (CLI) functionalities to manage and visualize agent flows within the CrewAI framework. It serves as the entry point for users to initiate the execution of a defined flow and generate visual representations of its structure.
-
-## Architecture and Component Relationships
-This module integrates with the broader `flow_orchestration` capabilities, enabling direct interaction with agent flows through the CLI. It leverages other components within the CLI for output and visual rendering.
-
-<!-- DIAGRAM_JSON
+<!-- DIAGRAM_JSON -->
+```json
 {
-    "direction": "TD",
-    "nodes": [
-        {"id": "flow_management", "label": "Flow Management", "type": "module", "link": "flow_management.md"},
-        {"id": "flow_orchestration", "label": "Flow Orchestration", "type": "module", "link": "flow_orchestration.md"},
-        {"id": "crew_integration", "label": "Crew Integration", "type": "module", "link": "crew_integration.md"}
-    ],
-    "edges": [
-        {"source": "flow_orchestration", "target": "flow_management"},
-        {"source": "flow_orchestration", "target": "crew_integration"}
-    ],
-    "groups": []
+  "nodes": [
+    {"id": "Flow", "label": "Flow"},
+    {"id": "FlowMeta", "label": "FlowMeta"},
+    {"id": "resume", "label": "resume"},
+    {"id": "from_pending", "label": "from_pending"},
+    {"id": "model_post_init", "label": "model_post_init"},
+    {"id": "decorator", "label": "decorator"},
+    {"id": "state", "label": "state"},
+    {"id": "reload", "label": "reload"},
+    {"id": "run_flow", "label": "run_flow"},
+    {"id": "_show_tracing_disabled_message", "label": "_show_tracing_disabled_message"}
+  ],
+  "edges": [
+    {"source": "FlowMeta", "target": "Flow", "label": "metaclass_of"},
+    {"source": "Flow", "target": "resume", "label": "method"},
+    {"source": "Flow", "target": "from_pending", "label": "classmethod"},
+    {"source": "Flow", "target": "model_post_init", "label": "method"},
+    {"source": "Flow", "target": "state", "label": "method"},
+    {"source": "Flow", "target": "reload", "label": "method"},
+    {"source": "Flow", "target": "run_flow", "label": "executes_via"},
+    {"source": "Flow", "target": "_show_tracing_disabled_message", "label": "uses_utility"},
+    {"source": "from_pending", "target": "resume", "label": "workflow_precedes"},
+    {"source": "FlowMeta", "target": "decorator", "label": "registers_methods_via"}
+  ],
+  "groups": [
+    {
+      "id": "flow_core",
+      "label": "Flow Core",
+      "nodes": ["Flow", "FlowMeta", "model_post_init", "state", "reload"]
+    },
+    {
+      "id": "human_feedback_management",
+      "label": "Human Feedback Management",
+      "nodes": ["from_pending", "resume"]
+    },
+    {
+      "id": "method_definition_routing",
+      "label": "Method Definition & Routing",
+      "nodes": ["decorator"]
+    },
+    {
+      "id": "internal_execution_tracing",
+      "label": "Internal Execution & Tracing",
+      "nodes": ["run_flow", "_show_tracing_disabled_message"]
+    }
+  ]
 }
--->
-```mermaid
-graph TD
-    flow_orchestration[Flow Orchestration] --> flow_management[Flow Management]
-    flow_orchestration --> crew_integration[Crew Integration]
-
-    click flow_management "flow_management.md" "View Flow Management Module"
-    click crew_integration "crew_integration.md" "View Crew Integration Module"
 ```
+<!-- /DIAGRAM_JSON -->
+```mermaid
+flowchart TD
+    subgraph Flow Core
+        Flow
+        FlowMeta
+        model_post_init
+        state
+        reload
+    end
 
-## Core Functionality
+    subgraph Human Feedback Management
+        from_pending
+        resume
+    end
 
-### `flow_run`
-This function is responsible for initiating the execution of a defined agent flow. It acts as the primary command-line interface for users to "kickoff" a flow, setting it in motion within the CrewAI system.
+    subgraph Method Definition & Routing
+        decorator
+    end
 
-### `flow_plot`
-This function generates a visual plot or diagram of the agent flow. It allows users to understand the structure, dependencies, and sequence of operations within a flow, aiding in debugging and comprehension.
+    subgraph Internal Execution & Tracing
+        run_flow
+        _show_tracing_disabled_message
+    end
 
-## How the Module Fits into the Overall System
-The `flow_management` module is a critical part of the CrewAI CLI, providing the direct means for users to interact with and observe agent flows. It sits under the `flow_orchestration` umbrella, working alongside other modules like `crew_integration` to offer a comprehensive set of tools for managing AI agent operations. It interacts with the core `crewai_flow_management` module (e.g., [crewai_flow_management.md](crewai_flow_management.md)) for the actual flow definitions and execution logic.
+    FlowMeta -- metaclass_of --> Flow
+    Flow -- method --> resume
+    Flow -- classmethod --> from_pending
+    Flow -- method --> model_post_init
+    Flow -- method --> state
+    Flow -- method --> reload
+    Flow -- executes_via --> run_flow
+    Flow -- uses_utility --> _show_tracing_disabled_message
+    from_pending -- workflow_precedes --> resume
+    FlowMeta -- registers_methods_via --> decorator
+```

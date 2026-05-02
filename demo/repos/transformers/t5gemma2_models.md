@@ -1,36 +1,45 @@
-# T5Gemma2 Models Documentation
-
-## Introduction
-The `t5gemma2_models` module provides implementations of the T5Gemma2 model for various natural language processing tasks. It includes both standard modeling classes and modular components for conditional generation, sequence classification, and token classification.
-
-## Architecture Overview
-
-The `t5gemma2_models` module is structured into two primary sub-modules:
-
-- [T5Gemma2 Modeling](t5gemma2_modeling.md): Contains the core modeling classes.
-- [T5Gemma2 Modular Components](t5gemma2_modular.md): Provides modular implementations of the models.
-
-These sub-modules encapsulate the specific functionalities of the T5Gemma2 model, allowing for clear separation of concerns and easier maintenance.
+# T5Gemma2 Models
+This module provides various T5Gemma2 model implementations for natural language processing, including models for conditional text generation, sequence classification, and token classification tasks.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "t5gemma2_modeling", "label": "T5Gemma2 Modeling", "type": "module", "link": "t5gemma2_modeling.md"},
-        {"id": "t5gemma2_modular", "label": "T5Gemma2 Modular Components", "type": "module", "link": "t5gemma2_modular.md"}
+        {"id": "conditional_generation", "label": "Conditional Generation Models", "type": "module", "link": "conditional_generation.md"},
+        {"id": "classification_models", "label": "Classification Models", "type": "module", "link": "classification_models.md"},
+        {"id": "base_t5gemma2_model", "label": "T5Gemma2 Base Model", "type": "external"}
     ],
     "edges": [
-        {"source": "t5gemma2_models", "target": "t5gemma2_modeling"},
-        {"source": "t5gemma2_models", "target": "t5gemma2_modular"}
+        {"source": "conditional_generation", "target": "base_t5gemma2_model", "label": "builds upon"},
+        {"source": "classification_models", "target": "base_t5gemma2_model", "label": "builds upon"}
     ],
-    "groups": []
+    "groups": [
+        {"id": "model_applications", "label": "High-Level Model Implementations", "role": "generative", "nodes": ["conditional_generation", "classification_models"]},
+        {"id": "core_dependencies", "label": "Core Dependencies", "role": "analytical", "nodes": ["base_t5gemma2_model"]}
+    ]
 }
 -->
-```mermaid
-graph TD
-    t5gemma2_models[T5Gemma2 Models] --> t5gemma2_modeling[T5Gemma2 Modeling]
-    t5gemma2_models --> t5gemma2_modular[T5Gemma2 Modular Components]
 
-    click t5gemma2_modeling "t5gemma2_modeling.md" "View T5Gemma2 Modeling Documentation"
-    click t5gemma2_modular "t5gemma2_modular.md" "View T5Gemma2 Modular Components Documentation"
+```mermaid
+flowchart TD
+    subgraph model_applications["High-Level Model Implementations"]
+        conditional_generation["Conditional Generation Models"]
+        classification_models["Classification Models"]
+    end
+
+    subgraph core_dependencies["Core Dependencies"]
+        base_t5gemma2_model["T5Gemma2 Base Model"]
+    end
+
+    conditional_generation -->|"builds upon"| base_t5gemma2_model
+    classification_models -->|"builds upon"| base_t5gemma2_model
+
+    classDef generative fill:#fed7aa,stroke:#ea580c,stroke-width:1px,color:#7c2d12
+    classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
+
+    class conditional_generation,classification_models generative
+    class base_t5gemma2_model analytical
+
+    click conditional_generation "conditional_generation.md"
+    click classification_models "classification_models.md"
 ```

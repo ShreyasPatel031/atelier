@@ -1,40 +1,35 @@
-# Conversational Retrieval Chains
-
-The `conversational_retrieval_chains` module provides tools for building conversational agents that can retrieve information from documents based on a chat history. It focuses on enabling question-answering capabilities within a conversational context, allowing the system to understand and respond to user queries that might refer to previous turns in the conversation.
-
-## Architecture Overview
-
-This module orchestrates the interaction between chat history, new user questions, document retrieval, and language model (LLM) processing to generate relevant answers. It primarily consists of chains designed to contextualize questions and combine retrieved documents with the conversational flow.
+# conversational_retrieval_chains
+This module contains components for conversational retrieval, including deprecated chain implementations and a modern utility for history-aware retrieval.
 
 <!-- DIAGRAM_JSON
 {
-    "direction": "TD",
-    "nodes": [
-        {"id": "conversational_retrieval_chain_impl", "label": "Conversational Retrieval Chain", "type": "module", "link": "conversational_retrieval_chain_impl.md"},
-        {"id": "chat_vector_db_chain_impl", "label": "Chat VectorDB Chain (Deprecated)", "type": "module", "link": "chat_vector_db_chain_impl.md"}
-    ],
-    "edges": [
-        {"source": "conversational_retrieval_chain_impl", "target": "chat_vector_db_chain_impl"}
-    ],
-    "groups": []
+  "nodes": [
+    {"id": "C1", "label": "ConstitutionalChain"},
+    {"id": "C2", "label": "ConversationalRetrievalChain"},
+    {"id": "C3", "label": "ChatVectorDBChain"},
+    {"id": "F1", "label": "create_history_aware_retriever"}
+  ],
+  "edges": [
+    {"source": "C3", "target": "C2", "label": "recommends using"},
+    {"source": "C2", "target": "F1", "label": "replaced by pattern using"}
+  ],
+  "groups": [
+    {"id": "deprecated", "label": "Deprecated Chains", "nodes": ["C1", "C2", "C3"]},
+    {"id": "modern", "label": "Modern Components", "nodes": ["F1"]}
+  ]
 }
 -->
-
 ```mermaid
-graph TD
-    conversational_retrieval_chain_impl[Conversational Retrieval Chain]
-    chat_vector_db_chain_impl[Chat VectorDB Chain (Deprecated)]
+flowchart TD
+    subgraph Deprecated Chains
+        C1["ConstitutionalChain"]
+        C2["ConversationalRetrievalChain"]
+        C3["ChatVectorDBChain"]
+    end
+    subgraph Modern Components
+        F1["create_history_aware_retriever"]
+    end
 
-    conversational_retrieval_chain_impl --> chat_vector_db_chain_impl
-
-    click conversational_retrieval_chain_impl "conversational_retrieval_chain_impl.md" "View Conversational Retrieval Chain Documentation"
-    click chat_vector_db_chain_impl "chat_vector_db_chain_impl.md" "View Chat VectorDB Chain Documentation"
+    C3 -- "recommends using" --> C2
+    C2 -- "replaced by pattern using" --> F1
 ```
-
-## Sub-modules
-
-*   ### [Conversational Retrieval Chain](conversational_retrieval_chain_impl.md)
-    Implements the core logic for conversational retrieval by combining chat history, new questions, and retrieved documents.
-
-*   ### [Chat VectorDB Chain (Deprecated)](chat_vector_db_chain_impl.md)
-    Provides an interface for conversational interactions with a vector database, though it is now deprecated.

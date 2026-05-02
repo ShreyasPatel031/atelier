@@ -1,0 +1,2863 @@
+{
+  "docs_dir": "/Users/shreyaspatel/atelier/demo/repos/pydantic-ai",
+  "timestamp": "2026-04-06T06:47:34.793255",
+  "summary": {
+    "total_modules": 270,
+    "missing_files": 86,
+    "failure_rate_pct": 31.85,
+    "success_rate_pct": 68.15,
+    "total_issues": 192,
+    "errors": 176,
+    "warnings": 16,
+    "files_created": 86,
+    "metadata_added": 16,
+    "diagrams_added": 89
+  },
+  "metrics": {
+    "presync_audit": {
+      "modules_total": 270,
+      "missing_md": 86,
+      "missing_title": 8,
+      "missing_description": 8,
+      "leaf_missing_diagram": 89,
+      "parent_missing_diagram_with_children": 4,
+      "diagram_nodes_with_empty_label": 0,
+      "diagram_edges_unknown_endpoint": 11,
+      "children_missing_from_diagram_nodes": 4,
+      "parent_diagram_gaps_to_inject": 48,
+      "mermaid_fence_blocks_total": 183
+    },
+    "mermaid_validation": {
+      "issues_found": 1,
+      "heuristic_ms": 10.3413,
+      "deep_validate_enabled": false,
+      "deep_ms": 0.0,
+      "mermaid_blocks_total": 0,
+      "deep_invalid_blocks": 0,
+      "deep_error_histogram": {}
+    },
+    "postsync_audit": {
+      "modules_total": 270,
+      "missing_md": 0,
+      "missing_title": 0,
+      "missing_description": 0,
+      "leaf_missing_diagram": 0,
+      "parent_missing_diagram_with_children": 0,
+      "diagram_nodes_with_empty_label": 0,
+      "diagram_edges_unknown_endpoint": 7,
+      "children_missing_from_diagram_nodes": 0,
+      "parent_diagram_gaps_to_inject": 0,
+      "mermaid_fence_blocks_total": 268
+    },
+    "delta_presync_minus_postsync": {
+      "parent_missing_diagram_with_children": 4.0,
+      "parent_diagram_gaps_to_inject": 48.0,
+      "diagram_edges_unknown_endpoint": 4.0,
+      "mermaid_fence_blocks_total": -85.0,
+      "missing_description": 8.0,
+      "modules_total": 0.0,
+      "diagram_nodes_with_empty_label": 0.0,
+      "missing_md": 86.0,
+      "missing_title": 8.0,
+      "leaf_missing_diagram": 89.0,
+      "children_missing_from_diagram_nodes": 4.0
+    },
+    "fixes_applied_counts": {
+      "metadata_field_updates": 16,
+      "placeholder_md_files_created": 86,
+      "leaf_diagrams_added": 89,
+      "parent_diagram_child_nodes_injected": 48,
+      "overview_md_created": 0,
+      "mermaid_heuristic_issues_reported": 1
+    },
+    "measurement_summary": {
+      "1_stage3_defects_before_stage45": {
+        "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
+        "presync_audit": {
+          "modules_total": 270,
+          "missing_md": 86,
+          "missing_title": 8,
+          "missing_description": 8,
+          "leaf_missing_diagram": 89,
+          "parent_missing_diagram_with_children": 4,
+          "diagram_nodes_with_empty_label": 0,
+          "diagram_edges_unknown_endpoint": 11,
+          "children_missing_from_diagram_nodes": 4,
+          "parent_diagram_gaps_to_inject": 48,
+          "mermaid_fence_blocks_total": 183
+        }
+      },
+      "1b_stage45_fixes_applied_counters": {
+        "metadata_field_updates": 16,
+        "placeholder_md_files_created": 86,
+        "leaf_diagrams_added": 89,
+        "parent_diagram_child_nodes_injected": 48,
+        "overview_md_created": 0,
+        "mermaid_heuristic_issues_reported": 1
+      },
+      "1c_residual_after_stage45": {
+        "postsync_audit": {
+          "modules_total": 270,
+          "missing_md": 0,
+          "missing_title": 0,
+          "missing_description": 0,
+          "leaf_missing_diagram": 0,
+          "parent_missing_diagram_with_children": 0,
+          "diagram_nodes_with_empty_label": 0,
+          "diagram_edges_unknown_endpoint": 7,
+          "children_missing_from_diagram_nodes": 0,
+          "parent_diagram_gaps_to_inject": 0,
+          "mermaid_fence_blocks_total": 268
+        }
+      },
+      "1d_reduction_delta_presync_minus_postsync": {
+        "note": "Positive number = fewer problems after sync for that metric",
+        "delta": {
+          "parent_missing_diagram_with_children": 4.0,
+          "parent_diagram_gaps_to_inject": 48.0,
+          "diagram_edges_unknown_endpoint": 4.0,
+          "mermaid_fence_blocks_total": -85.0,
+          "missing_description": 8.0,
+          "modules_total": 0.0,
+          "diagram_nodes_with_empty_label": 0.0,
+          "missing_md": 86.0,
+          "missing_title": 8.0,
+          "leaf_missing_diagram": 89.0,
+          "children_missing_from_diagram_nodes": 4.0
+        }
+      },
+      "1e_issues_logged_this_run_by_type": {
+        "all": {
+          "missing_title": 8,
+          "missing_description": 8,
+          "missing_md_file": 86,
+          "missing_diagram": 89,
+          "mermaid_unbalanced_subgraph": 1
+        },
+        "non_mermaid": {
+          "missing_title": 8,
+          "missing_description": 8,
+          "missing_md_file": 86,
+          "missing_diagram": 89
+        },
+        "mermaid_only": {
+          "mermaid_unbalanced_subgraph": 1
+        }
+      },
+      "2_mermaid_syntax_error_types": {
+        "from_sync_heuristic_pass": {
+          "total_issue_rows": 1,
+          "by_issue_type": {
+            "mermaid_unbalanced_subgraph": 1
+          }
+        },
+        "from_deep_validator_per_block": {
+          "enabled": false,
+          "mermaid_blocks_scanned": 0,
+          "invalid_blocks": 0,
+          "error_histogram": {},
+          "note": "Keys are MermaidErrorType values from mermaid_validator.validate_mermaid; warnings prefixed with warning:"
+        },
+        "viewer_regex_layers_vs_backend": [
+          {
+            "layer": "Fix 0",
+            "what": "Escape ()[]{} inside quoted [\"...\"] and some unquoted labels",
+            "backend_heuristic": "Not checked in sync (viewer-only escape path)",
+            "deep_validator": "May surface as invalid_node_id warning or missing_diagram_type if line breaks badly"
+          },
+          {
+            "layer": "Fix 1\u20132",
+            "what": "Edge labels |...| \u2014 strip numbered lists, quote edge text with .:-><",
+            "backend_heuristic": "Not checked",
+            "deep_validator": "malformed_edge_label if present"
+          },
+          {
+            "layer": "Fix 3",
+            "what": "subgraph + spaces \u2192 quote subgraph name",
+            "backend_heuristic": "MERMAID_UNBALANCED_SUBGRAPH if end/subgraph mismatch",
+            "deep_validator": "subgraph balance in mermaid_validator"
+          },
+          {
+            "layer": "Fix 4\u20135",
+            "what": "Strip HTML tags; backticks in labels",
+            "backend_heuristic": "Not checked",
+            "deep_validator": "syntax_error or warnings depending on content"
+          },
+          {
+            "layer": "sync heuristic",
+            "what": "% vs %%, bracket count, subgraph/end count",
+            "backend_heuristic": "MERMAID_INVALID_COMMENT, MERMAID_UNBALANCED_BRACKETS, MERMAID_UNBALANCED_SUBGRAPH",
+            "deep_validator": "invalid_comment, unbalanced_brackets, unbalanced_subgraph, etc."
+          }
+        ]
+      },
+      "3_mermaid_validation_timing_ms": {
+        "heuristic_pass": 10.3413,
+        "deep_pass": 0.0,
+        "deep_enabled": false
+      }
+    }
+  },
+  "issues_by_type": {
+    "missing_title": 8,
+    "missing_description": 8,
+    "missing_md_file": 86,
+    "missing_diagram": 89,
+    "mermaid_unbalanced_subgraph": 1
+  },
+  "issues": [
+    {
+      "issue_type": "missing_title",
+      "module_name": "pydantic_ai_agent_core",
+      "module_path": "pydantic_ai_agent_core",
+      "severity": "warning",
+      "details": {
+        "component_count": 167,
+        "has_children": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "pydantic_ai_agent_core",
+      "module_path": "pydantic_ai_agent_core",
+      "severity": "warning",
+      "details": {
+        "component_count": 167,
+        "has_children": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "agent_definition",
+      "module_path": "pydantic_ai_agent_core/agent_definition",
+      "severity": "warning",
+      "details": {
+        "component_count": 5,
+        "has_children": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "agent_definition",
+      "module_path": "pydantic_ai_agent_core/agent_definition",
+      "severity": "warning",
+      "details": {
+        "component_count": 5,
+        "has_children": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "agent_base_interface",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_base_interface",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "agent_base_interface",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_base_interface",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "agent_initialization",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_initialization",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "agent_initialization",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_initialization",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "model_provider_outlines",
+      "module_path": "pydantic_ai_agent_core/model_provider_outlines",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "model_provider_outlines",
+      "module_path": "pydantic_ai_agent_core/model_provider_outlines",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "durable_execution_dbos",
+      "module_path": "pydantic_ai_agent_core/durable_execution_dbos",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "durable_execution_dbos",
+      "module_path": "pydantic_ai_agent_core/durable_execution_dbos",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "ui_core",
+      "module_path": "pydantic_ai_agent_core/ui_core",
+      "severity": "warning",
+      "details": {
+        "component_count": 5,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "ui_core",
+      "module_path": "pydantic_ai_agent_core/ui_core",
+      "severity": "warning",
+      "details": {
+        "component_count": 5,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "pydantic_evals_framework",
+      "module_path": "pydantic_evals_framework",
+      "severity": "warning",
+      "details": {
+        "component_count": 23,
+        "has_children": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "pydantic_evals_framework",
+      "module_path": "pydantic_evals_framework",
+      "severity": "warning",
+      "details": {
+        "component_count": 23,
+        "has_children": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "agent_base_interface",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_base_interface",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_definition"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "schema_persistence",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_specification/agent_spec_definition/schema_persistence",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_definition/agent_specification/agent_spec_definition"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "agent_spec_model",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_specification/agent_spec_definition/agent_spec_model",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_definition/agent_specification/agent_spec_definition"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "agent_initialization",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_initialization",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_definition"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "message_capture_utility",
+      "module_path": "pydantic_ai_agent_core/agent_execution_graph/message_capture_utility",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_execution_graph"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "agent_output_streaming",
+      "module_path": "pydantic_ai_agent_core/agent_output_handling/agent_output_streaming",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_output_handling"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "response_part_management",
+      "module_path": "pydantic_ai_agent_core/agent_output_handling/response_part_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_output_handling"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "output_validation_logic",
+      "module_path": "pydantic_ai_agent_core/agent_output_handling/output_definition_and_validation/output_validation_logic",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_output_handling/output_definition_and_validation"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "output_toolset_management",
+      "module_path": "pydantic_ai_agent_core/agent_output_handling/output_definition_and_validation/output_toolset_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_output_handling/output_definition_and_validation"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "output_schema_definition",
+      "module_path": "pydantic_ai_agent_core/agent_output_handling/output_definition_and_validation/output_schema_definition",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_output_handling/output_definition_and_validation"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "runtime_usage",
+      "module_path": "pydantic_ai_agent_core/agent_utilities/runtime_usage",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_utilities"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "union_type_parser",
+      "module_path": "pydantic_ai_agent_core/agent_utilities/type_and_schema_utilities/type_introspection/union_type_parser",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_utilities/type_and_schema_utilities/type_introspection"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "function_context_checker",
+      "module_path": "pydantic_ai_agent_core/agent_utilities/type_and_schema_utilities/type_introspection/function_context_checker",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/agent_utilities/type_and_schema_utilities/type_introspection"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "hook_registration",
+      "module_path": "pydantic_ai_agent_core/capabilities_base/hook_system/hook_internals/hook_registration",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/capabilities_base/hook_system/hook_internals"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "hook_execution_wrappers",
+      "module_path": "pydantic_ai_agent_core/capabilities_base/hook_system/hook_internals/hook_execution_wrappers",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/capabilities_base/hook_system/hook_internals"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "thread_execution_management",
+      "module_path": "pydantic_ai_agent_core/capabilities_core_logic/thread_execution_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/capabilities_core_logic"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "web_fetching",
+      "module_path": "pydantic_ai_agent_core/capabilities_web_interaction/web_fetching",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/capabilities_web_interaction"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "memory_management_tool",
+      "module_path": "pydantic_ai_agent_core/builtin_tools/agent_action_tools/memory_management_tool",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/builtin_tools/agent_action_tools"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "deferred_toolset_alias",
+      "module_path": "pydantic_ai_agent_core/toolset_management/toolset_interfaces/abstract_and_deferred_toolsets/deferred_toolset_alias",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/toolset_management/toolset_interfaces/abstract_and_deferred_toolsets"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "abstract_toolset_interface",
+      "module_path": "pydantic_ai_agent_core/toolset_management/toolset_interfaces/abstract_and_deferred_toolsets/abstract_toolset_interface",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/toolset_management/toolset_interfaces/abstract_and_deferred_toolsets"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "tool_manager_logic",
+      "module_path": "pydantic_ai_agent_core/toolset_management/tool_manager_logic",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/toolset_management"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "tavily_integration",
+      "module_path": "pydantic_ai_agent_core/external_toolset_integrations/tavily_integration",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/external_toolset_integrations"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "streamed_responses",
+      "module_path": "pydantic_ai_agent_core/model_core_interfaces/streamed_responses",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_core_interfaces"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "model_base_definitions",
+      "module_path": "pydantic_ai_agent_core/model_core_interfaces/model_base_definitions",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_core_interfaces"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "fallback_mechanism",
+      "module_path": "pydantic_ai_agent_core/model_utilities/model_composition/fallback_mechanism",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_utilities/model_composition"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "synchronous_streamed_requests",
+      "module_path": "pydantic_ai_agent_core/direct_model_requests/synchronous_streamed_requests",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/direct_model_requests"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "base_groq_profiles",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions/groq_profiles/base_groq_profiles",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions/groq_profiles"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "integrated_groq_profiles",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions/groq_profiles/integrated_groq_profiles",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions/groq_profiles"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "harmony_profile",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions/harmony_profile",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "bedrock_profile",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions/bedrock_profile",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "vercel_provider",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/gateway_wrapper_providers/vercel_provider",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/gateway_wrapper_providers"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "local_inference_providers",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/openai_compatible_providers/local_inference_providers",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/openai_compatible_providers"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "ai_platform_providers",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/openai_compatible_providers/ai_platform_providers",
+      "severity": "error",
+      "details": {
+        "component_count": 8,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/openai_compatible_providers"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "cloud_based_providers",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/openai_compatible_providers/cloud_based_providers",
+      "severity": "error",
+      "details": {
+        "component_count": 5,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/openai_compatible_providers"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "voyage_ai_provider",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/native_client_providers/voyage_ai_provider",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/native_client_providers"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "structured_output_providers",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/structured_output_providers",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "gemini_model",
+      "module_path": "pydantic_ai_agent_core/model_provider_gemini/gemini_api_interaction/gemini_model_interface/gemini_model",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_gemini/gemini_api_interaction/gemini_model_interface"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "openai_responses_settings",
+      "module_path": "pydantic_ai_agent_core/model_provider_openai/openai_model_configuration/openai_responses_settings",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_openai/openai_model_configuration"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "openai_model_alias",
+      "module_path": "pydantic_ai_agent_core/model_provider_openai/openai_model_configuration/openai_model_definitions/openai_model_alias",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_openai/openai_model_configuration/openai_model_definitions"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "streamed_response_parser",
+      "module_path": "pydantic_ai_agent_core/model_provider_openai/openai_response_handling/streamed_response_parser",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_openai/openai_response_handling"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "model_provider_outlines",
+      "module_path": "pydantic_ai_agent_core/model_provider_outlines",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "groq_usage_mapper",
+      "module_path": "pydantic_ai_agent_core/model_provider_usage_mapping/groq_usage_mapper",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/model_provider_usage_mapping"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "embedding_interface",
+      "module_path": "pydantic_ai_agent_core/embedding_core/embedding_interface",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/embedding_core"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "titan_embedding_handler",
+      "module_path": "pydantic_ai_agent_core/embedding_provider_integrations/bedrock_embedding_handlers/bedrock_embedding_model_handlers/titan_embedding_handler",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/embedding_provider_integrations/bedrock_embedding_handlers/bedrock_embedding_model_handlers"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "google_usage_mapping",
+      "module_path": "pydantic_ai_agent_core/embedding_provider_integrations/embedding_usage_mapping/google_usage_mapping",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/embedding_provider_integrations/embedding_usage_mapping"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "durable_execution_dbos",
+      "module_path": "pydantic_ai_agent_core/durable_execution_dbos",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "agent_cache_policies",
+      "module_path": "pydantic_ai_agent_core/durable_execution_prefect/agent_cache_policies",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/durable_execution_prefect"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "prefect_agent_integration",
+      "module_path": "pydantic_ai_agent_core/durable_execution_prefect/prefect_agent_integration",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/durable_execution_prefect"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "toolset_adaptation",
+      "module_path": "pydantic_ai_agent_core/durable_execution_prefect/toolset_adaptation",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/durable_execution_prefect"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "temporal_mcp_toolset_implementation",
+      "module_path": "pydantic_ai_agent_core/durable_execution_temporal/temporal_toolset_adapters/temporal_mcp_toolset_implementation",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/durable_execution_temporal/temporal_toolset_adapters"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "temporalize_toolset_functionality",
+      "module_path": "pydantic_ai_agent_core/durable_execution_temporal/temporal_toolset_adapters/temporalize_toolset_functionality",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/durable_execution_temporal/temporal_toolset_adapters"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "temporal_wrapper_toolset_base",
+      "module_path": "pydantic_ai_agent_core/durable_execution_temporal/temporal_toolset_adapters/temporal_wrapper_toolset_base",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/durable_execution_temporal/temporal_toolset_adapters"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "fastmcp_toolset",
+      "module_path": "pydantic_ai_agent_core/mcp_core/mcp_model_and_tooling/fastmcp_toolset",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/mcp_core/mcp_model_and_tooling"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "mcp_sampling_model",
+      "module_path": "pydantic_ai_agent_core/mcp_core/mcp_model_and_tooling/mcp_sampling_model",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/mcp_core/mcp_model_and_tooling"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "mcp_server_loader",
+      "module_path": "pydantic_ai_agent_core/mcp_core/mcp_server_components/mcp_server_loader",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/mcp_core/mcp_server_components"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "ui_core",
+      "module_path": "pydantic_ai_agent_core/ui_core",
+      "severity": "error",
+      "details": {
+        "component_count": 5,
+        "depth": 2,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "dynamic_data_chunk",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_response_types/dynamic_data_chunk",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_response_types"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "source_content_definition",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_response_types/source_chunks/source_content_definition",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_response_types/source_chunks"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "vercel_ai_integration_adapter",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_integration_adapter",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/ui_vercel_ai_adapter"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "ui_step_management",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_request_types/ui_step_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_request_types"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "tool_request_states",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_request_types/static_tool_requests/tool_request_states",
+      "severity": "error",
+      "details": {
+        "component_count": 3,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_request_types/static_tool_requests"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "dynamic_tool_input_states",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_request_types/dynamic_tool_requests/dynamic_tool_input_states",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_request_types/dynamic_tool_requests"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "graph_run_results",
+      "module_path": "pydantic_ai_agent_core/graph_core_execution/graph_runtime/graph_run_results",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/graph_core_execution/graph_runtime"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "graph_run_management",
+      "module_path": "pydantic_ai_agent_core/graph_core_execution/graph_runtime/graph_run_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/graph_core_execution/graph_runtime"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "path_construction",
+      "module_path": "pydantic_ai_agent_core/graph_beta_features/graph_structure_definition/path_construction",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/graph_beta_features/graph_structure_definition"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "graph_iteration_logic",
+      "module_path": "pydantic_ai_agent_core/graph_beta_features/graph_execution_engine/graph_runtime/graph_iteration_logic",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/graph_beta_features/graph_execution_engine/graph_runtime"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "graph_run_management",
+      "module_path": "pydantic_ai_agent_core/graph_beta_features/graph_execution_engine/graph_runtime/graph_run_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/graph_beta_features/graph_execution_engine/graph_runtime"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "file_state_persistence",
+      "module_path": "pydantic_ai_agent_core/graph_persistence/file_state_persistence",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/graph_persistence"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "edge_collection",
+      "module_path": "pydantic_ai_agent_core/graph_visualization/mermaid_graph_rendering/edge_collection",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/graph_visualization/mermaid_graph_rendering"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "graph_renderer",
+      "module_path": "pydantic_ai_agent_core/graph_visualization/mermaid_graph_rendering/graph_renderer",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_ai_agent_core/graph_visualization/mermaid_graph_rendering"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "task_execution_runtime",
+      "module_path": "pydantic_evals_framework/dataset_management/task_execution_runtime",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_evals_framework/dataset_management"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "dataset_structure",
+      "module_path": "pydantic_evals_framework/dataset_management/dataset_structure",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_evals_framework/dataset_management"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "dataset_generation_logic",
+      "module_path": "pydantic_evals_framework/dataset_management/dataset_generation_logic",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_evals_framework/dataset_management"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "base_evaluator",
+      "module_path": "pydantic_evals_framework/evaluator_core/evaluation_base_classes/base_evaluator_interfaces/base_evaluator",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_evals_framework/evaluator_core/evaluation_base_classes/base_evaluator_interfaces"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "categorical_evaluator",
+      "module_path": "pydantic_evals_framework/metric_evaluators/statistical_report_evaluators/categorical_evaluator",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_evals_framework/metric_evaluators/statistical_report_evaluators"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "score_distribution_analysis",
+      "module_path": "pydantic_evals_framework/metric_evaluators/statistical_report_evaluators/score_distribution_evaluators/score_distribution_analysis",
+      "severity": "error",
+      "details": {
+        "component_count": 3,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_evals_framework/metric_evaluators/statistical_report_evaluators/score_distribution_evaluators"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "evaluator_execution_and_dispatch",
+      "module_path": "pydantic_evals_framework/online_evaluation_system/evaluator_execution/evaluation_dispatcher/evaluator_execution_and_dispatch",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "depth": 5,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_evals_framework/online_evaluation_system/evaluator_execution/evaluation_dispatcher"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "result_sinking",
+      "module_path": "pydantic_evals_framework/online_evaluation_system/result_sinking",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_evals_framework/online_evaluation_system"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "evaluation_configuration",
+      "module_path": "pydantic_evals_framework/online_evaluation_system/evaluation_orchestration/evaluation_configuration",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_evals_framework/online_evaluation_system/evaluation_orchestration"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "duration_formatting",
+      "module_path": "pydantic_evals_framework/reporting_and_rendering/duration_formatting",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "pydantic_evals_framework/reporting_and_rendering"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "cloud_upload_scripts",
+      "module_path": "project_documentation_and_developer_tools/developer_utility_scripts/cloud_upload_scripts",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "project_documentation_and_developer_tools/developer_utility_scripts"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "vcr_cassette_verification",
+      "module_path": "project_documentation_and_developer_tools/developer_utility_scripts/testing_and_verification/vcr_cassette_verification",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "project_documentation_and_developer_tools/developer_utility_scripts/testing_and_verification"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "cli_interface",
+      "module_path": "project_documentation_and_developer_tools/developer_utility_scripts/cli_interface",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 3,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "project_documentation_and_developer_tools/developer_utility_scripts"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "algolia_processor",
+      "module_path": "project_documentation_and_developer_tools/search_and_indexing/algolia_indexing/algolia_processor",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "project_documentation_and_developer_tools/search_and_indexing/algolia_indexing"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "changelog_management",
+      "module_path": "project_documentation_and_developer_tools/documentation_site_management/website_content_delivery/changelog_management",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "project_documentation_and_developer_tools/documentation_site_management/website_content_delivery"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_md_file",
+      "module_name": "content_serving",
+      "module_path": "project_documentation_and_developer_tools/documentation_site_management/website_content_delivery/content_serving",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "depth": 4,
+        "has_title": true,
+        "has_description": true,
+        "has_children": false,
+        "parent": "project_documentation_and_developer_tools/documentation_site_management/website_content_delivery"
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "agent_base_interface",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_base_interface",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "schema_persistence",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_specification/agent_spec_definition/schema_persistence",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "agent_spec_model",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_specification/agent_spec_definition/agent_spec_model",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "agent_initialization",
+      "module_path": "pydantic_ai_agent_core/agent_definition/agent_initialization",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "message_capture_utility",
+      "module_path": "pydantic_ai_agent_core/agent_execution_graph/message_capture_utility",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "agent_output_streaming",
+      "module_path": "pydantic_ai_agent_core/agent_output_handling/agent_output_streaming",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "response_part_management",
+      "module_path": "pydantic_ai_agent_core/agent_output_handling/response_part_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "output_validation_logic",
+      "module_path": "pydantic_ai_agent_core/agent_output_handling/output_definition_and_validation/output_validation_logic",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "output_toolset_management",
+      "module_path": "pydantic_ai_agent_core/agent_output_handling/output_definition_and_validation/output_toolset_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "output_schema_definition",
+      "module_path": "pydantic_ai_agent_core/agent_output_handling/output_definition_and_validation/output_schema_definition",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "runtime_usage",
+      "module_path": "pydantic_ai_agent_core/agent_utilities/runtime_usage",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "union_type_parser",
+      "module_path": "pydantic_ai_agent_core/agent_utilities/type_and_schema_utilities/type_introspection/union_type_parser",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "function_context_checker",
+      "module_path": "pydantic_ai_agent_core/agent_utilities/type_and_schema_utilities/type_introspection/function_context_checker",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "hook_registration",
+      "module_path": "pydantic_ai_agent_core/capabilities_base/hook_system/hook_internals/hook_registration",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "hook_execution_wrappers",
+      "module_path": "pydantic_ai_agent_core/capabilities_base/hook_system/hook_internals/hook_execution_wrappers",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "thread_execution_management",
+      "module_path": "pydantic_ai_agent_core/capabilities_core_logic/thread_execution_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "web_fetching",
+      "module_path": "pydantic_ai_agent_core/capabilities_web_interaction/web_fetching",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "memory_management_tool",
+      "module_path": "pydantic_ai_agent_core/builtin_tools/agent_action_tools/memory_management_tool",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "deferred_toolset_alias",
+      "module_path": "pydantic_ai_agent_core/toolset_management/toolset_interfaces/abstract_and_deferred_toolsets/deferred_toolset_alias",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "abstract_toolset_interface",
+      "module_path": "pydantic_ai_agent_core/toolset_management/toolset_interfaces/abstract_and_deferred_toolsets/abstract_toolset_interface",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "tool_manager_logic",
+      "module_path": "pydantic_ai_agent_core/toolset_management/tool_manager_logic",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "tavily_integration",
+      "module_path": "pydantic_ai_agent_core/external_toolset_integrations/tavily_integration",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "streamed_responses",
+      "module_path": "pydantic_ai_agent_core/model_core_interfaces/streamed_responses",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "model_base_definitions",
+      "module_path": "pydantic_ai_agent_core/model_core_interfaces/model_base_definitions",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "concurrency_management",
+      "module_path": "pydantic_ai_agent_core/model_utilities/concurrency_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "fallback_mechanism",
+      "module_path": "pydantic_ai_agent_core/model_utilities/model_composition/fallback_mechanism",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "synchronous_streamed_requests",
+      "module_path": "pydantic_ai_agent_core/direct_model_requests/synchronous_streamed_requests",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "base_groq_profiles",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions/groq_profiles/base_groq_profiles",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "integrated_groq_profiles",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions/groq_profiles/integrated_groq_profiles",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "harmony_profile",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions/harmony_profile",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "bedrock_profile",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_profile_definitions/bedrock_profile",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "vercel_provider",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/gateway_wrapper_providers/vercel_provider",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "local_inference_providers",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/openai_compatible_providers/local_inference_providers",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "ai_platform_providers",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/openai_compatible_providers/ai_platform_providers",
+      "severity": "error",
+      "details": {
+        "component_count": 8,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "cloud_based_providers",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/openai_compatible_providers/cloud_based_providers",
+      "severity": "error",
+      "details": {
+        "component_count": 5,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "voyage_ai_provider",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/native_client_providers/voyage_ai_provider",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "structured_output_providers",
+      "module_path": "pydantic_ai_agent_core/model_provider_configurations/model_provider_integrations/structured_output_providers",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "gemini_model",
+      "module_path": "pydantic_ai_agent_core/model_provider_gemini/gemini_api_interaction/gemini_model_interface/gemini_model",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "openai_responses_settings",
+      "module_path": "pydantic_ai_agent_core/model_provider_openai/openai_model_configuration/openai_responses_settings",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "openai_model_alias",
+      "module_path": "pydantic_ai_agent_core/model_provider_openai/openai_model_configuration/openai_model_definitions/openai_model_alias",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "streamed_response_parser",
+      "module_path": "pydantic_ai_agent_core/model_provider_openai/openai_response_handling/streamed_response_parser",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "model_provider_outlines",
+      "module_path": "pydantic_ai_agent_core/model_provider_outlines",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "groq_usage_mapper",
+      "module_path": "pydantic_ai_agent_core/model_provider_usage_mapping/groq_usage_mapper",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "embedding_interface",
+      "module_path": "pydantic_ai_agent_core/embedding_core/embedding_interface",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "titan_embedding_handler",
+      "module_path": "pydantic_ai_agent_core/embedding_provider_integrations/bedrock_embedding_handlers/bedrock_embedding_model_handlers/titan_embedding_handler",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "google_usage_mapping",
+      "module_path": "pydantic_ai_agent_core/embedding_provider_integrations/embedding_usage_mapping/google_usage_mapping",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "durable_execution_dbos",
+      "module_path": "pydantic_ai_agent_core/durable_execution_dbos",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "agent_cache_policies",
+      "module_path": "pydantic_ai_agent_core/durable_execution_prefect/agent_cache_policies",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "prefect_agent_integration",
+      "module_path": "pydantic_ai_agent_core/durable_execution_prefect/prefect_agent_integration",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "toolset_adaptation",
+      "module_path": "pydantic_ai_agent_core/durable_execution_prefect/toolset_adaptation",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "temporal_mcp_toolset_implementation",
+      "module_path": "pydantic_ai_agent_core/durable_execution_temporal/temporal_toolset_adapters/temporal_mcp_toolset_implementation",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "temporalize_toolset_functionality",
+      "module_path": "pydantic_ai_agent_core/durable_execution_temporal/temporal_toolset_adapters/temporalize_toolset_functionality",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "temporal_wrapper_toolset_base",
+      "module_path": "pydantic_ai_agent_core/durable_execution_temporal/temporal_toolset_adapters/temporal_wrapper_toolset_base",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "fastmcp_toolset",
+      "module_path": "pydantic_ai_agent_core/mcp_core/mcp_model_and_tooling/fastmcp_toolset",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "mcp_sampling_model",
+      "module_path": "pydantic_ai_agent_core/mcp_core/mcp_model_and_tooling/mcp_sampling_model",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "mcp_server_loader",
+      "module_path": "pydantic_ai_agent_core/mcp_core/mcp_server_components/mcp_server_loader",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "ui_core",
+      "module_path": "pydantic_ai_agent_core/ui_core",
+      "severity": "error",
+      "details": {
+        "component_count": 5,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "dynamic_data_chunk",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_response_types/dynamic_data_chunk",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "source_content_definition",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_response_types/source_chunks/source_content_definition",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "vercel_ai_integration_adapter",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_integration_adapter",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "ui_step_management",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_request_types/ui_step_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "tool_request_states",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_request_types/static_tool_requests/tool_request_states",
+      "severity": "error",
+      "details": {
+        "component_count": 3,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "dynamic_tool_input_states",
+      "module_path": "pydantic_ai_agent_core/ui_vercel_ai_adapter/vercel_ai_request_types/dynamic_tool_requests/dynamic_tool_input_states",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "graph_run_results",
+      "module_path": "pydantic_ai_agent_core/graph_core_execution/graph_runtime/graph_run_results",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "graph_run_management",
+      "module_path": "pydantic_ai_agent_core/graph_core_execution/graph_runtime/graph_run_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "path_construction",
+      "module_path": "pydantic_ai_agent_core/graph_beta_features/graph_structure_definition/path_construction",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "graph_iteration_logic",
+      "module_path": "pydantic_ai_agent_core/graph_beta_features/graph_execution_engine/graph_runtime/graph_iteration_logic",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "graph_run_management",
+      "module_path": "pydantic_ai_agent_core/graph_beta_features/graph_execution_engine/graph_runtime/graph_run_management",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "graph_definition",
+      "module_path": "pydantic_ai_agent_core/graph_beta_features/graph_execution_engine/graph_definition",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "file_state_persistence",
+      "module_path": "pydantic_ai_agent_core/graph_persistence/file_state_persistence",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "edge_collection",
+      "module_path": "pydantic_ai_agent_core/graph_visualization/mermaid_graph_rendering/edge_collection",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "graph_renderer",
+      "module_path": "pydantic_ai_agent_core/graph_visualization/mermaid_graph_rendering/graph_renderer",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "task_execution_runtime",
+      "module_path": "pydantic_evals_framework/dataset_management/task_execution_runtime",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "dataset_structure",
+      "module_path": "pydantic_evals_framework/dataset_management/dataset_structure",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "dataset_generation_logic",
+      "module_path": "pydantic_evals_framework/dataset_management/dataset_generation_logic",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "base_evaluator",
+      "module_path": "pydantic_evals_framework/evaluator_core/evaluation_base_classes/base_evaluator_interfaces/base_evaluator",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "categorical_evaluator",
+      "module_path": "pydantic_evals_framework/metric_evaluators/statistical_report_evaluators/categorical_evaluator",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "score_distribution_analysis",
+      "module_path": "pydantic_evals_framework/metric_evaluators/statistical_report_evaluators/score_distribution_evaluators/score_distribution_analysis",
+      "severity": "error",
+      "details": {
+        "component_count": 3,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "evaluator_execution_and_dispatch",
+      "module_path": "pydantic_evals_framework/online_evaluation_system/evaluator_execution/evaluation_dispatcher/evaluator_execution_and_dispatch",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "result_sinking",
+      "module_path": "pydantic_evals_framework/online_evaluation_system/result_sinking",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "evaluation_configuration",
+      "module_path": "pydantic_evals_framework/online_evaluation_system/evaluation_orchestration/evaluation_configuration",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "duration_formatting",
+      "module_path": "pydantic_evals_framework/reporting_and_rendering/duration_formatting",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "asynchronous_utilities",
+      "module_path": "pydantic_evals_framework/framework_utilities/asynchronous_utilities",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "cloud_upload_scripts",
+      "module_path": "project_documentation_and_developer_tools/developer_utility_scripts/cloud_upload_scripts",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "vcr_cassette_verification",
+      "module_path": "project_documentation_and_developer_tools/developer_utility_scripts/testing_and_verification/vcr_cassette_verification",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "cli_interface",
+      "module_path": "project_documentation_and_developer_tools/developer_utility_scripts/cli_interface",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "algolia_processor",
+      "module_path": "project_documentation_and_developer_tools/search_and_indexing/algolia_indexing/algolia_processor",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "changelog_management",
+      "module_path": "project_documentation_and_developer_tools/documentation_site_management/website_content_delivery/changelog_management",
+      "severity": "error",
+      "details": {
+        "component_count": 2,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_diagram",
+      "module_name": "content_serving",
+      "module_path": "project_documentation_and_developer_tools/documentation_site_management/website_content_delivery/content_serving",
+      "severity": "error",
+      "details": {
+        "component_count": 1,
+        "is_leaf": true
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "mermaid_unbalanced_subgraph",
+      "module_name": "temporal_agent_orchestration",
+      "module_path": "temporal_agent_orchestration",
+      "severity": "error",
+      "details": {
+        "subgraph_count": 2,
+        "end_count": 1
+      },
+      "auto_fixed": false
+    }
+  ],
+  "files_created": [
+    "agent_base_interface",
+    "schema_persistence",
+    "agent_spec_model",
+    "agent_initialization",
+    "message_capture_utility",
+    "agent_output_streaming",
+    "response_part_management",
+    "output_validation_logic",
+    "output_toolset_management",
+    "output_schema_definition",
+    "runtime_usage",
+    "union_type_parser",
+    "function_context_checker",
+    "hook_registration",
+    "hook_execution_wrappers",
+    "thread_execution_management",
+    "web_fetching",
+    "memory_management_tool",
+    "deferred_toolset_alias",
+    "abstract_toolset_interface",
+    "tool_manager_logic",
+    "tavily_integration",
+    "streamed_responses",
+    "model_base_definitions",
+    "fallback_mechanism",
+    "synchronous_streamed_requests",
+    "base_groq_profiles",
+    "integrated_groq_profiles",
+    "harmony_profile",
+    "bedrock_profile",
+    "vercel_provider",
+    "local_inference_providers",
+    "ai_platform_providers",
+    "cloud_based_providers",
+    "voyage_ai_provider",
+    "structured_output_providers",
+    "gemini_model",
+    "openai_responses_settings",
+    "openai_model_alias",
+    "streamed_response_parser",
+    "model_provider_outlines",
+    "groq_usage_mapper",
+    "embedding_interface",
+    "titan_embedding_handler",
+    "google_usage_mapping",
+    "durable_execution_dbos",
+    "agent_cache_policies",
+    "prefect_agent_integration",
+    "toolset_adaptation",
+    "temporal_mcp_toolset_implementation",
+    "temporalize_toolset_functionality",
+    "temporal_wrapper_toolset_base",
+    "fastmcp_toolset",
+    "mcp_sampling_model",
+    "mcp_server_loader",
+    "ui_core",
+    "dynamic_data_chunk",
+    "source_content_definition",
+    "vercel_ai_integration_adapter",
+    "ui_step_management",
+    "tool_request_states",
+    "dynamic_tool_input_states",
+    "graph_run_results",
+    "graph_run_management",
+    "path_construction",
+    "graph_iteration_logic",
+    "graph_run_management",
+    "file_state_persistence",
+    "edge_collection",
+    "graph_renderer",
+    "task_execution_runtime",
+    "dataset_structure",
+    "dataset_generation_logic",
+    "base_evaluator",
+    "categorical_evaluator",
+    "score_distribution_analysis",
+    "evaluator_execution_and_dispatch",
+    "result_sinking",
+    "evaluation_configuration",
+    "duration_formatting",
+    "cloud_upload_scripts",
+    "vcr_cassette_verification",
+    "cli_interface",
+    "algolia_processor",
+    "changelog_management",
+    "content_serving"
+  ],
+  "metadata_added": [
+    "pydantic_ai_agent_core:title",
+    "pydantic_ai_agent_core:description",
+    "agent_definition:title",
+    "agent_definition:description",
+    "agent_base_interface:title",
+    "agent_base_interface:description",
+    "agent_initialization:title",
+    "agent_initialization:description",
+    "model_provider_outlines:title",
+    "model_provider_outlines:description",
+    "durable_execution_dbos:title",
+    "durable_execution_dbos:description",
+    "ui_core:title",
+    "ui_core:description",
+    "pydantic_evals_framework:title",
+    "pydantic_evals_framework:description"
+  ],
+  "diagrams_added": [
+    "agent_base_interface",
+    "schema_persistence",
+    "agent_spec_model",
+    "agent_initialization",
+    "message_capture_utility",
+    "agent_output_streaming",
+    "response_part_management",
+    "output_validation_logic",
+    "output_toolset_management",
+    "output_schema_definition",
+    "runtime_usage",
+    "union_type_parser",
+    "function_context_checker",
+    "hook_registration",
+    "hook_execution_wrappers",
+    "thread_execution_management",
+    "web_fetching",
+    "memory_management_tool",
+    "deferred_toolset_alias",
+    "abstract_toolset_interface",
+    "tool_manager_logic",
+    "tavily_integration",
+    "streamed_responses",
+    "model_base_definitions",
+    "concurrency_management",
+    "fallback_mechanism",
+    "synchronous_streamed_requests",
+    "base_groq_profiles",
+    "integrated_groq_profiles",
+    "harmony_profile",
+    "bedrock_profile",
+    "vercel_provider",
+    "local_inference_providers",
+    "ai_platform_providers",
+    "cloud_based_providers",
+    "voyage_ai_provider",
+    "structured_output_providers",
+    "gemini_model",
+    "openai_responses_settings",
+    "openai_model_alias",
+    "streamed_response_parser",
+    "model_provider_outlines",
+    "groq_usage_mapper",
+    "embedding_interface",
+    "titan_embedding_handler",
+    "google_usage_mapping",
+    "durable_execution_dbos",
+    "agent_cache_policies",
+    "prefect_agent_integration",
+    "toolset_adaptation",
+    "temporal_mcp_toolset_implementation",
+    "temporalize_toolset_functionality",
+    "temporal_wrapper_toolset_base",
+    "fastmcp_toolset",
+    "mcp_sampling_model",
+    "mcp_server_loader",
+    "ui_core",
+    "dynamic_data_chunk",
+    "source_content_definition",
+    "vercel_ai_integration_adapter",
+    "ui_step_management",
+    "tool_request_states",
+    "dynamic_tool_input_states",
+    "graph_run_results",
+    "graph_run_management",
+    "path_construction",
+    "graph_iteration_logic",
+    "graph_run_management",
+    "graph_definition",
+    "file_state_persistence",
+    "edge_collection",
+    "graph_renderer",
+    "task_execution_runtime",
+    "dataset_structure",
+    "dataset_generation_logic",
+    "base_evaluator",
+    "categorical_evaluator",
+    "score_distribution_analysis",
+    "evaluator_execution_and_dispatch",
+    "result_sinking",
+    "evaluation_configuration",
+    "duration_formatting",
+    "asynchronous_utilities",
+    "cloud_upload_scripts",
+    "vcr_cassette_verification",
+    "cli_interface",
+    "algolia_processor",
+    "changelog_management",
+    "content_serving"
+  ]
+}

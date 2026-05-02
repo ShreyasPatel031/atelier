@@ -1,43 +1,55 @@
-# cohere_usage_mapping
+# Cohere Usage Mapping Module
 
-The `cohere_usage_mapping` module is responsible for translating usage information from Cohere API responses into a standardized `RequestUsage` format used internally by the `pydantic_ai` library. This ensures consistent reporting and handling of resource consumption across different language model providers.
+The `cohere_usage_mapping` module is responsible for standardizing the usage data received from Cohere embedding API responses into a unified `RequestUsage` format. This standardization is crucial for consistent cost tracking, analytics, and reporting across different model providers within the system.
 
-## Architecture and Component Relationships
+## How it Works
 
-This module contains the `_map_usage` function, which serves as the primary component for processing Cohere's `V2ChatResponse` objects.
+This module's primary function is to interpret the specific billing and usage metadata provided by Cohere's embedding API and transform it into a generic `RequestUsage` object. This involves extracting relevant metrics like billed units and input tokens, and enriching them with contextual information such as the provider name, URL, and the specific model used.
+
+The `_map_usage` function serves as the core logic for this transformation. It takes a Cohere-specific embedding response, identifies the billed units within its metadata, and then constructs a `RequestUsage` instance. Any non-zero integer or float values in the `billed_units` are converted to integers and included in the final usage details. This ensures that only meaningful usage metrics are captured.
+
+## Core Components
+
+### `_map_usage`
+
+-   **Path**: `pydantic_ai_slim/pydantic_ai/embeddings/cohere.py`
+-   **Description**: This function takes a `EmbedByTypeResponse` object (Cohere's embedding response format), extracts billing information from its `meta.billed_units` field, and maps it to a `RequestUsage` object. It filters for positive integer or float values, converting them to integers, and includes provider-specific details.
+
+## Connections to Other Modules
+
+This module plays a vital role in the `embedding_provider_integrations` ecosystem by providing a consistent interface for Cohere embedding usage data.
+
+-   **[Usage Module](usage.md)**: The `cohere_usage_mapping` module directly produces instances of `RequestUsage`, which is defined in the `usage` module. This provides a unified structure for tracking resource consumption across all integrated AI models and embedding providers.
+-   **[Cohere Provider Module](cohere_provider.md)**: The input `EmbedByTypeResponse` originates from interactions with the Cohere API, typically managed by the `CohereProvider`. This module thus acts as a bridge between the raw Cohere response format and the system's internal usage tracking.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "_map_usage", "label": "_map_usage Function", "type": "component", "link": null},
-        {"id": "request_usage", "label": "RequestUsage (from agent_utilities_results)", "type": "external", "link": "agent_utilities_results.md"}
+        {"id": "map_cohere_usage", "label": "Map Cohere Usage Data", "type": "component", "link": null},
+        {"id": "cohere_embed_response", "label": "Cohere Embeddings Response", "type": "external", "link": null},
+        {"id": "request_usage", "label": "Standardized Request Usage", "type": "external", "link": "usage.md"},
+        {"id": "cohere_provider", "label": "Cohere Provider", "type": "external", "link": "cohere_provider.md"}
     ],
     "edges": [
-        {"source": "_map_usage", "target": "request_usage"}
+        {"source": "cohere_embed_response", "target": "map_cohere_usage", "label": "contains usage metrics"},
+        {"source": "map_cohere_usage", "target": "request_usage", "label": "produces"},
+        {"source": "map_cohere_usage", "target": "cohere_provider", "label": "references provider context", "type": "dotted"}
     ],
     "groups": []
 }
 -->
 
 ```mermaid
-graph TD
-    _map_usage[_map_usage Function]
-    request_usage[RequestUsage (from agent_utilities_results)]
-    _map_usage --> request_usage
+flowchart TD
+    %% Define nodes
+    cohere_embed_response["Cohere Embeddings Response"]
+    map_cohere_usage["Map Cohere Usage Data"]
+    request_usage["Standardized Request Usage"]
+    cohere_provider["Cohere Provider"]
+
+    %% Define connections
+    cohere_embed_response -->|"contains usage metrics"| map_cohere_usage
+    map_cohere_usage -->|"produces"| request_usage
+    map_cohere_usage -.->|"references provider context"| cohere_provider
 ```
-
-### Core Components
-
-#### `_map_usage(response: V2ChatResponse) -> usage.RequestUsage`
-
-This function takes a `V2ChatResponse` object from the Cohere API and extracts detailed usage statistics. It populates an `RequestUsage` object with:
-- `input_tokens`: The number of tokens sent in the request.
-- `output_tokens`: The number of tokens received in the response.
-- `details`: A dictionary containing additional billed units such as `search_units` and `classifications`, if available in the Cohere response.
-
-If no usage information is present in the Cohere response, an empty `RequestUsage` object is returned.
-
-## How it Fits into the Overall System
-
-The `cohere_usage_mapping` module is an integral part of the [pydantic_ai_models](pydantic_ai_models.md) component, specifically within the [provider_usage_mapping](provider_usage_mapping.md) sub-module. Its `_map_usage` function is invoked by the Cohere model integration (e.g., within `pydantic_ai_slim.pydantic_ai.models.cohere.CohereModel`) after receiving a response from the Cohere API. This allows the `pydantic_ai` framework to uniformly track and report usage statistics, regardless of the underlying LLM provider. This mapping is crucial for cost tracking, monitoring, and potentially for implementing usage-based billing or rate limiting within applications built using `pydantic_ai`.

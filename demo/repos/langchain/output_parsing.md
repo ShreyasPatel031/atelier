@@ -1,70 +1,248 @@
-# Module: output_parsing
-
-The `output_parsing` module provides robust output parsing capabilities for structured chat agents, specifically focusing on handling and retrying parsing failures. It plays a crucial role in ensuring that the output from language models adheres to expected formats, enabling reliable operation of agents that depend on structured responses.
-
-## Core Functionality
-
-The primary component of this module is `StructuredChatOutputParserWithRetries`, which extends the basic output parsing functionality with a retry mechanism. This is particularly useful in scenarios where the language model might occasionally produce malformed output, allowing the system to attempt to fix it using an `OutputFixingParser`.
-
-## Architecture and Component Relationships
+# output_parsing
+This module provides a suite of output parsers designed to structure and transform language model responses into various formats, including lists, XML, datetimes, and enums.
 
 <!-- DIAGRAM_JSON
 {
-    "direction": "TD",
-    "nodes": [
-        {"id": "structured_chat_output_parser_with_retries", "label": "StructuredChatOutputParserWithRetries", "type": "component", "link": null},
-        {"id": "structured_chat_output_parser", "label": "StructuredChatOutputParser", "type": "external", "link": "structured_chat_core.md"},
-        {"id": "output_fixing_parser", "label": "OutputFixingParser", "type": "external", "link": "classic_output_parsers.md"},
-        {"id": "base_language_model", "label": "BaseLanguageModel", "type": "external", "link": "core_language_models.md"},
-        {"id": "agent_output_parser", "label": "AgentOutputParser", "type": "external", "link": "core_output_parsers.md"}
-    ],
-    "edges": [
-        {"source": "structured_chat_output_parser_with_retries", "target": "structured_chat_output_parser"},
-        {"source": "structured_chat_output_parser_with_retries", "target": "output_fixing_parser"},
-        {"source": "structured_chat_output_parser_with_retries", "target": "agent_output_parser", "label": "inherits"},
-        {"source": "structured_chat_output_parser_with_retries", "target": "base_language_model", "label": "uses in from_llm"}
-    ],
-    "groups": []
+  "nodes": [
+    {
+      "id": "id_1",
+      "label": "BaseGenerationOutputParser",
+      "metadata": {
+        "filepath": "libs/core/langchain_core/output_parsers/base/BaseGenerationOutputParser.py"
+      }
+    },
+    {
+      "id": "id_2",
+      "label": "BaseOutputParser",
+      "metadata": {
+        "filepath": "libs/core/langchain_core/output_parsers/base/BaseOutputParser.py"
+      }
+    },
+    {
+      "id": "id_3",
+      "label": "CommaSeparatedListOutputParser",
+      "metadata": {
+        "filepath": "libs/core/langchain_core/output_parsers/list/CommaSeparatedListOutputParser.py"
+      }
+    },
+    {
+      "id": "id_4",
+      "label": "NumberedListOutputParser",
+      "metadata": {
+        "filepath": "libs/core/langchain_core/output_parsers/list/NumberedListOutputParser.py"
+      }
+    },
+    {
+      "id": "id_5",
+      "label": "MarkdownListOutputParser",
+      "metadata": {
+        "filepath": "libs/core/langchain_core/output_parsers/list/MarkdownListOutputParser.py"
+      }
+    },
+    {
+      "id": "id_6",
+      "label": "BaseCumulativeTransformOutputParser",
+      "metadata": {
+        "filepath": "libs/core/langchain_core/output_parsers/transform/BaseCumulativeTransformOutputParser.py"
+      }
+    },
+    {
+      "id": "id_7",
+      "label": "BaseTransformOutputParser",
+      "metadata": {
+        "filepath": "libs/core/langchain_core/output_parsers/transform/BaseTransformOutputParser.py"
+      }
+    },
+    {
+      "id": "id_8",
+      "label": "XMLOutputParser",
+      "metadata": {
+        "filepath": "libs/core/langchain_core/output_parsers/xml/XMLOutputParser.py"
+      }
+    },
+    {
+      "id": "id_9",
+      "label": "DatetimeOutputParser",
+      "metadata": {
+        "filepath": "libs/langchain/langchain_classic/output_parsers/datetime/DatetimeOutputParser.py"
+      }
+    },
+    {
+      "id": "id_10",
+      "label": "EnumOutputParser",
+      "metadata": {
+        "filepath": "libs/langchain/langchain_classic/output_parsers/enum/EnumOutputParser.py"
+      }
+    },
+    {
+      "id": "id_11",
+      "label": "BaseLLMOutputParser",
+      "metadata": {
+        "filepath": null
+      }
+    },
+    {
+      "id": "id_12",
+      "label": "RunnableSerializable",
+      "metadata": {
+        "filepath": null
+      }
+    },
+    {
+      "id": "id_13",
+      "label": "ListOutputParser",
+      "metadata": {
+        "filepath": null
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "id_1",
+      "target": "id_11",
+      "type": "inherits"
+    },
+    {
+      "source": "id_1",
+      "target": "id_12",
+      "type": "inherits"
+    },
+    {
+      "source": "id_2",
+      "target": "id_11",
+      "type": "inherits"
+    },
+    {
+      "source": "id_2",
+      "target": "id_12",
+      "type": "inherits"
+    },
+    {
+      "source": "id_3",
+      "target": "id_13",
+      "type": "inherits"
+    },
+    {
+      "source": "id_4",
+      "target": "id_13",
+      "type": "inherits"
+    },
+    {
+      "source": "id_5",
+      "target": "id_13",
+      "type": "inherits"
+    },
+    {
+      "source": "id_6",
+      "target": "id_7",
+      "type": "inherits"
+    },
+    {
+      "source": "id_7",
+      "target": "id_2",
+      "type": "inherits"
+    },
+    {
+      "source": "id_8",
+      "target": "id_7",
+      "type": "inherits"
+    },
+    {
+      "source": "id_9",
+      "target": "id_2",
+      "type": "inherits"
+    },
+    {
+      "source": "id_10",
+      "target": "id_2",
+      "type": "inherits"
+    }
+  ],
+  "groups": [
+    {
+      "id": "grp_1",
+      "label": "libs.core.langchain_core.output_parsers.base",
+      "node_ids": [
+        "id_1",
+        "id_2"
+      ]
+    },
+    {
+      "id": "grp_2",
+      "label": "libs.core.langchain_core.output_parsers.list",
+      "node_ids": [
+        "id_3",
+        "id_4",
+        "id_5"
+      ]
+    },
+    {
+      "id": "grp_3",
+      "label": "libs.core.langchain_core.output_parsers.transform",
+      "node_ids": [
+        "id_6",
+        "id_7"
+      ]
+    },
+    {
+      "id": "grp_4",
+      "label": "libs.core.langchain_core.output_parsers.xml",
+      "node_ids": [
+        "id_8"
+      ]
+    },
+    {
+      "id": "grp_5",
+      "label": "libs.langchain.langchain_classic.output_parsers.datetime",
+      "node_ids": [
+        "id_9"
+      ]
+    },
+    {
+      "id": "grp_6",
+      "label": "libs.langchain.langchain_classic.output_parsers.enum",
+      "node_ids": [
+        "id_10"
+      ]
+    }
+  ]
 }
 -->
 ```mermaid
-graph TD
-    structured_chat_output_parser_with_retries[StructuredChatOutputParserWithRetries]
-    structured_chat_output_parser[StructuredChatOutputParser]:::external
-    output_fixing_parser[OutputFixingParser]:::external
-    base_language_model[BaseLanguageModel]:::external
-    agent_output_parser[AgentOutputParser]:::external
+flowchart TD
+    subgraph libs.core.langchain_core.output_parsers.base
+        id_1[BaseGenerationOutputParser]
+        id_2[BaseOutputParser]
+    end
+    subgraph libs.core.langchain_core.output_parsers.list
+        id_3[CommaSeparatedListOutputParser]
+        id_4[NumberedListOutputParser]
+        id_5[MarkdownListOutputParser]
+    end
+    subgraph libs.core.langchain_core.output_parsers.transform
+        id_6[BaseCumulativeTransformOutputParser]
+        id_7[BaseTransformOutputParser]
+    end
+    subgraph libs.core.langchain_core.output_parsers.xml
+        id_8[XMLOutputParser]
+    end
+    subgraph libs.langchain.langchain_classic.output_parsers.datetime
+        id_9[DatetimeOutputParser]
+    end
+    subgraph libs.langchain.langchain_classic.output_parsers.enum
+        id_10[EnumOutputParser]
+    end
 
-    structured_chat_output_parser_with_retries --> structured_chat_output_parser
-    structured_chat_output_parser_with_retries --> output_fixing_parser
-    structured_chat_output_parser_with_retries -- inherits --> agent_output_parser
-    structured_chat_output_parser_with_retries -- uses in from_llm --> base_language_model
-
-    classDef external fill:#f9f,stroke:#333,stroke-width:2px;
+    id_1 -->|"inherits"| id_11[BaseLLMOutputParser]
+    id_1 -->|"inherits"| id_12[RunnableSerializable]
+    id_2 -->|"inherits"| id_11
+    id_2 -->|"inherits"| id_12
+    id_3 -->|"inherits"| id_13[ListOutputParser]
+    id_4 -->|"inherits"| id_13
+    id_5 -->|"inherits"| id_13
+    id_6 -->|"inherits"| id_7
+    id_7 -->|"inherits"| id_2
+    id_8 -->|"inherits"| id_7
+    id_9 -->|"inherits"| id_2
+    id_10 -->|"inherits"| id_2
 ```
-
-## Module Components
-
-### StructuredChatOutputParserWithRetries
-
-`StructuredChatOutputParserWithRetries` is a specialized output parser designed for structured chat agents. It provides a robust mechanism to parse language model outputs, with an added layer of error handling and retry capabilities.
-
-**Key Features:**
-
-*   **Retry Mechanism:** It attempts to parse the output using a `base_parser` (typically `StructuredChatOutputParser`). If parsing fails, and an `output_fixing_parser` is provided, it leverages this parser to attempt to correct and re-parse the malformed output.
-*   **Flexible Initialization:** Can be initialized directly or created from a `BaseLanguageModel` using the `from_llm` class method. When initialized with an `llm`, it automatically sets up an `OutputFixingParser`.
-*   **Integration with Agents:** Inherits from `AgentOutputParser`, making it compatible with Langchain's agent framework.
-
-**Relationships:**
-
-*   **Inherits from:** `AgentOutputParser` ([core_output_parsers.md](core_output_parsers.md)) - Provides the foundational interface for agent output parsing.
-*   **Uses:**
-    *   `StructuredChatOutputParser` (part of [structured_chat_core.md](structured_chat_core.md)) - The primary parser used for structured chat agent outputs.
-    *   `OutputFixingParser` ([classic_output_parsers.md](classic_output_parsers.md)) - Used to attempt to correct and re-parse outputs that initially fail parsing.
-    *   `BaseLanguageModel` ([core_language_models.md](core_language_models.md)) - Used in the `from_llm` factory method to create an `OutputFixingParser`.
-
-## How the Module Fits into the Overall System
-
-The `output_parsing` module, specifically `StructuredChatOutputParserWithRetries`, is a critical component within the `structured_chat_core` module, which is part of the broader `classic_agents` system. It ensures the reliability and robustness of structured chat agents by gracefully handling and attempting to correct parsing errors in language model outputs.
-
-It acts as an intermediary between the raw output of a language model and the agent's decision-making process. By providing a reliable way to interpret structured responses, it enables agents to consistently understand and act upon the information generated by the LLM, even in the presence of minor formatting inconsistencies. This module enhances the overall fault tolerance and user experience of agent-based applications.

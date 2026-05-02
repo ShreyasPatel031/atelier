@@ -50,6 +50,7 @@ class ErrorType(Enum):
     PARSE_ERROR = "parse_error"
     FILE_WRITE_ERROR = "file_write_error"
     MODULE_TREE_SYNC = "module_tree_sync"
+    SUBMODULE_MD_MISSING = "submodule_md_missing"
     AGENT_CRASH = "agent_crash"
     UNKNOWN = "unknown"
 
@@ -124,6 +125,8 @@ class GenerationReport:
     # Files
     md_files_created: List[str] = field(default_factory=list)
     md_files_missing: List[str] = field(default_factory=list)
+    # Sub-agent wrote tree entry but did not leave {name}.md (or fallback failed); see submodule_md_failures.json
+    submodule_md_failures: List[Dict[str, Any]] = field(default_factory=list)
 
 
 class GenerationTracker:
@@ -339,7 +342,38 @@ class GenerationTracker:
         ))
         
         logger.error(f"[GENERATION_TRACKER] Error: {module_name} - {categorized_type}: {error_message}")
-    
+
+    def track_submodule_md_failure(self, docs_dir: str, record: Dict[str, Any]) -> None:
+        """
+        Record a sub-module whose .md was missing after the sub-agent run (and optional fallback).
+        Persists to docs_dir/submodule_md_failures.json for sync_issues / postmortem without scraping logs.
+        """
+        if not docs_dir:
+            return
+        record = {**record, "recorded_at": datetime.now().isoformat()}
+        if self.report:
+            self.report.submodule_md_failures.append(record)
+            self.report.errors_by_type[ErrorType.SUBMODULE_MD_MISSING.value] = (
+                self.report.errors_by_type.get(ErrorType.SUBMODULE_MD_MISSING.value, 0) + 1
+            )
+        outp = Path(docs_dir) / "submodule_md_failures.json"
+        try:
+            existing: List[Dict[str, Any]] = []
+            if outp.exists():
+                existing = json.loads(outp.read_text(encoding="utf-8"))
+            if not isinstance(existing, list):
+                existing = []
+            existing.append(record)
+            outp.write_text(json.dumps(existing, indent=2), encoding="utf-8")
+            logger.warning(
+                "[GENERATION_TRACKER] submodule_md_failure %s: %s — %s",
+                record.get("sub_module_name"),
+                record.get("reason"),
+                (record.get("detail") or "")[:200],
+            )
+        except Exception as ex:
+            logger.warning("[GENERATION_TRACKER] Could not write submodule_md_failures.json: %s", ex)
+
     def _categorize_error(self, error_type: str, error_message: str) -> str:
         """Categorize an error based on type and message."""
         msg_lower = error_message.lower() if error_message else ""
@@ -436,8 +470,10 @@ class GenerationTracker:
             "files": {
                 "created": len(self.report.md_files_created),
                 "missing": len(self.report.md_files_missing),
-                "missing_list": self.report.md_files_missing[:20]  # Limit for readability
+                "missing_list": self.report.md_files_missing[:20],  # Limit for readability
+                "submodule_md_failures_count": len(self.report.submodule_md_failures),
             },
+            "submodule_md_failures": self.report.submodule_md_failures[:100],
             "modules": {
                 name: {
                     "success": stats.success,

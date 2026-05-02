@@ -1,57 +1,44 @@
 # url_context_tool
 
-## Introduction
-The `url_context_tool` module provides the `UrlContextTool` class, which serves as a deprecated alias for the `WebFetchTool`. Its primary purpose is to ensure backward compatibility for deserializing older serialized payloads that refer to a tool of `kind: "url_context"`. Developers should use `WebFetchTool` directly for new implementations.
+The `url_context_tool` module provides a backward-compatible alias for the `WebFetchTool`. Its primary purpose is to allow existing systems and serialized payloads that reference `"kind": "url_context"` to continue functioning correctly by mapping these requests to the underlying web fetching capabilities. While it serves as a bridge for legacy implementations, new developments should directly utilize the `WebFetchTool` or the broader web fetching capabilities provided by the system.
 
-## Architecture and Component Relationships
+## Module Overview
 
-The `UrlContextTool` is a specialized built-in tool that inherits from `WebFetchTool`. This inheritance allows it to leverage the functionality of `WebFetchTool` while maintaining a distinct `kind` attribute for backward compatibility.
+This module is a leaf module within the `data_retrieval_tools` family, specifically focusing on providing a compatibility layer for web content retrieval. It ensures that agents can still access and process information from URLs even if their configuration or historical data refers to the older `url_context` kind.
+
+From a user's perspective, employing the `UrlContextTool` essentially triggers the same web content fetching mechanism as the more modern `WebFetchTool`. The module abstracts away the underlying change, offering a consistent interface for web interaction.
+
+## Architecture
+
+The `url_context_tool` module functions as a thin wrapper or alias. Its core component, `UrlContextTool`, inherits from and delegates to the `WebFetchTool`, which is part of the system's web interaction capabilities. This design ensures that the actual logic for fetching and processing web content resides in a dedicated, more robust module, while `url_context_tool` handles compatibility.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "url_context_tool", "label": "UrlContextTool", "type": "component", "link": null},
-        {"id": "web_fetch_tool", "label": "WebFetchTool", "type": "external", "link": "pydantic_ai_capabilities.md"}
+        {"id": "url_context_tool_alias", "label": "Provide URL Context (Deprecated)", "type": "component", "link": null},
+        {"id": "web_fetch_capability", "label": "Handle Web Content Fetching", "type": "external", "link": "capabilities_web_interaction.md"}
     ],
     "edges": [
-        {"source": "url_context_tool", "target": "web_fetch_tool"}
+        {"source": "url_context_tool_alias", "target": "web_fetch_capability", "label": "delegates to/is alias for"}
     ],
     "groups": []
 }
 -->
 
 ```mermaid
-graph TD
-    url_context_tool[UrlContextTool]
-    web_fetch_tool[WebFetchTool]
-    url_context_tool --> web_fetch_tool
+flowchart TD
+    %% Internal component of url_context_tool module
+    url_context_tool_alias["Provide URL Context (Deprecated)"]
+
+    %% External dependency: WebFetch Capability
+    web_fetch_capability["Handle Web Content Fetching"]
+
+    %% Relationship
+    url_context_tool_alias -.->|"delegates to/is alias for"| web_fetch_capability
 ```
 
-## Core Functionality
+## Related Modules
 
-### `UrlContextTool`
-The `UrlContextTool` class is defined as follows:
-
-```python
-class UrlContextTool(WebFetchTool):
-    """Deprecated alias for WebFetchTool. Use WebFetchTool instead.
-
-    Overrides kind to 'url_context' so old serialized payloads with {"kind": "url_context", ...}
-    can be deserialized to UrlContextTool for backward compatibility.
-    """
-
-    kind: str = 'url_context'
-    """The kind of tool (deprecated value for backward compatibility)."""
-```
-
-*   **Purpose**: Acts as a direct alias for `WebFetchTool`. It is explicitly designed for backward compatibility, allowing systems to correctly interpret and load tool configurations that specify `kind: 'url_context'`.
-*   **Inheritance**: It inherits all capabilities from `WebFetchTool`, meaning it can perform web fetching operations.
-*   **`kind` attribute**: The `kind` attribute is overridden to `'url_context'`. This is crucial for deserialization processes, ensuring that older data structures are correctly mapped to this tool.
-
-## Relationship to Other Modules
-
-The `url_context_tool` module is part of the `builtin_tools` sub-module within the larger `pydantic_ai_tools` module. It depends on the `WebFetchTool`, which is functionally related to the `web_fetch` capability found in the `pydantic_ai_capabilities` module.
-
-*   **pydantic_ai_tools**: This module contains various built-in tools available in the system, including `UrlContextTool`.
-*   **pydantic_ai_capabilities**: The `WebFetchTool` functionality is ultimately derived from or closely related to the web fetching capabilities defined within `pydantic_ai_capabilities`. New implementations should directly utilize the modern `WebFetchTool` or the underlying `WebFetch` capability.
+*   **[data_retrieval_tools.md](data_retrieval_tools.md)**: The parent module that groups tools for retrieving various types of data, including web content and file system information.
+*   **[capabilities_web_interaction.md](capabilities_web_interaction.md)**: This module contains the `WebFetch` capability, which is where the core logic for fetching and processing web content (via `WebFetchTool`) is implemented. The `url_context_tool` relies on this module for its actual functionality.

@@ -1,45 +1,55 @@
-# ESM Models Module Documentation
-
-The `esm_models` module provides implementations of various ESM (Evolutionary Scale Modeling) models for biological sequence analysis tasks. It includes models for general natural language processing tasks adapted for biological sequences, as well as specialized models for protein structure prediction.
-
-## Architecture Overview
-
-The `esm_models` module is composed of two main sub-modules, each addressing a distinct set of functionalities:
+# esm_models
+The `esm_models` module provides two specialized ESM models: `EsmForMaskedLM` for masked language modeling and `EsmForTokenClassification` for token-level prediction tasks. Both models extend `EsmPreTrainedModel` and utilize `EsmModel` as their backbone.
 
 <!-- DIAGRAM_JSON
 {
-    "direction": "TD",
-    "nodes": [
-        {"id": "esm_general_tasks", "label": "ESM General Tasks", "type": "module", "link": "esm_general_tasks.md"},
-        {"id": "esm_protein_folding", "label": "ESM Protein Folding", "type": "module", "link": "esm_protein_folding.md"}
-    ],
-    "edges": [
-        {"source": "esm_general_tasks", "target": "esm_protein_folding"}
-    ],
-    "groups": []
+  "nodes": [
+    {"id": "EsmForMaskedLM", "label": "EsmForMaskedLM"},
+    {"id": "EsmForTokenClassification", "label": "EsmForTokenClassification"},
+    {"id": "EsmPreTrainedModel", "label": "EsmPreTrainedModel", "metadata": {"type": "base_class"}},
+    {"id": "EsmModel", "label": "EsmModel", "metadata": {"type": "component"}},
+    {"id": "EsmLMHead", "label": "EsmLMHead", "metadata": {"type": "component"}},
+    {"id": "nn_Dropout", "label": "nn.Dropout", "metadata": {"type": "component"}},
+    {"id": "nn_Linear", "label": "nn.Linear", "metadata": {"type": "component"}}
+  ],
+  "edges": [
+    {"source": "EsmForMaskedLM", "target": "EsmPreTrainedModel", "label": "inherits"},
+    {"source": "EsmForTokenClassification", "target": "EsmPreTrainedModel", "label": "inherits"},
+    {"source": "EsmForMaskedLM", "target": "EsmModel", "label": "uses"},
+    {"source": "EsmForMaskedLM", "target": "EsmLMHead", "label": "uses"},
+    {"source": "EsmForTokenClassification", "target": "EsmModel", "label": "uses"},
+    {"source": "EsmForTokenClassification", "target": "nn_Dropout", "label": "uses"},
+    {"source": "EsmForTokenClassification", "target": "nn_Linear", "label": "uses"}
+  ],
+  "groups": [
+    {
+      "id": "esm_models",
+      "label": "esm_models",
+      "nodes": ["EsmForMaskedLM", "EsmForTokenClassification"]
+    }
+  ]
 }
 -->
-
 ```mermaid
-graph TD
-    esm_general_tasks[ESM General Tasks]
-    esm_protein_folding[ESM Protein Folding]
+flowchart TD
+    subgraph esm_models
+        EsmForMaskedLM
+        EsmForTokenClassification
+    end
 
-    esm_general_tasks --> esm_protein_folding
+    EsmForMaskedLM --> EsmPreTrainedModel
+    EsmForTokenClassification --> EsmPreTrainedModel
 
-    click esm_general_tasks "esm_general_tasks.md" "View ESM General Tasks Module"
-    click esm_protein_folding "esm_protein_folding.md" "View ESM Protein Folding Module"
+    EsmForMaskedLM --> EsmModel
+    EsmForMaskedLM --> EsmLMHead
+
+    EsmForTokenClassification --> EsmModel
+    EsmForTokenClassification --> nn_Dropout
+    EsmForTokenClassification --> nn_Linear
+
+    classDef base_class fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef component fill:#bbf,stroke:#333,stroke-width:2px;
+
+    class EsmPreTrainedModel base_class;
+    class EsmModel,EsmLMHead,nn_Dropout,nn_Linear component;
 ```
-
-## Sub-modules
-
-### [ESM General Tasks](esm_general_tasks.md)
-This sub-module focuses on foundational biological sequence analysis tasks. It includes models for:
-*   **Sequence Classification (`EsmForSequenceClassification`)**: Classifies entire protein sequences based on learned representations.
-*   **Masked Language Modeling (`EsmForMaskedLM`)**: Predicts masked-out amino acids in a sequence, useful for learning contextual representations.
-*   **Token Classification (`EsmForTokenClassification`)**: Assigns a label to each token (amino acid) in a sequence, suitable for tasks like secondary structure prediction or identifying functional regions.
-
-### [ESM Protein Folding](esm_protein_folding.md)
-This specialized sub-module provides capabilities for predicting protein 3D structures. It contains:
-*   **Protein Folding (`EsmForProteinFolding`)**: Implements the ESMFold model, which predicts the 3D atomic coordinates of a protein from its amino acid sequence.
-

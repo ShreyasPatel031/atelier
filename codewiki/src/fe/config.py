@@ -6,10 +6,26 @@ Configuration settings for the CodeWiki web application.
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# `fe/config.py` -> repo root is four levels up. Web app imports this before LLM code runs,
+# so GEMINI_API_KEY in `<repo>/.env` is always applied (stale shell exports get overridden).
+_FE_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _FE_DIR.parent.parent.parent
+load_dotenv(_REPO_ROOT / ".env", override=True)
+load_dotenv()
+
 
 class WebAppConfig:
-    """Configuration class for web application settings."""
-    
+    """Configuration class for web application settings.
+
+    Documentation jobs run ``codewiki generate`` in a subprocess. On each host,
+    run once: ``codewiki config set --base-url ... --main-model ...
+    --cluster-model ...`` so ``~/.codewiki/config.json`` exists (API key may
+    still come from ``GEMINI_API_KEY`` / ``LLM_API_KEY``). See
+    ``codewiki.src.fe.background_worker`` module docstring.
+    """
+
     # Directories
     CACHE_DIR = "./output/cache"
     TEMP_DIR = "./output/temp"

@@ -97,34 +97,30 @@ def extract_diagram_nodes(diagram: str) -> List[str]:
 
 
 def validate_mermaid_syntax(diagram: str, module: str, result: ValidationResult):
-    """Validate Mermaid diagram syntax."""
-    
-    # Check for valid diagram type
-    valid_pattern = r'^(graph|flowchart)\s+(TD|TB|LR|RL|BT)'
-    if not re.search(valid_pattern, diagram, re.MULTILINE):
-        # Check for forbidden types
-        forbidden = ['classDiagram', 'sequenceDiagram', 'stateDiagram', 'erDiagram', 'pie']
-        for ftype in forbidden:
-            if diagram.strip().startswith(ftype):
-                result.add(module, "FORBIDDEN_DIAGRAM_TYPE", 
-                          f"Uses '{ftype}' - only graph/flowchart TD allowed")
-                return
-        result.add(module, "INVALID_MERMAID", 
-                  "Diagram must start with 'graph TD' or 'flowchart TD'")
-    
-    # Check for balanced brackets
-    if diagram.count('[') != diagram.count(']'):
-        result.add(module, "SYNTAX_ERROR", "Unbalanced square brackets")
-    
-    if diagram.count('(') != diagram.count(')'):
-        result.add(module, "SYNTAX_ERROR", "Unbalanced parentheses")
-    
-    # Check subgraph/end balance
-    subgraph_count = len(re.findall(r'\bsubgraph\b', diagram))
-    end_count = len(re.findall(r'\bend\b', diagram))
-    if subgraph_count != end_count:
-        result.add(module, "SYNTAX_ERROR", 
-                  f"Unbalanced subgraph/end ({subgraph_count} subgraph, {end_count} end)")
+    """Validate Mermaid diagram syntax via the real Mermaid.js 11 parser.
+
+    No regex/character-counting heuristics — defers to ``mermaid_validator``,
+    which spawns the same Mermaid stack the viewer uses.
+    """
+    from codewiki.src.be.mermaid_validator import (
+        validate_mermaid,
+        MermaidErrorType,
+    )
+
+    vr = validate_mermaid(diagram, source_info=f"validation.py:{module}")
+    for err in vr.errors:
+        if err.error_type == MermaidErrorType.PARSER_UNAVAILABLE:
+            result.add(module, "MERMAID_PARSER_UNAVAILABLE", err.message, Severity.WARNING)
+        elif err.error_type == MermaidErrorType.EMPTY_DIAGRAM:
+            result.add(module, "EMPTY_MERMAID", err.message)
+        elif err.error_type == MermaidErrorType.PARSE_ERROR:
+            loc = f" (line {err.line_number})" if err.line_number else ""
+            result.add(module, "MERMAID_PARSE_ERROR", f"{err.message}{loc}")
+        else:
+            result.add(module, "INVALID_MERMAID", err.message)
+    for warn in vr.warnings:
+        if warn.error_type == MermaidErrorType.FORBIDDEN_DIAGRAM_TYPE:
+            result.add(module, "FORBIDDEN_DIAGRAM_TYPE", warn.message, Severity.WARNING)
 
 
 # ============================================================

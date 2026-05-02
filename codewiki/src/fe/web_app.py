@@ -11,17 +11,21 @@ Features:
 """
 
 import argparse
+import logging
+import os
+import subprocess
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Form, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Any, Dict
 
 from .cache_manager import CacheManager
-from .background_worker import BackgroundWorker
+from .background_worker import BackgroundWorker, resolve_codewiki_cli
 from .routes import WebRoutes
 from .config import WebAppConfig
 
@@ -39,6 +43,12 @@ background_worker = BackgroundWorker(
     temp_dir=WebAppConfig.TEMP_DIR,
 )
 web_routes = WebRoutes(background_worker=background_worker, cache_manager=cache_manager)
+
+_log = logging.getLogger(__name__)
+
+# Short-lived cache so page refreshes do not hammer the LLM API.
+_llm_health_cache: Dict[str, Any] = {"ts": 0.0, "payload": None}
+_LLM_HEALTH_TTL_SEC = 120.0
 
 
 @asynccontextmanager
@@ -107,6 +117,55 @@ async def get_job_status(job_id: str):
 async def list_jobs():
     """All tracked jobs (for E2E: wait until worker has no queued/processing work)."""
     return await web_routes.list_jobs()
+
+
+@app.get("/api/llm-health")
+def llm_health():
+    """
+    Same config surface the CLI uses: ``codewiki config validate --quick``
+    (no backend Config / call_llm). Surfaces missing ~/.codewiki/config.json, etc.
+    """
+    global _llm_health_cache
+    now = time.time()
+    if (
+        _llm_health_cache["payload"] is not None
+        and now - _llm_health_cache["ts"] < _LLM_HEALTH_TTL_SEC
+    ):
+        return JSONResponse(_llm_health_cache["payload"])
+
+    cmd = resolve_codewiki_cli() + ["config", "validate", "--quick"]
+    try:
+        p = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            env=os.environ.copy(),
+            timeout=30,
+        )
+    except (subprocess.TimeoutExpired, OSError) as e:
+        msg = str(e).strip().split("\n")[0][:400]
+        _log.warning("config validate (quick) failed: %s", msg)
+        payload = {
+            "ok": False,
+            "detail": msg or "codewiki config validate could not run.",
+        }
+    else:
+        if p.returncode == 0:
+            payload = {"ok": True, "detail": None}
+        else:
+            tail = (p.stdout or p.stderr or "").strip()
+            lines = [ln for ln in tail.splitlines() if ln.strip()]
+            last = (lines[-1] if lines else tail)[:400]
+            _log.warning("config validate (quick) exit %s: %s", p.returncode, last)
+            payload = {
+                "ok": False,
+                "detail": last
+                or f"Run: codewiki config set (exit {p.returncode})",
+            }
+
+    _llm_health_cache["ts"] = now
+    _llm_health_cache["payload"] = payload
+    return JSONResponse(payload)
 
 
 @app.get("/docs/{job_id}")
@@ -289,12 +348,16 @@ def main():
     # Ensure required directories exist
     WebAppConfig.ensure_directories()
 
-    print(f"🚀 CodeWiki Web Application starting...")
-    print(f"🌐 Server running at: http://{args.host}:{args.port}")
+    print("🚀 CodeWiki Web Application starting…")
     print(f"📁 Cache directory: {WebAppConfig.get_absolute_path(WebAppConfig.CACHE_DIR)}")
     print(f"🗂️  Temp directory: {WebAppConfig.get_absolute_path(WebAppConfig.TEMP_DIR)}")
-    print("\nPress Ctrl+C to stop the server")
-    
+    print(
+        f"🌐 Binding http://{args.host}:{args.port} — "
+        "if you see 'address already in use', stop the other process or run with "
+        f"`--port` (e.g. `python -m codewiki.run_web_app --port 8001`)."
+    )
+    print("Press Ctrl+C to stop the server\n")
+
     try:
         uvicorn.run(
             "codewiki.src.fe.web_app:app",

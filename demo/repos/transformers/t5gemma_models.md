@@ -1,53 +1,33 @@
-# T5Gemma Models Documentation
-
-This module (`t5gemma_models`) provides various implementations of the T5Gemma model, a powerful encoder-decoder transformer architecture. It includes functionalities for sequence classification, token classification, and conditional generation, offering both standard and modular approaches to integrate the T5Gemma model into diverse NLP tasks.
-
-## Architecture Overview
-
-The `t5gemma_models` module is structured into two primary sub-modules:
-
-1.  **Modeling Implementations**: Contains the direct, core implementations of T5Gemma models for various tasks.
-2.  **Modular Implementations**: Offers a more modular approach to T5Gemma model implementations, allowing for flexible component usage.
-
-These sub-modules interact with the base T5Gemma model and its configurations to provide specialized capabilities.
+# T5Gemma Models
+This module provides various T5Gemma model implementations for different natural language processing tasks, including sequence classification, token classification, and conditional text generation.
 
 <!-- DIAGRAM_JSON
 {
     "direction": "TD",
     "nodes": [
-        {"id": "modeling_implementations", "label": "Modeling Implementations", "type": "module", "link": "modeling_implementations.md"},
-        {"id": "modular_implementations", "label": "Modular Implementations", "type": "module", "link": "modular_implementations.md"}
+        {"id": "t5gemma_classification_models", "label": "T5Gemma Classification Models", "type": "module", "link": "t5gemma_classification_models.md"},
+        {"id": "t5gemma_generative_model", "label": "T5Gemma Generative Model", "type": "module", "link": "t5gemma_generative_model.md"}
     ],
     "edges": [
-        {"source": "modeling_implementations", "target": "modular_implementations", "label": "can inform"}
+        {"source": "t5gemma_classification_models", "target": "t5gemma_generative_model", "label": "can be adapted for"}
     ],
-    "groups": []
+    "groups": [
+        {"id": "classification", "label": "Classification Tasks", "role": "analytical", "nodes": ["t5gemma_classification_models"]},
+        {"id": "generation", "label": "Generation Tasks", "role": "generative", "nodes": ["t5gemma_generative_model"]}
+    ]
 }
 -->
-
 ```mermaid
-graph TD
-    modeling_implementations[Modeling Implementations]
-    modular_implementations[Modular Implementations]
-
-    modeling_implementations --> modular_implementations
-
-    click modeling_implementations "modeling_implementations.md" "View Modeling Implementations Documentation"
-    click modular_implementations "modular_implementations.md" "View Modular Implementations Documentation"
+flowchart TD
+    subgraph classification["Classification Tasks"]
+        t5gemma_classification_models["T5Gemma Classification Models"]
+    end
+    subgraph generation["Generation Tasks"]
+        t5gemma_generative_model["T5Gemma Generative Model"]
+    end
+    t5gemma_classification_models -->|
+can be adapted for
+| t5gemma_generative_model
+    click t5gemma_classification_models "t5gemma_classification_models.md"
+    click t5gemma_generative_model "t5gemma_generative_model.md"
 ```
-
-## Sub-modules
-
-### [Modeling Implementations](modeling_implementations.md)
-This sub-module focuses on the direct implementations of T5Gemma for key NLP tasks. It includes:
--   `T5GemmaForSequenceClassification`: For tasks requiring classification of entire input sequences.
--   `T5GemmaForTokenClassification`: For tasks that involve classifying individual tokens within a sequence.
--   `T5GemmaForConditionalGeneration`: Enables the model to perform conditional text generation, such as translation or summarization.
-
-### [Modular Implementations](modular_implementations.md)
-This sub-module provides modular variants of the T5Gemma model components, offering greater flexibility and reusability. It includes:
--   `T5GemmaForSequenceClassification`: A modular version for sequence classification.
--   `T5GemmaForTokenClassification`: A modular version for token classification.
--   `T5GemmaForConditionalGeneration`: A modular version for conditional text generation.
-
-These modular components allow developers to more easily swap out or combine different parts of the T5Gemma architecture based on their specific needs.

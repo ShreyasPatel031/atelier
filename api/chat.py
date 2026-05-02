@@ -83,6 +83,8 @@ def _run_chat(payload: dict) -> dict:
         opened = ["overview"] + list(opened)
 
     ds = payload.get("diagram_selection")
+    dss = payload.get("diagram_selections")
+    dss_list = dss if isinstance(dss, list) else None
 
     try:
         text, history = runner.chat(
@@ -90,6 +92,7 @@ def _run_chat(payload: dict) -> dict:
             opened_modules=opened,
             message_history=payload.get("history"),
             diagram_selection=ds if isinstance(ds, dict) else None,
+            diagram_selections=[x for x in (dss_list or []) if isinstance(x, dict)] or None,
         )
         return {"response": text, "history": history, "status": 200}
     except Exception as e:

@@ -13,9 +13,39 @@ import copy
 import logging
 import os
 from collections import defaultdict
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 logger = logging.getLogger(__name__)
+
+
+def _record_submodule_md_missing(
+    deps: CodeWikiDeps,
+    sub_module_name: str,
+    reason: str,
+    detail: Optional[str] = None,
+    component_count: int = 0,
+) -> None:
+    """Persist structured failure for postmortem (submodule_md_failures.json + generation_report)."""
+    try:
+        from codewiki.src.be.generation_tracker import get_generation_tracker
+
+        path_to = "/".join(deps.path_to_current_module + [sub_module_name])
+        get_generation_tracker().track_submodule_md_failure(
+            deps.absolute_docs_path,
+            {
+                "sub_module_name": sub_module_name,
+                "path_to_submodule": path_to,
+                "parent_module": deps.path_to_current_module[-1]
+                if deps.path_to_current_module
+                else "",
+                "depth": deps.current_depth,
+                "component_count": component_count,
+                "reason": reason,
+                "detail": (detail or "")[:4000],
+            },
+        )
+    except Exception as ex:
+        logger.warning("Could not record submodule_md_failure for %s: %s", sub_module_name, ex)
 
 
 def _auto_split_by_directory(
@@ -190,6 +220,7 @@ async def generate_sub_module_documentation(
             logger.info(f"{indent}  Using complex agent (force={force_subagent}, normal={normal_criteria}, depth={ctx.deps.current_depth}, min_depth={MIN_DEPTH})")
             sub_agent = Agent(
                 model=fallback_models,
+                retries=3,
                 name=sub_module_name,
                 deps_type=CodeWikiDeps,
                 system_prompt=SYSTEM_PROMPT.format(module_name=sub_module_name),
@@ -202,6 +233,7 @@ async def generate_sub_module_documentation(
                 logger.info(f"{indent}  Using leaf agent (depth={ctx.deps.current_depth}, tokens={num_tokens})")
             sub_agent = Agent(
                 model=fallback_models,
+                retries=3,
                 name=sub_module_name,
                 deps_type=CodeWikiDeps,
                 system_prompt=LEAF_SYSTEM_PROMPT.format(module_name=sub_module_name),
@@ -211,17 +243,31 @@ async def generate_sub_module_documentation(
         deps.path_to_current_module.append(sub_module_name)
         deps.current_depth += 1
 
-        result = await sub_agent.run(
-            format_user_prompt(
-                module_name=deps.current_module_name,
-                core_component_ids=core_component_ids,
-                components=ctx.deps.components,
-                module_tree=ctx.deps.module_tree,
-            ),
-            deps=ctx.deps
-        )
+        subagent_run_failed: Optional[str] = None
+        try:
+            await sub_agent.run(
+                format_user_prompt(
+                    module_name=deps.current_module_name,
+                    core_component_ids=core_component_ids,
+                    components=ctx.deps.components,
+                    module_tree=ctx.deps.module_tree,
+                ),
+                deps=ctx.deps,
+            )
+        except Exception as sub_err:
+            subagent_run_failed = f"{type(sub_err).__name__}: {sub_err}"
+            logger.error(
+                "%s  sub_agent.run() failed for %s — will try direct LLM fallback if .md missing: %s",
+                indent,
+                sub_module_name,
+                subagent_run_failed,
+            )
 
         sub_md_path = os.path.join(deps.absolute_docs_path, f"{sub_module_name}.md")
+        ncomp = len(core_component_ids)
+        fallback_failure_detail: Optional[str] = None
+        if subagent_run_failed:
+            fallback_failure_detail = f"subagent_run_exception: {subagent_run_failed}"
         if not os.path.exists(sub_md_path):
             logger.warning(f"{indent}  Sub-agent did not create {sub_module_name}.md — running direct LLM fallback")
             try:
@@ -250,9 +296,37 @@ async def generate_sub_module_documentation(
                         f.write(content)
                     logger.info(f"{indent}  Fallback wrote {sub_module_name}.md ({len(content)} chars)")
                 else:
+                    fb = f"fallback_insufficient response_len={len((content or '').strip())}"
+                    fallback_failure_detail = (
+                        f"{fallback_failure_detail}; {fb}" if fallback_failure_detail else fb
+                    )
                     logger.error(f"{indent}  Fallback LLM returned insufficient content for {sub_module_name}")
             except Exception as fallback_err:
+                fb = f"fallback_exception: {type(fallback_err).__name__}: {fallback_err}"
+                fallback_failure_detail = (
+                    f"{fallback_failure_detail}; {fb}" if fallback_failure_detail else fb
+                )
                 logger.error(f"{indent}  Fallback LLM call failed for {sub_module_name}: {fallback_err}")
+
+        if not os.path.exists(sub_md_path):
+            primary = "subagent_did_not_write_md_file"
+            reason = primary
+            detail: Optional[str] = (
+                fallback_failure_detail
+                if fallback_failure_detail
+                else "no_fallback_attempt_or_subagent_only"
+            )
+            if fallback_failure_detail and fallback_failure_detail.startswith("fallback_insufficient"):
+                reason = "subagent_no_md_fallback_insufficient"
+            elif fallback_failure_detail and fallback_failure_detail.startswith("fallback_exception"):
+                reason = "subagent_no_md_fallback_exception"
+            _record_submodule_md_missing(
+                deps,
+                sub_module_name,
+                reason,
+                detail=detail,
+                component_count=ncomp,
+            )
 
         # FORCE sub-module creation if depth < MIN_DEPTH and agent didn't create any
         current_module_children = value[sub_module_name].get("children", {})

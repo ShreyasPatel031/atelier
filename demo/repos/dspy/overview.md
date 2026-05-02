@@ -1,97 +1,71 @@
-The `dspy-src` repository houses the core DSPy framework, a programming model designed for composing, compiling, and optimizing pipelines that leverage large language models (LLMs) and retrieval models (RMs). It provides declarative interfaces for defining LM programs, tools for interacting with various language models and retrieval systems, and advanced strategies for program execution, evaluation, and automated optimization (teleprompting). DSPy aims to make it easier for developers to build robust, efficient, and self-improving applications with LLMs.
+DSPy is a framework for building, optimizing, and evaluating language model (LLM) programs. It empowers developers to move beyond simple prompt engineering by providing a systematic and declarative approach to constructing complex LLM applications. DSPy focuses on composable modules, explicit program flow, and automated optimization (teleprompting) to achieve higher performance and reliability.
 
-### Architecture Overview
+**Who is this software for? What problem does it solve?**
+DSPy is for developers, researchers, and engineers who want to build robust and high-performing applications powered by large language models. It solves the problem of "prompt engineering" by replacing manual prompt crafting with a programmatic approach. Instead of guessing the right prompts, users define the *structure* of their LLM program and the *desired outputs*, and DSPy automatically optimizes the prompts and weights (few-shot examples) to achieve better results on specific tasks. This makes LLM development more systematic, reproducible, and efficient.
 
-The DSPy framework is structured around a core set of components that define, execute, and optimize language model programs. It integrates with external LLM and RM providers through dedicated client and adapter modules. The architecture emphasizes a clear separation of concerns, allowing for modular development and flexible optimization strategies.
+**How would a new user or developer actually use it?**
+A new user would typically follow these steps:
+1.  **Define their LLM program:** They start by defining their task as a series of DSPy `Module`s, each with a `Signature` that specifies its inputs and outputs. This is similar to defining functions in traditional programming.
+2.  **Connect to Language Models and Retrievers:** They configure their preferred LLM (e.g., OpenAI, local models) and any necessary retrieval models (e.g., ColBERTv2, Weaviate) using DSPy's integration layer.
+3.  **Compose Modules:** They combine these `Module`s into a larger DSPy program, defining the flow of information and reasoning steps.
+4.  **Optimize the Program:** Instead of manually writing prompts, they use DSPy's "teleprompters" (optimizers) to automatically generate and refine the prompts and few-shot examples for their program based on a small dataset and a defined metric.
+5.  **Evaluate Performance:** They evaluate the optimized program's performance using DSPy's evaluation tools and metrics on a test dataset.
+
+**What are the 3-4 main things someone does with this system?**
+1.  **Build LLM Programs:** Define and compose modular LLM components with clear input/output signatures.
+2.  **Integrate LMs and Data Sources:** Connect to various language models and retrieval systems.
+3.  **Automate Optimization:** Use teleprompters to automatically generate and refine prompts and few-shot examples.
+4.  **Evaluate and Benchmark:** Measure program performance using diverse metrics and datasets.
 
 ```mermaid
-graph TD
-    S[DSPy Signatures]
-    P[DSPy Primitives]
-    PS[DSPy Prediction Strategies]
-    C[DSPy Clients]
-    R[DSPy Retrievers]
-    A[DSPy Adapters]
-    D[DSPy Datasets]
-    E[DSPy Evaluation]
-    TO[DSPy Teleprompting Optimizers]
-    PP[DSPy Program Proposal]
-    ST[DSPy Streaming]
-    DU[DSPy DSP Utilities]
-    U[DSPy Utilities]
-    DOC[Documentation Utilities]
+flowchart LR
+    user(("User"))
+    user ==>|"defines & runs"| core_program_building_node
 
-    S --> P
-    P --> PS
+    subgraph program_definition["Program Definition"]
+        core_program_building_node["Core Program Building"]
+    end
 
-    P --> C
-    P --> R
-    S --> A
-    A --> C
+    subgraph lm_and_retrieval["LM and Retrieval Integration"]
+        lm_integration_node["Language Model Integration"]
+    end
 
-    PS --> E
-    D --> E
-    E --> TO
-    D --> TO
-    TO --> PS
-    TO --> P
+    subgraph optimization_engine["Program Optimization Engine"]
+        program_optimization_node["Program Optimization"]
+    end
 
-    PP --> S
-    PP --> P
+    subgraph data_and_metrics["Data and Evaluation Metrics"]
+        data_evaluation_node["Data and Evaluation"]
+    end
 
-    C --> ST
-    P --> ST
+    subgraph support_utilities["Utilities and Adapters"]
+        utilities_adapters_node["Utilities and Adapters"]
+    end
 
-    DU --> P
-    DU --> R
-    U --> P
+    core_program_building_node ==>|"executes via"| lm_integration_node
+    lm_integration_node -->|"logs interactions"| data_evaluation_node
+    core_program_building_node ==>|"optimizes with"| program_optimization_node
+    program_optimization_node -->|"returns optimized program"| core_program_building_node
+    program_optimization_node ==>|"uses datasets & metrics"| data_evaluation_node
+    data_evaluation_node -.->|"provides feedback"| program_optimization_node
+    utilities_adapters_node -.->|"supports"| core_program_building_node
+    utilities_adapters_node -.->|"provides adapters for"| lm_integration_node
 
-    click S "dspy_signatures.md" "View DSPy Signatures Documentation"
-    click P "dspy_primitives.md" "View DSPy Primitives Documentation"
-    click PS "dspy_prediction_strategies.md" "View DSPy Prediction Strategies Documentation"
-    click C "dspy_clients.md" "View DSPy Clients Documentation"
-    click R "dspy_retrievers.md" "View DSPy Retrievers Documentation"
-    click A "dspy_adapters.md" "View DSPy Adapters Documentation"
-    click D "dspy_datasets.md" "View DSPy Datasets Documentation"
-    click E "dspy_evaluation.md" "View DSPy Evaluation Documentation"
-    click TO "dspy_teleprompting_optimizers.md" "View DSPy Teleprompting Optimizers Documentation"
-    click PP "dspy_program_proposal.md" "View DSPy Program Proposal Documentation"
-    click ST "dspy_streaming.md" "View DSPy Streaming Documentation"
-    click DU "dspy_dsp_utilities.md" "View DSPy DSP Utilities Documentation"
-    click U "dspy_utilities.md" "View DSPy Utilities Documentation"
-    click DOC "documentation_utilities.md" "View Documentation Utilities Documentation"
+    classDef userNode fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
+    classDef surface fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
+    classDef generative fill:#fed7aa,stroke:#ea580c,stroke-width:1px,color:#7c2d12
+    classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
+
+    class user userNode
+    class core_program_building_node,utilities_adapters_node surface
+    class lm_integration_node generative
+    class program_optimization_node analytical
+    class data_evaluation_node data
+
+    click core_program_building_node "core_program_building.md" "View Core Program Building"
+    click lm_integration_node "language_model_integration.md" "View Language Model Integration"
+    click program_optimization_node "program_optimization.md" "View Program Optimization"
+    click data_evaluation_node "data_and_evaluation.md" "View Data and Evaluation"
+    click utilities_adapters_node "utilities_and_adapters.md" "View Utilities and Adapters"
 ```
-
-### Core Modules and Their Relationships:
-
-*   **[DSPy Primitives](dspy_primitives.md)**: The foundational building blocks of DSPy programs, defining core modules and their lifecycle.
-*   **[DSPy Signatures](dspy_signatures.md)**: Declarative interfaces that specify the input and output fields for language model calls, defining the contract for primitives.
-    *   `DSPy Signatures` define `DSPy Primitives`.
-*   **[DSPy Clients](dspy_clients.md)**: Provides the interface for interacting with various language models (LLMs), including caching and finetuning integrations.
-    *   `DSPy Primitives` utilize `DSPy Clients` for LLM interactions.
-*   **[DSPy Retrievers](dspy_retrievers.md)**: Offers a framework for integrating different retrieval mechanisms (RMs) to fetch relevant information.
-    *   `DSPy Primitives` utilize `DSPy Retrievers` for context retrieval.
-*   **[DSPy Adapters](dspy_adapters.md)**: Bridges DSPy signatures to specific language model clients, handling prompt formatting and output parsing.
-    *   `DSPy Signatures` are adapted by `DSPy Adapters`, which then interact with `DSPy Clients`.
-*   **[DSPy Prediction Strategies](dspy_prediction_strategies.md)**: Implements various techniques for program execution, such as agentic behaviors (ReAct, CodeAct) and module optimization.
-    *   `DSPy Primitives` are used to build `DSPy Prediction Strategies`.
-*   **[DSPy Datasets](dspy_datasets.md)**: Provides tools for handling various datasets, crucial for training, development, and evaluation.
-*   **[DSPy Evaluation](dspy_evaluation.md)**: Offers a comprehensive suite of metrics for evaluating the performance of DSPy programs, including both traditional and LLM-based metrics.
-    *   `DSPy Datasets` are used for `DSPy Evaluation`.
-    *   `DSPy Prediction Strategies` are assessed by `DSPy Evaluation`.
-*   **[DSPy Teleprompting Optimizers](dspy_teleprompting_optimizers.md)**: A suite of strategies for automatically generating, refining, and selecting prompts (instructions and few-shot examples) to optimize program performance.
-    *   `DSPy Evaluation` informs `DSPy Teleprompting Optimizers`.
-    *   `DSPy Datasets` are used by `DSPy Teleprompting Optimizers`.
-    *   `DSPy Teleprompting Optimizers` improve `DSPy Prediction Strategies` and `DSPy Primitives`.
-
-### Supporting Modules:
-
-*   **[DSPy Program Proposal](dspy_program_proposal.md)**: Facilitates the generation of DSPy programs and signatures.
-    *   `DSPy Program Proposal` contributes to defining `DSPy Signatures` and `DSPy Primitives`.
-*   **[DSPy Streaming](dspy_streaming.md)**: Provides functionalities for handling streaming responses from language models.
-    *   `DSPy Clients` and `DSPy Primitives` support `DSPy Streaming`.
-*   **[DSPy DSP Utilities](dspy_dsp_utilities.md)**: Contains general utilities for DSPy, such as ColBERTv2 integration and settings management.
-    *   `DSPy DSP Utilities` support `DSPy Primitives` and `DSPy Retrievers`.
-*   **[DSPy Utilities](dspy_utilities.md)**: A collection of essential utility functions and classes, including asynchronous programming helpers, callback mechanisms, and dummy components for testing.
-    *   `DSPy Utilities` provide general support to `DSPy Primitives` and other core modules.
-*   **[Documentation Utilities](documentation_utilities.md)**: Tools designed to automate and streamline the generation and management of system documentation.

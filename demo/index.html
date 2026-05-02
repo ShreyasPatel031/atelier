@@ -33,7 +33,7 @@
 
         .back-button {
             padding: 8px 16px;
-            background: #2563eb;
+            background: #0039A6;
             color: white;
             border: none;
             border-radius: 6px;
@@ -72,12 +72,12 @@
         }
         
         .repo-dropdown:hover {
-            border-color: #2563eb;
+            border-color: #0039A6;
         }
         
         .repo-dropdown:focus {
             outline: none;
-            border-color: #2563eb;
+            border-color: #0039A6;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
@@ -87,7 +87,7 @@
             gap: 6px;
             padding: 8px 16px;
             background: white;
-            color: #2563eb;
+            color: #0039A6;
             text-decoration: none;
             border-radius: 8px;
             font-size: 14px;
@@ -98,7 +98,7 @@
         
         .repo-link:hover {
             background: #f8fafc;
-            border-color: #2563eb;
+            border-color: #0039A6;
         }
 
         .container {
@@ -162,8 +162,8 @@
         
         .zoom-btn:hover {
             background: #f1f5f9;
-            border-color: #2563eb;
-            color: #2563eb;
+            border-color: #0039A6;
+            color: #0039A6;
         }
         
         .zoom-btn:active {
@@ -330,7 +330,7 @@
         .node-module rect,
         .node-module circle,
         .node-module polygon {
-            stroke: #2563eb !important;
+            stroke: #0039A6 !important;
             stroke-width: 2px !important;
             cursor: pointer !important;
         }
@@ -423,7 +423,7 @@
         }
         
         .doc-content a {
-            color: #2563eb;
+            color: #0039A6;
             text-decoration: none;
         }
         
@@ -456,7 +456,7 @@
         }
 
         .doc-content blockquote {
-            border-left: 4px solid #2563eb;
+            border-left: 4px solid #0039A6;
             padding-left: 16px;
             margin: 16px 0;
             color: #64748b;
@@ -524,7 +524,7 @@
         #mermaid-diagram g.node.clickable-node .label-container path,
         #mermaid-diagram g.node.clickable-node .label-container polygon,
         #mermaid-diagram g.node.clickable-node .label-container ellipse {
-            stroke: #2563eb !important;
+            stroke: #0039A6 !important;
             stroke-width: 3px !important;
         }
 
@@ -591,33 +591,76 @@
         .mermaid .edgePaths > path {
             stroke: inherit !important;
         }
-
+        
         #mermaid-diagram svg g.edgeLabels,
         #mermaid-diagram svg g.edgeLabel {
             pointer-events: auto;
         }
+
+        /*
+         * Edge labels: Mermaid sets `.edgeLabel { color: classText }` where classText === primaryTextColor (#fff for blue nodes).
+         * Flowchart edge spans also use class `edgeLabel`, so labels become white-on-white unless we override the span.
+         */
+        #mermaid-diagram svg g.edgeLabel span.edgeLabel {
+            color: #000000 !important;
+        }
+        #mermaid-diagram svg g.edgeLabel rect {
+            fill: #ffffff !important;
+            stroke: #e2e8f0 !important;
+            stroke-width: 1px !important;
+        }
+        #mermaid-diagram svg g.edgeLabel text,
+        #mermaid-diagram svg g.edgeLabel tspan {
+            fill: #000000 !important;
+        }
+        #mermaid-diagram svg g.edgeLabel foreignObject div.labelBkg {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+        }
         
-        /* Selection styling - light grey border */
+        /*
+         * Cluster frames: MTA light-gray (#A7A9AC) stroke on neutral fill — matches mermaid themeVariables.clusterBkg.
+         */
+        #mermaid-diagram svg g.cluster > rect {
+            fill: #ebecee !important;
+            stroke: #A7A9AC !important;
+            stroke-width: 1px !important;
+        }
+
+        /* Selection: MTA Red (#EE352E) — clear hop without clashing with blue clickable outline */
         .selected-node rect,
         .selected-node circle,
         .selected-node polygon,
         .selected-node path,
         .selected-node ellipse {
-            stroke: #94a3b8 !important;
+            stroke: #EE352E !important;
             stroke-width: 4px !important;
-            fill: #f1f5f9 !important;
         }
         
-        .selected-subgraph > rect,
+        /* Must beat #mermaid-diagram … g.cluster > rect so selection ring shows on expanded subgraph too */
+        #mermaid-diagram svg g.cluster.selected-subgraph > rect,
         .selected-subgraph > .cluster-label rect,
-        svg g.selected-subgraph > rect {
-            stroke: #94a3b8 !important;
+        svg g.selected-subgraph > .cluster-label rect {
+            fill: #ebecee !important;
+            stroke: #EE352E !important;
             stroke-width: 3px !important;
-            fill: rgba(148, 163, 184, 0.1) !important;
         }
         
-        .selected-subgraph .flowchart-labelBox {
-            stroke: #94a3b8 !important;
+        #mermaid-diagram svg g.cluster.selected-subgraph .flowchart-labelBox {
+            stroke: #EE352E !important;
+            stroke-width: 3px !important;
+        }
+
+        /* Some Mermaid builds use a top-level <path> for the cluster panel instead of <rect>. */
+        #mermaid-diagram svg g.cluster > path {
+            fill: #ebecee !important;
+            stroke: #A7A9AC !important;
+            stroke-width: 1px !important;
+        }
+
+        #mermaid-diagram svg g.cluster.selected-subgraph > path {
+            fill: #ebecee !important;
+            stroke: #EE352E !important;
             stroke-width: 3px !important;
         }
 
@@ -653,7 +696,7 @@
         }
         
         .breadcrumb-link {
-            color: #2563eb;
+            color: #0039A6;
             text-decoration: none;
             cursor: pointer;
             padding: 2px 6px;
@@ -715,7 +758,7 @@
             line-height: 1.4;
         }
         .chat-message.user {
-            background: #2563eb;
+            background: #0039A6;
             color: white;
             align-self: flex-end;
         }
@@ -755,7 +798,7 @@
             color: #334155;
         }
         .chat-message.assistant strong { font-weight: 600; color: #1e293b; }
-        .chat-message.assistant a { color: #2563eb; text-decoration: none; }
+        .chat-message.assistant a { color: #0039A6; text-decoration: none; }
         .chat-message.assistant a:hover { text-decoration: underline; }
         .chat-message.loading {
             background: #f1f5f9;
@@ -778,11 +821,11 @@
         }
         .chat-input:focus {
             outline: none;
-            border-color: #2563eb;
+            border-color: #0039A6;
         }
         .chat-send {
             padding: 8px 16px;
-            background: #2563eb;
+            background: #0039A6;
             color: white;
             border: none;
             border-radius: 6px;
@@ -869,7 +912,7 @@
                                 <span class="view-tune-val" id="tuneZoomVal">0.10</span>
                                 <input type="range" id="tuneZoomStep" min="0.05" max="1" step="0.05" value="0.1" />
                             </label>
-                        </div>
+        </div>
                         <div class="view-tune-row">
                             <label>
                                 Edge hover tolerance (screen px)
@@ -1369,15 +1412,41 @@
             }
         }
         
-        // Initialize mermaid
+        // Initialize mermaid — theme "base" + NYC Subway (MTA) line palette for nodes, tracks, clusters, labels.
+        // Blue #0039A6 · Orange #FF6319 · Lime #6CBE45 · Brown #996633 · Light gray #A7A9AC · Yellow #FCCC0A
+        // Med gray #808183 · Red #EE352E · Green #00933C · Purple #B933AD
         mermaid.initialize({
             startOnLoad: false,
             theme: 'base',
             securityLevel: 'loose',
+            themeVariables: {
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontSize: '14px',
+                primaryColor: '#0039A6',
+                primaryTextColor: '#ffffff',
+                primaryBorderColor: '#002f85',
+                secondaryColor: '#ffffff',
+                secondaryTextColor: '#0039A6',
+                secondaryBorderColor: '#FF6319',
+                tertiaryColor: '#f9fafb',
+                tertiaryTextColor: '#1e293b',
+                tertiaryBorderColor: '#00933C',
+                lineColor: '#808183',
+                clusterBkg: '#ebecee',
+                clusterBorder: '#A7A9AC',
+                edgeLabelBackground: '#ffffff',
+                edgeLabelColor: '#000000',
+                mainBkg: '#ffffff',
+                secondBkg: '#fff5f0'
+            },
             flowchart: {
                 useMaxWidth: true,
                 htmlLabels: true,
-                curve: 'basis'
+                curve: 'basis',
+                padding: 12,
+                nodeSpacing: 56,
+                rankSpacing: 64,
+                diagramPadding: 16
             }
         });
         
@@ -1476,7 +1545,7 @@
                 word.charAt(0).toUpperCase() + word.slice(1)
             ).join(' ');
         }
-
+        
         // ------------------------------------------------------------
         // RENDERER BOUNDARY — diagram engine is pluggable
         // Today: Mermaid renders SVG; we parse the same source to build a registry, then stamp
@@ -1593,6 +1662,12 @@
                     pushNodeIfAllowed(nm[1], nm[2]);
                 }
                 nodeStadiumQuotedRe.lastIndex = 0;
+
+                const nodeBracketUnquotedRe = /\b([A-Za-z_][\w]*)\s*\[\s*([^\]"\n]+)\s*\]/g;
+                while ((nm = nodeBracketUnquotedRe.exec(line)) !== null) {
+                    pushNodeIfAllowed(nm[1], nm[2].trim());
+                }
+                nodeBracketUnquotedRe.lastIndex = 0;
             }
             return { nodeDefs, clusterDefs };
         }
@@ -2073,6 +2148,7 @@
                 setDiagramEdgeSelectionDashAnim(allEdgeTargets, true);
                 svg._diagramEdgeSelectionTargets = allEdgeTargets;
             }
+            applyDiagramClusterNeutralChrome(svg);
         }
 
         function diagramSelToChatPayload(ds) {
@@ -2667,6 +2743,33 @@
         const DIAGRAM_NODE_HOVER_SHAPE_SELECTOR =
             'rect, circle, polygon, ellipse, path, use, .label-container rect, .label-container path, .basic rect, .basic path, g.shape rect, g.shape path';
         const DIAGRAM_CLUSTER_HOVER_SHAPE_SELECTOR = 'rect, circle, polygon, ellipse, path';
+        /** Panel fill for every subgraph frame (overrides Mermaid classDef / inline fills on cluster chrome). */
+        const DIAGRAM_CLUSTER_NEUTRAL_FILL = '#f8fafc';
+
+        /**
+         * Mermaid applies classDef fills to subgraph cluster shapes (e.g. orange). CSS alone often loses to
+         * inline `style` + !important. Force neutral fill on cluster *chrome* only (same targets as hover).
+         */
+        function applyDiagramClusterNeutralChrome(svg) {
+            if (!svg) return;
+            svg.querySelectorAll('g.cluster').forEach((clusterG) => {
+                const targets = collectDiagramClusterHoverTargets(clusterG);
+                targets.forEach((el) => {
+                    if (!el || !el.isConnected) return;
+                    if (el.closest && el.closest('g.node')) return;
+                    const tag = (el.tagName || '').toLowerCase();
+                    if (
+                        tag === 'rect' ||
+                        tag === 'polygon' ||
+                        tag === 'ellipse' ||
+                        tag === 'circle' ||
+                        tag === 'path'
+                    ) {
+                        el.style.setProperty('fill', DIAGRAM_CLUSTER_NEUTRAL_FILL, 'important');
+                    }
+                });
+            });
+        }
         const DIAGRAM_HOVER_WIDTH_FACTOR = 2;
 
         function collectDiagramNodeHoverTargets(nodeGroup) {
@@ -3214,6 +3317,21 @@
             attachDiagramEdgeClickSelection(svg, contextModuleId);
         }
         
+        /**
+         * Subgraph/cluster tooltips attach to g.cluster; mousemove bubbles from inner shapes.
+         * Without this, cluster handlers run after node handlers and overwrite the correct node tooltip.
+         * Also suppress the outer subgraph tooltip when hovering a nested subgraph's frame (inner wins).
+         */
+        function diagramClusterTooltipShouldSuppress(e, clusterEl) {
+            const t = e.target;
+            if (!t || !t.closest) return false;
+            const hitNode = t.closest('g.node');
+            if (hitNode && clusterEl.contains(hitNode)) return true;
+            const hitCluster = t.closest('g.cluster');
+            if (hitCluster && hitCluster !== clusterEl && clusterEl.contains(hitCluster)) return true;
+            return false;
+        }
+        
         function processNodes(links, contextModuleId) {
             const svg = document.querySelector('#mermaid-diagram svg');
             if (!svg) return;
@@ -3366,13 +3484,20 @@
                 if (!tooltipDesc) tooltipDesc = '';
                 const tooltipMetadata = tooltipTitle ? { title: tooltipTitle, description: tooltipDesc } : null;
                 if (tooltipMetadata) {
-                    clusterEl.addEventListener('mouseenter', (e) => showTooltip(e, tooltipMetadata));
-                    clusterEl.addEventListener('mousemove', (e) => showTooltip(e, tooltipMetadata));
+                    clusterEl.addEventListener('mouseenter', (e) => {
+                        if (diagramClusterTooltipShouldSuppress(e, clusterEl)) return;
+                        showTooltip(e, tooltipMetadata);
+                    });
+                    clusterEl.addEventListener('mousemove', (e) => {
+                        if (diagramClusterTooltipShouldSuppress(e, clusterEl)) return;
+                        showTooltip(e, tooltipMetadata);
+                    });
                     clusterEl.addEventListener('mouseleave', hideTooltip);
                 }
             });
             
             attachDiagramHoverStrokes(svg);
+            applyDiagramClusterNeutralChrome(svg);
             attachDiagramEdgeTooltips(svg, contextModuleId);
             attachDiagramBackgroundDeselect(svg);
         }
@@ -3384,11 +3509,11 @@
             const capturedNodeId = nodeId;
             const capturedTargetModule = targetModuleId;
             const capturedDiagramContext = diagramContextModuleId;
-
+            
             const clickHandler = (e) => {
                 e.stopPropagation();
                 e.preventDefault();
-
+                
                 // Hide tooltip when clicking
                 hideTooltip();
 
@@ -3404,7 +3529,7 @@
                     refreshDiagramSelectionLabelFromDom();
                     return;
                 }
-
+                
                 if (capturedNodeId && capturedTargetModule && moduleData[capturedTargetModule]) {
                     const targetModuleData = moduleData[capturedTargetModule];
                     
@@ -3566,51 +3691,63 @@
                 `$1 ${nodeId}`
             );
             
-            // STEP 2: Check if the node is defined standalone (on its own line or in a subgraph)
-            // Pattern 1: nodeId["label"] or nodeId[label] on its own line
+            // STEP 2: Remove any standalone definition of the original leaf node.
+            // We don't insert the expanded subgraph IN PLACE because doing so
+            // creates 3+-deep subgraph nesting (e.g. ``app_orchestration`` >
+            // ``orchestration_and_agents_sub`` > inner clusters from the child
+            // diagram). Mermaid v11's dagre renderer crashes on such structures
+            // with ``Cannot read properties of undefined (reading 'shape')`` /
+            // edge-routing failures.  Instead we strip the original leaf and
+            // append the expanded subgraph at the TOP LEVEL of the diagram,
+            // outside any wrapping subgraph.  Step 3 below rewrites every
+            // reference (``->``, ``==>``, ``-.->``, ``class``, ``click`` …)
+            // from ``nodeId`` to the new ``subgraphName`` so edges still find
+            // their endpoints.
             const standaloneWithLabelPattern = new RegExp(`(^|\\n)(\\s*)${nodeId}\\[[^\\]]+\\]\\s*$`, 'm');
-            const standaloneWithLabelMatch = normalizedDiagram.match(standaloneWithLabelPattern);
-            
-            // Pattern 2: Plain nodeId on its own line (inside a subgraph typically)
             const standalonePlainPattern = new RegExp(`(^|\\n)(\\s*)${nodeId}\\s*$`, 'm');
-            const standalonePlainMatch = normalizedDiagram.match(standalonePlainPattern);
-            
-            let newDiagram;
-            if (standaloneWithLabelMatch) {
-                // Replace standalone node definition (with label) with the subgraph
-                const indent = standaloneWithLabelMatch[2] || '    ';
-                const indentedSubgraph = subgraphDef.split('\n').map((line, i) => i === 0 ? indent + line : indent + line).join('\n');
-                newDiagram = normalizedDiagram.replace(standaloneWithLabelPattern, `$1${indentedSubgraph}`);
-            } else if (standalonePlainMatch) {
-                // Replace plain node reference (inside subgraph) with the subgraph
-                const indent = standalonePlainMatch[2] || '        ';
-                const indentedSubgraph = subgraphDef.split('\n').map((line, i) => i === 0 ? indent + line : indent + line).join('\n');
-                newDiagram = normalizedDiagram.replace(standalonePlainPattern, `$1${indentedSubgraph}`);
-            } else {
-                // Node is only referenced in edges, add subgraph after the graph header
-                const headerMatch = normalizedDiagram.match(/^(graph|flowchart)\s+\w+\s*\n/);
+
+            let newDiagram = normalizedDiagram;
+            // Drop the original leaf definition (with or without label) so it
+            // won't conflict with the new subgraph cluster of the same base id.
+            newDiagram = newDiagram.replace(standaloneWithLabelPattern, '$1');
+            newDiagram = newDiagram.replace(standalonePlainPattern, '$1');
+
+            // Append the expanded subgraph after the graph header so it's at
+            // the root of the flowchart, not nested inside another subgraph.
+            const headerMatch = newDiagram.match(/^(graph|flowchart)\s+\w+\s*\n/);
                 if (headerMatch) {
                     const insertPos = headerMatch.index + headerMatch[0].length;
-                    newDiagram = normalizedDiagram.slice(0, insertPos) + 
+                newDiagram = newDiagram.slice(0, insertPos) +
                                  '    ' + subgraphDef + '\n' + 
-                                 normalizedDiagram.slice(insertPos);
+                             newDiagram.slice(insertPos);
                 } else {
-                    // Fallback: append at end
-                    newDiagram = normalizedDiagram.trimEnd() + '\n    ' + subgraphDef + '\n';
-                }
+                newDiagram = newDiagram.trimEnd() + '\n    ' + subgraphDef + '\n';
             }
             
-            // STEP 3: Update edge references - any edge to/from nodeId should go to the subgraph
-            // Use word boundaries to avoid matching nodeId inside prefixed node names (e.g., Resolver_Resolver)
-            
-            // Handle simple edges: A --> B, B --> A
-            newDiagram = newDiagram.replace(new RegExp(`-->\\s*\\b${nodeId}\\b`, 'g'), `--> ${subgraphName}`);
-            newDiagram = newDiagram.replace(new RegExp(`\\b${nodeId}\\b\\s*-->`, 'g'), `${subgraphName} -->`);
-            // Handle labeled edges with pipe syntax: A -->|label| B
-            newDiagram = newDiagram.replace(new RegExp(`\\|\\s*\\b${nodeId}\\b`, 'g'), `| ${subgraphName}`);
-            newDiagram = newDiagram.replace(new RegExp(`\\b${nodeId}\\b\\s*\\|`, 'g'), `${subgraphName} |`);
-            // Handle labeled edges with dash syntax: A -- "label" --> B
-            newDiagram = newDiagram.replace(new RegExp(`\\b${nodeId}\\b\\s*--(?!>)`, 'g'), `${subgraphName} --`);
+            // STEP 3: Update every remaining reference to nodeId so it points at the
+            // new subgraph. The previous narrow per-edge regexes (only ``-->``) left
+            // ``==>``/``-.->``/``class``/``click`` references dangling, which made
+            // Mermaid render fail with ``Cannot read properties of undefined (reading 'shape')``
+            // because ``insertNode`` ran into refs to a node that no longer existed.
+            //
+            // Why a single global ``\bnodeId\b`` is safe:
+            //   * The subgraph definition we inserted uses ``${nodeId}_sub`` and the
+            //     prefixed child IDs are ``${nodeId}_*`` — all continue with ``_``, a
+            //     word character, so ``\b`` does NOT match the boundary between
+            //     ``nodeId`` and ``_sub`` / ``_<child>``. Those stay intact.
+            //   * Everywhere else (edges, ``class …``, ``click …``, comments) the
+            //     bare nodeId is followed by a non-word char (space, ``-``, ``"``,
+            //     end-of-line), so ``\b`` matches and the ref is rewritten.
+            // Edge cases handled by the same pass:
+            //   * ``==>``, ``-.->``, ``--``, ``--x``, ``--o`` thick/dashed/special edges
+            //   * ``class nodeId someClass`` styling
+            //   * ``click nodeId "url" "title"`` directives (now click the subgraph)
+            //   * Anchor labels in pipe-syntax: ``-->|"text"| nodeId`` and ``nodeId -->|"text"|``
+            const escapedNodeId = nodeId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            newDiagram = newDiagram.replace(
+                new RegExp(`\\b${escapedNodeId}\\b`, 'g'),
+                subgraphName
+            );
             
             return newDiagram;
         }
@@ -4550,6 +4687,19 @@
             updateSelection('overview');
             
             renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+
+            // Optional ?expand=nodeId in the URL auto-expands a node after the
+            // overview renders. Useful for sharing a deep link / debugging the
+            // expansion code path without manual clicks.
+            const expandNodeId = urlParams.get('expand');
+            if (expandNodeId) {
+                const targetModuleId = overviewLinks[expandNodeId];
+                if (targetModuleId) {
+                    setTimeout(() => expandNodeInline(expandNodeId, targetModuleId), 100);
+                } else {
+                    console.warn('[expand=] Unknown node id', expandNodeId, '— known:', Object.keys(overviewLinks));
+                }
+            }
         }
         
         // Track URL changes

@@ -1,24 +1,31 @@
 #!/usr/bin/env python3
 """
 Background worker for processing documentation generation jobs.
+
+Documentation is produced by invoking the same entry point as the terminal:
+``codewiki generate`` (see ``codewiki.cli.commands.generate``). Requirements:
+
+- ``codewiki`` on ``PATH`` (install the package), or the worker falls back to
+  ``python -m codewiki.cli.main generate``.
+- ``~/.codewiki/config.json`` populated at least once via
+  ``codewiki config set --base-url ... --main-model ... --cluster-model ...``.
+  The API key may still come from ``GEMINI_API_KEY`` / ``LLM_API_KEY`` in the
+  process environment (see ``codewiki.cli.config_manager.ConfigManager``).
 """
 
-import os
-import json
-import time
-import shutil
-import threading
-import subprocess
-import asyncio
 import logging
+import os
+import shutil
+import subprocess
+import sys
+import threading
+import time
 from datetime import datetime
 from pathlib import Path
 from queue import Empty, Queue
 from typing import Dict
-from dataclasses import asdict
 
-from codewiki.src.be.documentation_generator import DocumentationGenerator
-from codewiki.src.config import Config, MAIN_MODEL
+from codewiki.src.config import MAIN_MODEL
 from .models import JobStatus
 from .cache_manager import CacheManager
 from .github_processor import GitHubRepoProcessor
@@ -26,6 +33,55 @@ from .config import WebAppConfig
 from codewiki.src.file_manager import file_manager
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_codewiki_cli() -> list:
+    """
+    How to invoke the CodeWiki CLI, matching what users run in a terminal.
+    Returns a argv prefix, e.g. ['codewiki'] or [sys.executable, '-m', 'codewiki.cli.main'].
+    """
+    codewiki_exe = shutil.which("codewiki")
+    if codewiki_exe:
+        return [codewiki_exe]
+    return [sys.executable, "-m", "codewiki.cli.main"]
+
+
+def _read_log_tail(log_path: str, max_bytes: int = 4096) -> str:
+    """Return the tail of a log file as text (best-effort)."""
+    try:
+        with open(log_path, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            size = f.tell()
+            if size <= max_bytes:
+                f.seek(0)
+            else:
+                f.seek(-max_bytes, os.SEEK_END)
+            raw = f.read()
+        return raw.decode("utf-8", errors="replace").strip()
+    except OSError:
+        return ""
+
+
+def _refresh_progress_from_artifacts(job: JobStatus, docs_dir: str, log_path: str) -> None:
+    """Update job.generation_stage and job.progress from output dir + log tail."""
+    has_module_tree = os.path.exists(os.path.join(docs_dir, "module_tree.json"))
+    has_overview = os.path.exists(os.path.join(docs_dir, "overview.md"))
+    has_report = os.path.exists(os.path.join(docs_dir, "generation_report.json"))
+    has_metrics = os.path.exists(os.path.join(docs_dir, "metrics.json"))
+    if has_metrics or has_report:
+        job.generation_stage = 3
+    elif has_overview:
+        job.generation_stage = 3
+    elif has_module_tree:
+        job.generation_stage = 2
+    else:
+        job.generation_stage = 1
+    last = _read_log_tail(log_path, max_bytes=400)
+    if last:
+        lines = last.splitlines()
+        if lines:
+            job.progress = lines[-1][:200]
+
 
 class BackgroundWorker:
     """Background worker for processing documentation generation jobs."""
@@ -155,7 +211,6 @@ class BackgroundWorker:
                     'main_model': job.main_model,
                     'commit_id': job.commit_id,
                     'generation_stage': job.generation_stage,
-                    'force_regenerate': getattr(job, 'force_regenerate', False),
                 }
             
             file_manager.save_json(data, self.jobs_file)
@@ -189,21 +244,29 @@ class BackgroundWorker:
         logger.info(f"[STAGE 0] Job details: repo_url={job.repo_url}, commit_id={job.commit_id}")
         
         try:
-            # Update job status
-            job.status = 'processing'
+            # Update job status (reset stage for UI pipeline; e.g. regenerate reuses same job_id)
+            job.status = "processing"
             job.started_at = datetime.now()
+            job.generation_stage = 0
             job.progress = "Starting repository clone..."
+            job.error_message = None
+            job.docs_path = None
             job.main_model = MAIN_MODEL
             
-            # STAGE 0.1: Check cache first (skip when user chose "Regenerate")
-            skip_cache = getattr(job, 'force_regenerate', False)
-            if skip_cache:
-                logger.info(f"[STAGE 0.1: CACHE CHECK] Skipped (force_regenerate=True) for {job.repo_url}")
-            else:
-                logger.info(f"[STAGE 0.1: CACHE CHECK] Checking cache for {job.repo_url}")
+            # STAGE 0.1: Check cache first (skip when user requested full regeneration)
+            skip_cache = getattr(job, "force_regenerate", False)
+            logger.info(
+                "[STAGE 0.1: CACHE CHECK] Checking cache for %s (force_regenerate=%s)",
+                job.repo_url,
+                skip_cache,
+            )
             cache_check_start = time.time()
             try:
-                cached_docs = None if skip_cache else self.cache_manager.get_cached_docs(job.repo_url)
+                cached_docs = (
+                    None if skip_cache else self.cache_manager.get_cached_docs(job.repo_url)
+                )
+                if skip_cache:
+                    logger.info("[STAGE 0.1] Cache lookup skipped (force_regenerate=True)")
                 cache_check_duration = time.time() - cache_check_start
                 
                 if cached_docs:
@@ -277,177 +340,160 @@ class BackgroundWorker:
                 logger.error(f"[STAGE 0.2] Traceback: {traceback.format_exc()}")
                 raise
             
-            # STAGE 0.3: Clone repository
+            # STAGE 0.3: Clone repository or update an existing clone (see CODEWIKI_DELETE_TEMP_REPO_AFTER_SUCCESS)
             temp_repo_dir = os.path.join(self.temp_dir, job_id)
-            logger.info(f"[STAGE 0.3: CLONE REPOSITORY] Cloning {repo_info['clone_url']}")
+            has_git = os.path.isdir(os.path.join(temp_repo_dir, ".git"))
+            logger.info(f"[STAGE 0.3: CLONE/UPDATE] {repo_info['clone_url']}")
             logger.info(f"[STAGE 0.3] Target directory: {temp_repo_dir}")
+            logger.info(f"[STAGE 0.3] Reuse: existing .git = {has_git}, delete after success = {WebAppConfig.DELETE_TEMP_REPO_AFTER_SUCCESS}")
             logger.info(f"[STAGE 0.3] Commit ID: {job.commit_id if job.commit_id else 'HEAD (shallow clone)'}")
             logger.info(f"[STAGE 0.3] Clone timeout: {WebAppConfig.CLONE_TIMEOUT}s")
             logger.info(f"[STAGE 0.3] Clone depth: {WebAppConfig.CLONE_DEPTH if not job.commit_id else 'full'}")
             
             clone_start = time.time()
-            job.progress = f"Cloning repository {repo_info['full_name']}..."
-            
-            try:
-                clone_success = False
-                reused = GitHubRepoProcessor.sync_existing_clone(
-                    repo_info['clone_url'], temp_repo_dir, job.commit_id
+            clone_method = "clone"
+            if has_git and GitHubRepoProcessor.sync_existing_clone(
+                repo_info["clone_url"], temp_repo_dir, job.commit_id
+            ):
+                clone_method = "fetch"
+                job.progress = f"Updated local copy (git fetch): {repo_info['full_name']}…"
+                clone_success = True
+            else:
+                if has_git:
+                    logger.info("[STAGE 0.3] Re-sync failed or no usable clone; removing and cloning fresh: %s", temp_repo_dir)
+                    shutil.rmtree(temp_repo_dir, ignore_errors=True)
+                job.progress = f"Cloning repository {repo_info['full_name']}…"
+                clone_success = GitHubRepoProcessor.clone_repository(
+                    repo_info["clone_url"], temp_repo_dir, job.commit_id
                 )
-                if reused:
-                    clone_success = True
-                    logger.info(f"[STAGE 0.3] Reused existing clone under {temp_repo_dir} (no full clone)")
-                else:
-                    if os.path.exists(temp_repo_dir):
-                        logger.info(f"[STAGE 0.3] Removing stale or incomplete temp dir before clone: {temp_repo_dir}")
-                        shutil.rmtree(temp_repo_dir, ignore_errors=True)
-                    clone_success = GitHubRepoProcessor.clone_repository(
-                        repo_info['clone_url'], temp_repo_dir, job.commit_id
-                    )
-                clone_duration = time.time() - clone_start
-                
-                if clone_success:
-                    # Verify clone succeeded
-                    if os.path.exists(temp_repo_dir):
-                        repo_size = sum(f.stat().st_size for f in Path(temp_repo_dir).rglob('*') if f.is_file())
-                        file_count = len(list(Path(temp_repo_dir).rglob('*')))
-                        logger.info(f"[STAGE 0.3] Clone completed in {clone_duration:.1f}s")
-                        logger.info(f"[STAGE 0.3] Repository size: {repo_size} bytes")
-                        logger.info(f"[STAGE 0.3] File count: {file_count}")
-                        logger.info(f"[STAGE 0.3] Target directory exists: {os.path.exists(temp_repo_dir)}")
-                    else:
-                        logger.error(f"[STAGE 0.3] Clone reported success but target directory does not exist: {temp_repo_dir}")
-                        raise Exception("Clone succeeded but target directory not found")
-                else:
-                    clone_duration = time.time() - clone_start
-                    logger.error(f"[STAGE 0.3] Clone FAILED after {clone_duration:.1f}s")
-                    logger.error(f"[STAGE 0.3] Clone URL: {repo_info['clone_url']}")
-                    logger.error(f"[STAGE 0.3] Target directory: {temp_repo_dir}")
-                    logger.error(f"[STAGE 0.3] Commit ID: {job.commit_id}")
-                    raise Exception("Failed to clone repository")
-            except subprocess.TimeoutExpired:
-                clone_duration = time.time() - clone_start
-                logger.error(f"[STAGE 0.3] Clone TIMEOUT after {clone_duration:.1f}s (timeout: {WebAppConfig.CLONE_TIMEOUT}s)")
-                logger.error(f"[STAGE 0.3] Clone URL: {repo_info['clone_url']}")
-                raise
-            except Exception as e:
-                clone_duration = time.time() - clone_start
-                logger.error(f"[STAGE 0.3] Clone FAILED after {clone_duration:.1f}s: {type(e).__name__}: {str(e)}")
+            clone_duration = time.time() - clone_start
+            self.save_job_statuses()
+
+            if not clone_success:
+                logger.error(
+                    "[STAGE 0.3] %s FAILED after %.1fs",
+                    clone_method,
+                    clone_duration,
+                )
                 logger.error(f"[STAGE 0.3] Clone URL: {repo_info['clone_url']}")
                 logger.error(f"[STAGE 0.3] Target directory: {temp_repo_dir}")
-                import traceback
-                logger.error(f"[STAGE 0.3] Traceback: {traceback.format_exc()}")
-                raise
-            
-            # STAGE 0.4: Create config
-            logger.info(f"[STAGE 0.4: CONFIG CREATION] Creating configuration")
-            logger.info(f"[STAGE 0.4] Repo path: {temp_repo_dir}")
-            config_start = time.time()
-            
-            try:
-                import argparse
-                args = argparse.Namespace(repo_path=temp_repo_dir)
-                config = Config.from_args(args)
-                config.docs_dir = os.path.join("output", "docs", f"{job_id}-docs")
-                config_duration = time.time() - config_start
-                
-                logger.info(f"[STAGE 0.4] Config created in {config_duration:.1f}s")
-                logger.info(f"[STAGE 0.4] Config values:")
-                logger.info(f"[STAGE 0.4]   - Repo path: {config.repo_path}")
-                logger.info(f"[STAGE 0.4]   - Output dir: {config.output_dir}")
-                logger.info(f"[STAGE 0.4]   - Docs dir: {config.docs_dir}")
-                logger.info(f"[STAGE 0.4]   - Dependency graph dir: {config.dependency_graph_dir}")
-                logger.info(f"[STAGE 0.4]   - Max depth: {config.max_depth}")
-                logger.info(f"[STAGE 0.4]   - Main model: {config.main_model}")
-                logger.info(f"[STAGE 0.4]   - Cluster model: {config.cluster_model}")
-                logger.info(f"[STAGE 0.4]   - LLM base URL: {config.llm_base_url}")
-                logger.info(f"[STAGE 0.4]   - LLM API key: {'*' * 8 if config.llm_api_key else 'NOT SET'}")
-                
-                # Validate config paths
-                if not os.path.exists(config.repo_path):
-                    logger.error(f"[STAGE 0.4] Config validation FAILED: repo_path does not exist: {config.repo_path}")
-                    raise ValueError(f"Repository path does not exist: {config.repo_path}")
-                
-                logger.info(f"[STAGE 0.4] Config validation passed")
-            except Exception as e:
-                config_duration = time.time() - config_start
-                logger.error(f"[STAGE 0.4] Config creation FAILED after {config_duration:.1f}s: {type(e).__name__}: {str(e)}")
-                import traceback
-                logger.error(f"[STAGE 0.4] Traceback: {traceback.format_exc()}")
-                raise
-            
-            stage_duration = time.time() - stage_start
-            logger.info(f"[STAGE 0: REPOSITORY SETUP] COMPLETE in {stage_duration:.1f}s")
-            
-            # Generate documentation
-            job.progress = "Analyzing repository structure..."
-            job.generation_stage = 0
-            logger.info(f"[STAGE 0] Starting documentation generation...")
-            logger.info(f"[STAGE 0] Commit ID: {job.commit_id}")
-            
-            doc_gen_start = time.time()
-            job.progress = "Generating documentation..."
+                logger.error(f"[STAGE 0.3] Commit ID: {job.commit_id}")
+                raise Exception("Failed to clone or update repository")
 
-            def _on_generation_stage(stage: int) -> None:
-                job.generation_stage = stage
-                if stage == 1:
-                    job.progress = "Dependency analysis complete"
-                elif stage == 2:
-                    job.progress = "Module clustering complete"
-                elif stage == 3:
-                    job.progress = "Documentation generation complete"
-                self.save_job_statuses()
-            
-            # Generate documentation
-            doc_generator = DocumentationGenerator(
-                config, job.commit_id, progress_callback=_on_generation_stage
+            if not os.path.exists(temp_repo_dir):
+                raise Exception("Repository path missing after clone or update")
+            if not os.path.isdir(os.path.join(temp_repo_dir, ".git")):
+                raise Exception("No .git after clone or update")
+
+            repo_size = sum(
+                f.stat().st_size for f in Path(temp_repo_dir).rglob("*") if f.is_file()
+            )
+            file_count = len(list(Path(temp_repo_dir).rglob("*")))
+            logger.info(
+                "[STAGE 0.3] %s complete in %.1fs (size=%s bytes, tree entries=%s)",
+                clone_method,
+                clone_duration,
+                repo_size,
+                file_count,
             )
             
-            # Run the async documentation generation in a new event loop
-            logger.info(f"[STAGE 0] Creating async event loop for documentation generation...")
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                logger.info(f"[STAGE 0] Running documentation generation (same as codewiki generate)...")
-                loop.run_until_complete(doc_generator.run())
-                doc_gen_duration = time.time() - doc_gen_start
-                logger.info(f"[STAGE 0] Documentation generation completed in {doc_gen_duration:.1f}s")
-            except Exception as e:
-                doc_gen_duration = time.time() - doc_gen_start
-                logger.error(f"[STAGE 0] Documentation generation FAILED after {doc_gen_duration:.1f}s: {type(e).__name__}: {str(e)}")
-                import traceback
-                logger.error(f"[STAGE 0] Traceback: {traceback.format_exc()}")
-                raise
-            finally:
-                loop.close()
-                logger.info(f"[STAGE 0] Event loop closed")
-            
-            # Cache the results
-            logger.info(f"[STAGE 0] Caching documentation results...")
-            docs_path = os.path.abspath(config.docs_dir)
-            
+            # STAGE 0.4: Invoke CLI (same pipeline as terminal `codewiki generate`)
+            logger.info("[STAGE 0.4: CLI GENERATE] Invoking codewiki generate")
+            logger.info("[STAGE 0.4] Repo path: %s", temp_repo_dir)
+            if not os.path.isdir(temp_repo_dir):
+                raise ValueError(f"Cloned repository path is not a directory: {temp_repo_dir}")
+
+            docs_dir = os.path.abspath(os.path.join("output", "docs", f"{job_id}-docs"))
+            # Wipe any prior run's artifacts so the poll loop cannot read stale module_tree
+            # / metrics / overview before this CLI run writes fresh files (fixes "Regenerate"
+            # still showing all steps as completed).
+            if os.path.isdir(docs_dir):
+                shutil.rmtree(docs_dir, ignore_errors=True)
+            os.makedirs(docs_dir, exist_ok=True)
+            log_path = os.path.join(docs_dir, "codewiki_generate.log")
+            job.generation_stage = 1
+
+            base = resolve_codewiki_cli()
+            if len(base) > 1:
+                logger.warning(
+                    "codewiki executable not on PATH; using %s -m codewiki.cli.main",
+                    sys.executable,
+                )
+            cmd = base + ["generate"]
+            cmd.extend(
+                [
+                    "--output",
+                    docs_dir,
+                    "--force",
+                    "--no-cache",
+                    "-v",
+                    "--demo-slug",
+                    repo_info.get("repo") or "repo",
+                ]
+            )
+
+            job.progress = "Running codewiki generate..."
+            self.save_job_statuses()
+
+            logger.info("[STAGE 0.4] Command: %s", " ".join(cmd))
+            logger.info("[STAGE 0.4] cwd=%s log=%s", temp_repo_dir, log_path)
+            logger.info("[STAGE 0] Commit ID: %s", job.commit_id)
+
+            doc_gen_start = time.time()
+            env = os.environ.copy()
+            with open(log_path, "wb") as logf:
+                proc = subprocess.Popen(
+                    cmd,
+                    cwd=temp_repo_dir,
+                    env=env,
+                    stdout=logf,
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                )
+                while proc.poll() is None:
+                    _refresh_progress_from_artifacts(job, docs_dir, log_path)
+                    self.save_job_statuses()
+                    time.sleep(2)
+                rc = proc.returncode
+
+            _refresh_progress_from_artifacts(job, docs_dir, log_path)
+            self.save_job_statuses()
+
+            if rc != 0:
+                tail = _read_log_tail(log_path, max_bytes=4096)
+                raise RuntimeError(
+                    f"codewiki generate exited with code {rc}. Log: {log_path}\n--- log tail ---\n{tail}"
+                )
+
+            doc_gen_duration = time.time() - doc_gen_start
+            logger.info(
+                "[STAGE 0.4] Documentation generation (CLI) completed in %.1fs",
+                doc_gen_duration,
+            )
+            phase_duration = time.time() - stage_start
+            logger.info(
+                "[STAGE 0] Clone + codewiki generate COMPLETE in %.1fs",
+                phase_duration,
+            )
+
+            docs_path = docs_dir
+
+            # Cache the results (demo viewer sync is done inside CLIDocumentationGenerator.generate)
+            logger.info("[STAGE 0] Caching documentation results...")
+
             try:
                 cache_start = time.time()
                 self.cache_manager.add_to_cache(job.repo_url, docs_path)
                 cache_duration = time.time() - cache_start
-                logger.info(f"[STAGE 0] Results cached in {cache_duration:.3f}s")
-                logger.info(f"[STAGE 0] Cache path: {docs_path}")
+                logger.info("[STAGE 0] Results cached in %.3fs", cache_duration)
+                logger.info("[STAGE 0] Cache path: %s", docs_path)
             except Exception as e:
-                logger.error(f"[STAGE 0] Failed to cache results: {type(e).__name__}: {str(e)}")
-                # Non-critical, continue
-
-            try:
-                from codewiki.cli.utils.demo_viewer_sync import (
-                    repo_slug_from_url,
-                    sync_generated_docs_to_demo_viewer,
+                logger.error(
+                    "[STAGE 0] Failed to cache results: %s: %s",
+                    type(e).__name__,
+                    str(e),
                 )
 
-                sync_generated_docs_to_demo_viewer(
-                    Path(docs_path),
-                    repo_slug_from_url(job.repo_url),
-                )
-            except Exception as e:
-                logger.warning("Demo viewer sync failed (non-fatal): %s", e)
-            
             # Update job status
             job.status = 'completed'
             job.completed_at = datetime.now()
@@ -495,37 +541,35 @@ class BackgroundWorker:
             logger.error("Job %s: Failed with error: %s", job_id, e)
         
         finally:
-            # Cleanup temp clone: always remove on failure; on success keep by default (regeneration reuses git fetch).
+            # Optional cleanup: default is to keep output/temp/<job_id> so the next run can
+            # git fetch instead of cloning. Set CODEWIKI_DELETE_TEMP_REPO_AFTER_SUCCESS=1 to
+            # remove the clone after a successful job to save disk.
+            should_delete_temp = (
+                "temp_repo_dir" in locals()
+                and os.path.exists(temp_repo_dir)
+                and WebAppConfig.DELETE_TEMP_REPO_AFTER_SUCCESS
+                and job.status == "completed"
+            )
             cleanup_start = time.time()
-            st = self.job_status.get(job_id)
-            remove_temp = bool(st and st.status == "failed") or WebAppConfig.DELETE_TEMP_REPO_AFTER_SUCCESS
-            if "temp_repo_dir" in locals() and os.path.exists(temp_repo_dir):
-                if remove_temp:
-                    try:
-                        logger.info(f"[STAGE 0] Cleaning up temporary repository: {temp_repo_dir}")
-                        subprocess.run(["rm", "-rf", temp_repo_dir], check=True, timeout=30)
-                        cleanup_duration = time.time() - cleanup_start
-                        logger.info(f"[STAGE 0] Cleanup completed in {cleanup_duration:.3f}s")
-                    except subprocess.TimeoutExpired:
-                        cleanup_duration = time.time() - cleanup_start
-                        logger.warning(
-                            f"[STAGE 0] Cleanup TIMEOUT after {cleanup_duration:.1f}s (timeout: 30s)"
-                        )
-                    except Exception as e:
-                        cleanup_duration = time.time() - cleanup_start
-                        logger.warning(
-                            "[STAGE 0] Cleanup failed after %.3fs: %s — %s",
-                            cleanup_duration,
-                            type(e).__name__,
-                            e,
-                        )
-                else:
+            if should_delete_temp:
+                try:
+                    logger.info("[STAGE 0] Deleting temp repository (CODEWIKI_DELETE_TEMP_REPO_AFTER_SUCCESS=1): %s", temp_repo_dir)
+                    shutil.rmtree(temp_repo_dir, ignore_errors=True)
                     logger.info(
-                        "[STAGE 0] Keeping temp clone for faster regeneration: %s "
-                        "(set CODEWIKI_DELETE_TEMP_REPO_AFTER_SUCCESS=1 to always delete after success)",
-                        temp_repo_dir,
+                        "[STAGE 0] Temp cleanup done in %.3fs",
+                        time.time() - cleanup_start,
                     )
+                except OSError as e:
+                    logger.warning("Failed to remove temp directory: %s", e)
+            elif "temp_repo_dir" in locals() and os.path.exists(temp_repo_dir):
+                logger.info(
+                    "[STAGE 0] Keeping temp clone for reuse: %s (set CODEWIKI_DELETE_TEMP_REPO_AFTER_SUCCESS=1 to delete after success)",
+                    temp_repo_dir,
+                )
             elif "temp_repo_dir" not in locals():
-                logger.info("[STAGE 0] No temporary directory to cleanup (not created)")
+                logger.info("[STAGE 0] No temporary directory to clean up (not created)")
             else:
-                logger.info("[STAGE 0] No temporary directory to cleanup (path missing)")
+                logger.info(
+                    "[STAGE 0] No temp directory to keep or delete (path missing): %s",
+                    temp_repo_dir,
+                )

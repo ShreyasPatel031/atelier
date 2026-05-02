@@ -1,39 +1,40 @@
-# UDOP Models Documentation
-
-## Introduction
-The `udop_models` module provides the core components for the UDOP (Unified Document Pre-training) model, a multi-modal architecture designed for document understanding tasks. This module includes functionalities for converting original UDOP checkpoints to the Hugging Face format and defining the model's encoder-decoder and encoder-only architectures.
-
-## Architecture Overview
-The UDOP module is structured into two main logical sub-modules: `conversion_utilities` and `modeling`. The `modeling` sub-module defines the fundamental building blocks and full model architectures, while `conversion_utilities` focuses on enabling the use of pre-trained models by converting their weights.
+# udop_models
+This module provides the core Udop model architecture, including a full encoder-decoder model and an encoder-only variant, both leveraging shared text/image embeddings and a transformer stack.
 
 <!-- DIAGRAM_JSON
 {
-    "direction": "TD",
-    "nodes": [
-        {"id": "modeling", "label": "UDOP Model Architectures", "type": "module", "link": "modeling.md"},
-        {"id": "conversion_utilities", "label": "Checkpoint Conversion", "type": "module", "link": "conversion_utilities.md"}
-    ],
-    "edges": [
-        {"source": "conversion_utilities", "target": "modeling"}
-    ],
-    "groups": []
+  "nodes": [
+    {"id": "UdopModel", "label": "UdopModel"},
+    {"id": "UdopEncoderModel", "label": "UdopEncoderModel"},
+    {"id": "UdopStack", "label": "UdopStack"},
+    {"id": "UdopPatchEmbeddings", "label": "UdopPatchEmbeddings"},
+    {"id": "nnEmbedding", "label": "nn.Embedding"}
+  ],
+  "edges": [
+    {"source": "UdopModel", "target": "UdopStack", "label": "uses encoder/decoder"},
+    {"source": "UdopModel", "target": "UdopPatchEmbeddings", "label": "uses"},
+    {"source": "UdopModel", "target": "nnEmbedding", "label": "uses"},
+    {"source": "UdopEncoderModel", "target": "UdopStack", "label": "uses encoder"},
+    {"source": "UdopEncoderModel", "target": "UdopPatchEmbeddings", "label": "uses"},
+    {"source": "UdopEncoderModel", "target": "nnEmbedding", "label": "uses"}
+  ],
+  "groups": [
+    {"id": "udop_models", "label": "udop_models", "nodes": ["UdopModel", "UdopEncoderModel"]}
+  ]
 }
 -->
 ```mermaid
-graph TD
-    modeling[UDOP Model Architectures]
-    conversion_utilities[Checkpoint Conversion]
+flowchart TD
+    subgraph udop_models
+        UdopModel
+        UdopEncoderModel
+    end
 
-    conversion_utilities --> modeling
+    UdopModel -- uses encoder/decoder --> UdopStack
+    UdopModel -- uses --> UdopPatchEmbeddings
+    UdopModel -- uses --> nnEmbedding
 
-    click modeling "modeling.md" "View UDOP Model Architectures Documentation"
-    click conversion_utilities "conversion_utilities.md" "View Checkpoint Conversion Documentation"
+    UdopEncoderModel -- uses encoder --> UdopStack
+    UdopEncoderModel -- uses --> UdopPatchEmbeddings
+    UdopEncoderModel -- uses --> nnEmbedding
 ```
-
-### Sub-modules:
-
-*   **[Modeling](modeling.md)**:
-    This sub-module encapsulates the core architectural definitions of the UDOP model, including the full encoder-decoder model (`UdopModel`) and the encoder-only variant (`UdopEncoderModel`). It handles the integration of text and image embeddings and defines the forward pass mechanisms for both architectures.
-
-*   **[Conversion Utilities](conversion_utilities.md)**:
-    This sub-module is responsible for the practical aspects of integrating pre-trained UDOP models. It provides utilities to convert original UDOP checkpoints into a format compatible with the Hugging Face ecosystem, ensuring proper weight loading, key renaming, and tokenizer configuration.

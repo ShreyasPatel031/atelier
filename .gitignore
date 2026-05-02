@@ -68,6 +68,10 @@ docs/.cache/
 .DS_Store
 Thumbs.db
 
+# Node (viewer tooling / Playwright — do not commit deps tree)
+node_modules/
+test-results/
+
 # Temporary files
 .tmp/
 *.tmp

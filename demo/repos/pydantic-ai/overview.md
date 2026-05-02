@@ -1,93 +1,133 @@
-The `pydantic--pydantic-ai` repository provides a comprehensive framework for building, deploying, and evaluating AI agents. It offers core components for orchestrating agent workflows, flexible integrations with various large language models (LLMs) and external tools, mechanisms for durable and fault-tolerant execution, and advanced capabilities for defining and managing complex graph-based workflows. Additionally, it includes modules for evaluating agent performance, managing documentation, and providing a command-line interface.
+The `pydantic-ai-src` repository offers a comprehensive framework for building, evaluating, and deploying intelligent AI agents. It empowers developers to define complex agent behaviors, integrate with diverse Large Language Models (LLMs) and embedding services, incorporate various tools, enable durable execution, and connect to interactive user interfaces. Additionally, it provides a robust evaluation system to define structured datasets, implement various metrics, and orchestrate both offline and real-time online evaluations, ensuring continuous monitoring and improvement of AI performance. It's designed for developers and researchers who need structured, observable, and reliable AI systems.
+
+### Key User Workflows
+
+1.  **Build & Orchestrate AI Agents**: Users define agent specifications, capabilities, and tools, then orchestrate their execution through a graph-based workflow, handling inputs, processing steps, and managing outputs.
+2.  **Integrate Diverse AI Models & Tools**: Connect to a wide array of LLM providers, embedding models, and external/internal tools via a unified interface, leveraging Pydantic for structured data handling.
+3.  **Evaluate AI System Performance**: Create and manage datasets, execute various evaluators (from simple checks to complex statistical analyses), and generate reports to assess and improve AI model and agent quality.
+4.  **Develop & Document**: Utilize developer tools for testing, verification, and manage comprehensive, searchable documentation for the entire project.
 
 ### Architecture Overview
 
-The repository is structured into several key functional areas, each encompassing modules responsible for specific aspects of AI agent development and operation. These areas interact to form a cohesive and extensible system.
-
 ```mermaid
-graph TD
-    %% Main Functional Areas — subgraph titles must be id["Quoted Label"] (& and spaces break unquoted titles)
-    subgraph sg_ac["Agent Core"]
-        AICore[Pydantic AI Core]
-        AIAgent[Pydantic AI Agent]
-        AICaps[Pydantic AI Capabilities]
-        AITools[Pydantic AI Toolsets]
+flowchart LR
+    user(("User"))
+    user ==>|"configures"| DefineAgent
+    user ==>|"interacts with"| UserInterface
+    user ==>|"initiates"| RunEvaluations
+    user ==>|"develops with"| UseDevTools
+
+    subgraph agent_core["Agent Core & Orchestration"]
+        DefineAgent["Define Agent Behavior"]
+        OrchestrateFlow["Orchestrate Agent Workflow"]
+        ManageCapabilities["Manage Agent Capabilities"]
+        HandleOutput["Process Agent Output"]
+        RunDurableAgent["Run Durable Agent"]
     end
 
-    subgraph sg_mm["Model Management"]
-        AIModels[Pydantic AI Models]
-        AIProviders[Pydantic AI Providers]
-        AIProfiles[Pydantic AI Model Profiles]
+    subgraph ai_ecosystem["AI Model & Tool Ecosystem"]
+        ConnectLLMs["Connect to LLM Providers"]
+        UseEmbeddings["Generate Embeddings"]
+        ManageToolsets["Manage Toolsets & Tools"]
+        ExternalTools["Integrate External Toolsets"]
+        BuiltinTools["Access Built-in Tools"]
     end
 
-    subgraph sg_wd["Workflow and Durability"]
-        GraphCore[Pydantic Graph Core]
-        GraphBeta[Pydantic Graph Beta]
-        GraphPersist[Pydantic Graph Persistence]
-        AIDurable[Pydantic AI Durable Execution]
+    subgraph evaluation["Evaluation & Reporting"]
+        DefineDatasets["Define & Generate Datasets"]
+        RunEvaluations["Execute Evaluations"]
+        AnalyzeReports["Analyze Reports & Metrics"]
+        EvaluatorLogic["Implement Evaluator Logic"]
     end
 
-    subgraph sg_xt["Extensions and Common Tools"]
-        AIExt[Pydantic AI Extensions]
-        AICommonTools[Pydantic AI Common Tools]
+    subgraph project_support["Project Support & UI"]
+        UserInterface["Interact via UI"]
+        BrowseDocs["Browse Documentation"]
+        UseDevTools["Use Developer Utilities"]
+        SearchDocs["Search Documentation"]
     end
 
-    subgraph sg_ev["Evaluation"]
-        EvalOTel[Pydantic Evals OTel]
-        EvalReport[Pydantic Evals Reporting]
+    subgraph data_storage["Stored Data"]
+        AgentState[("Agent State")]
+        EvalResults[("Evaluation Results")]
+        DocsContent[("Documentation Content")]
+        SearchIndex[("Search Index")]
     end
 
-    subgraph sg_ui["User Interface and Documentation"]
-        CLICLI[CLAI CLI]
-        DocsSite[Docs Site]
-        DocsHooks[Docs Hooks]
-    end
+    %% Agent Core & Orchestration internal connections
+    DefineAgent -->|"defines workflow"| OrchestrateFlow
+    DefineAgent -->|"configures"| ManageCapabilities
+    ManageCapabilities -->|"enables"| OrchestrateFlow
+    OrchestrateFlow -->|"produces"| HandleOutput
+    RunDurableAgent -.->|"wraps execution"| OrchestrateFlow
 
-    %% Core Relationships
-    AIAgent --> AICore
-    AICaps --> AIAgent
-    AITools --> AICore
-    AICore --> AIModels
-    AIModels --> AIProviders
-    AIProviders --> AIProfiles
-    AIModels --> AIProfiles
+    %% AI Model & Tool Ecosystem internal connections
+    ExternalTools -->|"extends"| ManageToolsets
+    BuiltinTools -->|"provides"| ManageToolsets
 
-    %% Workflow & Durability Relationships
-    AIDurable --> AIAgent
-    AIDurable --> AIModels
-    GraphCore --> GraphBeta
-    GraphCore --> GraphPersist
-    AIAgent --> GraphCore %% Agents can use graphs for complex workflows
+    %% Evaluation & Reporting internal connections
+    RunEvaluations -->|"uses"| DefineDatasets
+    RunEvaluations -->|"applies"| EvaluatorLogic
+    AnalyzeReports -->|"reads"| EvalResults
 
-    %% Extensions & Tools Relationships
-    AITools --> AIExt
-    AITools --> AICommonTools
+    %% Project Support & UI internal connections
+    BrowseDocs -->|"queries"| SearchDocs
 
-    %% Evaluation Relationships
-    EvalOTel --> AIAgent %% Observes agent execution
-    EvalReport --> EvalOTel %% Reports on observed data
+    %% Cross-group connections
+    OrchestrateFlow -->|"requests LLM/Tool"| ConnectLLMs
+    ConnectLLMs -->|"returns response"| OrchestrateFlow
+    ManageToolsets -->|"provides callable"| OrchestrateFlow
+    UseEmbeddings -->|"provides vectors"| ManageCapabilities
 
-    %% Documentation & CLI Relationships
-    CLICLI --> AICore %% CLI interacts with core functionality
-    DocsSite --> DocsHooks %% Docs site uses hooks for build process
+    OrchestrateFlow -->|"persists state"| AgentState
+    AgentState -->|"restores state"| OrchestrateFlow
 
-    %% Clickable nodes
-    click AICore "pydantic_ai_core.md" "View Pydantic AI Core Documentation"
-    click AIAgent "pydantic_ai_agent.md" "View Pydantic AI Agent Documentation"
-    click AICaps "pydantic_ai_capabilities.md" "View Pydantic AI Capabilities Documentation"
-    click AITools "pydantic_ai_toolsets.md" "View Pydantic AI Toolsets Documentation"
-    click AIModels "pydantic_ai_models.md" "View Pydantic AI Models Documentation"
-    click AIProviders "pydantic_ai_providers.md" "View Pydantic AI Providers Documentation"
-    click AIProfiles "pydantic_ai_model_profiles.md" "View Pydantic AI Model Profiles Documentation"
-    click AIDurable "pydantic_ai_durable_execution.md" "View Pydantic AI Durable Execution Documentation"
-    click AIExt "pydantic_ai_extensions.md" "View Pydantic AI Extensions Documentation"
-    click AICommonTools "pydantic_ai_common_tools.md" "View Pydantic AI Common Tools Documentation"
-    click GraphCore "pydantic_graph_core.md" "View Pydantic Graph Core Documentation"
-    click GraphBeta "pydantic_graph_beta.md" "View Pydantic Graph Beta Documentation"
-    click GraphPersist "pydantic_graph_persistence.md" "View Pydantic Graph Persistence Documentation"
-    click EvalOTel "pydantic_evals_otel.md" "View Pydantic Evals OTel Documentation"
-    click EvalReport "pydantic_evals_reporting.md" "View Pydantic Evals Reporting Documentation"
-    click CLICLI "clai_cli.md" "View CLAI CLI Documentation"
-    click DocsSite "docs_site.md" "View Docs Site Documentation"
-    click DocsHooks "docs_hooks.md" "View Docs Hooks Documentation"
+    HandleOutput -.->|"provides agent output"| RunEvaluations
+    ConnectLLMs -.->|"provides model output"| RunEvaluations
+
+    UserInterface -->|"sends commands"| OrchestrateFlow
+    HandleOutput -->|"streams output"| UserInterface
+
+    UseDevTools -->|"generates"| DocsContent
+    DocsContent -->|"indexed by"| SearchDocs
+    DocsContent -->|"served by"| BrowseDocs
+    SearchDocs -->|"updates"| SearchIndex
+    SearchIndex -->|"used by"| BrowseDocs
+
+    RunEvaluations -->|"writes"| EvalResults
+
+    classDef userNode fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
+    classDef surface fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
+    classDef generative fill:#fed7aa,stroke:#ea580c,stroke-width:1px,color:#7c2d12
+    classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
+
+    class user userNode
+    class DefineAgent,OrchestrateFlow,ManageCapabilities,HandleOutput,RunDurableAgent generative
+    class ConnectLLMs,UseEmbeddings,ManageToolsets,ExternalTools,BuiltinTools data
+    class DefineDatasets,RunEvaluations,AnalyzeReports,EvaluatorLogic analytical
+    class UserInterface,BrowseDocs,UseDevTools,SearchDocs surface
+    class AgentState,EvalResults,DocsContent,SearchIndex data
+
+    click DefineAgent "agent_definition.md" "View Agent Definition"
+    click OrchestrateFlow "agent_execution_graph.md" "View Agent Execution Graph"
+    click ManageCapabilities "capabilities_base.md" "View Capabilities Base"
+    click HandleOutput "agent_output_handling.md" "View Agent Output Handling"
+    click RunDurableAgent "durable_execution_temporal.md" "View Durable Execution with Temporal"
+
+    click ConnectLLMs "model_provider_integrations.md" "View Model Provider Integrations"
+    click UseEmbeddings "embedding_core.md" "View Embedding Core"
+    click ManageToolsets "toolset_management.md" "View Toolset Management"
+    click ExternalTools "external_toolset_integrations.md" "View External Toolset Integrations"
+    click BuiltinTools "builtin_tools.md" "View Built-in Tools"
+
+    click DefineDatasets "dataset_management.md" "View Dataset Management"
+    click RunEvaluations "online_evaluation_system.md" "View Online Evaluation System"
+    click AnalyzeReports "reporting_and_rendering.md" "View Reporting and Rendering"
+    click EvaluatorLogic "evaluator_core.md" "View Evaluator Core"
+
+    click UserInterface "ui_vercel_ai_adapter.md" "View Vercel AI Adapter"
+    click BrowseDocs "documentation_site_management.md" "View Documentation Site Management"
+    click UseDevTools "developer_utility_scripts.md" "View Developer Utility Scripts"
+    click SearchDocs "search_and_indexing.md" "View Search and Indexing"
 ```

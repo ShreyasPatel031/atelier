@@ -1,13 +1,32 @@
 [
-  "crewai",
-  "crewai_updated",
-  "dspy",
-  "langchain",
-  "ollama",
-  "pydantic-ai",
-  "pydantic-ai-regen-promptfix",
-  "pydantic-ai-src",
-  "pydantic-ai_updated",
-  "swift",
-  "transformers"
+  {
+    "id": "crewai",
+    "label": "CrewAI",
+    "description": "Multi-agent crews, tasks, and tools for LLM workflows."
+  },
+  {
+    "id": "dspy",
+    "label": "DSPy",
+    "description": "Framework for programming not prompting LLM pipelines."
+  },
+  {
+    "id": "langchain",
+    "label": "LangChain",
+    "description": "Building blocks and agents for LLM apps and RAG."
+  },
+  {
+    "id": "ollama",
+    "label": "Ollama",
+    "description": "Run and bundle local LLMs with a simple API and CLI."
+  },
+  {
+    "id": "pydantic-ai",
+    "label": "Pydantic",
+    "description": "Type-safe agents and structured outputs on top of Pydantic."
+  },
+  {
+    "id": "transformers",
+    "label": "Transformers",
+    "description": "State-of-the-art pretrained models for NLP, vision, and more."
+  }
 ]

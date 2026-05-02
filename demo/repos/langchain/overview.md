@@ -1,128 +1,105 @@
-The `langchain-src` repository serves as the foundational codebase for the LangChain ecosystem, providing core abstractions, classic components, and partner integrations essential for building sophisticated large language model (LLM) applications. It encompasses fundamental interfaces for language models, prompts, tools, and runnables, alongside higher-level frameworks for agents and chains, and a wide array of integrations with third-party services and text processing utilities. Its purpose is to offer a modular, extensible, and robust framework for developing AI-powered applications.
+The `langchain` repository provides a comprehensive framework for developing applications powered by large language models (LLMs). It empowers developers to move beyond simple API calls to build complex, stateful, and intelligent applications by orchestrating LLMs with external data sources, computational tools, and memory.
 
-## Architecture Overview
+Users primarily interact with LangChain to:
 
-The `langchain-src` repository is structured into several key areas: **LangChain Core** for fundamental abstractions, **Classic LangChain** for established higher-level components, **Partner Integrations** for external service connections, and **Text Processing Utilities** for data preparation. These areas interact to form a comprehensive framework for building LLM-powered applications.
+1.  **Build Intelligent Applications:** Define multi-step workflows using "Chains" and "Agents" that can reason, act, and interact with their environment. This includes managing conversational memory and integrating various tools.
+2.  **Interact with Language Models:** Select and configure different LLMs, design effective prompts, and parse the structured or unstructured outputs from these models.
+3.  **Manage Data and Integrations:** Load, process, and store documents, create vector embeddings for efficient retrieval, and connect to a wide array of third-party services and data providers.
+4.  **Observe and Evaluate Applications:** Monitor the execution flow of their LLM applications, trace interactions, evaluate performance, and utilize developer tools for debugging and optimization.
+
+The repository is structured to support these workflows, offering modular components that can be easily combined and extended.
 
 ```mermaid
-graph TD
-    subgraph LangChain Core
-        CR[Core Runnables]
-        CLM[Core Language Models]
-        CP[Core Prompts]
-        CM[Core Messages]
-        CT[Core Tools]
-        CRet[Core Retrievers]
-        CCB[Core Callbacks]
-        CVS[Core Vector Stores]
-        CDL[Core Document Loaders]
+flowchart LR
+    user(("Developer"))
+    user ==>|"builds applications"| app_orchestration
+    user -->|"configures LLMs directly"| llm_interaction
+
+    subgraph app_orchestration["Application Development & Orchestration"]
+        orchestration_and_agents["Orchestrate Agents & Chains"]
+        memory["Manage Conversational Memory"]
+        tools_and_middleware["Define Tools & Middleware"]
     end
 
-    subgraph Classic LangChain
-        CA[Classic Agents]
-        CCH[Classic Chains Base]
-        CME[Classic Memory]
+    subgraph llm_interaction["Language Model Interaction"]
+        language_model_interface["Interact with Language Models"]
+        prompts_and_examples["Design Prompts & Examples"]
+        output_parsing["Parse Model Outputs"]
     end
 
-    subgraph Integrations & Utilities
-        POAI[OpenAI Chat Models]
-        PQD[Qdrant Vectorstores]
-        TSB[Text Splitters Base]
+    subgraph data_integrations["Data Management & Integrations"]
+        document_management["Load, Split & Index Documents"]
+        retrieval_systems["Retrieve Relevant Information"]
+        vector_stores["Store & Search Embeddings"]
+        partner_integrations["Connect to Partner Services"]
     end
 
-    %% Core dependencies
-    CR --> CLM
-    CR --> CP
-    CR --> CM
-    CR --> CT
-    CR --> CRet
-    CR --> CCB
-    CR --> CDL
+    subgraph observability_utilities["Observability & Utilities"]
+        callbacks_and_tracing["Monitor & Trace Runs"]
+        evaluation_framework["Evaluate Application Performance"]
+        caching_and_storage["Cache Responses & Data"]
+        developer_tools["Utilize Developer Tools"]
+    end
 
-    CLM --> CM
-    CLM --> CCB
+    %% Connections
+    orchestration_and_agents ==>|"uses"| language_model_interface
+    orchestration_and_agents -->|"manages state with"| memory
+    orchestration_and_agents -->|"invokes"| tools_and_middleware
+    orchestration_and_agents -->|"integrates data from"| retrieval_systems
 
-    CP --> CM
+    language_model_interface -->|"formats inputs with"| prompts_and_examples
+    language_model_interface -->|"structures outputs with"| output_parsing
 
-    CT --> CM
+    retrieval_systems -->|"queries"| vector_stores
+    document_management -->|"indexes into"| vector_stores
+    document_management -->|"prepares data for"| retrieval_systems
 
-    CRet --> CM
-    CRet --> CCB
-    CRet --> CVS
+    partner_integrations -->|"provides LLM implementations"| language_model_interface
+    partner_integrations -->|"offers data loaders"| document_management
+    partner_integrations -->|"provides specialized tools"| tools_and_middleware
 
-    %% For embeddings
-    CVS --> CLM
+    callbacks_and_tracing -.->|"observes"| orchestration_and_agents
+    callbacks_and_tracing -.->|"observes"| language_model_interface
+    evaluation_framework -.->|"analyzes traces from"| callbacks_and_tracing
+    caching_and_storage -.->|"optimizes calls to"| language_model_interface
+    developer_tools -.->|"supports"| evaluation_framework
 
-    CDL --> TSB
+    %% Styling
+    classDef userNode fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
+    classDef surface fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+    classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
+    classDef generative fill:#fed7aa,stroke:#ea580c,stroke-width:1px,color:#7c2d12
+    classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
 
-    %% Classic LangChain building on Core
-    CA --> CLM
-    CA --> CT
-    CA --> CP
-    CA --> CME
-    CA --> CRet
+    class user userNode
+    class orchestration_and_agents generative
+    class memory data
+    class tools_and_middleware analytical
+    class language_model_interface generative
+    class prompts_and_examples analytical
+    class output_parsing analytical
+    class document_management data
+    class retrieval_systems analytical
+    class vector_stores data
+    class partner_integrations surface
+    class callbacks_and_tracing analytical
+    class evaluation_framework analytical
+    class caching_and_storage data
+    class developer_tools analytical
 
-    CCH --> CLM
-    CCH --> CP
-    CCH --> CME
-    CCH --> CRet
-    CCH --> CCB
-    CCH --> CR
-
-    CME --> CM
-
-    %% Integrations implementing Core interfaces
-    POAI --> CLM
-    PQD --> CVS
-
-    %% Text Splitters
-    TSB --> CDL
-
-    click CR "core_runnables.md" "View Core Runnables"
-    click CLM "core_language_models.md" "View Core Language Models"
-    click CP "core_prompts.md" "View Core Prompts"
-    click CM "core_messages.md" "View Core Messages"
-    click CT "core_tools.md" "View Core Tools"
-    click CRet "core_retrievers.md" "View Core Retrievers"
-    click CCB "core_callbacks.md" "View Core Callbacks"
-    click CVS "core_vectorstores.md" "View Core Vector Stores"
-    click CDL "core_document_loaders.md" "View Core Document Loaders"
-
-    click CA "classic_agents.md" "View Classic Agents"
-    click CCH "classic_chains_base.md" "View Classic Chains Base"
-    click CME "classic_memory.md" "View Classic Memory"
-
-    click POAI "partners_openai_chat_models.md" "View OpenAI Chat Models"
-    click PQD "partners_qdrant_vectorstores.md" "View Qdrant Vectorstores"
-
-    click TSB "text_splitters_base.md" "View Text Splitters Base"
+    %% Clickable links
+    click orchestration_and_agents "orchestration_and_agents.md" "View Orchestration & Agents"
+    click memory "memory.md" "View Memory Management"
+    click tools_and_middleware "tools_and_middleware.md" "View Tools & Middleware"
+    click language_model_interface "language_model_interface.md" "View Language Model Interface"
+    click prompts_and_examples "prompts_and_examples.md" "View Prompts & Examples"
+    click output_parsing "output_parsing.md" "View Output Parsing"
+    click document_management "document_management.md" "View Document Management"
+    click retrieval_systems "retrieval_systems.md" "View Retrieval Systems"
+    click vector_stores "vector_stores.md" "View Vector Stores"
+    click partner_integrations "partner_integrations.md" "View Partner Integrations"
+    click callbacks_and_tracing "callbacks_and_tracing.md" "View Callbacks & Tracing"
+    click evaluation_framework "evaluation_framework.md" "View Evaluation Framework"
+    click caching_and_storage "caching_and_storage.md" "View Caching & Storage"
+    click developer_tools "developer_tools.md" "View Developer Tools"
 ```
-
-## Main Modules
-
-### LangChain Core
-This section contains the fundamental building blocks of the LangChain framework, defining interfaces and basic implementations for key concepts:
--   **[Core Runnables](core_runnables.md)**: The foundation for the LangChain Expression Language (LCEL), enabling composable and executable units of work.
--   **[Core Language Models](core_language_models.md)**: Abstract interfaces for interacting with various LLMs and chat models.
--   **[Core Prompts](core_prompts.md)**: Tools for constructing, managing, and formatting prompts for language models.
--   **[Core Messages](core_messages.md)**: Defines the standard message types and content blocks for conversational interactions.
--   **[Core Tools](core_tools.md)**: Provides the base for defining and managing tools that agents can use to interact with external systems.
--   **[Core Retrievers](core_retrievers.md)**: Abstract base class for implementing document retrieval systems.
--   **[Core Callbacks](core_callbacks.md)**: A flexible system for handling events and interactions within the framework, enabling logging, monitoring, and tracing.
--   **[Core Vector Stores](core_vectorstores.md)**: Foundational interfaces and in-memory implementations for managing vector embeddings.
--   **[Core Document Loaders](core_document_loaders.md)**: Framework for loading various types of documents into a standardized format.
-
-### Classic LangChain
-This section includes established, higher-level components from the classic LangChain architecture:
--   **[Classic Agents](classic_agents.md)**: A comprehensive framework for building and managing intelligent agents.
--   **[Classic Chains Base](classic_chains_base.md)**: The foundational abstraction for constructing structured sequences of operations.
--   **[Classic Memory](classic_memory.md)**: A suite of conversation memory implementations for maintaining conversational context.
-
-### Partner Integrations
-This section provides integrations with various third-party services and LLM providers:
--   **[OpenAI Chat Models](partners_openai_chat_models.md)**: Core functionalities for interacting with OpenAI's chat models.
--   **[Qdrant Vectorstores](partners_qdrant_vectorstores.md)**: Robust integrations with Qdrant, a high-performance vector similarity search engine.
-
-### Text Processing Utilities
-This section offers utilities specifically designed for handling and splitting text:
--   **[Text Splitters Base](text_splitters_base.md)**: Foundational components for splitting text into manageable chunks, primarily focusing on token-based strategies.
