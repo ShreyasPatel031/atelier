@@ -3,12 +3,14 @@
     "node": "24.x"
   },
   "scripts": {
+    "test:elk-diagrams": "node demo/scripts/validate-elk-all-diagrams.js",
     "test:e2e": "playwright test",
     "test:e2e:edge": "playwright test demo/playwright/edge-hover.spec.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "dompurify": "^3.3.3",
+    "elkjs": "^0.9.3",
     "happy-dom": "^20.8.9",
     "jsdom": "^29.0.1",
     "mermaid": "^11.9.0"

@@ -7,6 +7,11 @@
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11.9.0/dist/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
     <script src="./viewer-debug.js"></script>
+    <script src="./pipeline-overview-mermaid.js"></script>
+    <script src="./pipeline-ir-repair.js"></script>
+    <script src="./pipeline-diagram-to-elk.js"></script>
+    <script src="../node_modules/elkjs/lib/elk.bundled.js"></script>
+    <script src="./pipeline-elk-svg.js"></script>
     <style>
         * {
             margin: 0;
@@ -183,6 +188,139 @@
             color: #94a3b8;
             margin-left: auto;
         }
+
+        /* R0 / R1: Mermaid vs React Flow tab + pipeline inspector */
+        .diagram-render-tabs {
+            display: flex;
+            gap: 0;
+            padding: 0 12px;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+        .diagram-tab {
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            margin-bottom: -1px;
+        }
+        .diagram-tab:hover {
+            color: #0039A6;
+        }
+        .diagram-tab.active {
+            color: #0039A6;
+            border-bottom-color: #0039A6;
+            background: #fff;
+        }
+        .pipeline-panel {
+            flex-shrink: 0;
+            max-height: 36vh;
+            overflow: auto;
+            border-bottom: 1px solid #e2e8f0;
+            background: #fafafa;
+            font-size: 11px;
+        }
+        .pipeline-section {
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .pipeline-section summary {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #334155;
+            background: #f1f5f9;
+            user-select: none;
+        }
+        .pipeline-section summary:hover {
+            background: #e2e8f0;
+        }
+        .pipeline-pre {
+            margin: 0;
+            padding: 10px 12px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+            color: #0f172a;
+            max-height: 22vh;
+            overflow: auto;
+        }
+        .pipeline-r4-hint {
+            margin: 0;
+            padding: 8px 12px 0;
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.4;
+        }
+        .pipeline-r4-hint a {
+            color: #0039a6;
+        }
+        .pipeline-r4-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            flex-wrap: wrap;
+        }
+        .pipeline-copy-btn {
+            font: inherit;
+            font-size: 11px;
+            padding: 4px 10px;
+            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: #fff;
+            color: #0f172a;
+        }
+        .pipeline-copy-btn:hover:not(:disabled) {
+            background: #f1f5f9;
+        }
+        .pipeline-copy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pipeline-copy-feedback {
+            font-size: 11px;
+            color: #15803d;
+        }
+        .pipeline-section.pipeline-nested summary {
+            padding-left: 20px;
+            font-weight: 500;
+        }
+        #elkSvgPane {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            overflow: visible;
+        }
+        #elkSvgMount {
+            display: inline-block;
+            transform-origin: 0 0;
+        }
+        #elkSvgMount svg {
+            display: block;
+        }
+        .reactflow-placeholder {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            color: #64748b;
+            font-size: 14px;
+            text-align: center;
+            background: #f8fafc;
+        }
+        .reactflow-placeholder p {
+            max-width: 420px;
+            line-height: 1.5;
+        }
         
         /* Dev: tune panel sits inside diagram viewport (bottom-left), not over the chat column */
         .view-tune-panel {
@@ -238,9 +376,12 @@
         
         .diagram-viewport {
             flex: 1;
+            min-height: 0;
             overflow: hidden;
             position: relative;
             cursor: grab;
+            display: flex;
+            flex-direction: column;
         }
         
         /* Pointer over diagram nodes (overrides inherited grab from .diagram-viewport) */
@@ -254,11 +395,12 @@
         }
         
         .diagram-canvas {
+            flex: 1;
+            min-height: 0;
             transform-origin: 0 0;
             transition: transform 0.1s ease-out;
             padding: 20px;
             min-width: 100%;
-            min-height: 100%;
         }
         
         .diagram-canvas.panning {
@@ -892,9 +1034,57 @@
                 <button class="zoom-btn" onclick="fitToView()" title="Fit to View">⊡</button>
                 <span class="zoom-hint">Scroll / two-finger trackpad → pan • ⌘/Ctrl+scroll or pinch → zoom • Drag to pan • ⌘/Ctrl/Shift+click diagram shapes to multi-select</span>
             </div>
+            <div class="diagram-render-tabs" role="tablist" aria-label="Diagram renderer">
+                <button type="button" class="diagram-tab active" id="tabMermaid" role="tab" aria-selected="true" aria-controls="diagramViewport">Mermaid</button>
+                <button type="button" class="diagram-tab" id="tabReactFlow" role="tab" aria-selected="false" aria-controls="diagramViewport">React Flow</button>
+                <button type="button" class="diagram-tab" id="tabElkSvg" role="tab" aria-selected="false" aria-controls="diagramViewport">ELK → SVG</button>
+            </div>
+            <div class="pipeline-panel" id="pipelinePanel">
+                <details open class="pipeline-section">
+                    <summary>Pipeline · Source (R0)</summary>
+                    <pre class="pipeline-pre" id="pipelinePreSource"></pre>
+                </details>
+                <details class="pipeline-section">
+                    <summary>Pipeline · Overview Mermaid excerpt</summary>
+                    <pre class="pipeline-pre" id="pipelinePreMermaid"></pre>
+                </details>
+                <details class="pipeline-section">
+                    <summary>Pipeline · R1 · Mermaid → DIAGRAM_JSON</summary>
+                    <pre class="pipeline-pre" id="pipelinePreR1"></pre>
+                </details>
+                <details class="pipeline-section">
+                    <summary>Pipeline · R2 · IR repair (G2 edges / G3 groups)</summary>
+                    <pre class="pipeline-pre" id="pipelinePreR2"></pre>
+                </details>
+                <details class="pipeline-section">
+                    <summary>Pipeline · R4 · IR → ELK JSON (ELK Live paste)</summary>
+                    <p class="pipeline-r4-hint">
+                        Graph only — paste into
+                        <a href="https://rtsys.informatik.uni-kiel.de/elklive/json.html" target="_blank" rel="noopener noreferrer">ELK JSON Editor</a>
+                        or use the
+                        <a href="https://eclipse.dev/elk/" target="_blank" rel="noopener noreferrer">Eclipse ELK</a>
+                        toolchain. (Wrapping metadata breaks import: every JSON object must be a graph element with an <code>id</code>.)
+                    </p>
+                    <div class="pipeline-r4-toolbar">
+                        <button type="button" class="pipeline-copy-btn" id="pipelineR4CopyBtn" disabled>Copy ELK graph JSON</button>
+                        <span class="pipeline-copy-feedback" id="pipelineR4CopyFeedback" hidden>Copied</span>
+                    </div>
+                    <pre class="pipeline-pre" id="pipelinePreR4"></pre>
+                    <details class="pipeline-section pipeline-nested">
+                        <summary>R4 · Converter metadata (not for ELK Live)</summary>
+                        <pre class="pipeline-pre" id="pipelinePreR4Meta"></pre>
+                    </details>
+                </details>
+            </div>
             <div class="diagram-viewport" id="diagramViewport">
                 <div class="diagram-canvas" id="diagramCanvas">
                     <div id="mermaid-diagram" class="loading">Loading diagram...</div>
+                    <div id="elkSvgPane" hidden>
+                        <div id="elkSvgMount" class="elk-svg-mount"></div>
+                    </div>
+                </div>
+                <div id="reactflowPlaceholder" class="reactflow-placeholder" hidden>
+                    <p><strong>React Flow + ELK</strong> will mount in this pane (R4+). The pipeline sections above show <strong>R0</strong> (source IR) and <strong>R1</strong> (overview Mermaid → DIAGRAM_JSON) so each step is verifiable before ELK.</p>
                 </div>
                 <details class="view-tune-panel" id="viewTunePanel">
                     <summary>Pan / zoom tune (dev)</summary>
@@ -967,6 +1157,11 @@
         let expandedNodes = new Set();
         let expandedNodeToModule = new Map();  // Maps nodeId -> moduleId for expanded nodes
         let currentModuleId = 'overview';
+        /** R0 / R5: which diagram tab is active — 'mermaid' | 'reactflow' | 'elk' */
+        let activeDiagramTab = 'mermaid';
+        let elkSvgRequestEpoch = 0;
+        /** Full ELK graph JSON string for R4 "Copy" (ELK Live root object only). */
+        let pipelineR4ElkPasteJson = '';
         let selectedModuleId = null;  // Currently selected module
         /** Last diagram shape id passed to updateSelectionHighlight (for clearing on background click). */
         let selectedDiagramNodeId = null;
@@ -2391,6 +2586,354 @@
         }
         
         // ============================================================
+        // R0 / R1 — Pipeline panel + diagram renderer tabs
+        // ============================================================
+
+        /** Same IR source as R2/R4 (overview DIAGRAM_JSON or R1 from Mermaid; modules → structuredDiagram). */
+        function resolveStructuredIrForPipeline() {
+            const overviewContent = DOCS_CONTENT['overview.md'] || '';
+            const overviewMermaidRaw = extractMermaidFromMarkdown(overviewContent);
+            const overviewDjFile = extractDiagramJsonFromMarkdown(overviewContent);
+            const overviewHasDiagramJson = !!(overviewDjFile && Array.isArray(overviewDjFile.nodes));
+
+            if (currentModuleId === 'overview') {
+                if (overviewHasDiagramJson && overviewDjFile) {
+                    return {
+                        diagram: overviewDjFile,
+                        r2InputSource: 'overview.md DIAGRAM_JSON',
+                    };
+                }
+                if (overviewMermaidRaw && typeof overviewMermaidToDiagramJson === 'function') {
+                    const conv = overviewMermaidToDiagramJson(overviewMermaidRaw);
+                    if (conv.ok && conv.diagram) {
+                        return {
+                            diagram: conv.diagram,
+                            r2InputSource: 'R1 (overview Mermaid → DIAGRAM_JSON)',
+                        };
+                    }
+                }
+                return { diagram: null, r2InputSource: 'none' };
+            }
+            const mod = moduleData[currentModuleId];
+            if (mod && mod.structuredDiagram) {
+                return {
+                    diagram: mod.structuredDiagram,
+                    r2InputSource: 'module_tree.json → diagram',
+                };
+            }
+            return { diagram: null, r2InputSource: 'none' };
+        }
+
+        /** R5: ELK layout → SVG inside diagram canvas (shared pan/zoom transform). */
+        async function refreshElkSvgView() {
+            const mount = document.getElementById('elkSvgMount');
+            if (!mount || activeDiagramTab !== 'elk') return;
+            const rid = ++elkSvgRequestEpoch;
+            const { diagram } = resolveStructuredIrForPipeline();
+            if (!diagram) {
+                mount.innerHTML = '';
+                const d = document.createElement('div');
+                d.className = 'loading';
+                d.textContent =
+                    'No structured diagram for ELK (overview: Mermaid or DIAGRAM_JSON; module: diagram on module_tree).';
+                mount.appendChild(d);
+                return;
+            }
+            if (typeof runElkLayoutSvgPipeline !== 'function') {
+                mount.innerHTML = '';
+                const e = document.createElement('div');
+                e.className = 'error';
+                e.textContent = 'pipeline-elk-svg.js not loaded.';
+                mount.appendChild(e);
+                return;
+            }
+            mount.innerHTML = '';
+            const loading = document.createElement('div');
+            loading.className = 'loading';
+            loading.textContent = 'Running ELK layout…';
+            mount.appendChild(loading);
+            const res = await runElkLayoutSvgPipeline(diagram);
+            if (rid !== elkSvgRequestEpoch) return;
+            if (!res.ok) {
+                mount.innerHTML = '';
+                const e = document.createElement('div');
+                e.className = 'error';
+                e.textContent = 'ELK SVG: ' + (res.error || 'failed');
+                mount.appendChild(e);
+                return;
+            }
+            mount.innerHTML = res.svg || '';
+        }
+
+        function setDiagramRenderTab(which) {
+            activeDiagramTab = which;
+            const tabM = document.getElementById('tabMermaid');
+            const tabR = document.getElementById('tabReactFlow');
+            const tabE = document.getElementById('tabElkSvg');
+            const canvas = document.getElementById('diagramCanvas');
+            const placeholder = document.getElementById('reactflowPlaceholder');
+            const mermaidEl = document.getElementById('mermaid-diagram');
+            const elkPane = document.getElementById('elkSvgPane');
+
+            const isM = which === 'mermaid';
+            const isRf = which === 'reactflow';
+            const isElk = which === 'elk';
+
+            if (tabM) {
+                tabM.classList.toggle('active', isM);
+                tabM.setAttribute('aria-selected', isM ? 'true' : 'false');
+            }
+            if (tabR) {
+                tabR.classList.toggle('active', isRf);
+                tabR.setAttribute('aria-selected', isRf ? 'true' : 'false');
+            }
+            if (tabE) {
+                tabE.classList.toggle('active', isElk);
+                tabE.setAttribute('aria-selected', isElk ? 'true' : 'false');
+            }
+
+            if (isRf) {
+                if (canvas) canvas.style.display = 'none';
+                if (placeholder) placeholder.hidden = false;
+            } else {
+                if (canvas) canvas.style.display = '';
+                if (placeholder) placeholder.hidden = true;
+                if (mermaidEl) mermaidEl.hidden = !isM;
+                if (elkPane) elkPane.hidden = !isElk;
+                if (isElk) refreshElkSvgView();
+            }
+            updatePipelinePanel();
+        }
+
+        function updatePipelinePanel() {
+            const preSrc = document.getElementById('pipelinePreSource');
+            const preMer = document.getElementById('pipelinePreMermaid');
+            const preR1 = document.getElementById('pipelinePreR1');
+            const preR2 = document.getElementById('pipelinePreR2');
+            const preR4 = document.getElementById('pipelinePreR4');
+            const preR4Meta = document.getElementById('pipelinePreR4Meta');
+            const r4CopyBtn = document.getElementById('pipelineR4CopyBtn');
+            const r4CopyFb = document.getElementById('pipelineR4CopyFeedback');
+            if (!preSrc || !preMer || !preR1 || !preR2 || !preR4) return;
+
+            function setR4View(mainText, metaObj, pasteJson) {
+                preR4.textContent = mainText;
+                if (preR4Meta) {
+                    preR4Meta.textContent =
+                        metaObj == null ? '' : JSON.stringify(metaObj, null, 2);
+                }
+                pipelineR4ElkPasteJson = pasteJson || '';
+                if (r4CopyBtn) {
+                    r4CopyBtn.disabled = !pipelineR4ElkPasteJson;
+                }
+                if (r4CopyFb) {
+                    r4CopyFb.hidden = true;
+                }
+            }
+
+            const overviewContent = DOCS_CONTENT['overview.md'] || '';
+            const overviewMermaidRaw = extractMermaidFromMarkdown(overviewContent);
+            const overviewDjFile = extractDiagramJsonFromMarkdown(overviewContent);
+            const overviewHasDiagramJson = !!(overviewDjFile && Array.isArray(overviewDjFile.nodes));
+
+            let structuredDiagram = null;
+            let structuredSource = '';
+            if (currentModuleId === 'overview') {
+                structuredDiagram = overviewHasDiagramJson ? overviewDjFile : null;
+                structuredSource = overviewHasDiagramJson
+                    ? 'overview.md <!-- DIAGRAM_JSON -->'
+                    : 'none (mermaid only until generation fix lands)';
+            } else if (moduleData[currentModuleId]) {
+                structuredDiagram = moduleData[currentModuleId].structuredDiagram || null;
+                structuredSource = structuredDiagram ? 'module_tree.json → diagram' : 'none';
+            }
+
+            const sourcePayload = {
+                repo: repoPath,
+                basePath,
+                currentModule: currentModuleId,
+                activeDiagramTab,
+                overviewHasDiagramJson,
+                structuredDiagramSource: structuredSource,
+                structuredDiagram,
+            };
+            preSrc.textContent = JSON.stringify(sourcePayload, null, 2);
+
+            preMer.textContent = overviewMermaidRaw
+                ? overviewMermaidRaw.slice(0, 6000) +
+                  (overviewMermaidRaw.length > 6000 ? '\n… [truncated]' : '')
+                : '(no ```mermaid block in overview.md)';
+
+            if (!overviewMermaidRaw) {
+                preR1.textContent = '(R1 skipped — no overview Mermaid)';
+            } else if (overviewHasDiagramJson) {
+                let converterSummary = null;
+                if (typeof overviewMermaidToDiagramJson === 'function') {
+                    const c = overviewMermaidToDiagramJson(overviewMermaidRaw);
+                    converterSummary = {
+                        ok: c.ok,
+                        counts: c.counts,
+                        unsupportedLineCount: c.unsupportedLineCount,
+                        reason: c.reason || null,
+                    };
+                }
+                preR1.textContent = JSON.stringify(
+                    {
+                        skipped: true,
+                        reason: 'overview.md already contains DIAGRAM_JSON',
+                        fileIR: {
+                            nodeCount: overviewDjFile.nodes.length,
+                            edgeCount: Array.isArray(overviewDjFile.edges)
+                                ? overviewDjFile.edges.length
+                                : 0,
+                            groupCount: Array.isArray(overviewDjFile.groups)
+                                ? overviewDjFile.groups.length
+                                : 0,
+                        },
+                        r1ConverterSummaryForDiff: converterSummary,
+                    },
+                    null,
+                    2
+                );
+            } else if (typeof overviewMermaidToDiagramJson !== 'function') {
+                preR1.textContent =
+                    '(R1 unavailable — load demo/pipeline-overview-mermaid.js)';
+            } else {
+                const conv = overviewMermaidToDiagramJson(overviewMermaidRaw);
+                preR1.textContent = JSON.stringify(conv, null, 2);
+            }
+
+            /* ---- R2: IR repair (same source as R5 ELK SVG via resolveStructuredIrForPipeline) ---- */
+            const irResolved = resolveStructuredIrForPipeline();
+            let r2InputSource = irResolved.r2InputSource;
+            let irBefore = irResolved.diagram;
+
+            let repairedForElk = null;
+
+            if (!irBefore) {
+                preR2.textContent = JSON.stringify(
+                    {
+                        skipped: true,
+                        reason:
+                            'No structured IR for this view (overview needs Mermaid or DIAGRAM_JSON; module needs diagram object on module_tree)',
+                        currentModule: currentModuleId,
+                    },
+                    null,
+                    2
+                );
+                setR4View(
+                    '(No ELK graph — same as R2: no IR to convert.)',
+                    { skipped: true, reason: 'same as R2 — no IR to convert' },
+                    ''
+                );
+            } else if (typeof repairDiagramIR !== 'function') {
+                preR2.textContent =
+                    '(R2 unavailable — load demo/pipeline-ir-repair.js)';
+                setR4View(
+                    '(R4 needs R2 — load demo/pipeline-ir-repair.js)',
+                    { note: 'Load demo/pipeline-ir-repair.js' },
+                    ''
+                );
+            } else {
+                const rep = repairDiagramIR(irBefore);
+                const r2Payload = {
+                    r2InputSource,
+                    ok: rep.ok,
+                    reason: rep.reason || null,
+                    summary: rep.summary,
+                    warnings: rep.warnings,
+                    repairedDiagram: rep.ok ? rep.diagram : null,
+                };
+                preR2.textContent = JSON.stringify(r2Payload, null, 2);
+
+                repairedForElk = rep.ok && rep.diagram ? rep.diagram : irBefore;
+
+                if (typeof diagramToElkInput !== 'function') {
+                    setR4View(
+                        '(R4 unavailable — load demo/pipeline-diagram-to-elk.js)',
+                        { note: 'Load demo/pipeline-diagram-to-elk.js' },
+                        ''
+                    );
+                } else {
+                    const elkPack = diagramToElkInput(repairedForElk);
+                    const r4Meta = {
+                        r2InputSource,
+                        diagramDirection: repairedForElk && repairedForElk.direction,
+                        elkTarget: elkPack.elkTarget || 'elklive',
+                        ok: elkPack.ok,
+                        reason: elkPack.reason || null,
+                        validate: elkPack.validate,
+                        converterWarnings: elkPack.warnings,
+                        summary: elkPack.summary,
+                    };
+                    if (!elkPack.ok || !elkPack.elkGraph) {
+                        setR4View(
+                            JSON.stringify(
+                                {
+                                    ok: false,
+                                    reason: elkPack.reason || 'no_elk_graph',
+                                },
+                                null,
+                                2
+                            ),
+                            Object.assign({}, r4Meta, { elkGraph: null }),
+                            ''
+                        );
+                    } else {
+                        const graphJson = JSON.stringify(elkPack.elkGraph, null, 2);
+                        setR4View(graphJson, r4Meta, graphJson);
+                    }
+                }
+            }
+        }
+
+        (function setupPipelineR4Copy() {
+            const btn = document.getElementById('pipelineR4CopyBtn');
+            const fb = document.getElementById('pipelineR4CopyFeedback');
+            if (!btn) return;
+            let hideTimer = null;
+            btn.addEventListener('click', async () => {
+                const s = pipelineR4ElkPasteJson;
+                if (!s) return;
+                try {
+                    await navigator.clipboard.writeText(s);
+                } catch {
+                    try {
+                        const ta = document.createElement('textarea');
+                        ta.value = s;
+                        ta.setAttribute('readonly', '');
+                        ta.style.position = 'fixed';
+                        ta.style.left = '-9999px';
+                        document.body.appendChild(ta);
+                        ta.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(ta);
+                    } catch (e2) {
+                        console.warn('R4 copy failed', e2);
+                        return;
+                    }
+                }
+                if (fb) {
+                    fb.hidden = false;
+                    if (hideTimer) clearTimeout(hideTimer);
+                    hideTimer = setTimeout(() => {
+                        fb.hidden = true;
+                    }, 2000);
+                }
+            });
+        })();
+
+        document.getElementById('tabMermaid')?.addEventListener('click', () =>
+            setDiagramRenderTab('mermaid')
+        );
+        document.getElementById('tabReactFlow')?.addEventListener('click', () =>
+            setDiagramRenderTab('reactflow')
+        );
+        document.getElementById('tabElkSvg')?.addEventListener('click', () =>
+            setDiagramRenderTab('elk')
+        );
+
+        // ============================================================
         // BUILD MODULE DATA
         // ============================================================
         
@@ -2440,8 +2983,12 @@
                 links: overviewLinks,
                 diagramNodeMeta: overviewDiagramNodeMeta,
                 diagramClusterMeta: overviewDiagramClusterMeta,
-                diagramEdgeMeta: overviewDiagramEdgeMeta
+                diagramEdgeMeta: overviewDiagramEdgeMeta,
+                structuredDiagram:
+                    overviewDj && Array.isArray(overviewDj.nodes) ? overviewDj : null,
             };
+
+            updatePipelinePanel();
         }
         
         // Build EXACT module mappings - only map nodes that exactly match module keys
@@ -2524,7 +3071,13 @@
                     path: data.path,
                     diagramNodeMeta,
                     diagramClusterMeta,
-                    diagramEdgeMeta
+                    diagramEdgeMeta,
+                    structuredDiagram:
+                        data.diagram &&
+                        typeof data.diagram === 'object' &&
+                        Array.isArray(data.diagram.nodes)
+                            ? data.diagram
+                            : null,
                 };
                 
                 // Recursively process children
@@ -2540,9 +3093,13 @@
         
         async function renderDiagram(code, links, moduleId) {
             const container = document.getElementById('mermaid-diagram');
+            const afterRender = () => {
+                if (activeDiagramTab === 'elk') refreshElkSvgView();
+            };
             if (!code || !code.trim()) {
                 container.innerHTML = '<div class="loading">No diagram available</div>';
                 lastDiagramRegistry = null;
+                afterRender();
                 return;
             }
             
@@ -2631,6 +3188,7 @@
                     }
                 }
             }
+            afterRender();
         }
         
         function renderDocumentation(content) {
@@ -3857,6 +4415,7 @@
             
             renderDiagram(currentDiagramCode, moduleData[moduleId].links || {}, moduleId);
             renderDocumentation(moduleData[moduleId].documentation);
+            updatePipelinePanel();
         }
         
         function selectNode(nodeId, moduleId) {
@@ -3890,6 +4449,7 @@
                 
                 updateSelection(currentModuleId);
                 renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
+                updatePipelinePanel();
                 return;
             }
             
@@ -3904,6 +4464,7 @@
                 currentDiagramCode = baseDiagramCode;
                 updateSelection('overview');
                 renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+                updatePipelinePanel();
                 return;
             }
             
@@ -4202,7 +4763,10 @@
         
         function fitToView() {
             const viewport = document.getElementById('diagramViewport');
-            const svg = document.querySelector('#mermaid-diagram svg');
+            let svg = document.querySelector('#mermaid-diagram svg');
+            if (activeDiagramTab === 'elk') {
+                svg = document.querySelector('#elkSvgMount svg');
+            }
             if (!svg || !viewport) return;
             
             const svgRect = svg.getBoundingClientRect();
@@ -4390,7 +4954,11 @@
             if (e.button !== 0) return;
             if (e.target.closest('.view-tune-panel')) return;
             /* Flowchart shapes: don’t start pan (edges/clusters don’t use g.node) */
-            if (e.target.closest('g.node, .collapse-button, g.edgePath, g.edgePaths, g.edgeLabels, g.cluster'))
+            if (
+                e.target.closest(
+                    'g.node, g.elk-node, .collapse-button, g.edgePath, g.edgePaths, g.edgeLabels, g.cluster'
+                )
+            )
                 return;
             
             isPanning = true;
@@ -4437,7 +5005,9 @@
                 if (
                     e.touches.length === 1 &&
                     e.target.closest &&
-                    e.target.closest('g.node, .collapse-button, g.edgePath, g.edgePaths, g.edgeLabels, g.cluster')
+                    e.target.closest(
+                        'g.node, g.elk-node, .collapse-button, g.edgePath, g.edgePaths, g.edgeLabels, g.cluster'
+                    )
                 ) {
                     return;
                 }
@@ -4687,6 +5257,7 @@
             updateSelection('overview');
             
             renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+            updatePipelinePanel();
 
             // Optional ?expand=nodeId in the URL auto-expands a node after the
             // overview renders. Useful for sharing a deep link / debugging the

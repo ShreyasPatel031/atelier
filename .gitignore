@@ -73,6 +73,7 @@ node_modules/
 test-results/
 
 # Temporary files
+tmp/
 .tmp/
 *.tmp
 *.log
