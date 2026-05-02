@@ -169,13 +169,14 @@
     }
 
     /**
-     * @param {object|null} diagram - diagram IR (nodes, edges, groups)
-     * @returns {Promise<{ ok: boolean, svg?: string, error?: string, warnings?: object[] }>}
+     * Repair → diagramToElkInput (elkjs) → elk.layout. Shared by R5 SVG and R6 React Flow.
+     * @param {object|null} diagram
+     * @returns {Promise<{ ok: boolean, laidOut?: object, error?: string, warnings?: object[] }>}
      */
-    async function runElkLayoutSvgPipeline(diagram) {
+    async function runElkLayoutPipeline(diagram) {
         var mergedWarnings = [];
         if (!diagram || typeof diagram !== 'object') {
-            return { ok: false, error: 'no_diagram', svg: '', warnings: mergedWarnings };
+            return { ok: false, error: 'no_diagram', warnings: mergedWarnings };
         }
         var d = diagram;
         if (typeof global.repairDiagramIR === 'function') {
@@ -184,7 +185,7 @@
             if (rep.ok && rep.diagram) d = rep.diagram;
         }
         if (typeof global.diagramToElkInput !== 'function') {
-            return { ok: false, error: 'diagramToElkInput missing', svg: '', warnings: mergedWarnings };
+            return { ok: false, error: 'diagramToElkInput missing', warnings: mergedWarnings };
         }
         var pack = global.diagramToElkInput(d, { target: 'elkjs' });
         if (pack.warnings && pack.warnings.length) mergedWarnings = mergedWarnings.concat(pack.warnings);
@@ -192,19 +193,18 @@
             return {
                 ok: false,
                 error: pack.reason || 'diagramToElkInput failed',
-                svg: '',
                 warnings: mergedWarnings,
             };
         }
         var ELKCtor = global.ELK;
         if (!ELKCtor) {
-            return { ok: false, error: 'ELK not loaded (include elk.bundled.js)', svg: '', warnings: mergedWarnings };
+            return { ok: false, error: 'ELK not loaded (include elk.bundled.js)', warnings: mergedWarnings };
         }
         var elkGraph;
         try {
             elkGraph = JSON.parse(JSON.stringify(pack.elkGraph));
         } catch (e) {
-            return { ok: false, error: 'clone failed: ' + String(e), svg: '', warnings: mergedWarnings };
+            return { ok: false, error: 'clone failed: ' + String(e), warnings: mergedWarnings };
         }
         var elk = new ELKCtor();
         var laidOut;
@@ -214,18 +214,34 @@
             return {
                 ok: false,
                 error: err && err.message ? err.message : String(err),
-                svg: '',
                 warnings: mergedWarnings,
             };
         }
-        var svg = elkLaidOutGraphToSvgMarkup(laidOut);
-        return { ok: true, svg: svg, warnings: mergedWarnings };
+        return { ok: true, laidOut: laidOut, warnings: mergedWarnings };
+    }
+
+    /**
+     * @param {object|null} diagram - diagram IR (nodes, edges, groups)
+     * @returns {Promise<{ ok: boolean, svg?: string, error?: string, warnings?: object[] }>}
+     */
+    async function runElkLayoutSvgPipeline(diagram) {
+        var r = await runElkLayoutPipeline(diagram);
+        if (!r.ok) {
+            return { ok: false, error: r.error || 'layout failed', svg: '', warnings: r.warnings || [] };
+        }
+        var svg = elkLaidOutGraphToSvgMarkup(r.laidOut);
+        return { ok: true, svg: svg, warnings: r.warnings || [] };
     }
 
     global.elkLaidOutGraphToSvgMarkup = elkLaidOutGraphToSvgMarkup;
+    global.runElkLayoutPipeline = runElkLayoutPipeline;
     global.runElkLayoutSvgPipeline = runElkLayoutSvgPipeline;
 
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { elkLaidOutGraphToSvgMarkup, runElkLayoutSvgPipeline };
+        module.exports = {
+            elkLaidOutGraphToSvgMarkup,
+            runElkLayoutPipeline,
+            runElkLayoutSvgPipeline,
+        };
     }
 })(typeof window !== 'undefined' ? window : globalThis);

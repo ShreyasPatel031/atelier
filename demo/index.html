@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeWiki Viewer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xyflow/react@12.4.2/dist/style.css" crossorigin="anonymous" />
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11.9.0/dist/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
     <script src="./viewer-debug.js"></script>
@@ -13,6 +14,7 @@
     <!-- CDN: ../node_modules/… breaks when static server roots at demo/ (e.g. :8080/). -->
     <script src="https://cdn.jsdelivr.net/npm/elkjs@0.9.3/lib/elk.bundled.js" crossorigin="anonymous"></script>
     <script src="./pipeline-elk-svg.js"></script>
+    <script src="./pipeline-elk-reactflow.js"></script>
     <style>
         * {
             margin: 0;
@@ -308,19 +310,23 @@
         .reactflow-placeholder {
             flex: 1;
             min-height: 0;
-            overflow: auto;
+            overflow: hidden;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            color: #64748b;
-            font-size: 14px;
-            text-align: center;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: stretch;
+            padding: 0;
             background: #f8fafc;
         }
-        .reactflow-placeholder p {
-            max-width: 420px;
-            line-height: 1.5;
+        #reactflowRoot {
+            flex: 1;
+            min-height: min(70vh, 560px);
+            width: 100%;
+            position: relative;
+        }
+        #reactflowRoot .react-flow {
+            width: 100%;
+            height: 100%;
         }
         
         /* Dev: tune panel sits inside diagram viewport (bottom-left), not over the chat column */
@@ -1085,10 +1091,7 @@
                     </div>
                 </div>
                 <div id="reactflowPlaceholder" class="reactflow-placeholder" hidden>
-                    <p>
-                        <strong>React Flow</strong> will mount here (next step after R5). Use the
-                        <strong>ELK → SVG</strong> tab for ELK layout preview from the same IR as R4; pipeline sections document R0–R4.
-                    </p>
+                    <div id="reactflowRoot" class="reactflow-root" aria-label="ELK layout in React Flow (R6)"></div>
                 </div>
                 <details class="view-tune-panel" id="viewTunePanel">
                     <summary>Pan / zoom tune (dev)</summary>
@@ -1161,9 +1164,10 @@
         let expandedNodes = new Set();
         let expandedNodeToModule = new Map();  // Maps nodeId -> moduleId for expanded nodes
         let currentModuleId = 'overview';
-        /** R0 / R5: which diagram tab is active — 'mermaid' | 'reactflow' | 'elk' */
+        /** R0 / R5 / R6: 'mermaid' | 'reactflow' | 'elk' */
         let activeDiagramTab = 'mermaid';
         let elkSvgRequestEpoch = 0;
+        let reactFlowRequestEpoch = 0;
         /** Full ELK graph JSON string for R4 "Copy" (ELK Live root object only). */
         let pipelineR4ElkPasteJson = '';
         let selectedModuleId = null;  // Currently selected module
@@ -2627,6 +2631,7 @@
             }
             return { diagram: null, r2InputSource: 'none' };
         }
+        window.atelierResolveStructuredIrForPipeline = resolveStructuredIrForPipeline;
 
         /** R5: ELK layout → SVG inside diagram canvas (shared pan/zoom transform). */
         async function refreshElkSvgView() {
@@ -2669,6 +2674,32 @@
             mount.innerHTML = res.svg || '';
         }
 
+        /** R6: ELK → @xyflow/react (reactflow-r6.mjs). */
+        async function refreshReactFlowView() {
+            const root = document.getElementById('reactflowRoot');
+            if (!root || activeDiagramTab !== 'reactflow') return;
+            const rid = ++reactFlowRequestEpoch;
+            root.innerHTML =
+                '<div class="loading" style="padding:16px">Loading React Flow…</div>';
+            let tries = 0;
+            while (typeof window.atelierMountReactFlowR6 !== 'function' && tries < 80) {
+                await new Promise((r) => setTimeout(r, 50));
+                tries++;
+            }
+            if (rid !== reactFlowRequestEpoch) return;
+            if (typeof window.atelierMountReactFlowR6 !== 'function') {
+                root.innerHTML = '';
+                const e = document.createElement('div');
+                e.className = 'error';
+                e.style.padding = '16px';
+                e.textContent =
+                    'R6 module failed to load (reactflow-r6.mjs). Check network / console; ensure ES modules are allowed.';
+                root.appendChild(e);
+                return;
+            }
+            await window.atelierMountReactFlowR6(root, rid);
+        }
+
         function setDiagramRenderTab(which) {
             activeDiagramTab = which;
             const tabM = document.getElementById('tabMermaid');
@@ -2699,6 +2730,7 @@
             if (isRf) {
                 if (canvas) canvas.style.display = 'none';
                 if (placeholder) placeholder.hidden = false;
+                refreshReactFlowView();
             } else {
                 if (canvas) canvas.style.display = '';
                 if (placeholder) placeholder.hidden = true;
@@ -3099,6 +3131,7 @@
             const container = document.getElementById('mermaid-diagram');
             const afterRender = () => {
                 if (activeDiagramTab === 'elk') refreshElkSvgView();
+                if (activeDiagramTab === 'reactflow') refreshReactFlowView();
             };
             if (!code || !code.trim()) {
                 container.innerHTML = '<div class="loading">No diagram available</div>';
@@ -4766,6 +4799,7 @@
         }
         
         function fitToView() {
+            if (activeDiagramTab === 'reactflow') return;
             const viewport = document.getElementById('diagramViewport');
             let svg = document.querySelector('#mermaid-diagram svg');
             if (activeDiagramTab === 'elk') {
@@ -4793,6 +4827,7 @@
         // Wheel: trackpad two-finger scroll fires wheel (not touch). Without ctrl/meta that must pan, not zoom.
         // Chrome maps trackpad pinch to wheel + ctrlKey — use that for zoom (same as map/design tools).
         function handleWheel(e) {
+            if (activeDiagramTab === 'reactflow') return;
             if (e.target.closest && e.target.closest('.view-tune-panel')) return;
             e.preventDefault();
             
@@ -4954,6 +4989,7 @@
         
         // Pan with mouse drag
         function handleMouseDown(e) {
+            if (activeDiagramTab === 'reactflow') return;
             // Only start panning on left click and not on nodes
             if (e.button !== 0) return;
             if (e.target.closest('.view-tune-panel')) return;
@@ -5005,6 +5041,7 @@
             let lastTwoFingerCenter = { x: 0, y: 0 };
             
             viewport.addEventListener('touchstart', (e) => {
+                if (activeDiagramTab === 'reactflow') return;
                 if (e.target.closest && e.target.closest('.view-tune-panel')) return;
                 if (
                     e.touches.length === 1 &&
@@ -5040,6 +5077,7 @@
             }, { passive: false });
             
             viewport.addEventListener('touchmove', (e) => {
+                if (activeDiagramTab === 'reactflow') return;
                 if (e.target.closest && e.target.closest('.view-tune-panel')) return;
                 if (e.touches.length === 2) {
                     // Two-finger pan - pan based on center point movement
@@ -5436,6 +5474,7 @@
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
         });
     </script>
+    <script type="module" src="./reactflow-r6.mjs"></script>
 </body>
 </html>
 
