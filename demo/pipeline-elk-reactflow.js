@@ -229,6 +229,37 @@
         var sourceSides = ['right', 'left', 'top', 'bottom'];
         var targetSides = ['left', 'right', 'top', 'bottom'];
 
+        /** ELK polyline in viewport coords: every section's start → bends → end (deduped). */
+        function buildAbsoluteRoutePoints(edge, containerAbs) {
+            var ox = containerAbs && containerAbs.x != null ? containerAbs.x : 0;
+            var oy = containerAbs && containerAbs.y != null ? containerAbs.y : 0;
+            /** @type {{ x: number; y: number }[]} */
+            var route = [];
+            var sections = edge.sections || [];
+
+            function pushAbs(p) {
+                if (p == null || typeof p.x !== 'number' || typeof p.y !== 'number') return;
+                var q = { x: ox + p.x, y: oy + p.y };
+                var last = route[route.length - 1];
+                if (
+                    !last ||
+                    Math.abs(last.x - q.x) > 0.001 ||
+                    Math.abs(last.y - q.y) > 0.001
+                ) {
+                    route.push(q);
+                }
+            }
+
+            for (var si = 0; si < sections.length; si++) {
+                var sec = sections[si];
+                if (sec.startPoint) pushAbs(sec.startPoint);
+                var bends = sec.bendPoints || [];
+                for (var bi = 0; bi < bends.length; bi++) pushAbs(bends[bi]);
+                if (sec.endPoint) pushAbs(sec.endPoint);
+            }
+            return route;
+        }
+
         function createEdge(edge, containerAbs) {
             var srcs = edge.sources || [];
             var tgts = edge.targets || [];
@@ -297,21 +328,19 @@
 
                     if (!sourceHandle || !targetHandle) continue;
 
-                    var bends = edge.absoluteBendPoints || [];
-                    var edgeType =
-                        bends.length >= 2 ? 'elkOrthogonal' : 'smoothstep';
+                    var routePoints = buildAbsoluteRoutePoints(edge, containerAbs);
 
                     edges.push({
                         id: edgeId,
                         source: String(sourceNodeId),
                         target: String(targetNodeId),
-                        type: edgeType,
+                        type: 'elkOrthogonal',
                         sourceHandle: sourceHandle,
                         targetHandle: targetHandle,
                         zIndex: 100,
                         style: { stroke: '#64748b', strokeWidth: 1.25 },
                         data: {
-                            bendPoints: bends,
+                            routePoints: routePoints,
                             labelPos:
                                 edge.labels && edge.labels[0]
                                     ? {

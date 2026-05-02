@@ -23,7 +23,11 @@ const baseHandleStyle = {
     height: 6,
 };
 
-/** Leaf node: handles offset slightly outside (CustomNode-style). */
+/**
+ * Leaf node: handles centered on the node bbox edge (matches xyflow .react-flow__handle-* and ELK port coords).
+ * Do not use negative left/right/top/bottom offsets — those move the connection point outside the ELK rectangle
+ * so edges no longer meet the visible border.
+ */
 function ElkCustomNode({ data }) {
     const label = data.label || '';
     const w = data.width || 80;
@@ -46,7 +50,7 @@ function ElkCustomNode({ data }) {
                     ...baseHandleStyle,
                     position: 'absolute',
                     top: yPos,
-                    left: -14,
+                    left: 0,
                     transform: 'translate(-50%, -50%)',
                 },
             }),
@@ -59,7 +63,7 @@ function ElkCustomNode({ data }) {
                     ...baseHandleStyle,
                     position: 'absolute',
                     top: yPos,
-                    left: -14,
+                    left: 0,
                     transform: 'translate(-50%, -50%)',
                     opacity: 0,
                 },
@@ -78,7 +82,7 @@ function ElkCustomNode({ data }) {
                     ...baseHandleStyle,
                     position: 'absolute',
                     top: yPos,
-                    right: -14,
+                    right: 0,
                     transform: 'translate(50%, -50%)',
                 },
             }),
@@ -91,7 +95,7 @@ function ElkCustomNode({ data }) {
                     ...baseHandleStyle,
                     position: 'absolute',
                     top: yPos,
-                    right: -14,
+                    right: 0,
                     transform: 'translate(50%, -50%)',
                     opacity: 0,
                 },
@@ -110,7 +114,7 @@ function ElkCustomNode({ data }) {
                     ...baseHandleStyle,
                     position: 'absolute',
                     left: xPos,
-                    top: -14,
+                    top: 0,
                     transform: 'translate(-50%, -50%)',
                 },
             }),
@@ -123,7 +127,7 @@ function ElkCustomNode({ data }) {
                     ...baseHandleStyle,
                     position: 'absolute',
                     left: xPos,
-                    top: -14,
+                    top: 0,
                     transform: 'translate(-50%, -50%)',
                     opacity: 0,
                 },
@@ -142,7 +146,7 @@ function ElkCustomNode({ data }) {
                     ...baseHandleStyle,
                     position: 'absolute',
                     left: xPos,
-                    bottom: -14,
+                    bottom: 0,
                     transform: 'translate(-50%, 50%)',
                 },
             }),
@@ -155,7 +159,7 @@ function ElkCustomNode({ data }) {
                     ...baseHandleStyle,
                     position: 'absolute',
                     left: xPos,
-                    bottom: -14,
+                    bottom: 0,
                     transform: 'translate(-50%, 50%)',
                     opacity: 0,
                 },
@@ -217,14 +221,27 @@ function ElkGroupNode({ data }) {
                 type: 'target',
                 position: Position.Left,
                 id: 'left-' + index + '-target',
-                style: { ...baseHandleStyle, top: yPos },
+                style: {
+                    ...baseHandleStyle,
+                    position: 'absolute',
+                    top: yPos,
+                    left: 0,
+                    transform: 'translate(-50%, -50%)',
+                },
             }),
             React.createElement(Handle, {
                 key: 'g-ls-' + index,
                 type: 'source',
                 position: Position.Left,
                 id: 'left-' + index + '-source',
-                style: { ...baseHandleStyle, top: yPos, opacity: 0 },
+                style: {
+                    ...baseHandleStyle,
+                    position: 'absolute',
+                    top: yPos,
+                    left: 0,
+                    transform: 'translate(-50%, -50%)',
+                    opacity: 0,
+                },
             })
         );
     });
@@ -236,14 +253,26 @@ function ElkGroupNode({ data }) {
                 type: 'source',
                 position: Position.Right,
                 id: 'right-' + index + '-source',
-                style: { ...baseHandleStyle, top: yPos },
+                style: {
+                    ...baseHandleStyle,
+                    position: 'absolute',
+                    top: yPos,
+                    right: 0,
+                    transform: 'translate(50%, -50%)',
+                },
             }),
             React.createElement(Handle, {
                 key: 'g-rt-' + index,
                 type: 'target',
                 position: Position.Right,
                 id: 'right-' + index + '-target',
-                style: { ...baseHandleStyle, top: yPos },
+                style: {
+                    ...baseHandleStyle,
+                    position: 'absolute',
+                    top: yPos,
+                    right: 0,
+                    transform: 'translate(50%, -50%)',
+                },
             })
         );
     });
@@ -255,14 +284,26 @@ function ElkGroupNode({ data }) {
                 type: 'source',
                 position: Position.Top,
                 id: 'top-' + index + '-source',
-                style: { ...baseHandleStyle, left: xPos },
+                style: {
+                    ...baseHandleStyle,
+                    position: 'absolute',
+                    left: xPos,
+                    top: 0,
+                    transform: 'translate(-50%, -50%)',
+                },
             }),
             React.createElement(Handle, {
                 key: 'g-tt-' + index,
                 type: 'target',
                 position: Position.Top,
                 id: 'top-' + index + '-target',
-                style: { ...baseHandleStyle, left: xPos },
+                style: {
+                    ...baseHandleStyle,
+                    position: 'absolute',
+                    left: xPos,
+                    top: 0,
+                    transform: 'translate(-50%, -50%)',
+                },
             })
         );
     });
@@ -274,14 +315,26 @@ function ElkGroupNode({ data }) {
                 type: 'target',
                 position: Position.Bottom,
                 id: 'bottom-' + index + '-target',
-                style: { ...baseHandleStyle, left: xPos },
+                style: {
+                    ...baseHandleStyle,
+                    position: 'absolute',
+                    left: xPos,
+                    bottom: 0,
+                    transform: 'translate(-50%, 50%)',
+                },
             }),
             React.createElement(Handle, {
                 key: 'g-bs-' + index,
                 type: 'source',
                 position: Position.Bottom,
                 id: 'bottom-' + index + '-source',
-                style: { ...baseHandleStyle, left: xPos },
+                style: {
+                    ...baseHandleStyle,
+                    position: 'absolute',
+                    left: xPos,
+                    bottom: 0,
+                    transform: 'translate(-50%, 50%)',
+                },
             })
         );
     });
@@ -329,59 +382,24 @@ function ElkGroupNode({ data }) {
     );
 }
 
-/** Orthogonal path from ELK bend points (StepEdge-style). */
+/**
+ * ELK orthogonal route: draw the exact polyline from layout (all sections:
+ * startPoint → bendPoints → endPoint), same coordinate space as nodes.
+ * Falls back to a straight segment between handles if ELK gave no section geometry.
+ */
 function ElkOrthogonalEdge(props) {
-    const {
-        id,
-        sourceX,
-        sourceY,
-        targetX,
-        targetY,
-        markerEnd,
-        style,
-        data,
-    } = props;
-    const bendPoints = (data && data.bendPoints) || [];
+    const { id, sourceX, sourceY, targetX, targetY, markerEnd, style, data } = props;
+    const routePoints = (data && data.routePoints) || [];
     let edgePath = '';
-    const midX = sourceX + (targetX - sourceX) / 2;
 
-    if (bendPoints.length >= 2) {
-        const fixedX = bendPoints[0].x;
-        edgePath =
-            'M ' +
-            sourceX +
-            ' ' +
-            sourceY +
-            ' L ' +
-            fixedX +
-            ' ' +
-            sourceY +
-            ' L ' +
-            fixedX +
-            ' ' +
-            targetY +
-            ' L ' +
-            targetX +
-            ' ' +
-            targetY;
+    if (routePoints.length >= 2) {
+        edgePath = 'M ' + routePoints[0].x + ' ' + routePoints[0].y;
+        for (let i = 1; i < routePoints.length; i++) {
+            edgePath += ' L ' + routePoints[i].x + ' ' + routePoints[i].y;
+        }
     } else {
         edgePath =
-            'M ' +
-            sourceX +
-            ' ' +
-            sourceY +
-            ' L ' +
-            midX +
-            ' ' +
-            sourceY +
-            ' L ' +
-            midX +
-            ' ' +
-            targetY +
-            ' L ' +
-            targetX +
-            ' ' +
-            targetY;
+            'M ' + sourceX + ' ' + sourceY + ' L ' + targetX + ' ' + targetY;
     }
 
     return React.createElement(BaseEdge, {
