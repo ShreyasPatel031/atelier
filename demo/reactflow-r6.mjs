@@ -28,10 +28,11 @@ const baseHandleStyle = {
  * Do not use negative left/right/top/bottom offsets — those move the connection point outside the ELK rectangle
  * so edges no longer meet the visible border.
  */
-function ElkCustomNode({ data }) {
+/** RF v12 passes width/height from node.{width,height}; prefer those over data so boxes stay ELK-sized. */
+function ElkCustomNode({ data, width: rw, height: rh }) {
     const label = data.label || '';
-    const w = data.width || 80;
-    const h = data.height || 40;
+    const w = rw ?? data.width ?? 80;
+    const h = rh ?? data.height ?? 40;
     const leftHandles = data.leftHandles || [];
     const rightHandles = data.rightHandles || [];
     const topHandles = data.topHandles || [];
@@ -201,6 +202,10 @@ function ElkCustomNode({ data }) {
                 position: 'relative',
                 width: w,
                 height: h,
+                minWidth: w,
+                maxWidth: w,
+                minHeight: h,
+                maxHeight: h,
                 boxSizing: 'border-box',
                 background: '#fff',
                 border: '1px solid #475569',
@@ -213,7 +218,7 @@ function ElkCustomNode({ data }) {
     );
 }
 
-/** Compound: handles on frame (GroupNode-style). */
+/** Compound: handles on frame (GroupNode-style). RF sizes the wrapper via node.width / node.height. */
 function ElkGroupNode({ data }) {
     const label = data.label || '';
     const leftHandles = data.leftHandles || [];

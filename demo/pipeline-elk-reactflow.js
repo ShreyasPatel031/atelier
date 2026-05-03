@@ -178,6 +178,12 @@
             var hasChildren = !!(node.children && node.children.length);
             var ep = edgeConnectionPoints[node.id] || { left: [], right: [], top: [], bottom: [] };
 
+            /** React Flow v12: fixed size uses top-level width/height; style-only sizing lets RF measure content and shrink short labels. */
+            var nw =
+                node.width != null ? Math.round(Number(node.width)) : undefined;
+            var nh =
+                node.height != null ? Math.round(Number(node.height)) : undefined;
+
             var rf = {
                 id: String(node.id),
                 type: hasChildren ? 'group' : 'custom',
@@ -186,13 +192,15 @@
                     : { x: absPos.x, y: absPos.y },
                 parentId: parentId || undefined,
                 extent: parentId ? 'parent' : undefined,
+                width: nw,
+                height: nh,
                 zIndex: hasChildren ? 5 : 50,
                 selectable: true,
                 draggable: false,
                 data: {
                     label: labelFor(node),
-                    width: node.width,
-                    height: node.height,
+                    width: nw,
+                    height: nh,
                     leftHandles: ep.left.map(function (cp) {
                         return cp.y - absPos.y;
                     }),
@@ -208,16 +216,11 @@
                 },
                 style: hasChildren
                     ? {
-                          width: node.width,
-                          height: node.height,
                           backgroundColor: 'rgba(241,245,249,0.4)',
                           border: '1px dashed #64748b',
                           borderRadius: 8,
                       }
-                    : {
-                          width: node.width,
-                          height: node.height,
-                      },
+                    : {},
             };
             nodes.push(rf);
             var ch = node.children || [];
