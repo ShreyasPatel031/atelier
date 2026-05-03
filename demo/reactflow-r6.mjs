@@ -1,8 +1,9 @@
 /**
  * R6: ELK → React Flow with ELK-accurate handles (ports), matching openai-realtime-elkjs-tool.
  */
-import React, { useCallback, useEffect } from 'https://esm.sh/react@18.3.1';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'https://esm.sh/react@18.3.1';
 import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
+import { createPortal } from 'https://esm.sh/react-dom@18.3.1?deps=react@18.3.1';
 import {
     ReactFlow,
     Background,
@@ -15,6 +16,8 @@ import {
     Position,
     BaseEdge,
     MarkerType,
+    useStore,
+    useReactFlow,
 } from 'https://esm.sh/@xyflow/react@12.4.2?deps=react@18.3.1,react-dom@18.3.1';
 
 const baseHandleStyle = {
@@ -22,7 +25,80 @@ const baseHandleStyle = {
     opacity: 0.9,
     width: 6,
     height: 6,
+    pointerEvents: 'auto',
+    /** Above node chrome so translate(-50%,-50%) ports are not clipped by overflow:hidden on the shell. */
+    zIndex: 2,
 };
+
+/** Gap between node edge and hover panel (visual); bridge handlers avoid hover flicker across the gap. */
+const NODE_HOVER_SIDE_GAP_PX = 10;
+
+const LEAF_NODE_BORDER_RADIUS = 6;
+/** Matches pipeline-elk-reactflow group node style.borderRadius */
+const GROUP_NODE_BORDER_RADIUS = 8;
+/** Must match `backgroundColor` / stroke on group nodes in pipeline-elk-reactflow.js (rgb + alpha on fill). */
+const GROUP_NODE_TINT = '241, 245, 249';
+/** Pill: same hue as group fill (see pipeline `rgba(241,245,249,0.4)`), fully opaque for legibility. */
+const GROUP_LABEL_PILL_BG = 'rgba(' + GROUP_NODE_TINT + ', 1)';
+const GROUP_LABEL_PILL_BORDER = '1px solid rgba(100, 116, 139, 0.42)';
+/** Group title pill; side hover panel uses HOVER_PANEL_Z_INDEX (above this). */
+const GROUP_LABEL_Z_INDEX = 20000;
+/** Above group title pill and local stacking context inside the node wrapper. */
+const HOVER_PANEL_Z_INDEX = 2147481000;
+
+/**
+ * Fixed width = 3× node width; height grows with content, caps at 2× node height then scrolls.
+ */
+function ElkSideHoverPanel({
+    visible,
+    nodeWidth,
+    nodeHeight,
+    borderRadius,
+    text,
+    panelRef,
+    onPanelMouseLeave,
+}) {
+    if (!visible) return null;
+    const panelW = nodeWidth * 3;
+    const maxH = nodeHeight * 2;
+    return React.createElement(
+        'div',
+        {
+            ref: panelRef,
+            'data-testid': 'atelier-rf-hover-panel',
+            onMouseLeave: onPanelMouseLeave,
+            style: {
+                position: 'absolute',
+                left: 'calc(100% + ' + NODE_HOVER_SIDE_GAP_PX + 'px)',
+                top: 0,
+                width: panelW,
+                maxHeight: maxH,
+                overflowY: 'auto',
+                boxSizing: 'border-box',
+                padding: '8px',
+                fontSize: 11,
+                lineHeight: 1.35,
+                color: '#0f172a',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+                background: '#fff',
+                border: '1px solid #475569',
+                borderRadius: borderRadius,
+                boxShadow: '0 4px 14px rgba(15,23,42,0.14)',
+                zIndex: HOVER_PANEL_Z_INDEX,
+                pointerEvents: 'auto',
+                textAlign: 'left',
+            },
+        },
+        text || ''
+    );
+}
+
+function containsNode(ancestor, node) {
+    if (!ancestor || !node) return false;
+    return ancestor === node || ancestor.contains(node);
+}
 
 /**
  * Leaf node: handles centered on the node bbox edge (matches xyflow .react-flow__handle-* and ELK port coords).
@@ -31,7 +107,13 @@ const baseHandleStyle = {
  */
 /** RF v12 passes width/height from node.{width,height}; prefer those over data so boxes stay ELK-sized. */
 function ElkCustomNode({ data, width: rw, height: rh }) {
+    const [hovered, setHovered] = useState(false);
+    const rootRef = useRef(null);
+    const panelRef = useRef(null);
+
     const label = data.label || '';
+    const detail = data.hoverDetail != null ? String(data.hoverDetail).trim() : '';
+    const showHoverPanel = hovered && detail.length > 0;
     const w = rw ?? data.width ?? 80;
     const h = rh ?? data.height ?? 40;
     const leftHandles = data.leftHandles || [];
@@ -39,10 +121,10 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
     const topHandles = data.topHandles || [];
     const bottomHandles = data.bottomHandles || [];
 
-    const parts = [];
+    const handleEls = [];
 
     leftHandles.forEach((yPos, index) => {
-        parts.push(
+        handleEls.push(
             React.createElement(Handle, {
                 key: 'lt-' + index,
                 type: 'target',
@@ -74,7 +156,7 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
     });
 
     rightHandles.forEach((yPos, index) => {
-        parts.push(
+        handleEls.push(
             React.createElement(Handle, {
                 key: 'rs-' + index,
                 type: 'source',
@@ -106,7 +188,7 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
     });
 
     topHandles.forEach((xPos, index) => {
-        parts.push(
+        handleEls.push(
             React.createElement(Handle, {
                 key: 'ts-' + index,
                 type: 'source',
@@ -138,7 +220,7 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
     });
 
     bottomHandles.forEach((xPos, index) => {
-        parts.push(
+        handleEls.push(
             React.createElement(Handle, {
                 key: 'bt-' + index,
                 type: 'target',
@@ -169,36 +251,52 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
         );
     });
 
-    parts.push(
-        React.createElement(
-            'div',
-            {
-                key: 'txt',
-                style: {
-                    boxSizing: 'border-box',
-                    width: '100%',
-                    height: '100%',
-                    padding: '8px',
-                    fontSize: 11,
-                    color: '#0f172a',
-                    lineHeight: 1.25,
-                    wordBreak: 'break-word',
-                    overflowWrap: 'break-word',
-                    whiteSpace: 'pre-wrap',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    overflow: 'hidden',
-                },
+    const labelEl = React.createElement(
+        'div',
+        {
+            key: 'txt',
+            style: {
+                boxSizing: 'border-box',
+                width: '100%',
+                height: '100%',
+                padding: '8px',
+                fontSize: 11,
+                color: '#0f172a',
+                lineHeight: 1.25,
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+                whiteSpace: 'pre-wrap',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                overflow: 'hidden',
             },
-            label
-        )
+        },
+        label
     );
+
+    const onRootLeave = function (e) {
+        var rel = e.relatedTarget;
+        if (containsNode(panelRef.current, rel)) return;
+        setHovered(false);
+    };
+    const onPanelLeave = function (e) {
+        var rel = e.relatedTarget;
+        if (containsNode(rootRef.current, rel)) return;
+        setHovered(false);
+    };
 
     return React.createElement(
         'div',
         {
+            ref: rootRef,
+            'data-atelier-rf-node-kind': 'leaf',
+            'data-atelier-rf-has-hover-detail': detail.length > 0 ? 'true' : 'false',
+            onMouseEnter: function () {
+                setHovered(true);
+            },
+            onMouseLeave: onRootLeave,
             style: {
                 position: 'relative',
                 width: w,
@@ -208,20 +306,149 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
                 minHeight: h,
                 maxHeight: h,
                 boxSizing: 'border-box',
-                background: '#fff',
-                border: '1px solid #475569',
-                borderRadius: 6,
-                boxShadow: '0 1px 3px rgba(15,23,42,0.12)',
                 overflow: 'visible',
             },
         },
-        parts
+        React.createElement(
+            'div',
+            {
+                key: 'chrome',
+                style: {
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    width: '100%',
+                    height: '100%',
+                    boxSizing: 'border-box',
+                    background: '#fff',
+                    border: '1px solid #475569',
+                    borderRadius: LEAF_NODE_BORDER_RADIUS,
+                    boxShadow: '0 1px 3px rgba(15,23,42,0.12)',
+                    overflow: 'hidden',
+                    zIndex: 0,
+                },
+            },
+            labelEl
+        ),
+        ...handleEls,
+        React.createElement(ElkSideHoverPanel, {
+            visible: showHoverPanel,
+            nodeWidth: w,
+            nodeHeight: h,
+            borderRadius: LEAF_NODE_BORDER_RADIUS,
+            text: detail,
+            panelRef: panelRef,
+            onPanelMouseLeave: onPanelLeave,
+        })
     );
 }
 
+function readGroupLabelViewTune() {
+    const vt = typeof window !== 'undefined' && window.viewTune ? window.viewTune : {};
+    let fontPx = Number(vt.groupLabelFontPx);
+    if (!Number.isFinite(fontPx)) fontPx = 12;
+    fontPx = Math.max(8, Math.min(20, Math.round(fontPx)));
+    let thresh = Number(vt.groupLabelOutsideZoomAt);
+    if (!Number.isFinite(thresh)) thresh = 0.8;
+    thresh = Math.max(0.08, Math.min(2, Math.round(thresh * 100) / 100));
+    return { fontPx, thresh };
+}
+
+/**
+ * Subscribes to the viewport-level pill layer created by AtelierViewportApiBootstrap.
+ * Returns the layer DOM node, or null until it appears (race on first render).
+ */
+function usePillLayer() {
+    const [layer, setLayer] = useState(() =>
+        typeof window !== 'undefined' ? window.__atelierR6PillLayer || null : null
+    );
+    useEffect(function () {
+        if (!layer && typeof window !== 'undefined' && window.__atelierR6PillLayer) {
+            setLayer(window.__atelierR6PillLayer);
+            return;
+        }
+        function onReady() {
+            setLayer(window.__atelierR6PillLayer || null);
+        }
+        window.addEventListener('atelier-rf-pill-layer-ready', onReady);
+        return function () {
+            window.removeEventListener('atelier-rf-pill-layer-ready', onReady);
+        };
+    }, [layer]);
+    return layer;
+}
+
 /** Compound: handles on frame (GroupNode-style). RF sizes the wrapper via node.width / node.height. */
-function ElkGroupNode({ data }) {
+function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, positionAbsoluteY }) {
+    const [hovered, setHovered] = useState(false);
+    const rootRef = useRef(null);
+    const panelRef = useRef(null);
+
+    const gw = rw ?? data.width ?? 160;
+    const gh = rh ?? data.height ?? 120;
+    const nodeX = typeof positionAbsoluteX === 'number' ? positionAbsoluteX : 0;
+    const nodeY = typeof positionAbsoluteY === 'number' ? positionAbsoluteY : 0;
+
+    const zoom = useStore((s) => {
+        const t = s.transform;
+        const z = t && typeof t[2] === 'number' && t[2] > 0 ? t[2] : 1;
+        return z;
+    });
+    const [, setTuneRev] = useState(0);
+    useEffect(() => {
+        const fn = () => setTuneRev((x) => x + 1);
+        window.addEventListener('atelier-view-tune', fn);
+        return () => window.removeEventListener('atelier-view-tune', fn);
+    }, []);
+
+    const pillLayer = usePillLayer();
+
     const label = data.label || '';
+    const detail = data.hoverDetail != null ? String(data.hoverDetail).trim() : '';
+    const showHoverPanel = hovered && detail.length > 0;
+    const { fontPx, thresh } = readGroupLabelViewTune();
+    const z = zoom > 0 ? zoom : 1;
+    const inside = z <= thresh;
+    /** 6 screen px → flow units (viewport scales by zoom; pill rides that scale via its container). */
+    const padFlow = 6 / z;
+
+    const pillMaxFlow = inside ? Math.max(0, gw - 2 * padFlow) : gw;
+
+    /**
+     * Pill is portaled into a viewport-level layer (.atelier-rf-pill-layer) inside
+     * .react-flow__viewport, so it shares the RF pan/zoom transform but escapes any
+     * group-node stacking context. Coordinates are in flow units.
+     */
+    const hdrStyle = {
+        position: 'absolute',
+        fontWeight: 600,
+        color: '#334155',
+        background: GROUP_LABEL_PILL_BG,
+        border: GROUP_LABEL_PILL_BORDER,
+        boxSizing: 'border-box',
+        padding: '2px 8px',
+        borderRadius: 4,
+        maxWidth: pillMaxFlow + 'px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none',
+        fontSize: fontPx / z,
+        ...(inside
+            ? {
+                  /** Inset from group top-left by 6 screen px (constant across zoom). */
+                  left: nodeX + padFlow,
+                  top: nodeY + padFlow,
+                  transform: 'none',
+              }
+            : {
+                  /** Anchor to group top-left, then shift up by own height + 6 screen px. */
+                  left: nodeX,
+                  top: nodeY,
+                  transform: 'translateY(calc(-100% - ' + padFlow + 'px))',
+              }),
+    };
+
     const leftHandles = data.leftHandles || [];
     const rightHandles = data.rightHandles || [];
     const topHandles = data.topHandles || [];
@@ -354,46 +581,75 @@ function ElkGroupNode({ data }) {
         );
     });
 
-    parts.push(
-        React.createElement(
-            'div',
-            {
-                key: 'hdr',
-                style: {
-                    position: 'absolute',
-                    top: 6,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: '#334155',
-                    background: '#f1f5f9',
-                    padding: '2px 8px',
-                    borderRadius: 4,
-                    maxWidth: '92%',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    zIndex: 2,
-                    pointerEvents: 'none',
-                },
-            },
-            label
-        )
-    );
+    const labelPill = pillLayer
+        ? createPortal(
+              React.createElement(
+                  'div',
+                  {
+                      key: 'hdr-' + id,
+                      'data-testid': 'atelier-rf-group-label',
+                      'data-group-id': id,
+                      style: hdrStyle,
+                  },
+                  label
+              ),
+              pillLayer
+          )
+        : null;
+
+    const onRootLeave = function (e) {
+        var rel = e.relatedTarget;
+        if (containsNode(panelRef.current, rel)) return;
+        setHovered(false);
+    };
+    const onPanelLeave = function (e) {
+        var rel = e.relatedTarget;
+        if (containsNode(rootRef.current, rel)) return;
+        setHovered(false);
+    };
 
     return React.createElement(
         'div',
         {
+            ref: rootRef,
+            onMouseEnter: function () {
+                setHovered(true);
+            },
+            onMouseLeave: onRootLeave,
             style: {
                 width: '100%',
                 height: '100%',
                 position: 'relative',
                 boxSizing: 'border-box',
                 overflow: 'visible',
+                /** See index.html: group RF wrapper is pointer-events:none; shell must not eat hits meant for child nodes. */
+                pointerEvents: 'none',
             },
         },
-        parts
+        labelPill,
+        React.createElement(
+            'div',
+            {
+                style: {
+                    width: '100%',
+                    height: '100%',
+                    position: 'relative',
+                    boxSizing: 'border-box',
+                    overflow: 'visible',
+                    pointerEvents: 'none',
+                },
+            },
+            parts
+        ),
+        React.createElement(ElkSideHoverPanel, {
+            visible: showHoverPanel,
+            nodeWidth: gw,
+            nodeHeight: gh,
+            borderRadius: GROUP_NODE_BORDER_RADIUS,
+            text: detail,
+            panelRef: panelRef,
+            onPanelMouseLeave: onPanelLeave,
+        })
     );
 }
 
@@ -408,9 +664,30 @@ function ElkOrthogonalEdge(props) {
     let edgePath = '';
 
     if (routePoints.length >= 2) {
-        edgePath = 'M ' + routePoints[0].x + ' ' + routePoints[0].y;
-        for (let i = 1; i < routePoints.length; i++) {
-            edgePath += ' L ' + routePoints[i].x + ' ' + routePoints[i].y;
+        /** RF handle centers come from sourceX/Y & targetX/Y; ELK polyline ends can sit on bbox edge. */
+        const pts = routePoints.map((p) => ({ x: Number(p.x), y: Number(p.y) }));
+        pts[0] = { x: sourceX, y: sourceY };
+        pts[pts.length - 1] = { x: targetX, y: targetY };
+        const deduped = [];
+        for (let i = 0; i < pts.length; i++) {
+            const p = pts[i];
+            const prev = deduped[deduped.length - 1];
+            if (
+                !prev ||
+                Math.abs(prev.x - p.x) > 0.01 ||
+                Math.abs(prev.y - p.y) > 0.01
+            ) {
+                deduped.push(p);
+            }
+        }
+        if (deduped.length >= 2) {
+            edgePath = 'M ' + deduped[0].x + ' ' + deduped[0].y;
+            for (let i = 1; i < deduped.length; i++) {
+                edgePath += ' L ' + deduped[i].x + ' ' + deduped[i].y;
+            }
+        } else {
+            edgePath =
+                'M ' + sourceX + ' ' + sourceY + ' L ' + targetX + ' ' + targetY;
         }
     } else {
         edgePath =
@@ -433,6 +710,50 @@ const nodeTypes = {
 const edgeTypes = {
     elkOrthogonal: ElkOrthogonalEdge,
 };
+
+/**
+ * Inside ReactFlow:
+ *   - Exposes viewport controls (zoomTo, etc.) via window for tests.
+ *   - Creates the pill overlay layer inside .react-flow__viewport so group label pills
+ *     paint above all node wrappers without being trapped in any group's stacking context.
+ *
+ * The pill layer is a sibling of .react-flow__nodes inside the transformed viewport, so
+ * its children use flow coordinates and inherit the RF pan/zoom transform automatically.
+ */
+function AtelierViewportApiBootstrap() {
+    const rf = useReactFlow();
+    useLayoutEffect(
+        function () {
+            window.__atelierR6ViewportApi = rf;
+            const root = document.getElementById('reactflowRoot');
+            const viewport = root ? root.querySelector('.react-flow__viewport') : null;
+            if (viewport) {
+                let layer = viewport.querySelector(':scope > .atelier-rf-pill-layer');
+                if (!layer) {
+                    layer = document.createElement('div');
+                    layer.className = 'atelier-rf-pill-layer';
+                    /**
+                     * Zero-size positioned wrapper; children use absolute flow coords.
+                     * z-index beats .react-flow__nodes (which we set to 1 in index.html).
+                     */
+                    layer.style.cssText =
+                        'position:absolute;left:0;top:0;width:0;height:0;' +
+                        'pointer-events:none;z-index:50000;';
+                    viewport.appendChild(layer);
+                }
+                window.__atelierR6PillLayer = layer;
+                window.dispatchEvent(new CustomEvent('atelier-rf-pill-layer-ready'));
+            }
+            return function () {
+                try {
+                    delete window.__atelierR6ViewportApi;
+                } catch (_) {}
+            };
+        },
+        [rf]
+    );
+    return null;
+}
 
 /** RF measures DOM and can shrink nodes with short labels; ELK boxes must stay fixed. */
 function clampElkCustomNodeDimensions(nodeList) {
@@ -495,6 +816,7 @@ function Inner(props) {
                 },
             },
         },
+        React.createElement(AtelierViewportApiBootstrap, null),
         React.createElement(Background, { gap: 16, color: '#cbd5e1' }),
         React.createElement(Controls, { showInteractive: false })
     );
@@ -507,13 +829,37 @@ function App(props) {
 let rfRoot = null;
 let rfContainer = null;
 
+/** Call before setting reactflowRoot.innerHTML so React is not torn down mid-commit (flash / blank graph). */
+window.atelierUnmountReactFlowR6 = function () {
+    if (rfRoot) {
+        try {
+            rfRoot.unmount();
+        } catch (_) {}
+        rfRoot = null;
+        rfContainer = null;
+    }
+};
+
 window.atelierMountReactFlowR6 = async function (container, epoch) {
     if (!container) return;
-    container.innerHTML = '';
+
+    function stale() {
+        return epoch != null && epoch !== window.__atelierRfLayoutEpoch;
+    }
+
+    if (rfRoot && rfContainer === container) {
+        try {
+            rfRoot.unmount();
+        } catch (_) {}
+        rfRoot = null;
+        rfContainer = null;
+    }
+
     const getIr = window.atelierResolveStructuredIrForPipeline;
     const layout = window.runElkLayoutPipeline;
     const convert = window.elkLaidOutToReactFlowElements;
     if (typeof getIr !== 'function' || typeof layout !== 'function' || typeof convert !== 'function') {
+        if (stale()) return;
         container.innerHTML = '';
         const d = document.createElement('div');
         d.className = 'error';
@@ -524,6 +870,7 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
     }
     const { diagram } = getIr();
     if (!diagram) {
+        if (stale()) return;
         container.innerHTML = '';
         const d = document.createElement('div');
         d.className = 'loading';
@@ -533,7 +880,9 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
         return;
     }
     const res = await layout(diagram);
+    if (stale()) return;
     if (!res.ok || !res.laidOut) {
+        if (stale()) return;
         container.innerHTML = '';
         const d = document.createElement('div');
         d.className = 'error';
@@ -541,20 +890,37 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
         container.appendChild(d);
         return;
     }
-    const { nodes, edges } = convert(res.laidOut);
+    const dim =
+        window.atelierElkNodeDimensions &&
+        typeof window.atelierElkNodeDimensions.getReactFlowDimensionProfile === 'function'
+            ? window.atelierElkNodeDimensions.getReactFlowDimensionProfile()
+            : undefined;
+    var converted = convert(res.laidOut, dim);
+    var nodes = converted.nodes;
+    var edges = converted.edges;
+    var hoverFn = window.atelierRfHoverDetailByNodeId;
+    var hoverMap =
+        typeof hoverFn === 'function' ? hoverFn(diagram) : Object.create(null);
+    nodes = nodes.map(function (n) {
+        var hid = hoverMap[n.id];
+        return Object.assign({}, n, {
+            data: Object.assign({}, n.data, {
+                hoverDetail: hid != null ? hid : n.data.hoverDetail,
+            }),
+        });
+    });
+    if (stale()) return;
     const key = 'rf-' + (epoch != null ? epoch : Date.now());
 
-    if (rfRoot && rfContainer !== container) {
-        try {
-            rfRoot.unmount();
-        } catch (_) {}
-        rfRoot = null;
-    }
-    if (!rfRoot) {
-        rfRoot = createRoot(container);
-        rfContainer = container;
-    }
-
+    /**
+     * Always tear down and create a new root before render. Reusing a root across
+     * async ELK while refreshReactFlowView can unmount + replace innerHTML causes
+     * React commit / removeChild crashes (seen on large graphs e.g. pydantic-ai).
+     */
+    window.atelierUnmountReactFlowR6();
+    if (stale()) return;
+    rfRoot = createRoot(container);
+    rfContainer = container;
     rfRoot.render(
         React.createElement(App, {
             key,

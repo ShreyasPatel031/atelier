@@ -15,24 +15,36 @@
  * Exposes:
  *   window.diagramToElkInput(diagram, options?)
  *   window.validateElkInputIdentifiers(elkGraph)
+ *
+ * Depends on demo/elk-node-dimensions.js (ELK leaf sizing + RF dimension profile).
  */
 (function (global) {
     'use strict';
 
-    var DEFAULTS = {
-        rootId: 'root',
-        /** Fixed pixel width for leaf nodes (ELK + React Flow). Overridable via options.leafNodeWidth / viewTune.elkLeafNodeWidth. */
-        leafNodeWidth: 200,
-        leafMinWidth: 72,
-        /** Horizontal padding budget inside the box for line wrapping (matches ~8px CSS padding each side). */
-        leafPaddingHorizontal: 16,
-        leafPaddingVertical: 18,
-        leafLineHeight: 14,
-        leafMinHeight: 36,
-        charWidth: 7,
-        groupLabelHeight: 28,
-        groupMinWidth: 120,
-    };
+    function getDimApi() {
+        var D = global.atelierElkNodeDimensions;
+        if (!D && typeof require !== 'undefined') {
+            try {
+                D = require('./elk-node-dimensions.js');
+            } catch (e) {
+                D = null;
+            }
+        }
+        if (!D) {
+            throw new Error(
+                'atelier: load elk-node-dimensions.js before pipeline-diagram-to-elk.js'
+            );
+        }
+        return D;
+    }
+
+    function estimateLeafSize(label, options) {
+        return getDimApi().estimateElkLeafSize(label, options);
+    }
+
+    function estimateGroupLabelSize(label, options) {
+        return getDimApi().estimateElkGroupLabelSize(label, options);
+    }
 
     function mapDirection(diagramDirection) {
         var d = String(diagramDirection || 'TD').toUpperCase();
@@ -49,87 +61,6 @@
             width: w,
             height: h,
         };
-    }
-
-    /** Word-wrap style line count for a single paragraph (no inner newlines). */
-    function linesForParagraph(para, maxChars) {
-        var words = para.split(/\s+/).filter(function (w) {
-            return w.length > 0;
-        });
-        if (words.length === 0) return 1;
-        var lineCount = 0;
-        var cur = 0;
-        for (var i = 0; i < words.length; i++) {
-            var w = words[i];
-            while (w.length > maxChars) {
-                if (cur > 0) {
-                    lineCount++;
-                    cur = 0;
-                }
-                lineCount++;
-                w = w.substring(maxChars);
-            }
-            if (w.length === 0) continue;
-            var need = w.length + (cur > 0 ? 1 : 0);
-            if (cur + need <= maxChars) {
-                cur += need;
-            } else {
-                lineCount++;
-                cur = w.length;
-            }
-        }
-        if (cur > 0) lineCount++;
-        return Math.max(1, lineCount);
-    }
-
-    /** Fixed width; height from wrapped label text (for ELK bounding box). */
-    function estimateLeafSize(label, options) {
-        var o = options || {};
-        var text = String(label != null ? label : '').trim() || '?';
-        var fixedW =
-            o.leafNodeWidth != null ? o.leafNodeWidth : DEFAULTS.leafNodeWidth;
-        var minW = o.leafMinWidth != null ? o.leafMinWidth : DEFAULTS.leafMinWidth;
-        fixedW = Math.max(minW, fixedW);
-        var cw = o.charWidth != null ? o.charWidth : DEFAULTS.charWidth;
-        var padH =
-            o.leafPaddingHorizontal != null
-                ? o.leafPaddingHorizontal
-                : DEFAULTS.leafPaddingHorizontal;
-        var padV =
-            o.leafPaddingVertical != null
-                ? o.leafPaddingVertical
-                : DEFAULTS.leafPaddingVertical;
-        var lineH =
-            o.leafLineHeight != null ? o.leafLineHeight : DEFAULTS.leafLineHeight;
-        var minH =
-            o.leafMinHeight != null ? o.leafMinHeight : DEFAULTS.leafMinHeight;
-        var innerW = Math.max(24, fixedW - padH);
-        var maxChars = Math.max(4, Math.floor(innerW / cw));
-
-        var paras = text.split(/\n/);
-        var totalLines = 0;
-        for (var pi = 0; pi < paras.length; pi++) {
-            var para = paras[pi];
-            if (para.length === 0) {
-                totalLines++;
-                continue;
-            }
-            totalLines += linesForParagraph(para, maxChars);
-        }
-        var h = padV + totalLines * lineH;
-        h = Math.max(minH, Math.ceil(h));
-        return { width: fixedW, height: h, text: text };
-    }
-
-    function estimateGroupLabelSize(label, options) {
-        var o = options || {};
-        var text = String(label != null ? label : '').trim() || '?';
-        var minW = o.groupMinWidth != null ? o.groupMinWidth : DEFAULTS.groupMinWidth;
-        var cw = o.charWidth != null ? o.charWidth : DEFAULTS.charWidth;
-        var pad = 32;
-        var w = Math.max(minW, Math.min(360, text.length * cw + pad));
-        var h = o.groupLabelHeight != null ? o.groupLabelHeight : DEFAULTS.groupLabelHeight;
-        return { width: w, height: h, text: text };
     }
 
     function collectElkNodeIds(node, out) {
@@ -267,11 +198,16 @@
         };
     }
 
-    function compoundLayoutOptions(target) {
+    function compoundLayoutOptions(target, padPx) {
+        var P = Math.round(Number(padPx));
+        if (!isFinite(P)) {
+            P = 14;
+        }
+        P = Math.max(4, Math.min(48, P));
         if (target === 'elkjs') {
             return {
                 'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
-                'elk.padding': '[top=24,left=14,bottom=14,right=14]',
+                'elk.padding': '[top=' + P + ',left=' + P + ',bottom=' + P + ',right=' + P + ']',
                 'elk.spacing.nodeNode': '28',
             };
         }
@@ -289,8 +225,16 @@
      */
     function diagramToElkInput(diagram, options) {
         var warnings = [];
-        var o = options || {};
-        var target = o.target === 'elkjs' ? 'elkjs' : 'elklive';
+        var merged = Object.assign({}, options || {});
+        var DIM = getDimApi();
+        if (merged.leafNodeWidth == null) {
+            merged.leafNodeWidth = DIM.resolveLeafNodeWidthPx(global);
+        }
+        var target = merged.target === 'elkjs' ? 'elkjs' : 'elklive';
+        var compoundPadPx =
+            typeof DIM.getElkCompoundPaddingPx === 'function'
+                ? DIM.getElkCompoundPaddingPx(global)
+                : 14;
 
         if (!diagram || typeof diagram !== 'object') {
             return { ok: false, reason: 'no_diagram', elkGraph: null, warnings: warnings, validate: null, summary: null };
@@ -322,19 +266,23 @@
         var rootChildren = [];
         var elkDirection = mapDirection(diagram.direction);
 
+        /** Same initial width for every non-root node (leaves + compounds). ELK auto-grows compounds to fit children.
+         *  Mirrors openai-realtime-elkjs-tool ensureIds: node.width ??= NON_ROOT_DEFAULT_OPTIONS.width.
+         *  Group label text contributes to width via labels[].width so ELK reserves room for the title bar. */
+        var defaultNonRootWidth = merged.leafNodeWidth;
         for (var gi = 0; gi < groups.length; gi++) {
             var gg = groups[gi];
             if (!gg || gg.id == null) continue;
             var gId = String(gg.id);
             var gLabel = gg.label != null ? String(gg.label) : gId;
-            var ls = estimateGroupLabelSize(gLabel, o);
+            var ls = estimateGroupLabelSize(gLabel, merged);
             var memberIds = Array.isArray(gg.nodes) ? gg.nodes.map(String) : [];
             var compoundChildren = [];
             for (var mi = 0; mi < memberIds.length; mi++) {
                 var mid = memberIds[mi];
                 var raw = nodeById.get(mid);
                 var lab = raw && raw.label != null ? raw.label : mid;
-                var sz = estimateLeafSize(lab, o);
+                var sz = estimateLeafSize(lab, merged);
                 compoundChildren.push({
                     id: mid,
                     width: sz.width,
@@ -344,10 +292,10 @@
             }
             var compound = {
                 id: gId,
-                width: ls.width,
+                width: defaultNonRootWidth,
                 height: ls.height,
                 labels: [elkLabel(gId, 0, ls.text, ls.width, ls.height)],
-                layoutOptions: compoundLayoutOptions(target),
+                layoutOptions: compoundLayoutOptions(target, compoundPadPx),
                 children: compoundChildren,
             };
             groupCompoundById.set(gId, compound);
@@ -365,7 +313,7 @@
             }
             if (inAnyGroup.has(idStr)) continue;
             var lab2 = node.label != null ? node.label : idStr;
-            var sz2 = estimateLeafSize(lab2, o);
+            var sz2 = estimateLeafSize(lab2, merged);
             rootChildren.push({
                 id: idStr,
                 width: sz2.width,
@@ -374,7 +322,8 @@
             });
         }
 
-        var rootId = o.rootId != null ? String(o.rootId) : DEFAULTS.rootId;
+        var rootId =
+            merged.rootId != null ? String(merged.rootId) : DIM.DEFAULTS.rootId;
 
         var elkGraph = {
             id: rootId,

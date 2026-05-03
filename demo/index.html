@@ -10,6 +10,7 @@
     <script src="./viewer-debug.js"></script>
     <script src="./pipeline-overview-mermaid.js"></script>
     <script src="./pipeline-ir-repair.js"></script>
+    <script src="./elk-node-dimensions.js"></script>
     <script src="./pipeline-diagram-to-elk.js"></script>
     <!-- CDN: ../node_modules/… breaks when static server roots at demo/ (e.g. :8080/). -->
     <script src="https://cdn.jsdelivr.net/npm/elkjs@0.9.3/lib/elk.bundled.js" crossorigin="anonymous"></script>
@@ -330,6 +331,27 @@
             width: 100%;
             height: 100%;
         }
+        /* Group label pill is portaled to .atelier-rf-pill-layer inside .react-flow__viewport
+           (see reactflow-r6.mjs AtelierViewportApiBootstrap). The layer sits above
+           .react-flow__nodes so labels never get covered by sibling nodes/edges. */
+        #reactflowRoot .atelier-rf-pill-layer {
+            pointer-events: none;
+        }
+        /**
+         * RF v12 renders all nodes flat as siblings under .react-flow__nodes (groups have no
+         * .react-flow__node-wrapper child, so v11-style selectors no-op). Compound frames sit
+         * above leaves (z=6000 vs 5000) for correct paint order, but that also makes them eat
+         * hover/click events meant for the leaves drawn over the same area.
+         *
+         * Make the group node transparent to pointer events so leaves underneath get hits;
+         * re-enable just handles + the group title pill (which becomes the group’s own hover target).
+         */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group {
+            pointer-events: none !important;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group .react-flow__handle {
+            pointer-events: auto !important;
+        }
         
         /* Dev: tune panel sits inside diagram viewport (bottom-left), not over the chat column */
         .view-tune-panel {
@@ -348,6 +370,10 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.35);
             pointer-events: auto;
         }
+        /** When open, cap overall height so the panel does not cover the whole viewport. */
+        .view-tune-panel[open] {
+            max-height: min(320px, calc(100vh - 96px));
+        }
         .view-tune-panel > summary {
             cursor: pointer;
             padding: 8px 12px;
@@ -357,11 +383,20 @@
         }
         .view-tune-panel > summary::-webkit-details-marker { display: none; }
         .view-tune-panel[open] > summary { border-bottom: 1px solid #334155; color: #cbd5e1; }
+        /**
+         * Explicit max-height so overflow-y works (flex-only caps on <details> are unreliable).
+         * Wheel over range inputs does not scroll parents — initViewTuneSliders wires manual scroll.
+         */
         .view-tune-body {
             padding: 10px 12px 12px;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            max-height: min(220px, calc(100vh - 160px));
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
         }
         .view-tune-row label {
             display: flex;
@@ -391,6 +426,34 @@
             cursor: grab;
             display: flex;
             flex-direction: column;
+        }
+        /** R6: node/group hover detail panels extend outside the node bbox */
+        #diagramViewport.diagram-viewport--reactflow {
+            overflow: visible;
+        }
+        #diagramViewport.diagram-viewport--reactflow .reactflow-placeholder {
+            overflow: visible;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__viewport {
+            overflow: visible;
+        }
+        /** R6: edges below nodes; hovered node above siblings so side hover panel isn’t covered */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__edges {
+            z-index: 0 !important;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__nodes {
+            z-index: 1 !important;
+            position: relative;
+        }
+        /**
+         * RF v12 renders nodes as flat siblings under .react-flow__nodes (no parent-child),
+         * so :has(.react-flow__node:hover) never matches and previously matched the GROUP
+         * (z=6000 catches the pointer before leaves at z=5000). Only leaf nodes have
+         * pointer-events on inside a group (group itself is pointer-events:none above), so
+         * .react-flow__node:hover here always means a leaf.
+         */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node:not(.react-flow__node-group):hover {
+            z-index: 2147482000 !important;
         }
         
         /* Pointer over diagram nodes (overrides inherited grab from .diagram-viewport) */
@@ -1101,11 +1164,11 @@
                         <div class="view-tune-row">
                             <label>
                                 ELK leaf node width (px) — re-runs ELK + React Flow / SVG
-                                <span class="view-tune-val" id="tuneElkLeafWVal">200</span>
-                                <input type="range" id="tuneElkLeafWidth" min="72" max="400" step="4" value="200" />
+                                <span class="view-tune-val" id="tuneElkLeafWVal">96</span>
+                                <input type="range" id="tuneElkLeafWidth" min="72" max="400" step="4" value="96" />
                             </label>
                             <p class="view-tune-hint" style="margin:0.35rem 0 0;font-size:0.8rem">
-                                Fixed box width; height follows label wrap in the converter (<code style="color:#94a3b8">pipeline-diagram-to-elk.js</code>).
+                                Leaf width/height policy lives in <code style="color:#94a3b8">elk-node-dimensions.js</code>; RF fallbacks match <code style="color:#94a3b8">processLayoutedGraph(..., dimensions)</code> from openai-realtime-elkjs-tool.
                             </p>
                         </div>
                         <div class="view-tune-row">
@@ -1132,7 +1195,27 @@
                                 Target width on screen; invisible hit stroke scales as <code style="color:#94a3b8">1 / zoom</code> so it feels the same while you zoom the canvas.
                             </p>
                         </div>
-                        <p class="view-tune-hint">Console: <code style="color:#94a3b8">viewTune.elkLeafNodeWidth = 240</code> then <code style="color:#94a3b8">refreshElkDerivedDiagramViews()</code> or <code style="color:#94a3b8">syncViewTuneUI()</code>.</p>
+                        <div class="view-tune-row">
+                            <label>
+                                React Flow group label size (screen px)
+                                <span class="view-tune-val" id="tuneGroupLabelFontVal">12</span>
+                                <input type="range" id="tuneGroupLabelFont" min="8" max="20" step="1" value="12" />
+                            </label>
+                            <p class="view-tune-hint" style="margin:0.35rem 0 0;font-size:0.8rem">
+                                Constant on-screen size; RF viewport zoom scales node chrome, label compensates with <code style="color:#94a3b8">fontSize / zoom</code>.
+                            </p>
+                        </div>
+                        <div class="view-tune-row">
+                            <label>
+                                RF group label inside/outside threshold (viewport zoom)
+                                <span class="view-tune-val" id="tuneGroupLabelZoomThreshVal">0.80</span>
+                                <input type="range" id="tuneGroupLabelZoomThresh" min="0.08" max="2" step="0.05" value="0.8" />
+                            </label>
+                            <p class="view-tune-hint" style="margin:0.35rem 0 0;font-size:0.8rem">
+                                At or below → label inside group (top-left); above → above frame, flush left. Matches RF min/max zoom (~0.08–2).
+                            </p>
+                        </div>
+                        <p class="view-tune-hint">Console: <code style="color:#94a3b8">viewTune.elkLeafNodeWidth = 240</code> then <code style="color:#94a3b8">refreshElkDerivedDiagramViews()</code> or <code style="color:#94a3b8">syncViewTuneUI()</code>. RF labels: <code style="color:#94a3b8">viewTune.groupLabelFontPx</code>, <code style="color:#94a3b8">viewTune.groupLabelOutsideZoomAt</code>.</p>
                     </div>
                 </details>
             </div>
@@ -1180,6 +1263,8 @@
         let activeDiagramTab = 'reactflow';
         let elkSvgRequestEpoch = 0;
         let reactFlowRequestEpoch = 0;
+        /** Serialize R6 mounts so ELK async + React commit never overlap another refresh (removeChild / blank canvas). */
+        let reactFlowRefreshChain = Promise.resolve();
         /** Full ELK graph JSON string for R4 "Copy" (ELK Live root object only). */
         let pipelineR4ElkPasteJson = '';
         let selectedModuleId = null;  // Currently selected module
@@ -2645,6 +2730,101 @@
         }
         window.atelierResolveStructuredIrForPipeline = resolveStructuredIrForPipeline;
 
+        /**
+         * R6: side hover panel copy.
+         *
+         * Sources, in order:
+         *  1. DIAGRAM_JSON title (header line) when authored.
+         *  2. Module intro prose from cached *.md (`moduleIntroFromDocsContent`) — same source as Mermaid hover.
+         *     For overview nodes we resolve the .md target via `overviewLinks[nodeId]`; for module pages the
+         *     diagram node `id` already equals the moduleId, optionally with `link: "<file>.md"`.
+         *  3. DIAGRAM_JSON description, if any.
+         *  4. Mermaid-authored shape label, only when it differs from the box label (avoids duplicating box text).
+         *
+         * Never repeats the ELK/React Flow box label by itself.
+         */
+        window.atelierRfHoverDetailByNodeId = function (diagram) {
+            const map = Object.create(null);
+            if (!diagram || typeof diagram !== 'object') return map;
+
+            let rawMermaid = '';
+            if (currentModuleId === 'overview') {
+                rawMermaid = extractMermaidFromMarkdown(DOCS_CONTENT['overview.md'] || '');
+            } else if (moduleData[currentModuleId]) {
+                rawMermaid = String(moduleData[currentModuleId].diagram || '');
+            }
+
+            let mermaidLabels = Object.create(null);
+            if (rawMermaid && typeof extractMermaidShapeLabels === 'function') {
+                mermaidLabels = extractMermaidShapeLabels(rawMermaid);
+            }
+
+            function normHover(s) {
+                return String(s || '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            function moduleIntroForNode(idStr, irLink) {
+                /** explicit link wins (e.g. structuredDiagram nodes carry `link: "<file>.md"`). */
+                const link = irLink != null && String(irLink).trim() ? String(irLink).trim() : '';
+                if (link) {
+                    const intro = moduleIntroFromDocsContent(link);
+                    if (intro) return intro;
+                }
+                if (currentModuleId === 'overview') {
+                    /** Mermaid `click <id> "<file>.md"` was harvested into overviewLinks[nodeId] when the overview rendered. */
+                    const mod = overviewLinks[idStr];
+                    if (mod) {
+                        const intro = moduleIntroFromDocsContent(mod);
+                        if (intro) return intro;
+                    }
+                }
+                /** Module page: the node id usually IS the module id. */
+                if (moduleData[idStr]) {
+                    const intro = moduleIntroFromDocsContent(idStr);
+                    if (intro) return intro;
+                }
+                return '';
+            }
+
+            function hoverLinesForShape(idStr, irLabel, irTitle, irDesc, irLink) {
+                const label = irLabel != null ? String(irLabel).trim() : '';
+                const title = irTitle != null ? String(irTitle).trim() : '';
+                const desc = irDesc != null ? String(irDesc).trim() : '';
+                const intro = moduleIntroForNode(idStr, irLink);
+
+                const rawM = mermaidLabels[idStr];
+                const fromMermaid =
+                    rawM != null ? decodeMermaidLabelFromSource(rawM).trim() : '';
+
+                const chunks = [];
+                if (title) chunks.push(title);
+                if (intro) chunks.push(intro);
+                if (desc && (!intro || normHover(desc) !== normHover(intro))) {
+                    chunks.push(desc);
+                }
+                if (fromMermaid) {
+                    const dm = normHover(fromMermaid);
+                    const dupes = [normHover(title), normHover(intro), normHover(desc), normHover(label)];
+                    if (!dupes.includes(dm)) chunks.push(fromMermaid);
+                }
+                return chunks.filter(Boolean).join('\n\n');
+            }
+
+            const nodes = Array.isArray(diagram.nodes) ? diagram.nodes : [];
+            for (const n of nodes) {
+                if (!n || n.id == null) continue;
+                map[String(n.id)] = hoverLinesForShape(String(n.id), n.label, n.title, n.description, n.link);
+            }
+            const groups = Array.isArray(diagram.groups) ? diagram.groups : [];
+            for (const g of groups) {
+                if (!g || g.id == null) continue;
+                map[String(g.id)] = hoverLinesForShape(String(g.id), g.label, g.title, g.description, g.link);
+            }
+            return map;
+        };
+
         /** R5: ELK layout → SVG inside diagram canvas (shared pan/zoom transform). */
         async function refreshElkSvgView() {
             const mount = document.getElementById('elkSvgMount');
@@ -2691,25 +2871,44 @@
             const root = document.getElementById('reactflowRoot');
             if (!root || activeDiagramTab !== 'reactflow') return;
             const rid = ++reactFlowRequestEpoch;
-            root.innerHTML =
-                '<div class="loading" style="padding:16px">Loading React Flow…</div>';
-            let tries = 0;
-            while (typeof window.atelierMountReactFlowR6 !== 'function' && tries < 80) {
-                await new Promise((r) => setTimeout(r, 50));
-                tries++;
-            }
-            if (rid !== reactFlowRequestEpoch) return;
-            if (typeof window.atelierMountReactFlowR6 !== 'function') {
-                root.innerHTML = '';
-                const e = document.createElement('div');
-                e.className = 'error';
-                e.style.padding = '16px';
-                e.textContent =
-                    'R6 module failed to load (reactflow-r6.mjs). Check network / console; ensure ES modules are allowed.';
-                root.appendChild(e);
-                return;
-            }
-            await window.atelierMountReactFlowR6(root, rid);
+
+            reactFlowRefreshChain = reactFlowRefreshChain
+                .catch(() => {})
+                .then(async () => {
+                    try {
+                        if (rid !== reactFlowRequestEpoch) return;
+                        window.__atelierRfLayoutEpoch = rid;
+                        if (typeof window.atelierUnmountReactFlowR6 === 'function') {
+                            window.atelierUnmountReactFlowR6();
+                        }
+                        root.innerHTML =
+                            '<div class="loading" style="padding:16px">Loading React Flow…</div>';
+                        let tries = 0;
+                        while (
+                            typeof window.atelierMountReactFlowR6 !== 'function' &&
+                            tries < 80
+                        ) {
+                            await new Promise((r) => setTimeout(r, 50));
+                            tries++;
+                        }
+                        if (rid !== reactFlowRequestEpoch) return;
+                        if (typeof window.atelierMountReactFlowR6 !== 'function') {
+                            root.innerHTML = '';
+                            const e = document.createElement('div');
+                            e.className = 'error';
+                            e.style.padding = '16px';
+                            e.textContent =
+                                'R6 module failed to load (reactflow-r6.mjs). Check network / console; ensure ES modules are allowed.';
+                            root.appendChild(e);
+                            return;
+                        }
+                        await window.atelierMountReactFlowR6(root, rid);
+                    } catch (err) {
+                        console.error('[R6] refreshReactFlowView', err);
+                    }
+                });
+
+            await reactFlowRefreshChain;
         }
 
         /** Re-run ELK layout → R5 SVG / R6 React Flow and refresh pipeline R4 when sizing inputs change. */
@@ -2729,10 +2928,15 @@
             const placeholder = document.getElementById('reactflowPlaceholder');
             const mermaidEl = document.getElementById('mermaid-diagram');
             const elkPane = document.getElementById('elkSvgPane');
+            const diagramViewportEl = document.getElementById('diagramViewport');
 
             const isM = which === 'mermaid';
             const isRf = which === 'reactflow';
             const isElk = which === 'elk';
+
+            if (diagramViewportEl) {
+                diagramViewportEl.classList.toggle('diagram-viewport--reactflow', isRf);
+            }
 
             if (tabM) {
                 tabM.classList.toggle('active', isM);
@@ -4625,12 +4829,18 @@
             zoom: 'atelier_view_tune_zoom_v2',
             edgeHit: 'atelier_view_tune_edge_hit_v1',
             elkLeafW: 'atelier_view_tune_elk_leaf_w_v1',
+            groupLabelFont: 'atelier_view_tune_group_label_font_v1',
+            groupLabelZoomThresh: 'atelier_view_tune_group_label_zoom_thresh_v1',
         };
         const VIEW_TUNE_ELK_LEAF_W_MIN = 72;
         const VIEW_TUNE_ELK_LEAF_W_MAX = 400;
         /** Slider + clamps for edge pointer hit (value = target width in CSS pixels on screen). */
         const VIEW_TUNE_EDGE_HIT_MIN = 6;
         const VIEW_TUNE_EDGE_HIT_MAX = 120;
+        const VIEW_TUNE_GROUP_LABEL_FONT_MIN = 8;
+        const VIEW_TUNE_GROUP_LABEL_FONT_MAX = 20;
+        const VIEW_TUNE_GROUP_ZOOM_THRESH_MIN = 0.08;
+        const VIEW_TUNE_GROUP_ZOOM_THRESH_MAX = 2;
 
         const viewTune = {
             panWheelMult: 2,
@@ -4638,7 +4848,11 @@
             /** Target on-screen hit thickness (CSS px). Actual SVG stroke uses this ÷ canvas zoomScale. */
             edgeHoverHitPx: 14,
             /** Passed to diagramToElkInput / runElkLayoutPipeline as leafNodeWidth. */
-            elkLeafNodeWidth: 200,
+            elkLeafNodeWidth: 96,
+            /** React Flow group label on-screen font size (see reactflow-r6.mjs ElkGroupNode). */
+            groupLabelFontPx: 12,
+            /** RF viewport zoom above which group label sits outside the frame (inside when ≤). */
+            groupLabelOutsideZoomAt: 0.8,
         };
         window.viewTune = viewTune;
         
@@ -4932,10 +5146,31 @@
         window.refreshDiagramEdgeHitAreas = refreshDiagramEdgeHitAreas;
         
         function clampElkLeafNodeWidthPx(x) {
-            let v = Math.round(Number(x) || 200);
+            let v = Math.round(Number(x) || 96);
             v = Math.max(VIEW_TUNE_ELK_LEAF_W_MIN, Math.min(VIEW_TUNE_ELK_LEAF_W_MAX, v));
             v = Math.round(v / 4) * 4;
             return v;
+        }
+
+        function clampGroupLabelFontPx(x) {
+            let v = Math.round(Number(x) || 12);
+            return Math.max(
+                VIEW_TUNE_GROUP_LABEL_FONT_MIN,
+                Math.min(VIEW_TUNE_GROUP_LABEL_FONT_MAX, v)
+            );
+        }
+
+        function clampGroupLabelOutsideZoomAt(x) {
+            let v = Number(x);
+            if (!Number.isFinite(v)) v = 0.8;
+            v = Math.round(Math.max(VIEW_TUNE_GROUP_ZOOM_THRESH_MIN, Math.min(VIEW_TUNE_GROUP_ZOOM_THRESH_MAX, v)) * 100) / 100;
+            return v;
+        }
+
+        function dispatchAtelierViewTune() {
+            try {
+                window.dispatchEvent(new CustomEvent('atelier-view-tune'));
+            } catch (e) { /* ignore */ }
         }
 
         function initViewTuneSliders() {
@@ -4947,11 +5182,17 @@
             const edgeHitVal = document.getElementById('tuneEdgeHitVal');
             const elkIn = document.getElementById('tuneElkLeafWidth');
             const elkVal = document.getElementById('tuneElkLeafWVal');
+            const grpFontIn = document.getElementById('tuneGroupLabelFont');
+            const grpFontVal = document.getElementById('tuneGroupLabelFontVal');
+            const grpThIn = document.getElementById('tuneGroupLabelZoomThresh');
+            const grpThVal = document.getElementById('tuneGroupLabelZoomThreshVal');
             try {
                 const sp = localStorage.getItem(VIEW_TUNE_STORAGE.pan);
                 const sz = localStorage.getItem(VIEW_TUNE_STORAGE.zoom);
                 const se = localStorage.getItem(VIEW_TUNE_STORAGE.edgeHit);
                 const sew = localStorage.getItem(VIEW_TUNE_STORAGE.elkLeafW);
+                const sgf = localStorage.getItem(VIEW_TUNE_STORAGE.groupLabelFont);
+                const sgt = localStorage.getItem(VIEW_TUNE_STORAGE.groupLabelZoomThresh);
                 if (sp != null) {
                     viewTune.panWheelMult = Math.max(0.25, Math.min(3, parseFloat(sp)));
                 }
@@ -4968,8 +5209,18 @@
                     const n = parseInt(sew, 10);
                     if (!isNaN(n)) viewTune.elkLeafNodeWidth = clampElkLeafNodeWidthPx(n);
                 }
+                if (sgf != null) {
+                    const n = parseInt(sgf, 10);
+                    if (!isNaN(n)) viewTune.groupLabelFontPx = clampGroupLabelFontPx(n);
+                }
+                if (sgt != null) {
+                    const z = parseFloat(sgt);
+                    if (!isNaN(z)) viewTune.groupLabelOutsideZoomAt = clampGroupLabelOutsideZoomAt(z);
+                }
             } catch (e) { /* ignore */ }
             viewTune.elkLeafNodeWidth = clampElkLeafNodeWidthPx(viewTune.elkLeafNodeWidth);
+            viewTune.groupLabelFontPx = clampGroupLabelFontPx(viewTune.groupLabelFontPx);
+            viewTune.groupLabelOutsideZoomAt = clampGroupLabelOutsideZoomAt(viewTune.groupLabelOutsideZoomAt);
             if (panIn && panVal) {
                 panIn.value = String(viewTune.panWheelMult);
                 panVal.textContent = viewTune.panWheelMult.toFixed(2);
@@ -5013,13 +5264,66 @@
                     void refreshElkDerivedDiagramViews();
                 });
             }
+            if (grpFontIn && grpFontVal) {
+                grpFontIn.value = String(viewTune.groupLabelFontPx);
+                grpFontVal.textContent = String(viewTune.groupLabelFontPx);
+                grpFontIn.addEventListener('input', function () {
+                    viewTune.groupLabelFontPx = clampGroupLabelFontPx(parseInt(grpFontIn.value, 10));
+                    grpFontVal.textContent = String(viewTune.groupLabelFontPx);
+                    grpFontIn.value = String(viewTune.groupLabelFontPx);
+                    try {
+                        localStorage.setItem(VIEW_TUNE_STORAGE.groupLabelFont, String(viewTune.groupLabelFontPx));
+                    } catch (e) {}
+                    dispatchAtelierViewTune();
+                });
+            }
+            if (grpThIn && grpThVal) {
+                grpThIn.value = String(viewTune.groupLabelOutsideZoomAt);
+                grpThVal.textContent = viewTune.groupLabelOutsideZoomAt.toFixed(2);
+                grpThIn.addEventListener('input', function () {
+                    viewTune.groupLabelOutsideZoomAt = clampGroupLabelOutsideZoomAt(parseFloat(grpThIn.value));
+                    grpThVal.textContent = viewTune.groupLabelOutsideZoomAt.toFixed(2);
+                    grpThIn.value = String(viewTune.groupLabelOutsideZoomAt);
+                    try {
+                        localStorage.setItem(
+                            VIEW_TUNE_STORAGE.groupLabelZoomThresh,
+                            String(viewTune.groupLabelOutsideZoomAt)
+                        );
+                    } catch (e) {}
+                    dispatchAtelierViewTune();
+                });
+            }
             const tunePanel = document.getElementById('viewTunePanel');
+            const tuneBody = tunePanel && tunePanel.querySelector('.view-tune-body');
+            if (tuneBody) {
+                tuneBody.addEventListener(
+                    'wheel',
+                    function (ev) {
+                        const el = tuneBody;
+                        const maxScroll = el.scrollHeight - el.clientHeight;
+                        if (maxScroll <= 0) {
+                            ev.stopPropagation();
+                            return;
+                        }
+                        el.scrollTop = Math.max(
+                            0,
+                            Math.min(maxScroll, el.scrollTop + ev.deltaY)
+                        );
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                    },
+                    { passive: false }
+                );
+            }
             if (tunePanel) {
-                tunePanel.addEventListener('wheel', function (ev) { ev.stopPropagation(); }, { passive: true });
                 tunePanel.addEventListener('touchstart', function (ev) { ev.stopPropagation(); }, { passive: true });
                 tunePanel.addEventListener('touchmove', function (ev) { ev.stopPropagation(); }, { passive: true });
             }
-            console.info('[viewTune] Panel bottom-left on diagram. viewTune.elkLeafNodeWidth → refreshElkDerivedDiagramViews()', viewTune);
+            console.info(
+                '[viewTune] Panel bottom-left on diagram. viewTune.elkLeafNodeWidth → refreshElkDerivedDiagramViews(); RF labels: groupLabelFontPx, groupLabelOutsideZoomAt',
+                viewTune
+            );
+            dispatchAtelierViewTune();
             window.syncViewTuneUI = function () {
                 viewTune.panWheelMult = Math.max(0.25, Math.min(3, Number(viewTune.panWheelMult) || 2));
                 viewTune.zoomStep = Math.max(0.05, Math.min(1, Number(viewTune.zoomStep) || 0.1));
@@ -5028,6 +5332,8 @@
                     Math.min(VIEW_TUNE_EDGE_HIT_MAX, Number(viewTune.edgeHoverHitPx) || 14)
                 );
                 viewTune.elkLeafNodeWidth = clampElkLeafNodeWidthPx(viewTune.elkLeafNodeWidth);
+                viewTune.groupLabelFontPx = clampGroupLabelFontPx(viewTune.groupLabelFontPx);
+                viewTune.groupLabelOutsideZoomAt = clampGroupLabelOutsideZoomAt(viewTune.groupLabelOutsideZoomAt);
                 const pi = document.getElementById('tunePanMult');
                 const pv = document.getElementById('tunePanVal');
                 const zi = document.getElementById('tuneZoomStep');
@@ -5036,6 +5342,10 @@
                 const ev = document.getElementById('tuneEdgeHitVal');
                 const ewi = document.getElementById('tuneElkLeafWidth');
                 const ewv = document.getElementById('tuneElkLeafWVal');
+                const gfi = document.getElementById('tuneGroupLabelFont');
+                const gfv = document.getElementById('tuneGroupLabelFontVal');
+                const gti = document.getElementById('tuneGroupLabelZoomThresh');
+                const gtv = document.getElementById('tuneGroupLabelZoomThreshVal');
                 if (pi && pv) { pi.value = String(viewTune.panWheelMult); pv.textContent = viewTune.panWheelMult.toFixed(2); }
                 if (zi && zv) { zi.value = String(viewTune.zoomStep); zv.textContent = viewTune.zoomStep.toFixed(2); }
                 if (ei && ev) {
@@ -5046,7 +5356,16 @@
                     ewi.value = String(viewTune.elkLeafNodeWidth);
                     ewv.textContent = String(viewTune.elkLeafNodeWidth);
                 }
+                if (gfi && gfv) {
+                    gfi.value = String(viewTune.groupLabelFontPx);
+                    gfv.textContent = String(viewTune.groupLabelFontPx);
+                }
+                if (gti && gtv) {
+                    gti.value = String(viewTune.groupLabelOutsideZoomAt);
+                    gtv.textContent = viewTune.groupLabelOutsideZoomAt.toFixed(2);
+                }
                 refreshDiagramEdgeHitAreas();
+                dispatchAtelierViewTune();
             };
         }
         

@@ -208,9 +208,80 @@
         };
     }
 
+    /**
+     * Shape labels as authored in Mermaid (node id → raw bracket text / subgraph title).
+     * Matches the subset parsed by overviewMermaidToDiagramJson.
+     */
+    function extractMermaidShapeLabels(text) {
+        const map = Object.create(null);
+        if (!text || typeof text !== 'string') return map;
+
+        const rawLines = text.split(/\r?\n/);
+        const lines = [];
+        for (const raw of rawLines) {
+            const line = raw.trim();
+            if (!line || line.startsWith('%%')) continue;
+            lines.push(line);
+        }
+
+        for (const line of lines) {
+            if (/^classDef\s/i.test(line) || /^class\s+/i.test(line) || /^style\s+/i.test(line)) {
+                continue;
+            }
+            if (/^click\s+/i.test(line)) continue;
+
+            const subOpen = line.match(/^subgraph\s+(\w+)(?:\["([^"]*)"\])?/i);
+            if (subOpen) {
+                const gid = subOpen[1];
+                map[gid] = subOpen[2] != null ? subOpen[2] : gid;
+                continue;
+            }
+            if (/^end\s*$/i.test(line)) continue;
+
+            const hdr = line.match(/^(flowchart|graph)\s+(\w+)\s*$/i);
+            if (hdr) continue;
+
+            const edgeLabeled = line.match(
+                /^(\w+)\s*(-->|==>|-\.->)\s*\|\s*"([^"]*)"\s*\|\s*(\w+)\s*$/
+            );
+            if (edgeLabeled) continue;
+
+            const edgePlain = line.match(/^(\w+)\s*(-->|==>|-\.->)\s*(\w+)\s*$/);
+            if (edgePlain) continue;
+
+            let nodeMatch = line.match(/^(\w+)\s*\[\s*"([^"]*)"\s*\]\s*$/);
+            if (nodeMatch) {
+                map[nodeMatch[1]] = nodeMatch[2];
+                continue;
+            }
+            nodeMatch = line.match(/^(\w+)\s*\[\s*([^\]]+?)\s*\]\s*$/);
+            if (nodeMatch) {
+                map[nodeMatch[1]] = nodeMatch[2].replace(/^["']|["']$/g, '').trim();
+                continue;
+            }
+            nodeMatch = line.match(/^(\w+)\s*\(\s*"([^"]*)"\s*\)\s*$/);
+            if (nodeMatch) {
+                map[nodeMatch[1]] = nodeMatch[2];
+                continue;
+            }
+            nodeMatch = line.match(/^(\w+)\s*\(\(\s*"([^"]*)"\s*\)\)\s*$/);
+            if (nodeMatch) {
+                map[nodeMatch[1]] = nodeMatch[2];
+                continue;
+            }
+            nodeMatch = line.match(/^(\w+)\s*\(\(\s*([^)]+?)\s*\)\)\s*$/);
+            if (nodeMatch) {
+                map[nodeMatch[1]] = nodeMatch[2].replace(/^["']|["']$/g, '').trim();
+                continue;
+            }
+        }
+        return map;
+    }
+
+    global.extractMermaidShapeLabels = extractMermaidShapeLabels;
     global.overviewMermaidToDiagramJson = overviewMermaidToDiagramJson;
 
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { overviewMermaidToDiagramJson };
+        module.exports = { overviewMermaidToDiagramJson, extractMermaidShapeLabels };
     }
 })(typeof window !== 'undefined' ? window : globalThis);

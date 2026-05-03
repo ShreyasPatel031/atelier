@@ -1,6 +1,7 @@
 /**
  * R6: ELK laid-out graph → @xyflow/react elements with ELK-accurate handles.
- * Ported from openai-realtime-elkjs-tool: absPositions + edgePoints + toReactFlow wiring.
+ * Ported from openai-realtime-elkjs-tool: absPositions + edgePoints + processLayoutedGraph-style
+ * dimension profile (demo/elk-node-dimensions.js → getReactFlowDimensionProfile).
  */
 (function (global) {
     'use strict';
@@ -155,10 +156,43 @@
     }
 
     /**
+     * Fallback profile if elk-node-dimensions.js not loaded (tests).
+     */
+    function defaultReactFlowDimensionProfile() {
+        var w = 96;
+        return {
+            width: w,
+            height: 40,
+            groupWidth: w * 3,
+            groupHeight: 120,
+            padding: 14,
+        };
+    }
+
+    function resolveReactFlowDimensionProfile(explicit) {
+        if (
+            explicit &&
+            explicit.width != null &&
+            explicit.height != null &&
+            explicit.groupWidth != null &&
+            explicit.groupHeight != null
+        ) {
+            return explicit;
+        }
+        var D = global.atelierElkNodeDimensions;
+        if (D && typeof D.getReactFlowDimensionProfile === 'function') {
+            return D.getReactFlowDimensionProfile(global);
+        }
+        return defaultReactFlowDimensionProfile();
+    }
+
+    /**
      * @param {object} laidOutGraph - elk.layout result
+     * @param {object} [dimensionProfile] - optional; default from atelierElkNodeDimensions.getReactFlowDimensionProfile() (cf. processLayoutedGraph)
      * @returns {{ nodes: object[], edges: object[] }}
      */
-    function elkLaidOutToReactFlowElements(laidOutGraph) {
+    function elkLaidOutToReactFlowElements(laidOutGraph, dimensionProfile) {
+        var dim = resolveReactFlowDimensionProfile(dimensionProfile);
         var absolutePositions = computeAbsolutePositions(laidOutGraph);
         var edgeConnectionPoints = buildNodeEdgePoints(laidOutGraph, absolutePositions);
         var nodes = [];
@@ -178,11 +212,19 @@
             var hasChildren = !!(node.children && node.children.length);
             var ep = edgeConnectionPoints[node.id] || { left: [], right: [], top: [], bottom: [] };
 
-            /** React Flow v12: fixed size uses top-level width/height; style-only sizing lets RF measure content and shrink short labels. */
+            /** RF v12: top-level width/height; fallbacks match openai-realtime-elkjs-tool processLayoutedGraph(dimensions). */
             var nw =
-                node.width != null ? Math.round(Number(node.width)) : undefined;
+                node.width != null
+                    ? Math.round(Number(node.width))
+                    : hasChildren
+                      ? dim.groupWidth
+                      : dim.width;
             var nh =
-                node.height != null ? Math.round(Number(node.height)) : undefined;
+                node.height != null
+                    ? Math.round(Number(node.height))
+                    : hasChildren
+                      ? dim.groupHeight
+                      : dim.height;
 
             var rf = {
                 id: String(node.id),
@@ -194,7 +236,12 @@
                 extent: parentId ? 'parent' : undefined,
                 width: nw,
                 height: nh,
-                zIndex: hasChildren ? 5 : 50,
+                /**
+                 * Groups below their leaves so children render inside parent frame.
+                 * Group label pills are portaled to .atelier-rf-pill-layer (z=50000) and
+                 * sit above all nodes regardless of group stacking — see reactflow-r6.mjs.
+                 */
+                zIndex: hasChildren ? 4000 : 5000,
                 selectable: true,
                 draggable: false,
                 data: {
@@ -340,7 +387,7 @@
                         type: 'elkOrthogonal',
                         sourceHandle: sourceHandle,
                         targetHandle: targetHandle,
-                        zIndex: 100,
+                        zIndex: 0,
                         style: { stroke: '#64748b', strokeWidth: 1.25 },
                         data: {
                             routePoints: routePoints,

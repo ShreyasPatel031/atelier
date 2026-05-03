@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const ELK = require('elkjs');
 const { repairDiagramIR } = require('../pipeline-ir-repair.js');
+require('../elk-node-dimensions.js');
 const {
     diagramToElkInput,
     validateElkEdgePlacement,
