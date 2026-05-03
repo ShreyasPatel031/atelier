@@ -1,7 +1,7 @@
 /**
  * R6: ELK → React Flow with ELK-accurate handles (ports), matching openai-realtime-elkjs-tool.
  */
-import React, { useEffect } from 'https://esm.sh/react@18.3.1';
+import React, { useCallback, useEffect } from 'https://esm.sh/react@18.3.1';
 import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
 import {
     ReactFlow,
@@ -10,6 +10,7 @@ import {
     ReactFlowProvider,
     useNodesState,
     useEdgesState,
+    applyNodeChanges,
     Handle,
     Position,
     BaseEdge,
@@ -433,16 +434,40 @@ const edgeTypes = {
     elkOrthogonal: ElkOrthogonalEdge,
 };
 
+/** RF measures DOM and can shrink nodes with short labels; ELK boxes must stay fixed. */
+function clampElkCustomNodeDimensions(nodeList) {
+    return nodeList.map(function (n) {
+        if (n.type !== 'custom' || !n.data) return n;
+        var dw = n.data.width;
+        var dh = n.data.height;
+        if (dw == null || dh == null) return n;
+        if (n.width === dw && n.height === dh) return n;
+        return Object.assign({}, n, { width: dw, height: dh });
+    });
+}
+
 function Inner(props) {
     const initialNodes = props.initialNodes || [];
     const initialEdges = props.initialEdges || [];
-    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+    const [nodes, setNodes] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-    useEffect(() => {
-        setNodes(initialNodes);
-        setEdges(initialEdges);
-    }, [initialNodes, initialEdges, setNodes, setEdges]);
+    const onNodesChange = useCallback(
+        function (changes) {
+            setNodes(function (nds) {
+                return clampElkCustomNodeDimensions(applyNodeChanges(changes, nds));
+            });
+        },
+        [setNodes]
+    );
+
+    useEffect(
+        function () {
+            setNodes(clampElkCustomNodeDimensions(initialNodes));
+            setEdges(initialEdges);
+        },
+        [initialNodes, initialEdges, setNodes, setEdges]
+    );
 
     return React.createElement(
         ReactFlow,

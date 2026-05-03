@@ -13,6 +13,15 @@
             .replace(/"/g, '&quot;');
     }
 
+    /** For XHTML inside foreignObject (node labels): keep text inside the ELK rect. */
+    function escapeHtmlText(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     function sectionToPathD(section, ox, oy) {
         if (!section) return '';
         var pts = [];
@@ -105,7 +114,12 @@
                 nn.labels[0] && nn.labels[0].text != null
                     ? String(nn.labels[0].text)
                     : nn.id;
-            var ty = nn.y + Math.min(16, nn.h / 2 + 4);
+            /** foreignObject matches RF leaf label: same box, wrap/clamp — single-line &lt;text&gt; looked wider on long strings. */
+            var foStyle =
+                'box-sizing:border-box;width:100%;height:100%;padding:8px;margin:0;' +
+                'font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;line-height:1.25;' +
+                'color:#0f172a;word-break:break-word;overflow-wrap:break-word;white-space:pre-wrap;' +
+                'overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;';
             nodeMarkup +=
                 '<g class="elk-node" data-elk-id="' +
                 escapeXml(nn.id) +
@@ -123,13 +137,20 @@
                 '" stroke="' +
                 stroke +
                 '" stroke-width="1"/>' +
-                '<text x="' +
-                (nn.x + 8) +
+                '<foreignObject x="' +
+                nn.x +
                 '" y="' +
-                ty +
-                '" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#0f172a">' +
-                escapeXml(lab) +
-                '</text>' +
+                nn.y +
+                '" width="' +
+                nn.w +
+                '" height="' +
+                nn.h +
+                '">' +
+                '<div xmlns="http://www.w3.org/1999/xhtml" style="' +
+                foStyle +
+                '">' +
+                escapeHtmlText(lab) +
+                '</div></foreignObject>' +
                 '</g>';
         }
 
