@@ -187,7 +187,12 @@
         if (typeof global.diagramToElkInput !== 'function') {
             return { ok: false, error: 'diagramToElkInput missing', warnings: mergedWarnings };
         }
-        var pack = global.diagramToElkInput(d, { target: 'elkjs' });
+        var elkInputOpts = { target: 'elkjs' };
+        var vt = global.viewTune;
+        if (vt && typeof vt.elkLeafNodeWidth === 'number' && !isNaN(vt.elkLeafNodeWidth)) {
+            elkInputOpts.leafNodeWidth = vt.elkLeafNodeWidth;
+        }
+        var pack = global.diagramToElkInput(d, elkInputOpts);
         if (pack.warnings && pack.warnings.length) mergedWarnings = mergedWarnings.concat(pack.warnings);
         if (!pack.ok || !pack.elkGraph) {
             return {

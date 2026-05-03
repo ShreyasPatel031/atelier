@@ -222,19 +222,20 @@
         }
         .pipeline-panel {
             flex-shrink: 0;
-            max-height: 36vh;
+            max-height: 18vh;
             overflow: auto;
             border-bottom: 1px solid #e2e8f0;
             background: #fafafa;
-            font-size: 11px;
+            font-size: 10px;
         }
         .pipeline-section {
             border-bottom: 1px solid #e8e8e8;
         }
         .pipeline-section summary {
-            padding: 8px 12px;
+            padding: 4px 10px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 10px;
             color: #334155;
             background: #f1f5f9;
             user-select: none;
@@ -244,12 +245,13 @@
         }
         .pipeline-pre {
             margin: 0;
-            padding: 10px 12px;
+            padding: 6px 10px;
             white-space: pre-wrap;
             word-break: break-word;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+            font-size: 10px;
             color: #0f172a;
-            max-height: 22vh;
+            max-height: 12vh;
             overflow: auto;
         }
         .pipeline-r4-hint {
@@ -1047,7 +1049,7 @@
                 <button type="button" class="diagram-tab" id="tabElkSvg" role="tab" aria-selected="false" aria-controls="diagramViewport">ELK → SVG</button>
             </div>
             <div class="pipeline-panel" id="pipelinePanel">
-                <details open class="pipeline-section">
+                <details class="pipeline-section">
                     <summary>Pipeline · Source (R0)</summary>
                     <pre class="pipeline-pre" id="pipelinePreSource"></pre>
                 </details>
@@ -1098,6 +1100,16 @@
                     <div class="view-tune-body">
                         <div class="view-tune-row">
                             <label>
+                                ELK leaf node width (px) — re-runs ELK + React Flow / SVG
+                                <span class="view-tune-val" id="tuneElkLeafWVal">200</span>
+                                <input type="range" id="tuneElkLeafWidth" min="72" max="400" step="4" value="200" />
+                            </label>
+                            <p class="view-tune-hint" style="margin:0.35rem 0 0;font-size:0.8rem">
+                                Fixed box width; height follows label wrap in the converter (<code style="color:#94a3b8">pipeline-diagram-to-elk.js</code>).
+                            </p>
+                        </div>
+                        <div class="view-tune-row">
+                            <label>
                                 Wheel / trackpad pan sensitivity
                                 <span class="view-tune-val" id="tunePanVal">2.00</span>
                                 <input type="range" id="tunePanMult" min="0.25" max="3" step="0.05" value="2" />
@@ -1120,7 +1132,7 @@
                                 Target width on screen; invisible hit stroke scales as <code style="color:#94a3b8">1 / zoom</code> so it feels the same while you zoom the canvas.
                             </p>
                         </div>
-                        <p class="view-tune-hint">Console: <code style="color:#94a3b8">viewTune.panWheelMult = 1.2</code> then <code style="color:#94a3b8">syncViewTuneUI()</code> to refresh sliders.</p>
+                        <p class="view-tune-hint">Console: <code style="color:#94a3b8">viewTune.elkLeafNodeWidth = 240</code> then <code style="color:#94a3b8">refreshElkDerivedDiagramViews()</code> or <code style="color:#94a3b8">syncViewTuneUI()</code>.</p>
                     </div>
                 </details>
             </div>
@@ -2700,6 +2712,14 @@
             await window.atelierMountReactFlowR6(root, rid);
         }
 
+        /** Re-run ELK layout → R5 SVG / R6 React Flow and refresh pipeline R4 when sizing inputs change. */
+        async function refreshElkDerivedDiagramViews() {
+            if (activeDiagramTab === 'reactflow') await refreshReactFlowView();
+            else if (activeDiagramTab === 'elk') await refreshElkSvgView();
+            updatePipelinePanel();
+        }
+        window.refreshElkDerivedDiagramViews = refreshElkDerivedDiagramViews;
+
         function setDiagramRenderTab(which) {
             activeDiagramTab = which;
             const tabM = document.getElementById('tabMermaid');
@@ -2891,7 +2911,9 @@
                         ''
                     );
                 } else {
-                    const elkPack = diagramToElkInput(repairedForElk);
+                    const elkPack = diagramToElkInput(repairedForElk, {
+                        leafNodeWidth: viewTune.elkLeafNodeWidth,
+                    });
                     const r4Meta = {
                         r2InputSource,
                         diagramDirection: repairedForElk && repairedForElk.direction,
@@ -4602,7 +4624,10 @@
             pan: 'atelier_view_tune_pan_v2',
             zoom: 'atelier_view_tune_zoom_v2',
             edgeHit: 'atelier_view_tune_edge_hit_v1',
+            elkLeafW: 'atelier_view_tune_elk_leaf_w_v1',
         };
+        const VIEW_TUNE_ELK_LEAF_W_MIN = 72;
+        const VIEW_TUNE_ELK_LEAF_W_MAX = 400;
         /** Slider + clamps for edge pointer hit (value = target width in CSS pixels on screen). */
         const VIEW_TUNE_EDGE_HIT_MIN = 6;
         const VIEW_TUNE_EDGE_HIT_MAX = 120;
@@ -4612,6 +4637,8 @@
             zoomStep: 0.1,
             /** Target on-screen hit thickness (CSS px). Actual SVG stroke uses this ÷ canvas zoomScale. */
             edgeHoverHitPx: 14,
+            /** Passed to diagramToElkInput / runElkLayoutPipeline as leafNodeWidth. */
+            elkLeafNodeWidth: 200,
         };
         window.viewTune = viewTune;
         
@@ -4904,6 +4931,13 @@
         }
         window.refreshDiagramEdgeHitAreas = refreshDiagramEdgeHitAreas;
         
+        function clampElkLeafNodeWidthPx(x) {
+            let v = Math.round(Number(x) || 200);
+            v = Math.max(VIEW_TUNE_ELK_LEAF_W_MIN, Math.min(VIEW_TUNE_ELK_LEAF_W_MAX, v));
+            v = Math.round(v / 4) * 4;
+            return v;
+        }
+
         function initViewTuneSliders() {
             const panIn = document.getElementById('tunePanMult');
             const panVal = document.getElementById('tunePanVal');
@@ -4911,10 +4945,13 @@
             const zoomVal = document.getElementById('tuneZoomVal');
             const edgeHitIn = document.getElementById('tuneEdgeHit');
             const edgeHitVal = document.getElementById('tuneEdgeHitVal');
+            const elkIn = document.getElementById('tuneElkLeafWidth');
+            const elkVal = document.getElementById('tuneElkLeafWVal');
             try {
                 const sp = localStorage.getItem(VIEW_TUNE_STORAGE.pan);
                 const sz = localStorage.getItem(VIEW_TUNE_STORAGE.zoom);
                 const se = localStorage.getItem(VIEW_TUNE_STORAGE.edgeHit);
+                const sew = localStorage.getItem(VIEW_TUNE_STORAGE.elkLeafW);
                 if (sp != null) {
                     viewTune.panWheelMult = Math.max(0.25, Math.min(3, parseFloat(sp)));
                 }
@@ -4927,7 +4964,12 @@
                         Math.min(VIEW_TUNE_EDGE_HIT_MAX, parseFloat(se))
                     );
                 }
+                if (sew != null) {
+                    const n = parseInt(sew, 10);
+                    if (!isNaN(n)) viewTune.elkLeafNodeWidth = clampElkLeafNodeWidthPx(n);
+                }
             } catch (e) { /* ignore */ }
+            viewTune.elkLeafNodeWidth = clampElkLeafNodeWidthPx(viewTune.elkLeafNodeWidth);
             if (panIn && panVal) {
                 panIn.value = String(viewTune.panWheelMult);
                 panVal.textContent = viewTune.panWheelMult.toFixed(2);
@@ -4958,13 +5000,26 @@
                     refreshDiagramEdgeHitAreas();
                 });
             }
+            if (elkIn && elkVal) {
+                elkIn.value = String(viewTune.elkLeafNodeWidth);
+                elkVal.textContent = String(viewTune.elkLeafNodeWidth);
+                elkIn.addEventListener('input', function () {
+                    viewTune.elkLeafNodeWidth = clampElkLeafNodeWidthPx(parseInt(elkIn.value, 10));
+                    elkVal.textContent = String(viewTune.elkLeafNodeWidth);
+                    elkIn.value = String(viewTune.elkLeafNodeWidth);
+                    try {
+                        localStorage.setItem(VIEW_TUNE_STORAGE.elkLeafW, String(viewTune.elkLeafNodeWidth));
+                    } catch (e) {}
+                    void refreshElkDerivedDiagramViews();
+                });
+            }
             const tunePanel = document.getElementById('viewTunePanel');
             if (tunePanel) {
                 tunePanel.addEventListener('wheel', function (ev) { ev.stopPropagation(); }, { passive: true });
                 tunePanel.addEventListener('touchstart', function (ev) { ev.stopPropagation(); }, { passive: true });
                 tunePanel.addEventListener('touchmove', function (ev) { ev.stopPropagation(); }, { passive: true });
             }
-            console.info('[viewTune] Panel bottom-left on diagram. Console: viewTune.panWheelMult = 1.2; syncViewTuneUI()', viewTune);
+            console.info('[viewTune] Panel bottom-left on diagram. viewTune.elkLeafNodeWidth → refreshElkDerivedDiagramViews()', viewTune);
             window.syncViewTuneUI = function () {
                 viewTune.panWheelMult = Math.max(0.25, Math.min(3, Number(viewTune.panWheelMult) || 2));
                 viewTune.zoomStep = Math.max(0.05, Math.min(1, Number(viewTune.zoomStep) || 0.1));
@@ -4972,17 +5027,24 @@
                     VIEW_TUNE_EDGE_HIT_MIN,
                     Math.min(VIEW_TUNE_EDGE_HIT_MAX, Number(viewTune.edgeHoverHitPx) || 14)
                 );
+                viewTune.elkLeafNodeWidth = clampElkLeafNodeWidthPx(viewTune.elkLeafNodeWidth);
                 const pi = document.getElementById('tunePanMult');
                 const pv = document.getElementById('tunePanVal');
                 const zi = document.getElementById('tuneZoomStep');
                 const zv = document.getElementById('tuneZoomVal');
                 const ei = document.getElementById('tuneEdgeHit');
                 const ev = document.getElementById('tuneEdgeHitVal');
+                const ewi = document.getElementById('tuneElkLeafWidth');
+                const ewv = document.getElementById('tuneElkLeafWVal');
                 if (pi && pv) { pi.value = String(viewTune.panWheelMult); pv.textContent = viewTune.panWheelMult.toFixed(2); }
                 if (zi && zv) { zi.value = String(viewTune.zoomStep); zv.textContent = viewTune.zoomStep.toFixed(2); }
                 if (ei && ev) {
                     ei.value = String(viewTune.edgeHoverHitPx);
                     ev.textContent = String(Math.round(viewTune.edgeHoverHitPx));
+                }
+                if (ewi && ewv) {
+                    ewi.value = String(viewTune.elkLeafNodeWidth);
+                    ewv.textContent = String(viewTune.elkLeafNodeWidth);
                 }
                 refreshDiagramEdgeHitAreas();
             };

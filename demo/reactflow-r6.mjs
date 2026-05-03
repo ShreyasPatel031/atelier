@@ -173,12 +173,21 @@ function ElkCustomNode({ data }) {
             {
                 key: 'txt',
                 style: {
+                    boxSizing: 'border-box',
+                    width: '100%',
+                    height: '100%',
                     padding: '8px',
                     fontSize: 11,
                     color: '#0f172a',
                     lineHeight: 1.25,
-                    maxWidth: w,
                     wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
+                    whiteSpace: 'pre-wrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    overflow: 'hidden',
                 },
             },
             label

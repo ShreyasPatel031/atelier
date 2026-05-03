@@ -21,10 +21,15 @@
 
     var DEFAULTS = {
         rootId: 'root',
-        maxNodeWidth: 280,
+        /** Fixed pixel width for leaf nodes (ELK + React Flow). Overridable via options.leafNodeWidth / viewTune.elkLeafNodeWidth. */
+        leafNodeWidth: 200,
+        leafMinWidth: 72,
+        /** Horizontal padding budget inside the box for line wrapping (matches ~8px CSS padding each side). */
+        leafPaddingHorizontal: 16,
+        leafPaddingVertical: 18,
+        leafLineHeight: 14,
+        leafMinHeight: 36,
         charWidth: 7,
-        nodePaddingWidth: 36,
-        leafHeight: 44,
         groupLabelHeight: 28,
         groupMinWidth: 120,
     };
@@ -46,15 +51,74 @@
         };
     }
 
+    /** Word-wrap style line count for a single paragraph (no inner newlines). */
+    function linesForParagraph(para, maxChars) {
+        var words = para.split(/\s+/).filter(function (w) {
+            return w.length > 0;
+        });
+        if (words.length === 0) return 1;
+        var lineCount = 0;
+        var cur = 0;
+        for (var i = 0; i < words.length; i++) {
+            var w = words[i];
+            while (w.length > maxChars) {
+                if (cur > 0) {
+                    lineCount++;
+                    cur = 0;
+                }
+                lineCount++;
+                w = w.substring(maxChars);
+            }
+            if (w.length === 0) continue;
+            var need = w.length + (cur > 0 ? 1 : 0);
+            if (cur + need <= maxChars) {
+                cur += need;
+            } else {
+                lineCount++;
+                cur = w.length;
+            }
+        }
+        if (cur > 0) lineCount++;
+        return Math.max(1, lineCount);
+    }
+
+    /** Fixed width; height from wrapped label text (for ELK bounding box). */
     function estimateLeafSize(label, options) {
         var o = options || {};
         var text = String(label != null ? label : '').trim() || '?';
-        var maxW = o.maxNodeWidth != null ? o.maxNodeWidth : DEFAULTS.maxNodeWidth;
+        var fixedW =
+            o.leafNodeWidth != null ? o.leafNodeWidth : DEFAULTS.leafNodeWidth;
+        var minW = o.leafMinWidth != null ? o.leafMinWidth : DEFAULTS.leafMinWidth;
+        fixedW = Math.max(minW, fixedW);
         var cw = o.charWidth != null ? o.charWidth : DEFAULTS.charWidth;
-        var pad = o.nodePaddingWidth != null ? o.nodePaddingWidth : DEFAULTS.nodePaddingWidth;
-        var w = Math.min(maxW, Math.max(72, text.length * cw + pad));
-        var h = o.leafHeight != null ? o.leafHeight : DEFAULTS.leafHeight;
-        return { width: w, height: h, text: text };
+        var padH =
+            o.leafPaddingHorizontal != null
+                ? o.leafPaddingHorizontal
+                : DEFAULTS.leafPaddingHorizontal;
+        var padV =
+            o.leafPaddingVertical != null
+                ? o.leafPaddingVertical
+                : DEFAULTS.leafPaddingVertical;
+        var lineH =
+            o.leafLineHeight != null ? o.leafLineHeight : DEFAULTS.leafLineHeight;
+        var minH =
+            o.leafMinHeight != null ? o.leafMinHeight : DEFAULTS.leafMinHeight;
+        var innerW = Math.max(24, fixedW - padH);
+        var maxChars = Math.max(4, Math.floor(innerW / cw));
+
+        var paras = text.split(/\n/);
+        var totalLines = 0;
+        for (var pi = 0; pi < paras.length; pi++) {
+            var para = paras[pi];
+            if (para.length === 0) {
+                totalLines++;
+                continue;
+            }
+            totalLines += linesForParagraph(para, maxChars);
+        }
+        var h = padV + totalLines * lineH;
+        h = Math.max(minH, Math.ceil(h));
+        return { width: fixedW, height: h, text: text };
     }
 
     function estimateGroupLabelSize(label, options) {
