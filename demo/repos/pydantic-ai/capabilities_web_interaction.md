@@ -18,32 +18,92 @@ Both `WebFetch` and `WebSearch` inherit from `BuiltinOrLocalTool`, found in the 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "capabilities_web_interaction_node", "label": "Web Interaction", "type": "module"},
-        {"id": "web_fetching", "label": "Web Content Fetching", "type": "module", "link": "web_fetching.md"},
-        {"id": "web_searching", "label": "Web Search Capabilities", "type": "module", "link": "web_searching.md"},
-        {"id": "capabilities_tool_integration", "label": "Tool Integration", "type": "external", "link": "capabilities_tool_integration.md"},
-        {"id": "external_toolset_integrations", "label": "External Toolsets", "type": "external", "link": "external_toolset_integrations.md"}
+        {
+            "id": "capabilities_web_interaction",
+            "label": "Capabilities: Web Interaction",
+            "type": "module"
+        },
+        {
+            "id": "capabilities_web_interaction_node",
+            "label": "Web Interaction",
+            "type": "module"
+        },
+        {
+            "id": "web_fetching",
+            "label": "Web Content Fetching",
+            "type": "module",
+            "link": "web_fetching.md"
+        },
+        {
+            "id": "web_searching",
+            "label": "Web Search Capabilities",
+            "type": "module",
+            "link": "web_searching.md"
+        },
+        {
+            "id": "capabilities_tool_integration",
+            "label": "Tool Integration",
+            "type": "external",
+            "link": "capabilities_tool_integration.md"
+        },
+        {
+            "id": "external_toolset_integrations",
+            "label": "External Toolsets",
+            "type": "external",
+            "link": "external_toolset_integrations.md"
+        }
     ],
     "edges": [
-        {"source": "capabilities_web_interaction_node", "target": "web_fetching", "label": "provides"},
-        {"source": "capabilities_web_interaction_node", "target": "web_searching", "label": "provides"},
-        {"source": "web_fetching", "target": "capabilities_tool_integration", "label": "uses base"},
-        {"source": "web_searching", "target": "capabilities_tool_integration", "label": "uses base"},
-        {"source": "web_fetching", "target": "external_toolset_integrations", "label": "uses fallback"},
-        {"source": "web_searching", "target": "external_toolset_integrations", "label": "uses fallback"}
+        {
+            "source": "capabilities_web_interaction_node",
+            "target": "web_fetching",
+            "label": "provides"
+        },
+        {
+            "source": "capabilities_web_interaction_node",
+            "target": "web_searching",
+            "label": "provides"
+        },
+        {
+            "source": "web_fetching",
+            "target": "capabilities_tool_integration",
+            "label": "uses base"
+        },
+        {
+            "source": "web_searching",
+            "target": "capabilities_tool_integration",
+            "label": "uses base"
+        },
+        {
+            "source": "web_fetching",
+            "target": "external_toolset_integrations",
+            "label": "uses fallback"
+        },
+        {
+            "source": "web_searching",
+            "target": "external_toolset_integrations",
+            "label": "uses fallback"
+        }
     ],
     "groups": [
         {
             "id": "web_interaction_group",
             "label": "Web Interaction Capabilities",
             "role": "surface",
-            "nodes": ["capabilities_web_interaction_node", "web_fetching", "web_searching"]
+            "nodes": [
+                "capabilities_web_interaction_node",
+                "web_fetching",
+                "web_searching"
+            ]
         },
         {
             "id": "dependencies",
             "label": "Dependencies",
             "role": "analytical",
-            "nodes": ["capabilities_tool_integration", "external_toolset_integrations"]
+            "nodes": [
+                "capabilities_tool_integration",
+                "external_toolset_integrations"
+            ]
         }
     ]
 }

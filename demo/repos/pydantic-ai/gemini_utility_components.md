@@ -10,26 +10,59 @@ The `gemini_utility_components` module supports the broader [model_provider_gemi
 {
     "direction": "TD",
     "nodes": [
-        {"id": "gemini_api_interaction", "label": "Gemini API Interaction", "type": "external", "link": "gemini_api_interaction.md"},
-        {"id": "gemini_data_handling", "label": "Handle Gemini Data", "type": "module", "link": "gemini_data_handling.md"},
-        {"id": "gemini_usage_and_config", "label": "Track Usage & Configure Tools", "type": "module", "link": "gemini_usage_and_config.md"}
+        {
+            "id": "gemini_utility_components",
+            "label": "Gemini Utility Components",
+            "type": "module"
+        },
+        {
+            "id": "gemini_api_interaction",
+            "label": "Gemini API Interaction",
+            "type": "external",
+            "link": "gemini_api_interaction.md"
+        },
+        {
+            "id": "gemini_data_handling",
+            "label": "Handle Gemini Data",
+            "type": "module",
+            "link": "gemini_data_handling.md"
+        },
+        {
+            "id": "gemini_usage_and_config",
+            "label": "Track Usage & Configure Tools",
+            "type": "module",
+            "link": "gemini_usage_and_config.md"
+        }
     ],
     "edges": [
-        {"source": "gemini_api_interaction", "target": "gemini_data_handling", "label": "uses data structures"},
-        {"source": "gemini_api_interaction", "target": "gemini_usage_and_config", "label": "retrieves usage / applies config"}
+        {
+            "source": "gemini_api_interaction",
+            "target": "gemini_data_handling",
+            "label": "uses data structures"
+        },
+        {
+            "source": "gemini_api_interaction",
+            "target": "gemini_usage_and_config",
+            "label": "retrieves usage / applies config"
+        }
     ],
     "groups": [
         {
             "id": "gemini_model_helpers",
             "label": "Gemini Model Helpers",
             "role": "data",
-            "nodes": ["gemini_data_handling", "gemini_usage_and_config"]
+            "nodes": [
+                "gemini_data_handling",
+                "gemini_usage_and_config"
+            ]
         },
         {
             "id": "api_core",
             "label": "Gemini API Core",
             "role": "surface",
-            "nodes": ["gemini_api_interaction"]
+            "nodes": [
+                "gemini_api_interaction"
+            ]
         }
     ]
 }

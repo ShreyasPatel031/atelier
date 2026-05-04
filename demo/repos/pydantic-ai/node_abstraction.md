@@ -24,28 +24,90 @@ The `node_abstraction` module is a fundamental part of the `pydantic_ai_agent_co
 {
     "direction": "TD",
     "nodes": [
-        {"id": "base_node", "label": "Base Node Abstraction", "type": "component", "link": null},
-        {"id": "run_method", "label": "Execute Node Logic", "type": "component", "link": null},
-        {"id": "parse_node_def", "label": "Parse Node Definition", "type": "component", "link": null},
-        {"id": "graph_runtime", "label": "Graph Runtime Context", "type": "external", "link": "graph_runtime.md"},
-        {"id": "graph_definition", "label": "Graph Structure Definitions", "type": "external", "link": "graph_definition.md"},
-        {"id": "type_utilities", "label": "Type & Schema Utilities", "type": "external", "link": "type_and_schema_utilities.md"}
+        {
+            "id": "base_node",
+            "label": "Base Node Abstraction",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "run_method",
+            "label": "Execute Node Logic",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "parse_node_def",
+            "label": "Parse Node Definition",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "graph_runtime",
+            "label": "Graph Runtime Context",
+            "type": "external",
+            "link": "graph_runtime.md"
+        },
+        {
+            "id": "graph_definition",
+            "label": "Graph Structure Definitions",
+            "type": "external",
+            "link": "graph_definition.md"
+        },
+        {
+            "id": "type_utilities",
+            "label": "Type & Schema Utilities",
+            "type": "external",
+            "link": "type_and_schema_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "base_node", "target": "run_method", "label": "defines abstract 'run'"},
-        {"source": "base_node", "target": "parse_node_def", "label": "provides definition parsing"},
-        {"source": "run_method", "target": "graph_runtime", "label": "uses context"},
-        {"source": "run_method", "target": "graph_definition", "label": "returns next node/end"},
-        {"source": "parse_node_def", "target": "run_method", "label": "inspects return types"},
-        {"source": "parse_node_def", "target": "type_utilities", "label": "leverages type parsing"},
-        {"source": "parse_node_def", "target": "graph_definition", "label": "constructs node/edge metadata"}
+        {
+            "source": "base_node",
+            "target": "run_method",
+            "label": "defines abstract 'run'"
+        },
+        {
+            "source": "base_node",
+            "target": "parse_node_def",
+            "label": "provides definition parsing"
+        },
+        {
+            "source": "run_method",
+            "target": "graph_runtime",
+            "label": "uses context"
+        },
+        {
+            "source": "run_method",
+            "target": "graph_definition",
+            "label": "returns next node/end"
+        },
+        {
+            "source": "parse_node_def",
+            "target": "run_method",
+            "label": "inspects return types"
+        },
+        {
+            "source": "parse_node_def",
+            "target": "type_utilities",
+            "label": "leverages type parsing"
+        },
+        {
+            "source": "parse_node_def",
+            "target": "graph_definition",
+            "label": "constructs node/edge metadata"
+        }
     ],
     "groups": [
         {
             "id": "node_core",
             "label": "Node Abstraction Core",
             "role": "core",
-            "nodes": ["base_node", "run_method", "parse_node_def"]
+            "nodes": [
+                "base_node",
+                "run_method",
+                "parse_node_def"
+            ]
         }
     ]
 }

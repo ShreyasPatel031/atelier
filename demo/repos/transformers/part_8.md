@@ -4,17 +4,61 @@ This module integrates diverse model architectures for language processing, incl
 {
     "direction": "TD",
     "nodes": [
-        {"id": "language_models_part_8", "label": "Language Models", "type": "module", "link": "language_models_part_8.md"},
-        {"id": "audio_models_part_8", "label": "Audio Models", "type": "module", "link": "audio_models_part_8.md"}
+        {
+            "id": "part_8",
+            "label": "Part 8",
+            "type": "module"
+        },
+        {
+            "id": "c0",
+            "label": "UniSpeechForSequenceClassifica",
+            "type": "component"
+        },
+        {
+            "id": "c1",
+            "label": "UniSpeechSatForPreTraining",
+            "type": "component"
+        },
+        {
+            "id": "c2",
+            "label": "UniSpeechSatForXVector",
+            "type": "component"
+        },
+        {
+            "id": "c3",
+            "label": "UniSpeechSatForCTC",
+            "type": "component"
+        },
+        {
+            "id": "c4",
+            "label": "UniSpeechSatForSequenceClassif",
+            "type": "component"
+        }
     ],
     "edges": [
-        {"source": "language_models_part_8", "target": "core_models_language_models", "label": "implements"},
-        {"source": "audio_models_part_8", "target": "core_models_audio_models", "label": "implements"}
+        {
+            "source": "part_8",
+            "target": "c0"
+        },
+        {
+            "source": "part_8",
+            "target": "c1"
+        },
+        {
+            "source": "part_8",
+            "target": "c2"
+        },
+        {
+            "source": "part_8",
+            "target": "c3"
+        },
+        {
+            "source": "part_8",
+            "target": "c4"
+        }
     ],
-    "groups": [
-        {"id": "language_processing", "label": "Language Processing", "role": "generative", "nodes": ["language_models_part_8"]},
-        {"id": "audio_processing", "label": "Audio Processing", "role": "generative", "nodes": ["audio_models_part_8"]}
-    ]
+    "groups": [],
+    "_auto_generated": true
 }
 -->
 ```mermaid

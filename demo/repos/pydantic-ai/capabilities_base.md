@@ -17,26 +17,59 @@ This modular design ensures that capabilities can be easily added, removed, or c
 {
     "direction": "TD",
     "nodes": [
-        {"id": "capability_interface", "label": "Capability Interface Definition", "type": "module", "link": "capability_interface.md"},
-        {"id": "capability_specification", "label": "Capability Specification", "type": "module", "link": "capability_specification.md"},
-        {"id": "hook_system", "label": "Agent Hook System", "type": "module", "link": "hook_system.md"}
+        {
+            "id": "capabilities_base",
+            "label": "Capabilities Base",
+            "type": "module"
+        },
+        {
+            "id": "capability_interface",
+            "label": "Capability Interface Definition",
+            "type": "module",
+            "link": "capability_interface.md"
+        },
+        {
+            "id": "capability_specification",
+            "label": "Capability Specification",
+            "type": "module",
+            "link": "capability_specification.md"
+        },
+        {
+            "id": "hook_system",
+            "label": "Agent Hook System",
+            "type": "module",
+            "link": "hook_system.md"
+        }
     ],
     "edges": [
-        {"source": "hook_system", "target": "capability_interface", "label": "implements"},
-        {"source": "capability_specification", "target": "capability_interface", "label": "references"}
+        {
+            "source": "hook_system",
+            "target": "capability_interface",
+            "label": "implements"
+        },
+        {
+            "source": "capability_specification",
+            "target": "capability_interface",
+            "label": "references"
+        }
     ],
     "groups": [
         {
             "id": "core_definition",
             "label": "Core Definition",
             "role": "analytical",
-            "nodes": ["capability_interface", "capability_specification"]
+            "nodes": [
+                "capability_interface",
+                "capability_specification"
+            ]
         },
         {
             "id": "extensibility",
             "label": "Extensibility",
             "role": "surface",
-            "nodes": ["hook_system"]
+            "nodes": [
+                "hook_system"
+            ]
         }
     ]
 }

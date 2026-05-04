@@ -6,6 +6,236 @@ Users primarily interact with Ollama through:
 3.  **Tool Integration**: Integrate Ollama with external tools and platforms (e.g., VS Code, Hermes) to leverage local models within their preferred environments.
 4.  **Configuration & Monitoring**: Configure application settings, manage server lifecycle, and monitor model performance.
 
+<!-- DIAGRAM_JSON
+{
+    "direction": "LR",
+    "nodes": [
+        {
+            "id": "api_endpoints",
+            "label": "REST API Endpoints",
+            "type": "module",
+            "link": "model_serving_api.md"
+        },
+        {
+            "id": "cli_commands",
+            "label": "CLI Commands",
+            "type": "module",
+            "link": "command_line_launchers.md"
+        },
+        {
+            "id": "config_util",
+            "label": "(\"Configuration and Utilities\")",
+            "type": "module",
+            "link": "configuration_and_utilities.md"
+        },
+        {
+            "id": "desktop_ui",
+            "label": "Desktop UI and Updates",
+            "type": "module",
+            "link": "user_interface_and_updates.md"
+        },
+        {
+            "id": "external_tools",
+            "label": "External Integrations and Tools",
+            "type": "module",
+            "link": "external_integrations.md"
+        },
+        {
+            "id": "image_gen",
+            "label": "Image Generation Subsystem",
+            "type": "module",
+            "link": "image_generation_subsystem.md"
+        },
+        {
+            "id": "ml_backends",
+            "label": "ML Backends and Operations",
+            "type": "module",
+            "link": "ml_backends_and_ops.md"
+        },
+        {
+            "id": "ml_runtime",
+            "label": "Model Runtime and Inference",
+            "type": "module",
+            "link": "model_runtime_and_inference.md"
+        },
+        {
+            "id": "model_creation",
+            "label": "Model Creation and Conversion",
+            "type": "module",
+            "link": "model_creation_and_conversion.md"
+        },
+        {
+            "id": "model_registry",
+            "label": "(\"Model Registry and Storage\")",
+            "type": "module",
+            "link": "model_registry_and_storage.md"
+        },
+        {
+            "id": "server_core",
+            "label": "Server Management",
+            "type": "module",
+            "link": "server_management.md"
+        },
+        {
+            "id": "tokenizer_prompt",
+            "label": "Tokenizer and Prompting",
+            "type": "module",
+            "link": "tokenizer_and_prompting.md"
+        },
+        {
+            "id": "user",
+            "label": "User",
+            "type": "component"
+        }
+    ],
+    "edges": [
+        {
+            "source": "user",
+            "target": "cli_commands",
+            "label": "issues commands"
+        },
+        {
+            "source": "user",
+            "target": "desktop_ui",
+            "label": "interacts with"
+        },
+        {
+            "source": "user",
+            "target": "api_endpoints",
+            "label": "sends requests to"
+        },
+        {
+            "source": "cli_commands",
+            "target": "model_registry",
+            "label": "manages models"
+        },
+        {
+            "source": "cli_commands",
+            "target": "config_util",
+            "label": "configures"
+        },
+        {
+            "source": "desktop_ui",
+            "target": "api_endpoints",
+            "label": "interacts via"
+        },
+        {
+            "source": "desktop_ui",
+            "target": "config_util",
+            "label": "reads/writes"
+        },
+        {
+            "source": "api_endpoints",
+            "target": "server_core",
+            "label": "routes requests"
+        },
+        {
+            "source": "api_endpoints",
+            "target": "model_registry",
+            "label": "accesses"
+        },
+        {
+            "source": "server_core",
+            "target": "ml_runtime",
+            "label": "loads/runs models"
+        },
+        {
+            "source": "server_core",
+            "target": "config_util",
+            "label": "uses"
+        },
+        {
+            "source": "model_registry",
+            "target": "ml_runtime",
+            "label": "provides models"
+        },
+        {
+            "source": "model_creation",
+            "target": "model_registry",
+            "label": "stores models"
+        },
+        {
+            "source": "ml_runtime",
+            "target": "ml_backends",
+            "label": "executes ops"
+        },
+        {
+            "source": "ml_runtime",
+            "target": "tokenizer_prompt",
+            "label": "processes input"
+        },
+        {
+            "source": "ml_runtime",
+            "target": "image_gen",
+            "label": "handles"
+        },
+        {
+            "source": "ml_runtime",
+            "target": "external_tools",
+            "label": "orchestrates"
+        },
+        {
+            "source": "ml_backends",
+            "target": "ml_runtime",
+            "label": "supports"
+        },
+        {
+            "source": "tokenizer_prompt",
+            "target": "ml_runtime",
+            "label": "prepares input for"
+        },
+        {
+            "source": "image_gen",
+            "target": "ml_runtime",
+            "label": "generates via"
+        },
+        {
+            "source": "external_tools",
+            "target": "api_endpoints",
+            "label": "interacts with"
+        },
+        {
+            "source": "external_tools",
+            "target": "ml_runtime",
+            "label": "leverages"
+        }
+    ],
+    "groups": [
+        {
+            "id": "user_access",
+            "label": "User Interaction and Access",
+            "nodes": [
+                "cli_commands",
+                "desktop_ui",
+                "api_endpoints"
+            ]
+        },
+        {
+            "id": "core_server",
+            "label": "Core Server and Model Management",
+            "nodes": [
+                "server_core",
+                "model_registry",
+                "model_creation",
+                "config_util"
+            ]
+        },
+        {
+            "id": "ml_runtime_integrations",
+            "label": "ML Runtime and Integrations",
+            "nodes": [
+                "ml_runtime",
+                "ml_backends",
+                "external_tools",
+                "tokenizer_prompt",
+                "image_gen"
+            ]
+        }
+    ],
+    "_auto_generated": "r1_overview_synthesis"
+}
+-->
+
 ```mermaid
 flowchart LR
     user(("User"))

@@ -10,36 +10,90 @@ The `external_toolset_integrations` module is structured to provide flexible and
 {
     "direction": "TD",
     "nodes": [
-        {"id": "exa_integration", "label": "Exa Search Integration", "type": "module", "link": "exa_integration.md"},
-        {"id": "tavily_integration", "label": "Tavily Search Integration", "type": "module", "link": "tavily_integration.md"},
-        {"id": "aci_toolset", "label": "ACI.dev Toolset Integration", "type": "module", "link": "aci_toolset.md"},
-        {"id": "langchain_toolset", "label": "LangChain Toolset Integration", "type": "module", "link": "langchain_toolset.md"},
-        {"id": "toolset_management", "label": "Toolset Management", "type": "module", "link": "toolset_management.md"}
+        {
+            "id": "external_toolset_integrations",
+            "label": "External Toolset Integrations",
+            "type": "module"
+        },
+        {
+            "id": "exa_integration",
+            "label": "Exa Search Integration",
+            "type": "module",
+            "link": "exa_integration.md"
+        },
+        {
+            "id": "tavily_integration",
+            "label": "Tavily Search Integration",
+            "type": "module",
+            "link": "tavily_integration.md"
+        },
+        {
+            "id": "aci_toolset",
+            "label": "ACI.dev Toolset Integration",
+            "type": "module",
+            "link": "aci_toolset.md"
+        },
+        {
+            "id": "langchain_toolset",
+            "label": "LangChain Toolset Integration",
+            "type": "module",
+            "link": "langchain_toolset.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management",
+            "type": "module",
+            "link": "toolset_management.md"
+        }
     ],
     "edges": [
-        {"source": "exa_integration", "target": "toolset_management", "label": "registers toolset"},
-        {"source": "tavily_integration", "target": "toolset_management", "label": "registers toolset"},
-        {"source": "aci_toolset", "target": "toolset_management", "label": "registers toolset"},
-        {"source": "langchain_toolset", "target": "toolset_management", "label": "registers toolset"}
+        {
+            "source": "exa_integration",
+            "target": "toolset_management",
+            "label": "registers toolset"
+        },
+        {
+            "source": "tavily_integration",
+            "target": "toolset_management",
+            "label": "registers toolset"
+        },
+        {
+            "source": "aci_toolset",
+            "target": "toolset_management",
+            "label": "registers toolset"
+        },
+        {
+            "source": "langchain_toolset",
+            "target": "toolset_management",
+            "label": "registers toolset"
+        }
     ],
     "groups": [
         {
             "id": "search_providers",
             "label": "Search Integrations",
             "role": "data",
-            "nodes": ["exa_integration", "tavily_integration"]
+            "nodes": [
+                "exa_integration",
+                "tavily_integration"
+            ]
         },
         {
             "id": "framework_integrations",
             "label": "Framework Integrations",
             "role": "generative",
-            "nodes": ["aci_toolset", "langchain_toolset"]
+            "nodes": [
+                "aci_toolset",
+                "langchain_toolset"
+            ]
         },
         {
             "id": "core_tooling",
             "label": "Core Tooling",
             "role": "generative",
-            "nodes": ["toolset_management"]
+            "nodes": [
+                "toolset_management"
+            ]
         }
     ]
 }

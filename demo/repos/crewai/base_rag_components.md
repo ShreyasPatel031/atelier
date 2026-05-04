@@ -3,26 +3,29 @@ This module provides foundational abstract base classes for RAG operations, incl
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "BaseLoader",
-      "label": "BaseLoader",
-      "type": "class"
-    },
-    {
-      "id": "BaseChunker",
-      "label": "BaseChunker",
-      "type": "class"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "base_rag_components",
-      "label": "base_rag_components",
-      "nodes": ["BaseLoader", "BaseChunker"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "BaseLoader",
+            "label": "BaseLoader",
+            "type": "class"
+        },
+        {
+            "id": "BaseChunker",
+            "label": "BaseChunker",
+            "type": "class"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "base_rag_components",
+            "label": "base_rag_components",
+            "nodes": [
+                "BaseLoader",
+                "BaseChunker"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

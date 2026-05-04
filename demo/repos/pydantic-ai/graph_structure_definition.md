@@ -10,18 +10,40 @@ This module is designed to provide a fluent and robust way to define the executi
 {
     "direction": "TD",
     "nodes": [
-        {"id": "path_construction", "label": "Path Construction", "type": "module", "link": "path_construction.md"},
-        {"id": "graph_execution_steps", "label": "Graph Execution Steps", "type": "module", "link": "graph_execution_steps.md"}
+        {
+            "id": "graph_structure_definition",
+            "label": "Graph Structure Definition",
+            "type": "module"
+        },
+        {
+            "id": "path_construction",
+            "label": "Path Construction",
+            "type": "module",
+            "link": "path_construction.md"
+        },
+        {
+            "id": "graph_execution_steps",
+            "label": "Graph Execution Steps",
+            "type": "module",
+            "link": "graph_execution_steps.md"
+        }
     ],
     "edges": [
-        {"source": "path_construction", "target": "graph_execution_steps", "label": "composes using"}
+        {
+            "source": "path_construction",
+            "target": "graph_execution_steps",
+            "label": "composes using"
+        }
     ],
     "groups": [
         {
             "id": "graph_definition",
             "label": "Graph Definition Core",
             "role": "generative",
-            "nodes": ["path_construction", "graph_execution_steps"]
+            "nodes": [
+                "path_construction",
+                "graph_execution_steps"
+            ]
         }
     ]
 }

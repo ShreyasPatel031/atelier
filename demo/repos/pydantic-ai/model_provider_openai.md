@@ -17,29 +17,76 @@ These sub-modules work in conjunction to provide a robust and flexible interface
 {
     "direction": "TD",
     "nodes": [
-        {"id": "openai_model_configuration", "label": "OpenAI Model Configuration", "type": "module", "link": "openai_model_configuration.md"},
-        {"id": "openai_response_handling", "label": "OpenAI Response Handling", "type": "module", "link": "openai_response_handling.md"},
-        {"id": "model_core_interfaces", "label": "Model Core Interfaces", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "model_utilities", "label": "Model Utilities", "type": "external", "link": "model_utilities.md"}
+        {
+            "id": "model_provider_openai",
+            "label": "model_provider_openai",
+            "type": "module"
+        },
+        {
+            "id": "openai_model_configuration",
+            "label": "OpenAI Model Configuration",
+            "type": "module",
+            "link": "openai_model_configuration.md"
+        },
+        {
+            "id": "openai_response_handling",
+            "label": "OpenAI Response Handling",
+            "type": "module",
+            "link": "openai_response_handling.md"
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Model Core Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "model_utilities",
+            "label": "Model Utilities",
+            "type": "external",
+            "link": "model_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "model_core_interfaces", "target": "openai_model_configuration", "label": "extends"},
-        {"source": "openai_model_configuration", "target": "openai_response_handling", "label": "uses settings for"},
-        {"source": "openai_response_handling", "target": "model_core_interfaces", "label": "produces StreamedResponse"},
-        {"source": "openai_response_handling", "target": "model_utilities", "label": "utilizes concurrency"}
+        {
+            "source": "model_core_interfaces",
+            "target": "openai_model_configuration",
+            "label": "extends"
+        },
+        {
+            "source": "openai_model_configuration",
+            "target": "openai_response_handling",
+            "label": "uses settings for"
+        },
+        {
+            "source": "openai_response_handling",
+            "target": "model_core_interfaces",
+            "label": "produces StreamedResponse"
+        },
+        {
+            "source": "openai_response_handling",
+            "target": "model_utilities",
+            "label": "utilizes concurrency"
+        }
     ],
     "groups": [
         {
             "id": "openai_integration",
             "label": "OpenAI Integration",
             "role": "generative",
-            "nodes": ["openai_model_configuration", "openai_response_handling"]
+            "nodes": [
+                "openai_model_configuration",
+                "openai_response_handling"
+            ]
         },
         {
             "id": "core_dependencies",
             "label": "Core Dependencies",
             "role": "analytical",
-            "nodes": ["model_core_interfaces", "model_utilities"]
+            "nodes": [
+                "model_core_interfaces",
+                "model_utilities"
+            ]
         }
     ]
 }

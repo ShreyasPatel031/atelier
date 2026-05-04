@@ -5,18 +5,60 @@ This module provides a comprehensive suite of tools for web search, content extr
 {
     "direction": "TD",
     "nodes": [
-        {"id": "web_search_providers", "label": "Web Search Providers", "type": "module", "link": "web_search_providers.md"},
-        {"id": "web_content_extraction", "label": "Web Content Extraction", "type": "module", "link": "web_content_extraction.md"},
-        {"id": "specialized_data_search", "label": "Specialized Data Search", "type": "module", "link": "specialized_data_search.md"}
+        {
+            "id": "web_search_providers",
+            "label": "Web Search Providers",
+            "type": "module",
+            "link": "web_search_providers.md"
+        },
+        {
+            "id": "web_content_extraction",
+            "label": "Web Content Extraction",
+            "type": "module",
+            "link": "web_content_extraction.md"
+        },
+        {
+            "id": "specialized_data_search",
+            "label": "Specialized Data Search",
+            "type": "module",
+            "link": "specialized_data_search.md"
+        }
     ],
     "edges": [
-        {"source": "web_search_providers", "target": "web_content_extraction", "label": "provides URLs for"},
-        {"source": "web_search_providers", "target": "specialized_data_search", "label": "informs"},
-        {"source": "specialized_data_search", "target": "web_content_extraction", "label": "extracts from results"}
+        {
+            "source": "web_search_providers",
+            "target": "web_content_extraction",
+            "label": "provides URLs for"
+        },
+        {
+            "source": "web_search_providers",
+            "target": "specialized_data_search",
+            "label": "informs"
+        },
+        {
+            "source": "specialized_data_search",
+            "target": "web_content_extraction",
+            "label": "extracts from results"
+        }
     ],
     "groups": [
-        {"id": "search_capabilities", "label": "Search Capabilities", "role": "surface", "nodes": ["web_search_providers", "specialized_data_search"]},
-        {"id": "data_extraction", "label": "Data Extraction", "role": "analytical", "nodes": ["web_content_extraction"]}
+        {
+            "id": "search_capabilities",
+            "label": "Search Capabilities",
+            "role": "surface",
+            "nodes": [
+                "web_search_providers",
+                "specialized_data_search"
+            ]
+        },
+        {
+            "id": "data_extraction",
+            "label": "Data Extraction",
+            "role": "analytical",
+            "nodes": [
+                "web_content_extraction"
+            ]
+        }
     ]
 }
 -->

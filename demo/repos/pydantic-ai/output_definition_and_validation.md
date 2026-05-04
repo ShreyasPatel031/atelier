@@ -14,30 +14,83 @@ The `output_definition_and_validation` module is composed of three key sub-modul
 {
     "direction": "TD",
     "nodes": [
-        {"id": "output_schema_definition", "label": "Define Output Schemas", "type": "module", "link": "output_schema_definition.md"},
-        {"id": "output_toolset_management", "label": "Manage Output Tools", "type": "module", "link": "output_toolset_management.md"},
-        {"id": "output_validation_logic", "label": "Validate Agent Outputs", "type": "module", "link": "output_validation_logic.md"},
-        {"id": "agent_output_streaming", "label": "Agent Output Streaming", "type": "module", "link": "agent_output_streaming.md"},
-        {"id": "response_part_management", "label": "Manage Response Parts", "type": "module", "link": "response_part_management.md"}
+        {
+            "id": "output_definition_and_validation",
+            "label": "Output Definition & Validation",
+            "type": "module"
+        },
+        {
+            "id": "output_schema_definition",
+            "label": "Define Output Schemas",
+            "type": "module",
+            "link": "output_schema_definition.md"
+        },
+        {
+            "id": "output_toolset_management",
+            "label": "Manage Output Tools",
+            "type": "module",
+            "link": "output_toolset_management.md"
+        },
+        {
+            "id": "output_validation_logic",
+            "label": "Validate Agent Outputs",
+            "type": "module",
+            "link": "output_validation_logic.md"
+        },
+        {
+            "id": "agent_output_streaming",
+            "label": "Agent Output Streaming",
+            "type": "module",
+            "link": "agent_output_streaming.md"
+        },
+        {
+            "id": "response_part_management",
+            "label": "Manage Response Parts",
+            "type": "module",
+            "link": "response_part_management.md"
+        }
     ],
     "edges": [
-        {"source": "output_schema_definition", "target": "output_toolset_management", "label": "defines tool schemas"},
-        {"source": "output_toolset_management", "target": "output_validation_logic", "label": "applies validators"},
-        {"source": "output_validation_logic", "target": "agent_output_streaming", "label": "validated output"},
-        {"source": "output_toolset_management", "target": "response_part_management", "label": "generates response parts"}
+        {
+            "source": "output_schema_definition",
+            "target": "output_toolset_management",
+            "label": "defines tool schemas"
+        },
+        {
+            "source": "output_toolset_management",
+            "target": "output_validation_logic",
+            "label": "applies validators"
+        },
+        {
+            "source": "output_validation_logic",
+            "target": "agent_output_streaming",
+            "label": "validated output"
+        },
+        {
+            "source": "output_toolset_management",
+            "target": "response_part_management",
+            "label": "generates response parts"
+        }
     ],
     "groups": [
         {
             "id": "output_definition_core",
             "label": "Output Definition Core",
             "role": "generative",
-            "nodes": ["output_schema_definition", "output_toolset_management", "output_validation_logic"]
+            "nodes": [
+                "output_schema_definition",
+                "output_toolset_management",
+                "output_validation_logic"
+            ]
         },
         {
             "id": "output_integration",
             "label": "Output Integration",
             "role": "data",
-            "nodes": ["agent_output_streaming", "response_part_management"]
+            "nodes": [
+                "agent_output_streaming",
+                "response_part_management"
+            ]
         }
     ]
 }

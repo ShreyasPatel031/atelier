@@ -12,20 +12,51 @@ This module integrates directly with the agent's core capabilities, offering spe
 {
     "direction": "TD",
     "nodes": [
-        {"id": "code_execution_tool", "label": "Code Execution Tool", "type": "module", "link": "code_execution_tool.md"},
-        {"id": "memory_management_tool", "label": "Memory Management Tool", "type": "module", "link": "memory_management_tool.md"},
-        {"id": "builtin_tools", "label": "Builtin Tools", "type": "external", "link": "builtin_tools.md"}
+        {
+            "id": "agent_action_tools",
+            "label": "Agent Action Tools",
+            "type": "module"
+        },
+        {
+            "id": "code_execution_tool",
+            "label": "Code Execution Tool",
+            "type": "module",
+            "link": "code_execution_tool.md"
+        },
+        {
+            "id": "memory_management_tool",
+            "label": "Memory Management Tool",
+            "type": "module",
+            "link": "memory_management_tool.md"
+        },
+        {
+            "id": "builtin_tools",
+            "label": "Builtin Tools",
+            "type": "external",
+            "link": "builtin_tools.md"
+        }
     ],
     "edges": [
-        {"source": "builtin_tools", "target": "code_execution_tool", "label": "provides"},
-        {"source": "builtin_tools", "target": "memory_management_tool", "label": "provides"}
+        {
+            "source": "builtin_tools",
+            "target": "code_execution_tool",
+            "label": "provides"
+        },
+        {
+            "source": "builtin_tools",
+            "target": "memory_management_tool",
+            "label": "provides"
+        }
     ],
     "groups": [
         {
             "id": "agent_action_capabilities",
             "label": "Agent Action Capabilities",
             "role": "generative",
-            "nodes": ["code_execution_tool", "memory_management_tool"]
+            "nodes": [
+                "code_execution_tool",
+                "memory_management_tool"
+            ]
         }
     ]
 }

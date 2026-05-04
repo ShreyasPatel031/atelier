@@ -23,20 +23,73 @@ The `synchronous_requests` module orchestrates the synchronous execution of an i
 {
     "direction": "TD",
     "nodes": [
-        {"id": "sync_req", "label": "Initiate Synchronous Request (model_request_sync)", "type": "component", "link": null},
-        {"id": "event_loop", "label": "Retrieve Async Event Loop", "type": "external", "link": "agent_utilities.md"},
-        {"id": "async_req", "label": "Execute Asynchronous Model Request", "type": "external", "link": "direct_model_requests.md"},
-        {"id": "model_params", "label": "Model Configuration & Inputs", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "response_out", "label": "Model Response", "type": "external", "link": "model_core_interfaces.md"}
+        {
+            "id": "sync_req",
+            "label": "Initiate Synchronous Request (model_request_sync)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "event_loop",
+            "label": "Retrieve Async Event Loop",
+            "type": "external",
+            "link": "agent_utilities.md"
+        },
+        {
+            "id": "async_req",
+            "label": "Execute Asynchronous Model Request",
+            "type": "external",
+            "link": "direct_model_requests.md"
+        },
+        {
+            "id": "model_params",
+            "label": "Model Configuration & Inputs",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "response_out",
+            "label": "Model Response",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        }
     ],
     "edges": [
-        {"source": "sync_req", "target": "event_loop", "label": "requests event loop"},
-        {"source": "sync_req", "target": "model_params", "label": "passes inputs & settings"},
-        {"source": "sync_req", "target": "async_req", "label": "runs async operation"},
-        {"source": "event_loop", "target": "async_req", "label": "executes"},
-        {"source": "model_params", "target": "async_req", "label": "informs"},
-        {"source": "async_req", "target": "sync_req", "label": "wrapped result"},
-        {"source": "sync_req", "target": "response_out", "label": "final output"}
+        {
+            "source": "sync_req",
+            "target": "event_loop",
+            "label": "requests event loop"
+        },
+        {
+            "source": "sync_req",
+            "target": "model_params",
+            "label": "passes inputs & settings"
+        },
+        {
+            "source": "sync_req",
+            "target": "async_req",
+            "label": "runs async operation"
+        },
+        {
+            "source": "event_loop",
+            "target": "async_req",
+            "label": "executes"
+        },
+        {
+            "source": "model_params",
+            "target": "async_req",
+            "label": "informs"
+        },
+        {
+            "source": "async_req",
+            "target": "sync_req",
+            "label": "wrapped result"
+        },
+        {
+            "source": "sync_req",
+            "target": "response_out",
+            "label": "final output"
+        }
     ],
     "groups": []
 }

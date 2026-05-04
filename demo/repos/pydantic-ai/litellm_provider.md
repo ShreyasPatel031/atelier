@@ -27,62 +27,244 @@ The `LiteLLMProvider` class is the core component of this module, acting as an a
 {
     "direction": "TD",
     "nodes": [
-        {"id": "litellm_provider", "label": "LiteLLMProvider", "type": "component", "link": null},
-        {"id": "init_client", "label": "Initialize OpenAI Client", "type": "component", "link": null},
-        {"id": "model_profile_mapping", "label": "Map Model to Profile", "type": "component", "link": null},
-        {"id": "model_profile", "label": "ModelProfile", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "openai_model_profile", "label": "OpenAIModelProfile & JSON Transformer", "type": "external", "link": "model_provider_openai.md"},
-        {"id": "anthropic_profile", "label": "Anthropic Model Profile", "type": "external", "link": "anthropic_provider.md"},
-        {"id": "openai_profile", "label": "OpenAI Model Profile", "type": "external", "link": "model_provider_openai.md"},
-        {"id": "google_profile", "label": "Google Model Profile", "type": "external", "link": "openrouter_google_profile.md"},
-        {"id": "mistral_profile", "label": "Mistral Model Profile", "type": "external", "link": "mistral_provider.md"},
-        {"id": "cohere_profile", "label": "Cohere Model Profile", "type": "external", "link": "cohere_provider.md"},
-        {"id": "amazon_profile", "label": "Amazon Bedrock Model Profile", "type": "external", "link": "bedrock_profile.md"},
-        {"id": "meta_profile", "label": "Meta Model Profile", "type": "external", "link": "model_profile_definitions.md"},
-        {"id": "groq_profile", "label": "Groq Model Profile", "type": "external", "link": "groq_profiles.md"},
-        {"id": "deepseek_profile", "label": "DeepSeek Model Profile", "type": "external", "link": "deepseek_provider.md"},
-        {"id": "moonshotai_profile", "label": "MoonshotAI Model Profile", "type": "external", "link": "moonshotai_provider.md"},
-        {"id": "xai_profile", "label": "Xai (Grok) Model Profile", "type": "external", "link": "xai_provider.md"},
-        {"id": "qwen_profile", "label": "Qwen Model Profile", "type": "external", "link": "alibaba_provider.md"},
-        {"id": "async_openai", "label": "AsyncOpenAI Client (from LiteLLM)", "type": "external", "link": null},
-        {"id": "async_http_client", "label": "AsyncHTTPClient", "type": "external", "link": null}
+        {
+            "id": "litellm_provider",
+            "label": "LiteLLMProvider",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "init_client",
+            "label": "Initialize OpenAI Client",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "model_profile_mapping",
+            "label": "Map Model to Profile",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "model_profile",
+            "label": "ModelProfile",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "openai_model_profile",
+            "label": "OpenAIModelProfile & JSON Transformer",
+            "type": "external",
+            "link": "model_provider_openai.md"
+        },
+        {
+            "id": "anthropic_profile",
+            "label": "Anthropic Model Profile",
+            "type": "external",
+            "link": "anthropic_provider.md"
+        },
+        {
+            "id": "openai_profile",
+            "label": "OpenAI Model Profile",
+            "type": "external",
+            "link": "model_provider_openai.md"
+        },
+        {
+            "id": "google_profile",
+            "label": "Google Model Profile",
+            "type": "external",
+            "link": "openrouter_google_profile.md"
+        },
+        {
+            "id": "mistral_profile",
+            "label": "Mistral Model Profile",
+            "type": "external",
+            "link": "mistral_provider.md"
+        },
+        {
+            "id": "cohere_profile",
+            "label": "Cohere Model Profile",
+            "type": "external",
+            "link": "cohere_provider.md"
+        },
+        {
+            "id": "amazon_profile",
+            "label": "Amazon Bedrock Model Profile",
+            "type": "external",
+            "link": "bedrock_profile.md"
+        },
+        {
+            "id": "meta_profile",
+            "label": "Meta Model Profile",
+            "type": "external",
+            "link": "model_profile_definitions.md"
+        },
+        {
+            "id": "groq_profile",
+            "label": "Groq Model Profile",
+            "type": "external",
+            "link": "groq_profiles.md"
+        },
+        {
+            "id": "deepseek_profile",
+            "label": "DeepSeek Model Profile",
+            "type": "external",
+            "link": "deepseek_provider.md"
+        },
+        {
+            "id": "moonshotai_profile",
+            "label": "MoonshotAI Model Profile",
+            "type": "external",
+            "link": "moonshotai_provider.md"
+        },
+        {
+            "id": "xai_profile",
+            "label": "Xai (Grok) Model Profile",
+            "type": "external",
+            "link": "xai_provider.md"
+        },
+        {
+            "id": "qwen_profile",
+            "label": "Qwen Model Profile",
+            "type": "external",
+            "link": "alibaba_provider.md"
+        },
+        {
+            "id": "async_openai",
+            "label": "AsyncOpenAI Client (from LiteLLM)",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "async_http_client",
+            "label": "AsyncHTTPClient",
+            "type": "external",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "litellm_provider", "target": "init_client", "label": "initializes"},
-        {"source": "litellm_provider", "target": "model_profile_mapping", "label": "resolves profiles"},
-        {"source": "init_client", "target": "async_openai", "label": "creates instance of"},
-        {"source": "init_client", "target": "async_http_client", "label": "uses"},
-        {"source": "model_profile_mapping", "target": "model_profile", "label": "generates"},
-        {"source": "model_profile_mapping", "target": "openai_model_profile", "label": "defaults to / uses"},
-        {"source": "model_profile_mapping", "target": "anthropic_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "openai_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "google_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "mistral_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "cohere_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "amazon_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "meta_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "groq_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "deepseek_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "moonshotai_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "xai_profile", "label": "gets profile from"},
-        {"source": "model_profile_mapping", "target": "qwen_profile", "label": "gets profile from"}
+        {
+            "source": "litellm_provider",
+            "target": "init_client",
+            "label": "initializes"
+        },
+        {
+            "source": "litellm_provider",
+            "target": "model_profile_mapping",
+            "label": "resolves profiles"
+        },
+        {
+            "source": "init_client",
+            "target": "async_openai",
+            "label": "creates instance of"
+        },
+        {
+            "source": "init_client",
+            "target": "async_http_client",
+            "label": "uses"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "model_profile",
+            "label": "generates"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "openai_model_profile",
+            "label": "defaults to / uses"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "anthropic_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "openai_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "google_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "mistral_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "cohere_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "amazon_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "meta_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "groq_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "deepseek_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "moonshotai_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "xai_profile",
+            "label": "gets profile from"
+        },
+        {
+            "source": "model_profile_mapping",
+            "target": "qwen_profile",
+            "label": "gets profile from"
+        }
     ],
     "groups": [
         {
             "id": "provider_initialization",
             "label": "Provider Initialization",
             "role": "control",
-            "nodes": ["init_client", "async_openai", "async_http_client"]
+            "nodes": [
+                "init_client",
+                "async_openai",
+                "async_http_client"
+            ]
         },
         {
             "id": "profile_resolution_process",
             "label": "Model Profile Resolution",
             "role": "analytical",
             "nodes": [
-                "model_profile_mapping", "model_profile", "openai_model_profile",
-                "anthropic_profile", "openai_profile", "google_profile", "mistral_profile",
-                "cohere_profile", "amazon_profile", "meta_profile", "groq_profile",
-                "deepseek_profile", "moonshotai_profile", "xai_profile", "qwen_profile"
+                "model_profile_mapping",
+                "model_profile",
+                "openai_model_profile",
+                "anthropic_profile",
+                "openai_profile",
+                "google_profile",
+                "mistral_profile",
+                "cohere_profile",
+                "amazon_profile",
+                "meta_profile",
+                "groq_profile",
+                "deepseek_profile",
+                "moonshotai_profile",
+                "xai_profile",
+                "qwen_profile"
             ]
         }
     ]

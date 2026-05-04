@@ -543,7 +543,8 @@
               "source": "agent_definition",
               "target": "agent_initialization"
             }
-          ]
+          ],
+          "groups": []
         }
       },
       "agent_execution_graph": {
@@ -2114,7 +2115,8 @@
                   "target": "xml_output",
                   "label": "formatted XML"
                 }
-              ]
+              ],
+              "groups": []
             }
           },
           "type_and_schema_utilities": {
@@ -3298,7 +3300,8 @@
                   "target": "model_request_context",
                   "label": "modifies messages in"
                 }
-              ]
+              ],
+              "groups": []
             }
           }
         },
@@ -4668,7 +4671,8 @@
                   "target": "abstract_toolset",
                   "label": "inherits functionality from"
                 }
-              ]
+              ],
+              "groups": []
             }
           },
           "exa_integration": {
@@ -6653,6 +6657,31 @@
                       "label": "Vercel AI Gateway",
                       "type": "module",
                       "link": "vercel_provider.md"
+                    },
+                    {
+                      "id": "huggingface_inference",
+                      "label": "HuggingFace Inference API",
+                      "type": "external",
+                      "_repaired": "g3_lifted_from_group"
+                    },
+                    {
+                      "id": "litellm_proxy",
+                      "label": "LiteLLM Proxy",
+                      "type": "external",
+                      "_repaired": "g3_lifted_from_group"
+                    },
+                    {
+                      "id": "vercel_ai_gateway",
+                      "label": "Vercel AI Gateway API",
+                      "type": "external",
+                      "_repaired": "g3_lifted_from_group"
+                    },
+                    {
+                      "id": "model_core_interfaces",
+                      "label": "Model Core Interfaces",
+                      "type": "module",
+                      "_repaired": "g3_lifted_from_group",
+                      "link": "model_core_interfaces.md"
                     }
                   ],
                   "edges": [
@@ -6688,27 +6717,10 @@
                       "label": "External AI Services",
                       "role": "data",
                       "nodes": [
-                        {
-                          "id": "huggingface_inference",
-                          "label": "HuggingFace Inference API",
-                          "type": "external"
-                        },
-                        {
-                          "id": "litellm_proxy",
-                          "label": "LiteLLM Proxy",
-                          "type": "external"
-                        },
-                        {
-                          "id": "vercel_ai_gateway",
-                          "label": "Vercel AI Gateway API",
-                          "type": "external"
-                        },
-                        {
-                          "id": "model_core_interfaces",
-                          "label": "Model Core Interfaces",
-                          "type": "module",
-                          "link": "model_core_interfaces.md"
-                        }
+                        "huggingface_inference",
+                        "litellm_proxy",
+                        "vercel_ai_gateway",
+                        "model_core_interfaces"
                       ]
                     }
                   ]
@@ -6993,14 +7005,15 @@
                   ],
                   "groups": [
                     {
-                      "id": "openai_compatible_providers",
+                      "id": "openai_compatible_providers__group",
                       "label": "OpenAI-Compatible Providers",
                       "role": "surface",
                       "nodes": [
                         "cloud_based_providers",
                         "ai_platform_providers",
                         "local_inference_providers"
-                      ]
+                      ],
+                      "_repaired": "r4_group_renamed_avoid_node_collision"
                     },
                     {
                       "id": "core_model_integration",
@@ -7488,6 +7501,12 @@
                   "label": "Structured Output Providers",
                   "type": "module",
                   "link": "structured_output_providers.md"
+                },
+                {
+                  "id": "pydantic_ai_agent_core",
+                  "label": "pydantic_ai_agent_core",
+                  "type": "external",
+                  "_repaired": "g2_injected_endpoint"
                 }
               ],
               "edges": [
@@ -7542,14 +7561,6 @@
                     "native_client_providers",
                     "gateway_wrapper_providers",
                     "structured_output_providers"
-                  ]
-                },
-                {
-                  "id": "core_system",
-                  "label": "Core System",
-                  "role": "generative",
-                  "nodes": [
-                    "pydantic_ai_agent_core"
                   ]
                 }
               ]
@@ -8372,7 +8383,8 @@
                           "target": "openai_chat_model_settings",
                           "label": "aliases"
                         }
-                      ]
+                      ],
+                      "groups": []
                     }
                   },
                   "openai_model_alias": {
@@ -9026,7 +9038,8 @@
                   "target": "base_chat_completion",
                   "label": "extends via inheritance"
                 }
-              ]
+              ],
+              "groups": []
             }
           }
         },
@@ -9154,7 +9167,8 @@
                   "target": "request_usage",
                   "label": "Mapped usage metrics"
                 }
-              ]
+              ],
+              "groups": []
             }
           },
           "cohere_usage_mapper": {
@@ -10046,28 +10060,29 @@
                       "label": "processed embeddings"
                     },
                     {
-                      "source": "bedrock_embedding_model_handlers",
+                      "source": "cohere_handler",
                       "target": "cohere_embedding_handler"
                     },
                     {
-                      "source": "bedrock_embedding_model_handlers",
+                      "source": "cohere_handler",
                       "target": "nova_embedding_handler"
                     },
                     {
-                      "source": "bedrock_embedding_model_handlers",
+                      "source": "cohere_handler",
                       "target": "titan_embedding_handler"
                     }
                   ],
                   "groups": [
                     {
-                      "id": "bedrock_embedding_model_handlers",
+                      "id": "bedrock_embedding_model_handlers__group",
                       "label": "Bedrock Embedding Model Handlers",
                       "role": "generative",
                       "nodes": [
                         "cohere_handler",
                         "nova_handler",
                         "titan_handler"
-                      ]
+                      ],
+                      "_repaired": "r4_group_renamed_avoid_node_collision"
                     }
                   ]
                 }
@@ -13648,7 +13663,8 @@
                       "source": "graph_runtime",
                       "target": "graph_run_management"
                     }
-                  ]
+                  ],
+                  "groups": []
                 }
               },
               "graph_definition": {
@@ -14948,7 +14964,8 @@
           "source": "pydantic_ai_agent_core",
           "target": "graph_visualization"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "pydantic_evals_framework": {
@@ -17208,7 +17225,8 @@
           "source": "pydantic_evals_framework",
           "target": "framework_utilities"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "project_documentation_and_developer_tools": {

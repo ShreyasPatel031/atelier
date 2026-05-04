@@ -55,23 +55,92 @@ The `FunctionModel` is the primary class in this module. It acts as an adapter, 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "FunctionModel", "label": "FunctionModel Class", "type": "component", "link": null},
-        {"id": "InitializeModel", "label": "Initialize FunctionModel", "type": "component", "link": null},
-        {"id": "HandleNonStreamedRequest", "label": "Handle Non-Streamed Request", "type": "component", "link": null},
-        {"id": "HandleStreamedRequest", "label": "Handle Streamed Request", "type": "component", "link": null},
-        {"id": "ModelBase", "label": "Model (Abstract Base)", "type": "external", "link": "model_base_definitions.md"},
-        {"id": "StreamedResponseBase", "label": "StreamedResponse (Abstract Base)", "type": "external", "link": "streamed_responses.md"},
-        {"id": "FunctionUtilities", "label": "Agent Utilities", "type": "external", "link": "agent_utilities.md"},
-        {"id": "BuiltinToolsModule", "label": "Builtin Tools", "type": "external", "link": "builtin_tools.md"}
+        {
+            "id": "FunctionModel",
+            "label": "FunctionModel Class",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "InitializeModel",
+            "label": "Initialize FunctionModel",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "HandleNonStreamedRequest",
+            "label": "Handle Non-Streamed Request",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "HandleStreamedRequest",
+            "label": "Handle Streamed Request",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "ModelBase",
+            "label": "Model (Abstract Base)",
+            "type": "external",
+            "link": "model_base_definitions.md"
+        },
+        {
+            "id": "StreamedResponseBase",
+            "label": "StreamedResponse (Abstract Base)",
+            "type": "external",
+            "link": "streamed_responses.md"
+        },
+        {
+            "id": "FunctionUtilities",
+            "label": "Agent Utilities",
+            "type": "external",
+            "link": "agent_utilities.md"
+        },
+        {
+            "id": "BuiltinToolsModule",
+            "label": "Builtin Tools",
+            "type": "external",
+            "link": "builtin_tools.md"
+        }
     ],
     "edges": [
-        {"source": "InitializeModel", "target": "FunctionModel", "label": "configures"},
-        {"source": "FunctionModel", "target": "ModelBase", "label": "implements", "type": "solid"},
-        {"source": "HandleNonStreamedRequest", "target": "FunctionModel", "label": "uses 'function'"},
-        {"source": "HandleStreamedRequest", "target": "FunctionModel", "label": "uses 'stream_function'"},
-        {"source": "FunctionModel", "target": "FunctionUtilities", "label": "uses run_in_executor"},
-        {"source": "FunctionModel", "target": "BuiltinToolsModule", "label": "supports all"},
-        {"source": "HandleStreamedRequest", "target": "StreamedResponseBase", "label": "produces"}
+        {
+            "source": "InitializeModel",
+            "target": "FunctionModel",
+            "label": "configures"
+        },
+        {
+            "source": "FunctionModel",
+            "target": "ModelBase",
+            "label": "implements",
+            "type": "solid"
+        },
+        {
+            "source": "HandleNonStreamedRequest",
+            "target": "FunctionModel",
+            "label": "uses 'function'"
+        },
+        {
+            "source": "HandleStreamedRequest",
+            "target": "FunctionModel",
+            "label": "uses 'stream_function'"
+        },
+        {
+            "source": "FunctionModel",
+            "target": "FunctionUtilities",
+            "label": "uses run_in_executor"
+        },
+        {
+            "source": "FunctionModel",
+            "target": "BuiltinToolsModule",
+            "label": "supports all"
+        },
+        {
+            "source": "HandleStreamedRequest",
+            "target": "StreamedResponseBase",
+            "label": "produces"
+        }
     ],
     "groups": []
 }

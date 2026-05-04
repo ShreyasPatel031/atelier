@@ -10,26 +10,35 @@ The `graph_runtime` module orchestrates the execution of predefined computationa
 {
     "direction": "TD",
     "nodes": [
-        {"id": "graph_run_management", "label": "Graph Run Management", "type": "module", "link": "graph_run_management.md"},
-        {"id": "graph_run_results", "label": "Graph Run Results", "type": "module", "link": "graph_run_results.md"}
-    ],
-    "edges": [
-        {"source": "graph_run_management", "target": "graph_run_results", "label": "generates"}
-    ],
-    "groups": [
         {
-            "id": "execution_flow",
-            "label": "Execution Flow",
-            "role": "generative",
-            "nodes": ["graph_run_management"]
+            "id": "graph_runtime",
+            "label": "Graph Runtime",
+            "type": "module"
         },
         {
-            "id": "output",
-            "label": "Output",
-            "role": "data",
-            "nodes": ["graph_run_results"]
+            "id": "graph_iteration_logic",
+            "label": "Graph Iteration Logic",
+            "type": "module",
+            "link": "graph_iteration_logic.md"
+        },
+        {
+            "id": "graph_run_management",
+            "label": "Graph Run Management",
+            "type": "module",
+            "link": "graph_run_management.md"
         }
-    ]
+    ],
+    "edges": [
+        {
+            "source": "graph_runtime",
+            "target": "graph_iteration_logic"
+        },
+        {
+            "source": "graph_runtime",
+            "target": "graph_run_management"
+        }
+    ],
+    "groups": []
 }
 -->
 

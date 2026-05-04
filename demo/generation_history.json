@@ -505,5 +505,207 @@
     "errors": 0,
     "warnings": 0,
     "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:08:10.787758",
+    "repo": "crewai",
+    "total_modules": 54,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:08:18.396187",
+    "repo": "langchain",
+    "total_modules": 83,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 10,
+    "issues_by_type": {
+      "diagram_ir_g2_endpoint_is_group_id": 5,
+      "diagram_ir_r4_node_id_collides_with_group": 5
+    }
+  },
+  {
+    "timestamp": "2026-05-05T02:08:29.005456",
+    "repo": "ollama",
+    "total_modules": 50,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 14,
+    "issues_by_type": {
+      "diagram_ir_g2_skip_edge_missing_endpoint": 7,
+      "diagram_ir_r4_skip_edge_missing_endpoint": 7
+    }
+  },
+  {
+    "timestamp": "2026-05-05T02:08:29.096442",
+    "repo": "transformers",
+    "total_modules": 99,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 13,
+    "issues_by_type": {
+      "diagram_ir_g2_endpoint_is_group_id": 9,
+      "diagram_ir_r4_node_id_collides_with_group": 4
+    }
+  },
+  {
+    "timestamp": "2026-05-05T02:08:29.006339",
+    "repo": "pydantic-ai",
+    "total_modules": 270,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 5,
+    "issues_by_type": {
+      "diagram_ir_r4_node_id_collides_with_group": 2,
+      "diagram_ir_g2_endpoint_is_group_id": 3
+    }
+  },
+  {
+    "timestamp": "2026-05-05T02:10:22.434710",
+    "repo": "crewai",
+    "total_modules": 54,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:10:25.747523",
+    "repo": "langchain",
+    "total_modules": 83,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 4,
+    "issues_by_type": {
+      "diagram_ir_g2_rewired_group_endpoint": 2,
+      "diagram_ir_r4_renamed_group_for_node_collision": 2
+    }
+  },
+  {
+    "timestamp": "2026-05-05T02:10:29.102936",
+    "repo": "ollama",
+    "total_modules": 50,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:10:31.897253",
+    "repo": "pydantic-ai",
+    "total_modules": 270,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:10:37.830480",
+    "repo": "transformers",
+    "total_modules": 99,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:11:08.350979",
+    "repo": "langchain",
+    "total_modules": 83,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:11:17.035601",
+    "repo": "langchain",
+    "total_modules": 83,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:11:24.791612",
+    "repo": "crewai",
+    "total_modules": 54,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:11:27.936107",
+    "repo": "ollama",
+    "total_modules": 50,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:11:30.861889",
+    "repo": "pydantic-ai",
+    "total_modules": 270,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:11:37.143970",
+    "repo": "transformers",
+    "total_modules": 99,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-05T02:11:40.723958",
+    "repo": "dspy",
+    "total_modules": 66,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
   }
 ]

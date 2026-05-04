@@ -3,23 +3,23 @@ This module contains tests for the `Pi` configuration system, specifically valid
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "cmd.launch.pi_test.TestPiEdit",
-      "label": "TestPiEdit",
-      "type": "test"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "pi_integration",
-      "label": "pi_integration",
-      "nodes": [
-        "cmd.launch.pi_test.TestPiEdit"
-      ]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "cmd.launch.pi_test.TestPiEdit",
+            "label": "TestPiEdit",
+            "type": "test"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "pi_integration",
+            "label": "pi_integration",
+            "nodes": [
+                "cmd.launch.pi_test.TestPiEdit"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

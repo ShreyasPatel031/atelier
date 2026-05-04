@@ -28,34 +28,124 @@ The `GeminiStreamedResponse` class extends the `StreamedResponse` interface to s
 {
     "direction": "TD",
     "nodes": [
-        {"id": "gemini_streamed_response", "label": "GeminiStreamedResponse (Current Module)", "type": "component", "link": null},
-        {"id": "process_gemini_stream", "label": "Process Gemini Byte Stream", "type": "component", "link": null},
-        {"id": "validate_gemini_json", "label": "Validate Partial Gemini JSON", "type": "component", "link": null},
-        {"id": "handle_text_deltas", "label": "Handle Text Deltas", "type": "component", "link": null},
-        {"id": "handle_tool_call_deltas", "label": "Handle Tool Call Deltas", "type": "component", "link": null},
-        {"id": "streamed_response_base", "label": "StreamedResponse (Base Interface)", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "parts_manager", "label": "ModelResponsePartsManager", "type": "external", "link": "agent_output_handling.md"},
-        {"id": "agent_utilities", "label": "Agent Utilities (now_utc)", "type": "external", "link": "agent_utilities.md"},
-        {"id": "gemini_usage_util", "label": "Gemini Utilities (usage)", "type": "external", "link": "gemini_utility_components.md"}
+        {
+            "id": "gemini_streamed_response",
+            "label": "GeminiStreamedResponse (Current Module)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "process_gemini_stream",
+            "label": "Process Gemini Byte Stream",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "validate_gemini_json",
+            "label": "Validate Partial Gemini JSON",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "handle_text_deltas",
+            "label": "Handle Text Deltas",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "handle_tool_call_deltas",
+            "label": "Handle Tool Call Deltas",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "streamed_response_base",
+            "label": "StreamedResponse (Base Interface)",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "parts_manager",
+            "label": "ModelResponsePartsManager",
+            "type": "external",
+            "link": "agent_output_handling.md"
+        },
+        {
+            "id": "agent_utilities",
+            "label": "Agent Utilities (now_utc)",
+            "type": "external",
+            "link": "agent_utilities.md"
+        },
+        {
+            "id": "gemini_usage_util",
+            "label": "Gemini Utilities (usage)",
+            "type": "external",
+            "link": "gemini_utility_components.md"
+        }
     ],
     "edges": [
-        {"source": "gemini_streamed_response", "target": "streamed_response_base", "label": "inherits from"},
-        {"source": "gemini_streamed_response", "target": "agent_utilities", "label": "uses default_factory"},
-        {"source": "gemini_streamed_response", "target": "process_gemini_stream", "label": "requests byte chunks"},
-        {"source": "process_gemini_stream", "target": "validate_gemini_json", "label": "accumulated bytes"},
-        {"source": "validate_gemini_json", "target": "gemini_streamed_response", "label": "yields complete responses"},
-        {"source": "gemini_streamed_response", "target": "handle_text_deltas", "label": "dispatches text parts"},
-        {"source": "gemini_streamed_response", "target": "handle_tool_call_deltas", "label": "dispatches tool call parts"},
-        {"source": "handle_text_deltas", "target": "parts_manager", "label": "produces events via"},
-        {"source": "handle_tool_call_deltas", "target": "parts_manager", "label": "produces events via"},
-        {"source": "gemini_streamed_response", "target": "gemini_usage_util", "label": "extracts usage data"}
+        {
+            "source": "gemini_streamed_response",
+            "target": "streamed_response_base",
+            "label": "inherits from"
+        },
+        {
+            "source": "gemini_streamed_response",
+            "target": "agent_utilities",
+            "label": "uses default_factory"
+        },
+        {
+            "source": "gemini_streamed_response",
+            "target": "process_gemini_stream",
+            "label": "requests byte chunks"
+        },
+        {
+            "source": "process_gemini_stream",
+            "target": "validate_gemini_json",
+            "label": "accumulated bytes"
+        },
+        {
+            "source": "validate_gemini_json",
+            "target": "gemini_streamed_response",
+            "label": "yields complete responses"
+        },
+        {
+            "source": "gemini_streamed_response",
+            "target": "handle_text_deltas",
+            "label": "dispatches text parts"
+        },
+        {
+            "source": "gemini_streamed_response",
+            "target": "handle_tool_call_deltas",
+            "label": "dispatches tool call parts"
+        },
+        {
+            "source": "handle_text_deltas",
+            "target": "parts_manager",
+            "label": "produces events via"
+        },
+        {
+            "source": "handle_tool_call_deltas",
+            "target": "parts_manager",
+            "label": "produces events via"
+        },
+        {
+            "source": "gemini_streamed_response",
+            "target": "gemini_usage_util",
+            "label": "extracts usage data"
+        }
     ],
     "groups": [
         {
             "id": "gemini_response_processing",
             "label": "Gemini Response Stream Processing",
             "role": "analytical",
-            "nodes": ["process_gemini_stream", "validate_gemini_json", "handle_text_deltas", "handle_tool_call_deltas"]
+            "nodes": [
+                "process_gemini_stream",
+                "validate_gemini_json",
+                "handle_text_deltas",
+                "handle_tool_call_deltas"
+            ]
         }
     ]
 }

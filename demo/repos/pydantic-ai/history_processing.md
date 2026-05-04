@@ -48,16 +48,49 @@ When an AI agent is about to send a prompt to a language model, the `HistoryProc
 {
     "direction": "TD",
     "nodes": [
-        {"id": "history_processor_capability", "label": "History Processor Capability", "type": "component", "link": null},
-        {"id": "process_messages", "label": "Process Message History", "type": "component", "link": null},
-        {"id": "abstract_capability", "label": "Abstract Capability", "type": "external", "link": "abstract_capability_base.md"},
-        {"id": "model_request_context", "label": "Model Request Context", "type": "external", "link": "agent_execution_graph.md"}
+        {
+            "id": "history_processor_capability",
+            "label": "History Processor Capability",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "process_messages",
+            "label": "Process Message History",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "abstract_capability",
+            "label": "Abstract Capability",
+            "type": "external",
+            "link": "abstract_capability_base.md"
+        },
+        {
+            "id": "model_request_context",
+            "label": "Model Request Context",
+            "type": "external",
+            "link": "agent_execution_graph.md"
+        }
     ],
     "edges": [
-        {"source": "history_processor_capability", "target": "abstract_capability", "label": "inherits from"},
-        {"source": "history_processor_capability", "target": "process_messages", "label": "uses"},
-        {"source": "process_messages", "target": "model_request_context", "label": "modifies messages in"}
-    ]
+        {
+            "source": "history_processor_capability",
+            "target": "abstract_capability",
+            "label": "inherits from"
+        },
+        {
+            "source": "history_processor_capability",
+            "target": "process_messages",
+            "label": "uses"
+        },
+        {
+            "source": "process_messages",
+            "target": "model_request_context",
+            "label": "modifies messages in"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

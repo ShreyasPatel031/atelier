@@ -32,17 +32,57 @@ This layered approach allows for granular control over agent behavior, enabling 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "hooks_manager", "label": "Hooks Manager (Hooks)", "type": "component", "link": null},
-        {"id": "abstract_capability_interface", "label": "Abstract Capability Interface", "type": "external", "link": "capability_interface.md"},
-        {"id": "hook_registration_api", "label": "Hook Registration API (.on)", "type": "component", "link": null},
-        {"id": "agent_runtime", "label": "Agent Runtime", "type": "external", "link": "agent_definition.md"}
+        {
+            "id": "hooks_manager",
+            "label": "Hooks Manager (Hooks)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "abstract_capability_interface",
+            "label": "Abstract Capability Interface",
+            "type": "external",
+            "link": "capability_interface.md"
+        },
+        {
+            "id": "hook_registration_api",
+            "label": "Hook Registration API (.on)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "agent_runtime",
+            "label": "Agent Runtime",
+            "type": "external",
+            "link": "agent_definition.md"
+        }
     ],
     "edges": [
-        {"source": "hooks_manager", "target": "abstract_capability_interface", "label": "inherits from"},
-        {"source": "hooks_manager", "target": "hook_registration_api", "label": "provides registration through"},
-        {"source": "hook_registration_api", "target": "hooks_manager", "label": "registers hook functions into"},
-        {"source": "agent_runtime", "target": "hooks_manager", "label": "invokes hooks during lifecycle"},
-        {"source": "hooks_manager", "target": "agent_runtime", "label": "returns modified context/results to"}
+        {
+            "source": "hooks_manager",
+            "target": "abstract_capability_interface",
+            "label": "inherits from"
+        },
+        {
+            "source": "hooks_manager",
+            "target": "hook_registration_api",
+            "label": "provides registration through"
+        },
+        {
+            "source": "hook_registration_api",
+            "target": "hooks_manager",
+            "label": "registers hook functions into"
+        },
+        {
+            "source": "agent_runtime",
+            "target": "hooks_manager",
+            "label": "invokes hooks during lifecycle"
+        },
+        {
+            "source": "hooks_manager",
+            "target": "agent_runtime",
+            "label": "returns modified context/results to"
+        }
     ],
     "groups": []
 }

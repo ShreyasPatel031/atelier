@@ -12,45 +12,164 @@ The `mkdocs_main_hooks` module integrates directly with the MkDocs build system.
 {
     "direction": "TD",
     "nodes": [
-        {"id": "on_page_markdown_hook_entry", "label": "on_page_markdown Hook", "type": "component", "link": null},
-        {"id": "inject_snippets_func_call", "label": "Inject Code Snippets", "type": "component", "link": null},
-        {"id": "replace_uv_python_run_func_call", "label": "Replace UV Python Run Directives", "type": "component", "link": null},
-        {"id": "render_examples_func_call", "label": "Render Code Examples", "type": "component", "link": null},
-        {"id": "render_video_func_call", "label": "Embed Video Content", "type": "component", "link": null},
-        {"id": "create_gateway_toggle_func_call", "label": "Generate Gateway Toggles", "type": "component", "link": null},
-        {"id": "on_env_hook_entry", "label": "on_env Hook", "type": "component", "link": null},
-        {"id": "locate_js_bundle", "label": "Locate JavaScript Bundle", "type": "component", "link": null},
-        {"id": "set_build_timestamp", "label": "Set Build Timestamp", "type": "component", "link": null},
-        {"id": "snippet_processing_module", "label": "Snippet Processing Module", "type": "external", "link": "snippet_processing.md"},
-        {"id": "mkdocs_system", "label": "MkDocs Build System", "type": "external", "link": null}
+        {
+            "id": "on_page_markdown_hook_entry",
+            "label": "on_page_markdown Hook",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "inject_snippets_func_call",
+            "label": "Inject Code Snippets",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "replace_uv_python_run_func_call",
+            "label": "Replace UV Python Run Directives",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "render_examples_func_call",
+            "label": "Render Code Examples",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "render_video_func_call",
+            "label": "Embed Video Content",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "create_gateway_toggle_func_call",
+            "label": "Generate Gateway Toggles",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "on_env_hook_entry",
+            "label": "on_env Hook",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "locate_js_bundle",
+            "label": "Locate JavaScript Bundle",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "set_build_timestamp",
+            "label": "Set Build Timestamp",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "snippet_processing_module",
+            "label": "Snippet Processing Module",
+            "type": "external",
+            "link": "snippet_processing.md"
+        },
+        {
+            "id": "mkdocs_system",
+            "label": "MkDocs Build System",
+            "type": "external",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "mkdocs_system", "target": "on_page_markdown_hook_entry", "label": "provides raw markdown"},
-        {"source": "on_page_markdown_hook_entry", "target": "inject_snippets_func_call", "label": "transforms"},
-        {"source": "inject_snippets_func_call", "target": "snippet_processing_module", "label": "uses logic from", "type": "dashed"},
-        {"source": "inject_snippets_func_call", "target": "replace_uv_python_run_func_call", "label": "sends modified markdown"},
-        {"source": "replace_uv_python_run_func_call", "target": "render_examples_func_call", "label": "sends modified markdown"},
-        {"source": "render_examples_func_call", "target": "render_video_func_call", "label": "sends modified markdown"},
-        {"source": "render_video_func_call", "target": "create_gateway_toggle_func_call", "label": "sends modified markdown"},
-        {"source": "create_gateway_toggle_func_call", "target": "on_page_markdown_hook_entry", "label": "returns final markdown"},
-        {"source": "on_page_markdown_hook_entry", "target": "mkdocs_system", "label": "delivers to"},
-        {"source": "mkdocs_system", "target": "on_env_hook_entry", "label": "triggers environment setup"},
-        {"source": "on_env_hook_entry", "target": "locate_js_bundle", "label": "identifies bundle"},
-        {"source": "locate_js_bundle", "target": "set_build_timestamp", "label": "updates environment via"},
-        {"source": "set_build_timestamp", "target": "mkdocs_system", "label": "modifies global state of"}
+        {
+            "source": "mkdocs_system",
+            "target": "on_page_markdown_hook_entry",
+            "label": "provides raw markdown"
+        },
+        {
+            "source": "on_page_markdown_hook_entry",
+            "target": "inject_snippets_func_call",
+            "label": "transforms"
+        },
+        {
+            "source": "inject_snippets_func_call",
+            "target": "snippet_processing_module",
+            "label": "uses logic from",
+            "type": "dashed"
+        },
+        {
+            "source": "inject_snippets_func_call",
+            "target": "replace_uv_python_run_func_call",
+            "label": "sends modified markdown"
+        },
+        {
+            "source": "replace_uv_python_run_func_call",
+            "target": "render_examples_func_call",
+            "label": "sends modified markdown"
+        },
+        {
+            "source": "render_examples_func_call",
+            "target": "render_video_func_call",
+            "label": "sends modified markdown"
+        },
+        {
+            "source": "render_video_func_call",
+            "target": "create_gateway_toggle_func_call",
+            "label": "sends modified markdown"
+        },
+        {
+            "source": "create_gateway_toggle_func_call",
+            "target": "on_page_markdown_hook_entry",
+            "label": "returns final markdown"
+        },
+        {
+            "source": "on_page_markdown_hook_entry",
+            "target": "mkdocs_system",
+            "label": "delivers to"
+        },
+        {
+            "source": "mkdocs_system",
+            "target": "on_env_hook_entry",
+            "label": "triggers environment setup"
+        },
+        {
+            "source": "on_env_hook_entry",
+            "target": "locate_js_bundle",
+            "label": "identifies bundle"
+        },
+        {
+            "source": "locate_js_bundle",
+            "target": "set_build_timestamp",
+            "label": "updates environment via"
+        },
+        {
+            "source": "set_build_timestamp",
+            "target": "mkdocs_system",
+            "label": "modifies global state of"
+        }
     ],
     "groups": [
         {
             "id": "page_markdown_pipeline",
             "label": "Page Markdown Transformation Pipeline",
             "role": "functional",
-            "nodes": ["on_page_markdown_hook_entry", "inject_snippets_func_call", "replace_uv_python_run_func_call", "render_examples_func_call", "render_video_func_call", "create_gateway_toggle_func_call"]
+            "nodes": [
+                "on_page_markdown_hook_entry",
+                "inject_snippets_func_call",
+                "replace_uv_python_run_func_call",
+                "render_examples_func_call",
+                "render_video_func_call",
+                "create_gateway_toggle_func_call"
+            ]
         },
         {
             "id": "env_setup_process",
             "label": "Environment Initialization Process",
             "role": "functional",
-            "nodes": ["on_env_hook_entry", "locate_js_bundle", "set_build_timestamp"]
+            "nodes": [
+                "on_env_hook_entry",
+                "locate_js_bundle",
+                "set_build_timestamp"
+            ]
         }
     ]
 }

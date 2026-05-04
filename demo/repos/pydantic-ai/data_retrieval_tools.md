@@ -10,26 +10,59 @@ This module integrates with the agent's core capabilities, allowing agents to se
 {
     "direction": "TD",
     "nodes": [
-        {"id": "url_context_tool", "label": "Retrieve URL Content", "type": "module", "link": "url_context_tool.md"},
-        {"id": "file_search_tool", "label": "Search Uploaded Files", "type": "module", "link": "file_search_tool.md"},
-        {"id": "agent_capabilities", "label": "Agent Capabilities", "type": "external", "link": "capabilities_web_interaction.md"}
+        {
+            "id": "data_retrieval_tools",
+            "label": "Data Retrieval Tools",
+            "type": "module"
+        },
+        {
+            "id": "url_context_tool",
+            "label": "Retrieve URL Content",
+            "type": "module",
+            "link": "url_context_tool.md"
+        },
+        {
+            "id": "file_search_tool",
+            "label": "Search Uploaded Files",
+            "type": "module",
+            "link": "file_search_tool.md"
+        },
+        {
+            "id": "agent_capabilities",
+            "label": "Agent Capabilities",
+            "type": "external",
+            "link": "capabilities_web_interaction.md"
+        }
     ],
     "edges": [
-        {"source": "agent_capabilities", "target": "url_context_tool", "label": "activates for URLs"},
-        {"source": "agent_capabilities", "target": "file_search_tool", "label": "activates for files"}
+        {
+            "source": "agent_capabilities",
+            "target": "url_context_tool",
+            "label": "activates for URLs"
+        },
+        {
+            "source": "agent_capabilities",
+            "target": "file_search_tool",
+            "label": "activates for files"
+        }
     ],
     "groups": [
         {
             "id": "data_access",
             "label": "Data Access Layer",
             "role": "data",
-            "nodes": ["url_context_tool", "file_search_tool"]
+            "nodes": [
+                "url_context_tool",
+                "file_search_tool"
+            ]
         },
         {
             "id": "integration",
             "label": "Agent Integration",
             "role": "analytical",
-            "nodes": ["agent_capabilities"]
+            "nodes": [
+                "agent_capabilities"
+            ]
         }
     ]
 }

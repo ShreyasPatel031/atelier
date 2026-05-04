@@ -12,24 +12,47 @@ The module's architecture is centered around two main functional areas: general 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mkdocs_main_hooks", "label": "MkDocs Core Hooks", "type": "module", "link": "mkdocs_main_hooks.md"},
-        {"id": "snippet_processing", "label": "Snippet Replacement Logic", "type": "module", "link": "snippet_processing.md"}
+        {
+            "id": "mkdocs_hooks_and_snippets",
+            "label": "MkDocs Hooks and Snippets",
+            "type": "module"
+        },
+        {
+            "id": "mkdocs_main_hooks",
+            "label": "MkDocs Core Hooks",
+            "type": "module",
+            "link": "mkdocs_main_hooks.md"
+        },
+        {
+            "id": "snippet_processing",
+            "label": "Snippet Replacement Logic",
+            "type": "module",
+            "link": "snippet_processing.md"
+        }
     ],
     "edges": [
-        {"source": "mkdocs_main_hooks", "target": "snippet_processing", "label": "utilizes for snippets"}
+        {
+            "source": "mkdocs_main_hooks",
+            "target": "snippet_processing",
+            "label": "utilizes for snippets"
+        }
     ],
     "groups": [
         {
             "id": "hooks",
             "label": "MkDocs Hooks",
             "role": "generative",
-            "nodes": ["mkdocs_main_hooks"]
+            "nodes": [
+                "mkdocs_main_hooks"
+            ]
         },
         {
             "id": "content_transformation",
             "label": "Content Transformation",
             "role": "analytical",
-            "nodes": ["snippet_processing"]
+            "nodes": [
+                "snippet_processing"
+            ]
         }
     ]
 }

@@ -10,18 +10,40 @@ This module orchestrates the communication with the Gemini API. The `GeminiModel
 {
     "direction": "TD",
     "nodes": [
-        {"id": "gemini_model", "label": "Gemini Model Implementation", "type": "module", "link": "gemini_model.md"},
-        {"id": "gemini_streamed_response", "label": "Gemini Streamed Response Handling", "type": "module", "link": "gemini_streamed_response.md"}
+        {
+            "id": "gemini_model_interface",
+            "label": "Gemini Model Interface",
+            "type": "module"
+        },
+        {
+            "id": "gemini_model",
+            "label": "Gemini Model Implementation",
+            "type": "module",
+            "link": "gemini_model.md"
+        },
+        {
+            "id": "gemini_streamed_response",
+            "label": "Gemini Streamed Response Handling",
+            "type": "module",
+            "link": "gemini_streamed_response.md"
+        }
     ],
     "edges": [
-        {"source": "gemini_model", "target": "gemini_streamed_response", "label": "initiates and processes stream"}
+        {
+            "source": "gemini_model",
+            "target": "gemini_streamed_response",
+            "label": "initiates and processes stream"
+        }
     ],
     "groups": [
         {
             "id": "gemini_core_interface",
             "label": "Gemini Core Interface",
             "role": "generative",
-            "nodes": ["gemini_model", "gemini_streamed_response"]
+            "nodes": [
+                "gemini_model",
+                "gemini_streamed_response"
+            ]
         }
     ]
 }

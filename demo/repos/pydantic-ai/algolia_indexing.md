@@ -24,7 +24,17 @@ These two phases work in conjunction to ensure that all relevant documentation c
 {
     "direction": "TD",
     "nodes": [
-        {"id": "algolia_processor", "label": "Algolia Content Processor", "type": "module", "link": "algolia_processor.md"}
+        {
+            "id": "algolia_indexing",
+            "label": "Algolia Indexing",
+            "type": "module"
+        },
+        {
+            "id": "algolia_processor",
+            "label": "Algolia Content Processor",
+            "type": "module",
+            "link": "algolia_processor.md"
+        }
     ],
     "edges": [],
     "groups": [
@@ -32,7 +42,9 @@ These two phases work in conjunction to ensure that all relevant documentation c
             "id": "indexing_process",
             "label": "Indexing Process",
             "role": "data",
-            "nodes": ["algolia_processor"]
+            "nodes": [
+                "algolia_processor"
+            ]
         }
     ]
 }

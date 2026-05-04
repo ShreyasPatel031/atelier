@@ -14,11 +14,25 @@ The `voyageai_usage_mapping` module contains a single, focused utility function 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "map_usage_func", "label": "Map VoyageAI Usage Data", "type": "component", "link": null},
-        {"id": "request_usage_model", "label": "RequestUsage Model", "type": "external", "link": "agent_utilities.md"}
+        {
+            "id": "map_usage_func",
+            "label": "Map VoyageAI Usage Data",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "request_usage_model",
+            "label": "RequestUsage Model",
+            "type": "external",
+            "link": "agent_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "map_usage_func", "target": "request_usage_model", "label": "transforms into"}
+        {
+            "source": "map_usage_func",
+            "target": "request_usage_model",
+            "label": "transforms into"
+        }
     ],
     "groups": []
 }

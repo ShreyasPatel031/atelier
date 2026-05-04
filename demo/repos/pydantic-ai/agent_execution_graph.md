@@ -16,27 +16,64 @@ The agent execution graph is composed of several key sub-modules that work in co
 {
     "direction": "TD",
     "nodes": [
-        {"id": "agent_interaction_nodes", "label": "Agent Interaction Nodes", "type": "module", "link": "agent_interaction_nodes.md"},
-        {"id": "tool_execution_logic", "label": "Tool Execution Logic", "type": "module", "link": "tool_execution_logic.md"},
-        {"id": "message_capture_utility", "label": "Message Capture Utility", "type": "module", "link": "message_capture_utility.md"}
+        {
+            "id": "agent_execution_graph",
+            "label": "Agent Execution Graph",
+            "type": "module"
+        },
+        {
+            "id": "agent_interaction_nodes",
+            "label": "Agent Interaction Nodes",
+            "type": "module",
+            "link": "agent_interaction_nodes.md"
+        },
+        {
+            "id": "tool_execution_logic",
+            "label": "Tool Execution Logic",
+            "type": "module",
+            "link": "tool_execution_logic.md"
+        },
+        {
+            "id": "message_capture_utility",
+            "label": "Message Capture Utility",
+            "type": "module",
+            "link": "message_capture_utility.md"
+        }
     ],
     "edges": [
-        {"source": "agent_interaction_nodes", "target": "tool_execution_logic", "label": "initiates tool calls"},
-        {"source": "tool_execution_logic", "target": "agent_interaction_nodes", "label": "returns results"},
-        {"source": "agent_interaction_nodes", "target": "message_capture_utility", "label": "generates messages"}
+        {
+            "source": "agent_interaction_nodes",
+            "target": "tool_execution_logic",
+            "label": "initiates tool calls"
+        },
+        {
+            "source": "tool_execution_logic",
+            "target": "agent_interaction_nodes",
+            "label": "returns results"
+        },
+        {
+            "source": "agent_interaction_nodes",
+            "target": "message_capture_utility",
+            "label": "generates messages"
+        }
     ],
     "groups": [
         {
             "id": "agent_core_flow",
             "label": "Agent Core Flow",
             "role": "generative",
-            "nodes": ["agent_interaction_nodes", "tool_execution_logic"]
+            "nodes": [
+                "agent_interaction_nodes",
+                "tool_execution_logic"
+            ]
         },
         {
             "id": "observability",
             "label": "Observability",
             "role": "data",
-            "nodes": ["message_capture_utility"]
+            "nodes": [
+                "message_capture_utility"
+            ]
         }
     ]
 }

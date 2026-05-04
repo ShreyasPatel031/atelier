@@ -23,43 +23,180 @@ The following diagram illustrates the internal workings of the `evaluation_wrapp
 {
     "direction": "TD",
     "nodes": [
-        {"id": "evaluation_wrapper", "label": "Intercept Function Call", "type": "component", "link": null},
-        {"id": "check_evaluation_status", "label": "Check Evaluation Status", "type": "component", "link": null},
-        {"id": "capture_function_inputs", "label": "Capture Function Inputs", "type": "component", "link": null},
-        {"id": "determine_evaluators", "label": "Sample Evaluators to Run", "type": "component", "link": null},
-        {"id": "execute_original_function", "label": "Execute Original Function", "type": "component", "link": null},
-        {"id": "capture_runtime_data", "label": "Capture Runtime Data (Spans, Metrics)", "type": "component", "link": null},
-        {"id": "create_evaluation_context", "label": "Assemble Evaluation Context", "type": "component", "link": null},
-        {"id": "dispatch_evaluators_async", "label": "Dispatch Evaluators Asynchronously", "type": "component", "link": null},
-        {"id": "evaluation_config", "label": "Evaluation Configuration", "type": "external", "link": "evaluation_configuration.md"},
-        {"id": "evaluator_definitions", "label": "Evaluator Core Definitions", "type": "external", "link": "evaluator_core.md"},
-        {"id": "evaluator_dispatcher", "label": "Evaluator Execution Dispatcher", "type": "external", "link": "evaluator_execution_and_dispatch.md"},
-        {"id": "tracing_library", "label": "Logging/Tracing System", "type": "external", "link": null}
+        {
+            "id": "evaluation_wrapper",
+            "label": "Intercept Function Call",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "check_evaluation_status",
+            "label": "Check Evaluation Status",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "capture_function_inputs",
+            "label": "Capture Function Inputs",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "determine_evaluators",
+            "label": "Sample Evaluators to Run",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "execute_original_function",
+            "label": "Execute Original Function",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "capture_runtime_data",
+            "label": "Capture Runtime Data (Spans, Metrics)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "create_evaluation_context",
+            "label": "Assemble Evaluation Context",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "dispatch_evaluators_async",
+            "label": "Dispatch Evaluators Asynchronously",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "evaluation_config",
+            "label": "Evaluation Configuration",
+            "type": "external",
+            "link": "evaluation_configuration.md"
+        },
+        {
+            "id": "evaluator_definitions",
+            "label": "Evaluator Core Definitions",
+            "type": "external",
+            "link": "evaluator_core.md"
+        },
+        {
+            "id": "evaluator_dispatcher",
+            "label": "Evaluator Execution Dispatcher",
+            "type": "external",
+            "link": "evaluator_execution_and_dispatch.md"
+        },
+        {
+            "id": "tracing_library",
+            "label": "Logging/Tracing System",
+            "type": "external",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "evaluation_wrapper", "target": "check_evaluation_status", "label": "starts process"},
-        {"source": "check_evaluation_status", "target": "evaluation_config", "label": "reads settings", "style": "dotted"},
-        {"source": "check_evaluation_status", "target": "capture_function_inputs", "label": "if enabled"},
-        {"source": "check_evaluation_status", "target": "execute_original_function", "label": "if disabled/skipped"},
-        {"source": "capture_function_inputs", "target": "determine_evaluators", "label": "provides inputs"},
-        {"source": "determine_evaluators", "target": "evaluation_config", "label": "applies sampling logic", "style": "dotted"},
-        {"source": "determine_evaluators", "target": "execute_original_function", "label": "triggers function run (if sampled)"},
-        {"source": "execute_original_function", "target": "capture_runtime_data", "label": "generates span tree, metrics"},
-        {"source": "capture_runtime_data", "target": "tracing_library", "label": "integrates with", "style": "dotted"},
-        {"source": "capture_function_inputs", "target": "create_evaluation_context", "label": "provides inputs"},
-        {"source": "execute_original_function", "target": "create_evaluation_context", "label": "provides output"},
-        {"source": "capture_runtime_data", "target": "create_evaluation_context", "label": "provides metrics, span tree"},
-        {"source": "create_evaluation_context", "target": "evaluator_definitions", "label": "uses data structures", "style": "dotted"},
-        {"source": "create_evaluation_context", "target": "dispatch_evaluators_async", "label": "prepared context"},
-        {"source": "dispatch_evaluators_async", "target": "evaluator_dispatcher", "label": "delegates execution", "style": "thick"},
-        {"source": "execute_original_function", "target": "evaluation_wrapper", "label": "returns result"}
+        {
+            "source": "evaluation_wrapper",
+            "target": "check_evaluation_status",
+            "label": "starts process"
+        },
+        {
+            "source": "check_evaluation_status",
+            "target": "evaluation_config",
+            "label": "reads settings",
+            "style": "dotted"
+        },
+        {
+            "source": "check_evaluation_status",
+            "target": "capture_function_inputs",
+            "label": "if enabled"
+        },
+        {
+            "source": "check_evaluation_status",
+            "target": "execute_original_function",
+            "label": "if disabled/skipped"
+        },
+        {
+            "source": "capture_function_inputs",
+            "target": "determine_evaluators",
+            "label": "provides inputs"
+        },
+        {
+            "source": "determine_evaluators",
+            "target": "evaluation_config",
+            "label": "applies sampling logic",
+            "style": "dotted"
+        },
+        {
+            "source": "determine_evaluators",
+            "target": "execute_original_function",
+            "label": "triggers function run (if sampled)"
+        },
+        {
+            "source": "execute_original_function",
+            "target": "capture_runtime_data",
+            "label": "generates span tree, metrics"
+        },
+        {
+            "source": "capture_runtime_data",
+            "target": "tracing_library",
+            "label": "integrates with",
+            "style": "dotted"
+        },
+        {
+            "source": "capture_function_inputs",
+            "target": "create_evaluation_context",
+            "label": "provides inputs"
+        },
+        {
+            "source": "execute_original_function",
+            "target": "create_evaluation_context",
+            "label": "provides output"
+        },
+        {
+            "source": "capture_runtime_data",
+            "target": "create_evaluation_context",
+            "label": "provides metrics, span tree"
+        },
+        {
+            "source": "create_evaluation_context",
+            "target": "evaluator_definitions",
+            "label": "uses data structures",
+            "style": "dotted"
+        },
+        {
+            "source": "create_evaluation_context",
+            "target": "dispatch_evaluators_async",
+            "label": "prepared context"
+        },
+        {
+            "source": "dispatch_evaluators_async",
+            "target": "evaluator_dispatcher",
+            "label": "delegates execution",
+            "style": "thick"
+        },
+        {
+            "source": "execute_original_function",
+            "target": "evaluation_wrapper",
+            "label": "returns result"
+        }
     ],
     "groups": [
         {
             "id": "evaluation_flow",
             "label": "Online Evaluation Flow",
             "role": "process",
-            "nodes": ["check_evaluation_status", "capture_function_inputs", "determine_evaluators", "execute_original_function", "capture_runtime_data", "create_evaluation_context", "dispatch_evaluators_async"]
+            "nodes": [
+                "check_evaluation_status",
+                "capture_function_inputs",
+                "determine_evaluators",
+                "execute_original_function",
+                "capture_runtime_data",
+                "create_evaluation_context",
+                "dispatch_evaluators_async"
+            ]
         }
     ]
 }

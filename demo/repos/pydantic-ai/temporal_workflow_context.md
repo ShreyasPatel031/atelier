@@ -30,25 +30,74 @@ In Temporal workflows, data passed between activities must be serializable. `Tem
 {
     "direction": "TD",
     "nodes": [
-        {"id": "temporal_run_context", "label": "TemporalRunContext", "type": "component", "link": null},
-        {"id": "serialize_context", "label": "Serialize Run Context", "type": "component", "link": null},
-        {"id": "deserialize_context", "label": "Deserialize Run Context", "type": "component", "link": null},
-        {"id": "run_context", "label": "Base RunContext", "type": "external", "link": "pydantic_ai_agent_core.md"},
-        {"id": "temporal_agent", "label": "TemporalAgent", "type": "external", "link": "temporal_agent_orchestration.md"}
+        {
+            "id": "temporal_run_context",
+            "label": "TemporalRunContext",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "serialize_context",
+            "label": "Serialize Run Context",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "deserialize_context",
+            "label": "Deserialize Run Context",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "run_context",
+            "label": "Base RunContext",
+            "type": "external",
+            "link": "pydantic_ai_agent_core.md"
+        },
+        {
+            "id": "temporal_agent",
+            "label": "TemporalAgent",
+            "type": "external",
+            "link": "temporal_agent_orchestration.md"
+        }
     ],
     "edges": [
-        {"source": "temporal_run_context", "target": "run_context", "label": "inherits from"},
-        {"source": "temporal_agent", "target": "serialize_context", "label": "calls to"},
-        {"source": "serialize_context", "target": "temporal_run_context", "label": "serializes data from"},
-        {"source": "temporal_agent", "target": "deserialize_context", "label": "calls to"},
-        {"source": "deserialize_context", "target": "temporal_run_context", "label": "reconstructs"}
+        {
+            "source": "temporal_run_context",
+            "target": "run_context",
+            "label": "inherits from"
+        },
+        {
+            "source": "temporal_agent",
+            "target": "serialize_context",
+            "label": "calls to"
+        },
+        {
+            "source": "serialize_context",
+            "target": "temporal_run_context",
+            "label": "serializes data from"
+        },
+        {
+            "source": "temporal_agent",
+            "target": "deserialize_context",
+            "label": "calls to"
+        },
+        {
+            "source": "deserialize_context",
+            "target": "temporal_run_context",
+            "label": "reconstructs"
+        }
     ],
     "groups": [
         {
             "id": "context_management",
             "label": "Temporal Context Management",
             "role": "analytical",
-            "nodes": ["temporal_run_context", "serialize_context", "deserialize_context"]
+            "nodes": [
+                "temporal_run_context",
+                "serialize_context",
+                "deserialize_context"
+            ]
         }
     ]
 }

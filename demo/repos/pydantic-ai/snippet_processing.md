@@ -39,34 +39,126 @@ It also implicitly depends on:
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mkdocs_hooks", "label": "MkDocs Hooks", "type": "external", "link": "mkdocs_main_hooks.md"},
-        {"id": "replace_snippet_func", "label": "Replace Snippet Directive", "type": "component", "link": null},
-        {"id": "parse_directive", "label": "Parse Snippet Directive", "type": "component", "link": null},
-        {"id": "resolve_path", "label": "Resolve File Path", "type": "component", "link": null},
-        {"id": "parse_sections", "label": "Parse File Sections", "type": "component", "link": null},
-        {"id": "extract_content", "label": "Extract Content & Highlights", "type": "component", "link": null},
-        {"id": "format_block", "label": "Format Code Block", "type": "component", "link": null},
-        {"id": "source_files", "label": "Documentation Source Files", "type": "external", "link": null},
-        {"id": "github", "label": "GitHub Repository", "type": "external", "link": null}
+        {
+            "id": "mkdocs_hooks",
+            "label": "MkDocs Hooks",
+            "type": "external",
+            "link": "mkdocs_main_hooks.md"
+        },
+        {
+            "id": "replace_snippet_func",
+            "label": "Replace Snippet Directive",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "parse_directive",
+            "label": "Parse Snippet Directive",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "resolve_path",
+            "label": "Resolve File Path",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "parse_sections",
+            "label": "Parse File Sections",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "extract_content",
+            "label": "Extract Content & Highlights",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "format_block",
+            "label": "Format Code Block",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "source_files",
+            "label": "Documentation Source Files",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "github",
+            "label": "GitHub Repository",
+            "type": "external",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "mkdocs_hooks", "target": "replace_snippet_func", "label": "triggers"},
-        {"source": "replace_snippet_func", "target": "parse_directive", "label": "reads line"},
-        {"source": "replace_snippet_func", "target": "resolve_path", "label": "uses directive path"},
-        {"source": "resolve_path", "target": "source_files", "label": "targets"},
-        {"source": "replace_snippet_func", "target": "parse_sections", "label": "with file path"},
-        {"source": "parse_sections", "target": "source_files", "label": "reads"},
-        {"source": "replace_snippet_func", "target": "extract_content", "label": "uses sections & directives"},
-        {"source": "replace_snippet_func", "target": "format_block", "label": "formats rendered content"},
-        {"source": "format_block", "target": "github", "label": "generates URL to"},
-        {"source": "replace_snippet_func", "target": "mkdocs_hooks", "label": "returns formatted snippet"}
+        {
+            "source": "mkdocs_hooks",
+            "target": "replace_snippet_func",
+            "label": "triggers"
+        },
+        {
+            "source": "replace_snippet_func",
+            "target": "parse_directive",
+            "label": "reads line"
+        },
+        {
+            "source": "replace_snippet_func",
+            "target": "resolve_path",
+            "label": "uses directive path"
+        },
+        {
+            "source": "resolve_path",
+            "target": "source_files",
+            "label": "targets"
+        },
+        {
+            "source": "replace_snippet_func",
+            "target": "parse_sections",
+            "label": "with file path"
+        },
+        {
+            "source": "parse_sections",
+            "target": "source_files",
+            "label": "reads"
+        },
+        {
+            "source": "replace_snippet_func",
+            "target": "extract_content",
+            "label": "uses sections & directives"
+        },
+        {
+            "source": "replace_snippet_func",
+            "target": "format_block",
+            "label": "formats rendered content"
+        },
+        {
+            "source": "format_block",
+            "target": "github",
+            "label": "generates URL to"
+        },
+        {
+            "source": "replace_snippet_func",
+            "target": "mkdocs_hooks",
+            "label": "returns formatted snippet"
+        }
     ],
     "groups": [
         {
             "id": "snippet_processing_flow",
             "label": "Snippet Processing Flow",
             "role": "data_transformation",
-            "nodes": ["replace_snippet_func", "parse_directive", "resolve_path", "parse_sections", "extract_content", "format_block"]
+            "nodes": [
+                "replace_snippet_func",
+                "parse_directive",
+                "resolve_path",
+                "parse_sections",
+                "extract_content",
+                "format_block"
+            ]
         }
     ]
 }

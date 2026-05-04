@@ -33,17 +33,54 @@ The `LangChainToolset` is a specialized `FunctionToolset` (from the [toolset_man
 {
     "direction": "TD",
     "nodes": [
-        {"id": "langchain_toolset", "label": "LangChain Toolset Adapter", "type": "component", "link": null},
-        {"id": "tool_conversion", "label": "Convert LangChain Tool", "type": "component", "link": null},
-        {"id": "abstract_toolset", "label": "Abstract Toolset Interface", "type": "external", "link": "toolset_management.md"},
-        {"id": "langchain_lib", "label": "LangChain Library", "type": "external", "link": null}
+        {
+            "id": "langchain_toolset",
+            "label": "LangChain Toolset Adapter",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "tool_conversion",
+            "label": "Convert LangChain Tool",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "abstract_toolset",
+            "label": "Abstract Toolset Interface",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "langchain_lib",
+            "label": "LangChain Library",
+            "type": "external",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "langchain_toolset", "target": "tool_conversion", "label": "initializes with"},
-        {"source": "tool_conversion", "target": "abstract_toolset", "label": "produces compatible tools for"},
-        {"source": "langchain_lib", "target": "tool_conversion", "label": "provides tools to"},
-        {"source": "langchain_toolset", "target": "abstract_toolset", "label": "inherits functionality from"}
-    ]
+        {
+            "source": "langchain_toolset",
+            "target": "tool_conversion",
+            "label": "initializes with"
+        },
+        {
+            "source": "tool_conversion",
+            "target": "abstract_toolset",
+            "label": "produces compatible tools for"
+        },
+        {
+            "source": "langchain_lib",
+            "target": "tool_conversion",
+            "label": "provides tools to"
+        },
+        {
+            "source": "langchain_toolset",
+            "target": "abstract_toolset",
+            "label": "inherits functionality from"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

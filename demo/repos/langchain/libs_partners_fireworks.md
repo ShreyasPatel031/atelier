@@ -3,13 +3,23 @@ This module provides the `FireworksEmbeddings` class for integrating Fireworks e
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "FireworksEmbeddings", "label": "FireworksEmbeddings", "type": "class"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "libs_partners_fireworks", "label": "libs_partners_fireworks", "nodes": ["FireworksEmbeddings"]}
-  ]
+    "nodes": [
+        {
+            "id": "FireworksEmbeddings",
+            "label": "FireworksEmbeddings",
+            "type": "class"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "libs_partners_fireworks",
+            "label": "libs_partners_fireworks",
+            "nodes": [
+                "FireworksEmbeddings"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

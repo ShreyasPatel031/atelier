@@ -12,27 +12,64 @@ The `hook_internals` module works in conjunction with the broader [Hook System](
 {
     "direction": "TD",
     "nodes": [
-        {"id": "hook_registration", "label": "Register Hooks", "type": "module", "link": "hook_registration.md"},
-        {"id": "hook_execution_wrappers", "label": "Execute Hooks", "type": "module", "link": "hook_execution_wrappers.md"},
-        {"id": "hook_management", "label": "Manage Hooks", "type": "external", "link": "hook_management.md"}
+        {
+            "id": "hook_internals",
+            "label": "Hook Internal Mechanisms",
+            "type": "module"
+        },
+        {
+            "id": "hook_registration",
+            "label": "Register Hooks",
+            "type": "module",
+            "link": "hook_registration.md"
+        },
+        {
+            "id": "hook_execution_wrappers",
+            "label": "Execute Hooks",
+            "type": "module",
+            "link": "hook_execution_wrappers.md"
+        },
+        {
+            "id": "hook_management",
+            "label": "Manage Hooks",
+            "type": "external",
+            "link": "hook_management.md"
+        }
     ],
     "edges": [
-        {"source": "hook_registration", "target": "hook_management", "label": "provides definitions to"},
-        {"source": "hook_management", "target": "hook_execution_wrappers", "label": "invokes through"},
-        {"source": "hook_execution_wrappers", "target": "hook_registration", "label": "executes registered functions"}
+        {
+            "source": "hook_registration",
+            "target": "hook_management",
+            "label": "provides definitions to"
+        },
+        {
+            "source": "hook_management",
+            "target": "hook_execution_wrappers",
+            "label": "invokes through"
+        },
+        {
+            "source": "hook_execution_wrappers",
+            "target": "hook_registration",
+            "label": "executes registered functions"
+        }
     ],
     "groups": [
         {
             "id": "hook_definition",
             "label": "Hook Definition & Management",
             "role": "analytical",
-            "nodes": ["hook_registration", "hook_management"]
+            "nodes": [
+                "hook_registration",
+                "hook_management"
+            ]
         },
         {
             "id": "hook_runtime",
             "label": "Hook Runtime Execution",
             "role": "generative",
-            "nodes": ["hook_execution_wrappers"]
+            "nodes": [
+                "hook_execution_wrappers"
+            ]
         }
     ]
 }

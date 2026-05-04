@@ -12,26 +12,59 @@ It interfaces closely with the `openai_response_handling` module (its parent), p
 {
     "direction": "TD",
     "nodes": [
-        {"id": "openai_response_handling", "label": "OpenAI Response Handling", "type": "external", "link": "openai_response_handling.md"},
-        {"id": "model_response_mapper_module", "label": "Model Response Mapper", "type": "module", "link": "model_response_mapper.md"},
-        {"id": "openai_response_mapping", "label": "OpenAI Response Mapping", "type": "module", "link": "openai_response_mapping.md"}
+        {
+            "id": "model_response_mapper",
+            "label": "Model Response Mapper",
+            "type": "module"
+        },
+        {
+            "id": "openai_response_handling",
+            "label": "OpenAI Response Handling",
+            "type": "external",
+            "link": "openai_response_handling.md"
+        },
+        {
+            "id": "model_response_mapper_module",
+            "label": "Model Response Mapper",
+            "type": "module",
+            "link": "model_response_mapper.md"
+        },
+        {
+            "id": "openai_response_mapping",
+            "label": "OpenAI Response Mapping",
+            "type": "module",
+            "link": "openai_response_mapping.md"
+        }
     ],
     "edges": [
-        {"source": "openai_response_handling", "target": "model_response_mapper_module", "label": "utilizes mapping logic"},
-        {"source": "model_response_mapper_module", "target": "openai_response_mapping", "label": "orchestrates"}
+        {
+            "source": "openai_response_handling",
+            "target": "model_response_mapper_module",
+            "label": "utilizes mapping logic"
+        },
+        {
+            "source": "model_response_mapper_module",
+            "target": "openai_response_mapping",
+            "label": "orchestrates"
+        }
     ],
     "groups": [
         {
             "id": "openai_integration_components",
             "label": "OpenAI Integration Components",
             "role": "generative",
-            "nodes": ["openai_response_handling"]
+            "nodes": [
+                "openai_response_handling"
+            ]
         },
         {
             "id": "response_mapping_logic",
             "label": "Response Mapping Logic",
             "role": "analytical",
-            "nodes": ["model_response_mapper_module", "openai_response_mapping"]
+            "nodes": [
+                "model_response_mapper_module",
+                "openai_response_mapping"
+            ]
         }
     ]
 }

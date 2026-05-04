@@ -3,28 +3,29 @@ This module provides utilities for reporting Groq API usage, specifically conver
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "module:groq_usage_reporting",
-      "label": "groq_usage_reporting",
-      "type": "module"
-    },
-    {
-      "id": "function:_create_usage_metadata",
-      "label": "_create_usage_metadata",
-      "type": "function"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "module:groq_usage_reporting",
-      "label": "groq_usage_reporting",
-      "nodes": [
-        "function:_create_usage_metadata"
-      ]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "module:groq_usage_reporting",
+            "label": "groq_usage_reporting",
+            "type": "module"
+        },
+        {
+            "id": "function:_create_usage_metadata",
+            "label": "_create_usage_metadata",
+            "type": "function"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "module:groq_usage_reporting__group",
+            "label": "groq_usage_reporting",
+            "nodes": [
+                "function:_create_usage_metadata"
+            ],
+            "_repaired": "r4_group_renamed_avoid_node_collision"
+        }
+    ]
 }
 -->
 ```mermaid

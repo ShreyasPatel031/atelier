@@ -10,26 +10,59 @@ This module defines the core structures for MCP resources. It integrates closely
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mcp_resource_management_module", "label": "MCP Resource Management", "type": "module", "link": "mcp_resource_management.md"},
-        {"id": "mcp_core_module", "label": "MCP Core", "type": "external", "link": "mcp_core.md"},
-        {"id": "mcp_resource_definitions", "label": "MCP Resource Definitions", "type": "module", "link": "mcp_resource_definitions.md"}
+        {
+            "id": "mcp_resource_management",
+            "label": "MCP Resource Management",
+            "type": "module"
+        },
+        {
+            "id": "mcp_resource_management_module",
+            "label": "MCP Resource Management",
+            "type": "module",
+            "link": "mcp_resource_management.md"
+        },
+        {
+            "id": "mcp_core_module",
+            "label": "MCP Core",
+            "type": "external",
+            "link": "mcp_core.md"
+        },
+        {
+            "id": "mcp_resource_definitions",
+            "label": "MCP Resource Definitions",
+            "type": "module",
+            "link": "mcp_resource_definitions.md"
+        }
     ],
     "edges": [
-        {"source": "mcp_core_module", "target": "mcp_resource_management_module", "label": "utilizes resource definitions"},
-        {"source": "mcp_resource_management_module", "target": "mcp_resource_definitions", "label": "defines"}
+        {
+            "source": "mcp_core_module",
+            "target": "mcp_resource_management_module",
+            "label": "utilizes resource definitions"
+        },
+        {
+            "source": "mcp_resource_management_module",
+            "target": "mcp_resource_definitions",
+            "label": "defines"
+        }
     ],
     "groups": [
         {
             "id": "resource_management_group",
             "label": "Resource Management",
             "role": "data",
-            "nodes": ["mcp_resource_management_module", "mcp_resource_definitions"]
+            "nodes": [
+                "mcp_resource_management_module",
+                "mcp_resource_definitions"
+            ]
         },
         {
             "id": "core_mcp_group",
             "label": "Core MCP Functionality",
             "role": "generative",
-            "nodes": ["mcp_core_module"]
+            "nodes": [
+                "mcp_core_module"
+            ]
         }
     ]
 }

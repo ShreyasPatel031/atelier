@@ -3,15 +3,15 @@ This module defines the `Chain` abstract base class, providing a structured inte
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "Chain",
-      "label": "Chain",
-      "type": "class"
-    }
-  ],
-  "edges": [],
-  "groups": []
+    "nodes": [
+        {
+            "id": "Chain",
+            "label": "Chain",
+            "type": "class"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

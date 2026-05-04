@@ -3,37 +3,37 @@ This module offers specialized `HfQuantizer` implementations for platform-specif
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "MetalHfQuantizer",
-      "label": "MetalHfQuantizer"
-    },
-    {
-      "id": "QuarkHfQuantizer",
-      "label": "QuarkHfQuantizer"
-    },
-    {
-      "id": "SinqHfQuantizer",
-      "label": "SinqHfQuantizer"
-    },
-    {
-      "id": "TorchAoHfQuantizer",
-      "label": "TorchAoHfQuantizer"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "quantization_implementations",
-      "label": "Quantization Implementations",
-      "nodes": [
-        "MetalHfQuantizer",
-        "QuarkHfQuantizer",
-        "SinqHfQuantizer",
-        "TorchAoHfQuantizer"
-      ]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "MetalHfQuantizer",
+            "label": "MetalHfQuantizer"
+        },
+        {
+            "id": "QuarkHfQuantizer",
+            "label": "QuarkHfQuantizer"
+        },
+        {
+            "id": "SinqHfQuantizer",
+            "label": "SinqHfQuantizer"
+        },
+        {
+            "id": "TorchAoHfQuantizer",
+            "label": "TorchAoHfQuantizer"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "quantization_implementations",
+            "label": "Quantization Implementations",
+            "nodes": [
+                "MetalHfQuantizer",
+                "QuarkHfQuantizer",
+                "SinqHfQuantizer",
+                "TorchAoHfQuantizer"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

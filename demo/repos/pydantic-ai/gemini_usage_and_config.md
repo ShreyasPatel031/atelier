@@ -9,32 +9,61 @@ The `gemini_usage_and_config` module is a critical component within the larger `
 {
     "direction": "TD",
     "nodes": [
-        {"id": "model_provider_gemini", "label": "Gemini Model Provider", "type": "module", "link": "model_provider_gemini.md"},
-        {"id": "gemini_utility_components", "label": "Gemini Utility Components", "type": "module", "link": "gemini_utility_components.md"},
-        {"id": "gemini_usage_and_config", "label": "Gemini Usage & Config", "type": "module", "link": "gemini_usage_and_config.md"}
+        {
+            "id": "model_provider_gemini",
+            "label": "Gemini Model Provider",
+            "type": "module",
+            "link": "model_provider_gemini.md"
+        },
+        {
+            "id": "gemini_utility_components",
+            "label": "Gemini Utility Components",
+            "type": "module",
+            "link": "gemini_utility_components.md"
+        },
+        {
+            "id": "gemini_usage_and_config",
+            "label": "Gemini Usage & Config",
+            "type": "module",
+            "link": "gemini_usage_and_config.md"
+        }
     ],
     "edges": [
-        {"source": "model_provider_gemini", "target": "gemini_utility_components", "label": "utilizes"},
-        {"source": "gemini_utility_components", "target": "gemini_usage_and_config", "label": "contains"}
+        {
+            "source": "model_provider_gemini",
+            "target": "gemini_utility_components",
+            "label": "utilizes"
+        },
+        {
+            "source": "gemini_utility_components",
+            "target": "gemini_usage_and_config",
+            "label": "contains"
+        }
     ],
     "groups": [
         {
             "id": "model_integration",
             "label": "Model Integration",
             "role": "generative",
-            "nodes": ["model_provider_gemini"]
+            "nodes": [
+                "model_provider_gemini"
+            ]
         },
         {
             "id": "utility_management",
             "label": "Utility Management",
             "role": "analytical",
-            "nodes": ["gemini_utility_components"]
+            "nodes": [
+                "gemini_utility_components"
+            ]
         },
         {
             "id": "configuration_and_metrics",
             "label": "Configuration & Metrics",
             "role": "data",
-            "nodes": ["gemini_usage_and_config"]
+            "nodes": [
+                "gemini_usage_and_config"
+            ]
         }
     ]
 }

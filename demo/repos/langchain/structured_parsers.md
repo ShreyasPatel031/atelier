@@ -4,31 +4,134 @@ This module provides a collection of specialized output parsers for converting r
 {
     "direction": "TD",
     "nodes": [
-        {"id": "xml_parser", "label": "XML Output Parser", "type": "component", "link": null},
-        {"id": "datetime_parser", "label": "Datetime Output Parser", "type": "component", "link": null},
-        {"id": "enum_parser", "label": "Enum Output Parser", "type": "component", "link": null},
-        {"id": "pandas_parser", "label": "Pandas DataFrame Output Parser", "type": "component", "link": null},
-        {"id": "structured_parser", "label": "Structured JSON Output Parser", "type": "component", "link": null},
-        {"id": "yaml_parser", "label": "YAML Output Parser (Pydantic)", "type": "component", "link": null},
-        {"id": "tools_parser", "label": "Tools Output Parser (Anthropic)", "type": "component", "link": null},
-        {"id": "base_parsers_mod", "label": "Base Parsers", "type": "external", "link": "base_parsers.md"},
-        {"id": "core_utilities_mod", "label": "Core Utilities (Pydantic)", "type": "external", "link": "core_utilities.md"},
-        {"id": "libs_partners_anthropic_mod", "label": "Anthropic Partner Integration", "type": "external", "link": "libs_partners_anthropic.md"}
+        {
+            "id": "xml_parser",
+            "label": "XML Output Parser",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "datetime_parser",
+            "label": "Datetime Output Parser",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "enum_parser",
+            "label": "Enum Output Parser",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "pandas_parser",
+            "label": "Pandas DataFrame Output Parser",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "structured_parser",
+            "label": "Structured JSON Output Parser",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "yaml_parser",
+            "label": "YAML Output Parser (Pydantic)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "tools_parser",
+            "label": "Tools Output Parser (Anthropic)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "base_parsers_mod",
+            "label": "Base Parsers",
+            "type": "external",
+            "link": "base_parsers.md"
+        },
+        {
+            "id": "core_utilities_mod",
+            "label": "Core Utilities (Pydantic)",
+            "type": "external",
+            "link": "core_utilities.md"
+        },
+        {
+            "id": "libs_partners_anthropic_mod",
+            "label": "Anthropic Partner Integration",
+            "type": "external",
+            "link": "libs_partners_anthropic.md"
+        }
     ],
     "edges": [
-        {"source": "xml_parser", "target": "base_parsers_mod", "label": "inherits from"},
-        {"source": "datetime_parser", "target": "base_parsers_mod", "label": "inherits from"},
-        {"source": "enum_parser", "target": "base_parsers_mod", "label": "inherits from"},
-        {"source": "pandas_parser", "target": "base_parsers_mod", "label": "inherits from"},
-        {"source": "structured_parser", "target": "base_parsers_mod", "label": "inherits from"},
-        {"source": "yaml_parser", "target": "base_parsers_mod", "label": "inherits from"},
-        {"source": "tools_parser", "target": "base_parsers_mod", "label": "inherits from"},
-        {"source": "yaml_parser", "target": "core_utilities_mod", "label": "uses Pydantic from"},
-        {"source": "tools_parser", "target": "core_utilities_mod", "label": "uses Pydantic from"},
-        {"source": "tools_parser", "target": "libs_partners_anthropic_mod", "label": "part of"}
+        {
+            "source": "xml_parser",
+            "target": "base_parsers_mod",
+            "label": "inherits from"
+        },
+        {
+            "source": "datetime_parser",
+            "target": "base_parsers_mod",
+            "label": "inherits from"
+        },
+        {
+            "source": "enum_parser",
+            "target": "base_parsers_mod",
+            "label": "inherits from"
+        },
+        {
+            "source": "pandas_parser",
+            "target": "base_parsers_mod",
+            "label": "inherits from"
+        },
+        {
+            "source": "structured_parser",
+            "target": "base_parsers_mod",
+            "label": "inherits from"
+        },
+        {
+            "source": "yaml_parser",
+            "target": "base_parsers_mod",
+            "label": "inherits from"
+        },
+        {
+            "source": "tools_parser",
+            "target": "base_parsers_mod",
+            "label": "inherits from"
+        },
+        {
+            "source": "yaml_parser",
+            "target": "core_utilities_mod",
+            "label": "uses Pydantic from"
+        },
+        {
+            "source": "tools_parser",
+            "target": "core_utilities_mod",
+            "label": "uses Pydantic from"
+        },
+        {
+            "source": "tools_parser",
+            "target": "libs_partners_anthropic_mod",
+            "label": "part of"
+        }
     ],
     "groups": [
-        {"id": "structured_output_parsing", "label": "Structured Output Parsing", "role": "analytical", "nodes": ["xml_parser", "datetime_parser", "enum_parser", "pandas_parser", "structured_parser", "yaml_parser", "tools_parser"]}
+        {
+            "id": "structured_output_parsing",
+            "label": "Structured Output Parsing",
+            "role": "analytical",
+            "nodes": [
+                "xml_parser",
+                "datetime_parser",
+                "enum_parser",
+                "pandas_parser",
+                "structured_parser",
+                "yaml_parser",
+                "tools_parser"
+            ]
+        }
     ]
 }
 -->

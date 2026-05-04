@@ -35,32 +35,114 @@ The `MistralProvider` acts as an adapter. When instantiated, it sets up a `Mistr
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mistral_provider_init", "label": "Initialize MistralProvider", "type": "component", "link": null},
-        {"id": "get_api_key", "label": "Get MISTRAL_API_KEY", "type": "component", "link": null},
-        {"id": "create_mistral_client", "label": "Create Mistral SDK Client", "type": "component", "link": null},
-        {"id": "mistral_sdk", "label": "Mistral SDK", "type": "external", "link": null},
-        {"id": "model_profile_retrieval", "label": "Retrieve Model Profile", "type": "component", "link": null},
-        {"id": "model_profile_defs", "label": "Model Profile Definitions", "type": "external", "link": "model_profile_definitions.md"},
-        {"id": "model_core_int", "label": "Model Core Interfaces", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "http_client_util", "label": "HTTP Client Utility", "type": "external", "link": "model_utilities.md"},
-        {"id": "agent_utilities", "label": "Agent Utilities (UserError)", "type": "external", "link": "agent_utilities.md"}
+        {
+            "id": "mistral_provider_init",
+            "label": "Initialize MistralProvider",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "get_api_key",
+            "label": "Get MISTRAL_API_KEY",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "create_mistral_client",
+            "label": "Create Mistral SDK Client",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "mistral_sdk",
+            "label": "Mistral SDK",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "model_profile_retrieval",
+            "label": "Retrieve Model Profile",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "model_profile_defs",
+            "label": "Model Profile Definitions",
+            "type": "external",
+            "link": "model_profile_definitions.md"
+        },
+        {
+            "id": "model_core_int",
+            "label": "Model Core Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "http_client_util",
+            "label": "HTTP Client Utility",
+            "type": "external",
+            "link": "model_utilities.md"
+        },
+        {
+            "id": "agent_utilities",
+            "label": "Agent Utilities (UserError)",
+            "type": "external",
+            "link": "agent_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "mistral_provider_init", "target": "get_api_key", "label": "initialization flow"},
-        {"source": "get_api_key", "target": "create_mistral_client", "label": "API Key"},
-        {"source": "create_mistral_client", "target": "mistral_sdk", "label": "uses"},
-        {"source": "create_mistral_client", "target": "http_client_util", "label": "requests cached client"},
-        {"source": "mistral_provider_init", "target": "model_profile_retrieval", "label": "requests profile"},
-        {"source": "model_profile_retrieval", "target": "model_profile_defs", "label": "reads mistral_model_profile from"},
-        {"source": "mistral_provider_init", "target": "model_core_int", "label": "implements ModelProvider"},
-        {"source": "get_api_key", "target": "agent_utilities", "label": "raises UserError"}
+        {
+            "source": "mistral_provider_init",
+            "target": "get_api_key",
+            "label": "initialization flow"
+        },
+        {
+            "source": "get_api_key",
+            "target": "create_mistral_client",
+            "label": "API Key"
+        },
+        {
+            "source": "create_mistral_client",
+            "target": "mistral_sdk",
+            "label": "uses"
+        },
+        {
+            "source": "create_mistral_client",
+            "target": "http_client_util",
+            "label": "requests cached client"
+        },
+        {
+            "source": "mistral_provider_init",
+            "target": "model_profile_retrieval",
+            "label": "requests profile"
+        },
+        {
+            "source": "model_profile_retrieval",
+            "target": "model_profile_defs",
+            "label": "reads mistral_model_profile from"
+        },
+        {
+            "source": "mistral_provider_init",
+            "target": "model_core_int",
+            "label": "implements ModelProvider"
+        },
+        {
+            "source": "get_api_key",
+            "target": "agent_utilities",
+            "label": "raises UserError"
+        }
     ],
     "groups": [
         {
             "id": "provider_setup",
             "label": "Mistral Provider Setup",
             "role": "analytical",
-            "nodes": ["mistral_provider_init", "get_api_key", "create_mistral_client", "model_profile_retrieval"]
+            "nodes": [
+                "mistral_provider_init",
+                "get_api_key",
+                "create_mistral_client",
+                "model_profile_retrieval"
+            ]
         }
     ]
 }

@@ -10,7 +10,17 @@ The `evaluator_core` module is designed around a core set of abstract base class
 {
     "direction": "TD",
     "nodes": [
-        {"id": "evaluation_base_classes", "label": "Evaluation Base Classes", "type": "module", "link": "evaluation_base_classes.md"}
+        {
+            "id": "evaluator_core",
+            "label": "Evaluator Core",
+            "type": "module"
+        },
+        {
+            "id": "evaluation_base_classes",
+            "label": "Evaluation Base Classes",
+            "type": "module",
+            "link": "evaluation_base_classes.md"
+        }
     ],
     "edges": [],
     "groups": [
@@ -18,7 +28,9 @@ The `evaluator_core` module is designed around a core set of abstract base class
             "id": "evaluator_core_components",
             "label": "Core Evaluator Interfaces",
             "role": "analytical",
-            "nodes": ["evaluation_base_classes"]
+            "nodes": [
+                "evaluation_base_classes"
+            ]
         }
     ]
 }

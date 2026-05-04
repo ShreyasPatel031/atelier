@@ -14,24 +14,67 @@ The module integrates closely with the `agent_definition` module, as `MCPServerH
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mcp_http_server_component", "label": "MCPServerHTTP (HTTP SSE Transport)", "type": "component", "link": null},
-        {"id": "mcp_server_loader", "label": "Load MCP Servers", "type": "external", "link": "mcp_server_loader.md"},
-        {"id": "agent_definition", "label": "Agent Definition", "type": "external", "link": "agent_definition.md"},
-        {"id": "toolset_management", "label": "Toolset Management", "type": "external", "link": "toolset_management.md"},
-        {"id": "mcp_core", "label": "MCP Core Functionality", "type": "external", "link": "mcp_core.md"}
+        {
+            "id": "mcp_http_server_component",
+            "label": "MCPServerHTTP (HTTP SSE Transport)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "mcp_server_loader",
+            "label": "Load MCP Servers",
+            "type": "external",
+            "link": "mcp_server_loader.md"
+        },
+        {
+            "id": "agent_definition",
+            "label": "Agent Definition",
+            "type": "external",
+            "link": "agent_definition.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "mcp_core",
+            "label": "MCP Core Functionality",
+            "type": "external",
+            "link": "mcp_core.md"
+        }
     ],
     "edges": [
-        {"source": "mcp_server_loader", "target": "mcp_http_server_component", "label": "provides server instance"},
-        {"source": "mcp_http_server_component", "target": "toolset_management", "label": "integrated as"},
-        {"source": "agent_definition", "target": "mcp_http_server_component", "label": "communicates via"},
-        {"source": "mcp_http_server_component", "target": "mcp_core", "label": "implements MCP Spec"}
+        {
+            "source": "mcp_server_loader",
+            "target": "mcp_http_server_component",
+            "label": "provides server instance"
+        },
+        {
+            "source": "mcp_http_server_component",
+            "target": "toolset_management",
+            "label": "integrated as"
+        },
+        {
+            "source": "agent_definition",
+            "target": "mcp_http_server_component",
+            "label": "communicates via"
+        },
+        {
+            "source": "mcp_http_server_component",
+            "target": "mcp_core",
+            "label": "implements MCP Spec"
+        }
     ],
     "groups": [
         {
             "id": "http_communication_layer",
             "label": "HTTP SSE Communication Layer",
             "role": "technical",
-            "nodes": ["mcp_http_server_component"]
+            "nodes": [
+                "mcp_http_server_component"
+            ]
         }
     ]
 }

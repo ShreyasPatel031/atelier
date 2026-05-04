@@ -56,32 +56,114 @@ The `fork_management` module plays a foundational role in the overall graph exec
 {
     "direction": "TD",
     "nodes": [
-        {"id": "find_parent_fork_node", "label": "Identify Parent Fork", "type": "component", "link": null},
-        {"id": "predecessors_cache", "label": "Cache Node Predecessors", "type": "component", "link": null},
-        {"id": "dominators_compute", "label": "Compute All Dominators", "type": "component", "link": null},
-        {"id": "immediate_dominator_find", "label": "Find Immediate Dominator", "type": "component", "link": null},
-        {"id": "validate_fork_cycles", "label": "Validate Fork for Cycles", "type": "component", "link": null},
-        {"id": "join_operations_module", "label": "Join Operations Module", "type": "external", "link": "join_operations.md"},
-        {"id": "graph_execution_engine_module", "label": "Graph Execution Engine", "type": "external", "link": "graph_execution_engine.md"},
-        {"id": "graph_structure_definition_module", "label": "Graph Structure Definition", "type": "external", "link": "graph_structure_definition.md"}
+        {
+            "id": "find_parent_fork_node",
+            "label": "Identify Parent Fork",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "predecessors_cache",
+            "label": "Cache Node Predecessors",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "dominators_compute",
+            "label": "Compute All Dominators",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "immediate_dominator_find",
+            "label": "Find Immediate Dominator",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "validate_fork_cycles",
+            "label": "Validate Fork for Cycles",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "join_operations_module",
+            "label": "Join Operations Module",
+            "type": "external",
+            "link": "join_operations.md"
+        },
+        {
+            "id": "graph_execution_engine_module",
+            "label": "Graph Execution Engine",
+            "type": "external",
+            "link": "graph_execution_engine.md"
+        },
+        {
+            "id": "graph_structure_definition_module",
+            "label": "Graph Structure Definition",
+            "type": "external",
+            "link": "graph_structure_definition.md"
+        }
     ],
     "edges": [
-        {"source": "graph_structure_definition_module", "target": "predecessors_cache", "label": "provides graph structure"},
-        {"source": "graph_structure_definition_module", "target": "dominators_compute", "label": "provides graph structure"},
-        {"source": "predecessors_cache", "target": "dominators_compute", "label": "predecessor info"},
-        {"source": "predecessors_cache", "target": "validate_fork_cycles", "label": "predecessor info"},
-        {"source": "dominators_compute", "target": "immediate_dominator_find", "label": "dominator sets"},
-        {"source": "immediate_dominator_find", "target": "find_parent_fork_node", "label": "immediate dominator"},
-        {"source": "validate_fork_cycles", "target": "find_parent_fork_node", "label": "validation result"},
-        {"source": "find_parent_fork_node", "target": "join_operations_module", "label": "parent fork identified"},
-        {"source": "find_parent_fork_node", "target": "graph_execution_engine_module", "label": "fork insights"}
+        {
+            "source": "graph_structure_definition_module",
+            "target": "predecessors_cache",
+            "label": "provides graph structure"
+        },
+        {
+            "source": "graph_structure_definition_module",
+            "target": "dominators_compute",
+            "label": "provides graph structure"
+        },
+        {
+            "source": "predecessors_cache",
+            "target": "dominators_compute",
+            "label": "predecessor info"
+        },
+        {
+            "source": "predecessors_cache",
+            "target": "validate_fork_cycles",
+            "label": "predecessor info"
+        },
+        {
+            "source": "dominators_compute",
+            "target": "immediate_dominator_find",
+            "label": "dominator sets"
+        },
+        {
+            "source": "immediate_dominator_find",
+            "target": "find_parent_fork_node",
+            "label": "immediate dominator"
+        },
+        {
+            "source": "validate_fork_cycles",
+            "target": "find_parent_fork_node",
+            "label": "validation result"
+        },
+        {
+            "source": "find_parent_fork_node",
+            "target": "join_operations_module",
+            "label": "parent fork identified"
+        },
+        {
+            "source": "find_parent_fork_node",
+            "target": "graph_execution_engine_module",
+            "label": "fork insights"
+        }
     ],
     "groups": [
         {
             "id": "parent_fork_finder_component",
             "label": "ParentForkFinder Component",
             "role": "core_logic",
-            "nodes": ["find_parent_fork_node", "predecessors_cache", "dominators_compute", "immediate_dominator_find", "validate_fork_cycles"]
+            "nodes": [
+                "find_parent_fork_node",
+                "predecessors_cache",
+                "dominators_compute",
+                "immediate_dominator_find",
+                "validate_fork_cycles"
+            ]
         }
     ]
 }

@@ -12,38 +12,147 @@ For serialization and deserialization, `FullStatePersistence` leverages Pydantic
 {
     "direction": "TD",
     "nodes": [
-        {"id": "in_memory_manager", "label": "In-Memory State Persistence Manager", "type": "component", "link": null},
-        {"id": "record_node_snapshot_op", "label": "Record Node Snapshots", "type": "component", "link": null},
-        {"id": "record_end_snapshot_op", "label": "Record End Snapshots", "type": "component", "link": null},
-        {"id": "manage_execution_op", "label": "Manage Node Execution Lifecycle", "type": "component", "link": null},
-        {"id": "serialize_op", "label": "Serialize History to JSON", "type": "component", "link": null},
-        {"id": "deserialize_op", "label": "Deserialize History from JSON", "type": "component", "link": null},
-        {"id": "base_persistence_interface", "label": "Base Persistence Interface", "type": "external", "link": "base_persistence_interface.md"},
-        {"id": "graph_state_t", "label": "Graph State (StateT)", "type": "external", "link": "pydantic_ai_agent_core.md"},
-        {"id": "graph_node_base", "label": "Graph Node Definition (BaseNode)", "type": "external", "link": "pydantic_ai_agent_core.md"},
-        {"id": "graph_run_end_t", "label": "Graph Run End (RunEndT)", "type": "external", "link": "pydantic_ai_agent_core.md"},
-        {"id": "pydantic_lib", "label": "Pydantic Library", "type": "external", "link": "pydantic_ai_agent_core.md"}
+        {
+            "id": "in_memory_manager",
+            "label": "In-Memory State Persistence Manager",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "record_node_snapshot_op",
+            "label": "Record Node Snapshots",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "record_end_snapshot_op",
+            "label": "Record End Snapshots",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "manage_execution_op",
+            "label": "Manage Node Execution Lifecycle",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "serialize_op",
+            "label": "Serialize History to JSON",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "deserialize_op",
+            "label": "Deserialize History from JSON",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "base_persistence_interface",
+            "label": "Base Persistence Interface",
+            "type": "external",
+            "link": "base_persistence_interface.md"
+        },
+        {
+            "id": "graph_state_t",
+            "label": "Graph State (StateT)",
+            "type": "external",
+            "link": "pydantic_ai_agent_core.md"
+        },
+        {
+            "id": "graph_node_base",
+            "label": "Graph Node Definition (BaseNode)",
+            "type": "external",
+            "link": "pydantic_ai_agent_core.md"
+        },
+        {
+            "id": "graph_run_end_t",
+            "label": "Graph Run End (RunEndT)",
+            "type": "external",
+            "link": "pydantic_ai_agent_core.md"
+        },
+        {
+            "id": "pydantic_lib",
+            "label": "Pydantic Library",
+            "type": "external",
+            "link": "pydantic_ai_agent_core.md"
+        }
     ],
     "edges": [
-        {"source": "in_memory_manager", "target": "base_persistence_interface", "label": "implements"},
-        {"source": "in_memory_manager", "target": "record_node_snapshot_op", "label": "orchestrates"},
-        {"source": "in_memory_manager", "target": "record_end_snapshot_op", "label": "orchestrates"},
-        {"source": "in_memory_manager", "target": "manage_execution_op", "label": "orchestrates"},
-        {"source": "in_memory_manager", "target": "serialize_op", "label": "orchestrates"},
-        {"source": "in_memory_manager", "target": "deserialize_op", "label": "orchestrates"},
-        {"source": "record_node_snapshot_op", "target": "graph_state_t", "label": "captures"},
-        {"source": "record_node_snapshot_op", "target": "graph_node_base", "label": "captures"},
-        {"source": "record_end_snapshot_op", "target": "graph_state_t", "label": "captures"},
-        {"source": "record_end_snapshot_op", "target": "graph_run_end_t", "label": "captures"},
-        {"source": "serialize_op", "target": "pydantic_lib", "label": "uses adapter from"},
-        {"source": "deserialize_op", "target": "pydantic_lib", "label": "uses adapter from"}
+        {
+            "source": "in_memory_manager",
+            "target": "base_persistence_interface",
+            "label": "implements"
+        },
+        {
+            "source": "in_memory_manager",
+            "target": "record_node_snapshot_op",
+            "label": "orchestrates"
+        },
+        {
+            "source": "in_memory_manager",
+            "target": "record_end_snapshot_op",
+            "label": "orchestrates"
+        },
+        {
+            "source": "in_memory_manager",
+            "target": "manage_execution_op",
+            "label": "orchestrates"
+        },
+        {
+            "source": "in_memory_manager",
+            "target": "serialize_op",
+            "label": "orchestrates"
+        },
+        {
+            "source": "in_memory_manager",
+            "target": "deserialize_op",
+            "label": "orchestrates"
+        },
+        {
+            "source": "record_node_snapshot_op",
+            "target": "graph_state_t",
+            "label": "captures"
+        },
+        {
+            "source": "record_node_snapshot_op",
+            "target": "graph_node_base",
+            "label": "captures"
+        },
+        {
+            "source": "record_end_snapshot_op",
+            "target": "graph_state_t",
+            "label": "captures"
+        },
+        {
+            "source": "record_end_snapshot_op",
+            "target": "graph_run_end_t",
+            "label": "captures"
+        },
+        {
+            "source": "serialize_op",
+            "target": "pydantic_lib",
+            "label": "uses adapter from"
+        },
+        {
+            "source": "deserialize_op",
+            "target": "pydantic_lib",
+            "label": "uses adapter from"
+        }
     ],
     "groups": [
         {
             "id": "core_operations",
             "label": "Core Persistence Operations",
             "role": "analytical",
-            "nodes": ["record_node_snapshot_op", "record_end_snapshot_op", "manage_execution_op", "serialize_op", "deserialize_op"]
+            "nodes": [
+                "record_node_snapshot_op",
+                "record_end_snapshot_op",
+                "manage_execution_op",
+                "serialize_op",
+                "deserialize_op"
+            ]
         }
     ]
 }

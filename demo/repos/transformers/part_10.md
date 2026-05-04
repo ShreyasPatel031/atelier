@@ -6,12 +6,30 @@ This module integrates diverse model architectures, offering specialized impleme
 {
     "direction": "TD",
     "nodes": [
-        {"id": "audio_model_implementations", "label": "Audio Model Implementations", "type": "module", "link": "audio_model_implementations.md"},
-        {"id": "language_model_implementations", "label": "Language Model Implementations", "type": "module", "link": "language_model_implementations.md"}
+        {
+            "id": "audio_model_implementations",
+            "label": "Audio Model Implementations",
+            "type": "module",
+            "link": "audio_model_implementations.md"
+        },
+        {
+            "id": "language_model_implementations",
+            "label": "Language Model Implementations",
+            "type": "module",
+            "link": "language_model_implementations.md"
+        }
     ],
     "edges": [],
     "groups": [
-        {"id": "model_architectures", "label": "Model Architectures", "role": "analytical", "nodes": ["audio_model_implementations", "language_model_implementations"]}
+        {
+            "id": "model_architectures",
+            "label": "Model Architectures",
+            "role": "analytical",
+            "nodes": [
+                "audio_model_implementations",
+                "language_model_implementations"
+            ]
+        }
     ]
 }
 -->

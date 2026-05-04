@@ -10,32 +10,66 @@ This module primarily consists of evaluators that consume processed case data, o
 {
     "direction": "TD",
     "nodes": [
-        {"id": "score_distribution_analysis", "label": "Analyze Score Distributions", "type": "module", "link": "score_distribution_analysis.md"},
-        {"id": "metric_evaluators", "label": "Metric Evaluators", "type": "external", "link": "metric_evaluators.md"},
-        {"id": "reporting_and_rendering", "label": "Reporting and Rendering", "type": "external", "link": "reporting_and_rendering.md"}
+        {
+            "id": "score_distribution_evaluators",
+            "label": "Score Distribution Evaluators",
+            "type": "module"
+        },
+        {
+            "id": "score_distribution_analysis",
+            "label": "Analyze Score Distributions",
+            "type": "module",
+            "link": "score_distribution_analysis.md"
+        },
+        {
+            "id": "metric_evaluators",
+            "label": "Metric Evaluators",
+            "type": "external",
+            "link": "metric_evaluators.md"
+        },
+        {
+            "id": "reporting_and_rendering",
+            "label": "Reporting and Rendering",
+            "type": "external",
+            "link": "reporting_and_rendering.md"
+        }
     ],
     "edges": [
-        {"source": "metric_evaluators", "target": "score_distribution_analysis", "label": "provides scored data"},
-        {"source": "score_distribution_analysis", "target": "reporting_and_rendering", "label": "generates analytical reports"}
+        {
+            "source": "metric_evaluators",
+            "target": "score_distribution_analysis",
+            "label": "provides scored data"
+        },
+        {
+            "source": "score_distribution_analysis",
+            "target": "reporting_and_rendering",
+            "label": "generates analytical reports"
+        }
     ],
     "groups": [
         {
             "id": "input_data",
             "label": "Input Data",
             "role": "data",
-            "nodes": ["metric_evaluators"]
+            "nodes": [
+                "metric_evaluators"
+            ]
         },
         {
             "id": "core_analysis",
             "label": "Core Analysis",
             "role": "analytical",
-            "nodes": ["score_distribution_analysis"]
+            "nodes": [
+                "score_distribution_analysis"
+            ]
         },
         {
             "id": "output_generation",
             "label": "Output Generation",
             "role": "surface",
-            "nodes": ["reporting_and_rendering"]
+            "nodes": [
+                "reporting_and_rendering"
+            ]
         }
     ]
 }

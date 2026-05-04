@@ -28,18 +28,40 @@ This sub-module ([categorical_evaluator.md](categorical_evaluator.md)) focuses o
 {
     "direction": "TD",
     "nodes": [
-        {"id": "score_distribution_evaluators", "label": "Score Distribution Evaluators", "type": "module", "link": "score_distribution_evaluators.md"},
-        {"id": "categorical_evaluator", "label": "Categorical Evaluator", "type": "module", "link": "categorical_evaluator.md"}
+        {
+            "id": "statistical_report_evaluators",
+            "label": "Statistical Report Evaluators",
+            "type": "module"
+        },
+        {
+            "id": "score_distribution_evaluators",
+            "label": "Score Distribution Evaluators",
+            "type": "module",
+            "link": "score_distribution_evaluators.md"
+        },
+        {
+            "id": "categorical_evaluator",
+            "label": "Categorical Evaluator",
+            "type": "module",
+            "link": "categorical_evaluator.md"
+        }
     ],
     "edges": [
-        {"source": "score_distribution_evaluators", "target": "categorical_evaluator", "label": "provides different analysis types"}
+        {
+            "source": "score_distribution_evaluators",
+            "target": "categorical_evaluator",
+            "label": "provides different analysis types"
+        }
     ],
     "groups": [
         {
             "id": "statistical_analysis",
             "label": "Statistical Analysis",
             "role": "analytical",
-            "nodes": ["score_distribution_evaluators", "categorical_evaluator"]
+            "nodes": [
+                "score_distribution_evaluators",
+                "categorical_evaluator"
+            ]
         }
     ]
 }

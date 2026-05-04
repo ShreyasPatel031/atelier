@@ -3,37 +3,41 @@ This module handles the persistence, retrieval, and migration of application con
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "TestSave",
-      "label": "TestSave"
-    },
-    {
-      "id": "TestListIntegrations",
-      "label": "TestListIntegrations"
-    },
-    {
-      "id": "TestMigrateConfig",
-      "label": "TestMigrateConfig"
-    }
-  ],
-  "edges": [
-    {
-      "source": "TestMigrateConfig",
-      "target": "TestSave"
-    },
-    {
-      "source": "TestSave",
-      "target": "TestListIntegrations"
-    }
-  ],
-  "groups": [
-    {
-      "id": "configuration_management",
-      "label": "configuration_management",
-      "nodes": ["TestSave", "TestListIntegrations", "TestMigrateConfig"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "TestSave",
+            "label": "TestSave"
+        },
+        {
+            "id": "TestListIntegrations",
+            "label": "TestListIntegrations"
+        },
+        {
+            "id": "TestMigrateConfig",
+            "label": "TestMigrateConfig"
+        }
+    ],
+    "edges": [
+        {
+            "source": "TestMigrateConfig",
+            "target": "TestSave"
+        },
+        {
+            "source": "TestSave",
+            "target": "TestListIntegrations"
+        }
+    ],
+    "groups": [
+        {
+            "id": "configuration_management",
+            "label": "configuration_management",
+            "nodes": [
+                "TestSave",
+                "TestListIntegrations",
+                "TestMigrateConfig"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

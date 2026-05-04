@@ -42,32 +42,112 @@ agent = Agent('openai:gpt-5.2', toolsets=[toolset])
 {
     "direction": "TD",
     "nodes": [
-        {"id": "ExaToolset_component", "label": "ExaToolset", "type": "component", "link": null},
-        {"id": "FunctionToolset_ext", "label": "FunctionToolset (from Toolset Management)", "type": "external", "link": "toolset_management.md"},
-        {"id": "AsyncExa_ext", "label": "Exa.ai API Client (AsyncExa)", "type": "external", "link": "https://pypi.org/project/exa-py/"},
-        {"id": "create_search_tool", "label": "Create Exa Search Tool (exa_search_tool)", "type": "component", "link": null},
-        {"id": "create_find_similar_tool", "label": "Create Exa Find Similar Tool (exa_find_similar_tool)", "type": "component", "link": null},
-        {"id": "create_get_contents_tool", "label": "Create Exa Get Contents Tool (exa_get_contents_tool)", "type": "component", "link": null},
-        {"id": "create_answer_tool", "label": "Create Exa Answer Tool (exa_answer_tool)", "type": "component", "link": null}
+        {
+            "id": "ExaToolset_component",
+            "label": "ExaToolset",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "FunctionToolset_ext",
+            "label": "FunctionToolset (from Toolset Management)",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "AsyncExa_ext",
+            "label": "Exa.ai API Client (AsyncExa)",
+            "type": "external",
+            "link": "https://pypi.org/project/exa-py/"
+        },
+        {
+            "id": "create_search_tool",
+            "label": "Create Exa Search Tool (exa_search_tool)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "create_find_similar_tool",
+            "label": "Create Exa Find Similar Tool (exa_find_similar_tool)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "create_get_contents_tool",
+            "label": "Create Exa Get Contents Tool (exa_get_contents_tool)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "create_answer_tool",
+            "label": "Create Exa Answer Tool (exa_answer_tool)",
+            "type": "component",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "ExaToolset_component", "target": "FunctionToolset_ext", "label": "inherits from"},
-        {"source": "ExaToolset_component", "target": "AsyncExa_ext", "label": "initializes with API key"},
-        {"source": "ExaToolset_component", "target": "create_search_tool", "label": "configures & instantiates if enabled"},
-        {"source": "ExaToolset_component", "target": "create_find_similar_tool", "label": "configures & instantiates if enabled"},
-        {"source": "ExaToolset_component", "target": "create_get_contents_tool", "label": "configures & instantiates if enabled"},
-        {"source": "ExaToolset_component", "target": "create_answer_tool", "label": "configures & instantiates if enabled"},
-        {"source": "create_search_tool", "target": "AsyncExa_ext", "label": "uses client"},
-        {"source": "create_find_similar_tool", "target": "AsyncExa_ext", "label": "uses client"},
-        {"source": "create_get_contents_tool", "target": "AsyncExa_ext", "label": "uses client"},
-        {"source": "create_answer_tool", "target": "AsyncExa_ext", "label": "uses client"}
+        {
+            "source": "ExaToolset_component",
+            "target": "FunctionToolset_ext",
+            "label": "inherits from"
+        },
+        {
+            "source": "ExaToolset_component",
+            "target": "AsyncExa_ext",
+            "label": "initializes with API key"
+        },
+        {
+            "source": "ExaToolset_component",
+            "target": "create_search_tool",
+            "label": "configures & instantiates if enabled"
+        },
+        {
+            "source": "ExaToolset_component",
+            "target": "create_find_similar_tool",
+            "label": "configures & instantiates if enabled"
+        },
+        {
+            "source": "ExaToolset_component",
+            "target": "create_get_contents_tool",
+            "label": "configures & instantiates if enabled"
+        },
+        {
+            "source": "ExaToolset_component",
+            "target": "create_answer_tool",
+            "label": "configures & instantiates if enabled"
+        },
+        {
+            "source": "create_search_tool",
+            "target": "AsyncExa_ext",
+            "label": "uses client"
+        },
+        {
+            "source": "create_find_similar_tool",
+            "target": "AsyncExa_ext",
+            "label": "uses client"
+        },
+        {
+            "source": "create_get_contents_tool",
+            "target": "AsyncExa_ext",
+            "label": "uses client"
+        },
+        {
+            "source": "create_answer_tool",
+            "target": "AsyncExa_ext",
+            "label": "uses client"
+        }
     ],
     "groups": [
         {
             "id": "exa_tool_creation",
             "label": "Exa Tool Creation Process",
             "role": "analytical",
-            "nodes": ["create_search_tool", "create_find_similar_tool", "create_get_contents_tool", "create_answer_tool"]
+            "nodes": [
+                "create_search_tool",
+                "create_find_similar_tool",
+                "create_get_contents_tool",
+                "create_answer_tool"
+            ]
         }
     ]
 }

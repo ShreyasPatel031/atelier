@@ -12,44 +12,133 @@ The `model_provider_usage_mapping` module operates by providing dedicated mappin
 {
     "direction": "TD",
     "nodes": [
-        {"id": "cohere_usage_mapper", "label": "Map Cohere Usage", "type": "module", "link": "cohere_usage_mapper.md"},
-        {"id": "groq_usage_mapper", "label": "Map Groq Usage", "type": "module", "link": "groq_usage_mapper.md"},
-        {"id": "huggingface_usage_mapper", "label": "Map HuggingFace Usage", "type": "module", "link": "huggingface_usage_mapper.md"},
-        {"id": "mistral_usage_mapper", "label": "Map Mistral Usage", "type": "module", "link": "mistral_usage_mapper.md"},
-        {"id": "cohere_raw", "label": "Cohere Raw Usage Data", "type": "external"},
-        {"id": "groq_raw", "label": "Groq Raw Usage Data", "type": "external"},
-        {"id": "huggingface_raw", "label": "HuggingFace Raw Usage Data", "type": "external"},
-        {"id": "mistral_raw", "label": "Mistral Raw Usage Data", "type": "external"},
-        {"id": "standardized_usage", "label": "Standardized RequestUsage", "type": "external"}
+        {
+            "id": "model_provider_usage_mapping",
+            "label": "Model Provider Usage Mapping",
+            "type": "module"
+        },
+        {
+            "id": "cohere_usage_mapper",
+            "label": "Map Cohere Usage",
+            "type": "module",
+            "link": "cohere_usage_mapper.md"
+        },
+        {
+            "id": "groq_usage_mapper",
+            "label": "Map Groq Usage",
+            "type": "module",
+            "link": "groq_usage_mapper.md"
+        },
+        {
+            "id": "huggingface_usage_mapper",
+            "label": "Map HuggingFace Usage",
+            "type": "module",
+            "link": "huggingface_usage_mapper.md"
+        },
+        {
+            "id": "mistral_usage_mapper",
+            "label": "Map Mistral Usage",
+            "type": "module",
+            "link": "mistral_usage_mapper.md"
+        },
+        {
+            "id": "cohere_raw",
+            "label": "Cohere Raw Usage Data",
+            "type": "external"
+        },
+        {
+            "id": "groq_raw",
+            "label": "Groq Raw Usage Data",
+            "type": "external"
+        },
+        {
+            "id": "huggingface_raw",
+            "label": "HuggingFace Raw Usage Data",
+            "type": "external"
+        },
+        {
+            "id": "mistral_raw",
+            "label": "Mistral Raw Usage Data",
+            "type": "external"
+        },
+        {
+            "id": "standardized_usage",
+            "label": "Standardized RequestUsage",
+            "type": "external"
+        }
     ],
     "edges": [
-        {"source": "cohere_raw", "target": "cohere_usage_mapper", "label": "raw response"},
-        {"source": "groq_raw", "target": "groq_usage_mapper", "label": "raw response"},
-        {"source": "huggingface_raw", "target": "huggingface_usage_mapper", "label": "raw response"},
-        {"source": "mistral_raw", "target": "mistral_usage_mapper", "label": "raw response"},
-        {"source": "cohere_usage_mapper", "target": "standardized_usage", "label": "RequestUsage object"},
-        {"source": "groq_usage_mapper", "target": "standardized_usage", "label": "RequestUsage object"},
-        {"source": "huggingface_usage_mapper", "target": "standardized_usage", "label": "RequestUsage object"},
-        {"source": "mistral_usage_mapper", "target": "standardized_usage", "label": "RequestUsage object"}
+        {
+            "source": "cohere_raw",
+            "target": "cohere_usage_mapper",
+            "label": "raw response"
+        },
+        {
+            "source": "groq_raw",
+            "target": "groq_usage_mapper",
+            "label": "raw response"
+        },
+        {
+            "source": "huggingface_raw",
+            "target": "huggingface_usage_mapper",
+            "label": "raw response"
+        },
+        {
+            "source": "mistral_raw",
+            "target": "mistral_usage_mapper",
+            "label": "raw response"
+        },
+        {
+            "source": "cohere_usage_mapper",
+            "target": "standardized_usage",
+            "label": "RequestUsage object"
+        },
+        {
+            "source": "groq_usage_mapper",
+            "target": "standardized_usage",
+            "label": "RequestUsage object"
+        },
+        {
+            "source": "huggingface_usage_mapper",
+            "target": "standardized_usage",
+            "label": "RequestUsage object"
+        },
+        {
+            "source": "mistral_usage_mapper",
+            "target": "standardized_usage",
+            "label": "RequestUsage object"
+        }
     ],
     "groups": [
         {
             "id": "provider_mappers",
             "label": "Provider Usage Mappers",
             "role": "data",
-            "nodes": ["cohere_usage_mapper", "groq_usage_mapper", "huggingface_usage_mapper", "mistral_usage_mapper"]
+            "nodes": [
+                "cohere_usage_mapper",
+                "groq_usage_mapper",
+                "huggingface_usage_mapper",
+                "mistral_usage_mapper"
+            ]
         },
         {
             "id": "data_sources",
             "label": "External Usage Sources",
             "role": "data",
-            "nodes": ["cohere_raw", "groq_raw", "huggingface_raw", "mistral_raw"]
+            "nodes": [
+                "cohere_raw",
+                "groq_raw",
+                "huggingface_raw",
+                "mistral_raw"
+            ]
         },
         {
             "id": "output",
             "label": "Standardized Output",
             "role": "data",
-            "nodes": ["standardized_usage"]
+            "nodes": [
+                "standardized_usage"
+            ]
         }
     ]
 }

@@ -10,37 +10,154 @@ By implementing `AbstractCapability`, developers can encapsulate specific functi
 {
     "direction": "TD",
     "nodes": [
-        {"id": "abstract_capability", "label": "AbstractCapability (Interface)", "type": "component"},
-        {"id": "capability_config", "label": "Capability Configuration", "type": "component"},
-        {"id": "tool_prep", "label": "Tool Preparation Hooks", "type": "component"},
-        {"id": "run_hooks", "label": "Agent Run Lifecycle Hooks", "type": "component"},
-        {"id": "node_hooks", "label": "Graph Node Lifecycle Hooks", "type": "component"},
-        {"id": "model_hooks", "label": "Model Request Lifecycle Hooks", "type": "component"},
-        {"id": "tool_validation_hooks", "label": "Tool Argument Validation Hooks", "type": "component"},
-        {"id": "tool_execution_hooks", "label": "Tool Execution Hooks", "type": "component"},
-        {"id": "agent_base_interface", "label": "Agent Base Interface", "type": "external", "link": "agent_base_interface.md"},
-        {"id": "capability_spec", "label": "Capability Specification", "type": "external", "link": "capability_specification.md"},
-        {"id": "toolset_management", "label": "Toolset Management", "type": "external", "link": "toolset_management.md"},
-        {"id": "agent_execution_graph", "label": "Agent Execution Graph", "type": "external", "link": "agent_execution_graph.md"},
-        {"id": "agent_output_handling", "label": "Agent Output Handling", "type": "external", "link": "agent_output_handling.md"},
-        {"id": "model_core_interfaces", "label": "Model Core Interfaces", "type": "external", "link": "model_core_interfaces.md"}
+        {
+            "id": "abstract_capability",
+            "label": "AbstractCapability (Interface)",
+            "type": "component"
+        },
+        {
+            "id": "capability_config",
+            "label": "Capability Configuration",
+            "type": "component"
+        },
+        {
+            "id": "tool_prep",
+            "label": "Tool Preparation Hooks",
+            "type": "component"
+        },
+        {
+            "id": "run_hooks",
+            "label": "Agent Run Lifecycle Hooks",
+            "type": "component"
+        },
+        {
+            "id": "node_hooks",
+            "label": "Graph Node Lifecycle Hooks",
+            "type": "component"
+        },
+        {
+            "id": "model_hooks",
+            "label": "Model Request Lifecycle Hooks",
+            "type": "component"
+        },
+        {
+            "id": "tool_validation_hooks",
+            "label": "Tool Argument Validation Hooks",
+            "type": "component"
+        },
+        {
+            "id": "tool_execution_hooks",
+            "label": "Tool Execution Hooks",
+            "type": "component"
+        },
+        {
+            "id": "agent_base_interface",
+            "label": "Agent Base Interface",
+            "type": "external",
+            "link": "agent_base_interface.md"
+        },
+        {
+            "id": "capability_spec",
+            "label": "Capability Specification",
+            "type": "external",
+            "link": "capability_specification.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "agent_execution_graph",
+            "label": "Agent Execution Graph",
+            "type": "external",
+            "link": "agent_execution_graph.md"
+        },
+        {
+            "id": "agent_output_handling",
+            "label": "Agent Output Handling",
+            "type": "external",
+            "link": "agent_output_handling.md"
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Model Core Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        }
     ],
     "edges": [
-        {"source": "abstract_capability", "target": "capability_config", "label": "defines"},
-        {"source": "abstract_capability", "target": "tool_prep", "label": "defines"},
-        {"source": "abstract_capability", "target": "run_hooks", "label": "defines"},
-        {"source": "abstract_capability", "target": "node_hooks", "label": "defines"},
-        {"source": "abstract_capability", "target": "model_hooks", "label": "defines"},
-        {"source": "abstract_capability", "target": "tool_validation_hooks", "label": "defines"},
-        {"source": "abstract_capability", "target": "tool_execution_hooks", "label": "defines"},
-
-        {"source": "agent_base_interface", "target": "abstract_capability", "label": "uses"},
-        {"source": "capability_spec", "target": "abstract_capability", "label": "defines serialization for"},
-        {"source": "abstract_capability", "target": "toolset_management", "label": "configures/wraps toolsets"},
-        {"source": "node_hooks", "target": "agent_execution_graph", "label": "processes nodes from"},
-        {"source": "run_hooks", "target": "agent_output_handling", "label": "modifies run results from"},
-        {"source": "model_hooks", "target": "model_core_interfaces", "label": "handles model responses from"},
-        {"source": "tool_prep", "target": "toolset_management", "label": "filters tool definitions"}
+        {
+            "source": "abstract_capability",
+            "target": "capability_config",
+            "label": "defines"
+        },
+        {
+            "source": "abstract_capability",
+            "target": "tool_prep",
+            "label": "defines"
+        },
+        {
+            "source": "abstract_capability",
+            "target": "run_hooks",
+            "label": "defines"
+        },
+        {
+            "source": "abstract_capability",
+            "target": "node_hooks",
+            "label": "defines"
+        },
+        {
+            "source": "abstract_capability",
+            "target": "model_hooks",
+            "label": "defines"
+        },
+        {
+            "source": "abstract_capability",
+            "target": "tool_validation_hooks",
+            "label": "defines"
+        },
+        {
+            "source": "abstract_capability",
+            "target": "tool_execution_hooks",
+            "label": "defines"
+        },
+        {
+            "source": "agent_base_interface",
+            "target": "abstract_capability",
+            "label": "uses"
+        },
+        {
+            "source": "capability_spec",
+            "target": "abstract_capability",
+            "label": "defines serialization for"
+        },
+        {
+            "source": "abstract_capability",
+            "target": "toolset_management",
+            "label": "configures/wraps toolsets"
+        },
+        {
+            "source": "node_hooks",
+            "target": "agent_execution_graph",
+            "label": "processes nodes from"
+        },
+        {
+            "source": "run_hooks",
+            "target": "agent_output_handling",
+            "label": "modifies run results from"
+        },
+        {
+            "source": "model_hooks",
+            "target": "model_core_interfaces",
+            "label": "handles model responses from"
+        },
+        {
+            "source": "tool_prep",
+            "target": "toolset_management",
+            "label": "filters tool definitions"
+        }
     ],
     "groups": [
         {

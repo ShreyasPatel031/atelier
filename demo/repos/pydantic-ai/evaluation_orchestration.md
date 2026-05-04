@@ -12,18 +12,40 @@ The `evaluation_orchestration` module primarily consists of two interconnected c
 {
     "direction": "TD",
     "nodes": [
-        {"id": "evaluation_configuration", "label": "Online Evaluation Configuration", "type": "module", "link": "evaluation_configuration.md"},
-        {"id": "evaluation_wrapper", "label": "Evaluation Execution Wrapper", "type": "module", "link": "evaluation_wrapper.md"}
+        {
+            "id": "evaluation_orchestration",
+            "label": "Evaluation Orchestration",
+            "type": "module"
+        },
+        {
+            "id": "evaluation_configuration",
+            "label": "Online Evaluation Configuration",
+            "type": "module",
+            "link": "evaluation_configuration.md"
+        },
+        {
+            "id": "evaluation_wrapper",
+            "label": "Evaluation Execution Wrapper",
+            "type": "module",
+            "link": "evaluation_wrapper.md"
+        }
     ],
     "edges": [
-        {"source": "evaluation_configuration", "target": "evaluation_wrapper", "label": "provides settings"}
+        {
+            "source": "evaluation_configuration",
+            "target": "evaluation_wrapper",
+            "label": "provides settings"
+        }
     ],
     "groups": [
         {
             "id": "core_logic",
             "label": "Core Logic",
             "role": "generative",
-            "nodes": ["evaluation_configuration", "evaluation_wrapper"]
+            "nodes": [
+                "evaluation_configuration",
+                "evaluation_wrapper"
+            ]
         }
     ]
 }

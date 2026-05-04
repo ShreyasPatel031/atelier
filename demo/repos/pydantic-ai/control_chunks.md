@@ -12,26 +12,54 @@ This module is situated within the `vercel_ai_response_types` module, which is p
 {
     "direction": "TD",
     "nodes": [
-        {"id": "vercel_ai_response_types", "label": "Vercel AI Response Types", "type": "module", "link": "vercel_ai_response_types.md"},
-        {"id": "control_chunks", "label": "Control Chunks Module", "type": "module", "link": "control_chunks.md"},
-        {"id": "response_control_chunks", "label": "Response Control Chunks", "type": "module", "link": "response_control_chunks.md"}
+        {
+            "id": "vercel_ai_response_types",
+            "label": "Vercel AI Response Types",
+            "type": "module",
+            "link": "vercel_ai_response_types.md"
+        },
+        {
+            "id": "control_chunks",
+            "label": "Control Chunks Module",
+            "type": "module",
+            "link": "control_chunks.md"
+        },
+        {
+            "id": "response_control_chunks",
+            "label": "Response Control Chunks",
+            "type": "module",
+            "link": "response_control_chunks.md"
+        }
     ],
     "edges": [
-        {"source": "vercel_ai_response_types", "target": "control_chunks", "label": "contains"},
-        {"source": "control_chunks", "target": "response_control_chunks", "label": "defines"}
+        {
+            "source": "vercel_ai_response_types",
+            "target": "control_chunks",
+            "label": "contains"
+        },
+        {
+            "source": "control_chunks",
+            "target": "response_control_chunks",
+            "label": "defines"
+        }
     ],
     "groups": [
         {
             "id": "vercel_ai_ui",
             "label": "Vercel AI UI Integration",
             "role": "surface",
-            "nodes": ["vercel_ai_response_types"]
+            "nodes": [
+                "vercel_ai_response_types"
+            ]
         },
         {
             "id": "control_response_handling",
             "label": "Control Response Handling",
             "role": "generative",
-            "nodes": ["control_chunks", "response_control_chunks"]
+            "nodes": [
+                "control_chunks",
+                "response_control_chunks"
+            ]
         }
     ]
 }

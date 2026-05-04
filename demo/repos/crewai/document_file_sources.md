@@ -3,14 +3,27 @@ This module defines components for managing file-based knowledge sources, offeri
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "BFS", "label": "BaseFileKnowledgeSource"},
-    {"id": "CDS", "label": "CrewDoclingSource"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "document_file_sources", "label": "document_file_sources", "nodes": ["BFS", "CDS"]}
-  ]
+    "nodes": [
+        {
+            "id": "BFS",
+            "label": "BaseFileKnowledgeSource"
+        },
+        {
+            "id": "CDS",
+            "label": "CrewDoclingSource"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "document_file_sources",
+            "label": "document_file_sources",
+            "nodes": [
+                "BFS",
+                "CDS"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

@@ -10,20 +10,52 @@ The module is structured into three main components: the core adapter, and disti
 {
     "direction": "TD",
     "nodes": [
-        {"id": "vercel_ai_integration_adapter", "label": "Vercel AI Integration Adapter", "type": "module", "link": "vercel_ai_integration_adapter.md"},
-        {"id": "vercel_ai_request_types", "label": "Vercel AI Request Definitions", "type": "module", "link": "vercel_ai_request_types.md"},
-        {"id": "vercel_ai_response_types", "label": "Vercel AI Response Definitions", "type": "module", "link": "vercel_ai_response_types.md"}
+        {
+            "id": "ui_vercel_ai_adapter",
+            "label": "ui_vercel_ai_adapter",
+            "type": "module"
+        },
+        {
+            "id": "vercel_ai_integration_adapter",
+            "label": "Vercel AI Integration Adapter",
+            "type": "module",
+            "link": "vercel_ai_integration_adapter.md"
+        },
+        {
+            "id": "vercel_ai_request_types",
+            "label": "Vercel AI Request Definitions",
+            "type": "module",
+            "link": "vercel_ai_request_types.md"
+        },
+        {
+            "id": "vercel_ai_response_types",
+            "label": "Vercel AI Response Definitions",
+            "type": "module",
+            "link": "vercel_ai_response_types.md"
+        }
     ],
     "edges": [
-        {"source": "vercel_ai_request_types", "target": "vercel_ai_integration_adapter", "label": "incoming request data"},
-        {"source": "vercel_ai_integration_adapter", "target": "vercel_ai_response_types", "label": "outgoing response chunks"}
+        {
+            "source": "vercel_ai_request_types",
+            "target": "vercel_ai_integration_adapter",
+            "label": "incoming request data"
+        },
+        {
+            "source": "vercel_ai_integration_adapter",
+            "target": "vercel_ai_response_types",
+            "label": "outgoing response chunks"
+        }
     ],
     "groups": [
         {
             "id": "ui_interaction",
             "label": "UI Interaction",
             "role": "surface",
-            "nodes": ["vercel_ai_integration_adapter", "vercel_ai_request_types", "vercel_ai_response_types"]
+            "nodes": [
+                "vercel_ai_integration_adapter",
+                "vercel_ai_request_types",
+                "vercel_ai_response_types"
+            ]
         }
     ]
 }

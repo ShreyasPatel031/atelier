@@ -66,7 +66,7 @@
         }
 
         /** --- G3: normalize group member lists --- */
-        const groupIds = collectGroupIds();
+        let groupIds = collectGroupIds();
 
         for (const g of data.groups) {
             if (!g || g.id == null) continue;
@@ -144,7 +144,16 @@
 
         nodeIds = collectNodeIds();
 
-        /** --- G2: inject external nodes for unknown edge endpoints --- */
+        function firstGroupMember(gid) {
+            for (const g of data.groups) {
+                if (g && String(g.id) === gid && Array.isArray(g.nodes) && g.nodes.length) {
+                    return String(g.nodes[0]);
+                }
+            }
+            return null;
+        }
+
+        /** --- G2: normalize edges, then inject external nodes for unknown endpoints --- */
         function ensureExternalNode(id) {
             const sid = String(id);
             if (nodeIds.has(sid)) return;
@@ -161,26 +170,69 @@
             return true;
         }
 
+        const keptEdges = [];
+        for (const e of data.edges) {
+            if (!e) continue;
+            let src = e.source != null ? String(e.source) : '';
+            let tgt = e.target != null ? String(e.target) : '';
+            if (!src || !tgt) {
+                warnings.push({ code: 'g2_removed_edge_missing_endpoint', edge: e });
+                continue;
+            }
+            if (groupIds.has(src)) {
+                const rep = firstGroupMember(src);
+                if (rep) {
+                    warnings.push({ code: 'g2_rewired_group_endpoint', role: 'source', from: src, to: rep });
+                    src = rep;
+                } else {
+                    warnings.push({ code: 'g2_dropped_edge_group_endpoint', role: 'source', id: src });
+                    continue;
+                }
+            }
+            if (groupIds.has(tgt)) {
+                const rep = firstGroupMember(tgt);
+                if (rep) {
+                    warnings.push({ code: 'g2_rewired_group_endpoint', role: 'target', from: tgt, to: rep });
+                    tgt = rep;
+                } else {
+                    warnings.push({ code: 'g2_dropped_edge_group_endpoint', role: 'target', id: tgt });
+                    continue;
+                }
+            }
+            keptEdges.push({ ...e, source: src, target: tgt });
+        }
+        data.edges = keptEdges;
+
+        nodeIds = collectNodeIds();
+        groupIds = collectGroupIds();
+        const usedIds = new Set([...nodeIds, ...groupIds]);
+        for (const g of data.groups) {
+            if (!g || g.id == null) continue;
+            const gid = String(g.id);
+            if (!nodeIds.has(gid)) continue;
+            let base = `${gid}__group`;
+            let newGid = base;
+            let n = 1;
+            while (usedIds.has(newGid)) {
+                newGid = `${base}_${n}`;
+                n += 1;
+            }
+            g.id = newGid;
+            g._repaired = 'r4_group_renamed_avoid_node_collision';
+            usedIds.add(newGid);
+            warnings.push({ code: 'r4_renamed_group_for_node_collision', from: gid, to: newGid });
+        }
+
+        groupIds = collectGroupIds();
+        nodeIds = collectNodeIds();
+
         for (const e of data.edges) {
             if (!e) continue;
             const src = e.source != null ? String(e.source) : '';
             const tgt = e.target != null ? String(e.target) : '';
-            if (!src || !tgt) {
-                warnings.push({ code: 'g2_skip_edge_missing_endpoint', edge: e });
-                continue;
-            }
-            if (groupIds.has(src)) {
-                summary.g2EndpointIsGroupId.push({ role: 'source', id: src });
-                warnings.push({ code: 'g2_endpoint_is_group_id', role: 'source', id: src });
-            } else if (!nodeIds.has(src)) {
-                ensureExternalNode(src);
-            }
-            if (groupIds.has(tgt)) {
-                summary.g2EndpointIsGroupId.push({ role: 'target', id: tgt });
-                warnings.push({ code: 'g2_endpoint_is_group_id', role: 'target', id: tgt });
-            } else if (!nodeIds.has(tgt)) {
-                ensureExternalNode(tgt);
-            }
+            if (!src || !tgt) continue;
+            if (!nodeIds.has(src)) ensureExternalNode(src);
+            if (!nodeIds.has(tgt)) ensureExternalNode(tgt);
         }
 
         summary.after = {

@@ -12,26 +12,59 @@ The module is structured into three primary sub-modules, each focusing on a dist
 {
     "direction": "TD",
     "nodes": [
-        {"id": "cli_interface", "label": "CLI Interface", "type": "module", "link": "cli_interface.md"},
-        {"id": "testing_and_verification", "label": "Testing & Verification", "type": "module", "link": "testing_and_verification.md"},
-        {"id": "cloud_upload_scripts", "label": "Cloud Upload Scripts", "type": "module", "link": "cloud_upload_scripts.md"}
+        {
+            "id": "developer_utility_scripts",
+            "label": "Developer Utility Scripts",
+            "type": "module"
+        },
+        {
+            "id": "cli_interface",
+            "label": "CLI Interface",
+            "type": "module",
+            "link": "cli_interface.md"
+        },
+        {
+            "id": "testing_and_verification",
+            "label": "Testing & Verification",
+            "type": "module",
+            "link": "testing_and_verification.md"
+        },
+        {
+            "id": "cloud_upload_scripts",
+            "label": "Cloud Upload Scripts",
+            "type": "module",
+            "link": "cloud_upload_scripts.md"
+        }
     ],
     "edges": [
-        {"source": "cli_interface", "target": "testing_and_verification", "label": "triggers checks"},
-        {"source": "cloud_upload_scripts", "target": "testing_and_verification", "label": "prepares data for"}
+        {
+            "source": "cli_interface",
+            "target": "testing_and_verification",
+            "label": "triggers checks"
+        },
+        {
+            "source": "cloud_upload_scripts",
+            "target": "testing_and_verification",
+            "label": "prepares data for"
+        }
     ],
     "groups": [
         {
             "id": "interface",
             "label": "User Interface",
             "role": "surface",
-            "nodes": ["cli_interface"]
+            "nodes": [
+                "cli_interface"
+            ]
         },
         {
             "id": "utilities",
             "label": "Core Utilities",
             "role": "analytical",
-            "nodes": ["testing_and_verification", "cloud_upload_scripts"]
+            "nodes": [
+                "testing_and_verification",
+                "cloud_upload_scripts"
+            ]
         }
     ]
 }

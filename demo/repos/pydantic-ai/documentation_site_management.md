@@ -10,24 +10,47 @@ The `documentation_site_management` module operates in two main spheres: the cli
 {
     "direction": "TD",
     "nodes": [
-        {"id": "website_content_delivery", "label": "Website Content Delivery", "type": "module", "link": "website_content_delivery.md"},
-        {"id": "mkdocs_hooks_and_snippets", "label": "MkDocs Hooks and Snippets", "type": "module", "link": "mkdocs_hooks_and_snippets.md"}
+        {
+            "id": "documentation_site_management",
+            "label": "Documentation Site Management",
+            "type": "module"
+        },
+        {
+            "id": "website_content_delivery",
+            "label": "Website Content Delivery",
+            "type": "module",
+            "link": "website_content_delivery.md"
+        },
+        {
+            "id": "mkdocs_hooks_and_snippets",
+            "label": "MkDocs Hooks and Snippets",
+            "type": "module",
+            "link": "mkdocs_hooks_and_snippets.md"
+        }
     ],
     "edges": [
-        {"source": "mkdocs_hooks_and_snippets", "target": "website_content_delivery", "label": "pre-processes content for"}
+        {
+            "source": "mkdocs_hooks_and_snippets",
+            "target": "website_content_delivery",
+            "label": "pre-processes content for"
+        }
     ],
     "groups": [
         {
             "id": "content_processing",
             "label": "Content Processing",
             "role": "analytical",
-            "nodes": ["mkdocs_hooks_and_snippets"]
+            "nodes": [
+                "mkdocs_hooks_and_snippets"
+            ]
         },
         {
             "id": "content_delivery",
             "label": "Content Delivery",
             "role": "surface",
-            "nodes": ["website_content_delivery"]
+            "nodes": [
+                "website_content_delivery"
+            ]
         }
     ]
 }

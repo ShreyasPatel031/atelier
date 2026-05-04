@@ -16,29 +16,76 @@ Key architectural aspects include:
 {
     "direction": "TD",
     "nodes": [
-        {"id": "temporal_agent_orchestration", "label": "Temporal Agent Orchestration", "type": "module", "link": "temporal_agent_orchestration.md"},
-        {"id": "temporal_toolset_adapters", "label": "Temporal Toolset Adapters", "type": "module", "link": "temporal_toolset_adapters.md"},
-        {"id": "temporal_workflow_context", "label": "Temporal Workflow Context", "type": "module", "link": "temporal_workflow_context.md"},
-        {"id": "temporal_observability", "label": "Temporal Observability", "type": "module", "link": "temporal_observability.md"}
+        {
+            "id": "durable_execution_temporal",
+            "label": "Durable Execution with Temporal",
+            "type": "module"
+        },
+        {
+            "id": "temporal_agent_orchestration",
+            "label": "Temporal Agent Orchestration",
+            "type": "module",
+            "link": "temporal_agent_orchestration.md"
+        },
+        {
+            "id": "temporal_toolset_adapters",
+            "label": "Temporal Toolset Adapters",
+            "type": "module",
+            "link": "temporal_toolset_adapters.md"
+        },
+        {
+            "id": "temporal_workflow_context",
+            "label": "Temporal Workflow Context",
+            "type": "module",
+            "link": "temporal_workflow_context.md"
+        },
+        {
+            "id": "temporal_observability",
+            "label": "Temporal Observability",
+            "type": "module",
+            "link": "temporal_observability.md"
+        }
     ],
     "edges": [
-        {"source": "temporal_agent_orchestration", "target": "temporal_toolset_adapters", "label": "uses"},
-        {"source": "temporal_agent_orchestration", "target": "temporal_workflow_context", "label": "manages"},
-        {"source": "temporal_agent_orchestration", "target": "temporal_observability", "label": "integrates with"},
-        {"source": "temporal_toolset_adapters", "target": "temporal_workflow_context", "label": "uses context"}
+        {
+            "source": "temporal_agent_orchestration",
+            "target": "temporal_toolset_adapters",
+            "label": "uses"
+        },
+        {
+            "source": "temporal_agent_orchestration",
+            "target": "temporal_workflow_context",
+            "label": "manages"
+        },
+        {
+            "source": "temporal_agent_orchestration",
+            "target": "temporal_observability",
+            "label": "integrates with"
+        },
+        {
+            "source": "temporal_toolset_adapters",
+            "target": "temporal_workflow_context",
+            "label": "uses context"
+        }
     ],
     "groups": [
         {
             "id": "agent_core",
             "label": "Agent Core Integration",
             "role": "generative",
-            "nodes": ["temporal_agent_orchestration"]
+            "nodes": [
+                "temporal_agent_orchestration"
+            ]
         },
         {
             "id": "workflow_support",
             "label": "Workflow Support",
             "role": "analytical",
-            "nodes": ["temporal_toolset_adapters", "temporal_workflow_context", "temporal_observability"]
+            "nodes": [
+                "temporal_toolset_adapters",
+                "temporal_workflow_context",
+                "temporal_observability"
+            ]
         }
     ]
 }

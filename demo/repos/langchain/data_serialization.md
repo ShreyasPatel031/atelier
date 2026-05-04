@@ -3,19 +3,49 @@ This module provides utilities for serializing and deserializing various data ty
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "_dump_as_bytes", "label": "_dump_as_bytes"},
-    {"id": "_dump_document_as_bytes", "label": "_dump_document_as_bytes"},
-    {"id": "_load_document_from_bytes", "label": "_load_document_from_bytes"},
-    {"id": "_load_from_bytes", "label": "_load_from_bytes"}
-  ],
-  "edges": [
-    {"source": "Dumping", "target": "Loading", "label": "Conceptual Flow"}
-  ],
-  "groups": [
-    {"id": "Dumping", "label": "Dumping Functions", "nodes": ["_dump_as_bytes", "_dump_document_as_bytes"]},
-    {"id": "Loading", "label": "Loading Functions", "nodes": ["_load_document_from_bytes", "_load_from_bytes"]}
-  ]
+    "nodes": [
+        {
+            "id": "_dump_as_bytes",
+            "label": "_dump_as_bytes"
+        },
+        {
+            "id": "_dump_document_as_bytes",
+            "label": "_dump_document_as_bytes"
+        },
+        {
+            "id": "_load_document_from_bytes",
+            "label": "_load_document_from_bytes"
+        },
+        {
+            "id": "_load_from_bytes",
+            "label": "_load_from_bytes"
+        }
+    ],
+    "edges": [
+        {
+            "source": "_dump_as_bytes",
+            "target": "_load_document_from_bytes",
+            "label": "Conceptual Flow"
+        }
+    ],
+    "groups": [
+        {
+            "id": "Dumping",
+            "label": "Dumping Functions",
+            "nodes": [
+                "_dump_as_bytes",
+                "_dump_document_as_bytes"
+            ]
+        },
+        {
+            "id": "Loading",
+            "label": "Loading Functions",
+            "nodes": [
+                "_load_document_from_bytes",
+                "_load_from_bytes"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

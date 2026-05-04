@@ -3,16 +3,41 @@ The `project_core` module provides foundational components for class metaprogram
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "_CrewBaseType", "label": "_CrewBaseType", "type": "class"},
-    {"id": "DecoratedMethod", "label": "DecoratedMethod", "type": "class"},
-    {"id": "wrapper", "label": "wrapper", "type": "function"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "Metaclasses", "label": "Metaclasses", "nodes": ["_CrewBaseType"]},
-    {"id": "Method Utilities", "label": "Method Utilities", "nodes": ["DecoratedMethod", "wrapper"]}
-  ]
+    "nodes": [
+        {
+            "id": "_CrewBaseType",
+            "label": "_CrewBaseType",
+            "type": "class"
+        },
+        {
+            "id": "DecoratedMethod",
+            "label": "DecoratedMethod",
+            "type": "class"
+        },
+        {
+            "id": "wrapper",
+            "label": "wrapper",
+            "type": "function"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "Metaclasses",
+            "label": "Metaclasses",
+            "nodes": [
+                "_CrewBaseType"
+            ]
+        },
+        {
+            "id": "Method Utilities",
+            "label": "Method Utilities",
+            "nodes": [
+                "DecoratedMethod",
+                "wrapper"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

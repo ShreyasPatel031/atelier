@@ -16,29 +16,74 @@ These components collectively ensure that graphs can be easily defined, validate
 {
     "direction": "TD",
     "nodes": [
-        {"id": "graph_definition", "label": "Define Graph Structure", "type": "module", "link": "graph_definition.md"},
-        {"id": "node_abstraction", "label": "Abstract Graph Nodes", "type": "module", "link": "node_abstraction.md"},
-        {"id": "graph_runtime", "label": "Execute Graph Runs", "type": "module", "link": "graph_runtime.md"}
+        {
+            "id": "graph_core_execution",
+            "label": "Graph Core Execution",
+            "type": "module"
+        },
+        {
+            "id": "graph_definition",
+            "label": "Define Graph Structure",
+            "type": "module",
+            "link": "graph_definition.md"
+        },
+        {
+            "id": "node_abstraction",
+            "label": "Abstract Graph Nodes",
+            "type": "module",
+            "link": "node_abstraction.md"
+        },
+        {
+            "id": "graph_runtime",
+            "label": "Execute Graph Runs",
+            "type": "module",
+            "link": "graph_runtime.md"
+        }
     ],
     "edges": [
-        {"source": "graph_definition", "target": "node_abstraction", "label": "defines nodes"},
-        {"source": "graph_definition", "target": "graph_runtime", "label": "provides graph"},
-        {"source": "node_abstraction", "target": "graph_runtime", "label": "executable units"},
-        {"source": "graph_runtime", "target": "graph_definition", "label": "uses definition"},
-        {"source": "graph_runtime", "target": "node_abstraction", "label": "runs nodes"}
+        {
+            "source": "graph_definition",
+            "target": "node_abstraction",
+            "label": "defines nodes"
+        },
+        {
+            "source": "graph_definition",
+            "target": "graph_runtime",
+            "label": "provides graph"
+        },
+        {
+            "source": "node_abstraction",
+            "target": "graph_runtime",
+            "label": "executable units"
+        },
+        {
+            "source": "graph_runtime",
+            "target": "graph_definition",
+            "label": "uses definition"
+        },
+        {
+            "source": "graph_runtime",
+            "target": "node_abstraction",
+            "label": "runs nodes"
+        }
     ],
     "groups": [
         {
             "id": "definition_layer",
             "label": "Graph Definition Layer",
             "role": "generative",
-            "nodes": ["graph_definition", "node_abstraction"]
+            "nodes": [
+                "graph_definition",
+                "node_abstraction"
+            ]
         },
         {
             "id": "execution_layer",
             "label": "Graph Execution Layer",
             "role": "surface",
-            "nodes": ["graph_runtime"]
+            "nodes": [
+                "graph_runtime"
+            ]
         }
     ]
 }

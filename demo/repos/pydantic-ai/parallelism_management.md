@@ -16,18 +16,40 @@ This module is structured into two main sub-modules: `fork_management` and `join
 {
     "direction": "TD",
     "nodes": [
-        {"id": "fork_management", "label": "Manage Parallel Forks", "type": "module", "link": "fork_management.md"},
-        {"id": "join_operations", "label": "Perform Join Operations", "type": "module", "link": "join_operations.md"}
+        {
+            "id": "parallelism_management",
+            "label": "Parallelism Management",
+            "type": "module"
+        },
+        {
+            "id": "fork_management",
+            "label": "Manage Parallel Forks",
+            "type": "module",
+            "link": "fork_management.md"
+        },
+        {
+            "id": "join_operations",
+            "label": "Perform Join Operations",
+            "type": "module",
+            "link": "join_operations.md"
+        }
     ],
     "edges": [
-        {"source": "fork_management", "target": "join_operations", "label": "identifies synchronization points"}
+        {
+            "source": "fork_management",
+            "target": "join_operations",
+            "label": "identifies synchronization points"
+        }
     ],
     "groups": [
         {
             "id": "parallel_control",
             "label": "Parallel Execution Control",
             "role": "generative",
-            "nodes": ["fork_management", "join_operations"]
+            "nodes": [
+                "fork_management",
+                "join_operations"
+            ]
         }
     ]
 }

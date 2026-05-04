@@ -13,31 +13,88 @@ The `temporal_toolset_adapters` module acts as a bridge, transforming standard P
 {
     "direction": "TD",
     "nodes": [
-        {"id": "temporalize_toolset_functionality", "label": "Toolset Temporalization", "type": "module", "link": "temporalize_toolset_functionality.md"},
-        {"id": "temporal_wrapper_toolset_base", "label": "Base Temporal Toolset Wrapper", "type": "module", "link": "temporal_wrapper_toolset_base.md"},
-        {"id": "temporal_mcp_toolset_implementation", "label": "Temporal MCP Toolset", "type": "module", "link": "temporal_mcp_toolset_implementation.md"},
-        {"id": "temporal_workflow_context", "label": "Temporal Workflow Context", "type": "module", "link": "temporal_workflow_context.md"},
-        {"id": "temporal_agent_orchestration", "label": "Temporal Agent Orchestration", "type": "module", "link": "temporal_agent_orchestration.md"}
+        {
+            "id": "temporal_toolset_adapters",
+            "label": "Temporal Toolset Adapters",
+            "type": "module"
+        },
+        {
+            "id": "temporalize_toolset_functionality",
+            "label": "Toolset Temporalization",
+            "type": "module",
+            "link": "temporalize_toolset_functionality.md"
+        },
+        {
+            "id": "temporal_wrapper_toolset_base",
+            "label": "Base Temporal Toolset Wrapper",
+            "type": "module",
+            "link": "temporal_wrapper_toolset_base.md"
+        },
+        {
+            "id": "temporal_mcp_toolset_implementation",
+            "label": "Temporal MCP Toolset",
+            "type": "module",
+            "link": "temporal_mcp_toolset_implementation.md"
+        },
+        {
+            "id": "temporal_workflow_context",
+            "label": "Temporal Workflow Context",
+            "type": "module",
+            "link": "temporal_workflow_context.md"
+        },
+        {
+            "id": "temporal_agent_orchestration",
+            "label": "Temporal Agent Orchestration",
+            "type": "module",
+            "link": "temporal_agent_orchestration.md"
+        }
     ],
     "edges": [
-        {"source": "temporalize_toolset_functionality", "target": "temporal_wrapper_toolset_base", "label": "creates wrapper"},
-        {"source": "temporalize_toolset_functionality", "target": "temporal_mcp_toolset_implementation", "label": "creates MCP adapter"},
-        {"source": "temporal_mcp_toolset_implementation", "target": "temporal_workflow_context", "label": "accesses context"},
-        {"source": "temporal_wrapper_toolset_base", "target": "temporal_workflow_context", "label": "manages context"},
-        {"source": "temporal_mcp_toolset_implementation", "target": "temporal_agent_orchestration", "label": "orchestrates via agent"}
+        {
+            "source": "temporalize_toolset_functionality",
+            "target": "temporal_wrapper_toolset_base",
+            "label": "creates wrapper"
+        },
+        {
+            "source": "temporalize_toolset_functionality",
+            "target": "temporal_mcp_toolset_implementation",
+            "label": "creates MCP adapter"
+        },
+        {
+            "source": "temporal_mcp_toolset_implementation",
+            "target": "temporal_workflow_context",
+            "label": "accesses context"
+        },
+        {
+            "source": "temporal_wrapper_toolset_base",
+            "target": "temporal_workflow_context",
+            "label": "manages context"
+        },
+        {
+            "source": "temporal_mcp_toolset_implementation",
+            "target": "temporal_agent_orchestration",
+            "label": "orchestrates via agent"
+        }
     ],
     "groups": [
         {
             "id": "adapters",
             "label": "Toolset Adapters",
             "role": "generative",
-            "nodes": ["temporalize_toolset_functionality", "temporal_wrapper_toolset_base", "temporal_mcp_toolset_implementation"]
+            "nodes": [
+                "temporalize_toolset_functionality",
+                "temporal_wrapper_toolset_base",
+                "temporal_mcp_toolset_implementation"
+            ]
         },
         {
             "id": "temporal_core",
             "label": "Temporal Core Integration",
             "role": "data",
-            "nodes": ["temporal_workflow_context", "temporal_agent_orchestration"]
+            "nodes": [
+                "temporal_workflow_context",
+                "temporal_agent_orchestration"
+            ]
         }
     ]
 }

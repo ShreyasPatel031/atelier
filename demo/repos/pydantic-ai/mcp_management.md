@@ -49,34 +49,125 @@ The `mcp_management` module, through its `MCP` capability, integrates deeply int
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mcp_capability", "label": "MCP Capability", "type": "component", "link": null},
-        {"id": "builtin_or_local_tool", "label": "BuiltinOrLocalTool", "type": "external", "link": "capabilities_tool_integration.md"},
-        {"id": "mcp_server_tool", "label": "MCPServerTool", "type": "external", "link": "mcp_core.md"},
-        {"id": "mcp_server_streamable_http", "label": "MCPServerStreamableHTTP", "type": "external", "link": "mcp_core.md"},
-        {"id": "mcp_server_sse", "label": "MCPServerSSE", "type": "external", "link": "mcp_core.md"},
-        {"id": "abstract_toolset", "label": "AbstractToolset", "type": "external", "link": "toolset_management.md"},
-        {"id": "resolve_id", "label": "Resolve MCP ID", "type": "component", "link": null},
-        {"id": "create_builtin_tool", "label": "Create Builtin Tool", "type": "component", "link": null},
-        {"id": "create_local_tool", "label": "Create Local Tool", "type": "component", "link": null},
-        {"id": "filter_tools", "label": "Filter Tools", "type": "component", "link": null}
+        {
+            "id": "mcp_capability",
+            "label": "MCP Capability",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "builtin_or_local_tool",
+            "label": "BuiltinOrLocalTool",
+            "type": "external",
+            "link": "capabilities_tool_integration.md"
+        },
+        {
+            "id": "mcp_server_tool",
+            "label": "MCPServerTool",
+            "type": "external",
+            "link": "mcp_core.md"
+        },
+        {
+            "id": "mcp_server_streamable_http",
+            "label": "MCPServerStreamableHTTP",
+            "type": "external",
+            "link": "mcp_core.md"
+        },
+        {
+            "id": "mcp_server_sse",
+            "label": "MCPServerSSE",
+            "type": "external",
+            "link": "mcp_core.md"
+        },
+        {
+            "id": "abstract_toolset",
+            "label": "AbstractToolset",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "resolve_id",
+            "label": "Resolve MCP ID",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "create_builtin_tool",
+            "label": "Create Builtin Tool",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "create_local_tool",
+            "label": "Create Local Tool",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "filter_tools",
+            "label": "Filter Tools",
+            "type": "component",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "mcp_capability", "target": "builtin_or_local_tool", "label": "inherits"},
-        {"source": "mcp_capability", "target": "resolve_id", "label": "uses"},
-        {"source": "mcp_capability", "target": "create_builtin_tool", "label": "uses builtin config"},
-        {"source": "mcp_capability", "target": "create_local_tool", "label": "uses local config"},
-        {"source": "mcp_capability", "target": "filter_tools", "label": "applies filters"},
-        {"source": "create_builtin_tool", "target": "mcp_server_tool", "label": "instantiates"},
-        {"source": "create_local_tool", "target": "mcp_server_streamable_http", "label": "instantiates HTTP"},
-        {"source": "create_local_tool", "target": "mcp_server_sse", "label": "instantiates SSE"},
-        {"source": "filter_tools", "target": "abstract_toolset", "label": "filters and returns"}
+        {
+            "source": "mcp_capability",
+            "target": "builtin_or_local_tool",
+            "label": "inherits"
+        },
+        {
+            "source": "mcp_capability",
+            "target": "resolve_id",
+            "label": "uses"
+        },
+        {
+            "source": "mcp_capability",
+            "target": "create_builtin_tool",
+            "label": "uses builtin config"
+        },
+        {
+            "source": "mcp_capability",
+            "target": "create_local_tool",
+            "label": "uses local config"
+        },
+        {
+            "source": "mcp_capability",
+            "target": "filter_tools",
+            "label": "applies filters"
+        },
+        {
+            "source": "create_builtin_tool",
+            "target": "mcp_server_tool",
+            "label": "instantiates"
+        },
+        {
+            "source": "create_local_tool",
+            "target": "mcp_server_streamable_http",
+            "label": "instantiates HTTP"
+        },
+        {
+            "source": "create_local_tool",
+            "target": "mcp_server_sse",
+            "label": "instantiates SSE"
+        },
+        {
+            "source": "filter_tools",
+            "target": "abstract_toolset",
+            "label": "filters and returns"
+        }
     ],
     "groups": [
         {
             "id": "mcp_internal_logic",
             "label": "MCP Internal Logic",
             "role": "core",
-            "nodes": ["resolve_id", "create_builtin_tool", "create_local_tool", "filter_tools"]
+            "nodes": [
+                "resolve_id",
+                "create_builtin_tool",
+                "create_local_tool",
+                "filter_tools"
+            ]
         }
     ]
 }

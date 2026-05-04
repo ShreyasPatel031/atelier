@@ -10,27 +10,63 @@ The `toolset_management` module is composed of two primary sub-modules: the `too
 {
     "direction": "TD",
     "nodes": [
-        {"id": "tool_manager_logic", "label": "Manage Tool Execution", "type": "module", "link": "tool_manager_logic.md"},
-        {"id": "toolset_interfaces", "label": "Define Toolset Structures", "type": "module", "link": "toolset_interfaces.md"},
-        {"id": "agent_execution_graph", "label": "Agent Execution Graph", "type": "external", "link": "agent_execution_graph.md"}
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management",
+            "type": "module"
+        },
+        {
+            "id": "tool_manager_logic",
+            "label": "Manage Tool Execution",
+            "type": "module",
+            "link": "tool_manager_logic.md"
+        },
+        {
+            "id": "toolset_interfaces",
+            "label": "Define Toolset Structures",
+            "type": "module",
+            "link": "toolset_interfaces.md"
+        },
+        {
+            "id": "agent_execution_graph",
+            "label": "Agent Execution Graph",
+            "type": "external",
+            "link": "agent_execution_graph.md"
+        }
     ],
     "edges": [
-        {"source": "agent_execution_graph", "target": "tool_manager_logic", "label": "requests tool call"},
-        {"source": "tool_manager_logic", "target": "toolset_interfaces", "label": "uses tool definitions"},
-        {"source": "toolset_interfaces", "target": "tool_manager_logic", "label": "provides tools"}
+        {
+            "source": "agent_execution_graph",
+            "target": "tool_manager_logic",
+            "label": "requests tool call"
+        },
+        {
+            "source": "tool_manager_logic",
+            "target": "toolset_interfaces",
+            "label": "uses tool definitions"
+        },
+        {
+            "source": "toolset_interfaces",
+            "target": "tool_manager_logic",
+            "label": "provides tools"
+        }
     ],
     "groups": [
         {
             "id": "tool_orchestration",
             "label": "Tool Orchestration",
             "role": "generative",
-            "nodes": ["tool_manager_logic"]
+            "nodes": [
+                "tool_manager_logic"
+            ]
         },
         {
             "id": "tool_definitions",
             "label": "Tool Definitions",
             "role": "data",
-            "nodes": ["toolset_interfaces"]
+            "nodes": [
+                "toolset_interfaces"
+            ]
         }
     ]
 }

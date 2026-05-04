@@ -18,34 +18,78 @@ The `agent_spec_definition` module is composed of two primary sub-modules that w
 {
     "direction": "TD",
     "nodes": [
-        {"id": "agent_spec_model", "label": "Agent Specification Model", "type": "module", "link": "agent_spec_model.md"},
-        {"id": "schema_persistence", "label": "Schema Persistence", "type": "module", "link": "schema_persistence.md"},
-        {"id": "agent_definition", "label": "Agent Definition (Parent)", "type": "external", "link": "agent_definition.md"},
-        {"id": "capabilities_base", "label": "Capabilities Base", "type": "external", "link": "capabilities_base.md"}
+        {
+            "id": "agent_spec_definition",
+            "label": "Agent Specification Definition",
+            "type": "module"
+        },
+        {
+            "id": "agent_spec_model",
+            "label": "Agent Specification Model",
+            "type": "module",
+            "link": "agent_spec_model.md"
+        },
+        {
+            "id": "schema_persistence",
+            "label": "Schema Persistence",
+            "type": "module",
+            "link": "schema_persistence.md"
+        },
+        {
+            "id": "agent_definition",
+            "label": "Agent Definition (Parent)",
+            "type": "external",
+            "link": "agent_definition.md"
+        },
+        {
+            "id": "capabilities_base",
+            "label": "Capabilities Base",
+            "type": "external",
+            "link": "capabilities_base.md"
+        }
     ],
     "edges": [
-        {"source": "agent_definition", "target": "agent_spec_model", "label": "defines"},
-        {"source": "agent_spec_model", "target": "schema_persistence", "label": "generates schema"},
-        {"source": "agent_spec_model", "target": "capabilities_base", "label": "integrates"}
+        {
+            "source": "agent_definition",
+            "target": "agent_spec_model",
+            "label": "defines"
+        },
+        {
+            "source": "agent_spec_model",
+            "target": "schema_persistence",
+            "label": "generates schema"
+        },
+        {
+            "source": "agent_spec_model",
+            "target": "capabilities_base",
+            "label": "integrates"
+        }
     ],
     "groups": [
         {
             "id": "core_spec",
             "label": "Core Specification",
             "role": "data",
-            "nodes": ["agent_spec_model"]
+            "nodes": [
+                "agent_spec_model"
+            ]
         },
         {
             "id": "schema_management",
             "label": "Schema Management",
             "role": "analytical",
-            "nodes": ["schema_persistence"]
+            "nodes": [
+                "schema_persistence"
+            ]
         },
         {
             "id": "external_dependencies",
             "label": "External Dependencies",
             "role": "surface",
-            "nodes": ["agent_definition", "capabilities_base"]
+            "nodes": [
+                "agent_definition",
+                "capabilities_base"
+            ]
         }
     ]
 }

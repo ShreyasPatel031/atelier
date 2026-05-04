@@ -3,24 +3,26 @@ This module provides `InMemoryCache`, a simple in-memory key-value store for cac
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "InMemoryCache",
-      "label": "InMemoryCache",
-      "metadata": {
-        "type": "class",
-        "full_name": "libs.core.langchain_core.caches.InMemoryCache"
-      }
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "cache_implementations",
-      "label": "cache_implementations",
-      "nodes": ["InMemoryCache"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "InMemoryCache",
+            "label": "InMemoryCache",
+            "metadata": {
+                "type": "class",
+                "full_name": "libs.core.langchain_core.caches.InMemoryCache"
+            }
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "cache_implementations",
+            "label": "cache_implementations",
+            "nodes": [
+                "InMemoryCache"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

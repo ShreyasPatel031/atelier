@@ -3,47 +3,35 @@ This module provides helper utilities and base classes for the CrewAI command-li
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "BaseCommand",
-      "label": "BaseCommand",
-      "type": "class"
-    },
-    {
-      "id": "PlusAPIMixin",
-      "label": "PlusAPIMixin",
-      "type": "class"
-    },
-    {
-      "id": "copy_template_files",
-      "label": "copy_template_files",
-      "type": "function"
-    },
-    {
-      "id": "run_crew_tool_with_messages",
-      "label": "run_crew_tool_with_messages",
-      "type": "function"
-    },
-    {
-      "id": "ContentCrew",
-      "label": "ContentCrew",
-      "type": "class"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "cli_helpers",
-      "label": "cli_helpers",
-      "contains": [
-        "BaseCommand",
-        "PlusAPIMixin",
-        "copy_template_files",
-        "run_crew_tool_with_messages",
-        "ContentCrew"
-      ]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "BaseCommand",
+            "label": "BaseCommand",
+            "type": "class"
+        },
+        {
+            "id": "PlusAPIMixin",
+            "label": "PlusAPIMixin",
+            "type": "class"
+        },
+        {
+            "id": "copy_template_files",
+            "label": "copy_template_files",
+            "type": "function"
+        },
+        {
+            "id": "run_crew_tool_with_messages",
+            "label": "run_crew_tool_with_messages",
+            "type": "function"
+        },
+        {
+            "id": "ContentCrew",
+            "label": "ContentCrew",
+            "type": "class"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

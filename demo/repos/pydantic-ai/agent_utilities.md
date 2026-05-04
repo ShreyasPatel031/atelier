@@ -12,38 +12,129 @@ The following diagram illustrates the internal structure of the `agent_utilities
 {
     "direction": "TD",
     "nodes": [
-        {"id": "async_concurrency", "label": "Asynchronous Concurrency", "type": "module", "link": "async_concurrency.md"},
-        {"id": "data_formatting", "label": "Data Formatting", "type": "module", "link": "data_formatting.md"},
-        {"id": "runtime_usage", "label": "Runtime Usage Tracking", "type": "module", "link": "runtime_usage.md"},
-        {"id": "type_and_schema_utilities", "label": "Type and Schema Utilities", "type": "module", "link": "type_and_schema_utilities.md"},
-        {"id": "model_utilities", "label": "Model Utilities", "type": "external", "link": "model_utilities.md"},
-        {"id": "toolset_management", "label": "Toolset Management", "type": "external", "link": "toolset_management.md"},
-        {"id": "agent_definition", "label": "Agent Definition", "type": "external", "link": "agent_definition.md"},
-        {"id": "agent_output_handling", "label": "Agent Output Handling", "type": "external", "link": "agent_output_handling.md"}
+        {
+            "id": "agent_utilities",
+            "label": "Agent Utilities",
+            "type": "module"
+        },
+        {
+            "id": "async_concurrency",
+            "label": "Asynchronous Concurrency",
+            "type": "module",
+            "link": "async_concurrency.md"
+        },
+        {
+            "id": "data_formatting",
+            "label": "Data Formatting",
+            "type": "module",
+            "link": "data_formatting.md"
+        },
+        {
+            "id": "runtime_usage",
+            "label": "Runtime Usage Tracking",
+            "type": "module",
+            "link": "runtime_usage.md"
+        },
+        {
+            "id": "type_and_schema_utilities",
+            "label": "Type and Schema Utilities",
+            "type": "module",
+            "link": "type_and_schema_utilities.md"
+        },
+        {
+            "id": "model_utilities",
+            "label": "Model Utilities",
+            "type": "external",
+            "link": "model_utilities.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "agent_definition",
+            "label": "Agent Definition",
+            "type": "external",
+            "link": "agent_definition.md"
+        },
+        {
+            "id": "agent_output_handling",
+            "label": "Agent Output Handling",
+            "type": "external",
+            "link": "agent_output_handling.md"
+        }
     ],
     "edges": [
-        {"source": "model_utilities", "target": "async_concurrency", "label": "uses concurrency limiters"},
-        {"source": "toolset_management", "target": "type_and_schema_utilities", "label": "introspects functions"},
-        {"source": "agent_definition", "target": "data_formatting", "label": "formats prompts"},
-        {"source": "agent_output_handling", "target": "data_formatting", "label": "formats output"},
-        {"source": "agent_output_handling", "target": "runtime_usage", "label": "reports usage"},
-        {"source": "agent_utilities", "target": "async_concurrency", "label": "provides"},
-        {"source": "agent_utilities", "target": "data_formatting", "label": "provides"},
-        {"source": "agent_utilities", "target": "runtime_usage", "label": "provides"},
-        {"source": "agent_utilities", "target": "type_and_schema_utilities", "label": "provides"}
+        {
+            "source": "model_utilities",
+            "target": "async_concurrency",
+            "label": "uses concurrency limiters"
+        },
+        {
+            "source": "toolset_management",
+            "target": "type_and_schema_utilities",
+            "label": "introspects functions"
+        },
+        {
+            "source": "agent_definition",
+            "target": "data_formatting",
+            "label": "formats prompts"
+        },
+        {
+            "source": "agent_output_handling",
+            "target": "data_formatting",
+            "label": "formats output"
+        },
+        {
+            "source": "agent_output_handling",
+            "target": "runtime_usage",
+            "label": "reports usage"
+        },
+        {
+            "source": "agent_utilities",
+            "target": "async_concurrency",
+            "label": "provides"
+        },
+        {
+            "source": "agent_utilities",
+            "target": "data_formatting",
+            "label": "provides"
+        },
+        {
+            "source": "agent_utilities",
+            "target": "runtime_usage",
+            "label": "provides"
+        },
+        {
+            "source": "agent_utilities",
+            "target": "type_and_schema_utilities",
+            "label": "provides"
+        }
     ],
     "groups": [
         {
             "id": "agent_core_utilities",
             "label": "Agent Core Utilities",
             "role": "generative",
-            "nodes": ["async_concurrency", "data_formatting", "runtime_usage", "type_and_schema_utilities"]
+            "nodes": [
+                "async_concurrency",
+                "data_formatting",
+                "runtime_usage",
+                "type_and_schema_utilities"
+            ]
         },
         {
             "id": "system_dependencies",
             "label": "System Dependencies",
             "role": "data",
-            "nodes": ["model_utilities", "toolset_management", "agent_definition", "agent_output_handling"]
+            "nodes": [
+                "model_utilities",
+                "toolset_management",
+                "agent_definition",
+                "agent_output_handling"
+            ]
         }
     ]
 }

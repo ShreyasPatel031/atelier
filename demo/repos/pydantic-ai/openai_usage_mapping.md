@@ -25,11 +25,25 @@ The `openai_usage_mapping` module provides the core functionality for translatin
 {
     "direction": "TD",
     "nodes": [
-        {"id": "map_usage", "label": "Map OpenAI Usage to Standard Format", "type": "component", "link": null},
-        {"id": "usage_type", "label": "Usage Data Type", "type": "external", "link": "agent_utilities.md"}
+        {
+            "id": "map_usage",
+            "label": "Map OpenAI Usage to Standard Format",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "usage_type",
+            "label": "Usage Data Type",
+            "type": "external",
+            "link": "agent_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "map_usage", "target": "usage_type", "label": "consumes"}
+        {
+            "source": "map_usage",
+            "target": "usage_type",
+            "label": "consumes"
+        }
     ],
     "groups": []
 }

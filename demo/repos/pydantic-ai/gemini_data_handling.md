@@ -18,8 +18,16 @@ These data structures are utilized by the [gemini_api_interaction.md](gemini_api
 {
     "direction": "TD",
     "nodes": [
-        {"id": "inline_data", "label": "Inline Data (_GeminiInlineData)", "type": "component"},
-        {"id": "file_data", "label": "File Data (_GeminiFileData)", "type": "component"}
+        {
+            "id": "inline_data",
+            "label": "Inline Data (_GeminiInlineData)",
+            "type": "component"
+        },
+        {
+            "id": "file_data",
+            "label": "File Data (_GeminiFileData)",
+            "type": "component"
+        }
     ],
     "edges": [],
     "groups": [
@@ -27,7 +35,10 @@ These data structures are utilized by the [gemini_api_interaction.md](gemini_api
             "id": "gemini_data_structures",
             "label": "Gemini Data Structures",
             "role": "data",
-            "nodes": ["inline_data", "file_data"]
+            "nodes": [
+                "inline_data",
+                "file_data"
+            ]
         }
     ]
 }

@@ -6,14 +6,41 @@ This module provides core utilities for integrating Groq chat models, focusing o
 {
     "direction": "TD",
     "nodes": [
-        {"id": "groq_message_conversion", "label": "Message Conversion", "type": "module", "link": "groq_message_conversion.md"},
-        {"id": "groq_usage_reporting", "label": "Usage Reporting", "type": "module", "link": "groq_usage_reporting.md"}
+        {
+            "id": "libs_partners_groq",
+            "label": "Groq Chat Model Integration",
+            "type": "module"
+        },
+        {
+            "id": "groq_message_conversion",
+            "label": "Message Conversion",
+            "type": "module",
+            "link": "groq_message_conversion.md"
+        },
+        {
+            "id": "groq_usage_reporting",
+            "label": "Usage Reporting",
+            "type": "module",
+            "link": "groq_usage_reporting.md"
+        }
     ],
     "edges": [
-        {"source": "groq_message_conversion", "target": "groq_usage_reporting", "label": "generates metadata"}
+        {
+            "source": "groq_message_conversion",
+            "target": "groq_usage_reporting",
+            "label": "generates metadata"
+        }
     ],
     "groups": [
-        {"id": "groq_integration_logic", "label": "Groq Integration Logic", "role": "generative", "nodes": ["groq_message_conversion", "groq_usage_reporting"]}
+        {
+            "id": "groq_integration_logic",
+            "label": "Groq Integration Logic",
+            "role": "generative",
+            "nodes": [
+                "groq_message_conversion",
+                "groq_usage_reporting"
+            ]
+        }
     ]
 }
 -->

@@ -3,17 +3,17 @@ This module provides the `PerplexitySearchRetriever`, a LangChain-compatible ret
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "libs.partners.perplexity.langchain_perplexity.retrievers.PerplexitySearchRetriever",
-      "label": "PerplexitySearchRetriever",
-      "metadata": {
-        "type": "class"
-      }
-    }
-  ],
-  "edges": [],
-  "groups": []
+    "nodes": [
+        {
+            "id": "libs.partners.perplexity.langchain_perplexity.retrievers.PerplexitySearchRetriever",
+            "label": "PerplexitySearchRetriever",
+            "metadata": {
+                "type": "class"
+            }
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 

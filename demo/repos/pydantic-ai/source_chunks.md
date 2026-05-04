@@ -20,7 +20,17 @@ This module contains the following sub-module:
 {
     "direction": "TD",
     "nodes": [
-        {"id": "source_content_definition", "label": "Define Source Content", "type": "module", "link": "source_content_definition.md"}
+        {
+            "id": "source_chunks",
+            "label": "Source Information Chunks",
+            "type": "module"
+        },
+        {
+            "id": "source_content_definition",
+            "label": "Define Source Content",
+            "type": "module",
+            "link": "source_content_definition.md"
+        }
     ],
     "edges": [],
     "groups": [
@@ -28,7 +38,9 @@ This module contains the following sub-module:
             "id": "source_data_models",
             "label": "Source Data Models",
             "role": "data",
-            "nodes": ["source_content_definition"]
+            "nodes": [
+                "source_content_definition"
+            ]
         }
     ]
 }

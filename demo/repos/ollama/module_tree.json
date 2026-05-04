@@ -1116,7 +1116,8 @@
           "source": "core_application",
           "target": "configuration_and_utilities"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "model_management_and_serving": {
@@ -1548,7 +1549,8 @@
           "source": "model_management_and_serving",
           "target": "model_runtime_and_inference"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "model_integrations_and_tools": {
@@ -1636,16 +1638,7 @@
                   "label": "tests"
                 }
               ],
-              "groups": [
-                {
-                  "id": "cmd.launch.vscode",
-                  "label": "cmd.launch.vscode"
-                },
-                {
-                  "id": "cmd.launch.vscode_test",
-                  "label": "cmd.launch.vscode_test"
-                }
-              ]
+              "groups": []
             }
           },
           "hermes_integration": {
@@ -1764,43 +1757,7 @@
                   "label": "cmd.launch.openclaw_test.TestOpenclawModelsEdgeCases"
                 }
               ],
-              "edges": [
-                {
-                  "from": "TOE",
-                  "to": "ORun",
-                  "label": "tests config"
-                },
-                {
-                  "from": "TOEMN",
-                  "to": "ORun",
-                  "label": "tests config"
-                },
-                {
-                  "from": "TOEAP",
-                  "to": "ORun",
-                  "label": "tests config"
-                },
-                {
-                  "from": "TIO",
-                  "to": "ORun",
-                  "label": "tests onboarding"
-                },
-                {
-                  "from": "TORPA",
-                  "to": "ORun",
-                  "label": "tests run args"
-                },
-                {
-                  "from": "TOLP",
-                  "to": "ORun",
-                  "label": "tests legacy config"
-                },
-                {
-                  "from": "TOMEC",
-                  "to": "ORun",
-                  "label": "tests config parsing"
-                }
-              ],
+              "edges": [],
               "groups": [
                 {
                   "id": "Core",
@@ -2320,60 +2277,7 @@
               "target": "pi_integration"
             }
           ],
-          "groups": [
-            {
-              "id": "G_EI",
-              "label": "external_integrations",
-              "members": [
-                "C_DR",
-                "C_HE",
-                "C_OC"
-              ]
-            },
-            {
-              "id": "G_OU",
-              "label": "Openclaw Utilities",
-              "members": [
-                "OU_CP",
-                "OU_EOI",
-                "OU_WH",
-                "OU_PDS",
-                "OU_EWSP",
-                "OU_RWSP",
-                "OU_RCSP",
-                "OU_EH",
-                "OU_EC"
-              ]
-            },
-            {
-              "id": "G_TU",
-              "label": "Test Utilities",
-              "members": [
-                "TU_HTS",
-                "TU_STH",
-                "TU_WHP",
-                "TU_WHO"
-              ]
-            },
-            {
-              "id": "G_CF",
-              "label": "Configuration Files",
-              "members": [
-                "CF_SET",
-                "CF_CFG",
-                "CF_OCJ"
-              ]
-            },
-            {
-              "id": "G_ES",
-              "label": "External Services",
-              "members": [
-                "ES_OLL",
-                "ES_OPR",
-                "ES_ANT"
-              ]
-            }
-          ]
+          "groups": []
         }
       },
       "tool_execution_and_web_search": {
@@ -2621,18 +2525,7 @@
                   "label": "Manages Streaming"
                 }
               ],
-              "groups": [
-                {
-                  "id": "anthropic_api_middleware",
-                  "label": "anthropic_api_middleware",
-                  "members": [
-                    "A",
-                    "B",
-                    "C",
-                    "D"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "openai_api_middleware": {
@@ -2932,7 +2825,8 @@
           "source": "model_integrations_and_tools",
           "target": "command_line_launchers"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "model_architecture_and_ml_ops": {
@@ -3417,15 +3311,7 @@
                 }
               ],
               "edges": [],
-              "groups": [
-                {
-                  "id": "model_file_parsing",
-                  "label": "model_file_parsing",
-                  "contains": [
-                    "parser.parser_test.TestFilesForModel"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "prompt_generation": {
@@ -4003,7 +3889,8 @@
           "source": "model_architecture_and_ml_ops",
           "target": "image_generation_subsystem"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "system_testing_and_benchmarking": {
@@ -4197,23 +4084,7 @@
                   "target": "E"
                 }
               ],
-              "groups": [
-                {
-                  "id": "group_integration_model_perf_test",
-                  "label": "integration.model_perf_test",
-                  "members": [
-                    "B",
-                    "C"
-                  ]
-                },
-                {
-                  "id": "group_cmd_bench_bench_test",
-                  "label": "cmd.bench.bench_test",
-                  "members": [
-                    "A"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "core_ml_transform_benchmarking": {
@@ -4407,7 +4278,8 @@
           "source": "system_testing_and_benchmarking",
           "target": "performance_benchmarking"
         }
-      ]
+      ],
+      "groups": []
     }
   }
 }

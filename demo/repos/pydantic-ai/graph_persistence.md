@@ -10,26 +10,59 @@ The `graph_persistence` module is built around a core abstract interface, `BaseS
 {
     "direction": "TD",
     "nodes": [
-        {"id": "base_persistence_interface", "label": "Base Persistence Interface", "type": "module", "link": "base_persistence_interface.md"},
-        {"id": "file_state_persistence", "label": "File State Persistence", "type": "module", "link": "file_state_persistence.md"},
-        {"id": "in_memory_state_persistence", "label": "In-Memory State Persistence", "type": "module", "link": "in_memory_state_persistence.md"}
+        {
+            "id": "graph_persistence",
+            "label": "Graph Persistence",
+            "type": "module"
+        },
+        {
+            "id": "base_persistence_interface",
+            "label": "Base Persistence Interface",
+            "type": "module",
+            "link": "base_persistence_interface.md"
+        },
+        {
+            "id": "file_state_persistence",
+            "label": "File State Persistence",
+            "type": "module",
+            "link": "file_state_persistence.md"
+        },
+        {
+            "id": "in_memory_state_persistence",
+            "label": "In-Memory State Persistence",
+            "type": "module",
+            "link": "in_memory_state_persistence.md"
+        }
     ],
     "edges": [
-        {"source": "file_state_persistence", "target": "base_persistence_interface", "label": "implements"},
-        {"source": "in_memory_state_persistence", "target": "base_persistence_interface", "label": "implements"}
+        {
+            "source": "file_state_persistence",
+            "target": "base_persistence_interface",
+            "label": "implements"
+        },
+        {
+            "source": "in_memory_state_persistence",
+            "target": "base_persistence_interface",
+            "label": "implements"
+        }
     ],
     "groups": [
         {
             "id": "interfaces",
             "label": "Persistence Interfaces",
             "role": "analytical",
-            "nodes": ["base_persistence_interface"]
+            "nodes": [
+                "base_persistence_interface"
+            ]
         },
         {
             "id": "implementations",
             "label": "Concrete Implementations",
             "role": "data",
-            "nodes": ["file_state_persistence", "in_memory_state_persistence"]
+            "nodes": [
+                "file_state_persistence",
+                "in_memory_state_persistence"
+            ]
         }
     ]
 }

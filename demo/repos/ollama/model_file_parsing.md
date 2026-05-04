@@ -3,24 +3,16 @@ This module contains test cases for parsing and identifying model files within a
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "parser.parser_test.TestFilesForModel",
-      "label": "TestFilesForModel",
-      "type": "test_function",
-      "language": "go"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "model_file_parsing",
-      "label": "model_file_parsing",
-      "contains": [
-        "parser.parser_test.TestFilesForModel"
-      ]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "parser.parser_test.TestFilesForModel",
+            "label": "TestFilesForModel",
+            "type": "test_function",
+            "language": "go"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

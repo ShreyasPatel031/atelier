@@ -10,7 +10,17 @@ The `common_content_checks` module is composed of a single sub-module: `content_
 {
     "direction": "TD",
     "nodes": [
-        {"id": "content_evaluators", "label": "Content Validation Evaluators", "type": "module", "link": "content_evaluators.md"}
+        {
+            "id": "common_content_checks",
+            "label": "Common Content Checks",
+            "type": "module"
+        },
+        {
+            "id": "content_evaluators",
+            "label": "Content Validation Evaluators",
+            "type": "module",
+            "link": "content_evaluators.md"
+        }
     ],
     "edges": [],
     "groups": [
@@ -18,7 +28,9 @@ The `common_content_checks` module is composed of a single sub-module: `content_
             "id": "validation_logic",
             "label": "Validation Logic",
             "role": "analytical",
-            "nodes": ["content_evaluators"]
+            "nodes": [
+                "content_evaluators"
+            ]
         }
     ]
 }

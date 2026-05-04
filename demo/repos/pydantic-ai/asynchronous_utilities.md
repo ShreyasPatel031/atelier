@@ -10,27 +10,25 @@ This module is a foundational layer for asynchronous execution, primarily focusi
 {
     "direction": "TD",
     "nodes": [
-        {"id": "async_execution_primitives", "label": "Async Execution Primitives", "type": "module", "link": "async_execution_primitives.md"},
-        {"id": "concurrency_management", "label": "Concurrency Management", "type": "module", "link": "concurrency_management.md"}
-    ],
-    "edges": [
-        {"source": "concurrency_management", "target": "async_execution_primitives", "label": "requests async execution"},
-        {"source": "async_execution_primitives", "target": "concurrency_management", "label": "provides execution context"}
-    ],
-    "groups": [
         {
-            "id": "async_core",
-            "label": "Async Core Primitives",
-            "role": "generative",
-            "nodes": ["async_execution_primitives"]
+            "id": "asynchronous_utilities",
+            "label": "Asynchronous Utilities",
+            "type": "module"
         },
         {
-            "id": "concurrency_layer",
-            "label": "Concurrency Layer",
-            "role": "analytical",
-            "nodes": ["concurrency_management"]
+            "id": "c0",
+            "label": "get_event_loop",
+            "type": "component"
         }
-    ]
+    ],
+    "edges": [
+        {
+            "source": "asynchronous_utilities",
+            "target": "c0"
+        }
+    ],
+    "groups": [],
+    "_auto_generated": true
 }
 -->
 

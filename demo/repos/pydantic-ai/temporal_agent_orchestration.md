@@ -95,37 +95,140 @@ An internal `_temporal_overrides` context manager is used to activate workflow-s
 {
     "direction": "TD",
     "nodes": [
-        {"id": "temporal_agent", "label": "TemporalAgent", "type": "component", "link": null},
-        {"id": "wrapped_agent", "label": "Wrapped Agent (AbstractAgent)", "type": "external", "link": "agent_base_interface.md"},
-        {"id": "temporal_workflow_runtime", "label": "Temporal Workflow Runtime", "type": "external", "link": "https://temporal.io/"},
-        {"id": "temporal_activities", "label": "Temporal Activities", "type": "external", "link": "https://temporal.io/"},
-        {"id": "temporal_model_adapter", "label": "Temporal Model Adapter", "type": "component", "link": null},
-        {"id": "temporal_toolset_adapter", "label": "Temporal Toolset Adapter", "type": "component", "link": "temporal_toolset_adapters.md"},
-        {"id": "event_stream_activity", "label": "Event Stream Handler Activity", "type": "component", "link": null},
-        {"id": "run_context_serializer", "label": "Run Context Serializer (TemporalRunContext)", "type": "external", "link": "temporal_workflow_context.md"},
-        {"id": "abstract_toolset", "label": "AbstractToolset", "type": "external", "link": "toolset_interfaces.md"},
-        {"id": "abstract_model", "label": "Abstract Model", "type": "external", "link": "model_core_interfaces.md"}
+        {
+            "id": "temporal_agent",
+            "label": "TemporalAgent",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "wrapped_agent",
+            "label": "Wrapped Agent (AbstractAgent)",
+            "type": "external",
+            "link": "agent_base_interface.md"
+        },
+        {
+            "id": "temporal_workflow_runtime",
+            "label": "Temporal Workflow Runtime",
+            "type": "external",
+            "link": "https://temporal.io/"
+        },
+        {
+            "id": "temporal_activities",
+            "label": "Temporal Activities",
+            "type": "external",
+            "link": "https://temporal.io/"
+        },
+        {
+            "id": "temporal_model_adapter",
+            "label": "Temporal Model Adapter",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "temporal_toolset_adapter",
+            "label": "Temporal Toolset Adapter",
+            "type": "component",
+            "link": "temporal_toolset_adapters.md"
+        },
+        {
+            "id": "event_stream_activity",
+            "label": "Event Stream Handler Activity",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "run_context_serializer",
+            "label": "Run Context Serializer (TemporalRunContext)",
+            "type": "external",
+            "link": "temporal_workflow_context.md"
+        },
+        {
+            "id": "abstract_toolset",
+            "label": "AbstractToolset",
+            "type": "external",
+            "link": "toolset_interfaces.md"
+        },
+        {
+            "id": "abstract_model",
+            "label": "Abstract Model",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        }
     ],
     "edges": [
-        {"source": "temporal_agent", "target": "wrapped_agent", "label": "wraps and delegates to"},
-        {"source": "temporal_agent", "target": "temporal_workflow_runtime", "label": "orchestrates via"},
-        {"source": "temporal_workflow_runtime", "target": "temporal_activities", "label": "executes"},
-        {"source": "temporal_agent", "target": "temporal_model_adapter", "label": "uses for model calls"},
-        {"source": "temporal_agent", "target": "temporal_toolset_adapter", "label": "uses for tool calls"},
-        {"source": "temporal_agent", "target": "event_stream_activity", "label": "uses for event handling"},
-        {"source": "temporal_model_adapter", "target": "temporal_activities", "label": "maps model requests to"},
-        {"source": "temporal_toolset_adapter", "target": "temporal_activities", "label": "maps tool calls to"},
-        {"source": "event_stream_activity", "target": "temporal_activities", "label": "handles stream events via"},
-        {"source": "temporal_agent", "target": "run_context_serializer", "label": "serializes/deserializes context"},
-        {"source": "temporal_model_adapter", "target": "abstract_model", "label": "implements"},
-        {"source": "temporal_toolset_adapter", "target": "abstract_toolset", "label": "adapts"}
+        {
+            "source": "temporal_agent",
+            "target": "wrapped_agent",
+            "label": "wraps and delegates to"
+        },
+        {
+            "source": "temporal_agent",
+            "target": "temporal_workflow_runtime",
+            "label": "orchestrates via"
+        },
+        {
+            "source": "temporal_workflow_runtime",
+            "target": "temporal_activities",
+            "label": "executes"
+        },
+        {
+            "source": "temporal_agent",
+            "target": "temporal_model_adapter",
+            "label": "uses for model calls"
+        },
+        {
+            "source": "temporal_agent",
+            "target": "temporal_toolset_adapter",
+            "label": "uses for tool calls"
+        },
+        {
+            "source": "temporal_agent",
+            "target": "event_stream_activity",
+            "label": "uses for event handling"
+        },
+        {
+            "source": "temporal_model_adapter",
+            "target": "temporal_activities",
+            "label": "maps model requests to"
+        },
+        {
+            "source": "temporal_toolset_adapter",
+            "target": "temporal_activities",
+            "label": "maps tool calls to"
+        },
+        {
+            "source": "event_stream_activity",
+            "target": "temporal_activities",
+            "label": "handles stream events via"
+        },
+        {
+            "source": "temporal_agent",
+            "target": "run_context_serializer",
+            "label": "serializes/deserializes context"
+        },
+        {
+            "source": "temporal_model_adapter",
+            "target": "abstract_model",
+            "label": "implements"
+        },
+        {
+            "source": "temporal_toolset_adapter",
+            "target": "abstract_toolset",
+            "label": "adapts"
+        }
     ],
     "groups": [
         {
             "id": "temporal_agent_orchestration_components",
             "label": "Temporal Agent Orchestration Components",
-            "role": "core", 
-            "nodes": ["temporal_agent", "temporal_model_adapter", "temporal_toolset_adapter", "event_stream_activity"]
+            "role": "core",
+            "nodes": [
+                "temporal_agent",
+                "temporal_model_adapter",
+                "temporal_toolset_adapter",
+                "event_stream_activity"
+            ]
         }
     ]
 }

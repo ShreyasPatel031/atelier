@@ -19,32 +19,94 @@ The various provider sub-modules within this component feed into the broader [mo
 {
     "direction": "TD",
     "nodes": [
-        {"id": "cloud_based_providers", "label": "Cloud-Based Providers", "type": "module", "link": "cloud_based_providers.md"},
-        {"id": "ai_platform_providers", "label": "AI Platform Integrations", "type": "module", "link": "ai_platform_providers.md"},
-        {"id": "local_inference_providers", "label": "Local Inference Providers", "type": "module", "link": "local_inference_providers.md"},
-        {"id": "model_core_interfaces", "label": "Core Model Interfaces", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "model_provider_configurations", "label": "Model Configurations", "type": "external", "link": "model_provider_configurations.md"}
-    ],
-    "edges": [
-        {"source": "cloud_based_providers", "target": "model_core_interfaces", "label": "provides client"},
-        {"source": "cloud_based_providers", "target": "model_provider_configurations", "label": "utilizes profiles"},
-        {"source": "ai_platform_providers", "target": "model_core_interfaces", "label": "provides client"},
-        {"source": "ai_platform_providers", "target": "model_provider_configurations", "label": "utilizes profiles"},
-        {"source": "local_inference_providers", "target": "model_core_interfaces", "label": "provides client"},
-        {"source": "local_inference_providers", "target": "model_provider_configurations", "label": "utilizes profiles"}
-    ],
-    "groups": [
         {
             "id": "openai_compatible_providers",
             "label": "OpenAI-Compatible Providers",
+            "type": "module"
+        },
+        {
+            "id": "cloud_based_providers",
+            "label": "Cloud-Based Providers",
+            "type": "module",
+            "link": "cloud_based_providers.md"
+        },
+        {
+            "id": "ai_platform_providers",
+            "label": "AI Platform Integrations",
+            "type": "module",
+            "link": "ai_platform_providers.md"
+        },
+        {
+            "id": "local_inference_providers",
+            "label": "Local Inference Providers",
+            "type": "module",
+            "link": "local_inference_providers.md"
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Core Model Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "model_provider_configurations",
+            "label": "Model Configurations",
+            "type": "external",
+            "link": "model_provider_configurations.md"
+        }
+    ],
+    "edges": [
+        {
+            "source": "cloud_based_providers",
+            "target": "model_core_interfaces",
+            "label": "provides client"
+        },
+        {
+            "source": "cloud_based_providers",
+            "target": "model_provider_configurations",
+            "label": "utilizes profiles"
+        },
+        {
+            "source": "ai_platform_providers",
+            "target": "model_core_interfaces",
+            "label": "provides client"
+        },
+        {
+            "source": "ai_platform_providers",
+            "target": "model_provider_configurations",
+            "label": "utilizes profiles"
+        },
+        {
+            "source": "local_inference_providers",
+            "target": "model_core_interfaces",
+            "label": "provides client"
+        },
+        {
+            "source": "local_inference_providers",
+            "target": "model_provider_configurations",
+            "label": "utilizes profiles"
+        }
+    ],
+    "groups": [
+        {
+            "id": "openai_compatible_providers__group",
+            "label": "OpenAI-Compatible Providers",
             "role": "surface",
-            "nodes": ["cloud_based_providers", "ai_platform_providers", "local_inference_providers"]
+            "nodes": [
+                "cloud_based_providers",
+                "ai_platform_providers",
+                "local_inference_providers"
+            ],
+            "_repaired": "r4_group_renamed_avoid_node_collision"
         },
         {
             "id": "core_model_integration",
             "label": "Core Model Integration",
             "role": "generative",
-            "nodes": ["model_core_interfaces", "model_provider_configurations"]
+            "nodes": [
+                "model_core_interfaces",
+                "model_provider_configurations"
+            ]
         }
     ]
 }

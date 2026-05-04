@@ -10,32 +10,95 @@ This module wraps existing AI agents, enhancing them with Prefect's capabilities
 {
     "direction": "TD",
     "nodes": [
-        {"id": "abstract_agent", "label": "Abstract Agent", "type": "external", "link": "agent_definition.md"},
-        {"id": "abstract_toolset", "label": "Abstract Toolset", "type": "external", "link": "toolset_management.md"},
-        {"id": "model_interface", "label": "Model Interface", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "prefect_agent_integration", "label": "Prefect Agent Integration", "type": "module", "link": "prefect_agent_integration.md"},
-        {"id": "toolset_adaptation", "label": "Toolset Adaptation", "type": "module", "link": "toolset_adaptation.md"},
-        {"id": "agent_cache_policies", "label": "Agent Cache Policies", "type": "module", "link": "agent_cache_policies.md"}
+        {
+            "id": "durable_execution_prefect",
+            "label": "Durable Execution with Prefect",
+            "type": "module"
+        },
+        {
+            "id": "abstract_agent",
+            "label": "Abstract Agent",
+            "type": "external",
+            "link": "agent_definition.md"
+        },
+        {
+            "id": "abstract_toolset",
+            "label": "Abstract Toolset",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "model_interface",
+            "label": "Model Interface",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "prefect_agent_integration",
+            "label": "Prefect Agent Integration",
+            "type": "module",
+            "link": "prefect_agent_integration.md"
+        },
+        {
+            "id": "toolset_adaptation",
+            "label": "Toolset Adaptation",
+            "type": "module",
+            "link": "toolset_adaptation.md"
+        },
+        {
+            "id": "agent_cache_policies",
+            "label": "Agent Cache Policies",
+            "type": "module",
+            "link": "agent_cache_policies.md"
+        }
     ],
     "edges": [
-        {"source": "prefect_agent_integration", "target": "abstract_agent", "label": "wraps"},
-        {"source": "prefect_agent_integration", "target": "model_interface", "label": "uses"},
-        {"source": "prefect_agent_integration", "target": "toolset_adaptation", "label": "adapts toolsets via"},
-        {"source": "prefect_agent_integration", "target": "agent_cache_policies", "label": "applies caching with"},
-        {"source": "toolset_adaptation", "target": "abstract_toolset", "label": "transforms"}
+        {
+            "source": "prefect_agent_integration",
+            "target": "abstract_agent",
+            "label": "wraps"
+        },
+        {
+            "source": "prefect_agent_integration",
+            "target": "model_interface",
+            "label": "uses"
+        },
+        {
+            "source": "prefect_agent_integration",
+            "target": "toolset_adaptation",
+            "label": "adapts toolsets via"
+        },
+        {
+            "source": "prefect_agent_integration",
+            "target": "agent_cache_policies",
+            "label": "applies caching with"
+        },
+        {
+            "source": "toolset_adaptation",
+            "target": "abstract_toolset",
+            "label": "transforms"
+        }
     ],
     "groups": [
         {
             "id": "agent_components",
             "label": "Agent Core",
             "role": "generative",
-            "nodes": ["abstract_agent", "model_interface", "abstract_toolset"]
+            "nodes": [
+                "abstract_agent",
+                "model_interface",
+                "abstract_toolset"
+            ]
         },
         {
             "id": "prefect_integration_layer",
             "label": "Prefect Integration",
             "role": "generative",
-            "nodes": ["prefect_agent_integration", "toolset_adaptation", "agent_cache_policies"]
+            "nodes": [
+                "prefect_agent_integration",
+                "toolset_adaptation",
+                "agent_cache_policies"
+            ]
         }
     ]
 }

@@ -19,33 +19,71 @@ The `model_provider_configurations` module is structured around two primary conc
 {
     "direction": "TD",
     "nodes": [
-        {"id": "model_provider_integrations", "label": "Model Provider Integrations", "type": "module", "link": "model_provider_integrations.md"},
-        {"id": "model_profile_definitions", "label": "Model Profile Definitions", "type": "module", "link": "model_profile_definitions.md"},
-        {"id": "model_core_interfaces", "label": "Model Core Interfaces", "type": "external", "link": "model_core_interfaces.md"}
+        {
+            "id": "model_provider_configurations",
+            "label": "Model Provider Configurations",
+            "type": "module"
+        },
+        {
+            "id": "model_provider_integrations",
+            "label": "Model Provider Integrations",
+            "type": "module",
+            "link": "model_provider_integrations.md"
+        },
+        {
+            "id": "model_profile_definitions",
+            "label": "Model Profile Definitions",
+            "type": "module",
+            "link": "model_profile_definitions.md"
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Model Core Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        }
     ],
     "edges": [
-        {"source": "model_provider_integrations", "target": "model_profile_definitions", "label": "retrieves profiles for models"},
-        {"source": "model_profile_definitions", "target": "model_core_interfaces", "label": "informs model capabilities"},
-        {"source": "model_provider_integrations", "target": "model_core_interfaces", "label": "provides configured clients"}
+        {
+            "source": "model_provider_integrations",
+            "target": "model_profile_definitions",
+            "label": "retrieves profiles for models"
+        },
+        {
+            "source": "model_profile_definitions",
+            "target": "model_core_interfaces",
+            "label": "informs model capabilities"
+        },
+        {
+            "source": "model_provider_integrations",
+            "target": "model_core_interfaces",
+            "label": "provides configured clients"
+        }
     ],
     "groups": [
         {
             "id": "provider_management",
             "label": "Provider Management",
             "role": "data",
-            "nodes": ["model_provider_integrations"]
+            "nodes": [
+                "model_provider_integrations"
+            ]
         },
         {
             "id": "model_metadata",
             "label": "Model Metadata",
             "role": "analytical",
-            "nodes": ["model_profile_definitions"]
+            "nodes": [
+                "model_profile_definitions"
+            ]
         },
         {
             "id": "system_integration",
             "label": "System Integration",
             "role": "surface",
-            "nodes": ["model_core_interfaces"]
+            "nodes": [
+                "model_core_interfaces"
+            ]
         }
     ]
 }

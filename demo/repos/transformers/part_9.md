@@ -5,13 +5,52 @@ This module provides implementations for LongT5 models, including the base, enco
 {
     "direction": "TD",
     "nodes": [
-        {"id": "longt5_models", "label": "LongT5 Models", "type": "module", "link": "longt5_models.md"},
-        {"id": "mbart_classification", "label": "MBart Sequence Classification", "type": "module", "link": "mbart_classification.md"}
+        {
+            "id": "part_9",
+            "label": "Part 9",
+            "type": "module"
+        },
+        {
+            "id": "c0",
+            "label": "UniSpeechSatForAudioFrameClass",
+            "type": "component"
+        },
+        {
+            "id": "c1",
+            "label": "Wav2Vec2ForXVector",
+            "type": "component"
+        },
+        {
+            "id": "c2",
+            "label": "Wav2Vec2ForAudioFrameClassific",
+            "type": "component"
+        },
+        {
+            "id": "c3",
+            "label": "Wav2Vec2BertForXVector",
+            "type": "component"
+        }
     ],
-    "edges": [],
-    "groups": [
-        {"id": "model_implementations", "label": "Model Implementations", "role": "generative", "nodes": ["longt5_models", "mbart_classification"]}
-    ]
+    "edges": [
+        {
+            "source": "part_9",
+            "target": "c0"
+        },
+        {
+            "source": "part_9",
+            "target": "c1"
+        },
+        {
+            "source": "part_9",
+            "target": "c2"
+        },
+        {
+            "source": "part_9",
+            "target": "c3"
+        }
+    ],
+    "groups": [],
+    "_auto_generated": true
 }
 -->
 ```mermaid

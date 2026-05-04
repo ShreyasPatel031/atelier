@@ -3,24 +3,15 @@ This module provides the `HuggingFacePipeline` class, a LangChain-compatible wra
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "HuggingFacePipeline",
-      "label": "HuggingFacePipeline",
-      "type": "class"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "huggingface_llm_pipelines",
-      "label": "huggingface_llm_pipelines",
-      "type": "module",
-      "contents": [
-        "HuggingFacePipeline"
-      ]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "HuggingFacePipeline",
+            "label": "HuggingFacePipeline",
+            "type": "class"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

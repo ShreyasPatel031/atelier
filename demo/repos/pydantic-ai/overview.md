@@ -9,6 +9,359 @@ The `pydantic-ai-src` repository offers a comprehensive framework for building, 
 
 ### Architecture Overview
 
+<!-- DIAGRAM_JSON
+{
+    "direction": "LR",
+    "nodes": [
+        {
+            "id": "AgentState",
+            "label": "(\"Agent State\")",
+            "type": "component"
+        },
+        {
+            "id": "AnalyzeReports",
+            "label": "Analyze Reports & Metrics",
+            "type": "module",
+            "link": "reporting_and_rendering.md"
+        },
+        {
+            "id": "BrowseDocs",
+            "label": "Browse Documentation",
+            "type": "module",
+            "link": "documentation_site_management.md"
+        },
+        {
+            "id": "BuiltinTools",
+            "label": "Access Built-in Tools",
+            "type": "module",
+            "link": "builtin_tools.md"
+        },
+        {
+            "id": "ConnectLLMs",
+            "label": "Connect to LLM Providers",
+            "type": "module",
+            "link": "model_provider_integrations.md"
+        },
+        {
+            "id": "DefineAgent",
+            "label": "Define Agent Behavior",
+            "type": "module",
+            "link": "agent_definition.md"
+        },
+        {
+            "id": "DefineDatasets",
+            "label": "Define & Generate Datasets",
+            "type": "module",
+            "link": "dataset_management.md"
+        },
+        {
+            "id": "DocsContent",
+            "label": "(\"Documentation Content\")",
+            "type": "component"
+        },
+        {
+            "id": "EvalResults",
+            "label": "(\"Evaluation Results\")",
+            "type": "component"
+        },
+        {
+            "id": "EvaluatorLogic",
+            "label": "Implement Evaluator Logic",
+            "type": "module",
+            "link": "evaluator_core.md"
+        },
+        {
+            "id": "ExternalTools",
+            "label": "Integrate External Toolsets",
+            "type": "module",
+            "link": "external_toolset_integrations.md"
+        },
+        {
+            "id": "HandleOutput",
+            "label": "Process Agent Output",
+            "type": "module",
+            "link": "agent_output_handling.md"
+        },
+        {
+            "id": "ManageCapabilities",
+            "label": "Manage Agent Capabilities",
+            "type": "module",
+            "link": "capabilities_base.md"
+        },
+        {
+            "id": "ManageToolsets",
+            "label": "Manage Toolsets & Tools",
+            "type": "module",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "OrchestrateFlow",
+            "label": "Orchestrate Agent Workflow",
+            "type": "module",
+            "link": "agent_execution_graph.md"
+        },
+        {
+            "id": "RunDurableAgent",
+            "label": "Run Durable Agent",
+            "type": "module",
+            "link": "durable_execution_temporal.md"
+        },
+        {
+            "id": "RunEvaluations",
+            "label": "Execute Evaluations",
+            "type": "module",
+            "link": "online_evaluation_system.md"
+        },
+        {
+            "id": "SearchDocs",
+            "label": "Search Documentation",
+            "type": "module",
+            "link": "search_and_indexing.md"
+        },
+        {
+            "id": "SearchIndex",
+            "label": "(\"Search Index\")",
+            "type": "component"
+        },
+        {
+            "id": "UseDevTools",
+            "label": "Use Developer Utilities",
+            "type": "module",
+            "link": "developer_utility_scripts.md"
+        },
+        {
+            "id": "UseEmbeddings",
+            "label": "Generate Embeddings",
+            "type": "module",
+            "link": "embedding_core.md"
+        },
+        {
+            "id": "UserInterface",
+            "label": "Interact via UI",
+            "type": "module",
+            "link": "ui_vercel_ai_adapter.md"
+        },
+        {
+            "id": "user",
+            "label": "User",
+            "type": "component"
+        }
+    ],
+    "edges": [
+        {
+            "source": "user",
+            "target": "DefineAgent",
+            "label": "configures"
+        },
+        {
+            "source": "user",
+            "target": "UserInterface",
+            "label": "interacts with"
+        },
+        {
+            "source": "user",
+            "target": "RunEvaluations",
+            "label": "initiates"
+        },
+        {
+            "source": "user",
+            "target": "UseDevTools",
+            "label": "develops with"
+        },
+        {
+            "source": "DefineAgent",
+            "target": "OrchestrateFlow",
+            "label": "defines workflow"
+        },
+        {
+            "source": "DefineAgent",
+            "target": "ManageCapabilities",
+            "label": "configures"
+        },
+        {
+            "source": "ManageCapabilities",
+            "target": "OrchestrateFlow",
+            "label": "enables"
+        },
+        {
+            "source": "OrchestrateFlow",
+            "target": "HandleOutput",
+            "label": "produces"
+        },
+        {
+            "source": "RunDurableAgent",
+            "target": "OrchestrateFlow",
+            "label": "wraps execution"
+        },
+        {
+            "source": "ExternalTools",
+            "target": "ManageToolsets",
+            "label": "extends"
+        },
+        {
+            "source": "BuiltinTools",
+            "target": "ManageToolsets",
+            "label": "provides"
+        },
+        {
+            "source": "RunEvaluations",
+            "target": "DefineDatasets",
+            "label": "uses"
+        },
+        {
+            "source": "RunEvaluations",
+            "target": "EvaluatorLogic",
+            "label": "applies"
+        },
+        {
+            "source": "AnalyzeReports",
+            "target": "EvalResults",
+            "label": "reads"
+        },
+        {
+            "source": "BrowseDocs",
+            "target": "SearchDocs",
+            "label": "queries"
+        },
+        {
+            "source": "OrchestrateFlow",
+            "target": "ConnectLLMs",
+            "label": "requests LLM/Tool"
+        },
+        {
+            "source": "ConnectLLMs",
+            "target": "OrchestrateFlow",
+            "label": "returns response"
+        },
+        {
+            "source": "ManageToolsets",
+            "target": "OrchestrateFlow",
+            "label": "provides callable"
+        },
+        {
+            "source": "UseEmbeddings",
+            "target": "ManageCapabilities",
+            "label": "provides vectors"
+        },
+        {
+            "source": "OrchestrateFlow",
+            "target": "AgentState",
+            "label": "persists state"
+        },
+        {
+            "source": "AgentState",
+            "target": "OrchestrateFlow",
+            "label": "restores state"
+        },
+        {
+            "source": "HandleOutput",
+            "target": "RunEvaluations",
+            "label": "provides agent output"
+        },
+        {
+            "source": "ConnectLLMs",
+            "target": "RunEvaluations",
+            "label": "provides model output"
+        },
+        {
+            "source": "UserInterface",
+            "target": "OrchestrateFlow",
+            "label": "sends commands"
+        },
+        {
+            "source": "HandleOutput",
+            "target": "UserInterface",
+            "label": "streams output"
+        },
+        {
+            "source": "UseDevTools",
+            "target": "DocsContent",
+            "label": "generates"
+        },
+        {
+            "source": "DocsContent",
+            "target": "SearchDocs",
+            "label": "indexed by"
+        },
+        {
+            "source": "DocsContent",
+            "target": "BrowseDocs",
+            "label": "served by"
+        },
+        {
+            "source": "SearchDocs",
+            "target": "SearchIndex",
+            "label": "updates"
+        },
+        {
+            "source": "SearchIndex",
+            "target": "BrowseDocs",
+            "label": "used by"
+        },
+        {
+            "source": "RunEvaluations",
+            "target": "EvalResults",
+            "label": "writes"
+        }
+    ],
+    "groups": [
+        {
+            "id": "agent_core",
+            "label": "Agent Core & Orchestration",
+            "nodes": [
+                "DefineAgent",
+                "OrchestrateFlow",
+                "ManageCapabilities",
+                "HandleOutput",
+                "RunDurableAgent"
+            ]
+        },
+        {
+            "id": "ai_ecosystem",
+            "label": "AI Model & Tool Ecosystem",
+            "nodes": [
+                "ConnectLLMs",
+                "UseEmbeddings",
+                "ManageToolsets",
+                "ExternalTools",
+                "BuiltinTools"
+            ]
+        },
+        {
+            "id": "evaluation",
+            "label": "Evaluation & Reporting",
+            "nodes": [
+                "DefineDatasets",
+                "RunEvaluations",
+                "AnalyzeReports",
+                "EvaluatorLogic"
+            ]
+        },
+        {
+            "id": "project_support",
+            "label": "Project Support & UI",
+            "nodes": [
+                "UserInterface",
+                "BrowseDocs",
+                "UseDevTools",
+                "SearchDocs"
+            ]
+        },
+        {
+            "id": "data_storage",
+            "label": "Stored Data",
+            "nodes": [
+                "AgentState",
+                "EvalResults",
+                "DocsContent",
+                "SearchIndex"
+            ]
+        }
+    ],
+    "_auto_generated": "r1_overview_synthesis"
+}
+-->
+
 ```mermaid
 flowchart LR
     user(("User"))

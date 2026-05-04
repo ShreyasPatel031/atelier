@@ -3,14 +3,20 @@ This module offers a `ModelLaboratory` for experimenting with and comparing lang
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "A", "label": "ModelLaboratory", "type": "class"},
-    {"id": "B", "label": "main", "type": "function"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "model_development_profiling", "label": "model_development_profiling", "contains": ["A", "B"]}
-  ]
+    "nodes": [
+        {
+            "id": "A",
+            "label": "ModelLaboratory",
+            "type": "class"
+        },
+        {
+            "id": "B",
+            "label": "main",
+            "type": "function"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

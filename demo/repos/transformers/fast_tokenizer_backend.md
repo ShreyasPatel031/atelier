@@ -3,16 +3,34 @@ This module defines `TokenizersBackend`, a foundational class for fast tokenizer
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "fast_tokenizer_backend", "label": "fast_tokenizer_backend", "type": "module"},
-    {"id": "TokenizersBackend", "label": "TokenizersBackend", "type": "class"}
-  ],
-  "edges": [
-    {"source": "fast_tokenizer_backend", "target": "TokenizersBackend", "type": "contains"}
-  ],
-  "groups": [
-    {"id": "fast_tokenizer_backend_group", "label": "fast_tokenizer_backend", "nodes": ["TokenizersBackend"]}
-  ]
+    "nodes": [
+        {
+            "id": "fast_tokenizer_backend",
+            "label": "fast_tokenizer_backend",
+            "type": "module"
+        },
+        {
+            "id": "TokenizersBackend",
+            "label": "TokenizersBackend",
+            "type": "class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "fast_tokenizer_backend",
+            "target": "TokenizersBackend",
+            "type": "contains"
+        }
+    ],
+    "groups": [
+        {
+            "id": "fast_tokenizer_backend_group",
+            "label": "fast_tokenizer_backend",
+            "nodes": [
+                "TokenizersBackend"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

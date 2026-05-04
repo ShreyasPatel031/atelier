@@ -339,16 +339,7 @@
                       "label": "uses"
                     }
                   ],
-                  "groups": [
-                    {
-                      "id": "bamba_models",
-                      "label": "bamba_models",
-                      "contains": [
-                        "BambaForCausalLM",
-                        "BambaModel"
-                      ]
-                    }
-                  ]
+                  "groups": []
                 }
               },
               "afmoe_models": {
@@ -985,6 +976,18 @@
                   "label": "Audio Models",
                   "type": "module",
                   "link": "audio_models_part_8.md"
+                },
+                {
+                  "id": "core_models_language_models",
+                  "label": "core_models_language_models",
+                  "type": "external",
+                  "_repaired": "g2_injected_endpoint"
+                },
+                {
+                  "id": "core_models_audio_models",
+                  "label": "core_models_audio_models",
+                  "type": "external",
+                  "_repaired": "g2_injected_endpoint"
                 }
               ],
               "edges": [
@@ -1760,39 +1763,7 @@
                   "type": "composition"
                 }
               ],
-              "groups": [
-                {
-                  "id": "grp_switch_transformers",
-                  "label": "src.transformers.models.switch_transformers.modular_switch_transformers",
-                  "members": [
-                    "SwitchTransformersModel",
-                    "SwitchTransformersEncoderModel"
-                  ]
-                },
-                {
-                  "id": "grp_t5",
-                  "label": "src.transformers.models.t5.modeling_t5",
-                  "members": [
-                    "T5ForSequenceClassification"
-                  ]
-                },
-                {
-                  "id": "grp_t5gemma_modeling",
-                  "label": "src.transformers.models.t5gemma.modeling_t5gemma",
-                  "members": [
-                    "T5GemmaForSequenceClassification_modeling",
-                    "T5GemmaForTokenClassification",
-                    "T5GemmaForConditionalGeneration"
-                  ]
-                },
-                {
-                  "id": "grp_t5gemma_modular",
-                  "label": "src.transformers.models.t5gemma.modular_t5gemma",
-                  "members": [
-                    "T5GemmaForSequenceClassification_modular"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "part_15": {
@@ -2538,7 +2509,8 @@
               "source": "language_models",
               "target": "part_17"
             }
-          ]
+          ],
+          "groups": []
         }
       },
       "vision_models": {
@@ -3184,7 +3156,8 @@
               "source": "vision_models",
               "target": "part_6"
             }
-          ]
+          ],
+          "groups": []
         }
       },
       "audio_models": {
@@ -3285,16 +3258,7 @@
                       "type": "uses"
                     }
                   ],
-                  "groups": [
-                    {
-                      "id": "hubert_audio_models",
-                      "label": "hubert_audio_models",
-                      "contains": [
-                        "HubertForCTC",
-                        "HubertForSequenceClassification"
-                      ]
-                    }
-                  ]
+                  "groups": []
                 }
               },
               "data2vec_audio_models": {
@@ -3370,16 +3334,7 @@
                       "type": "composition"
                     }
                   ],
-                  "groups": [
-                    {
-                      "id": "data2vec_audio_models",
-                      "label": "data2vec_audio_models",
-                      "members": [
-                        "Data2VecAudioForXVector",
-                        "Data2VecAudioForSequenceClassification"
-                      ]
-                    }
-                  ]
+                  "groups": []
                 }
               }
             },
@@ -4089,7 +4044,8 @@
               "source": "audio_models",
               "target": "part_10"
             }
-          ]
+          ],
+          "groups": []
         }
       },
       "multimodal_models": {
@@ -4446,7 +4402,8 @@
               "source": "multimodal_models",
               "target": "part_6"
             }
-          ]
+          ],
+          "groups": []
         }
       },
       "specialized_models": {
@@ -4884,7 +4841,8 @@
               "source": "specialized_models",
               "target": "part_2"
             }
-          ]
+          ],
+          "groups": []
         }
       }
     },
@@ -4950,7 +4908,8 @@
           "source": "core_models",
           "target": "specialized_models"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "data_preparation": {
@@ -5046,16 +5005,7 @@
                     }
                   ],
                   "edges": [],
-                  "groups": [
-                    {
-                      "id": "G_tokenizer_base_interface",
-                      "label": "tokenizer_base_interface",
-                      "type": "module",
-                      "contains": [
-                        "C_PreTrainedTokenizerBase"
-                      ]
-                    }
-                  ]
+                  "groups": []
                 }
               }
             },
@@ -5144,7 +5094,8 @@
               "source": "tokenizers",
               "target": "part_2"
             }
-          ]
+          ],
+          "groups": []
         }
       },
       "image_processors": {
@@ -5520,24 +5471,25 @@
               "label": "inherits"
             },
             {
-              "source": "general_processors",
+              "source": "CMVBP1",
               "target": "multimodal_processors"
             },
             {
-              "source": "general_processors",
+              "source": "CMVBP1",
               "target": "number_normalization"
             }
           ],
           "groups": [
             {
-              "id": "general_processors",
+              "id": "general_processors__group",
               "label": "general_processors",
               "nodes": [
                 "CMVBP1",
                 "CMVBP2",
                 "GOP",
                 "ENN"
-              ]
+              ],
+              "_repaired": "r4_group_renamed_avoid_node_collision"
             }
           ]
         }
@@ -5585,7 +5537,8 @@
           "source": "data_preparation",
           "target": "general_processors"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "model_utilities": {
@@ -5855,22 +5808,23 @@
               "label": "inherits"
             },
             {
-              "source": "generation",
+              "source": "ContinuousMixin",
               "target": "core_generation_logic"
             },
             {
-              "source": "generation",
+              "source": "ContinuousMixin",
               "target": "continuous_batching"
             }
           ],
           "groups": [
             {
-              "id": "generation",
+              "id": "generation__group",
               "label": "generation",
               "nodes": [
                 "ContinuousMixin",
                 "GenerationMixin"
-              ]
+              ],
+              "_repaired": "r4_group_renamed_avoid_node_collision"
             }
           ]
         }
@@ -6242,7 +6196,8 @@
           "source": "model_utilities",
           "target": "optimization_and_fusion"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "integrations_and_workflows": {
@@ -6315,16 +6270,7 @@
                 }
               ],
               "edges": [],
-              "groups": [
-                {
-                  "id": "base_pipelines",
-                  "label": "base_pipelines",
-                  "path": "base_pipelines",
-                  "contains": [
-                    "ChunkPipeline"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "image_text_pipelines": {
@@ -6407,22 +6353,23 @@
               "type": "inheritance"
             },
             {
-              "source": "pipelines",
+              "source": "ChunkPipeline",
               "target": "base_pipelines"
             },
             {
-              "source": "pipelines",
+              "source": "ChunkPipeline",
               "target": "image_text_pipelines"
             }
           ],
           "groups": [
             {
-              "id": "pipelines",
+              "id": "pipelines__group",
               "label": "pipelines",
               "nodes": [
                 "ChunkPipeline",
                 "ImageTextToTextPipeline"
-              ]
+              ],
+              "_repaired": "r4_group_renamed_avoid_node_collision"
             }
           ]
         }
@@ -6460,7 +6407,8 @@
           "source": "integrations_and_workflows",
           "target": "pipelines"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "model_conversion_scripts": {
@@ -7259,7 +7207,8 @@
               "source": "vision_model_converters",
               "target": "part_5"
             }
-          ]
+          ],
+          "groups": []
         }
       },
       "audio_model_converters": {
@@ -7639,27 +7588,28 @@
           ],
           "edges": [
             {
-              "source": "multimodal_converters",
+              "source": "A",
               "target": "tf_model_conversion"
             },
             {
-              "source": "multimodal_converters",
+              "source": "A",
               "target": "multimodal_processor_conversion"
             },
             {
-              "source": "multimodal_converters",
+              "source": "A",
               "target": "flax_model_conversion"
             }
           ],
           "groups": [
             {
-              "id": "multimodal_converters",
+              "id": "multimodal_converters__group",
               "label": "multimodal_converters",
               "nodes": [
                 "A",
                 "B",
                 "C"
-              ]
+              ],
+              "_repaired": "r4_group_renamed_avoid_node_collision"
             }
           ]
         }
@@ -7717,7 +7667,8 @@
           "source": "model_conversion_scripts",
           "target": "multimodal_converters"
         }
-      ]
+      ],
+      "groups": []
     }
   }
 }

@@ -10,20 +10,51 @@ This module is a part of the broader `openai_model_configuration` sub-module wit
 {
     "direction": "TD",
     "nodes": [
-        {"id": "openai_model_configuration", "label": "OpenAI Model Configuration", "type": "external", "link": "openai_model_configuration.md"},
-        {"id": "openai_model_alias", "label": "OpenAI Model Alias", "type": "module", "link": "openai_model_alias.md"},
-        {"id": "openai_settings_alias", "label": "OpenAI Model Settings Alias", "type": "module", "link": "openai_settings_alias.md"}
+        {
+            "id": "openai_model_definitions",
+            "label": "OpenAI Model Definitions",
+            "type": "module"
+        },
+        {
+            "id": "openai_model_configuration",
+            "label": "OpenAI Model Configuration",
+            "type": "external",
+            "link": "openai_model_configuration.md"
+        },
+        {
+            "id": "openai_model_alias",
+            "label": "OpenAI Model Alias",
+            "type": "module",
+            "link": "openai_model_alias.md"
+        },
+        {
+            "id": "openai_settings_alias",
+            "label": "OpenAI Model Settings Alias",
+            "type": "module",
+            "link": "openai_settings_alias.md"
+        }
     ],
     "edges": [
-        {"source": "openai_model_configuration", "target": "openai_model_alias", "label": "provides alias for"},
-        {"source": "openai_model_configuration", "target": "openai_settings_alias", "label": "provides alias for"}
+        {
+            "source": "openai_model_configuration",
+            "target": "openai_model_alias",
+            "label": "provides alias for"
+        },
+        {
+            "source": "openai_model_configuration",
+            "target": "openai_settings_alias",
+            "label": "provides alias for"
+        }
     ],
     "groups": [
         {
             "id": "aliases",
             "label": "Deprecated Aliases",
             "role": "data",
-            "nodes": ["openai_model_alias", "openai_settings_alias"]
+            "nodes": [
+                "openai_model_alias",
+                "openai_settings_alias"
+            ]
         }
     ]
 }

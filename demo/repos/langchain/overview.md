@@ -9,6 +9,253 @@ Users primarily interact with LangChain to:
 
 The repository is structured to support these workflows, offering modular components that can be easily combined and extended.
 
+<!-- DIAGRAM_JSON
+{
+    "direction": "LR",
+    "nodes": [
+        {
+            "id": "app_orchestration",
+            "label": "app_orchestration",
+            "type": "component"
+        },
+        {
+            "id": "caching_and_storage",
+            "label": "Cache Responses & Data",
+            "type": "module",
+            "link": "caching_and_storage.md"
+        },
+        {
+            "id": "callbacks_and_tracing",
+            "label": "Monitor & Trace Runs",
+            "type": "module",
+            "link": "callbacks_and_tracing.md"
+        },
+        {
+            "id": "developer_tools",
+            "label": "Utilize Developer Tools",
+            "type": "module",
+            "link": "developer_tools.md"
+        },
+        {
+            "id": "document_management",
+            "label": "Load, Split & Index Documents",
+            "type": "module",
+            "link": "document_management.md"
+        },
+        {
+            "id": "evaluation_framework",
+            "label": "Evaluate Application Performance",
+            "type": "module",
+            "link": "evaluation_framework.md"
+        },
+        {
+            "id": "language_model_interface",
+            "label": "Interact with Language Models",
+            "type": "module",
+            "link": "language_model_interface.md"
+        },
+        {
+            "id": "llm_interaction",
+            "label": "llm_interaction",
+            "type": "component"
+        },
+        {
+            "id": "memory",
+            "label": "Manage Conversational Memory",
+            "type": "module",
+            "link": "memory.md"
+        },
+        {
+            "id": "orchestration_and_agents",
+            "label": "Orchestrate Agents & Chains",
+            "type": "module",
+            "link": "orchestration_and_agents.md"
+        },
+        {
+            "id": "output_parsing",
+            "label": "Parse Model Outputs",
+            "type": "module",
+            "link": "output_parsing.md"
+        },
+        {
+            "id": "partner_integrations",
+            "label": "Connect to Partner Services",
+            "type": "module",
+            "link": "partner_integrations.md"
+        },
+        {
+            "id": "prompts_and_examples",
+            "label": "Design Prompts & Examples",
+            "type": "module",
+            "link": "prompts_and_examples.md"
+        },
+        {
+            "id": "retrieval_systems",
+            "label": "Retrieve Relevant Information",
+            "type": "module",
+            "link": "retrieval_systems.md"
+        },
+        {
+            "id": "tools_and_middleware",
+            "label": "Define Tools & Middleware",
+            "type": "module",
+            "link": "tools_and_middleware.md"
+        },
+        {
+            "id": "user",
+            "label": "Developer",
+            "type": "component"
+        },
+        {
+            "id": "vector_stores",
+            "label": "Store & Search Embeddings",
+            "type": "module",
+            "link": "vector_stores.md"
+        }
+    ],
+    "edges": [
+        {
+            "source": "user",
+            "target": "orchestration_and_agents",
+            "label": "builds applications"
+        },
+        {
+            "source": "user",
+            "target": "language_model_interface",
+            "label": "configures LLMs directly"
+        },
+        {
+            "source": "orchestration_and_agents",
+            "target": "language_model_interface",
+            "label": "uses"
+        },
+        {
+            "source": "orchestration_and_agents",
+            "target": "memory",
+            "label": "manages state with"
+        },
+        {
+            "source": "orchestration_and_agents",
+            "target": "tools_and_middleware",
+            "label": "invokes"
+        },
+        {
+            "source": "orchestration_and_agents",
+            "target": "retrieval_systems",
+            "label": "integrates data from"
+        },
+        {
+            "source": "language_model_interface",
+            "target": "prompts_and_examples",
+            "label": "formats inputs with"
+        },
+        {
+            "source": "language_model_interface",
+            "target": "output_parsing",
+            "label": "structures outputs with"
+        },
+        {
+            "source": "retrieval_systems",
+            "target": "vector_stores",
+            "label": "queries"
+        },
+        {
+            "source": "document_management",
+            "target": "vector_stores",
+            "label": "indexes into"
+        },
+        {
+            "source": "document_management",
+            "target": "retrieval_systems",
+            "label": "prepares data for"
+        },
+        {
+            "source": "partner_integrations",
+            "target": "language_model_interface",
+            "label": "provides LLM implementations"
+        },
+        {
+            "source": "partner_integrations",
+            "target": "document_management",
+            "label": "offers data loaders"
+        },
+        {
+            "source": "partner_integrations",
+            "target": "tools_and_middleware",
+            "label": "provides specialized tools"
+        },
+        {
+            "source": "callbacks_and_tracing",
+            "target": "orchestration_and_agents",
+            "label": "observes"
+        },
+        {
+            "source": "callbacks_and_tracing",
+            "target": "language_model_interface",
+            "label": "observes"
+        },
+        {
+            "source": "evaluation_framework",
+            "target": "callbacks_and_tracing",
+            "label": "analyzes traces from"
+        },
+        {
+            "source": "caching_and_storage",
+            "target": "language_model_interface",
+            "label": "optimizes calls to"
+        },
+        {
+            "source": "developer_tools",
+            "target": "evaluation_framework",
+            "label": "supports"
+        }
+    ],
+    "groups": [
+        {
+            "id": "app_orchestration__group",
+            "label": "Application Development & Orchestration",
+            "nodes": [
+                "orchestration_and_agents",
+                "memory",
+                "tools_and_middleware"
+            ],
+            "_repaired": "r4_group_renamed_avoid_node_collision"
+        },
+        {
+            "id": "llm_interaction__group",
+            "label": "Language Model Interaction",
+            "nodes": [
+                "language_model_interface",
+                "prompts_and_examples",
+                "output_parsing"
+            ],
+            "_repaired": "r4_group_renamed_avoid_node_collision"
+        },
+        {
+            "id": "data_integrations",
+            "label": "Data Management & Integrations",
+            "nodes": [
+                "document_management",
+                "retrieval_systems",
+                "vector_stores",
+                "partner_integrations"
+            ]
+        },
+        {
+            "id": "observability_utilities",
+            "label": "Observability & Utilities",
+            "nodes": [
+                "callbacks_and_tracing",
+                "evaluation_framework",
+                "caching_and_storage",
+                "developer_tools"
+            ]
+        }
+    ],
+    "_auto_generated": "r1_overview_synthesis"
+}
+-->
+
 ```mermaid
 flowchart LR
     user(("Developer"))

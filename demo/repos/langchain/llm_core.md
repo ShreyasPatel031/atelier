@@ -3,14 +3,29 @@ This module provides components for integrating with Anthropic language models, 
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "A", "label": "_create_usage_metadata", "type": "function"},
-    {"id": "B", "label": "AnthropicLLM", "type": "class"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "llm_core", "label": "llm_core", "nodes": ["A", "B"]}
-  ]
+    "nodes": [
+        {
+            "id": "A",
+            "label": "_create_usage_metadata",
+            "type": "function"
+        },
+        {
+            "id": "B",
+            "label": "AnthropicLLM",
+            "type": "class"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "llm_core",
+            "label": "llm_core",
+            "nodes": [
+                "A",
+                "B"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

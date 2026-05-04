@@ -5,12 +5,35 @@ This module provides mechanisms for caching language model responses to enhance 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "cache_implementations", "label": "Cache Implementations", "type": "module", "link": "cache_implementations.md"},
-        {"id": "data_serialization", "label": "Data Serialization", "type": "module", "link": "data_serialization.md"}
+        {
+            "id": "caching_and_storage",
+            "label": "Caching and Storage",
+            "type": "module"
+        },
+        {
+            "id": "cache_implementations",
+            "label": "Cache Implementations",
+            "type": "module",
+            "link": "cache_implementations.md"
+        },
+        {
+            "id": "data_serialization",
+            "label": "Data Serialization",
+            "type": "module",
+            "link": "data_serialization.md"
+        }
     ],
     "edges": [],
     "groups": [
-        {"id": "data_management", "label": "Data Management", "role": "data", "nodes": ["cache_implementations", "data_serialization"]}
+        {
+            "id": "data_management",
+            "label": "Data Management",
+            "role": "data",
+            "nodes": [
+                "cache_implementations",
+                "data_serialization"
+            ]
+        }
     ]
 }
 -->

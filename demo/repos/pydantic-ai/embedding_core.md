@@ -10,33 +10,71 @@ The `embedding_core` module is structured to separate the primary user interface
 {
     "direction": "TD",
     "nodes": [
-        {"id": "embedding_interface", "label": "Embedding Interface", "type": "module", "link": "embedding_interface.md"},
-        {"id": "base_embedding_model", "label": "Base Embedding Model", "type": "module", "link": "base_embedding_model.md"},
-        {"id": "wrapper_embedding_model", "label": "Wrapper Embedding Model", "type": "module", "link": "wrapper_embedding_model.md"}
+        {
+            "id": "embedding_core",
+            "label": "Embedding Core",
+            "type": "module"
+        },
+        {
+            "id": "embedding_interface",
+            "label": "Embedding Interface",
+            "type": "module",
+            "link": "embedding_interface.md"
+        },
+        {
+            "id": "base_embedding_model",
+            "label": "Base Embedding Model",
+            "type": "module",
+            "link": "base_embedding_model.md"
+        },
+        {
+            "id": "wrapper_embedding_model",
+            "label": "Wrapper Embedding Model",
+            "type": "module",
+            "link": "wrapper_embedding_model.md"
+        }
     ],
     "edges": [
-        {"source": "embedding_interface", "target": "base_embedding_model", "label": "uses model definition"},
-        {"source": "wrapper_embedding_model", "target": "base_embedding_model", "label": "delegates behavior to"},
-        {"source": "embedding_interface", "target": "wrapper_embedding_model", "label": "can wrap"}
+        {
+            "source": "embedding_interface",
+            "target": "base_embedding_model",
+            "label": "uses model definition"
+        },
+        {
+            "source": "wrapper_embedding_model",
+            "target": "base_embedding_model",
+            "label": "delegates behavior to"
+        },
+        {
+            "source": "embedding_interface",
+            "target": "wrapper_embedding_model",
+            "label": "can wrap"
+        }
     ],
     "groups": [
         {
             "id": "user_interaction",
             "label": "User Interaction Layer",
             "role": "surface",
-            "nodes": ["embedding_interface"]
+            "nodes": [
+                "embedding_interface"
+            ]
         },
         {
             "id": "core_abstractions",
             "label": "Core Abstractions",
             "role": "generative",
-            "nodes": ["base_embedding_model"]
+            "nodes": [
+                "base_embedding_model"
+            ]
         },
         {
             "id": "model_extensions",
             "label": "Model Extensions",
             "role": "generative",
-            "nodes": ["wrapper_embedding_model"]
+            "nodes": [
+                "wrapper_embedding_model"
+            ]
         }
     ]
 }

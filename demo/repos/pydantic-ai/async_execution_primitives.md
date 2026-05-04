@@ -10,13 +10,36 @@ This module is a foundational part of the `async_concurrency` submodule within `
 {
     "direction": "TD",
     "nodes": [
-        {"id": "get_event_loop", "label": "Get/Create Asyncio Event Loop", "type": "component", "link": null},
-        {"id": "run_in_executor", "label": "Execute Blocking Task Asynchronously", "type": "component", "link": null},
-        {"id": "async_concurrency_mod", "label": "Asynchronous Concurrency Module", "type": "external", "link": "async_concurrency.md"}
+        {
+            "id": "get_event_loop",
+            "label": "Get/Create Asyncio Event Loop",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "run_in_executor",
+            "label": "Execute Blocking Task Asynchronously",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "async_concurrency_mod",
+            "label": "Asynchronous Concurrency Module",
+            "type": "external",
+            "link": "async_concurrency.md"
+        }
     ],
     "edges": [
-        {"source": "get_event_loop", "target": "run_in_executor", "label": "ensures event loop availability for"},
-        {"source": "run_in_executor", "target": "async_concurrency_mod", "label": "enables non-blocking synchronous execution for"}
+        {
+            "source": "get_event_loop",
+            "target": "run_in_executor",
+            "label": "ensures event loop availability for"
+        },
+        {
+            "source": "run_in_executor",
+            "target": "async_concurrency_mod",
+            "label": "enables non-blocking synchronous execution for"
+        }
     ],
     "groups": []
 }

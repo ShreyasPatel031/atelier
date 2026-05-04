@@ -3,28 +3,28 @@ This module provides the `ChatHuggingFace` class, enabling the use of various Hu
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "ChatHuggingFace",
-      "label": "ChatHuggingFace",
-      "metadata": {
-        "type": "class"
-      }
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "huggingface_chat_models",
-      "label": "huggingface_chat_models",
-      "nodes": [
-        "ChatHuggingFace"
-      ],
-      "metadata": {
-        "type": "module"
-      }
-    }
-  ]
+    "nodes": [
+        {
+            "id": "ChatHuggingFace",
+            "label": "ChatHuggingFace",
+            "metadata": {
+                "type": "class"
+            }
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "huggingface_chat_models",
+            "label": "huggingface_chat_models",
+            "nodes": [
+                "ChatHuggingFace"
+            ],
+            "metadata": {
+                "type": "module"
+            }
+        }
+    ]
 }
 -->
 ```mermaid

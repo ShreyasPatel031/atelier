@@ -28,15 +28,47 @@ The `code_execution_tool` module plays a vital role in enabling agents to perfor
 {
     "direction": "TD",
     "nodes": [
-        {"id": "code_execution_tool_component", "label": "Code Execution Tool", "type": "component", "link": null},
-        {"id": "abstract_builtin_tool", "label": "AbstractBuiltinTool", "type": "external", "link": "capabilities_tool_integration.md"},
-        {"id": "agent_definition", "label": "Agent Definition Module", "type": "external", "link": "agent_definition.md"},
-        {"id": "agent_execution_graph", "label": "Agent Execution Graph Module", "type": "external", "link": "agent_execution_graph.md"}
+        {
+            "id": "code_execution_tool_component",
+            "label": "Code Execution Tool",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "abstract_builtin_tool",
+            "label": "AbstractBuiltinTool",
+            "type": "external",
+            "link": "capabilities_tool_integration.md"
+        },
+        {
+            "id": "agent_definition",
+            "label": "Agent Definition Module",
+            "type": "external",
+            "link": "agent_definition.md"
+        },
+        {
+            "id": "agent_execution_graph",
+            "label": "Agent Execution Graph Module",
+            "type": "external",
+            "link": "agent_execution_graph.md"
+        }
     ],
     "edges": [
-        {"source": "code_execution_tool_component", "target": "abstract_builtin_tool", "label": "inherits from"},
-        {"source": "agent_definition", "target": "code_execution_tool_component", "label": "utilizes"},
-        {"source": "agent_execution_graph", "target": "code_execution_tool_component", "label": "invokes for execution"}
+        {
+            "source": "code_execution_tool_component",
+            "target": "abstract_builtin_tool",
+            "label": "inherits from"
+        },
+        {
+            "source": "agent_definition",
+            "target": "code_execution_tool_component",
+            "label": "utilizes"
+        },
+        {
+            "source": "agent_execution_graph",
+            "target": "code_execution_tool_component",
+            "label": "invokes for execution"
+        }
     ],
     "groups": []
 }

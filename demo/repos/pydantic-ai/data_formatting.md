@@ -69,14 +69,38 @@ print(format_as_xml(user_data, root_tag='person', include_field_info='once'))
 {
     "direction": "TD",
     "nodes": [
-        {"id": "input_object", "label": "Python Object", "type": "component", "link": null},
-        {"id": "format_as_xml", "label": "Format as XML", "type": "component", "link": null},
-        {"id": "xml_output", "label": "XML String Output", "type": "component", "link": null}
+        {
+            "id": "input_object",
+            "label": "Python Object",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "format_as_xml",
+            "label": "Format as XML",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "xml_output",
+            "label": "XML String Output",
+            "type": "component",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "input_object", "target": "format_as_xml", "label": "data to serialize"},
-        {"source": "format_as_xml", "target": "xml_output", "label": "formatted XML"}
-    ]
+        {
+            "source": "input_object",
+            "target": "format_as_xml",
+            "label": "data to serialize"
+        },
+        {
+            "source": "format_as_xml",
+            "target": "xml_output",
+            "label": "formatted XML"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

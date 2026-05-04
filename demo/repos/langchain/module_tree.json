@@ -866,8 +866,8 @@
               ],
               "edges": [
                 {
-                  "source": "Dumping",
-                  "target": "Loading",
+                  "source": "_dump_as_bytes",
+                  "target": "_load_document_from_bytes",
                   "label": "Conceptual Flow"
                 }
               ],
@@ -1012,7 +1012,8 @@
           "source": "foundational_components",
           "target": "caching_and_storage"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "language_model_interface": {
@@ -1869,54 +1870,7 @@
               "target": "base_parsers"
             }
           ],
-          "groups": [
-            {
-              "id": "grp_1",
-              "label": "libs.core.langchain_core.output_parsers.base",
-              "node_ids": [
-                "id_1",
-                "id_2"
-              ]
-            },
-            {
-              "id": "grp_2",
-              "label": "libs.core.langchain_core.output_parsers.list",
-              "node_ids": [
-                "id_3",
-                "id_4",
-                "id_5"
-              ]
-            },
-            {
-              "id": "grp_3",
-              "label": "libs.core.langchain_core.output_parsers.transform",
-              "node_ids": [
-                "id_6",
-                "id_7"
-              ]
-            },
-            {
-              "id": "grp_4",
-              "label": "libs.core.langchain_core.output_parsers.xml",
-              "node_ids": [
-                "id_8"
-              ]
-            },
-            {
-              "id": "grp_5",
-              "label": "libs.langchain.langchain_classic.output_parsers.datetime",
-              "node_ids": [
-                "id_9"
-              ]
-            },
-            {
-              "id": "grp_6",
-              "label": "libs.langchain.langchain_classic.output_parsers.enum",
-              "node_ids": [
-                "id_10"
-              ]
-            }
-          ]
+          "groups": []
         }
       }
     },
@@ -1972,7 +1926,8 @@
           "source": "language_model_interface",
           "target": "output_parsing"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "orchestration_and_agents": {
@@ -3612,7 +3567,7 @@
               ],
               "edges": [
                 {
-                  "source": "vector_store_memory",
+                  "source": "ConversationVectorStoreTokenBufferMemory",
                   "target": "ConversationVectorStoreTokenBufferMemory",
                   "type": "contains"
                 },
@@ -3634,11 +3589,12 @@
               ],
               "groups": [
                 {
-                  "id": "vector_store_memory",
+                  "id": "vector_store_memory__group",
                   "label": "vector_store_memory",
                   "nodes": [
                     "ConversationVectorStoreTokenBufferMemory"
-                  ]
+                  ],
+                  "_repaired": "r4_group_renamed_avoid_node_collision"
                 }
               ]
             }
@@ -4053,7 +4009,8 @@
           "source": "orchestration_and_agents",
           "target": "tools_and_middleware"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "data_and_integrations": {
@@ -4194,19 +4151,7 @@
                   "type": "uses"
                 }
               ],
-              "groups": [
-                {
-                  "id": "document_indexing",
-                  "label": "document_indexing",
-                  "members": [
-                    "aindex",
-                    "_hash_nested_dict",
-                    "DocumentIndex",
-                    "InMemoryDocumentIndex",
-                    "VectorstoreIndexCreator"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "text_splitters": {
@@ -4449,16 +4394,7 @@
                   "type": "inherits"
                 }
               ],
-              "groups": [
-                {
-                  "id": "base_and_composite_retrievers",
-                  "label": "base_and_composite_retrievers",
-                  "contains": [
-                    "BaseRetriever",
-                    "EnsembleRetriever"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "document_post_processing": {
@@ -4895,7 +4831,8 @@
                   "path": "libs/core/langchain_core/vectorstores/in_memory/InMemoryVectorStore.py"
                 }
               ],
-              "edges": []
+              "edges": [],
+              "groups": []
             }
           }
         },
@@ -5340,6 +5277,12 @@
                       "id": "ExaSearchRetriever",
                       "label": "ExaSearchRetriever",
                       "type": "component"
+                    },
+                    {
+                      "id": "BaseRetriever",
+                      "label": "BaseRetriever",
+                      "type": "external",
+                      "_repaired": "g2_injected_endpoint"
                     }
                   ],
                   "edges": [
@@ -5537,11 +5480,12 @@
                   "edges": [],
                   "groups": [
                     {
-                      "id": "module:groq_usage_reporting",
+                      "id": "module:groq_usage_reporting__group",
                       "label": "groq_usage_reporting",
                       "nodes": [
                         "function:_create_usage_metadata"
-                      ]
+                      ],
+                      "_repaired": "r4_group_renamed_avoid_node_collision"
                     }
                   ]
                 }
@@ -5644,16 +5588,7 @@
                     }
                   ],
                   "edges": [],
-                  "groups": [
-                    {
-                      "id": "huggingface_llm_pipelines",
-                      "label": "huggingface_llm_pipelines",
-                      "type": "module",
-                      "contents": [
-                        "HuggingFacePipeline"
-                      ]
-                    }
-                  ]
+                  "groups": []
                 }
               }
             },
@@ -5750,15 +5685,7 @@
                   "type": "contains"
                 }
               ],
-              "groups": [
-                {
-                  "id": "libs_partners_mistralai",
-                  "label": "libs_partners_mistralai",
-                  "contains": [
-                    "_convert_to_openai_response_format"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "libs_partners_ollama": {
@@ -5785,11 +5712,12 @@
               "edges": [],
               "groups": [
                 {
-                  "id": "libs_partners_ollama",
+                  "id": "libs_partners_ollama__group",
                   "label": "libs_partners_ollama",
                   "nodes": [
                     "OllamaLLM"
-                  ]
+                  ],
+                  "_repaired": "r4_group_renamed_avoid_node_collision"
                 }
               ]
             }
@@ -6065,16 +5993,7 @@
                 }
               ],
               "edges": [],
-              "groups": [
-                {
-                  "id": "libs_partners_openrouter",
-                  "label": "libs_partners_openrouter",
-                  "type": "module",
-                  "contains": [
-                    "libs.partners.openrouter.langchain_openrouter.chat_models.ChatOpenRouter"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "libs_partners_perplexity": {
@@ -6387,7 +6306,8 @@
               "source": "partner_integrations",
               "target": "libs_partners_qdrant"
             }
-          ]
+          ],
+          "groups": []
         }
       }
     },
@@ -6443,7 +6363,8 @@
           "source": "data_and_integrations",
           "target": "partner_integrations"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "evaluation_and_testing": {
@@ -6704,16 +6625,7 @@
                 }
               ],
               "edges": [],
-              "groups": [
-                {
-                  "id": "model_development_profiling",
-                  "label": "model_development_profiling",
-                  "contains": [
-                    "A",
-                    "B"
-                  ]
-                }
-              ]
+              "groups": []
             }
           }
         },
@@ -6851,7 +6763,8 @@
           "source": "evaluation_and_testing",
           "target": "developer_tools"
         }
-      ]
+      ],
+      "groups": []
     }
   }
 }

@@ -4,17 +4,60 @@ This module provides a unified interface for integrating diverse knowledge sourc
 {
     "direction": "TD",
     "nodes": [
-        {"id": "document_file_sources", "label": "Document File Sources", "type": "module", "link": "document_file_sources.md"},
-        {"id": "excel_data_sources", "label": "Excel Data Sources", "type": "module", "link": "excel_data_sources.md"},
-        {"id": "rag_vector_stores", "label": "RAG Vector Stores", "type": "module", "link": "rag_vector_stores.md"}
+        {
+            "id": "knowledge_sources",
+            "label": "Knowledge Sources",
+            "type": "module"
+        },
+        {
+            "id": "document_file_sources",
+            "label": "Document File Sources",
+            "type": "module",
+            "link": "document_file_sources.md"
+        },
+        {
+            "id": "excel_data_sources",
+            "label": "Excel Data Sources",
+            "type": "module",
+            "link": "excel_data_sources.md"
+        },
+        {
+            "id": "rag_vector_stores",
+            "label": "RAG Vector Stores",
+            "type": "module",
+            "link": "rag_vector_stores.md"
+        }
     ],
     "edges": [
-        {"source": "document_file_sources", "target": "rag_vector_stores", "label": "processed documents"},
-        {"source": "excel_data_sources", "target": "rag_vector_stores", "label": "structured data"}
+        {
+            "source": "document_file_sources",
+            "target": "rag_vector_stores",
+            "label": "processed documents"
+        },
+        {
+            "source": "excel_data_sources",
+            "target": "rag_vector_stores",
+            "label": "structured data"
+        }
     ],
     "groups": [
-        {"id": "input_sources", "label": "Input Sources", "role": "surface", "nodes": ["document_file_sources", "excel_data_sources"]},
-        {"id": "knowledge_storage", "label": "Knowledge Storage", "role": "data", "nodes": ["rag_vector_stores"]}
+        {
+            "id": "input_sources",
+            "label": "Input Sources",
+            "role": "surface",
+            "nodes": [
+                "document_file_sources",
+                "excel_data_sources"
+            ]
+        },
+        {
+            "id": "knowledge_storage",
+            "label": "Knowledge Storage",
+            "role": "data",
+            "nodes": [
+                "rag_vector_stores"
+            ]
+        }
     ]
 }
 -->

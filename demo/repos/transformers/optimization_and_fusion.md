@@ -3,21 +3,23 @@ The `optimization_and_fusion` module defines specifications for fusing `Conv3d` 
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "PatchEmbeddingsFusionSpec",
-      "label": "PatchEmbeddingsFusionSpec",
-      "path": "src.transformers.fusion_mapping.PatchEmbeddingsFusionSpec"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "optimization_and_fusion",
-      "label": "optimization_and_fusion",
-      "nodes": ["PatchEmbeddingsFusionSpec"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "PatchEmbeddingsFusionSpec",
+            "label": "PatchEmbeddingsFusionSpec",
+            "path": "src.transformers.fusion_mapping.PatchEmbeddingsFusionSpec"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "optimization_and_fusion",
+            "label": "optimization_and_fusion",
+            "nodes": [
+                "PatchEmbeddingsFusionSpec"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

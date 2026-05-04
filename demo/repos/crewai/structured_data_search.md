@@ -3,36 +3,138 @@ This module offers specialized tools for semantic searching across diverse struc
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "CSVSearchTool", "label": "CSVSearchTool"},
-    {"id": "CSVSearchToolSchema", "label": "CSVSearchToolSchema"},
-    {"id": "DOCXSearchTool", "label": "DOCXSearchTool"},
-    {"id": "DOCXSearchToolSchema", "label": "DOCXSearchToolSchema"},
-    {"id": "JSONSearchTool", "label": "JSONSearchTool"},
-    {"id": "JSONSearchToolSchema", "label": "JSONSearchToolSchema"},
-    {"id": "MDXSearchTool", "label": "MDXSearchTool"},
-    {"id": "MDXSearchToolSchema", "label": "MDXSearchToolSchema"},
-    {"id": "MySQLSearchTool", "label": "MySQLSearchTool"},
-    {"id": "MySQLSearchToolSchema", "label": "MySQLSearchToolSchema"},
-    {"id": "PDFSearchTool", "label": "PDFSearchTool"},
-    {"id": "PDFSearchToolSchema", "label": "PDFSearchToolSchema"}
-  ],
-  "edges": [
-    {"source": "CSVSearchTool", "target": "CSVSearchToolSchema", "label": "uses"},
-    {"source": "DOCXSearchTool", "target": "DOCXSearchToolSchema", "label": "uses"},
-    {"source": "JSONSearchTool", "target": "JSONSearchToolSchema", "label": "uses"},
-    {"source": "MDXSearchTool", "target": "MDXSearchToolSchema", "label": "uses"},
-    {"source": "MySQLSearchTool", "target": "MySQLSearchToolSchema", "label": "uses"},
-    {"source": "PDFSearchTool", "target": "PDFSearchToolSchema", "label": "uses"}
-  ],
-  "groups": [
-    {"id": "CSV", "label": "CSV Tools", "nodes": ["CSVSearchTool", "CSVSearchToolSchema"]},
-    {"id": "DOCX", "label": "DOCX Tools", "nodes": ["DOCXSearchTool", "DOCXSearchToolSchema"]},
-    {"id": "JSON", "label": "JSON Tools", "nodes": ["JSONSearchTool", "JSONSearchToolSchema"]},
-    {"id": "MDX", "label": "MDX Tools", "nodes": ["MDXSearchTool", "MDXSearchToolSchema"]},
-    {"id": "MySQL", "label": "MySQL Tools", "nodes": ["MySQLSearchTool", "MySQLSearchToolSchema"]},
-    {"id": "PDF", "label": "PDF Tools", "nodes": ["PDFSearchTool", "PDFSearchToolSchema"]}
-  ]
+    "nodes": [
+        {
+            "id": "CSVSearchTool",
+            "label": "CSVSearchTool"
+        },
+        {
+            "id": "CSVSearchToolSchema",
+            "label": "CSVSearchToolSchema"
+        },
+        {
+            "id": "DOCXSearchTool",
+            "label": "DOCXSearchTool"
+        },
+        {
+            "id": "DOCXSearchToolSchema",
+            "label": "DOCXSearchToolSchema"
+        },
+        {
+            "id": "JSONSearchTool",
+            "label": "JSONSearchTool"
+        },
+        {
+            "id": "JSONSearchToolSchema",
+            "label": "JSONSearchToolSchema"
+        },
+        {
+            "id": "MDXSearchTool",
+            "label": "MDXSearchTool"
+        },
+        {
+            "id": "MDXSearchToolSchema",
+            "label": "MDXSearchToolSchema"
+        },
+        {
+            "id": "MySQLSearchTool",
+            "label": "MySQLSearchTool"
+        },
+        {
+            "id": "MySQLSearchToolSchema",
+            "label": "MySQLSearchToolSchema"
+        },
+        {
+            "id": "PDFSearchTool",
+            "label": "PDFSearchTool"
+        },
+        {
+            "id": "PDFSearchToolSchema",
+            "label": "PDFSearchToolSchema"
+        }
+    ],
+    "edges": [
+        {
+            "source": "CSVSearchTool",
+            "target": "CSVSearchToolSchema",
+            "label": "uses"
+        },
+        {
+            "source": "DOCXSearchTool",
+            "target": "DOCXSearchToolSchema",
+            "label": "uses"
+        },
+        {
+            "source": "JSONSearchTool",
+            "target": "JSONSearchToolSchema",
+            "label": "uses"
+        },
+        {
+            "source": "MDXSearchTool",
+            "target": "MDXSearchToolSchema",
+            "label": "uses"
+        },
+        {
+            "source": "MySQLSearchTool",
+            "target": "MySQLSearchToolSchema",
+            "label": "uses"
+        },
+        {
+            "source": "PDFSearchTool",
+            "target": "PDFSearchToolSchema",
+            "label": "uses"
+        }
+    ],
+    "groups": [
+        {
+            "id": "CSV",
+            "label": "CSV Tools",
+            "nodes": [
+                "CSVSearchTool",
+                "CSVSearchToolSchema"
+            ]
+        },
+        {
+            "id": "DOCX",
+            "label": "DOCX Tools",
+            "nodes": [
+                "DOCXSearchTool",
+                "DOCXSearchToolSchema"
+            ]
+        },
+        {
+            "id": "JSON",
+            "label": "JSON Tools",
+            "nodes": [
+                "JSONSearchTool",
+                "JSONSearchToolSchema"
+            ]
+        },
+        {
+            "id": "MDX",
+            "label": "MDX Tools",
+            "nodes": [
+                "MDXSearchTool",
+                "MDXSearchToolSchema"
+            ]
+        },
+        {
+            "id": "MySQL",
+            "label": "MySQL Tools",
+            "nodes": [
+                "MySQLSearchTool",
+                "MySQLSearchToolSchema"
+            ]
+        },
+        {
+            "id": "PDF",
+            "label": "PDF Tools",
+            "nodes": [
+                "PDFSearchTool",
+                "PDFSearchToolSchema"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

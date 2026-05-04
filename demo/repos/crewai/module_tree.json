@@ -313,24 +313,7 @@
                   "label": "registers handler"
                 }
               ],
-              "groups": [
-                {
-                  "id": "event_recording",
-                  "label": "Event Recording",
-                  "members": [
-                    "EventRecord",
-                    "_resolve_event"
-                  ]
-                },
-                {
-                  "id": "checkpointing",
-                  "label": "Checkpointing",
-                  "members": [
-                    "_on_any_event",
-                    "_coerce_checkpoint"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "event_bus_and_context": {
@@ -565,24 +548,7 @@
                   "type": "inheritance"
                 }
               ],
-              "groups": [
-                {
-                  "id": "A2A_Events_Group",
-                  "label": "A2A Events",
-                  "members": [
-                    "A2AEventBase",
-                    "A2APushNotificationReceivedEvent",
-                    "A2APushNotificationSentEvent",
-                    "A2AAgentCardFetchedEvent",
-                    "A2AParallelDelegationStartedEvent",
-                    "A2AParallelDelegationCompletedEvent",
-                    "A2AContextCreatedEvent",
-                    "A2AContextExpiredEvent",
-                    "A2AContextIdleEvent",
-                    "A2AContextCompletedEvent"
-                  ]
-                }
-              ]
+              "groups": []
             }
           }
         },
@@ -717,20 +683,7 @@
               "target": "OpenAI"
             }
           ],
-          "groups": [
-            {
-              "id": "Providers",
-              "label": "LLM Providers",
-              "members": [
-                "Anthropic",
-                "Azure",
-                "Bedrock",
-                "Gemini",
-                "OpenAI",
-                "OpenAICompatible"
-              ]
-            }
-          ]
+          "groups": []
         }
       },
       "a2a_communication": {
@@ -1331,6 +1284,30 @@
                   "id": "AfterToolCallHookMethod",
                   "label": "AfterToolCallHookMethod",
                   "type": "class"
+                },
+                {
+                  "id": "clear_all_llm_call_hooks",
+                  "label": "clear_all_llm_call_hooks",
+                  "type": "external",
+                  "_repaired": "g2_injected_endpoint"
+                },
+                {
+                  "id": "clear_all_tool_call_hooks",
+                  "label": "clear_all_tool_call_hooks",
+                  "type": "external",
+                  "_repaired": "g2_injected_endpoint"
+                },
+                {
+                  "id": "register_function",
+                  "label": "register_function",
+                  "type": "external",
+                  "_repaired": "g2_injected_endpoint"
+                },
+                {
+                  "id": "_copy_method_metadata",
+                  "label": "_copy_method_metadata",
+                  "type": "external",
+                  "_repaired": "g2_injected_endpoint"
                 }
               ],
               "edges": [
@@ -1733,7 +1710,8 @@
           "source": "crewai_core",
           "target": "hooks_and_memory"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "tools_and_integrations": {
@@ -3594,7 +3572,8 @@
           "source": "tools_and_integrations",
           "target": "ai_service_tools"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "file_and_rag_infra": {
@@ -4307,6 +4286,18 @@
                 {
                   "id": "CreateCollectionParams",
                   "label": "CreateCollectionParams"
+                },
+                {
+                  "id": "BaseCollectionParams",
+                  "label": "BaseCollectionParams",
+                  "type": "external",
+                  "_repaired": "g2_injected_endpoint"
+                },
+                {
+                  "id": "CommonCreateFields",
+                  "label": "CommonCreateFields",
+                  "type": "external",
+                  "_repaired": "g2_injected_endpoint"
                 }
               ],
               "edges": [
@@ -4797,7 +4788,8 @@
           "source": "file_and_rag_infra",
           "target": "knowledge_sources"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "cli_and_dev_utils": {
@@ -5493,19 +5485,7 @@
             }
           ],
           "edges": [],
-          "groups": [
-            {
-              "id": "cli_helpers",
-              "label": "cli_helpers",
-              "contains": [
-                "BaseCommand",
-                "PlusAPIMixin",
-                "copy_template_files",
-                "run_crew_tool_with_messages",
-                "ContentCrew"
-              ]
-            }
-          ]
+          "groups": []
         }
       },
       "development_tools": {
@@ -5554,50 +5534,7 @@
               "label": "uses"
             }
           ],
-          "groups": [
-            {
-              "id": "crewai_devtools",
-              "label": "crewai_devtools",
-              "groups": [
-                {
-                  "id": "cli",
-                  "label": "cli",
-                  "nodes": [
-                    "tag",
-                    "bump"
-                  ]
-                },
-                {
-                  "id": "docs_check_group",
-                  "label": "docs_check",
-                  "nodes": [
-                    "docs_check"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "crewai_experimental_evaluation",
-              "label": "crewai.experimental.evaluation",
-              "groups": [
-                {
-                  "id": "base_evaluator_group",
-                  "label": "base_evaluator",
-                  "nodes": [
-                    "BaseEvaluator"
-                  ]
-                },
-                {
-                  "id": "testing_group",
-                  "label": "testing",
-                  "nodes": [
-                    "run_experiment",
-                    "assert_experiment_successfully"
-                  ]
-                }
-              ]
-            }
-          ]
+          "groups": []
         }
       },
       "core_utilities": {
@@ -5856,7 +5793,8 @@
           "source": "cli_and_dev_utils",
           "target": "system_config"
         }
-      ]
+      ],
+      "groups": []
     }
   }
 }

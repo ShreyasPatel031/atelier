@@ -18,30 +18,102 @@ Both scripts are crucial for validating that data pipeline components correctly 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "verify_gcs_main", "label": "Verify specific GCS file types", "type": "component", "link": null},
-        {"id": "verify_all_types_main", "label": "Verify all GCS file types for Vertex AI tools", "type": "component", "link": null},
-        {"id": "gcs_files_list", "label": "Predefined GCS Files (Subset)", "type": "component", "link": null},
-        {"id": "all_files_list", "label": "Predefined GCS Files (All Types)", "type": "component", "link": null},
-        {"id": "vertex_ai_services", "label": "Vertex AI Services", "type": "external", "link": "model_provider_gemini.md"},
-        {"id": "gcs_storage", "label": "Google Cloud Storage", "type": "external", "link": null},
-        {"id": "environment_config", "label": "Environment Configuration", "type": "external", "link": null}
+        {
+            "id": "verify_gcs_main",
+            "label": "Verify specific GCS file types",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "verify_all_types_main",
+            "label": "Verify all GCS file types for Vertex AI tools",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "gcs_files_list",
+            "label": "Predefined GCS Files (Subset)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "all_files_list",
+            "label": "Predefined GCS Files (All Types)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "vertex_ai_services",
+            "label": "Vertex AI Services",
+            "type": "external",
+            "link": "model_provider_gemini.md"
+        },
+        {
+            "id": "gcs_storage",
+            "label": "Google Cloud Storage",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "environment_config",
+            "label": "Environment Configuration",
+            "type": "external",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "environment_config", "target": "verify_gcs_main", "label": "reads project/location"},
-        {"source": "environment_config", "target": "verify_all_types_main", "label": "reads project"},
-        {"source": "gcs_files_list", "target": "verify_gcs_main", "label": "provides GCS URIs"},
-        {"source": "all_files_list", "target": "verify_all_types_main", "label": "provides GCS URIs"},
-        {"source": "verify_gcs_main", "target": "vertex_ai_services", "label": "sends test requests"},
-        {"source": "verify_gcs_main", "target": "gcs_storage", "label": "accesses files via URIs"},
-        {"source": "verify_all_types_main", "target": "vertex_ai_services", "label": "sends test requests"},
-        {"source": "verify_all_types_main", "target": "gcs_storage", "label": "accesses files via URIs"}
+        {
+            "source": "environment_config",
+            "target": "verify_gcs_main",
+            "label": "reads project/location"
+        },
+        {
+            "source": "environment_config",
+            "target": "verify_all_types_main",
+            "label": "reads project"
+        },
+        {
+            "source": "gcs_files_list",
+            "target": "verify_gcs_main",
+            "label": "provides GCS URIs"
+        },
+        {
+            "source": "all_files_list",
+            "target": "verify_all_types_main",
+            "label": "provides GCS URIs"
+        },
+        {
+            "source": "verify_gcs_main",
+            "target": "vertex_ai_services",
+            "label": "sends test requests"
+        },
+        {
+            "source": "verify_gcs_main",
+            "target": "gcs_storage",
+            "label": "accesses files via URIs"
+        },
+        {
+            "source": "verify_all_types_main",
+            "target": "vertex_ai_services",
+            "label": "sends test requests"
+        },
+        {
+            "source": "verify_all_types_main",
+            "target": "gcs_storage",
+            "label": "accesses files via URIs"
+        }
     ],
     "groups": [
         {
             "id": "verification_scripts",
             "label": "GCS Verification Scripts",
             "role": "functional",
-            "nodes": ["verify_gcs_main", "verify_all_types_main", "gcs_files_list", "all_files_list"]
+            "nodes": [
+                "verify_gcs_main",
+                "verify_all_types_main",
+                "gcs_files_list",
+                "all_files_list"
+            ]
         }
     ]
 }

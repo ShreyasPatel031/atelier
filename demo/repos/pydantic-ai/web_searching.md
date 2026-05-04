@@ -34,31 +34,113 @@ When an agent utilizes the `WebSearch` capability, it follows a specific logic t
 {
     "direction": "TD",
     "nodes": [
-        {"id": "web_search_capability", "label": "WebSearch Capability", "type": "component", "link": null},
-        {"id": "configure_search", "label": "Configure Search Parameters", "type": "component", "link": null},
-        {"id": "select_tool_impl", "label": "Select Tool Implementation (Builtin/Local)", "type": "component", "link": null},
-        {"id": "builtin_web_search_tool", "label": "Builtin WebSearch Tool", "type": "component", "link": null},
-        {"id": "local_duckduckgo_tool", "label": "Local DuckDuckGo Search", "type": "component", "link": null},
-        {"id": "builtin_or_local_tool", "label": "BuiltinOrLocalTool Base", "type": "external", "link": "capabilities_tool_integration.md"},
-        {"id": "external_search_toolsets", "label": "External Search Toolsets", "type": "external", "link": "external_toolset_integrations.md"},
-        {"id": "agent_run_context", "label": "Agent Run Context", "type": "external", "link": "agent_execution_graph.md"}
+        {
+            "id": "web_search_capability",
+            "label": "WebSearch Capability",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "configure_search",
+            "label": "Configure Search Parameters",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "select_tool_impl",
+            "label": "Select Tool Implementation (Builtin/Local)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "builtin_web_search_tool",
+            "label": "Builtin WebSearch Tool",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "local_duckduckgo_tool",
+            "label": "Local DuckDuckGo Search",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "builtin_or_local_tool",
+            "label": "BuiltinOrLocalTool Base",
+            "type": "external",
+            "link": "capabilities_tool_integration.md"
+        },
+        {
+            "id": "external_search_toolsets",
+            "label": "External Search Toolsets",
+            "type": "external",
+            "link": "external_toolset_integrations.md"
+        },
+        {
+            "id": "agent_run_context",
+            "label": "Agent Run Context",
+            "type": "external",
+            "link": "agent_execution_graph.md"
+        }
     ],
     "edges": [
-        {"source": "web_search_capability", "target": "configure_search", "label": "initializes with"},
-        {"source": "configure_search", "target": "select_tool_impl", "label": "passes configurations"},
-        {"source": "select_tool_impl", "target": "builtin_web_search_tool", "label": "delegates if builtin chosen"},
-        {"source": "select_tool_impl", "target": "local_duckduckgo_tool", "label": "delegates if local chosen (fallback)"},
-        {"source": "web_search_capability", "target": "builtin_or_local_tool", "label": "inherits from", "arrowhead": "open"},
-        {"source": "builtin_web_search_tool", "target": "agent_run_context", "label": "operates within", "lineType": "dotted"},
-        {"source": "local_duckduckgo_tool", "target": "external_search_toolsets", "label": "uses", "arrowhead": "normal"},
-        {"source": "local_duckduckgo_tool", "target": "agent_run_context", "label": "operates within", "lineType": "dotted"}
+        {
+            "source": "web_search_capability",
+            "target": "configure_search",
+            "label": "initializes with"
+        },
+        {
+            "source": "configure_search",
+            "target": "select_tool_impl",
+            "label": "passes configurations"
+        },
+        {
+            "source": "select_tool_impl",
+            "target": "builtin_web_search_tool",
+            "label": "delegates if builtin chosen"
+        },
+        {
+            "source": "select_tool_impl",
+            "target": "local_duckduckgo_tool",
+            "label": "delegates if local chosen (fallback)"
+        },
+        {
+            "source": "web_search_capability",
+            "target": "builtin_or_local_tool",
+            "label": "inherits from",
+            "arrowhead": "open"
+        },
+        {
+            "source": "builtin_web_search_tool",
+            "target": "agent_run_context",
+            "label": "operates within",
+            "lineType": "dotted"
+        },
+        {
+            "source": "local_duckduckgo_tool",
+            "target": "external_search_toolsets",
+            "label": "uses",
+            "arrowhead": "normal"
+        },
+        {
+            "source": "local_duckduckgo_tool",
+            "target": "agent_run_context",
+            "label": "operates within",
+            "lineType": "dotted"
+        }
     ],
     "groups": [
         {
             "id": "web_search_process",
             "label": "Web Search Flow",
             "role": "core",
-            "nodes": ["web_search_capability", "configure_search", "select_tool_impl", "builtin_web_search_tool", "local_duckduckgo_tool"]
+            "nodes": [
+                "web_search_capability",
+                "configure_search",
+                "select_tool_impl",
+                "builtin_web_search_tool",
+                "local_duckduckgo_tool"
+            ]
         }
     ]
 }

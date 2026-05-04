@@ -25,34 +25,127 @@ Concrete implementations, like [in_memory_state_persistence](in_memory_state_per
 {
     "direction": "TD",
     "nodes": [
-        {"id": "base_persistence_interface", "label": "Base State Persistence Interface", "type": "component", "link": null},
-        {"id": "snapshot_node_method", "label": "Snapshot Node State", "type": "component", "link": null},
-        {"id": "snapshot_end_method", "label": "Snapshot Graph End", "type": "component", "link": null},
-        {"id": "record_run_method", "label": "Record Node Execution Lifecycle", "type": "component", "link": null},
-        {"id": "load_next_method", "label": "Load Next Pending Node", "type": "component", "link": null},
-        {"id": "load_all_method", "label": "Load All Snapshots", "type": "component", "link": null},
-        {"id": "set_types_method", "label": "Set Serialization Types", "type": "component", "link": null},
-        {"id": "in_memory_state_persistence", "label": "In-Memory Persistence", "type": "external", "link": "in_memory_state_persistence.md"},
-        {"id": "file_state_persistence", "label": "File State Persistence", "type": "external", "link": "file_state_persistence.md"},
-        {"id": "graph_core_execution", "label": "Graph Core Execution", "type": "external", "link": "graph_core_execution.md"}
+        {
+            "id": "base_persistence_interface",
+            "label": "Base State Persistence Interface",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "snapshot_node_method",
+            "label": "Snapshot Node State",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "snapshot_end_method",
+            "label": "Snapshot Graph End",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "record_run_method",
+            "label": "Record Node Execution Lifecycle",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "load_next_method",
+            "label": "Load Next Pending Node",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "load_all_method",
+            "label": "Load All Snapshots",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "set_types_method",
+            "label": "Set Serialization Types",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "in_memory_state_persistence",
+            "label": "In-Memory Persistence",
+            "type": "external",
+            "link": "in_memory_state_persistence.md"
+        },
+        {
+            "id": "file_state_persistence",
+            "label": "File State Persistence",
+            "type": "external",
+            "link": "file_state_persistence.md"
+        },
+        {
+            "id": "graph_core_execution",
+            "label": "Graph Core Execution",
+            "type": "external",
+            "link": "graph_core_execution.md"
+        }
     ],
     "edges": [
-        {"source": "base_persistence_interface", "target": "snapshot_node_method", "label": "defines"},
-        {"source": "base_persistence_interface", "target": "snapshot_end_method", "label": "defines"},
-        {"source": "base_persistence_interface", "target": "record_run_method", "label": "defines"},
-        {"source": "base_persistence_interface", "target": "load_next_method", "label": "defines"},
-        {"source": "base_persistence_interface", "target": "load_all_method", "label": "defines"},
-        {"source": "base_persistence_interface", "target": "set_types_method", "label": "defines"},
-        {"source": "in_memory_state_persistence", "target": "base_persistence_interface", "label": "implements"},
-        {"source": "file_state_persistence", "target": "base_persistence_interface", "label": "implements"},
-        {"source": "graph_core_execution", "target": "base_persistence_interface", "label": "utilizes interface"}
+        {
+            "source": "base_persistence_interface",
+            "target": "snapshot_node_method",
+            "label": "defines"
+        },
+        {
+            "source": "base_persistence_interface",
+            "target": "snapshot_end_method",
+            "label": "defines"
+        },
+        {
+            "source": "base_persistence_interface",
+            "target": "record_run_method",
+            "label": "defines"
+        },
+        {
+            "source": "base_persistence_interface",
+            "target": "load_next_method",
+            "label": "defines"
+        },
+        {
+            "source": "base_persistence_interface",
+            "target": "load_all_method",
+            "label": "defines"
+        },
+        {
+            "source": "base_persistence_interface",
+            "target": "set_types_method",
+            "label": "defines"
+        },
+        {
+            "source": "in_memory_state_persistence",
+            "target": "base_persistence_interface",
+            "label": "implements"
+        },
+        {
+            "source": "file_state_persistence",
+            "target": "base_persistence_interface",
+            "label": "implements"
+        },
+        {
+            "source": "graph_core_execution",
+            "target": "base_persistence_interface",
+            "label": "utilizes interface"
+        }
     ],
     "groups": [
         {
             "id": "persistence_interface_details",
             "label": "Base Persistence Interface Methods",
             "role": "core",
-            "nodes": ["snapshot_node_method", "snapshot_end_method", "record_run_method", "load_next_method", "load_all_method", "set_types_method"]
+            "nodes": [
+                "snapshot_node_method",
+                "snapshot_end_method",
+                "record_run_method",
+                "load_next_method",
+                "load_all_method",
+                "set_types_method"
+            ]
         }
     ]
 }

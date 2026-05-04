@@ -11,6 +11,163 @@ New users and developers typically interact with the system through a few key wo
 
 The library aims to simplify the adoption of complex deep learning models, fostering innovation and enabling a wide range of AI-powered applications.
 
+<!-- DIAGRAM_JSON
+{
+    "direction": "LR",
+    "nodes": [
+        {
+            "id": "core_models",
+            "label": "Core Models",
+            "type": "module",
+            "link": "core_models.md"
+        },
+        {
+            "id": "data_preparation",
+            "label": "Data Preparation",
+            "type": "module",
+            "link": "data_preparation.md"
+        },
+        {
+            "id": "generation",
+            "label": "Generation Logic",
+            "type": "module",
+            "link": "generation.md"
+        },
+        {
+            "id": "integrations",
+            "label": "Integrations",
+            "type": "module",
+            "link": "integrations.md"
+        },
+        {
+            "id": "model_conversion",
+            "label": "Model Conversion Scripts",
+            "type": "module",
+            "link": "model_conversion_scripts.md"
+        },
+        {
+            "id": "optimization",
+            "label": "Optimization and Fusion",
+            "type": "module",
+            "link": "optimization_and_fusion.md"
+        },
+        {
+            "id": "pipelines",
+            "label": "Pipelines",
+            "type": "module",
+            "link": "pipelines.md"
+        },
+        {
+            "id": "quantization",
+            "label": "Quantization",
+            "type": "module",
+            "link": "quantization.md"
+        },
+        {
+            "id": "user",
+            "label": "User",
+            "type": "component"
+        }
+    ],
+    "edges": [
+        {
+            "source": "user",
+            "target": "pipelines",
+            "label": "uses high-level APIs"
+        },
+        {
+            "source": "user",
+            "target": "core_models",
+            "label": "directly uses"
+        },
+        {
+            "source": "user",
+            "target": "data_preparation",
+            "label": "prepares data with"
+        },
+        {
+            "source": "user",
+            "target": "quantization",
+            "label": "optimizes models with"
+        },
+        {
+            "source": "user",
+            "target": "model_conversion",
+            "label": "converts models with"
+        },
+        {
+            "source": "pipelines",
+            "target": "core_models",
+            "label": "orchestrates"
+        },
+        {
+            "source": "pipelines",
+            "target": "data_preparation",
+            "label": "uses"
+        },
+        {
+            "source": "core_models",
+            "target": "generation",
+            "label": "leverages"
+        },
+        {
+            "source": "core_models",
+            "target": "quantization",
+            "label": "supports"
+        },
+        {
+            "source": "data_preparation",
+            "target": "core_models",
+            "label": "provides inputs for"
+        },
+        {
+            "source": "model_conversion",
+            "target": "core_models",
+            "label": "produces compatible"
+        },
+        {
+            "source": "integrations",
+            "target": "core_models",
+            "label": "extends functionality of"
+        },
+        {
+            "source": "optimization",
+            "target": "core_models",
+            "label": "applies to"
+        }
+    ],
+    "groups": [
+        {
+            "id": "user_interaction",
+            "label": "User Interaction",
+            "nodes": [
+                "pipelines",
+                "integrations"
+            ]
+        },
+        {
+            "id": "core_functionality",
+            "label": "Core Models and Data",
+            "nodes": [
+                "core_models",
+                "data_preparation"
+            ]
+        },
+        {
+            "id": "model_lifecycle",
+            "label": "Model Management and Optimization",
+            "nodes": [
+                "generation",
+                "quantization",
+                "optimization",
+                "model_conversion"
+            ]
+        }
+    ],
+    "_auto_generated": "r1_overview_synthesis"
+}
+-->
+
 ```mermaid
 flowchart LR
     user(("User"))

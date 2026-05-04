@@ -12,14 +12,38 @@ This module contains the core logic for extracting and mapping token usage infor
 {
     "direction": "TD",
     "nodes": [
-        {"id": "_map_usage", "label": "Map HuggingFace Usage", "type": "component", "link": null},
-        {"id": "hf_model_response", "label": "HuggingFace Model Response", "type": "external", "link": null},
-        {"id": "request_usage", "label": "Standardized Request Usage", "type": "external", "link": "agent_utilities.md"}
+        {
+            "id": "_map_usage",
+            "label": "Map HuggingFace Usage",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "hf_model_response",
+            "label": "HuggingFace Model Response",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "request_usage",
+            "label": "Standardized Request Usage",
+            "type": "external",
+            "link": "agent_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "hf_model_response", "target": "_map_usage", "label": "HuggingFace response data"},
-        {"source": "_map_usage", "target": "request_usage", "label": "Mapped usage metrics"}
-    ]
+        {
+            "source": "hf_model_response",
+            "target": "_map_usage",
+            "label": "HuggingFace response data"
+        },
+        {
+            "source": "_map_usage",
+            "target": "request_usage",
+            "label": "Mapped usage metrics"
+        }
+    ],
+    "groups": []
 }
 -->
 

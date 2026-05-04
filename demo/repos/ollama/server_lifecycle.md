@@ -3,16 +3,16 @@ This module manages the lifecycle of the Ollama server, handling its startup, co
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "app.server.server.Server.Run",
-      "label": "Run",
-      "type": "method",
-      "path": "app.server.server.Server.Run"
-    }
-  ],
-  "edges": [],
-  "groups": []
+    "nodes": [
+        {
+            "id": "app.server.server.Server.Run",
+            "label": "Run",
+            "type": "method",
+            "path": "app.server.server.Server.Run"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

@@ -3,23 +3,16 @@ This module defines `ChunkPipeline`, a specialized pipeline for processing input
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "ChunkPipeline",
-      "label": "ChunkPipeline",
-      "type": "class",
-      "path": "src.transformers.pipelines.base.ChunkPipeline"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "base_pipelines",
-      "label": "base_pipelines",
-      "path": "base_pipelines",
-      "contains": ["ChunkPipeline"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "ChunkPipeline",
+            "label": "ChunkPipeline",
+            "type": "class",
+            "path": "src.transformers.pipelines.base.ChunkPipeline"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

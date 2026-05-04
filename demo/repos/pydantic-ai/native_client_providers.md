@@ -12,24 +12,75 @@ The `native_client_providers` module is structured around individual provider im
 {
     "direction": "TD",
     "nodes": [
-        {"id": "cohere_provider", "label": "Cohere Integration", "type": "module", "link": "cohere_provider.md"},
-        {"id": "mistral_provider", "label": "Mistral Integration", "type": "module", "link": "mistral_provider.md"},
-        {"id": "voyage_ai_provider", "label": "VoyageAI Integration", "type": "module", "link": "voyage_ai_provider.md"},
-        {"id": "xai_provider", "label": "xAI Integration", "type": "module", "link": "xai_provider.md"},
-        {"id": "model_provider_configurations", "label": "Model Provider Configurations", "type": "external", "link": "model_provider_configurations.md"}
+        {
+            "id": "native_client_providers",
+            "label": "Native Client Providers",
+            "type": "module"
+        },
+        {
+            "id": "cohere_provider",
+            "label": "Cohere Integration",
+            "type": "module",
+            "link": "cohere_provider.md"
+        },
+        {
+            "id": "mistral_provider",
+            "label": "Mistral Integration",
+            "type": "module",
+            "link": "mistral_provider.md"
+        },
+        {
+            "id": "voyage_ai_provider",
+            "label": "VoyageAI Integration",
+            "type": "module",
+            "link": "voyage_ai_provider.md"
+        },
+        {
+            "id": "xai_provider",
+            "label": "xAI Integration",
+            "type": "module",
+            "link": "xai_provider.md"
+        },
+        {
+            "id": "model_provider_configurations",
+            "label": "Model Provider Configurations",
+            "type": "external",
+            "link": "model_provider_configurations.md"
+        }
     ],
     "edges": [
-        {"source": "cohere_provider", "target": "model_provider_configurations", "label": "uses model profiles"},
-        {"source": "mistral_provider", "target": "model_provider_configurations", "label": "uses model profiles"},
-        {"source": "voyage_ai_provider", "target": "model_provider_configurations", "label": "uses model profiles"},
-        {"source": "xai_provider", "target": "model_provider_configurations", "label": "uses model profiles"}
+        {
+            "source": "cohere_provider",
+            "target": "model_provider_configurations",
+            "label": "uses model profiles"
+        },
+        {
+            "source": "mistral_provider",
+            "target": "model_provider_configurations",
+            "label": "uses model profiles"
+        },
+        {
+            "source": "voyage_ai_provider",
+            "target": "model_provider_configurations",
+            "label": "uses model profiles"
+        },
+        {
+            "source": "xai_provider",
+            "target": "model_provider_configurations",
+            "label": "uses model profiles"
+        }
     ],
     "groups": [
         {
             "id": "native_integrations",
             "label": "Native API Integrations",
-            "role": "surface", 
-            "nodes": ["cohere_provider", "mistral_provider", "voyage_ai_provider", "xai_provider"]
+            "role": "surface",
+            "nodes": [
+                "cohere_provider",
+                "mistral_provider",
+                "voyage_ai_provider",
+                "xai_provider"
+            ]
         }
     ]
 }

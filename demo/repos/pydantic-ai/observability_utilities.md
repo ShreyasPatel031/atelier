@@ -12,26 +12,80 @@ This module is crucial for the `pydantic_evals_framework` as it underpins the ab
 {
     "direction": "TD",
     "nodes": [
-        {"id": "capture_span_subtree", "label": "Capture Span Subtree Context", "type": "component", "link": null},
-        {"id": "collect_spans_internal", "label": "Internal Span Collector", "type": "component", "link": null},
-        {"id": "span_tree_model", "label": "Span Tree Data Model", "type": "component", "link": null},
-        {"id": "span_error_model", "label": "Span Recording Error", "type": "component", "link": null},
-        {"id": "pydantic_evals_framework", "label": "Pydantic Evals Framework", "type": "external", "link": "pydantic_evals_framework.md"}
+        {
+            "id": "capture_span_subtree",
+            "label": "Capture Span Subtree Context",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "collect_spans_internal",
+            "label": "Internal Span Collector",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "span_tree_model",
+            "label": "Span Tree Data Model",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "span_error_model",
+            "label": "Span Recording Error",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "pydantic_evals_framework",
+            "label": "Pydantic Evals Framework",
+            "type": "external",
+            "link": "pydantic_evals_framework.md"
+        }
     ],
     "edges": [
-        {"source": "capture_span_subtree", "target": "collect_spans_internal", "label": "calls"},
-        {"source": "collect_spans_internal", "target": "span_tree_model", "label": "populates with collected spans"},
-        {"source": "collect_spans_internal", "target": "span_error_model", "label": "indicates failure to"},
-        {"source": "capture_span_subtree", "target": "span_tree_model", "label": "yields"},
-        {"source": "capture_span_subtree", "target": "span_error_model", "label": "yields on error"},
-        {"source": "pydantic_evals_framework", "target": "capture_span_subtree", "label": "utilizes for tracing"}
+        {
+            "source": "capture_span_subtree",
+            "target": "collect_spans_internal",
+            "label": "calls"
+        },
+        {
+            "source": "collect_spans_internal",
+            "target": "span_tree_model",
+            "label": "populates with collected spans"
+        },
+        {
+            "source": "collect_spans_internal",
+            "target": "span_error_model",
+            "label": "indicates failure to"
+        },
+        {
+            "source": "capture_span_subtree",
+            "target": "span_tree_model",
+            "label": "yields"
+        },
+        {
+            "source": "capture_span_subtree",
+            "target": "span_error_model",
+            "label": "yields on error"
+        },
+        {
+            "source": "pydantic_evals_framework",
+            "target": "capture_span_subtree",
+            "label": "utilizes for tracing"
+        }
     ],
     "groups": [
         {
             "id": "span_collection_pipeline",
             "label": "Span Collection Pipeline",
             "role": "data_flow",
-            "nodes": ["capture_span_subtree", "collect_spans_internal", "span_tree_model", "span_error_model"]
+            "nodes": [
+                "capture_span_subtree",
+                "collect_spans_internal",
+                "span_tree_model",
+                "span_error_model"
+            ]
         }
     ]
 }

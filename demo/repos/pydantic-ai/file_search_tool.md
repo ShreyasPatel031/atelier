@@ -49,34 +49,123 @@ The following diagram illustrates the internal workings of the `file_search_tool
 {
     "direction": "TD",
     "nodes": [
-        {"id": "file_search_tool_component", "label": "File Search Tool", "type": "component", "link": null},
-        {"id": "process_files", "label": "Process & Chunk Files", "type": "component", "link": null},
-        {"id": "generate_embeddings", "label": "Generate Embeddings", "type": "component", "link": null},
-        {"id": "perform_vector_search", "label": "Perform Vector Search", "type": "component", "link": null},
-        {"id": "embedding_core", "label": "Embedding Core Module", "type": "external", "link": "embedding_core.md"},
-        {"id": "openai_models", "label": "OpenAI Models", "type": "external", "link": "model_provider_openai.md"},
-        {"id": "gemini_models", "label": "Gemini Models", "type": "external", "link": "model_provider_gemini.md"},
-        {"id": "toolset_management", "label": "Toolset Management", "type": "external", "link": "toolset_management.md"},
-        {"id": "data_retrieval_tools", "label": "Data Retrieval Tools", "type": "external", "link": "data_retrieval_tools.md"}
+        {
+            "id": "file_search_tool_component",
+            "label": "File Search Tool",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "process_files",
+            "label": "Process & Chunk Files",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "generate_embeddings",
+            "label": "Generate Embeddings",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "perform_vector_search",
+            "label": "Perform Vector Search",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "embedding_core",
+            "label": "Embedding Core Module",
+            "type": "external",
+            "link": "embedding_core.md"
+        },
+        {
+            "id": "openai_models",
+            "label": "OpenAI Models",
+            "type": "external",
+            "link": "model_provider_openai.md"
+        },
+        {
+            "id": "gemini_models",
+            "label": "Gemini Models",
+            "type": "external",
+            "link": "model_provider_gemini.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "data_retrieval_tools",
+            "label": "Data Retrieval Tools",
+            "type": "external",
+            "link": "data_retrieval_tools.md"
+        }
     ],
     "edges": [
-        {"source": "file_search_tool_component", "target": "process_files", "label": "manages file intake"},
-        {"source": "process_files", "target": "generate_embeddings", "label": "prepares data for embedding"},
-        {"source": "generate_embeddings", "target": "embedding_core", "label": "leverages embedding services"},
-        {"source": "generate_embeddings", "target": "perform_vector_search", "label": "indexes embedded data"},
-        {"source": "file_search_tool_component", "target": "perform_vector_search", "label": "executes search queries"},
-        {"source": "perform_vector_search", "target": "file_search_tool_component", "label": "returns search results"},
-        {"source": "file_search_tool_component", "target": "openai_models", "label": "integrates with"},
-        {"source": "file_search_tool_component", "target": "gemini_models", "label": "integrates with"},
-        {"source": "data_retrieval_tools", "target": "file_search_tool_component", "label": "offers"},
-        {"source": "toolset_management", "target": "file_search_tool_component", "label": "registers and manages"}
+        {
+            "source": "file_search_tool_component",
+            "target": "process_files",
+            "label": "manages file intake"
+        },
+        {
+            "source": "process_files",
+            "target": "generate_embeddings",
+            "label": "prepares data for embedding"
+        },
+        {
+            "source": "generate_embeddings",
+            "target": "embedding_core",
+            "label": "leverages embedding services"
+        },
+        {
+            "source": "generate_embeddings",
+            "target": "perform_vector_search",
+            "label": "indexes embedded data"
+        },
+        {
+            "source": "file_search_tool_component",
+            "target": "perform_vector_search",
+            "label": "executes search queries"
+        },
+        {
+            "source": "perform_vector_search",
+            "target": "file_search_tool_component",
+            "label": "returns search results"
+        },
+        {
+            "source": "file_search_tool_component",
+            "target": "openai_models",
+            "label": "integrates with"
+        },
+        {
+            "source": "file_search_tool_component",
+            "target": "gemini_models",
+            "label": "integrates with"
+        },
+        {
+            "source": "data_retrieval_tools",
+            "target": "file_search_tool_component",
+            "label": "offers"
+        },
+        {
+            "source": "toolset_management",
+            "target": "file_search_tool_component",
+            "label": "registers and manages"
+        }
     ],
     "groups": [
         {
             "id": "rag_pipeline",
             "label": "Retrieval Augmented Generation Pipeline",
-            "role": "analytical", 
-            "nodes": ["process_files", "generate_embeddings", "perform_vector_search"]
+            "role": "analytical",
+            "nodes": [
+                "process_files",
+                "generate_embeddings",
+                "perform_vector_search"
+            ]
         }
     ]
 }

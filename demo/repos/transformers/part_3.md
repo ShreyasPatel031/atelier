@@ -3,40 +3,72 @@ The `part_3` module defines `SeamlessM4TForTextToSpeech` and `SeamlessM4TForText
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "SeamlessM4TForTextToSpeech", "label": "SeamlessM4TForTextToSpeech"},
-    {"id": "SeamlessM4TForTextToText", "label": "SeamlessM4TForTextToText"},
-    {"id": "SeamlessM4TEncoder", "label": "SeamlessM4TEncoder"},
-    {"id": "SeamlessM4TDecoder", "label": "SeamlessM4TDecoder"},
-    {"id": "SeamlessM4TTextToUnitForConditionalGeneration", "label": "SeamlessM4TTextToUnitForConditionalGeneration"},
-    {"id": "SeamlessM4TCodeHifiGan", "label": "SeamlessM4TCodeHifiGan"},
-    {"id": "SeamlessM4TPreTrainedModel", "label": "SeamlessM4TPreTrainedModel"},
-    {"id": "GenerationMixin", "label": "GenerationMixin"},
-    {"id": "nn.Embedding", "label": "nn.Embedding"},
-    {"id": "nn.Linear", "label": "nn.Linear"}
-  ],
-  "edges": [
-    {"source": "SeamlessM4TForTextToSpeech", "target": "SeamlessM4TPreTrainedModel", "label": "inherits"},
-    {"source": "SeamlessM4TForTextToSpeech", "target": "GenerationMixin", "label": "inherits"},
-    {"source": "SeamlessM4TForTextToSpeech", "target": "SeamlessM4TEncoder", "label": "uses"},
-    {"source": "SeamlessM4TForTextToSpeech", "target": "SeamlessM4TDecoder", "label": "uses"},
-    {"source": "SeamlessM4TForTextToSpeech", "target": "SeamlessM4TTextToUnitForConditionalGeneration", "label": "uses"},
-    {"source": "SeamlessM4TForTextToSpeech", "target": "SeamlessM4TCodeHifiGan", "label": "uses"},
-    {"source": "SeamlessM4TForTextToSpeech", "target": "nn.Embedding", "label": "uses"},
-    {"source": "SeamlessM4TForTextToSpeech", "target": "nn.Linear", "label": "uses"},
-    {"source": "SeamlessM4TForTextToText", "target": "SeamlessM4TPreTrainedModel", "label": "inherits"},
-    {"source": "SeamlessM4TForTextToText", "target": "GenerationMixin", "label": "inherits"},
-    {"source": "SeamlessM4TForTextToText", "target": "SeamlessM4TEncoder", "label": "uses"},
-    {"source": "SeamlessM4TForTextToText", "target": "SeamlessM4TDecoder", "label": "uses"},
-    {"source": "SeamlessM4TForTextToText", "target": "nn.Embedding", "label": "uses"},
-    {"source": "SeamlessM4TForTextToText", "target": "nn.Linear", "label": "uses"}
-  ],
-  "groups": [
-    {"id": "part_3", "label": "part_3", "nodes": ["SeamlessM4TForTextToSpeech", "SeamlessM4TForTextToText"]},
-    {"id": "Shared Components", "label": "Shared Components", "nodes": ["SeamlessM4TEncoder", "SeamlessM4TDecoder", "nn.Embedding", "nn.Linear"]},
-    {"id": "TTS Specific", "label": "TTS Specific", "nodes": ["SeamlessM4TTextToUnitForConditionalGeneration", "SeamlessM4TCodeHifiGan"]},
-    {"id": "Base Classes/Mixins", "label": "Base Classes/Mixins", "nodes": ["SeamlessM4TPreTrainedModel", "GenerationMixin"]}
-  ]
+    "direction": "TD",
+    "nodes": [
+        {
+            "id": "part_3",
+            "label": "Part 3",
+            "type": "module"
+        },
+        {
+            "id": "c0",
+            "label": "main",
+            "type": "component"
+        },
+        {
+            "id": "c1",
+            "label": "convert_maskformer_checkpoint",
+            "type": "component"
+        },
+        {
+            "id": "c2",
+            "label": "convert_maskformer_checkpoint",
+            "type": "component"
+        },
+        {
+            "id": "c3",
+            "label": "convert_checkpoint",
+            "type": "component"
+        },
+        {
+            "id": "c4",
+            "label": "main",
+            "type": "component"
+        },
+        {
+            "id": "more",
+            "label": "+13 more",
+            "type": "component"
+        }
+    ],
+    "edges": [
+        {
+            "source": "part_3",
+            "target": "c0"
+        },
+        {
+            "source": "part_3",
+            "target": "c1"
+        },
+        {
+            "source": "part_3",
+            "target": "c2"
+        },
+        {
+            "source": "part_3",
+            "target": "c3"
+        },
+        {
+            "source": "part_3",
+            "target": "c4"
+        },
+        {
+            "source": "part_3",
+            "target": "more"
+        }
+    ],
+    "groups": [],
+    "_auto_generated": true
 }
 -->
 ```mermaid

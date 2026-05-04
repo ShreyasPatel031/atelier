@@ -3,32 +3,34 @@ This module provides utilities for extracting server inference information and d
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "server_info_and_diagnostics",
-      "label": "server_info_and_diagnostics",
-      "type": "module"
-    },
-    {
-      "id": "app.server.server_test.TestGetInferenceInfo",
-      "label": "TestGetInferenceInfo",
-      "type": "component"
-    }
-  ],
-  "edges": [
-    {
-      "source": "server_info_and_diagnostics",
-      "target": "app.server.server_test.TestGetInferenceInfo",
-      "type": "contains"
-    }
-  ],
-  "groups": [
-    {
-      "id": "server_info_and_diagnostics_group",
-      "label": "server_info_and_diagnostics",
-      "nodes": ["app.server.server_test.TestGetInferenceInfo"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "server_info_and_diagnostics",
+            "label": "server_info_and_diagnostics",
+            "type": "module"
+        },
+        {
+            "id": "app.server.server_test.TestGetInferenceInfo",
+            "label": "TestGetInferenceInfo",
+            "type": "component"
+        }
+    ],
+    "edges": [
+        {
+            "source": "server_info_and_diagnostics",
+            "target": "app.server.server_test.TestGetInferenceInfo",
+            "type": "contains"
+        }
+    ],
+    "groups": [
+        {
+            "id": "server_info_and_diagnostics_group",
+            "label": "server_info_and_diagnostics",
+            "nodes": [
+                "app.server.server_test.TestGetInferenceInfo"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

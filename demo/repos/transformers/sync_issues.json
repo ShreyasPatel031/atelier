@@ -1,42 +1,64 @@
 {
-  "docs_dir": "/Users/shreyaspatel/atelier/demo/repos/transformers",
-  "timestamp": "2026-04-17T05:34:50.047048",
+  "docs_dir": "demo/repos/transformers",
+  "timestamp": "2026-05-05T02:11:37.143970",
   "summary": {
     "total_modules": 99,
     "missing_files": 0,
     "failure_rate_pct": 0.0,
     "success_rate_pct": 100.0,
-    "total_issues": 64,
-    "errors": 14,
-    "warnings": 50,
+    "total_issues": 0,
+    "errors": 0,
+    "warnings": 0,
     "files_created": 0,
-    "metadata_added": 50,
-    "diagrams_added": 14
+    "metadata_added": 0,
+    "diagrams_added": 0
   },
   "metrics": {
     "presync_audit": {
       "modules_total": 99,
       "missing_md": 0,
-      "missing_title": 25,
-      "missing_description": 25,
-      "leaf_missing_diagram": 14,
-      "parent_missing_diagram_with_children": 12,
+      "missing_title": 0,
+      "missing_description": 0,
+      "leaf_missing_diagram": 0,
+      "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 2,
-      "children_missing_from_diagram_nodes": 25,
-      "parent_diagram_gaps_to_inject": 90,
+      "diagram_edges_unknown_endpoint": 0,
+      "children_missing_from_diagram_nodes": 0,
+      "parent_diagram_gaps_to_inject": 0,
       "mermaid_fence_blocks_total": 123,
       "placeholder_md_files": 0
     },
+    "diagram_ir_audit": {
+      "module_diagrams_total": 99,
+      "overview_has_diagram_json": true,
+      "overview_mermaid_parse_ok": true,
+      "overview_r1_reason": null,
+      "by_code": {},
+      "samples_by_code": {}
+    },
+    "diagram_ir_repairs_applied": {
+      "modules_repaired": 99,
+      "g2_injected_total": 0,
+      "g3_lifted_total": 0,
+      "overview_diagram_json_injected": false,
+      "overview_diagram_json_repaired": false
+    },
+    "diagram_ir_audit_post": {
+      "module_diagrams_total": 99,
+      "overview_has_diagram_json": true,
+      "overview_mermaid_parse_ok": true,
+      "overview_r1_reason": null,
+      "by_code": {},
+      "samples_by_code": {}
+    },
     "mermaid_validation": {
       "blocks_checked": 123,
-      "blocks_invalid": 21,
-      "validation_ms": 8.2816,
-      "error_type_histogram": {
-        "syntax_error": 21,
-        "warning:invalid_node_id": 10
-      },
-      "stage46_fixes_applied": 32
+      "blocks_invalid": 0,
+      "validation_ms": 2199.0229,
+      "error_type_histogram": {},
+      "stage46_fixes_applied": 0,
+      "postfix_blocks_invalid": 0,
+      "postfix_error_type_histogram": {}
     },
     "postsync_audit": {
       "modules_total": 99,
@@ -46,33 +68,38 @@
       "leaf_missing_diagram": 0,
       "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 2,
+      "diagram_edges_unknown_endpoint": 0,
       "children_missing_from_diagram_nodes": 0,
       "parent_diagram_gaps_to_inject": 0,
       "mermaid_fence_blocks_total": 123,
       "placeholder_md_files": 0
     },
     "delta_presync_minus_postsync": {
-      "mermaid_fence_blocks_total": 0.0,
-      "diagram_nodes_with_empty_label": 0.0,
-      "diagram_edges_unknown_endpoint": 0.0,
-      "leaf_missing_diagram": 14.0,
-      "parent_diagram_gaps_to_inject": 90.0,
-      "modules_total": 0.0,
-      "children_missing_from_diagram_nodes": 25.0,
-      "missing_description": 25.0,
-      "parent_missing_diagram_with_children": 12.0,
+      "missing_description": 0.0,
       "missing_md": 0.0,
-      "missing_title": 25.0,
-      "placeholder_md_files": 0.0
+      "leaf_missing_diagram": 0.0,
+      "children_missing_from_diagram_nodes": 0.0,
+      "modules_total": 0.0,
+      "placeholder_md_files": 0.0,
+      "missing_title": 0.0,
+      "diagram_edges_unknown_endpoint": 0.0,
+      "parent_diagram_gaps_to_inject": 0.0,
+      "parent_missing_diagram_with_children": 0.0,
+      "mermaid_fence_blocks_total": 0.0,
+      "diagram_nodes_with_empty_label": 0.0
     },
     "fixes_applied_counts": {
-      "metadata_field_updates": 50,
+      "metadata_field_updates": 0,
       "placeholder_md_files_created": 0,
-      "leaf_diagrams_added": 14,
-      "parent_diagram_child_nodes_injected": 90,
+      "leaf_diagrams_added": 0,
+      "parent_diagram_child_nodes_injected": 0,
       "overview_md_created": 0,
-      "mermaid_stage46_fixes": 32
+      "mermaid_stage46_fixes": 0,
+      "diagram_ir_modules_repaired": 99,
+      "diagram_ir_g2_injected_total": 0,
+      "diagram_ir_g3_lifted_total": 0,
+      "diagram_ir_overview_json_injected": 0,
+      "diagram_ir_overview_json_repaired": 0
     },
     "measurement_summary": {
       "1_stage3_defects_before_stage45": {
@@ -80,25 +107,30 @@
         "presync_audit": {
           "modules_total": 99,
           "missing_md": 0,
-          "missing_title": 25,
-          "missing_description": 25,
-          "leaf_missing_diagram": 14,
-          "parent_missing_diagram_with_children": 12,
+          "missing_title": 0,
+          "missing_description": 0,
+          "leaf_missing_diagram": 0,
+          "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 2,
-          "children_missing_from_diagram_nodes": 25,
-          "parent_diagram_gaps_to_inject": 90,
+          "diagram_edges_unknown_endpoint": 0,
+          "children_missing_from_diagram_nodes": 0,
+          "parent_diagram_gaps_to_inject": 0,
           "mermaid_fence_blocks_total": 123,
           "placeholder_md_files": 0
         }
       },
       "1b_stage45_fixes_applied_counters": {
-        "metadata_field_updates": 50,
+        "metadata_field_updates": 0,
         "placeholder_md_files_created": 0,
-        "leaf_diagrams_added": 14,
-        "parent_diagram_child_nodes_injected": 90,
+        "leaf_diagrams_added": 0,
+        "parent_diagram_child_nodes_injected": 0,
         "overview_md_created": 0,
-        "mermaid_stage46_fixes": 32
+        "mermaid_stage46_fixes": 0,
+        "diagram_ir_modules_repaired": 99,
+        "diagram_ir_g2_injected_total": 0,
+        "diagram_ir_g3_lifted_total": 0,
+        "diagram_ir_overview_json_injected": 0,
+        "diagram_ir_overview_json_repaired": 0
       },
       "1c_residual_after_stage45": {
         "postsync_audit": {
@@ -109,7 +141,7 @@
           "leaf_missing_diagram": 0,
           "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 2,
+          "diagram_edges_unknown_endpoint": 0,
           "children_missing_from_diagram_nodes": 0,
           "parent_diagram_gaps_to_inject": 0,
           "mermaid_fence_blocks_total": 123,
@@ -119,849 +151,65 @@
       "1d_reduction_delta_presync_minus_postsync": {
         "note": "Positive number = fewer problems after sync for that metric",
         "delta": {
-          "mermaid_fence_blocks_total": 0.0,
-          "diagram_nodes_with_empty_label": 0.0,
-          "diagram_edges_unknown_endpoint": 0.0,
-          "leaf_missing_diagram": 14.0,
-          "parent_diagram_gaps_to_inject": 90.0,
-          "modules_total": 0.0,
-          "children_missing_from_diagram_nodes": 25.0,
-          "missing_description": 25.0,
-          "parent_missing_diagram_with_children": 12.0,
+          "missing_description": 0.0,
           "missing_md": 0.0,
-          "missing_title": 25.0,
-          "placeholder_md_files": 0.0
+          "leaf_missing_diagram": 0.0,
+          "children_missing_from_diagram_nodes": 0.0,
+          "modules_total": 0.0,
+          "placeholder_md_files": 0.0,
+          "missing_title": 0.0,
+          "diagram_edges_unknown_endpoint": 0.0,
+          "parent_diagram_gaps_to_inject": 0.0,
+          "parent_missing_diagram_with_children": 0.0,
+          "mermaid_fence_blocks_total": 0.0,
+          "diagram_nodes_with_empty_label": 0.0
         }
       },
       "1e_issues_logged_this_run_by_type": {
-        "all": {
-          "missing_title": 25,
-          "missing_description": 25,
-          "missing_diagram": 14
-        }
+        "all": {}
       },
       "2_mermaid": {
         "blocks_checked": 123,
-        "blocks_invalid_before_stage46": 21,
-        "validation_ms": 8.2816,
-        "error_type_histogram": {
-          "syntax_error": 21,
-          "warning:invalid_node_id": 10
+        "blocks_invalid_before_stage46": 0,
+        "blocks_invalid_after_stage46": 0,
+        "validation_ms": 2199.0229,
+        "error_type_histogram": {},
+        "error_type_histogram_after_stage46": {},
+        "stage46_fixes_applied": 0,
+        "validator": "mermaid_validator (Mermaid.js 11.9 via Node, same as viewer)"
+      },
+      "3_diagram_ir": {
+        "audit_pre": {
+          "module_diagrams_total": 99,
+          "overview_has_diagram_json": true,
+          "overview_mermaid_parse_ok": true,
+          "overview_r1_reason": null,
+          "by_code": {},
+          "samples_by_code": {}
         },
-        "stage46_fixes_applied": 32,
-        "viewer_regex_layers_vs_backend": [
-          {
-            "layer": "Fix 0",
-            "what": "Escape ()[]{} inside quoted [\"...\"] and some unquoted labels",
-            "backend_heuristic": "Not checked in sync (viewer-only escape path)",
-            "deep_validator": "May surface as invalid_node_id warning or missing_diagram_type if line breaks badly"
-          },
-          {
-            "layer": "Fix 1\u20132",
-            "what": "Edge labels |...| \u2014 strip numbered lists, quote edge text with .:-><",
-            "backend_heuristic": "Not checked",
-            "deep_validator": "malformed_edge_label if present"
-          },
-          {
-            "layer": "Fix 3",
-            "what": "subgraph + spaces \u2192 quote subgraph name",
-            "backend_heuristic": "validate_mermaid unbalanced_subgraph",
-            "deep_validator": "subgraph balance in mermaid_validator"
-          },
-          {
-            "layer": "Fix 4\u20135",
-            "what": "Strip HTML tags; backticks in labels",
-            "backend_heuristic": "Not checked",
-            "deep_validator": "syntax_error or warnings depending on content"
-          },
-          {
-            "layer": "doc sync validation",
-            "what": "Single pass: codewiki.src.be.mermaid_validator.validate_mermaid per fenced block (no duplicate inline heuristics)",
-            "backend_heuristic": "N/A \u2014 use validate_mermaid only",
-            "deep_validator": "Same validate_mermaid (MermaidErrorType histogram optional in metrics)"
-          }
-        ]
+        "audit_post": {
+          "module_diagrams_total": 99,
+          "overview_has_diagram_json": true,
+          "overview_mermaid_parse_ok": true,
+          "overview_r1_reason": null,
+          "by_code": {},
+          "samples_by_code": {}
+        },
+        "by_code_pre": {},
+        "by_code_post": {},
+        "repairs_applied": {
+          "modules_repaired": 99,
+          "g2_injected_total": 0,
+          "g3_lifted_total": 0,
+          "overview_diagram_json_injected": false,
+          "overview_diagram_json_repaired": false
+        }
       }
     }
   },
-  "issues_by_type": {
-    "missing_title": 25,
-    "missing_description": 25,
-    "missing_diagram": 14
-  },
-  "issues": [
-    {
-      "issue_type": "missing_title",
-      "module_name": "language_models",
-      "module_path": "core_models/language_models",
-      "severity": "warning",
-      "details": {
-        "component_count": 105,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "language_models",
-      "module_path": "core_models/language_models",
-      "severity": "warning",
-      "details": {
-        "component_count": 105,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_2",
-      "module_path": "core_models/language_models/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_2",
-      "module_path": "core_models/language_models/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_3",
-      "module_path": "core_models/language_models/part_3",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_3",
-      "module_path": "core_models/language_models/part_3",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_5",
-      "module_path": "core_models/language_models/part_5",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_5",
-      "module_path": "core_models/language_models/part_5",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_6",
-      "module_path": "core_models/language_models/part_6",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_6",
-      "module_path": "core_models/language_models/part_6",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "vision_models",
-      "module_path": "core_models/vision_models",
-      "severity": "warning",
-      "details": {
-        "component_count": 17,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "vision_models",
-      "module_path": "core_models/vision_models",
-      "severity": "warning",
-      "details": {
-        "component_count": 17,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_2",
-      "module_path": "core_models/vision_models/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_2",
-      "module_path": "core_models/vision_models/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_5",
-      "module_path": "core_models/vision_models/part_5",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_5",
-      "module_path": "core_models/vision_models/part_5",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_6",
-      "module_path": "core_models/vision_models/part_6",
-      "severity": "warning",
-      "details": {
-        "component_count": 1,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_6",
-      "module_path": "core_models/vision_models/part_6",
-      "severity": "warning",
-      "details": {
-        "component_count": 1,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "audio_models",
-      "module_path": "core_models/audio_models",
-      "severity": "warning",
-      "details": {
-        "component_count": 27,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "audio_models",
-      "module_path": "core_models/audio_models",
-      "severity": "warning",
-      "details": {
-        "component_count": 27,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_2",
-      "module_path": "core_models/audio_models/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 2,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_2",
-      "module_path": "core_models/audio_models/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 2,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_8",
-      "module_path": "core_models/audio_models/part_8",
-      "severity": "warning",
-      "details": {
-        "component_count": 5,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_8",
-      "module_path": "core_models/audio_models/part_8",
-      "severity": "warning",
-      "details": {
-        "component_count": 5,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_9",
-      "module_path": "core_models/audio_models/part_9",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_9",
-      "module_path": "core_models/audio_models/part_9",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "multimodal_models",
-      "module_path": "core_models/multimodal_models",
-      "severity": "warning",
-      "details": {
-        "component_count": 15,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "multimodal_models",
-      "module_path": "core_models/multimodal_models",
-      "severity": "warning",
-      "details": {
-        "component_count": 15,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_2",
-      "module_path": "core_models/multimodal_models/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_2",
-      "module_path": "core_models/multimodal_models/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_3",
-      "module_path": "core_models/multimodal_models/part_3",
-      "severity": "warning",
-      "details": {
-        "component_count": 1,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_3",
-      "module_path": "core_models/multimodal_models/part_3",
-      "severity": "warning",
-      "details": {
-        "component_count": 1,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_6",
-      "module_path": "core_models/multimodal_models/part_6",
-      "severity": "warning",
-      "details": {
-        "component_count": 2,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_6",
-      "module_path": "core_models/multimodal_models/part_6",
-      "severity": "warning",
-      "details": {
-        "component_count": 2,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "specialized_models",
-      "module_path": "core_models/specialized_models",
-      "severity": "warning",
-      "details": {
-        "component_count": 8,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "specialized_models",
-      "module_path": "core_models/specialized_models",
-      "severity": "warning",
-      "details": {
-        "component_count": 8,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_2",
-      "module_path": "core_models/specialized_models/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_2",
-      "module_path": "core_models/specialized_models/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "tokenizers",
-      "module_path": "data_preparation/tokenizers",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "tokenizers",
-      "module_path": "data_preparation/tokenizers",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "vision_model_converters",
-      "module_path": "model_conversion_scripts/vision_model_converters",
-      "severity": "warning",
-      "details": {
-        "component_count": 93,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "vision_model_converters",
-      "module_path": "model_conversion_scripts/vision_model_converters",
-      "severity": "warning",
-      "details": {
-        "component_count": 93,
-        "has_children": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_2",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 23,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_2",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_2",
-      "severity": "warning",
-      "details": {
-        "component_count": 23,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_3",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_3",
-      "severity": "warning",
-      "details": {
-        "component_count": 18,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_3",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_3",
-      "severity": "warning",
-      "details": {
-        "component_count": 18,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_4",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_4",
-      "severity": "warning",
-      "details": {
-        "component_count": 20,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_4",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_4",
-      "severity": "warning",
-      "details": {
-        "component_count": 20,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "part_5",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_5",
-      "severity": "warning",
-      "details": {
-        "component_count": 11,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "part_5",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_5",
-      "severity": "warning",
-      "details": {
-        "component_count": 11,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_2",
-      "module_path": "core_models/vision_models/part_2",
-      "severity": "error",
-      "details": {
-        "component_count": 4,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_5",
-      "module_path": "core_models/vision_models/part_5",
-      "severity": "error",
-      "details": {
-        "component_count": 3,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_6",
-      "module_path": "core_models/vision_models/part_6",
-      "severity": "error",
-      "details": {
-        "component_count": 1,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_2",
-      "module_path": "core_models/audio_models/part_2",
-      "severity": "error",
-      "details": {
-        "component_count": 2,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_8",
-      "module_path": "core_models/audio_models/part_8",
-      "severity": "error",
-      "details": {
-        "component_count": 5,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_9",
-      "module_path": "core_models/audio_models/part_9",
-      "severity": "error",
-      "details": {
-        "component_count": 4,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_2",
-      "module_path": "core_models/multimodal_models/part_2",
-      "severity": "error",
-      "details": {
-        "component_count": 3,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_3",
-      "module_path": "core_models/multimodal_models/part_3",
-      "severity": "error",
-      "details": {
-        "component_count": 1,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_6",
-      "module_path": "core_models/multimodal_models/part_6",
-      "severity": "error",
-      "details": {
-        "component_count": 2,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_2",
-      "module_path": "core_models/specialized_models/part_2",
-      "severity": "error",
-      "details": {
-        "component_count": 3,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_2",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_2",
-      "severity": "error",
-      "details": {
-        "component_count": 23,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_3",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_3",
-      "severity": "error",
-      "details": {
-        "component_count": 18,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_4",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_4",
-      "severity": "error",
-      "details": {
-        "component_count": 20,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "part_5",
-      "module_path": "model_conversion_scripts/vision_model_converters/part_5",
-      "severity": "error",
-      "details": {
-        "component_count": 11,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    }
-  ],
+  "issues_by_type": {},
+  "issues": [],
   "files_created": [],
-  "metadata_added": [
-    "language_models:title",
-    "language_models:description",
-    "part_2:title",
-    "part_2:description",
-    "part_3:title",
-    "part_3:description",
-    "part_5:title",
-    "part_5:description",
-    "part_6:title",
-    "part_6:description",
-    "vision_models:title",
-    "vision_models:description",
-    "part_2:title",
-    "part_2:description",
-    "part_5:title",
-    "part_5:description",
-    "part_6:title",
-    "part_6:description",
-    "audio_models:title",
-    "audio_models:description",
-    "part_2:title",
-    "part_2:description",
-    "part_8:title",
-    "part_8:description",
-    "part_9:title",
-    "part_9:description",
-    "multimodal_models:title",
-    "multimodal_models:description",
-    "part_2:title",
-    "part_2:description",
-    "part_3:title",
-    "part_3:description",
-    "part_6:title",
-    "part_6:description",
-    "specialized_models:title",
-    "specialized_models:description",
-    "part_2:title",
-    "part_2:description",
-    "tokenizers:title",
-    "tokenizers:description",
-    "vision_model_converters:title",
-    "vision_model_converters:description",
-    "part_2:title",
-    "part_2:description",
-    "part_3:title",
-    "part_3:description",
-    "part_4:title",
-    "part_4:description",
-    "part_5:title",
-    "part_5:description"
-  ],
-  "diagrams_added": [
-    "part_2",
-    "part_5",
-    "part_6",
-    "part_2",
-    "part_8",
-    "part_9",
-    "part_2",
-    "part_3",
-    "part_6",
-    "part_2",
-    "part_2",
-    "part_3",
-    "part_4",
-    "part_5"
-  ]
+  "metadata_added": [],
+  "diagrams_added": []
 }

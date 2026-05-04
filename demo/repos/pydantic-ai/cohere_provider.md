@@ -8,26 +8,107 @@ The `CohereProvider` class acts as the primary interface, abstracting the comple
 {
     "direction": "TD",
     "nodes": [
-        {"id": "cohere_provider_class", "label": "CohereProvider", "type": "component", "link": null},
-        {"id": "cohere_v2_client_inst", "label": "Cohere API V2 Client (Instance)", "type": "component", "link": null},
-        {"id": "cohere_v1_client_inst", "label": "Cohere API V1 Client (Instance)", "type": "component", "link": null},
-        {"id": "cohere_external_api", "label": "Cohere External API Service", "type": "external", "link": null},
-        {"id": "model_profile_definitions", "label": "Model Profile Configurations", "type": "external", "link": "model_profile_definitions.md"},
-        {"id": "http_client_caching_util", "label": "HTTP Client Caching Utility", "type": "component", "link": null},
-        {"id": "environment_variables", "label": "Environment Variables (API Key, Base URL)", "type": "external", "link": null},
-        {"id": "base_provider_interface", "label": "Base Provider Interface", "type": "external", "link": "model_provider_integrations.md"},
-        {"id": "user_error_exception", "label": "UserError Exception", "type": "external", "link": null}
+        {
+            "id": "cohere_provider_class",
+            "label": "CohereProvider",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "cohere_v2_client_inst",
+            "label": "Cohere API V2 Client (Instance)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "cohere_v1_client_inst",
+            "label": "Cohere API V1 Client (Instance)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "cohere_external_api",
+            "label": "Cohere External API Service",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "model_profile_definitions",
+            "label": "Model Profile Configurations",
+            "type": "external",
+            "link": "model_profile_definitions.md"
+        },
+        {
+            "id": "http_client_caching_util",
+            "label": "HTTP Client Caching Utility",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "environment_variables",
+            "label": "Environment Variables (API Key, Base URL)",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "base_provider_interface",
+            "label": "Base Provider Interface",
+            "type": "external",
+            "link": "model_provider_integrations.md"
+        },
+        {
+            "id": "user_error_exception",
+            "label": "UserError Exception",
+            "type": "external",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "cohere_provider_class", "target": "base_provider_interface", "label": "inherits from"},
-        {"source": "cohere_provider_class", "target": "cohere_v2_client_inst", "label": "manages"},
-        {"source": "cohere_provider_class", "target": "cohere_v1_client_inst", "label": "manages"},
-        {"source": "cohere_v2_client_inst", "target": "cohere_external_api", "label": "sends requests to"},
-        {"source": "cohere_v1_client_inst", "target": "cohere_external_api", "label": "sends requests to"},
-        {"source": "cohere_provider_class", "target": "model_profile_definitions", "label": "reads model profiles from"},
-        {"source": "cohere_provider_class", "target": "environment_variables", "label": "reads configuration from"},
-        {"source": "cohere_provider_class", "target": "http_client_caching_util", "label": "obtains HTTP client from"},
-        {"source": "cohere_provider_class", "target": "user_error_exception", "label": "raises error on missing API key"}
+        {
+            "source": "cohere_provider_class",
+            "target": "base_provider_interface",
+            "label": "inherits from"
+        },
+        {
+            "source": "cohere_provider_class",
+            "target": "cohere_v2_client_inst",
+            "label": "manages"
+        },
+        {
+            "source": "cohere_provider_class",
+            "target": "cohere_v1_client_inst",
+            "label": "manages"
+        },
+        {
+            "source": "cohere_v2_client_inst",
+            "target": "cohere_external_api",
+            "label": "sends requests to"
+        },
+        {
+            "source": "cohere_v1_client_inst",
+            "target": "cohere_external_api",
+            "label": "sends requests to"
+        },
+        {
+            "source": "cohere_provider_class",
+            "target": "model_profile_definitions",
+            "label": "reads model profiles from"
+        },
+        {
+            "source": "cohere_provider_class",
+            "target": "environment_variables",
+            "label": "reads configuration from"
+        },
+        {
+            "source": "cohere_provider_class",
+            "target": "http_client_caching_util",
+            "label": "obtains HTTP client from"
+        },
+        {
+            "source": "cohere_provider_class",
+            "target": "user_error_exception",
+            "label": "raises error on missing API key"
+        }
     ],
     "groups": []
 }

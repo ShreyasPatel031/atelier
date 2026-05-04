@@ -864,6 +864,17 @@ def repair_diagram_ir(
     group_ids = collect_group_ids()
     node_ids = collect_node_ids()
 
+    def first_group_member(gid: str) -> Optional[str]:
+        for g in data["groups"]:
+            if not g or g.get("id") is None:
+                continue
+            if str(g["id"]) != gid:
+                continue
+            members = g.get("nodes") or []
+            if not members:
+                return None
+            return str(members[0])
+
     def ensure_external_node(eid: str) -> None:
         sid = str(eid)
         if sid in node_ids:
@@ -882,23 +893,74 @@ def repair_diagram_ir(
         summary["g2Injected"].append(sid)
         warnings.append({"code": "g2_injected_external", "nodeId": sid})
 
+    # Normalize edges: drop malformed; rewire endpoints that reference group ids to the group's first member.
+    kept_edges: List[Dict[str, Any]] = []
     for e in data["edges"]:
         if not e:
             continue
         src = str(e["source"]) if e.get("source") is not None else ""
         tgt = str(e["target"]) if e.get("target") is not None else ""
         if not src or not tgt:
-            warnings.append({"code": "g2_skip_edge_missing_endpoint", "edge": e})
+            warnings.append({"code": "g2_removed_edge_missing_endpoint", "edge": e})
             continue
         if src in group_ids:
-            summary["g2EndpointIsGroupId"].append({"role": "source", "id": src})
-            warnings.append({"code": "g2_endpoint_is_group_id", "role": "source", "id": src})
-        elif src not in node_ids:
-            ensure_external_node(src)
+            rep = first_group_member(src)
+            if rep:
+                warnings.append(
+                    {"code": "g2_rewired_group_endpoint", "role": "source", "from": src, "to": rep}
+                )
+                src = rep
+            else:
+                warnings.append({"code": "g2_dropped_edge_group_endpoint", "role": "source", "id": src})
+                continue
         if tgt in group_ids:
-            summary["g2EndpointIsGroupId"].append({"role": "target", "id": tgt})
-            warnings.append({"code": "g2_endpoint_is_group_id", "role": "target", "id": tgt})
-        elif tgt not in node_ids:
+            rep = first_group_member(tgt)
+            if rep:
+                warnings.append(
+                    {"code": "g2_rewired_group_endpoint", "role": "target", "from": tgt, "to": rep}
+                )
+                tgt = rep
+            else:
+                warnings.append({"code": "g2_dropped_edge_group_endpoint", "role": "target", "id": tgt})
+                continue
+        ne = dict(e)
+        ne["source"] = src
+        ne["target"] = tgt
+        kept_edges.append(ne)
+    data["edges"] = kept_edges
+
+    # R4 prep: ELK cannot use the same id for a leaf node and a compound group — rename colliding groups.
+    node_ids = collect_node_ids()
+    group_ids = collect_group_ids()
+    used_ids: Set[str] = set(node_ids) | set(group_ids)
+    for g in data["groups"]:
+        if not g or g.get("id") is None:
+            continue
+        gid = str(g["id"])
+        if gid not in node_ids:
+            continue
+        base = f"{gid}__group"
+        new_gid = base
+        n = 1
+        while new_gid in used_ids:
+            new_gid = f"{base}_{n}"
+            n += 1
+        g["id"] = new_gid
+        g["_repaired"] = "r4_group_renamed_avoid_node_collision"
+        used_ids.add(new_gid)
+        warnings.append({"code": "r4_renamed_group_for_node_collision", "from": gid, "to": new_gid})
+
+    group_ids = collect_group_ids()
+    node_ids = collect_node_ids()
+
+    for e in data["edges"]:
+        if not e:
+            continue
+        src = str(e["source"]) if e.get("source") is not None else ""
+        tgt = str(e["target"]) if e.get("target") is not None else ""
+        if src not in node_ids:
+            ensure_external_node(src)
+        if tgt not in node_ids:
             ensure_external_node(tgt)
 
     summary["after"] = {
@@ -1408,6 +1470,7 @@ def apply_diagram_ir_repairs_to_docs_dir(docs_dir: str) -> Dict[str, Any]:
         "g2_injected_total": 0,
         "g3_lifted_total": 0,
         "overview_diagram_json_injected": False,
+        "overview_diagram_json_repaired": False,
     }
 
     if tree_path.exists():
@@ -1458,6 +1521,17 @@ def apply_diagram_ir_repairs_to_docs_dir(docs_dir: str) -> Dict[str, Any]:
                         content = content[:idx] + insert + content[idx:]
                         overview_path.write_text(content, encoding="utf-8")
                         agg["overview_diagram_json_injected"] = True
+        else:
+            om = _DIAGRAM_JSON_BLOCK_RE.search(content)
+            if om:
+                try:
+                    overview_diagram = json.loads(om.group(1).strip())
+                except Exception:
+                    overview_diagram = None
+                if isinstance(overview_diagram, dict) and isinstance(overview_diagram.get("nodes"), list):
+                    ok_o, repaired_o, _wo, _summ_o = repair_diagram_ir(overview_diagram)
+                    if ok_o and repaired_o and _write_diagram_json_back_to_md(overview_path, repaired_o):
+                        agg["overview_diagram_json_repaired"] = True
 
     return agg
 
@@ -2676,6 +2750,11 @@ def run_full_sync(
         else 0,
         "diagram_ir_overview_json_injected": int(
             diagram_ir_repairs.get("overview_diagram_json_injected", False)
+        )
+        if isinstance(diagram_ir_repairs, dict)
+        else 0,
+        "diagram_ir_overview_json_repaired": int(
+            diagram_ir_repairs.get("overview_diagram_json_repaired", False)
         )
         if isinstance(diagram_ir_repairs, dict)
         else 0,

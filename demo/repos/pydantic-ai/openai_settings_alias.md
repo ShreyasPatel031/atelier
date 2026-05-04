@@ -14,12 +14,27 @@ For more details on the actual settings and configurations, refer to the [openai
 {
     "direction": "TD",
     "nodes": [
-        {"id": "openai_model_settings", "label": "OpenAIModelSettings (Deprecated Alias)", "type": "component", "link": null},
-        {"id": "openai_chat_model_settings", "label": "OpenAIChatModelSettings (Actual Settings)", "type": "external", "link": "openai_model_definitions.md"}
+        {
+            "id": "openai_model_settings",
+            "label": "OpenAIModelSettings (Deprecated Alias)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "openai_chat_model_settings",
+            "label": "OpenAIChatModelSettings (Actual Settings)",
+            "type": "external",
+            "link": "openai_model_definitions.md"
+        }
     ],
     "edges": [
-        {"source": "openai_model_settings", "target": "openai_chat_model_settings", "label": "aliases"}
-    ]
+        {
+            "source": "openai_model_settings",
+            "target": "openai_chat_model_settings",
+            "label": "aliases"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

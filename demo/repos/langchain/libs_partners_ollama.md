@@ -3,14 +3,30 @@ This module provides the `OllamaLLM` class, an interface for interacting with Ol
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "libs_partners_ollama", "label": "libs_partners_ollama", "type": "module"},
-    {"id": "OllamaLLM", "label": "OllamaLLM", "type": "component", "path": "libs.partners.ollama.langchain_ollama.llms.OllamaLLM"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "libs_partners_ollama", "label": "libs_partners_ollama", "nodes": ["OllamaLLM"]}
-  ]
+    "nodes": [
+        {
+            "id": "libs_partners_ollama",
+            "label": "libs_partners_ollama",
+            "type": "module"
+        },
+        {
+            "id": "OllamaLLM",
+            "label": "OllamaLLM",
+            "type": "component",
+            "path": "libs.partners.ollama.langchain_ollama.llms.OllamaLLM"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "libs_partners_ollama__group",
+            "label": "libs_partners_ollama",
+            "nodes": [
+                "OllamaLLM"
+            ],
+            "_repaired": "r4_group_renamed_avoid_node_collision"
+        }
+    ]
 }
 -->
 ```mermaid

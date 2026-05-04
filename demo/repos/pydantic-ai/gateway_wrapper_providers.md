@@ -12,31 +12,92 @@ The `gateway_wrapper_providers` module integrates with external model providers,
 {
     "direction": "TD",
     "nodes": [
-        {"id": "huggingface_provider", "label": "HuggingFace Integration", "type": "module", "link": "huggingface_provider.md"},
-        {"id": "litellm_provider", "label": "LiteLLM Gateway", "type": "module", "link": "litellm_provider.md"},
-        {"id": "vercel_provider", "label": "Vercel AI Gateway", "type": "module", "link": "vercel_provider.md"}
+        {
+            "id": "gateway_wrapper_providers",
+            "label": "Gateway and Wrapper Providers",
+            "type": "module"
+        },
+        {
+            "id": "huggingface_provider",
+            "label": "HuggingFace Integration",
+            "type": "module",
+            "link": "huggingface_provider.md"
+        },
+        {
+            "id": "litellm_provider",
+            "label": "LiteLLM Gateway",
+            "type": "module",
+            "link": "litellm_provider.md"
+        },
+        {
+            "id": "vercel_provider",
+            "label": "Vercel AI Gateway",
+            "type": "module",
+            "link": "vercel_provider.md"
+        },
+        {
+            "id": "huggingface_inference",
+            "label": "HuggingFace Inference API",
+            "type": "external",
+            "_repaired": "g3_lifted_from_group"
+        },
+        {
+            "id": "litellm_proxy",
+            "label": "LiteLLM Proxy",
+            "type": "external",
+            "_repaired": "g3_lifted_from_group"
+        },
+        {
+            "id": "vercel_ai_gateway",
+            "label": "Vercel AI Gateway API",
+            "type": "external",
+            "_repaired": "g3_lifted_from_group"
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Model Core Interfaces",
+            "type": "module",
+            "_repaired": "g3_lifted_from_group",
+            "link": "model_core_interfaces.md"
+        }
     ],
     "edges": [
-        {"source": "huggingface_provider", "target": "model_core_interfaces", "label": "provides model access"},
-        {"source": "litellm_provider", "target": "model_core_interfaces", "label": "provides model access"},
-        {"source": "vercel_provider", "target": "model_core_interfaces", "label": "provides model access"}
+        {
+            "source": "huggingface_provider",
+            "target": "model_core_interfaces",
+            "label": "provides model access"
+        },
+        {
+            "source": "litellm_provider",
+            "target": "model_core_interfaces",
+            "label": "provides model access"
+        },
+        {
+            "source": "vercel_provider",
+            "target": "model_core_interfaces",
+            "label": "provides model access"
+        }
     ],
     "groups": [
         {
             "id": "gateway_providers",
             "label": "Gateway Providers",
             "role": "surface",
-            "nodes": ["huggingface_provider", "litellm_provider", "vercel_provider"]
+            "nodes": [
+                "huggingface_provider",
+                "litellm_provider",
+                "vercel_provider"
+            ]
         },
         {
             "id": "external_systems",
             "label": "External AI Services",
             "role": "data",
             "nodes": [
-                {"id": "huggingface_inference", "label": "HuggingFace Inference API", "type": "external"},
-                {"id": "litellm_proxy", "label": "LiteLLM Proxy", "type": "external"},
-                {"id": "vercel_ai_gateway", "label": "Vercel AI Gateway API", "type": "external"},
-                {"id": "model_core_interfaces", "label": "Model Core Interfaces", "type": "module", "link": "model_core_interfaces.md"}
+                "huggingface_inference",
+                "litellm_proxy",
+                "vercel_ai_gateway",
+                "model_core_interfaces"
             ]
         }
     ]

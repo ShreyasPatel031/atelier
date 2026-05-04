@@ -65,7 +65,8 @@ DIAGRAM_SYNTAX_RULES_SECTION = """
 - **Data artifacts:** Use cylinder shape `[("label")]` for stored data nodes.
 
 **Edges and arrows:**
-- Allowed arrow types: `-->` (normal), `-.->` (dashed/reference), `==>` (heavy/primary).
+- Allowed arrow types: `-->` (normal), `-.->` (dashed/reference — exactly one hyphen before the dot), `==>` (heavy/primary).
+  WRONG: `--.->` (double hyphen before the dot) — lexical / parse errors.
   Use `==>` for primary data pipeline, `-->` for normal flow, `-.->` for reads/references.
 - Do NOT use reverse arrows (`<--`, `<==`, `<-.->`) — they cause parse errors. Swap source and target instead.
 - Do NOT use activation-style arrows such as `--|>` or `---|>`.
@@ -220,6 +221,10 @@ Group roles: "surface" (blue), "generative" (orange), "analytical" (purple), "da
 GROUPS INTEGRITY (CRITICAL): Every id you list in `groups[].nodes[]` MUST exactly match an `"id"` field in your `nodes[]` array.
 Never emit a group with `"nodes": []` — if you cannot populate a group with at least one valid node id, omit that group entirely.
 
+EDGE INTEGRITY: Every `edges[].source` and `edges[].target` MUST be an `"id"` from `nodes[]`. Never use a group/subgraph id as an edge endpoint — connect actual nodes only.
+
+ID UNIQUENESS: No string may appear as both a `nodes[].id` and a `groups[].id` (layout engines treat these as separate namespaces; collisions break rendering).
+
 After DIAGRAM_JSON, include matching Mermaid:
 ```mermaid
 flowchart TD
@@ -300,6 +305,10 @@ Group roles: "surface" (blue), "generative" (orange), "analytical" (purple), "da
 
 GROUPS INTEGRITY (CRITICAL): Every id you list in `groups[].nodes[]` MUST exactly match an `"id"` field in your `nodes[]` array.
 Never emit a group with `"nodes": []` — if you cannot populate a group with at least one valid node id, omit that group entirely.
+
+EDGE INTEGRITY: Every `edges[].source` and `edges[].target` MUST be an `"id"` from `nodes[]`. Never use a group/subgraph id as an edge endpoint — connect actual nodes only.
+
+ID UNIQUENESS: No string may appear as both a `nodes[].id` and a `groups[].id` (layout engines treat these as separate namespaces; collisions break rendering).
 
 After DIAGRAM_JSON, include matching Mermaid:
 ```mermaid
@@ -465,6 +474,8 @@ Rules:
 - Use only module names from AVAILABLE_MODULES as node ids and links.
 - Node type "module" for repo modules, "external" for actors/dependencies outside the repo.
 - GROUPS INTEGRITY: Every id in `groups[].nodes[]` MUST exist in `nodes[]`. Never emit `"nodes": []`.
+- EDGE INTEGRITY: Every edge `source` and `target` must be ids from `nodes[]`, never group/subgraph ids.
+- ID UNIQUENESS: Do not reuse the same string as both a node id and a group id.
 </DIAGRAM_JSON_FORMAT>
 
 """ + DIAGRAM_SYNTAX_RULES_SECTION + """
@@ -569,6 +580,8 @@ MANDATORY — include this block in the output, placed before the mermaid code b
 Rules:
 - Node ids should match the clickable module names in the Mermaid diagram.
 - GROUPS INTEGRITY: Every id in `groups[].nodes[]` MUST exist in `nodes[]`. Never emit `"nodes": []`.
+- EDGE INTEGRITY: Every edge `source` and `target` must be ids from `nodes[]`, never group/subgraph ids.
+- ID UNIQUENESS: Do not reuse the same string as both a node id and a group id.
 </DIAGRAM_JSON_FORMAT>
 
 """ + DIAGRAM_SYNTAX_RULES_SECTION + """

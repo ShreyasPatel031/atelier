@@ -12,39 +12,102 @@ This module is structured around core abstractions for models and their response
 {
     "direction": "TD",
     "nodes": [
-        {"id": "model_base_definitions", "label": "Model Base Definitions", "type": "module", "link": "model_base_definitions.md"},
-        {"id": "streamed_responses", "label": "Streamed Response Handling", "type": "module", "link": "streamed_responses.md"},
-        {"id": "function_model_implementation", "label": "Function Model Implementation", "type": "module", "link": "function_model_implementation.md"},
-        {"id": "agent_execution_graph", "label": "Agent Execution Graph", "type": "external", "link": "agent_execution_graph.md"},
-        {"id": "agent_output_handling", "label": "Agent Output Handling", "type": "external", "link": "agent_output_handling.md"},
-        {"id": "model_utilities", "label": "Model Utilities", "type": "external", "link": "model_utilities.md"}
-
+        {
+            "id": "model_core_interfaces",
+            "label": "Model Core Interfaces",
+            "type": "module"
+        },
+        {
+            "id": "model_base_definitions",
+            "label": "Model Base Definitions",
+            "type": "module",
+            "link": "model_base_definitions.md"
+        },
+        {
+            "id": "streamed_responses",
+            "label": "Streamed Response Handling",
+            "type": "module",
+            "link": "streamed_responses.md"
+        },
+        {
+            "id": "function_model_implementation",
+            "label": "Function Model Implementation",
+            "type": "module",
+            "link": "function_model_implementation.md"
+        },
+        {
+            "id": "agent_execution_graph",
+            "label": "Agent Execution Graph",
+            "type": "external",
+            "link": "agent_execution_graph.md"
+        },
+        {
+            "id": "agent_output_handling",
+            "label": "Agent Output Handling",
+            "type": "external",
+            "link": "agent_output_handling.md"
+        },
+        {
+            "id": "model_utilities",
+            "label": "Model Utilities",
+            "type": "external",
+            "link": "model_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "agent_execution_graph", "target": "model_base_definitions", "label": "makes requests to"},
-        {"source": "model_base_definitions", "target": "streamed_responses", "label": "generates"},
-        {"source": "model_base_definitions", "target": "model_utilities", "label": "uses"},
-        {"source": "function_model_implementation", "target": "model_base_definitions", "label": "extends"},
-        {"source": "streamed_responses", "target": "agent_output_handling", "label": "provides events to"}
+        {
+            "source": "agent_execution_graph",
+            "target": "model_base_definitions",
+            "label": "makes requests to"
+        },
+        {
+            "source": "model_base_definitions",
+            "target": "streamed_responses",
+            "label": "generates"
+        },
+        {
+            "source": "model_base_definitions",
+            "target": "model_utilities",
+            "label": "uses"
+        },
+        {
+            "source": "function_model_implementation",
+            "target": "model_base_definitions",
+            "label": "extends"
+        },
+        {
+            "source": "streamed_responses",
+            "target": "agent_output_handling",
+            "label": "provides events to"
+        }
     ],
     "groups": [
         {
-            "id": "core_abstractions", 
-            "label": "Core Model Abstractions", 
-            "role": "generative", 
-            "nodes": ["model_base_definitions", "streamed_responses"]
+            "id": "core_abstractions",
+            "label": "Core Model Abstractions",
+            "role": "generative",
+            "nodes": [
+                "model_base_definitions",
+                "streamed_responses"
+            ]
         },
         {
-            "id": "model_implementations", 
-            "label": "Model Implementations", 
-            "role": "generative", 
-            "nodes": ["function_model_implementation"]
+            "id": "model_implementations",
+            "label": "Model Implementations",
+            "role": "generative",
+            "nodes": [
+                "function_model_implementation"
+            ]
         },
         {
-            "id": "external_dependencies", 
-            "label": "External Dependencies", 
-            "role": "data", 
-            "nodes": ["agent_execution_graph", "agent_output_handling", "model_utilities"]
+            "id": "external_dependencies",
+            "label": "External Dependencies",
+            "role": "data",
+            "nodes": [
+                "agent_execution_graph",
+                "agent_output_handling",
+                "model_utilities"
+            ]
         }
     ]
 }

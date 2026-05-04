@@ -17,35 +17,83 @@ These components are designed to be modular and extensible, allowing agents to b
 {
     "direction": "TD",
     "nodes": [
-        {"id": "history_processing", "label": "Process Message History", "type": "module", "link": "history_processing.md"},
-        {"id": "agent_thinking_control", "label": "Configure Model Thinking", "type": "module", "link": "agent_thinking_control.md"},
-        {"id": "mcp_management", "label": "Integrate MCP Servers", "type": "module", "link": "mcp_management.md"},
-        {"id": "thread_execution_management", "label": "Manage Thread Execution", "type": "module", "link": "thread_execution_management.md"}
+        {
+            "id": "capabilities_core_logic",
+            "label": "Capabilities Core Logic",
+            "type": "module"
+        },
+        {
+            "id": "history_processing",
+            "label": "Process Message History",
+            "type": "module",
+            "link": "history_processing.md"
+        },
+        {
+            "id": "agent_thinking_control",
+            "label": "Configure Model Thinking",
+            "type": "module",
+            "link": "agent_thinking_control.md"
+        },
+        {
+            "id": "mcp_management",
+            "label": "Integrate MCP Servers",
+            "type": "module",
+            "link": "mcp_management.md"
+        },
+        {
+            "id": "thread_execution_management",
+            "label": "Manage Thread Execution",
+            "type": "module",
+            "link": "thread_execution_management.md"
+        }
     ],
     "edges": [
-        {"source": "history_processing", "target": "agent_thinking_control", "label": "prepared messages & context"},
-        {"source": "agent_thinking_control", "target": "mcp_management", "label": "model inference leading to tool call"},
-        {"source": "agent_thinking_control", "target": "thread_execution_management", "label": "utilizes for sync ops"},
-        {"source": "mcp_management", "target": "thread_execution_management", "label": "utilizes for sync ops"}
+        {
+            "source": "history_processing",
+            "target": "agent_thinking_control",
+            "label": "prepared messages & context"
+        },
+        {
+            "source": "agent_thinking_control",
+            "target": "mcp_management",
+            "label": "model inference leading to tool call"
+        },
+        {
+            "source": "agent_thinking_control",
+            "target": "thread_execution_management",
+            "label": "utilizes for sync ops"
+        },
+        {
+            "source": "mcp_management",
+            "target": "thread_execution_management",
+            "label": "utilizes for sync ops"
+        }
     ],
     "groups": [
         {
             "id": "preprocessing",
             "label": "Preprocessing",
             "role": "generative",
-            "nodes": ["history_processing"]
+            "nodes": [
+                "history_processing"
+            ]
         },
         {
             "id": "core_logic",
             "label": "Core Logic",
             "role": "generative",
-            "nodes": ["agent_thinking_control", "mcp_management"]
+            "nodes": [
+                "agent_thinking_control",
+                "mcp_management"
+            ]
         },
         {
             "id": "utilities",
             "label": "Utilities",
             "role": "generative",
-            "nodes": ["thread_execution_management"]
+            "nodes": [
+                "thread_execution_management"
+            ]
         }
     ]
 }

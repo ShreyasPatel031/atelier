@@ -17,26 +17,105 @@ The `evaluator_interface` module sits within the `pydantic_evals_framework`, spe
 {
     "direction": "TD",
     "nodes": [
-        {"id": "evaluator_base", "label": "Evaluator Base Interface (Evaluator)", "type": "component", "link": null},
-        {"id": "evaluate_abstract", "label": "Define Evaluation Logic (abstract evaluate)", "type": "component", "link": null},
-        {"id": "sync_runner", "label": "Run Evaluation Synchronously (evaluate_sync)", "type": "component", "link": null},
-        {"id": "async_runner", "label": "Run Evaluation Asynchronously (evaluate_async)", "type": "component", "link": null},
-        {"id": "naming_logic", "label": "Determine Evaluation Report Name (get_default_evaluation_name)", "type": "component", "link": null},
-        {"id": "base_evaluator_interfaces", "label": "Base Evaluation Interfaces", "type": "external", "link": "base_evaluator_interfaces.md"},
-        {"id": "concrete_eval_impl", "label": "Concrete Evaluator Implementations", "type": "external", "link": "evaluation_base_classes.md"}
+        {
+            "id": "evaluator_base",
+            "label": "Evaluator Base Interface (Evaluator)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "evaluate_abstract",
+            "label": "Define Evaluation Logic (abstract evaluate)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "sync_runner",
+            "label": "Run Evaluation Synchronously (evaluate_sync)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "async_runner",
+            "label": "Run Evaluation Asynchronously (evaluate_async)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "naming_logic",
+            "label": "Determine Evaluation Report Name (get_default_evaluation_name)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "base_evaluator_interfaces",
+            "label": "Base Evaluation Interfaces",
+            "type": "external",
+            "link": "base_evaluator_interfaces.md"
+        },
+        {
+            "id": "concrete_eval_impl",
+            "label": "Concrete Evaluator Implementations",
+            "type": "external",
+            "link": "evaluation_base_classes.md"
+        }
     ],
     "edges": [
-        {"source": "evaluator_base", "target": "base_evaluator_interfaces", "label": "inherits from BaseEvaluator, uses EvaluatorContext/Output"},
-        {"source": "evaluator_base", "target": "evaluate_abstract", "label": "requires implementation of"},
-        {"source": "evaluator_base", "target": "sync_runner", "label": "provides"},
-        {"source": "evaluator_base", "target": "async_runner", "label": "provides"},
-        {"source": "evaluator_base", "target": "naming_logic", "label": "provides"},
-        {"source": "sync_runner", "target": "evaluate_abstract", "label": "invokes"},
-        {"source": "async_runner", "target": "evaluate_abstract", "label": "invokes"},
-        {"source": "evaluate_abstract", "target": "base_evaluator_interfaces", "label": "receives EvaluatorContext"},
-        {"source": "evaluate_abstract", "target": "base_evaluator_interfaces", "label": "returns EvaluatorOutput"},
-        {"source": "naming_logic", "target": "evaluator_base", "label": "references self for name"},
-        {"source": "concrete_eval_impl", "target": "evaluator_base", "label": "implements"}
+        {
+            "source": "evaluator_base",
+            "target": "base_evaluator_interfaces",
+            "label": "inherits from BaseEvaluator, uses EvaluatorContext/Output"
+        },
+        {
+            "source": "evaluator_base",
+            "target": "evaluate_abstract",
+            "label": "requires implementation of"
+        },
+        {
+            "source": "evaluator_base",
+            "target": "sync_runner",
+            "label": "provides"
+        },
+        {
+            "source": "evaluator_base",
+            "target": "async_runner",
+            "label": "provides"
+        },
+        {
+            "source": "evaluator_base",
+            "target": "naming_logic",
+            "label": "provides"
+        },
+        {
+            "source": "sync_runner",
+            "target": "evaluate_abstract",
+            "label": "invokes"
+        },
+        {
+            "source": "async_runner",
+            "target": "evaluate_abstract",
+            "label": "invokes"
+        },
+        {
+            "source": "evaluate_abstract",
+            "target": "base_evaluator_interfaces",
+            "label": "receives EvaluatorContext"
+        },
+        {
+            "source": "evaluate_abstract",
+            "target": "base_evaluator_interfaces",
+            "label": "returns EvaluatorOutput"
+        },
+        {
+            "source": "naming_logic",
+            "target": "evaluator_base",
+            "label": "references self for name"
+        },
+        {
+            "source": "concrete_eval_impl",
+            "target": "evaluator_base",
+            "label": "implements"
+        }
     ],
     "groups": []
 }

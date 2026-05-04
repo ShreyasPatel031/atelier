@@ -20,15 +20,47 @@ The wrapper can be initialized with an `EmbeddingModel` instance or a string rep
 {
     "direction": "TD",
     "nodes": [
-        {"id": "wrapper_embedding_model", "label": "Custom Embedding Model Wrapper", "type": "component", "link": null},
-        {"id": "wrapped_model", "label": "Underlying Embedding Model", "type": "component", "link": null},
-        {"id": "infer_embedding_model", "label": "Determine Embedding Model", "type": "external", "link": "embedding_interface.md"},
-        {"id": "base_embedding_model", "label": "Define Base Embedding Behavior", "type": "external", "link": "base_embedding_model.md"}
+        {
+            "id": "wrapper_embedding_model",
+            "label": "Custom Embedding Model Wrapper",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "wrapped_model",
+            "label": "Underlying Embedding Model",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "infer_embedding_model",
+            "label": "Determine Embedding Model",
+            "type": "external",
+            "link": "embedding_interface.md"
+        },
+        {
+            "id": "base_embedding_model",
+            "label": "Define Base Embedding Behavior",
+            "type": "external",
+            "link": "base_embedding_model.md"
+        }
     ],
     "edges": [
-        {"source": "wrapper_embedding_model", "target": "wrapped_model", "label": "delegates operations to"},
-        {"source": "wrapper_embedding_model", "target": "infer_embedding_model", "label": "initializes wrapped model via"},
-        {"source": "wrapper_embedding_model", "target": "base_embedding_model", "label": "inherits functionality from"}
+        {
+            "source": "wrapper_embedding_model",
+            "target": "wrapped_model",
+            "label": "delegates operations to"
+        },
+        {
+            "source": "wrapper_embedding_model",
+            "target": "infer_embedding_model",
+            "label": "initializes wrapped model via"
+        },
+        {
+            "source": "wrapper_embedding_model",
+            "target": "base_embedding_model",
+            "label": "inherits functionality from"
+        }
     ],
     "groups": []
 }
