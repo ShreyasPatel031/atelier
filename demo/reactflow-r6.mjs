@@ -807,6 +807,10 @@ function Inner(props) {
             proOptions: { hideAttribution: true },
             minZoom: 0.08,
             maxZoom: 2,
+            panOnScroll: true,
+            panOnScrollMode: 'free',
+            zoomOnScroll: false,
+            zoomOnPinch: true,
             defaultEdgeOptions: {
                 markerEnd: {
                     type: MarkerType.ArrowClosed,

@@ -5418,74 +5418,35 @@
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
             
-            // Touch support for mobile
-            // Two-finger gestures now pan (more intuitive)
-            let lastTwoFingerCenter = { x: 0, y: 0 };
-            
+            // Touch: single-finger drag pans. Trackpad two-finger scroll and pinch fire as wheel events
+            // (handled by handleWheel above) — no custom touch logic needed for those.
             viewport.addEventListener('touchstart', (e) => {
                 if (activeDiagramTab === 'reactflow') return;
                 if (e.target.closest && e.target.closest('.view-tune-panel')) return;
-                if (
-                    e.touches.length === 1 &&
-                    e.target.closest &&
-                    e.target.closest(
-                        'g.node, g.elk-node, .collapse-button, g.edgePath, g.edgePaths, g.edgeLabels, g.cluster'
-                    )
-                ) {
-                    return;
-                }
-                if (e.touches.length === 2) {
-                    // Two-finger pan start - use center point between two fingers
-                    e.preventDefault();
-                    isPanning = true;
-                    lastTwoFingerCenter = {
-                        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-                        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-                    };
-                    startMouseX = lastTwoFingerCenter.x;
-                    startMouseY = lastTwoFingerCenter.y;
-                    startPanX = panX;
-                    startPanY = panY;
-                    document.getElementById('diagramCanvas').classList.add('panning');
-                } else if (e.touches.length === 1) {
-                    // Single touch pan
-                    isPanning = true;
-                    startMouseX = e.touches[0].clientX;
-                    startMouseY = e.touches[0].clientY;
-                    startPanX = panX;
-                    startPanY = panY;
-                    document.getElementById('diagramCanvas').classList.add('panning');
-                }
-            }, { passive: false });
-            
+                if (e.touches.length !== 1) return;
+                if (e.target.closest && e.target.closest('g.node, g.elk-node, .collapse-button, g.edgePath, g.edgePaths, g.edgeLabels, g.cluster')) return;
+                isPanning = true;
+                startMouseX = e.touches[0].clientX;
+                startMouseY = e.touches[0].clientY;
+                startPanX = panX;
+                startPanY = panY;
+                document.getElementById('diagramCanvas').classList.add('panning');
+            }, { passive: true });
+
             viewport.addEventListener('touchmove', (e) => {
                 if (activeDiagramTab === 'reactflow') return;
-                if (e.target.closest && e.target.closest('.view-tune-panel')) return;
-                if (e.touches.length === 2) {
-                    // Two-finger pan - pan based on center point movement
-                    e.preventDefault();
-                    const currentCenter = {
-                        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-                        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-                    };
-                    
-                    const dx = currentCenter.x - startMouseX;
-                    const dy = currentCenter.y - startMouseY;
-                    panX = startPanX + dx;
-                    panY = startPanY + dy;
-                    
-                    applyTransform();
-                } else if (e.touches.length === 1 && isPanning) {
-                    // Single finger pan
-                    const dx = e.touches[0].clientX - startMouseX;
-                    const dy = e.touches[0].clientY - startMouseY;
-                    panX = startPanX + dx;
-                    panY = startPanY + dy;
-                    applyTransform();
-                }
-            }, { passive: false });
-            
+                if (!isPanning || e.touches.length !== 1) return;
+                panX = startPanX + (e.touches[0].clientX - startMouseX);
+                panY = startPanY + (e.touches[0].clientY - startMouseY);
+                applyTransform();
+            }, { passive: true });
+
             viewport.addEventListener('touchend', () => {
+                isPanning = false;
+                document.getElementById('diagramCanvas').classList.remove('panning');
+            }, { passive: true });
+
+            viewport.addEventListener('touchcancel', () => {
                 isPanning = false;
                 document.getElementById('diagramCanvas').classList.remove('panning');
             }, { passive: true });
