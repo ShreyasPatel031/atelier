@@ -3,18 +3,72 @@ This module defines the foundational `BaseModule` and `Module` classes, which fo
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "BM", "label": "BaseModule", "file": "dspy.primitives.base_module"},
-    {"id": "M", "label": "Module", "file": "dspy.primitives.module"},
-    {"id": "RV", "label": "REPLVariable", "file": "dspy.primitives.repl_types"}
-  ],
-  "edges": [
-    {"source": "M", "target": "BM", "type": "inherits"}
-  ],
-  "groups": [
-    {"id": "Core", "label": "Core Modules", "nodes": ["BM", "M"]},
-    {"id": "REPL", "label": "REPL Utilities", "nodes": ["RV"]}
-  ]
+    "nodes": [
+        {
+            "id": "base_modules",
+            "label": "base_modules",
+            "type": "module"
+        },
+        {
+            "id": "BM",
+            "label": "BaseModule",
+            "file": "dspy.primitives.base_module"
+        },
+        {
+            "id": "M",
+            "label": "Module",
+            "file": "dspy.primitives.module"
+        },
+        {
+            "id": "RV",
+            "label": "REPLVariable",
+            "file": "dspy.primitives.repl_types"
+        },
+        {
+            "id": "repl_utilities",
+            "label": "REPL Variable Management",
+            "type": "module",
+            "link": "repl_utilities.md"
+        },
+        {
+            "id": "module_core",
+            "label": "Core Program Modules",
+            "type": "module",
+            "link": "module_core.md"
+        }
+    ],
+    "edges": [
+        {
+            "source": "M",
+            "target": "BM",
+            "type": "inherits"
+        },
+        {
+            "source": "base_modules",
+            "target": "repl_utilities"
+        },
+        {
+            "source": "base_modules",
+            "target": "module_core"
+        }
+    ],
+    "groups": [
+        {
+            "id": "Core",
+            "label": "Core Modules",
+            "nodes": [
+                "BM",
+                "M"
+            ]
+        },
+        {
+            "id": "REPL",
+            "label": "REPL Utilities",
+            "nodes": [
+                "RV"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

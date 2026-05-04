@@ -3,32 +3,33 @@ This module defines DSPy signatures for describing programs and modules, and for
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "DescribeProgram",
-      "label": "DescribeProgram"
-    },
-    {
-      "id": "DescribeModule",
-      "label": "DescribeModule"
-    },
-    {
-      "id": "GenerateSingleModuleInstruction",
-      "label": "GenerateSingleModuleInstruction"
-    }
-  ],
-  "edges": [
-    {
-      "source": "DescribeProgram",
-      "target": "DescribeModule",
-      "label": "program_description"
-    },
-    {
-      "source": "DescribeModule",
-      "target": "GenerateSingleModuleInstruction",
-      "label": "module_description"
-    }
-  ]
+    "nodes": [
+        {
+            "id": "DescribeProgram",
+            "label": "DescribeProgram"
+        },
+        {
+            "id": "DescribeModule",
+            "label": "DescribeModule"
+        },
+        {
+            "id": "GenerateSingleModuleInstruction",
+            "label": "GenerateSingleModuleInstruction"
+        }
+    ],
+    "edges": [
+        {
+            "source": "DescribeProgram",
+            "target": "DescribeModule",
+            "label": "program_description"
+        },
+        {
+            "source": "DescribeModule",
+            "target": "GenerateSingleModuleInstruction",
+            "label": "module_description"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

@@ -5,15 +5,48 @@ This module defines the foundational structures for DSPy signatures, including c
 {
     "direction": "TD",
     "nodes": [
-        {"id": "signature_core", "label": "Signature Metaclass", "type": "module", "link": "signature_core.md"},
-        {"id": "field_definitions", "label": "Field Types and Conversion", "type": "module", "link": "field_definitions.md"}
+        {
+            "id": "signatures_and_fields",
+            "label": "Signature and Field Definitions",
+            "type": "module"
+        },
+        {
+            "id": "signature_core",
+            "label": "Signature Metaclass",
+            "type": "module",
+            "link": "signature_core.md"
+        },
+        {
+            "id": "field_definitions",
+            "label": "Field Types and Conversion",
+            "type": "module",
+            "link": "field_definitions.md"
+        }
     ],
     "edges": [
-        {"source": "signature_core", "target": "field_definitions", "label": "uses field definitions"}
+        {
+            "source": "signature_core",
+            "target": "field_definitions",
+            "label": "uses field definitions"
+        }
     ],
     "groups": [
-        {"id": "signature_structure", "label": "Signature Structure", "role": "analytical", "nodes": ["signature_core"]},
-        {"id": "field_management", "label": "Field Management", "role": "analytical", "nodes": ["field_definitions"]}
+        {
+            "id": "signature_structure",
+            "label": "Signature Structure",
+            "role": "analytical",
+            "nodes": [
+                "signature_core"
+            ]
+        },
+        {
+            "id": "field_management",
+            "label": "Field Management",
+            "role": "analytical",
+            "nodes": [
+                "field_definitions"
+            ]
+        }
     ]
 }
 -->

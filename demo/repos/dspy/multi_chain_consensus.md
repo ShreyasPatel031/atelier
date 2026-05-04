@@ -3,26 +3,26 @@ This module facilitates comparing and synthesizing multiple reasoning attempts o
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "MultiChainComparison",
-      "label": "MultiChainComparison",
-      "type": "module"
-    },
-    {
-      "id": "Predict",
-      "label": "Predict",
-      "type": "module"
-    }
-  ],
-  "edges": [
-    {
-      "source": "MultiChainComparison",
-      "target": "Predict",
-      "label": "uses"
-    }
-  ],
-  "groups": []
+    "nodes": [
+        {
+            "id": "MultiChainComparison",
+            "label": "MultiChainComparison",
+            "type": "module"
+        },
+        {
+            "id": "Predict",
+            "label": "Predict",
+            "type": "module"
+        }
+    ],
+    "edges": [
+        {
+            "source": "MultiChainComparison",
+            "target": "Predict",
+            "label": "uses"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

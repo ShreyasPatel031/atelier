@@ -3,14 +3,27 @@ This module provides utilities for automating API documentation generation, incl
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "generate_md_docs", "label": "generate_md_docs"},
-    {"id": "main", "label": "main"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "documentation_tools", "label": "documentation_tools", "nodes": ["generate_md_docs", "main"]}
-  ]
+    "nodes": [
+        {
+            "id": "generate_md_docs",
+            "label": "generate_md_docs"
+        },
+        {
+            "id": "main",
+            "label": "main"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "documentation_tools",
+            "label": "documentation_tools",
+            "nodes": [
+                "generate_md_docs",
+                "main"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

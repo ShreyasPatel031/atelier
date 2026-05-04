@@ -3,17 +3,41 @@ This module provides foundational classes for managing and loading datasets with
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "DataLoader", "label": "dspy.datasets.dataloader.DataLoader", "type": "class"},
-    {"id": "Dataset", "label": "dspy.datasets.dataset.Dataset", "type": "class"}
-  ],
-  "edges": [
-    {"source": "DataLoader", "target": "Dataset", "type": "inherits"}
-  ],
-  "groups": [
-    {"id": "dspy.datasets.dataloader", "label": "dspy.datasets.dataloader", "nodes": ["DataLoader"]},
-    {"id": "dspy.datasets.dataset", "label": "dspy.datasets.dataset", "nodes": ["Dataset"]}
-  ]
+    "nodes": [
+        {
+            "id": "DataLoader",
+            "label": "dspy.datasets.dataloader.DataLoader",
+            "type": "class"
+        },
+        {
+            "id": "Dataset",
+            "label": "dspy.datasets.dataset.Dataset",
+            "type": "class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "DataLoader",
+            "target": "Dataset",
+            "type": "inherits"
+        }
+    ],
+    "groups": [
+        {
+            "id": "dspy.datasets.dataloader",
+            "label": "dspy.datasets.dataloader",
+            "nodes": [
+                "DataLoader"
+            ]
+        },
+        {
+            "id": "dspy.datasets.dataset",
+            "label": "dspy.datasets.dataset",
+            "nodes": [
+                "Dataset"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid
