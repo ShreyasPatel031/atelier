@@ -1,5 +1,10 @@
 [
   {
+    "id": "rf-expand-fixture",
+    "label": "RF expand (test)",
+    "description": "Minimal repo for React Flow inline expansion E2E tests."
+  },
+  {
     "id": "crewai",
     "label": "CrewAI",
     "description": "Multi-agent crews, tasks, and tools for LLM workflows."

@@ -248,23 +248,33 @@
                     label: labelFor(node),
                     width: nw,
                     height: nh,
+                    /**
+                     * Each handle stores BOTH x and y offsets (relative to node top-left)
+                     * from ELK's exact connection point. Using just one axis + wrapper edge
+                     * (left:0 / right:0 / top:0 / bottom:0) introduces sub-pixel drift when
+                     * width/height is rounded or ELK places the endpoint slightly off-boundary.
+                     */
                     leftHandles: ep.left.map(function (cp) {
-                        return cp.y - absPos.y;
+                        return { x: cp.x - absPos.x, y: cp.y - absPos.y };
                     }),
                     rightHandles: ep.right.map(function (cp) {
-                        return cp.y - absPos.y;
+                        return { x: cp.x - absPos.x, y: cp.y - absPos.y };
                     }),
                     topHandles: ep.top.map(function (cp) {
-                        return cp.x - absPos.x;
+                        return { x: cp.x - absPos.x, y: cp.y - absPos.y };
                     }),
                     bottomHandles: ep.bottom.map(function (cp) {
-                        return cp.x - absPos.x;
+                        return { x: cp.x - absPos.x, y: cp.y - absPos.y };
                     }),
                 },
+                /**
+                 * NO border on the xyflow wrapper. Border consumes 1px of the padding edge,
+                 * shifting absolutely-positioned handles (left:0) 1px inward from ELK's boundary.
+                 * ElkGroupNode renders the border as an inner div at inset:0 instead.
+                 */
                 style: hasChildren
                     ? {
                           backgroundColor: 'rgba(241,245,249,0.4)',
-                          border: '1px dashed #64748b',
                           borderRadius: 8,
                       }
                     : {},

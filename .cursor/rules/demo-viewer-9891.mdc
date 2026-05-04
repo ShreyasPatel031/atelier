@@ -1,0 +1,17 @@
+---
+description: Keep the demo diagram viewer reachable on port 9891 after relevant work
+alwaysApply: true
+---
+
+# Demo viewer (127.0.0.1:9891)
+
+When you finish work under `demo/`, change viewer behavior, or tell the user to open `http://127.0.0.1:9891/`, **ensure the static server is running** so they do not see “connection refused”.
+
+1. Check: `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:9891/` — expect `200`.
+2. If not `200`, from the **repository root** start in the background (survives tool timeout):
+
+   `nohup python3 -m http.server 9891 --directory demo >> /tmp/atelier-demo-9891.log 2>&1 & sleep 1`
+
+   (Equivalent for humans: `npm run demo` — foreground.)
+
+3. Then tell the user the URL (e.g. `http://127.0.0.1:9891/?repo=pydantic-ai`).

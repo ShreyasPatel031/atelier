@@ -348,9 +348,24 @@
          */
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group {
             pointer-events: none !important;
+            /**
+             * xyflow default CSS adds `padding: 10px` and `border: 1px solid` to
+             * .react-flow__node-group. Both shift the padding edge (where abs-positioned
+             * handles with left:0/top:0 anchor) inward from ELK's exact boundary.
+             * Zero them; ElkGroupNode paints its own dashed frame as an inner div.
+             */
+            padding: 0 !important;
+            border: 0 !important;
         }
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group .react-flow__handle {
             pointer-events: auto !important;
+        }
+        /** Expanded `*_sub` uses same pointer-events as other groups (none) so collapse / inner nodes stay clickable. */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node[data-atelier-rf-selected='true'] {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+            border-radius: 8px;
+            z-index: 2147482100 !important;
         }
         
         /* Dev: tune panel sits inside diagram viewport (bottom-left), not over the chat column */
@@ -1243,6 +1258,9 @@
         // Get repo path from URL query param: ?repo=flask or ?repo=repos/flask
         const urlParams = new URLSearchParams(window.location.search);
         const repoPath = urlParams.get('repo') || 'crewai';
+        if (urlParams.get('rfDebug') === '1') {
+            window.atelierRfDebugLayout = true;
+        }
         // Ensure relative path with ./ prefix for correct resolution
         const basePath = repoPath.startsWith('repos/') ? `./${repoPath}` : `./repos/${repoPath}`;
         
@@ -1265,6 +1283,12 @@
         let reactFlowRequestEpoch = 0;
         /** Serialize R6 mounts so ELK async + React commit never overlap another refresh (removeChild / blank canvas). */
         let reactFlowRefreshChain = Promise.resolve();
+        /** R6 inline expansion: baseline IR per module + ordered expansions (rebuild working diagram). */
+        let rfExpansionContextKey = null;
+        let rfBaselineDiagramIr = null;
+        let rfExpandedNodesOrder = [];
+        const rfExpandedNodeIds = new Set();
+        const rfExpandedNodeToModule = new Map();
         /** Full ELK graph JSON string for R4 "Copy" (ELK Live root object only). */
         let pipelineR4ElkPasteJson = '';
         let selectedModuleId = null;  // Currently selected module
@@ -2406,50 +2430,79 @@
 
         function applyDiagramSelectionHighlight(svg) {
             if (!svg) svg = document.querySelector('#mermaid-diagram svg');
-            if (!svg) return;
-            if (svg._diagramEdgeSelectionTargets && svg._diagramEdgeSelectionTargets.length) {
-                setDiagramEdgeSelectionDashAnim(svg._diagramEdgeSelectionTargets, false);
-                applyDiagramHoverStroke(svg._diagramEdgeSelectionTargets, false);
-                svg._diagramEdgeSelectionTargets = null;
+            if (svg) {
+                if (svg._diagramEdgeSelectionTargets && svg._diagramEdgeSelectionTargets.length) {
+                    setDiagramEdgeSelectionDashAnim(svg._diagramEdgeSelectionTargets, false);
+                    applyDiagramHoverStroke(svg._diagramEdgeSelectionTargets, false);
+                    svg._diagramEdgeSelectionTargets = null;
+                }
+                svg.querySelectorAll('.selected-node, .selected-subgraph').forEach((el) => {
+                    el.classList.remove('selected-node', 'selected-subgraph');
+                });
+                if (diagramSelections.length) {
+                    const allEdgeTargets = [];
+                    for (const ds of diagramSelections) {
+                        if (ds.kind === 'edge' && ds.edge) {
+                            let edgeEl = queryDiagramEdgeStampedElement(svg, ds);
+                            if (edgeEl) {
+                                if (
+                                    edgeEl.tagName &&
+                                    edgeEl.tagName.toLowerCase() === 'path' &&
+                                    edgeEl.closest &&
+                                    edgeEl.closest('g.edgePath')
+                                ) {
+                                    edgeEl = edgeEl.closest('g.edgePath');
+                                }
+                                const t = collectDiagramEdgeSelectionStrokeTargets(edgeEl);
+                                if (t.length) allEdgeTargets.push(...t);
+                            }
+                            continue;
+                        }
+                        if (!ds.logicalId || ds.kind === 'none') continue;
+                        const el = queryDiagramElementByLogicalId(svg, ds.logicalId);
+                        if (!el) continue;
+                        if (el.classList.contains('cluster')) {
+                            el.classList.add('selected-subgraph');
+                        } else if (el.classList.contains('node')) {
+                            el.classList.add('selected-node');
+                        }
+                    }
+                    if (allEdgeTargets.length) {
+                        applyDiagramHoverStroke(allEdgeTargets, true);
+                        setDiagramEdgeSelectionDashAnim(allEdgeTargets, true);
+                        svg._diagramEdgeSelectionTargets = allEdgeTargets;
+                    }
+                }
+                applyDiagramClusterNeutralChrome(svg);
             }
-            svg.querySelectorAll('.selected-node, .selected-subgraph').forEach((el) => {
-                el.classList.remove('selected-node', 'selected-subgraph');
+            applyRfReactFlowSelectionHighlight();
+        }
+
+        function cssEscapeRfSelector(id) {
+            if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+                return CSS.escape(id);
+            }
+            return String(id).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        }
+
+        /** Mirror diagramSelections onto React Flow node wrappers (Mermaid uses SVG classes). */
+        function applyRfReactFlowSelectionHighlight() {
+            if (activeDiagramTab !== 'reactflow') return;
+            const root = document.getElementById('reactflowRoot');
+            if (!root) return;
+            root.querySelectorAll('.react-flow__node[data-atelier-rf-selected]').forEach((el) => {
+                el.removeAttribute('data-atelier-rf-selected');
             });
             if (!diagramSelections.length) return;
-            const allEdgeTargets = [];
             for (const ds of diagramSelections) {
-                if (ds.kind === 'edge' && ds.edge) {
-                    let edgeEl = queryDiagramEdgeStampedElement(svg, ds);
-                    if (edgeEl) {
-                        if (
-                            edgeEl.tagName &&
-                            edgeEl.tagName.toLowerCase() === 'path' &&
-                            edgeEl.closest &&
-                            edgeEl.closest('g.edgePath')
-                        ) {
-                            edgeEl = edgeEl.closest('g.edgePath');
-                        }
-                        const t = collectDiagramEdgeSelectionStrokeTargets(edgeEl);
-                        if (t.length) allEdgeTargets.push(...t);
-                    }
-                    continue;
-                }
-                if (!ds.logicalId || ds.kind === 'none') continue;
-                const el = queryDiagramElementByLogicalId(svg, ds.logicalId);
-                if (!el) continue;
-                if (el.classList.contains('cluster')) {
-                    el.classList.add('selected-subgraph');
-                } else if (el.classList.contains('node')) {
-                    el.classList.add('selected-node');
-                }
+                if (!ds.logicalId || ds.kind === 'edge') continue;
+                const wrap = root.querySelector(
+                    '.react-flow__node[data-id="' + cssEscapeRfSelector(ds.logicalId) + '"]'
+                );
+                if (wrap) wrap.setAttribute('data-atelier-rf-selected', 'true');
             }
-            if (allEdgeTargets.length) {
-                applyDiagramHoverStroke(allEdgeTargets, true);
-                setDiagramEdgeSelectionDashAnim(allEdgeTargets, true);
-                svg._diagramEdgeSelectionTargets = allEdgeTargets;
-            }
-            applyDiagramClusterNeutralChrome(svg);
         }
+        window.atelierRfSyncSelectionHighlight = applyRfReactFlowSelectionHighlight;
 
         function diagramSelToChatPayload(ds) {
             if (!ds || ds.kind === 'none') return null;
@@ -2825,12 +2878,485 @@
             return map;
         };
 
+        function rfEnsureExpansionContext() {
+            const key = currentModuleId;
+            if (rfExpansionContextKey !== key) {
+                rfExpansionContextKey = key;
+                const resolved = resolveStructuredIrForPipeline();
+                rfBaselineDiagramIr =
+                    resolved.diagram && typeof resolved.diagram === 'object'
+                        ? JSON.parse(JSON.stringify(resolved.diagram))
+                        : null;
+                rfExpandedNodesOrder = [];
+                rfExpandedNodeIds.clear();
+                rfExpandedNodeToModule.clear();
+                return;
+            }
+            /** Repo/overview hydrates after the first RF refresh (script runs setDiagramRenderTab before init). */
+            if (!rfBaselineDiagramIr) {
+                const resolved = resolveStructuredIrForPipeline();
+                if (resolved.diagram && typeof resolved.diagram === 'object') {
+                    rfBaselineDiagramIr = JSON.parse(JSON.stringify(resolved.diagram));
+                }
+            }
+        }
+
+        function rebuildRfWorkingDiagram() {
+            if (!rfBaselineDiagramIr) return null;
+            let d = JSON.parse(JSON.stringify(rfBaselineDiagramIr));
+            for (const nodeId of rfExpandedNodesOrder) {
+                const targetMod = rfExpandedNodeToModule.get(nodeId);
+                const childIr = targetMod && moduleData[targetMod]?.structuredDiagram;
+                if (!childIr || !Array.isArray(childIr.nodes)) continue;
+                const next = applyExpansionToStructuredIr(d, nodeId, childIr);
+                if (next) d = next;
+            }
+            return d;
+        }
+
+        /**
+         * RF expansion: replace leaf nodeId with compound group `${nodeId}_sub` containing prefixed child IR nodes/edges.
+         * Child `groups` are flattened (members merged into the wrapper group) — matches flat ELK compound model.
+         */
+        function applyExpansionToStructuredIr(diagram, nodeId, childIr) {
+            if (!diagram || !childIr || !Array.isArray(childIr.nodes)) return null;
+            const subId = `${nodeId}_sub`;
+            const prefix = `${nodeId}_`;
+            const collapseId = `${prefix}collapse`;
+
+            const d = JSON.parse(JSON.stringify(diagram));
+            if (!Array.isArray(d.nodes)) d.nodes = [];
+            if (!Array.isArray(d.edges)) d.edges = [];
+            if (!Array.isArray(d.groups)) d.groups = [];
+
+            const idx = d.nodes.findIndex((n) => n && String(n.id) === String(nodeId));
+            if (idx < 0) return null;
+
+            const originalNode = d.nodes[idx];
+            const originalLabel =
+                originalNode.label != null ? String(originalNode.label) : String(nodeId);
+            d.nodes.splice(idx, 1);
+
+            for (const g of d.groups) {
+                if (!g || !Array.isArray(g.nodes)) continue;
+                const mi = g.nodes.findIndex((m) => String(m) === String(nodeId));
+                if (mi >= 0) g.nodes[mi] = subId;
+            }
+
+            for (const e of d.edges) {
+                if (!e) continue;
+                if (String(e.source) === String(nodeId)) e.source = subId;
+                if (String(e.target) === String(nodeId)) e.target = subId;
+            }
+
+            const child = JSON.parse(JSON.stringify(childIr));
+            const childNodes = Array.isArray(child.nodes) ? child.nodes : [];
+            const childEdges = Array.isArray(child.edges) ? child.edges : [];
+
+            function pfx(id) {
+                return prefix + String(id);
+            }
+
+            const memberIds = [];
+
+            for (const cn of childNodes) {
+                if (!cn || cn.id == null) continue;
+                const cid = String(cn.id);
+                const newId = pfx(cid);
+                memberIds.push(newId);
+                const copy = Object.assign({}, cn, { id: newId });
+                d.nodes.push(copy);
+            }
+
+            const collapseNode = { id: collapseId, label: '[-] Collapse' };
+            d.nodes.push(collapseNode);
+            memberIds.push(collapseId);
+
+            d.groups.push({
+                id: subId,
+                label: originalLabel,
+                nodes: memberIds,
+            });
+
+            for (let ei = 0; ei < childEdges.length; ei++) {
+                const e = childEdges[ei];
+                if (!e || e.source == null || e.target == null) continue;
+                const copy = Object.assign({}, e, {
+                    source: pfx(e.source),
+                    target: pfx(e.target),
+                });
+                d.edges.push(copy);
+            }
+
+            return d;
+        }
+
+        function resolveRfTargetModule(nodeId, nodeText, irLink) {
+            const linkRaw = irLink != null && String(irLink).trim() ? String(irLink).trim() : '';
+            if (linkRaw) {
+                const stem = linkRaw.replace(/\.md$/i, '');
+                if (moduleData[stem]) return stem;
+            }
+            const mergedLinks = Object.assign(
+                {},
+                overviewLinks,
+                moduleData[currentModuleId]?.links || {}
+            );
+            let targetModule = null;
+            let longestPrefix = '';
+            let longestPrefixModuleId = null;
+            for (const expandedNodeId of rfExpandedNodeIds) {
+                const p = `${expandedNodeId}_`;
+                if (nodeId.startsWith(p) && p.length > longestPrefix.length) {
+                    longestPrefix = p;
+                    longestPrefixModuleId = rfExpandedNodeToModule.get(expandedNodeId) || null;
+                }
+            }
+            if (longestPrefix && longestPrefixModuleId && moduleData[longestPrefixModuleId]) {
+                const unprefixedNodeId = nodeId.substring(longestPrefix.length);
+                const parentModule = moduleData[longestPrefixModuleId];
+                const childLinks = parentModule.links || {};
+                if (childLinks[unprefixedNodeId]) targetModule = childLinks[unprefixedNodeId];
+                else if (nodeText && childLinks[nodeText]) targetModule = childLinks[nodeText];
+            }
+            if (!targetModule) {
+                if (mergedLinks[nodeId]) targetModule = mergedLinks[nodeId];
+                else if (nodeText && mergedLinks[nodeText]) targetModule = mergedLinks[nodeText];
+                else if (moduleData[nodeId]) targetModule = nodeId;
+            }
+            return targetModule;
+        }
+
+        /** nodeId -> module key when that module has structuredDiagram (RF-expandable). */
+        window.atelierRfExpandableByNodeId = function atelierRfExpandableByNodeId(diagram) {
+            const map = Object.create(null);
+            if (!diagram || typeof diagram !== 'object') return map;
+            const nodes = Array.isArray(diagram.nodes) ? diagram.nodes : [];
+            for (const n of nodes) {
+                if (!n || n.id == null) continue;
+                const id = String(n.id);
+                if (id.endsWith('_collapse')) continue;
+                const label = n.label != null ? String(n.label).trim() : '';
+                const target = resolveRfTargetModule(id, label, n.link);
+                if (!target || !moduleData[target]) continue;
+                const sd = moduleData[target].structuredDiagram;
+                if (!sd || !Array.isArray(sd.nodes)) continue;
+                map[id] = target;
+            }
+            return map;
+        };
+
+        window.atelierRfRebuildWorkingDiagram = rebuildRfWorkingDiagram;
+        window.atelierRfEnsureExpansionContext = rfEnsureExpansionContext;
+
+        /** Same merged IR as R6 (baseline + inline expansions). ELK SVG tab uses this too. */
+        function resolveWorkingDiagramIrOrBaseline() {
+            rfEnsureExpansionContext();
+            let diagram =
+                typeof rebuildRfWorkingDiagram === 'function' ? rebuildRfWorkingDiagram() : null;
+            if (!diagram) {
+                const resolved = resolveStructuredIrForPipeline();
+                diagram =
+                    resolved.diagram && typeof resolved.diagram === 'object' ? resolved.diagram : null;
+            }
+            return diagram;
+        }
+
+        /**
+         * Console: working IR, ELK input edge placement (LCA), RF snapshot. Call anytime:
+         *   atelierRfLogLayoutDebug('manual')
+         * Enable auto logs after each RF mount: window.atelierRfDebugLayout = true or ?rfDebug=1
+         */
+        window.atelierRfLogLayoutDebug = function atelierRfLogLayoutDebug(tag) {
+            const tagStr = tag != null ? String(tag) : 'diagram';
+            console.groupCollapsed('[Atelier ELK/RF] ' + tagStr);
+            try {
+                const diagram = resolveWorkingDiagramIrOrBaseline();
+                console.log('working diagram IR', diagram);
+                if (
+                    diagram &&
+                    typeof repairDiagramIR === 'function' &&
+                    typeof diagramToElkInput === 'function'
+                ) {
+                    const rep = repairDiagramIR(JSON.parse(JSON.stringify(diagram)));
+                    const d = rep.ok && rep.diagram ? rep.diagram : diagram;
+                    if (rep.warnings && rep.warnings.length) {
+                        console.log('IR repair warnings', rep.warnings);
+                    }
+                    const elkOpts = { target: 'elkjs' };
+                    const vt = typeof viewTune !== 'undefined' ? viewTune : {};
+                    if (
+                        vt &&
+                        typeof vt.elkLeafNodeWidth === 'number' &&
+                        !isNaN(vt.elkLeafNodeWidth)
+                    ) {
+                        elkOpts.leafNodeWidth = vt.elkLeafNodeWidth;
+                    }
+                    const pack = diagramToElkInput(d, elkOpts);
+                    console.log('diagramToElkInput summary', pack.summary);
+                    if (pack.warnings && pack.warnings.length) {
+                        console.log('diagramToElkInput warnings', pack.warnings);
+                    }
+                    if (pack.elkGraph && typeof validateElkEdgePlacement === 'function') {
+                        const pl = validateElkEdgePlacement(pack.elkGraph);
+                        console.log('validateElkEdgePlacement (pre-layout)', pl);
+                    }
+                    if (pack.elkGraph && typeof validateElkInputIdentifiers === 'function') {
+                        console.log('validateElkInputIdentifiers', validateElkInputIdentifiers(pack.elkGraph));
+                    }
+                } else {
+                    console.log('skip ELK pack (no diagram or diagramToElkInput / repairDiagramIR)');
+                }
+                console.log('atelierRfLastRfSnapshot', window.atelierRfLastRfSnapshot ?? null);
+                console.log('atelierRfLastNodeParentById', window.atelierRfLastNodeParentById ?? null);
+                console.log('diagramSelections', diagramSelections);
+
+                const portDiff = measurePortVsEdgeEndpoints();
+                if (portDiff && portDiff.length) {
+                    console.log('Port vs edge endpoint offsets (viewport px):');
+                    console.table(portDiff);
+                    const offenders = portDiff.filter(
+                        (r) => r.dxStart > 0.5 || r.dyStart > 0.5 || r.dxEnd > 0.5 || r.dyEnd > 0.5
+                    );
+                    if (offenders.length) {
+                        console.warn('[Atelier] Port/edge misalignment detected:', offenders);
+                    }
+                }
+            } catch (e) {
+                console.error('[Atelier ELK/RF] log failed', e);
+            }
+            console.groupEnd();
+        };
+
+        /**
+         * Measure, in **viewport pixel coordinates**, the gap between
+         *   a) the rendered edge path endpoints (first/last segment pt), and
+         *   b) the center of the source/target Handle dots.
+         * If the numbers are non-zero, the port is drawn at a different pixel than where the edge attaches.
+         */
+        function measurePortVsEdgeEndpoints() {
+            const root = document.getElementById('reactflowRoot');
+            if (!root) return [];
+            const out = [];
+            const edges = root.querySelectorAll('.react-flow__edge');
+            edges.forEach((edgeEl) => {
+                const edgeId = edgeEl.getAttribute('data-id');
+                if (!edgeId) return;
+                const path = edgeEl.querySelector('path.react-flow__edge-path');
+                if (!path) return;
+                let start, end;
+                try {
+                    const total = path.getTotalLength();
+                    if (!(total > 0)) return;
+                    start = path.getPointAtLength(0);
+                    end = path.getPointAtLength(total);
+                } catch (err) {
+                    return;
+                }
+                const pathCtm = path.getScreenCTM();
+                if (!pathCtm) return;
+                const startScreen = domPointToScreen(start, pathCtm);
+                const endScreen = domPointToScreen(end, pathCtm);
+
+                const snap = window.atelierRfLastRfSnapshot;
+                const edgeSnap = snap
+                    ? snap.edges.find((e) => e.id === edgeId)
+                    : null;
+                if (!edgeSnap) return;
+
+                const srcNode = root.querySelector(
+                    '.react-flow__node[data-id="' + cssEscapeRfSelector(edgeSnap.source) + '"]'
+                );
+                const tgtNode = root.querySelector(
+                    '.react-flow__node[data-id="' + cssEscapeRfSelector(edgeSnap.target) + '"]'
+                );
+                const srcHandle = srcNode
+                    ? srcNode.querySelector(
+                          '.react-flow__handle[data-handleid="' +
+                              cssEscapeRfSelector(edgeSnap.sourceHandle || '') +
+                              '"]'
+                      )
+                    : null;
+                const tgtHandle = tgtNode
+                    ? tgtNode.querySelector(
+                          '.react-flow__handle[data-handleid="' +
+                              cssEscapeRfSelector(edgeSnap.targetHandle || '') +
+                              '"]'
+                      )
+                    : null;
+
+                const srcRect = srcHandle ? srcHandle.getBoundingClientRect() : null;
+                const tgtRect = tgtHandle ? tgtHandle.getBoundingClientRect() : null;
+                const srcCenter = srcRect
+                    ? { x: srcRect.left + srcRect.width / 2, y: srcRect.top + srcRect.height / 2 }
+                    : null;
+                const tgtCenter = tgtRect
+                    ? { x: tgtRect.left + tgtRect.width / 2, y: tgtRect.top + tgtRect.height / 2 }
+                    : null;
+
+                const row = {
+                    edge: edgeId,
+                    source: edgeSnap.source,
+                    sourceHandle: edgeSnap.sourceHandle,
+                    target: edgeSnap.target,
+                    targetHandle: edgeSnap.targetHandle,
+                    pathStartX: round3(startScreen.x),
+                    pathStartY: round3(startScreen.y),
+                    portStartX: srcCenter ? round3(srcCenter.x) : null,
+                    portStartY: srcCenter ? round3(srcCenter.y) : null,
+                    dxStart: srcCenter ? round3(Math.abs(startScreen.x - srcCenter.x)) : null,
+                    dyStart: srcCenter ? round3(Math.abs(startScreen.y - srcCenter.y)) : null,
+                    pathEndX: round3(endScreen.x),
+                    pathEndY: round3(endScreen.y),
+                    portEndX: tgtCenter ? round3(tgtCenter.x) : null,
+                    portEndY: tgtCenter ? round3(tgtCenter.y) : null,
+                    dxEnd: tgtCenter ? round3(Math.abs(endScreen.x - tgtCenter.x)) : null,
+                    dyEnd: tgtCenter ? round3(Math.abs(endScreen.y - tgtCenter.y)) : null,
+                };
+                out.push(row);
+            });
+            return out;
+        }
+        window.atelierRfMeasurePortVsEdgeEndpoints = measurePortVsEdgeEndpoints;
+
+        function domPointToScreen(pt, ctm) {
+            return {
+                x: ctm.a * pt.x + ctm.c * pt.y + ctm.e,
+                y: ctm.b * pt.x + ctm.d * pt.y + ctm.f,
+            };
+        }
+        function round3(n) {
+            return Math.round(n * 1000) / 1000;
+        }
+
+        if (window.atelierRfDebugLayout) {
+            console.info(
+                '[Atelier] rfDebug: auto layout logs on RF mount. Run atelierRfLogLayoutDebug("…") anytime.'
+            );
+        }
+
+        window.atelierRfTriggerExpansion = async function atelierRfTriggerExpansion(nodeId, targetModuleId) {
+            rfEnsureExpansionContext();
+            const childIr = moduleData[targetModuleId]?.structuredDiagram;
+            if (!childIr || !Array.isArray(childIr.nodes)) return;
+
+            rfExpandedNodesOrder.push(nodeId);
+            rfExpandedNodeIds.add(nodeId);
+            rfExpandedNodeToModule.set(nodeId, targetModuleId);
+
+            expandDiagramSelectionEpoch += 1;
+            openedModules.add(targetModuleId);
+            updateSelection(targetModuleId);
+
+            await refreshReactFlowView();
+            if (activeDiagramTab === 'elk') await refreshElkSvgView();
+
+            setDiagramSelection({
+                kind: 'cluster',
+                logicalId: `${nodeId}_sub`,
+                moduleId: currentModuleId,
+            });
+        };
+
+        window.atelierRfTriggerCollapse = async function atelierRfTriggerCollapse(expandedNodeKey) {
+            rfEnsureExpansionContext();
+            rfExpandedNodesOrder = rfExpandedNodesOrder.filter(
+                (id) => id !== expandedNodeKey && !id.startsWith(`${expandedNodeKey}_`)
+            );
+            for (const id of [...rfExpandedNodeIds]) {
+                if (id === expandedNodeKey || id.startsWith(`${expandedNodeKey}_`)) {
+                    rfExpandedNodeIds.delete(id);
+                    rfExpandedNodeToModule.delete(id);
+                }
+            }
+            expandDiagramSelectionEpoch += 1;
+            await refreshReactFlowView();
+            if (activeDiagramTab === 'elk') await refreshElkSvgView();
+            setDiagramSelection({
+                kind: 'node',
+                logicalId: expandedNodeKey,
+                moduleId: currentModuleId,
+            });
+        };
+
+        window.atelierRfOnPaneClick = function atelierRfOnPaneClick() {
+            if (activeDiagramTab !== 'reactflow') return;
+            clearDiagramShapeSelection();
+        };
+
+        window.atelierRfHandleNodeClick = function atelierRfHandleNodeClick(payload) {
+            const ev = payload && payload.event;
+            const nodeId = payload && payload.nodeId != null ? String(payload.nodeId) : '';
+            const nodeType = payload && payload.nodeType;
+            if (!nodeId) return;
+
+            function rfDbgSel(reason) {
+                if (window.atelierRfDebugLayout && typeof window.atelierRfLogLayoutDebug === 'function') {
+                    queueMicrotask(() => window.atelierRfLogLayoutDebug(reason));
+                }
+            }
+
+            if (ev && typeof isMultiSelectModifier === 'function' && isMultiSelectModifier(ev)) {
+                const kind = nodeType === 'group' ? 'cluster' : 'node';
+                setDiagramSelection({ kind, logicalId: nodeId, moduleId: currentModuleId }, ev);
+                rfDbgSel('rf-click multi ' + nodeId);
+                return;
+            }
+
+            if (payload && payload.isCollapse) {
+                const collapseSuf = '_collapse';
+                if (nodeId.endsWith(collapseSuf)) {
+                    const expandedKey = nodeId.slice(0, -collapseSuf.length);
+                    if (expandedKey && typeof window.atelierRfTriggerCollapse === 'function') {
+                        void window.atelierRfTriggerCollapse(expandedKey);
+                    }
+                }
+                return;
+            }
+
+            if (nodeType === 'group' && nodeId.endsWith('_sub')) {
+                const baseId = nodeId.slice(0, -'_sub'.length);
+                const targetModuleId = rfExpandedNodeToModule.get(baseId);
+                if (targetModuleId && rfExpandedNodeIds.has(baseId)) {
+                    expandDiagramSelectionEpoch += 1;
+                    updateSelection(targetModuleId, nodeId);
+                    setDiagramSelection(
+                        { kind: 'cluster', logicalId: nodeId, moduleId: currentModuleId },
+                        ev
+                    );
+                    rfDbgSel('rf-click cluster ' + nodeId);
+                    return;
+                }
+            }
+
+            if (payload && payload.expandable && payload.targetModuleId) {
+                if (rfExpandedNodeIds.has(nodeId)) {
+                    const tm = rfExpandedNodeToModule.get(nodeId);
+                    expandDiagramSelectionEpoch += 1;
+                    updateSelection(tm, `${nodeId}_sub`);
+                    setDiagramSelection(
+                        { kind: 'cluster', logicalId: `${nodeId}_sub`, moduleId: currentModuleId },
+                        ev
+                    );
+                    rfDbgSel('rf-click re-expand ' + nodeId);
+                    return;
+                }
+                void window.atelierRfTriggerExpansion(nodeId, payload.targetModuleId);
+                return;
+            }
+
+            expandDiagramSelectionEpoch += 1;
+            const kind = nodeType === 'group' ? 'cluster' : 'node';
+            setDiagramSelection({ kind, logicalId: nodeId, moduleId: currentModuleId }, ev);
+            rfDbgSel('rf-click ' + kind + ' ' + nodeId);
+        };
+
         /** R5: ELK layout → SVG inside diagram canvas (shared pan/zoom transform). */
         async function refreshElkSvgView() {
             const mount = document.getElementById('elkSvgMount');
             if (!mount || activeDiagramTab !== 'elk') return;
             const rid = ++elkSvgRequestEpoch;
-            const { diagram } = resolveStructuredIrForPipeline();
+            const diagram = resolveWorkingDiagramIrOrBaseline();
             if (!diagram) {
                 mount.innerHTML = '';
                 const d = document.createElement('div');
@@ -2878,6 +3404,7 @@
                     try {
                         if (rid !== reactFlowRequestEpoch) return;
                         window.__atelierRfLayoutEpoch = rid;
+                        rfEnsureExpansionContext();
                         if (typeof window.atelierUnmountReactFlowR6 === 'function') {
                             window.atelierUnmountReactFlowR6();
                         }

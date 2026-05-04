@@ -113,6 +113,9 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
 
     const label = data.label || '';
     const detail = data.hoverDetail != null ? String(data.hoverDetail).trim() : '';
+    const expandable = !!(data && data.expandable);
+    const collapseBtn = !!(data && data.rfIsCollapse);
+    const leafInteractive = expandable || collapseBtn;
     const showHoverPanel = hovered && detail.length > 0;
     const w = rw ?? data.width ?? 80;
     const h = rh ?? data.height ?? 40;
@@ -123,130 +126,89 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
 
     const handleEls = [];
 
-    leftHandles.forEach((yPos, index) => {
+    /** Exact ELK connection point → handle center (translate -50/-50 centers on top/left). */
+    function handleStyle(cp) {
+        return {
+            ...baseHandleStyle,
+            position: 'absolute',
+            left: cp.x,
+            top: cp.y,
+            transform: 'translate(-50%, -50%)',
+        };
+    }
+
+    leftHandles.forEach((cp, index) => {
         handleEls.push(
             React.createElement(Handle, {
                 key: 'lt-' + index,
                 type: 'target',
                 position: Position.Left,
                 id: 'left-' + index + '-target',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    top: yPos,
-                    left: 0,
-                    transform: 'translate(-50%, -50%)',
-                },
+                style: handleStyle(cp),
             }),
             React.createElement(Handle, {
                 key: 'ls-' + index,
                 type: 'source',
                 position: Position.Left,
                 id: 'left-' + index + '-source',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    top: yPos,
-                    left: 0,
-                    transform: 'translate(-50%, -50%)',
-                    opacity: 0,
-                },
+                style: { ...handleStyle(cp), opacity: 0 },
             })
         );
     });
 
-    rightHandles.forEach((yPos, index) => {
+    rightHandles.forEach((cp, index) => {
         handleEls.push(
             React.createElement(Handle, {
                 key: 'rs-' + index,
                 type: 'source',
                 position: Position.Right,
                 id: 'right-' + index + '-source',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    top: yPos,
-                    right: 0,
-                    transform: 'translate(50%, -50%)',
-                },
+                style: handleStyle(cp),
             }),
             React.createElement(Handle, {
                 key: 'rt-' + index,
                 type: 'target',
                 position: Position.Right,
                 id: 'right-' + index + '-target',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    top: yPos,
-                    right: 0,
-                    transform: 'translate(50%, -50%)',
-                    opacity: 0,
-                },
+                style: { ...handleStyle(cp), opacity: 0 },
             })
         );
     });
 
-    topHandles.forEach((xPos, index) => {
+    topHandles.forEach((cp, index) => {
         handleEls.push(
             React.createElement(Handle, {
                 key: 'ts-' + index,
                 type: 'source',
                 position: Position.Top,
                 id: 'top-' + index + '-source',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    left: xPos,
-                    top: 0,
-                    transform: 'translate(-50%, -50%)',
-                },
+                style: handleStyle(cp),
             }),
             React.createElement(Handle, {
                 key: 'tt-' + index,
                 type: 'target',
                 position: Position.Top,
                 id: 'top-' + index + '-target',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    left: xPos,
-                    top: 0,
-                    transform: 'translate(-50%, -50%)',
-                    opacity: 0,
-                },
+                style: { ...handleStyle(cp), opacity: 0 },
             })
         );
     });
 
-    bottomHandles.forEach((xPos, index) => {
+    bottomHandles.forEach((cp, index) => {
         handleEls.push(
             React.createElement(Handle, {
                 key: 'bt-' + index,
                 type: 'target',
                 position: Position.Bottom,
                 id: 'bottom-' + index + '-target',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    left: xPos,
-                    bottom: 0,
-                    transform: 'translate(-50%, 50%)',
-                },
+                style: handleStyle(cp),
             }),
             React.createElement(Handle, {
                 key: 'bs-' + index,
                 type: 'source',
                 position: Position.Bottom,
                 id: 'bottom-' + index + '-source',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    left: xPos,
-                    bottom: 0,
-                    transform: 'translate(-50%, 50%)',
-                    opacity: 0,
-                },
+                style: { ...handleStyle(cp), opacity: 0 },
             })
         );
     });
@@ -293,6 +255,7 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
             ref: rootRef,
             'data-atelier-rf-node-kind': 'leaf',
             'data-atelier-rf-has-hover-detail': detail.length > 0 ? 'true' : 'false',
+            'data-atelier-rf-expandable': expandable ? 'true' : 'false',
             onMouseEnter: function () {
                 setHovered(true);
             },
@@ -307,12 +270,14 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
                 maxHeight: h,
                 boxSizing: 'border-box',
                 overflow: 'visible',
+                cursor: leafInteractive ? 'pointer' : undefined,
             },
         },
         React.createElement(
             'div',
             {
                 key: 'chrome',
+                className: 'atelier-rf-leaf-chrome',
                 style: {
                     position: 'absolute',
                     left: 0,
@@ -321,7 +286,10 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
                     height: '100%',
                     boxSizing: 'border-box',
                     background: '#fff',
-                    border: '1px solid #475569',
+                    border:
+                        hovered && leafInteractive
+                            ? '2px solid #3b82f6'
+                            : '1px solid #475569',
                     borderRadius: LEAF_NODE_BORDER_RADIUS,
                     boxShadow: '0 1px 3px rgba(15,23,42,0.12)',
                     overflow: 'hidden',
@@ -456,127 +424,89 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
 
     const parts = [];
 
-    leftHandles.forEach((yPos, index) => {
+    /** Exact ELK connection point → handle center (translate -50/-50 centers on top/left). */
+    function gHandleStyle(cp) {
+        return {
+            ...baseHandleStyle,
+            position: 'absolute',
+            left: cp.x,
+            top: cp.y,
+            transform: 'translate(-50%, -50%)',
+        };
+    }
+
+    leftHandles.forEach((cp, index) => {
         parts.push(
             React.createElement(Handle, {
                 key: 'g-lt-' + index,
                 type: 'target',
                 position: Position.Left,
                 id: 'left-' + index + '-target',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    top: yPos,
-                    left: 0,
-                    transform: 'translate(-50%, -50%)',
-                },
+                style: gHandleStyle(cp),
             }),
             React.createElement(Handle, {
                 key: 'g-ls-' + index,
                 type: 'source',
                 position: Position.Left,
                 id: 'left-' + index + '-source',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    top: yPos,
-                    left: 0,
-                    transform: 'translate(-50%, -50%)',
-                    opacity: 0,
-                },
+                style: { ...gHandleStyle(cp), opacity: 0 },
             })
         );
     });
 
-    rightHandles.forEach((yPos, index) => {
+    rightHandles.forEach((cp, index) => {
         parts.push(
             React.createElement(Handle, {
                 key: 'g-rs-' + index,
                 type: 'source',
                 position: Position.Right,
                 id: 'right-' + index + '-source',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    top: yPos,
-                    right: 0,
-                    transform: 'translate(50%, -50%)',
-                },
+                style: gHandleStyle(cp),
             }),
             React.createElement(Handle, {
                 key: 'g-rt-' + index,
                 type: 'target',
                 position: Position.Right,
                 id: 'right-' + index + '-target',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    top: yPos,
-                    right: 0,
-                    transform: 'translate(50%, -50%)',
-                },
+                style: gHandleStyle(cp),
             })
         );
     });
 
-    topHandles.forEach((xPos, index) => {
+    topHandles.forEach((cp, index) => {
         parts.push(
             React.createElement(Handle, {
                 key: 'g-ts-' + index,
                 type: 'source',
                 position: Position.Top,
                 id: 'top-' + index + '-source',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    left: xPos,
-                    top: 0,
-                    transform: 'translate(-50%, -50%)',
-                },
+                style: gHandleStyle(cp),
             }),
             React.createElement(Handle, {
                 key: 'g-tt-' + index,
                 type: 'target',
                 position: Position.Top,
                 id: 'top-' + index + '-target',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    left: xPos,
-                    top: 0,
-                    transform: 'translate(-50%, -50%)',
-                },
+                style: gHandleStyle(cp),
             })
         );
     });
 
-    bottomHandles.forEach((xPos, index) => {
+    bottomHandles.forEach((cp, index) => {
         parts.push(
             React.createElement(Handle, {
                 key: 'g-bt-' + index,
                 type: 'target',
                 position: Position.Bottom,
                 id: 'bottom-' + index + '-target',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    left: xPos,
-                    bottom: 0,
-                    transform: 'translate(-50%, 50%)',
-                },
+                style: gHandleStyle(cp),
             }),
             React.createElement(Handle, {
                 key: 'g-bs-' + index,
                 type: 'source',
                 position: Position.Bottom,
                 id: 'bottom-' + index + '-source',
-                style: {
-                    ...baseHandleStyle,
-                    position: 'absolute',
-                    left: xPos,
-                    bottom: 0,
-                    transform: 'translate(-50%, 50%)',
-                },
+                style: gHandleStyle(cp),
             })
         );
     });
@@ -622,10 +552,25 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                 position: 'relative',
                 boxSizing: 'border-box',
                 overflow: 'visible',
-                /** See index.html: group RF wrapper is pointer-events:none; shell must not eat hits meant for child nodes. */
                 pointerEvents: 'none',
             },
         },
+        /**
+         * Dashed frame drawn as an inner div so the xyflow wrapper has no border —
+         * keeps handle positions (left:0 / top:0) exactly on the wrapper outer edge
+         * (= ELK boundary). Border-box + inset:0 draws the 1px border INSIDE the outer edge.
+         */
+        React.createElement('div', {
+            key: 'group-frame',
+            style: {
+                position: 'absolute',
+                inset: 0,
+                boxSizing: 'border-box',
+                border: '1px dashed #64748b',
+                borderRadius: GROUP_NODE_BORDER_RADIUS,
+                pointerEvents: 'none',
+            },
+        }),
         labelPill,
         React.createElement(
             'div',
@@ -664,10 +609,13 @@ function ElkOrthogonalEdge(props) {
     let edgePath = '';
 
     if (routePoints.length >= 2) {
-        /** RF handle centers come from sourceX/Y & targetX/Y; ELK polyline ends can sit on bbox edge. */
+        /**
+         * Use the ELK polyline as-is — it is geometrically exact (straight orthogonal
+         * segments aligned with node boundaries). Do NOT substitute sourceX/sourceY or
+         * targetX/targetY from xyflow handles: those come from DOM measurements that can
+         * differ by sub-pixels due to border widths, CSS transforms, and parent offsets.
+         */
         const pts = routePoints.map((p) => ({ x: Number(p.x), y: Number(p.y) }));
-        pts[0] = { x: sourceX, y: sourceY };
-        pts[pts.length - 1] = { x: targetX, y: targetY };
         const deduped = [];
         for (let i = 0; i < pts.length; i++) {
             const p = pts[i];
@@ -782,10 +730,34 @@ function Inner(props) {
         [setNodes]
     );
 
+    const onNodeClick = useCallback(function (ev, node) {
+        if (typeof window.atelierRfHandleNodeClick === 'function') {
+            window.atelierRfHandleNodeClick({
+                nodeId: node.id,
+                nodeType: node.type,
+                event: ev && ev.nativeEvent ? ev.nativeEvent : ev,
+                expandable: !!(node.data && node.data.expandable),
+                targetModuleId: node.data && node.data.targetModuleId,
+                isCollapse: !!(node.data && node.data.rfIsCollapse),
+            });
+        }
+    }, []);
+
+    const onPaneClick = useCallback(function () {
+        if (typeof window.atelierRfOnPaneClick === 'function') {
+            window.atelierRfOnPaneClick();
+        }
+    }, []);
+
     useEffect(
         function () {
             setNodes(clampElkCustomNodeDimensions(initialNodes));
             setEdges(initialEdges);
+            queueMicrotask(function () {
+                if (typeof window.atelierRfSyncSelectionHighlight === 'function') {
+                    window.atelierRfSyncSelectionHighlight();
+                }
+            });
         },
         [initialNodes, initialEdges, setNodes, setEdges]
     );
@@ -797,6 +769,8 @@ function Inner(props) {
             edges,
             onNodesChange,
             onEdgesChange,
+            onNodeClick,
+            onPaneClick,
             nodeTypes,
             edgeTypes,
             fitView: true,
@@ -842,6 +816,9 @@ window.atelierUnmountReactFlowR6 = function () {
         rfRoot = null;
         rfContainer = null;
     }
+    try {
+        window.atelierRfLastNodeParentById = null;
+    } catch (_) {}
 };
 
 window.atelierMountReactFlowR6 = async function (container, epoch) {
@@ -872,7 +849,16 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
         container.appendChild(d);
         return;
     }
-    const { diagram } = getIr();
+    if (typeof window.atelierRfEnsureExpansionContext === 'function') {
+        window.atelierRfEnsureExpansionContext();
+    }
+    var diagram =
+        typeof window.atelierRfRebuildWorkingDiagram === 'function'
+            ? window.atelierRfRebuildWorkingDiagram()
+            : null;
+    if (!diagram && typeof getIr === 'function') {
+        diagram = getIr().diagram || null;
+    }
     if (!diagram) {
         if (stale()) return;
         container.innerHTML = '';
@@ -905,14 +891,44 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
     var hoverFn = window.atelierRfHoverDetailByNodeId;
     var hoverMap =
         typeof hoverFn === 'function' ? hoverFn(diagram) : Object.create(null);
+    var expandFn = window.atelierRfExpandableByNodeId;
+    var expandMap =
+        typeof expandFn === 'function' ? expandFn(diagram) : Object.create(null);
     nodes = nodes.map(function (n) {
         var hid = hoverMap[n.id];
-        return Object.assign({}, n, {
-            data: Object.assign({}, n.data, {
-                hoverDetail: hid != null ? hid : n.data.hoverDetail,
-            }),
+        var idStr = String(n.id);
+        var isCollapse = idStr.endsWith('_collapse');
+        var targetMod = expandMap[idStr];
+        var dataExtra = {
+            hoverDetail: hid != null ? hid : n.data.hoverDetail,
+            rfIsCollapse: isCollapse,
+        };
+        if (n.type === 'custom' && targetMod && !isCollapse) {
+            dataExtra.expandable = true;
+            dataExtra.targetModuleId = targetMod;
+        }
+        if (n.type === 'group' && idStr.endsWith('_sub')) {
+            dataExtra.rfExpandedSubgraph = true;
+        }
+        var out = Object.assign({}, n, {
+            data: Object.assign({}, n.data || {}, dataExtra),
         });
+        if (n.type === 'group' && idStr.endsWith('_sub')) {
+            out.className = n.className
+                ? n.className + ' atelier-rf-expanded-subgraph'
+                : 'atelier-rf-expanded-subgraph';
+        }
+        if (isCollapse && n.type === 'custom') {
+            out.zIndex = 6500;
+        }
+        return out;
     });
+    var parentDbg = Object.create(null);
+    for (var pi = 0; pi < nodes.length; pi++) {
+        var pn = nodes[pi];
+        var ppid = pn.parentId != null ? String(pn.parentId) : '';
+        parentDbg[String(pn.id)] = ppid ? ppid : null;
+    }
     if (stale()) return;
     const key = 'rf-' + (epoch != null ? epoch : Date.now());
 
@@ -923,6 +939,33 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
      */
     window.atelierUnmountReactFlowR6();
     if (stale()) return;
+    window.atelierRfLastNodeParentById = parentDbg;
+    window.atelierRfLastRfSnapshot = {
+        epoch: epoch != null ? epoch : null,
+        at: Date.now(),
+        nodes: nodes.map(function (n) {
+            return {
+                id: String(n.id),
+                type: n.type,
+                parentId: n.parentId != null ? String(n.parentId) : null,
+                zIndex: n.zIndex,
+                width: n.width,
+                height: n.height,
+                position: n.position,
+                extent: n.extent,
+            };
+        }),
+        edges: edges.map(function (e) {
+            return {
+                id: String(e.id),
+                source: String(e.source),
+                target: String(e.target),
+                sourceHandle: e.sourceHandle,
+                targetHandle: e.targetHandle,
+                type: e.type,
+            };
+        }),
+    };
     rfRoot = createRoot(container);
     rfContainer = container;
     rfRoot.render(
@@ -932,6 +975,14 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
             initialEdges: edges,
         })
     );
+    queueMicrotask(function () {
+        if (typeof window.atelierRfSyncSelectionHighlight === 'function') {
+            window.atelierRfSyncSelectionHighlight();
+        }
+        if (window.atelierRfDebugLayout && typeof window.atelierRfLogLayoutDebug === 'function') {
+            window.atelierRfLogLayoutDebug('rf-mount epoch=' + String(epoch));
+        }
+    });
 };
 
 window.atelierR6ReactFlowReady = true;

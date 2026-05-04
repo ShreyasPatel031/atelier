@@ -118,6 +118,11 @@
             for (const mid of g.nodes) {
                 const sid = String(mid);
                 if (!nodeIds.has(sid)) {
+                    /** Nested compound: member id is another group's id (not listed in nodes[]). */
+                    if (groupIds.has(sid)) {
+                        kept.push(sid);
+                        continue;
+                    }
                     summary.g3DroppedUnknownMember.push({ groupId: gid, memberId: sid });
                     warnings.push({ code: 'g3_drop_unknown_member', groupId: gid, memberId: sid });
                     continue;

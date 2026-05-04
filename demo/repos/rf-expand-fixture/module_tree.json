@@ -1,0 +1,18 @@
+{
+  "child_target": {
+    "path": "fixture",
+    "components": [],
+    "children": {},
+    "title": "Child target",
+    "description": "Minimal module with structuredDiagram for React Flow inline expansion tests.",
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        { "id": "inner_a", "label": "Inner A" },
+        { "id": "inner_b", "label": "Inner B" }
+      ],
+      "edges": [{ "source": "inner_a", "target": "inner_b", "label": "rel" }],
+      "groups": []
+    }
+  }
+}

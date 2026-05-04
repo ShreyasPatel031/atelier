@@ -3,6 +3,7 @@
     "node": "24.x"
   },
   "scripts": {
+    "demo": "python3 -m http.server 9891 --directory demo",
     "test:elk-diagrams": "node demo/scripts/validate-elk-all-diagrams.js",
     "test:e2e": "playwright test",
     "test:e2e:edge": "playwright test demo/playwright/edge-hover.spec.ts"
