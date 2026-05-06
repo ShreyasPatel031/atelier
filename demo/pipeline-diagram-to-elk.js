@@ -15,19 +15,36 @@
  * Exposes:
  *   window.diagramToElkInput(diagram, options?)
  *   window.validateElkInputIdentifiers(elkGraph)
+ *
+ * Depends on demo/elk-node-dimensions.js (ELK leaf sizing + RF dimension profile).
  */
 (function (global) {
     'use strict';
 
-    var DEFAULTS = {
-        rootId: 'root',
-        maxNodeWidth: 280,
-        charWidth: 7,
-        nodePaddingWidth: 36,
-        leafHeight: 44,
-        groupLabelHeight: 28,
-        groupMinWidth: 120,
-    };
+    function getDimApi() {
+        var D = global.atelierElkNodeDimensions;
+        if (!D && typeof require !== 'undefined') {
+            try {
+                D = require('./elk-node-dimensions.js');
+            } catch (e) {
+                D = null;
+            }
+        }
+        if (!D) {
+            throw new Error(
+                'atelier: load elk-node-dimensions.js before pipeline-diagram-to-elk.js'
+            );
+        }
+        return D;
+    }
+
+    function estimateLeafSize(label, options) {
+        return getDimApi().estimateElkLeafSize(label, options);
+    }
+
+    function estimateGroupLabelSize(label, options) {
+        return getDimApi().estimateElkGroupLabelSize(label, options);
+    }
 
     function mapDirection(diagramDirection) {
         var d = String(diagramDirection || 'TD').toUpperCase();
@@ -44,28 +61,6 @@
             width: w,
             height: h,
         };
-    }
-
-    function estimateLeafSize(label, options) {
-        var o = options || {};
-        var text = String(label != null ? label : '').trim() || '?';
-        var maxW = o.maxNodeWidth != null ? o.maxNodeWidth : DEFAULTS.maxNodeWidth;
-        var cw = o.charWidth != null ? o.charWidth : DEFAULTS.charWidth;
-        var pad = o.nodePaddingWidth != null ? o.nodePaddingWidth : DEFAULTS.nodePaddingWidth;
-        var w = Math.min(maxW, Math.max(72, text.length * cw + pad));
-        var h = o.leafHeight != null ? o.leafHeight : DEFAULTS.leafHeight;
-        return { width: w, height: h, text: text };
-    }
-
-    function estimateGroupLabelSize(label, options) {
-        var o = options || {};
-        var text = String(label != null ? label : '').trim() || '?';
-        var minW = o.groupMinWidth != null ? o.groupMinWidth : DEFAULTS.groupMinWidth;
-        var cw = o.charWidth != null ? o.charWidth : DEFAULTS.charWidth;
-        var pad = 32;
-        var w = Math.max(minW, Math.min(360, text.length * cw + pad));
-        var h = o.groupLabelHeight != null ? o.groupLabelHeight : DEFAULTS.groupLabelHeight;
-        return { width: w, height: h, text: text };
     }
 
     function collectElkNodeIds(node, out) {
@@ -203,11 +198,16 @@
         };
     }
 
-    function compoundLayoutOptions(target) {
+    function compoundLayoutOptions(target, padPx) {
+        var P = Math.round(Number(padPx));
+        if (!isFinite(P)) {
+            P = 14;
+        }
+        P = Math.max(4, Math.min(48, P));
         if (target === 'elkjs') {
             return {
                 'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
-                'elk.padding': '[top=24,left=14,bottom=14,right=14]',
+                'elk.padding': '[top=' + P + ',left=' + P + ',bottom=' + P + ',right=' + P + ']',
                 'elk.spacing.nodeNode': '28',
             };
         }
@@ -225,8 +225,16 @@
      */
     function diagramToElkInput(diagram, options) {
         var warnings = [];
-        var o = options || {};
-        var target = o.target === 'elkjs' ? 'elkjs' : 'elklive';
+        var merged = Object.assign({}, options || {});
+        var DIM = getDimApi();
+        if (merged.leafNodeWidth == null) {
+            merged.leafNodeWidth = DIM.resolveLeafNodeWidthPx(global);
+        }
+        var target = merged.target === 'elkjs' ? 'elkjs' : 'elklive';
+        var compoundPadPx =
+            typeof DIM.getElkCompoundPaddingPx === 'function'
+                ? DIM.getElkCompoundPaddingPx(global)
+                : 14;
 
         if (!diagram || typeof diagram !== 'object') {
             return { ok: false, reason: 'no_diagram', elkGraph: null, warnings: warnings, validate: null, summary: null };
@@ -242,6 +250,16 @@
             if (n && n.id != null) nodeById.set(String(n.id), n);
         }
 
+        var groupDefById = new Map();
+        var groupIdsSet = new Set();
+        for (var gx = 0; gx < groups.length; gx++) {
+            var gr0 = groups[gx];
+            if (!gr0 || gr0.id == null) continue;
+            var gId0 = String(gr0.id);
+            groupIdsSet.add(gId0);
+            groupDefById.set(gId0, gr0);
+        }
+
         var parentOf = new Map();
         for (var g = 0; g < groups.length; g++) {
             var gr = groups[g];
@@ -254,40 +272,62 @@
             }
         }
 
-        var groupCompoundById = new Map();
         var rootChildren = [];
         var elkDirection = mapDirection(diagram.direction);
 
-        for (var gi = 0; gi < groups.length; gi++) {
-            var gg = groups[gi];
-            if (!gg || gg.id == null) continue;
-            var gId = String(gg.id);
+        /** Same initial width for every non-root node (leaves + compounds). ELK auto-grows compounds to fit children.
+         *  Mirrors openai-realtime-elkjs-tool ensureIds: node.width ??= NON_ROOT_DEFAULT_OPTIONS.width.
+         *  Group label text contributes to width via labels[].width so ELK reserves room for the title bar. */
+        var defaultNonRootWidth = merged.leafNodeWidth;
+
+        function makeLeafElkNode(mid) {
+            var raw = nodeById.get(mid);
+            var lab = raw && raw.label != null ? raw.label : mid;
+            var sz = estimateLeafSize(lab, merged);
+            return {
+                id: mid,
+                width: sz.width,
+                height: sz.height,
+                labels: [elkLabel(mid, 0, sz.text, sz.width, sz.height)],
+            };
+        }
+
+        var buildingCompounds = new Set();
+        function buildGroupCompound(gId) {
+            if (buildingCompounds.has(gId)) {
+                warnings.push({ code: 'r4_group_cycle', id: gId });
+                return makeLeafElkNode(gId);
+            }
+            var gg = groupDefById.get(gId);
+            if (!gg) {
+                warnings.push({ code: 'r4_missing_group_def', id: gId });
+                return makeLeafElkNode(gId);
+            }
+            buildingCompounds.add(gId);
             var gLabel = gg.label != null ? String(gg.label) : gId;
-            var ls = estimateGroupLabelSize(gLabel, o);
+            var ls = estimateGroupLabelSize(gLabel, merged);
             var memberIds = Array.isArray(gg.nodes) ? gg.nodes.map(String) : [];
             var compoundChildren = [];
             for (var mi = 0; mi < memberIds.length; mi++) {
                 var mid = memberIds[mi];
-                var raw = nodeById.get(mid);
-                var lab = raw && raw.label != null ? raw.label : mid;
-                var sz = estimateLeafSize(lab, o);
-                compoundChildren.push({
-                    id: mid,
-                    width: sz.width,
-                    height: sz.height,
-                    labels: [elkLabel(mid, 0, sz.text, sz.width, sz.height)],
-                });
+                if (groupDefById.has(mid)) {
+                    compoundChildren.push(buildGroupCompound(mid));
+                } else {
+                    if (!nodeById.has(mid)) {
+                        warnings.push({ code: 'r4_member_not_in_nodes', groupId: gId, member: mid });
+                    }
+                    compoundChildren.push(makeLeafElkNode(mid));
+                }
             }
-            var compound = {
+            buildingCompounds.delete(gId);
+            return {
                 id: gId,
-                width: ls.width,
+                width: defaultNonRootWidth,
                 height: ls.height,
                 labels: [elkLabel(gId, 0, ls.text, ls.width, ls.height)],
-                layoutOptions: compoundLayoutOptions(target),
+                layoutOptions: compoundLayoutOptions(target, compoundPadPx),
                 children: compoundChildren,
             };
-            groupCompoundById.set(gId, compound);
-            rootChildren.push(compound);
         }
 
         var inAnyGroup = new Set(parentOf.keys());
@@ -295,22 +335,24 @@
             var node = nodes[ni];
             if (!node || node.id == null) continue;
             var idStr = String(node.id);
-            if (groupCompoundById.has(idStr)) {
+            if (groupIdsSet.has(idStr)) {
                 warnings.push({ code: 'r4_node_id_collides_with_group', id: idStr });
                 continue;
             }
             if (inAnyGroup.has(idStr)) continue;
-            var lab2 = node.label != null ? node.label : idStr;
-            var sz2 = estimateLeafSize(lab2, o);
-            rootChildren.push({
-                id: idStr,
-                width: sz2.width,
-                height: sz2.height,
-                labels: [elkLabel(idStr, 0, sz2.text, sz2.width, sz2.height)],
-            });
+            rootChildren.push(makeLeafElkNode(idStr));
         }
 
-        var rootId = o.rootId != null ? String(o.rootId) : DEFAULTS.rootId;
+        for (var gi = 0; gi < groups.length; gi++) {
+            var ggR = groups[gi];
+            if (!ggR || ggR.id == null) continue;
+            var rootGid = String(ggR.id);
+            if (parentOf.has(rootGid)) continue;
+            rootChildren.push(buildGroupCompound(rootGid));
+        }
+
+        var rootId =
+            merged.rootId != null ? String(merged.rootId) : DIM.DEFAULTS.rootId;
 
         var elkGraph = {
             id: rootId,
