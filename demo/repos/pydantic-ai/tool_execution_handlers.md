@@ -10,27 +10,62 @@ This module primarily focuses on two key aspects: executing the actual tool call
 {
     "direction": "TD",
     "nodes": [
-        {"id": "tool_call_processing", "label": "Process Tool Calls", "type": "module", "link": "tool_call_processing.md"},
-        {"id": "toolset_management", "label": "Manage Toolsets", "type": "external"},
-        {"id": "agent_execution_graph", "label": "Agent Execution Flow", "type": "external"}
+        {
+            "id": "tool_execution_handlers",
+            "label": "Tool Execution Handlers",
+            "type": "module"
+        },
+        {
+            "id": "tool_call_processing",
+            "label": "Process Tool Calls",
+            "type": "module",
+            "link": "tool_call_processing.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Manage Toolsets",
+            "type": "external"
+        },
+        {
+            "id": "agent_execution_graph",
+            "label": "Agent Execution Flow",
+            "type": "external"
+        }
     ],
     "edges": [
-        {"source": "agent_execution_graph", "target": "tool_call_processing", "label": "initiates tool call"},
-        {"source": "tool_call_processing", "target": "toolset_management", "label": "executes tool"},
-        {"source": "tool_call_processing", "target": "agent_execution_graph", "label": "returns result"}
+        {
+            "source": "agent_execution_graph",
+            "target": "tool_call_processing",
+            "label": "initiates tool call"
+        },
+        {
+            "source": "tool_call_processing",
+            "target": "toolset_management",
+            "label": "executes tool"
+        },
+        {
+            "source": "tool_call_processing",
+            "target": "agent_execution_graph",
+            "label": "returns result"
+        }
     ],
     "groups": [
         {
             "id": "tool_handling",
             "label": "Tool Handling",
             "role": "generative",
-            "nodes": ["tool_call_processing"]
+            "nodes": [
+                "tool_call_processing"
+            ]
         },
         {
             "id": "dependencies",
             "label": "Dependencies",
             "role": "data",
-            "nodes": ["toolset_management", "agent_execution_graph"]
+            "nodes": [
+                "toolset_management",
+                "agent_execution_graph"
+            ]
         }
     ]
 }

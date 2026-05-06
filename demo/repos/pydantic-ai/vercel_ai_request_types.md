@@ -14,20 +14,52 @@ The `vercel_ai_request_types` module is organized into several key areas, primar
 {
     "direction": "TD",
     "nodes": [
-        {"id": "ui_step_management", "label": "UI Step Management", "type": "module", "link": "ui_step_management.md"},
-        {"id": "static_tool_requests", "label": "Static Tool Interaction Requests", "type": "module", "link": "static_tool_requests.md"},
-        {"id": "dynamic_tool_requests", "label": "Dynamic Tool Interaction Requests", "type": "module", "link": "dynamic_tool_requests.md"}
+        {
+            "id": "vercel_ai_request_types",
+            "label": "Vercel AI Request Definitions",
+            "type": "module"
+        },
+        {
+            "id": "ui_step_management",
+            "label": "UI Step Management",
+            "type": "module",
+            "link": "ui_step_management.md"
+        },
+        {
+            "id": "static_tool_requests",
+            "label": "Static Tool Interaction Requests",
+            "type": "module",
+            "link": "static_tool_requests.md"
+        },
+        {
+            "id": "dynamic_tool_requests",
+            "label": "Dynamic Tool Interaction Requests",
+            "type": "module",
+            "link": "dynamic_tool_requests.md"
+        }
     ],
     "edges": [
-        {"source": "ui_step_management", "target": "static_tool_requests", "label": "triggers tool actions"},
-        {"source": "ui_step_management", "target": "dynamic_tool_requests", "label": "triggers dynamic tool actions"}
+        {
+            "source": "ui_step_management",
+            "target": "static_tool_requests",
+            "label": "triggers tool actions"
+        },
+        {
+            "source": "ui_step_management",
+            "target": "dynamic_tool_requests",
+            "label": "triggers dynamic tool actions"
+        }
     ],
     "groups": [
         {
             "id": "request_categorization",
             "label": "Request Categorization",
             "role": "analytical",
-            "nodes": ["ui_step_management", "static_tool_requests", "dynamic_tool_requests"]
+            "nodes": [
+                "ui_step_management",
+                "static_tool_requests",
+                "dynamic_tool_requests"
+            ]
         }
     ]
 }

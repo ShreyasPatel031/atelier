@@ -14,28 +14,71 @@ The module also interacts with `gemini_utility_components` for specific data str
 {
     "direction": "TD",
     "nodes": [
-        {"id": "gemini_model_interface", "label": "Gemini Model Interface", "type": "module", "link": "gemini_model_interface.md"},
-        {"id": "gemini_content_processing", "label": "Gemini Content Processing", "type": "module", "link": "gemini_content_processing.md"},
-        {"id": "gemini_utility_components", "label": "Gemini Utility Components", "type": "module", "link": "gemini_utility_components.md"},
-        {"id": "model_core_interfaces", "label": "Model Core Interfaces", "type": "module", "link": "model_core_interfaces.md"}
+        {
+            "id": "gemini_api_interaction",
+            "label": "Gemini API Interaction",
+            "type": "module"
+        },
+        {
+            "id": "gemini_model_interface",
+            "label": "Gemini Model Interface",
+            "type": "module",
+            "link": "gemini_model_interface.md"
+        },
+        {
+            "id": "gemini_content_processing",
+            "label": "Gemini Content Processing",
+            "type": "module",
+            "link": "gemini_content_processing.md"
+        },
+        {
+            "id": "gemini_utility_components",
+            "label": "Gemini Utility Components",
+            "type": "module",
+            "link": "gemini_utility_components.md"
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Model Core Interfaces",
+            "type": "module",
+            "link": "model_core_interfaces.md"
+        }
     ],
     "edges": [
-        {"source": "gemini_model_interface", "target": "gemini_content_processing", "label": "formats messages / parses responses"},
-        {"source": "gemini_model_interface", "target": "gemini_utility_components", "label": "uses utilities and data types"},
-        {"source": "gemini_model_interface", "target": "model_core_interfaces", "label": "implements Model/StreamedResponse"}
+        {
+            "source": "gemini_model_interface",
+            "target": "gemini_content_processing",
+            "label": "formats messages / parses responses"
+        },
+        {
+            "source": "gemini_model_interface",
+            "target": "gemini_utility_components",
+            "label": "uses utilities and data types"
+        },
+        {
+            "source": "gemini_model_interface",
+            "target": "model_core_interfaces",
+            "label": "implements Model/StreamedResponse"
+        }
     ],
     "groups": [
         {
             "id": "gemini_interaction",
             "label": "Gemini Interaction",
             "role": "generative",
-            "nodes": ["gemini_model_interface", "gemini_content_processing"]
+            "nodes": [
+                "gemini_model_interface",
+                "gemini_content_processing"
+            ]
         },
         {
             "id": "dependencies",
             "label": "Dependencies",
             "role": "data",
-            "nodes": ["gemini_utility_components", "model_core_interfaces"]
+            "nodes": [
+                "gemini_utility_components",
+                "model_core_interfaces"
+            ]
         }
     ]
 }

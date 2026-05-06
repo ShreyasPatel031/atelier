@@ -17,20 +17,46 @@ The `diff_rendering` module contains the following core components:
 {
     "direction": "TD",
     "nodes": [
-        {"id": "render_number_diff", "label": "Render Number Difference", "type": "component", "link": null},
-        {"id": "render_duration_diff", "label": "Render Duration Difference", "type": "component", "link": null},
-        {"id": "diff_formatters", "label": "Difference Formatting Utilities", "type": "external", "link": "diff_formatters.md"}
+        {
+            "id": "render_number_diff",
+            "label": "Render Number Difference",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "render_duration_diff",
+            "label": "Render Duration Difference",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "diff_formatters",
+            "label": "Difference Formatting Utilities",
+            "type": "external",
+            "link": "diff_formatters.md"
+        }
     ],
     "edges": [
-        {"source": "render_number_diff", "target": "diff_formatters", "label": "uses _render_signed, _render_relative"},
-        {"source": "render_duration_diff", "target": "diff_formatters", "label": "uses _render_duration, _render_relative"}
+        {
+            "source": "render_number_diff",
+            "target": "diff_formatters",
+            "label": "uses _render_signed, _render_relative"
+        },
+        {
+            "source": "render_duration_diff",
+            "target": "diff_formatters",
+            "label": "uses _render_duration, _render_relative"
+        }
     ],
     "groups": [
         {
             "id": "diff_core",
             "label": "Difference Calculation and Formatting",
             "role": "analytical",
-            "nodes": ["render_number_diff", "render_duration_diff"]
+            "nodes": [
+                "render_number_diff",
+                "render_duration_diff"
+            ]
         }
     ]
 }

@@ -35,26 +35,79 @@ The following diagram illustrates the internal workings of the `openrouter_googl
 {
     "direction": "TD",
     "nodes": [
-        {"id": "get_base_google_profile", "label": "Retrieve Base Google Profile", "type": "component", "link": null},
-        {"id": "apply_transformer", "label": "Apply OpenRouter Transformer", "type": "component", "link": null},
-        {"id": "output_profile", "label": "OpenRouter Google Model Profile", "type": "component", "link": null},
-        {"id": "model_profiles", "label": "Model Profile Definitions", "type": "external", "link": "model_profile_definitions.md"},
-        {"id": "openrouter_models", "label": "OpenRouter Model Provider", "type": "external", "link": "model_provider_openrouter.md"}
+        {
+            "id": "get_base_google_profile",
+            "label": "Retrieve Base Google Profile",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "apply_transformer",
+            "label": "Apply OpenRouter Transformer",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "output_profile",
+            "label": "OpenRouter Google Model Profile",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "model_profiles",
+            "label": "Model Profile Definitions",
+            "type": "external",
+            "link": "model_profile_definitions.md"
+        },
+        {
+            "id": "openrouter_models",
+            "label": "OpenRouter Model Provider",
+            "type": "external",
+            "link": "model_provider_openrouter.md"
+        }
     ],
     "edges": [
-        {"source": "get_base_google_profile", "target": "model_profiles", "label": "requests base profile"},
-        {"source": "model_profiles", "target": "get_base_google_profile", "label": "returns base profile"},
-        {"source": "get_base_google_profile", "target": "apply_transformer", "label": "base profile"},
-        {"source": "apply_transformer", "target": "openrouter_models", "label": "uses transformer definition"},
-        {"source": "openrouter_models", "target": "apply_transformer", "label": "provides transformer"},
-        {"source": "apply_transformer", "target": "output_profile", "label": "transformed profile"}
+        {
+            "source": "get_base_google_profile",
+            "target": "model_profiles",
+            "label": "requests base profile"
+        },
+        {
+            "source": "model_profiles",
+            "target": "get_base_google_profile",
+            "label": "returns base profile"
+        },
+        {
+            "source": "get_base_google_profile",
+            "target": "apply_transformer",
+            "label": "base profile"
+        },
+        {
+            "source": "apply_transformer",
+            "target": "openrouter_models",
+            "label": "uses transformer definition"
+        },
+        {
+            "source": "openrouter_models",
+            "target": "apply_transformer",
+            "label": "provides transformer"
+        },
+        {
+            "source": "apply_transformer",
+            "target": "output_profile",
+            "label": "transformed profile"
+        }
     ],
     "groups": [
         {
             "id": "openrouter_profile_generation",
             "label": "OpenRouter Profile Generation",
             "role": "main_process",
-            "nodes": ["get_base_google_profile", "apply_transformer", "output_profile"]
+            "nodes": [
+                "get_base_google_profile",
+                "apply_transformer",
+                "output_profile"
+            ]
         }
     ]
 }

@@ -25,29 +25,101 @@ The `embedding_usage_mapping` module comprises several key components, each resp
 {
     "direction": "TD",
     "nodes": [
-        {"id": "cohere_usage_mapping", "label": "Map Cohere Usage", "type": "module", "link": "cohere_usage_mapping.md"},
-        {"id": "google_usage_mapping", "label": "Map Google Usage", "type": "module", "link": "google_usage_mapping.md"},
-        {"id": "openai_usage_mapping", "label": "Map OpenAI Usage", "type": "module", "link": "openai_usage_mapping.md"},
-        {"id": "voyageai_usage_mapping", "label": "Map VoyageAI Usage", "type": "module", "link": "voyageai_usage_mapping.md"},
-        {"id": "embedding_provider_integrations", "label": "Embedding Providers", "type": "external", "link": "embedding_provider_integrations.md"},
-        {"id": "usage_reporting_system", "label": "Usage Reporting System", "type": "external", "link": "usage.md"}
+        {
+            "id": "embedding_usage_mapping",
+            "label": "Embedding Usage Mapping",
+            "type": "module"
+        },
+        {
+            "id": "cohere_usage_mapping",
+            "label": "Map Cohere Usage",
+            "type": "module",
+            "link": "cohere_usage_mapping.md"
+        },
+        {
+            "id": "google_usage_mapping",
+            "label": "Map Google Usage",
+            "type": "module",
+            "link": "google_usage_mapping.md"
+        },
+        {
+            "id": "openai_usage_mapping",
+            "label": "Map OpenAI Usage",
+            "type": "module",
+            "link": "openai_usage_mapping.md"
+        },
+        {
+            "id": "voyageai_usage_mapping",
+            "label": "Map VoyageAI Usage",
+            "type": "module",
+            "link": "voyageai_usage_mapping.md"
+        },
+        {
+            "id": "embedding_provider_integrations",
+            "label": "Embedding Providers",
+            "type": "external",
+            "link": "embedding_provider_integrations.md"
+        },
+        {
+            "id": "usage_reporting_system",
+            "label": "Usage Reporting System",
+            "type": "external",
+            "link": "usage.md"
+        }
     ],
     "edges": [
-        {"source": "embedding_provider_integrations", "target": "cohere_usage_mapping", "label": "Cohere usage data"},
-        {"source": "embedding_provider_integrations", "target": "google_usage_mapping", "label": "Google usage data"},
-        {"source": "embedding_provider_integrations", "target": "openai_usage_mapping", "label": "OpenAI usage data"},
-        {"source": "embedding_provider_integrations", "target": "voyageai_usage_mapping", "label": "VoyageAI usage data"},
-        {"source": "cohere_usage_mapping", "target": "usage_reporting_system", "label": "Standardized Usage"},
-        {"source": "google_usage_mapping", "target": "usage_reporting_system", "label": "Standardized Usage"},
-        {"source": "openai_usage_mapping", "target": "usage_reporting_system", "label": "Standardized Usage"},
-        {"source": "voyageai_usage_mapping", "target": "usage_reporting_system", "label": "Standardized Usage"}
+        {
+            "source": "embedding_provider_integrations",
+            "target": "cohere_usage_mapping",
+            "label": "Cohere usage data"
+        },
+        {
+            "source": "embedding_provider_integrations",
+            "target": "google_usage_mapping",
+            "label": "Google usage data"
+        },
+        {
+            "source": "embedding_provider_integrations",
+            "target": "openai_usage_mapping",
+            "label": "OpenAI usage data"
+        },
+        {
+            "source": "embedding_provider_integrations",
+            "target": "voyageai_usage_mapping",
+            "label": "VoyageAI usage data"
+        },
+        {
+            "source": "cohere_usage_mapping",
+            "target": "usage_reporting_system",
+            "label": "Standardized Usage"
+        },
+        {
+            "source": "google_usage_mapping",
+            "target": "usage_reporting_system",
+            "label": "Standardized Usage"
+        },
+        {
+            "source": "openai_usage_mapping",
+            "target": "usage_reporting_system",
+            "label": "Standardized Usage"
+        },
+        {
+            "source": "voyageai_usage_mapping",
+            "target": "usage_reporting_system",
+            "label": "Standardized Usage"
+        }
     ],
     "groups": [
         {
             "id": "mapping_functions",
             "label": "Usage Mapping Functions",
             "role": "generative",
-            "nodes": ["cohere_usage_mapping", "google_usage_mapping", "openai_usage_mapping", "voyageai_usage_mapping"]
+            "nodes": [
+                "cohere_usage_mapping",
+                "google_usage_mapping",
+                "openai_usage_mapping",
+                "voyageai_usage_mapping"
+            ]
         }
     ]
 }

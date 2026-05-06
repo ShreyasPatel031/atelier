@@ -17,18 +17,40 @@ These sub-modules work together to provide a robust and flexible framework for d
 {
     "direction": "TD",
     "nodes": [
-        {"id": "base_evaluator", "label": "Base Evaluator Logic", "type": "module", "link": "base_evaluator.md"},
-        {"id": "evaluator_interface", "label": "Core Evaluator Interface", "type": "module", "link": "evaluator_interface.md"}
+        {
+            "id": "base_evaluator_interfaces",
+            "label": "Base Evaluator Interfaces",
+            "type": "module"
+        },
+        {
+            "id": "base_evaluator",
+            "label": "Base Evaluator Logic",
+            "type": "module",
+            "link": "base_evaluator.md"
+        },
+        {
+            "id": "evaluator_interface",
+            "label": "Core Evaluator Interface",
+            "type": "module",
+            "link": "evaluator_interface.md"
+        }
     ],
     "edges": [
-        {"source": "evaluator_interface", "target": "base_evaluator", "label": "inherits from"}
+        {
+            "source": "evaluator_interface",
+            "target": "base_evaluator",
+            "label": "inherits from"
+        }
     ],
     "groups": [
         {
             "id": "evaluator_foundations",
             "label": "Evaluator Foundations",
             "role": "analytical",
-            "nodes": ["base_evaluator", "evaluator_interface"]
+            "nodes": [
+                "base_evaluator",
+                "evaluator_interface"
+            ]
         }
     ]
 }

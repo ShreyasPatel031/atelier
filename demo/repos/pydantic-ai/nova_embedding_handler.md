@@ -41,29 +41,96 @@ The overall flow involves:
 {
     "direction": "TD",
     "nodes": [
-        {"id": "nova_handler", "label": "Nova Embedding Handler (pydantic_ai_slim.pydantic_ai.embeddings.bedrock._NovaEmbeddingHandler)", "type": "component", "link": null},
-        {"id": "prepare_request", "label": "Prepare Nova Request", "type": "component", "link": null},
-        {"id": "parse_response", "label": "Parse Nova Response", "type": "component", "link": null},
-        {"id": "bedrock_handler_base", "label": "Bedrock Embedding Handler Base", "type": "external", "link": "bedrock_embedding_handlers.md"},
-        {"id": "embedder", "label": "Embedder Core", "type": "external", "link": "embedding_core.md"},
-        {"id": "embedding_model", "label": "Base Embedding Model Interface", "type": "external", "link": "embedding_core.md"},
-        {"id": "bedrock_api", "label": "Amazon Bedrock API", "type": "external", "link": "model_provider_configurations.md"}
+        {
+            "id": "nova_handler",
+            "label": "Nova Embedding Handler (pydantic_ai_slim.pydantic_ai.embeddings.bedrock._NovaEmbeddingHandler)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "prepare_request",
+            "label": "Prepare Nova Request",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "parse_response",
+            "label": "Parse Nova Response",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "bedrock_handler_base",
+            "label": "Bedrock Embedding Handler Base",
+            "type": "external",
+            "link": "bedrock_embedding_handlers.md"
+        },
+        {
+            "id": "embedder",
+            "label": "Embedder Core",
+            "type": "external",
+            "link": "embedding_core.md"
+        },
+        {
+            "id": "embedding_model",
+            "label": "Base Embedding Model Interface",
+            "type": "external",
+            "link": "embedding_core.md"
+        },
+        {
+            "id": "bedrock_api",
+            "label": "Amazon Bedrock API",
+            "type": "external",
+            "link": "model_provider_configurations.md"
+        }
     ],
     "edges": [
-        {"source": "bedrock_handler_base", "target": "nova_handler", "label": "extends"},
-        {"source": "embedder", "target": "nova_handler", "label": "uses"},
-        {"source": "nova_handler", "target": "embedding_model", "label": "implements"},
-        {"source": "nova_handler", "target": "prepare_request", "label": "orchestrates"},
-        {"source": "prepare_request", "target": "bedrock_api", "label": "sends formatted request"},
-        {"source": "bedrock_api", "target": "parse_response", "label": "returns raw response"},
-        {"source": "parse_response", "target": "nova_handler", "label": "returns embeddings"}
+        {
+            "source": "bedrock_handler_base",
+            "target": "nova_handler",
+            "label": "extends"
+        },
+        {
+            "source": "embedder",
+            "target": "nova_handler",
+            "label": "uses"
+        },
+        {
+            "source": "nova_handler",
+            "target": "embedding_model",
+            "label": "implements"
+        },
+        {
+            "source": "nova_handler",
+            "target": "prepare_request",
+            "label": "orchestrates"
+        },
+        {
+            "source": "prepare_request",
+            "target": "bedrock_api",
+            "label": "sends formatted request"
+        },
+        {
+            "source": "bedrock_api",
+            "target": "parse_response",
+            "label": "returns raw response"
+        },
+        {
+            "source": "parse_response",
+            "target": "nova_handler",
+            "label": "returns embeddings"
+        }
     ],
     "groups": [
         {
             "id": "nova_embedding_process",
             "label": "Nova Embedding Workflow",
             "role": "system",
-            "nodes": ["nova_handler", "prepare_request", "parse_response"]
+            "nodes": [
+                "nova_handler",
+                "prepare_request",
+                "parse_response"
+            ]
         }
     ]
 }

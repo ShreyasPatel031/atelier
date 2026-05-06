@@ -5,13 +5,42 @@ This module offers advanced prediction strategies, including an agentic framewor
 {
     "direction": "TD",
     "nodes": [
-        {"id": "avatar_agent", "label": "Avatar Agent", "type": "module", "link": "avatar_agent.md"},
-        {"id": "multi_chain_consensus", "label": "Multi-Chain Consensus", "type": "module", "link": "multi_chain_consensus.md"}
+        {
+            "id": "advanced_prediction",
+            "label": "Advanced Prediction Strategies",
+            "type": "module"
+        },
+        {
+            "id": "avatar_agent",
+            "label": "Avatar Agent",
+            "type": "module",
+            "link": "avatar_agent.md"
+        },
+        {
+            "id": "multi_chain_consensus",
+            "label": "Multi-Chain Consensus",
+            "type": "module",
+            "link": "multi_chain_consensus.md"
+        }
     ],
     "edges": [],
     "groups": [
-        {"id": "agentic_framework", "label": "Agentic Framework", "role": "generative", "nodes": ["avatar_agent"]},
-        {"id": "comparison_strategies", "label": "Comparison Strategies", "role": "analytical", "nodes": ["multi_chain_consensus"]}
+        {
+            "id": "agentic_framework",
+            "label": "Agentic Framework",
+            "role": "generative",
+            "nodes": [
+                "avatar_agent"
+            ]
+        },
+        {
+            "id": "comparison_strategies",
+            "label": "Comparison Strategies",
+            "role": "analytical",
+            "nodes": [
+                "multi_chain_consensus"
+            ]
+        }
     ]
 }
 -->

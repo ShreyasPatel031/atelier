@@ -8,7 +8,6 @@ const fs = require('fs');
 const path = require('path');
 const ELK = require('elkjs');
 const { repairDiagramIR } = require('../pipeline-ir-repair.js');
-require('../elk-node-dimensions.js');
 const {
     diagramToElkInput,
     validateElkEdgePlacement,
@@ -53,7 +52,9 @@ async function layoutOne(elkGraph, meta) {
 
 async function main() {
     const reposDir = path.join(__dirname, '..', 'repos');
+    const repoFilter = process.env.ELK_VALIDATE_REPO;
     const repoNames = fs.readdirSync(reposDir).filter((n) => {
+        if (repoFilter && n !== repoFilter) return false;
         const p = path.join(reposDir, n, 'module_tree.json');
         return fs.existsSync(p);
     });

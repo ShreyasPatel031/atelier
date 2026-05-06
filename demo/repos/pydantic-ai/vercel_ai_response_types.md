@@ -12,28 +12,71 @@ This module is a core component of the Vercel AI UI integration, residing within
 {
     "direction": "TD",
     "nodes": [
-        {"id": "vercel_ai_integration_adapter", "label": "Vercel AI Adapter", "type": "module", "link": "vercel_ai_integration_adapter.md"},
-        {"id": "source_chunks", "label": "Source Information Chunks", "type": "module", "link": "source_chunks.md"},
-        {"id": "control_chunks", "label": "Control and Metadata Chunks", "type": "module", "link": "control_chunks.md"},
-        {"id": "dynamic_data_chunk", "label": "Dynamic Data Chunk", "type": "module", "link": "dynamic_data_chunk.md"}
+        {
+            "id": "vercel_ai_response_types",
+            "label": "Vercel AI Response Definitions",
+            "type": "module"
+        },
+        {
+            "id": "vercel_ai_integration_adapter",
+            "label": "Vercel AI Adapter",
+            "type": "module",
+            "link": "vercel_ai_integration_adapter.md"
+        },
+        {
+            "id": "source_chunks",
+            "label": "Source Information Chunks",
+            "type": "module",
+            "link": "source_chunks.md"
+        },
+        {
+            "id": "control_chunks",
+            "label": "Control and Metadata Chunks",
+            "type": "module",
+            "link": "control_chunks.md"
+        },
+        {
+            "id": "dynamic_data_chunk",
+            "label": "Dynamic Data Chunk",
+            "type": "module",
+            "link": "dynamic_data_chunk.md"
+        }
     ],
     "edges": [
-        {"source": "vercel_ai_integration_adapter", "target": "source_chunks", "label": "sends sources"},
-        {"source": "vercel_ai_integration_adapter", "target": "control_chunks", "label": "sends control signals"},
-        {"source": "vercel_ai_integration_adapter", "target": "dynamic_data_chunk", "label": "sends arbitrary data"}
+        {
+            "source": "vercel_ai_integration_adapter",
+            "target": "source_chunks",
+            "label": "sends sources"
+        },
+        {
+            "source": "vercel_ai_integration_adapter",
+            "target": "control_chunks",
+            "label": "sends control signals"
+        },
+        {
+            "source": "vercel_ai_integration_adapter",
+            "target": "dynamic_data_chunk",
+            "label": "sends arbitrary data"
+        }
     ],
     "groups": [
         {
             "id": "integration",
             "label": "Vercel AI Integration",
             "role": "surface",
-            "nodes": ["vercel_ai_integration_adapter"]
+            "nodes": [
+                "vercel_ai_integration_adapter"
+            ]
         },
         {
             "id": "response_formats",
             "label": "Response Formats",
             "role": "data",
-            "nodes": ["source_chunks", "control_chunks", "dynamic_data_chunk"]
+            "nodes": [
+                "source_chunks",
+                "control_chunks",
+                "dynamic_data_chunk"
+            ]
         }
     ]
 }

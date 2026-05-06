@@ -3,59 +3,59 @@ This module offers components for optimizing and refining instructions given to 
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "BasicGenerateInstruction",
-      "label": "BasicGenerateInstruction",
-      "type": "Signature"
-    },
-    {
-      "id": "GenerateInstructionGivenAttempts",
-      "label": "GenerateInstructionGivenAttempts",
-      "type": "Signature"
-    },
-    {
-      "id": "MultiModalInstructionProposer",
-      "label": "MultiModalInstructionProposer",
-      "type": "ProposalFn"
-    },
-    {
-      "id": "GenerateEnhancedMultimodalInstructionFromFeedback",
-      "label": "GenerateEnhancedMultimodalInstructionFromFeedback",
-      "type": "Signature"
-    },
-    {
-      "id": "CustomRulesInduction",
-      "label": "CustomRulesInduction",
-      "type": "Signature"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "InstructionOptimization",
-      "label": "Instruction Optimization (CoproOptimizer)",
-      "nodes": [
-        "BasicGenerateInstruction",
-        "GenerateInstructionGivenAttempts"
-      ]
-    },
-    {
-      "id": "MultimodalInstructionProposal",
-      "label": "Multimodal Instruction Proposal (GEPA)",
-      "nodes": [
-        "MultiModalInstructionProposer",
-        "GenerateEnhancedMultimodalInstructionFromFeedback"
-      ]
-    },
-    {
-      "id": "RuleInduction",
-      "label": "Rule Induction",
-      "nodes": [
-        "CustomRulesInduction"
-      ]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "BasicGenerateInstruction",
+            "label": "BasicGenerateInstruction",
+            "type": "Signature"
+        },
+        {
+            "id": "GenerateInstructionGivenAttempts",
+            "label": "GenerateInstructionGivenAttempts",
+            "type": "Signature"
+        },
+        {
+            "id": "MultiModalInstructionProposer",
+            "label": "MultiModalInstructionProposer",
+            "type": "ProposalFn"
+        },
+        {
+            "id": "GenerateEnhancedMultimodalInstructionFromFeedback",
+            "label": "GenerateEnhancedMultimodalInstructionFromFeedback",
+            "type": "Signature"
+        },
+        {
+            "id": "CustomRulesInduction",
+            "label": "CustomRulesInduction",
+            "type": "Signature"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "InstructionOptimization",
+            "label": "Instruction Optimization (CoproOptimizer)",
+            "nodes": [
+                "BasicGenerateInstruction",
+                "GenerateInstructionGivenAttempts"
+            ]
+        },
+        {
+            "id": "MultimodalInstructionProposal",
+            "label": "Multimodal Instruction Proposal (GEPA)",
+            "nodes": [
+                "MultiModalInstructionProposer",
+                "GenerateEnhancedMultimodalInstructionFromFeedback"
+            ]
+        },
+        {
+            "id": "RuleInduction",
+            "label": "Rule Induction",
+            "nodes": [
+                "CustomRulesInduction"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

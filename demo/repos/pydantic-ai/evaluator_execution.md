@@ -12,36 +12,100 @@ The `evaluator_execution` module acts as an intermediary, receiving evaluation t
 {
     "direction": "TD",
     "nodes": [
-        {"id": "online_system", "label": "Online Evaluation System", "type": "module", "link": "online_evaluation_system.md"},
-        {"id": "eval_orchestration", "label": "Evaluation Orchestration", "type": "module", "link": "evaluation_orchestration.md"},
-        {"id": "eval_dispatcher", "label": "Evaluation Dispatcher", "type": "module", "link": "evaluation_dispatcher.md"},
-        {"id": "eval_core", "label": "Evaluator Core", "type": "module", "link": "evaluator_core.md"},
-        {"id": "result_sink", "label": "Result Sinking", "type": "module", "link": "result_sinking.md"}
+        {
+            "id": "evaluator_execution",
+            "label": "Evaluator Execution",
+            "type": "module"
+        },
+        {
+            "id": "online_system",
+            "label": "Online Evaluation System",
+            "type": "module",
+            "link": "online_evaluation_system.md"
+        },
+        {
+            "id": "eval_orchestration",
+            "label": "Evaluation Orchestration",
+            "type": "module",
+            "link": "evaluation_orchestration.md"
+        },
+        {
+            "id": "eval_dispatcher",
+            "label": "Evaluation Dispatcher",
+            "type": "module",
+            "link": "evaluation_dispatcher.md"
+        },
+        {
+            "id": "eval_core",
+            "label": "Evaluator Core",
+            "type": "module",
+            "link": "evaluator_core.md"
+        },
+        {
+            "id": "result_sink",
+            "label": "Result Sinking",
+            "type": "module",
+            "link": "result_sinking.md"
+        },
+        {
+            "id": "evaluation_dispatcher",
+            "label": "Evaluation Dispatcher",
+            "type": "module",
+            "link": "evaluation_dispatcher.md"
+        }
     ],
     "edges": [
-        {"source": "online_system", "target": "eval_orchestration", "label": "orchestrates"},
-        {"source": "eval_orchestration", "target": "eval_dispatcher", "label": "dispatches task"},
-        {"source": "eval_dispatcher", "target": "eval_core", "label": "calls evaluator logic"},
-        {"source": "eval_dispatcher", "target": "result_sink", "label": "submits results"}
+        {
+            "source": "online_system",
+            "target": "eval_orchestration",
+            "label": "orchestrates"
+        },
+        {
+            "source": "eval_orchestration",
+            "target": "eval_dispatcher",
+            "label": "dispatches task"
+        },
+        {
+            "source": "eval_dispatcher",
+            "target": "eval_core",
+            "label": "calls evaluator logic"
+        },
+        {
+            "source": "eval_dispatcher",
+            "target": "result_sink",
+            "label": "submits results"
+        },
+        {
+            "source": "evaluator_execution",
+            "target": "evaluation_dispatcher"
+        }
     ],
     "groups": [
         {
             "id": "orchestration_layer",
             "label": "Orchestration Layer",
             "role": "surface",
-            "nodes": ["online_system", "eval_orchestration"]
+            "nodes": [
+                "online_system",
+                "eval_orchestration"
+            ]
         },
         {
             "id": "execution_layer",
             "label": "Execution Layer",
             "role": "generative",
-            "nodes": ["eval_dispatcher", "eval_core"]
+            "nodes": [
+                "eval_dispatcher",
+                "eval_core"
+            ]
         },
         {
             "id": "data_output",
             "label": "Data Output",
             "role": "data",
-            "nodes": ["result_sink"]
+            "nodes": [
+                "result_sink"
+            ]
         }
     ]
 }

@@ -12,7 +12,17 @@ The module is structured around a core sub-module that provides these formatting
 {
     "direction": "TD",
     "nodes": [
-        {"id": "diff_formatters", "label": "Format Differences", "type": "module", "link": "diff_formatters.md"}
+        {
+            "id": "difference_rendering",
+            "label": "Difference Rendering",
+            "type": "module"
+        },
+        {
+            "id": "diff_formatters",
+            "label": "Format Differences",
+            "type": "module",
+            "link": "diff_formatters.md"
+        }
     ],
     "edges": [],
     "groups": [
@@ -20,7 +30,9 @@ The module is structured around a core sub-module that provides these formatting
             "id": "rendering_logic",
             "label": "Rendering Logic",
             "role": "analytical",
-            "nodes": ["diff_formatters"]
+            "nodes": [
+                "diff_formatters"
+            ]
         }
     ]
 }

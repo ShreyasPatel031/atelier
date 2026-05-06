@@ -12,24 +12,47 @@ The `data_content_evaluators` module is designed to integrate seamlessly with th
 {
     "direction": "TD",
     "nodes": [
-        {"id": "evaluator_core", "label": "Evaluator Core (External)", "type": "external", "link": "evaluator_core.md"},
-        {"id": "common_content_checks", "label": "Common Content Checks", "type": "module", "link": "common_content_checks.md"}
+        {
+            "id": "data_content_evaluators",
+            "label": "Data Content and Type Evaluation",
+            "type": "module"
+        },
+        {
+            "id": "evaluator_core",
+            "label": "Evaluator Core (External)",
+            "type": "external",
+            "link": "evaluator_core.md"
+        },
+        {
+            "id": "common_content_checks",
+            "label": "Common Content Checks",
+            "type": "module",
+            "link": "common_content_checks.md"
+        }
     ],
     "edges": [
-        {"source": "common_content_checks", "target": "evaluator_core", "label": "extends/uses"}
+        {
+            "source": "common_content_checks",
+            "target": "evaluator_core",
+            "label": "extends/uses"
+        }
     ],
     "groups": [
         {
             "id": "content_evaluation",
             "label": "Content Evaluation Logic",
             "role": "generative",
-            "nodes": ["common_content_checks"]
+            "nodes": [
+                "common_content_checks"
+            ]
         },
         {
             "id": "framework",
             "label": "Evaluation Framework",
             "role": "analytical",
-            "nodes": ["evaluator_core"]
+            "nodes": [
+                "evaluator_core"
+            ]
         }
     ]
 }

@@ -10,7 +10,17 @@ This module focuses on transforming raw HTML content from documentation pages in
 {
     "direction": "TD",
     "nodes": [
-        {"id": "algolia_indexing", "label": "Process & Index Documentation", "type": "module", "link": "algolia_indexing.md"}
+        {
+            "id": "search_and_indexing",
+            "label": "Search and Indexing",
+            "type": "module"
+        },
+        {
+            "id": "algolia_indexing",
+            "label": "Process & Index Documentation",
+            "type": "module",
+            "link": "algolia_indexing.md"
+        }
     ],
     "edges": [],
     "groups": [
@@ -18,7 +28,9 @@ This module focuses on transforming raw HTML content from documentation pages in
             "id": "indexing_pipeline",
             "label": "Indexing Pipeline",
             "role": "data",
-            "nodes": ["algolia_indexing"]
+            "nodes": [
+                "algolia_indexing"
+            ]
         }
     ]
 }

@@ -25,29 +25,97 @@ The `LLMJudge` component orchestrates the entire evaluation flow by:
 {
     "direction": "TD",
     "nodes": [
-        {"id": "LLMJudge_component", "label": "LLMJudge Evaluator Class", "type": "component", "link": null},
-        {"id": "determine_judge_strategy", "label": "Determine Judging Strategy", "type": "component", "link": null},
-        {"id": "format_evaluation_output", "label": "Format Evaluation Output", "type": "component", "link": null},
-        {"id": "EvaluatorCore_Module", "label": "Evaluator Core Module", "type": "external", "link": "evaluator_core.md"},
-        {"id": "LLMAsAJudge_Module", "label": "LLM as a Judge Functions", "type": "external", "link": "llm_as_a_judge.md"},
-        {"id": "ModelCoreInterfaces_Module", "label": "Model Core Interfaces", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "ModelProviderConfigs_Module", "label": "Model Provider Configurations", "type": "external", "link": "model_provider_configurations.md"}
+        {
+            "id": "LLMJudge_component",
+            "label": "LLMJudge Evaluator Class",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "determine_judge_strategy",
+            "label": "Determine Judging Strategy",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "format_evaluation_output",
+            "label": "Format Evaluation Output",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "EvaluatorCore_Module",
+            "label": "Evaluator Core Module",
+            "type": "external",
+            "link": "evaluator_core.md"
+        },
+        {
+            "id": "LLMAsAJudge_Module",
+            "label": "LLM as a Judge Functions",
+            "type": "external",
+            "link": "llm_as_a_judge.md"
+        },
+        {
+            "id": "ModelCoreInterfaces_Module",
+            "label": "Model Core Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "ModelProviderConfigs_Module",
+            "label": "Model Provider Configurations",
+            "type": "external",
+            "link": "model_provider_configurations.md"
+        }
     ],
     "edges": [
-        {"source": "EvaluatorCore_Module", "target": "LLMJudge_component", "label": "defines base types"},
-        {"source": "LLMJudge_component", "target": "determine_judge_strategy", "label": "configures evaluation"},
-        {"source": "determine_judge_strategy", "target": "LLMAsAJudge_Module", "label": "invokes judge function"},
-        {"source": "LLMAsAJudge_Module", "target": "format_evaluation_output", "label": "returns raw grading"},
-        {"source": "format_evaluation_output", "target": "LLMJudge_component", "label": "generates final output"},
-        {"source": "LLMJudge_component", "target": "ModelCoreInterfaces_Module", "label": "references model definitions", "line_type": "-.->"},
-        {"source": "LLMJudge_component", "target": "ModelProviderConfigs_Module", "label": "accesses model settings", "line_type": "-.->"}
+        {
+            "source": "EvaluatorCore_Module",
+            "target": "LLMJudge_component",
+            "label": "defines base types"
+        },
+        {
+            "source": "LLMJudge_component",
+            "target": "determine_judge_strategy",
+            "label": "configures evaluation"
+        },
+        {
+            "source": "determine_judge_strategy",
+            "target": "LLMAsAJudge_Module",
+            "label": "invokes judge function"
+        },
+        {
+            "source": "LLMAsAJudge_Module",
+            "target": "format_evaluation_output",
+            "label": "returns raw grading"
+        },
+        {
+            "source": "format_evaluation_output",
+            "target": "LLMJudge_component",
+            "label": "generates final output"
+        },
+        {
+            "source": "LLMJudge_component",
+            "target": "ModelCoreInterfaces_Module",
+            "label": "references model definitions",
+            "line_type": "-.->"
+        },
+        {
+            "source": "LLMJudge_component",
+            "target": "ModelProviderConfigs_Module",
+            "label": "accesses model settings",
+            "line_type": "-.->"
+        }
     ],
     "groups": [
         {
             "id": "llm_judge_internal_logic",
             "label": "LLMJudge Internal Logic",
             "role": "control",
-            "nodes": ["determine_judge_strategy", "format_evaluation_output"]
+            "nodes": [
+                "determine_judge_strategy",
+                "format_evaluation_output"
+            ]
         }
     ]
 }

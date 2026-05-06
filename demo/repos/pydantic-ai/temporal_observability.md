@@ -19,15 +19,47 @@ The `temporal_observability` module centers around configuring an observability 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "setup_logfire", "label": "Initialize Logfire for Observability", "type": "component", "link": null},
-        {"id": "logfire_lib", "label": "Logfire Library", "type": "external", "link": null},
-        {"id": "temporal_agent_orchestration", "label": "Temporal Agent Orchestration", "type": "external", "link": "temporal_agent_orchestration.md"},
-        {"id": "pydantic_ai_agent_core", "label": "Pydantic AI Agent Core", "type": "external", "link": "pydantic_ai_agent_core.md"}
+        {
+            "id": "setup_logfire",
+            "label": "Initialize Logfire for Observability",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "logfire_lib",
+            "label": "Logfire Library",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "temporal_agent_orchestration",
+            "label": "Temporal Agent Orchestration",
+            "type": "external",
+            "link": "temporal_agent_orchestration.md"
+        },
+        {
+            "id": "pydantic_ai_agent_core",
+            "label": "Pydantic AI Agent Core",
+            "type": "external",
+            "link": "pydantic_ai_agent_core.md"
+        }
     ],
     "edges": [
-        {"source": "setup_logfire", "target": "logfire_lib", "label": "initializes"},
-        {"source": "setup_logfire", "target": "pydantic_ai_agent_core", "label": "instruments operations"},
-        {"source": "temporal_agent_orchestration", "target": "setup_logfire", "label": "uses for observability"}
+        {
+            "source": "setup_logfire",
+            "target": "logfire_lib",
+            "label": "initializes"
+        },
+        {
+            "source": "setup_logfire",
+            "target": "pydantic_ai_agent_core",
+            "label": "instruments operations"
+        },
+        {
+            "source": "temporal_agent_orchestration",
+            "target": "setup_logfire",
+            "label": "uses for observability"
+        }
     ],
     "groups": []
 }

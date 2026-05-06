@@ -26,15 +26,48 @@ This module plays a vital role in the `embedding_provider_integrations` ecosyste
 {
     "direction": "TD",
     "nodes": [
-        {"id": "map_cohere_usage", "label": "Map Cohere Usage Data", "type": "component", "link": null},
-        {"id": "cohere_embed_response", "label": "Cohere Embeddings Response", "type": "external", "link": null},
-        {"id": "request_usage", "label": "Standardized Request Usage", "type": "external", "link": "usage.md"},
-        {"id": "cohere_provider", "label": "Cohere Provider", "type": "external", "link": "cohere_provider.md"}
+        {
+            "id": "map_cohere_usage",
+            "label": "Map Cohere Usage Data",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "cohere_embed_response",
+            "label": "Cohere Embeddings Response",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "request_usage",
+            "label": "Standardized Request Usage",
+            "type": "external",
+            "link": "usage.md"
+        },
+        {
+            "id": "cohere_provider",
+            "label": "Cohere Provider",
+            "type": "external",
+            "link": "cohere_provider.md"
+        }
     ],
     "edges": [
-        {"source": "cohere_embed_response", "target": "map_cohere_usage", "label": "contains usage metrics"},
-        {"source": "map_cohere_usage", "target": "request_usage", "label": "produces"},
-        {"source": "map_cohere_usage", "target": "cohere_provider", "label": "references provider context", "type": "dotted"}
+        {
+            "source": "cohere_embed_response",
+            "target": "map_cohere_usage",
+            "label": "contains usage metrics"
+        },
+        {
+            "source": "map_cohere_usage",
+            "target": "request_usage",
+            "label": "produces"
+        },
+        {
+            "source": "map_cohere_usage",
+            "target": "cohere_provider",
+            "label": "references provider context",
+            "type": "dotted"
+        }
     ],
     "groups": []
 }

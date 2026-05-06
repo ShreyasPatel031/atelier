@@ -12,28 +12,69 @@ The `tool_execution_logic` module operates as a core part of the [agent executio
 {
     "direction": "TD",
     "nodes": [
-        {"id": "agent_execution_graph", "label": "Agent Execution Graph", "type": "external", "link": "agent_execution_graph.md"},
-        {"id": "tool_execution_handlers", "label": "Tool Execution Handlers", "type": "module", "link": "tool_execution_handlers.md"},
-        {"id": "toolset_management", "label": "Toolset Management", "type": "external", "link": "toolset_management.md"}
+        {
+            "id": "tool_execution_logic",
+            "label": "Tool Execution Logic",
+            "type": "module"
+        },
+        {
+            "id": "agent_execution_graph",
+            "label": "Agent Execution Graph",
+            "type": "external",
+            "link": "agent_execution_graph.md"
+        },
+        {
+            "id": "tool_execution_handlers",
+            "label": "Tool Execution Handlers",
+            "type": "module",
+            "link": "tool_execution_handlers.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management",
+            "type": "external",
+            "link": "toolset_management.md"
+        }
     ],
     "edges": [
-        {"source": "agent_execution_graph", "target": "tool_execution_handlers", "label": "initiates tool call"},
-        {"source": "tool_execution_handlers", "target": "toolset_management", "label": "executes tool"},
-        {"source": "toolset_management", "target": "tool_execution_handlers", "label": "tool result/status"},
-        {"source": "tool_execution_handlers", "target": "agent_execution_graph", "label": "returns outcome"}
+        {
+            "source": "agent_execution_graph",
+            "target": "tool_execution_handlers",
+            "label": "initiates tool call"
+        },
+        {
+            "source": "tool_execution_handlers",
+            "target": "toolset_management",
+            "label": "executes tool"
+        },
+        {
+            "source": "toolset_management",
+            "target": "tool_execution_handlers",
+            "label": "tool result/status"
+        },
+        {
+            "source": "tool_execution_handlers",
+            "target": "agent_execution_graph",
+            "label": "returns outcome"
+        }
     ],
     "groups": [
         {
             "id": "core_logic",
             "label": "Core Execution Logic",
             "role": "generative",
-            "nodes": ["tool_execution_handlers"]
+            "nodes": [
+                "tool_execution_handlers"
+            ]
         },
         {
             "id": "dependencies",
             "label": "External Dependencies",
             "role": "analytical",
-            "nodes": ["agent_execution_graph", "toolset_management"]
+            "nodes": [
+                "agent_execution_graph",
+                "toolset_management"
+            ]
         }
     ]
 }

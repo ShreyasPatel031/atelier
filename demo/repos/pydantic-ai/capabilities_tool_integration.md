@@ -32,29 +32,76 @@ This sub-module offers a powerful mechanism to dynamically manipulate tool defin
 {
     "direction": "TD",
     "nodes": [
-        {"id": "builtin_tool_handling", "label": "Built-in Tool Handling", "type": "module", "link": "builtin_tool_handling.md"},
-        {"id": "tool_preparation_and_filtering", "label": "Tool Preparation and Filtering", "type": "module", "link": "tool_preparation_and_filtering.md"},
-        {"id": "capabilities_base_node", "label": "Capabilities Base", "type": "external", "link": "capabilities_base.md"},
-        {"id": "toolset_management_node", "label": "Toolset Management", "type": "external", "link": "toolset_management.md"}
+        {
+            "id": "capabilities_tool_integration",
+            "label": "Capabilities Tool Integration",
+            "type": "module"
+        },
+        {
+            "id": "builtin_tool_handling",
+            "label": "Built-in Tool Handling",
+            "type": "module",
+            "link": "builtin_tool_handling.md"
+        },
+        {
+            "id": "tool_preparation_and_filtering",
+            "label": "Tool Preparation and Filtering",
+            "type": "module",
+            "link": "tool_preparation_and_filtering.md"
+        },
+        {
+            "id": "capabilities_base_node",
+            "label": "Capabilities Base",
+            "type": "external",
+            "link": "capabilities_base.md"
+        },
+        {
+            "id": "toolset_management_node",
+            "label": "Toolset Management",
+            "type": "external",
+            "link": "toolset_management.md"
+        }
     ],
     "edges": [
-        {"source": "capabilities_base_node", "target": "builtin_tool_handling", "label": "configures capability"},
-        {"source": "capabilities_base_node", "target": "tool_preparation_and_filtering", "label": "applies capability"},
-        {"source": "builtin_tool_handling", "target": "toolset_management_node", "label": "provides toolset"},
-        {"source": "tool_preparation_and_filtering", "target": "toolset_management_node", "label": "modifies toolset"}
+        {
+            "source": "capabilities_base_node",
+            "target": "builtin_tool_handling",
+            "label": "configures capability"
+        },
+        {
+            "source": "capabilities_base_node",
+            "target": "tool_preparation_and_filtering",
+            "label": "applies capability"
+        },
+        {
+            "source": "builtin_tool_handling",
+            "target": "toolset_management_node",
+            "label": "provides toolset"
+        },
+        {
+            "source": "tool_preparation_and_filtering",
+            "target": "toolset_management_node",
+            "label": "modifies toolset"
+        }
     ],
     "groups": [
         {
             "id": "capabilities_integration",
             "label": "Capabilities Integration",
             "role": "generative",
-            "nodes": ["builtin_tool_handling", "tool_preparation_and_filtering"]
+            "nodes": [
+                "builtin_tool_handling",
+                "tool_preparation_and_filtering"
+            ]
         },
         {
             "id": "external_dependencies",
             "label": "External Dependencies",
             "role": "data",
-            "nodes": ["capabilities_base_node", "toolset_management_node"]
+            "nodes": [
+                "capabilities_base_node",
+                "toolset_management_node"
+            ]
         }
     ]
 }

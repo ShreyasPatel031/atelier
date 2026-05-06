@@ -5,16 +5,53 @@ This module encapsulates core machine learning backend functionalities, includin
 {
     "direction": "TD",
     "nodes": [
-        {"id": "kv_cache_management", "label": "KV Cache Management", "type": "module", "link": "kv_cache_management.md"},
-        {"id": "tensor_operations", "label": "Tensor Operations (GGML)", "type": "module", "link": "tensor_operations.md"},
-        {"id": "ml_utilities_and_sync", "label": "ML Utilities and Sync", "type": "module", "link": "ml_utilities_and_sync.md"}
+        {
+            "id": "ml_backends_and_ops",
+            "label": "ML Backends and Operations",
+            "type": "module"
+        },
+        {
+            "id": "kv_cache_management",
+            "label": "KV Cache Management",
+            "type": "module",
+            "link": "kv_cache_management.md"
+        },
+        {
+            "id": "tensor_operations",
+            "label": "Tensor Operations (GGML)",
+            "type": "module",
+            "link": "tensor_operations.md"
+        },
+        {
+            "id": "ml_utilities_and_sync",
+            "label": "ML Utilities and Sync",
+            "type": "module",
+            "link": "ml_utilities_and_sync.md"
+        }
     ],
     "edges": [
-        {"source": "tensor_operations", "target": "kv_cache_management", "label": "manages data for"},
-        {"source": "ml_utilities_and_sync", "target": "tensor_operations", "label": "utilizes"}
+        {
+            "source": "tensor_operations",
+            "target": "kv_cache_management",
+            "label": "manages data for"
+        },
+        {
+            "source": "ml_utilities_and_sync",
+            "target": "tensor_operations",
+            "label": "utilizes"
+        }
     ],
     "groups": [
-        {"id": "ml_processing", "label": "ML Processing Core", "role": "analytical", "nodes": ["kv_cache_management", "tensor_operations", "ml_utilities_and_sync"]}
+        {
+            "id": "ml_processing",
+            "label": "ML Processing Core",
+            "role": "analytical",
+            "nodes": [
+                "kv_cache_management",
+                "tensor_operations",
+                "ml_utilities_and_sync"
+            ]
+        }
     ]
 }
 -->

@@ -10,18 +10,39 @@ This module is designed to offer foundational utilities that support more comple
 {
     "direction": "TD",
     "nodes": [
-        {"id": "type_introspection", "label": "Type Introspection", "type": "module", "link": "type_introspection.md"},
-        {"id": "agent_utilities", "label": "Agent Utilities", "type": "external", "link": "agent_utilities.md"}
+        {
+            "id": "type_and_schema_utilities",
+            "label": "Type and Schema Utilities",
+            "type": "module"
+        },
+        {
+            "id": "type_introspection",
+            "label": "Type Introspection",
+            "type": "module",
+            "link": "type_introspection.md"
+        },
+        {
+            "id": "agent_utilities",
+            "label": "Agent Utilities",
+            "type": "external",
+            "link": "agent_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "type_introspection", "target": "agent_utilities", "label": "provides type utilities"}
+        {
+            "source": "type_introspection",
+            "target": "agent_utilities",
+            "label": "provides type utilities"
+        }
     ],
     "groups": [
         {
             "id": "type_and_schema_utilities_group",
             "label": "Type and Schema Utilities",
             "role": "analytical",
-            "nodes": ["type_introspection"]
+            "nodes": [
+                "type_introspection"
+            ]
         }
     ]
 }

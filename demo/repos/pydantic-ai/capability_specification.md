@@ -12,24 +12,68 @@ This separation of specification from implementation allows for a flexible and e
 {
     "direction": "TD",
     "nodes": [
-        {"id": "capability_spec_definition", "label": "Define CapabilitySpec", "type": "component", "link": null},
-        {"id": "named_spec", "label": "NamedSpec Base Class", "type": "external", "link": null},
-        {"id": "agent_spec", "label": "Agent Specification Module", "type": "external", "link": "agent_specification.md"},
-        {"id": "schema_generation", "label": "JSON Schema Generation", "type": "component", "link": null},
-        {"id": "full_capability_union", "label": "Full Capability Union", "type": "external", "link": "capabilities_base.md"}
+        {
+            "id": "capability_spec_definition",
+            "label": "Define CapabilitySpec",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "named_spec",
+            "label": "NamedSpec Base Class",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "agent_spec",
+            "label": "Agent Specification Module",
+            "type": "external",
+            "link": "agent_specification.md"
+        },
+        {
+            "id": "schema_generation",
+            "label": "JSON Schema Generation",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "full_capability_union",
+            "label": "Full Capability Union",
+            "type": "external",
+            "link": "capabilities_base.md"
+        }
     ],
     "edges": [
-        {"source": "capability_spec_definition", "target": "named_spec", "label": "inherits from"},
-        {"source": "agent_spec", "target": "capability_spec_definition", "label": "references as field type"},
-        {"source": "capability_spec_definition", "target": "schema_generation", "label": "provides type hint to"},
-        {"source": "schema_generation", "target": "full_capability_union", "label": "expands into"}
+        {
+            "source": "capability_spec_definition",
+            "target": "named_spec",
+            "label": "inherits from"
+        },
+        {
+            "source": "agent_spec",
+            "target": "capability_spec_definition",
+            "label": "references as field type"
+        },
+        {
+            "source": "capability_spec_definition",
+            "target": "schema_generation",
+            "label": "provides type hint to"
+        },
+        {
+            "source": "schema_generation",
+            "target": "full_capability_union",
+            "label": "expands into"
+        }
     ],
     "groups": [
         {
             "id": "capability_spec_flow",
             "label": "Capability Specification Flow",
             "role": "analytical",
-            "nodes": ["capability_spec_definition", "schema_generation"]
+            "nodes": [
+                "capability_spec_definition",
+                "schema_generation"
+            ]
         }
     ]
 }

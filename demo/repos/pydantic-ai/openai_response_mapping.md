@@ -10,19 +10,71 @@ This module is critical for enabling seamless communication with OpenAI models, 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "map_response_context", "label": "Map Agent Response Context", "type": "component", "link": null},
-        {"id": "map_binary_content", "label": "Map Binary Content for Input", "type": "component", "link": null},
-        {"id": "openai_config", "label": "OpenAI Model Configuration", "type": "external", "link": "openai_model_configuration.md"},
-        {"id": "model_response_obj", "label": "Model Response Object", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "output_assistant_message", "label": "OpenAI Assistant Message", "type": "output", "link": null},
-        {"id": "output_content_part", "label": "OpenAI Content Part (for Input)", "type": "output", "link": null}
+        {
+            "id": "map_response_context",
+            "label": "Map Agent Response Context",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "map_binary_content",
+            "label": "Map Binary Content for Input",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "openai_config",
+            "label": "OpenAI Model Configuration",
+            "type": "external",
+            "link": "openai_model_configuration.md"
+        },
+        {
+            "id": "model_response_obj",
+            "label": "Model Response Object",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "output_assistant_message",
+            "label": "OpenAI Assistant Message",
+            "type": "output",
+            "link": null
+        },
+        {
+            "id": "output_content_part",
+            "label": "OpenAI Content Part (for Input)",
+            "type": "output",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "model_response_obj", "target": "map_response_context", "label": "contains parts"},
-        {"source": "map_response_context", "target": "output_assistant_message", "label": "generates"},
-        {"source": "map_binary_content", "target": "output_content_part", "label": "generates"},
-        {"source": "openai_config", "target": "map_response_context", "label": "influences mapping", "style": "dashed"},
-        {"source": "openai_config", "target": "map_binary_content", "label": "influences mapping", "style": "dashed"}
+        {
+            "source": "model_response_obj",
+            "target": "map_response_context",
+            "label": "contains parts"
+        },
+        {
+            "source": "map_response_context",
+            "target": "output_assistant_message",
+            "label": "generates"
+        },
+        {
+            "source": "map_binary_content",
+            "target": "output_content_part",
+            "label": "generates"
+        },
+        {
+            "source": "openai_config",
+            "target": "map_response_context",
+            "label": "influences mapping",
+            "style": "dashed"
+        },
+        {
+            "source": "openai_config",
+            "target": "map_binary_content",
+            "label": "influences mapping",
+            "style": "dashed"
+        }
     ],
     "groups": []
 }

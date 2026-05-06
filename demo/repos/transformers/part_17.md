@@ -5,13 +5,37 @@ This module houses various language model implementations, including VaultGemma 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "vaultgemma_causal_lm", "label": "VaultGemma Causal LM", "type": "module", "link": "vaultgemma_causal_lm.md"},
-        {"id": "zamba_models", "label": "Zamba Models", "type": "module", "link": "zamba_models.md"},
-        {"id": "zamba2_models", "label": "Zamba2 Models", "type": "module", "link": "zamba2_models.md"}
+        {
+            "id": "vaultgemma_causal_lm",
+            "label": "VaultGemma Causal LM",
+            "type": "module",
+            "link": "vaultgemma_causal_lm.md"
+        },
+        {
+            "id": "zamba_models",
+            "label": "Zamba Models",
+            "type": "module",
+            "link": "zamba_models.md"
+        },
+        {
+            "id": "zamba2_models",
+            "label": "Zamba2 Models",
+            "type": "module",
+            "link": "zamba2_models.md"
+        }
     ],
     "edges": [],
     "groups": [
-        {"id": "language_model_implementations", "label": "Language Model Implementations", "role": "generative", "nodes": ["vaultgemma_causal_lm", "zamba_models", "zamba2_models"]}
+        {
+            "id": "language_model_implementations",
+            "label": "Language Model Implementations",
+            "role": "generative",
+            "nodes": [
+                "vaultgemma_causal_lm",
+                "zamba_models",
+                "zamba2_models"
+            ]
+        }
     ]
 }
 -->

@@ -56,18 +56,63 @@ This method processes the raw response from the Cohere Bedrock API. It extracts 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "cohere_handler", "label": "_CohereEmbeddingHandler", "type": "component", "link": null},
-        {"id": "prepare_request", "label": "Prepare Request Body", "type": "component", "link": null},
-        {"id": "parse_response", "label": "Parse Model Response", "type": "component", "link": null},
-        {"id": "bedrock_handlers", "label": "Bedrock Embedding Handlers", "type": "external", "link": "bedrock_embedding_handlers.md"},
-        {"id": "embedding_core", "label": "Embedding Core Module", "type": "external", "link": "embedding_core.md"}
+        {
+            "id": "cohere_handler",
+            "label": "_CohereEmbeddingHandler",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "prepare_request",
+            "label": "Prepare Request Body",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "parse_response",
+            "label": "Parse Model Response",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "bedrock_handlers",
+            "label": "Bedrock Embedding Handlers",
+            "type": "external",
+            "link": "bedrock_embedding_handlers.md"
+        },
+        {
+            "id": "embedding_core",
+            "label": "Embedding Core Module",
+            "type": "external",
+            "link": "embedding_core.md"
+        }
     ],
     "edges": [
-        {"source": "cohere_handler", "target": "prepare_request", "label": "prepares request"},
-        {"source": "cohere_handler", "target": "parse_response", "label": "parses response"},
-        {"source": "cohere_handler", "target": "bedrock_handlers", "label": "inherits from"},
-        {"source": "prepare_request", "target": "embedding_core", "label": "uses EmbedInputType, BedrockEmbeddingSettings"},
-        {"source": "parse_response", "target": "cohere_handler", "label": "returns embeddings to"}
+        {
+            "source": "cohere_handler",
+            "target": "prepare_request",
+            "label": "prepares request"
+        },
+        {
+            "source": "cohere_handler",
+            "target": "parse_response",
+            "label": "parses response"
+        },
+        {
+            "source": "cohere_handler",
+            "target": "bedrock_handlers",
+            "label": "inherits from"
+        },
+        {
+            "source": "prepare_request",
+            "target": "embedding_core",
+            "label": "uses EmbedInputType, BedrockEmbeddingSettings"
+        },
+        {
+            "source": "parse_response",
+            "target": "cohere_handler",
+            "label": "returns embeddings to"
+        }
     ],
     "groups": []
 }

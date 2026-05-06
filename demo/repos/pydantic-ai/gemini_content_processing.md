@@ -10,7 +10,17 @@ The `gemini_content_processing` module primarily consists of a single, focused s
 {
     "direction": "TD",
     "nodes": [
-        {"id": "gemini_response_conversion", "label": "Gemini Response Conversion", "type": "module", "link": "gemini_response_conversion.md"}
+        {
+            "id": "gemini_content_processing",
+            "label": "Gemini Content Processing",
+            "type": "module"
+        },
+        {
+            "id": "gemini_response_conversion",
+            "label": "Gemini Response Conversion",
+            "type": "module",
+            "link": "gemini_response_conversion.md"
+        }
     ],
     "edges": [],
     "groups": [
@@ -18,7 +28,9 @@ The `gemini_content_processing` module primarily consists of a single, focused s
             "id": "core_conversion",
             "label": "Core Conversion Logic",
             "role": "generative",
-            "nodes": ["gemini_response_conversion"]
+            "nodes": [
+                "gemini_response_conversion"
+            ]
         }
     ]
 }

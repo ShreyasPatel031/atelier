@@ -12,28 +12,71 @@ The `groq_profiles` module is structured into several sub-modules that handle di
 {
     "direction": "TD",
     "nodes": [
-        {"id": "base_groq_profiles", "label": "Base Groq Model Profiles", "type": "module", "link": "base_groq_profiles.md"},
-        {"id": "integrated_groq_profiles", "label": "Integrated Groq Model Profiles", "type": "module", "link": "integrated_groq_profiles.md"},
-        {"id": "moonshotai_profile", "label": "MoonshotAI Model Profile", "type": "external", "link": "model_profile_definitions.md"},
-        {"id": "meta_profile", "label": "Meta Model Profile", "type": "external", "link": "model_profile_definitions.md"}
+        {
+            "id": "groq_profiles",
+            "label": "Groq Model Profiles",
+            "type": "module"
+        },
+        {
+            "id": "base_groq_profiles",
+            "label": "Base Groq Model Profiles",
+            "type": "module",
+            "link": "base_groq_profiles.md"
+        },
+        {
+            "id": "integrated_groq_profiles",
+            "label": "Integrated Groq Model Profiles",
+            "type": "module",
+            "link": "integrated_groq_profiles.md"
+        },
+        {
+            "id": "moonshotai_profile",
+            "label": "MoonshotAI Model Profile",
+            "type": "external",
+            "link": "model_profile_definitions.md"
+        },
+        {
+            "id": "meta_profile",
+            "label": "Meta Model Profile",
+            "type": "external",
+            "link": "model_profile_definitions.md"
+        }
     ],
     "edges": [
-        {"source": "base_groq_profiles", "target": "integrated_groq_profiles", "label": "extends with specific features"},
-        {"source": "integrated_groq_profiles", "target": "moonshotai_profile", "label": "integrates"},
-        {"source": "integrated_groq_profiles", "target": "meta_profile", "label": "integrates"}
+        {
+            "source": "base_groq_profiles",
+            "target": "integrated_groq_profiles",
+            "label": "extends with specific features"
+        },
+        {
+            "source": "integrated_groq_profiles",
+            "target": "moonshotai_profile",
+            "label": "integrates"
+        },
+        {
+            "source": "integrated_groq_profiles",
+            "target": "meta_profile",
+            "label": "integrates"
+        }
     ],
     "groups": [
         {
             "id": "groq_profiles_core",
             "label": "Groq Profile Core",
             "role": "generative",
-            "nodes": ["base_groq_profiles", "integrated_groq_profiles"]
+            "nodes": [
+                "base_groq_profiles",
+                "integrated_groq_profiles"
+            ]
         },
         {
             "id": "external_model_profiles",
             "label": "External Model Profiles",
             "role": "data",
-            "nodes": ["moonshotai_profile", "meta_profile"]
+            "nodes": [
+                "moonshotai_profile",
+                "meta_profile"
+            ]
         }
     ]
 }

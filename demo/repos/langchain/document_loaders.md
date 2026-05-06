@@ -3,47 +3,52 @@ This module provides interfaces and implementations for loading documents from v
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "BaseLoader",
-      "label": "BaseLoader",
-      "type": "class"
-    },
-    {
-      "id": "_stringify",
-      "label": "_stringify",
-      "type": "function"
-    },
-    {
-      "id": "LangSmithLoader",
-      "label": "LangSmithLoader",
-      "type": "class"
-    }
-  ],
-  "edges": [
-    {
-      "source": "LangSmithLoader",
-      "target": "BaseLoader",
-      "label": "inherits"
-    },
-    {
-      "source": "LangSmithLoader",
-      "target": "_stringify",
-      "label": "uses"
-    }
-  ],
-  "groups": [
-    {
-      "id": "Base",
-      "label": "Base",
-      "nodes": ["BaseLoader"]
-    },
-    {
-      "id": "LangSmith",
-      "label": "LangSmith",
-      "nodes": ["LangSmithLoader", "_stringify"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "BaseLoader",
+            "label": "BaseLoader",
+            "type": "class"
+        },
+        {
+            "id": "_stringify",
+            "label": "_stringify",
+            "type": "function"
+        },
+        {
+            "id": "LangSmithLoader",
+            "label": "LangSmithLoader",
+            "type": "class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "LangSmithLoader",
+            "target": "BaseLoader",
+            "label": "inherits"
+        },
+        {
+            "source": "LangSmithLoader",
+            "target": "_stringify",
+            "label": "uses"
+        }
+    ],
+    "groups": [
+        {
+            "id": "Base",
+            "label": "Base",
+            "nodes": [
+                "BaseLoader"
+            ]
+        },
+        {
+            "id": "LangSmith",
+            "label": "LangSmith",
+            "nodes": [
+                "LangSmithLoader",
+                "_stringify"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

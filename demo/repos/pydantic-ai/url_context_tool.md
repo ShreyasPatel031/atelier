@@ -16,11 +16,25 @@ The `url_context_tool` module functions as a thin wrapper or alias. Its core com
 {
     "direction": "TD",
     "nodes": [
-        {"id": "url_context_tool_alias", "label": "Provide URL Context (Deprecated)", "type": "component", "link": null},
-        {"id": "web_fetch_capability", "label": "Handle Web Content Fetching", "type": "external", "link": "capabilities_web_interaction.md"}
+        {
+            "id": "url_context_tool_alias",
+            "label": "Provide URL Context (Deprecated)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "web_fetch_capability",
+            "label": "Handle Web Content Fetching",
+            "type": "external",
+            "link": "capabilities_web_interaction.md"
+        }
     ],
     "edges": [
-        {"source": "url_context_tool_alias", "target": "web_fetch_capability", "label": "delegates to/is alias for"}
+        {
+            "source": "url_context_tool_alias",
+            "target": "web_fetch_capability",
+            "label": "delegates to/is alias for"
+        }
     ],
     "groups": []
 }

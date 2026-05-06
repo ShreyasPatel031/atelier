@@ -3,14 +3,27 @@ This module provides utilities for handling tool definitions, including converti
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "_xml_to_tool_calls", "label": "_xml_to_tool_calls"},
-    {"id": "get_system_message", "label": "get_system_message"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "tooling_and_prompts", "label": "tooling_and_prompts", "nodes": ["_xml_to_tool_calls", "get_system_message"]}
-  ]
+    "nodes": [
+        {
+            "id": "_xml_to_tool_calls",
+            "label": "_xml_to_tool_calls"
+        },
+        {
+            "id": "get_system_message",
+            "label": "get_system_message"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "tooling_and_prompts",
+            "label": "tooling_and_prompts",
+            "nodes": [
+                "_xml_to_tool_calls",
+                "get_system_message"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

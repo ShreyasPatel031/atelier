@@ -3,15 +3,15 @@ This module provides the `Store` component, responsible for managing application
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "Store",
-      "label": "Store",
-      "type": "component"
-    }
-  ],
-  "edges": [],
-  "groups": []
+    "nodes": [
+        {
+            "id": "Store",
+            "label": "Store",
+            "type": "component"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

@@ -5,17 +5,58 @@ This module provides robust infrastructure for capturing, managing, and reacting
 {
     "direction": "TD",
     "nodes": [
-        {"id": "callback_handlers", "label": "Event Callback Handlers", "type": "module", "link": "callback_handlers.md"},
-        {"id": "core_tracers", "label": "Core Tracing Logic", "type": "module", "link": "core_tracers.md"},
-        {"id": "run_and_event_managers", "label": "Run & Event Managers", "type": "module", "link": "run_and_event_managers.md"}
+        {
+            "id": "callbacks_and_tracing",
+            "label": "Callbacks and Tracing",
+            "type": "module"
+        },
+        {
+            "id": "callback_handlers",
+            "label": "Event Callback Handlers",
+            "type": "module",
+            "link": "callback_handlers.md"
+        },
+        {
+            "id": "core_tracers",
+            "label": "Core Tracing Logic",
+            "type": "module",
+            "link": "core_tracers.md"
+        },
+        {
+            "id": "run_and_event_managers",
+            "label": "Run & Event Managers",
+            "type": "module",
+            "link": "run_and_event_managers.md"
+        }
     ],
     "edges": [
-        {"source": "run_and_event_managers", "target": "core_tracers", "label": "orchestrates runs"},
-        {"source": "core_tracers", "target": "callback_handlers", "label": "emits events to"},
-        {"source": "run_and_event_managers", "target": "callback_handlers", "label": "dispatches custom events"}
+        {
+            "source": "run_and_event_managers",
+            "target": "core_tracers",
+            "label": "orchestrates runs"
+        },
+        {
+            "source": "core_tracers",
+            "target": "callback_handlers",
+            "label": "emits events to"
+        },
+        {
+            "source": "run_and_event_managers",
+            "target": "callback_handlers",
+            "label": "dispatches custom events"
+        }
     ],
     "groups": [
-        {"id": "tracing_system", "label": "Tracing System", "role": "analytical", "nodes": ["callback_handlers", "core_tracers", "run_and_event_managers"]}
+        {
+            "id": "tracing_system",
+            "label": "Tracing System",
+            "role": "analytical",
+            "nodes": [
+                "callback_handlers",
+                "core_tracers",
+                "run_and_event_managers"
+            ]
+        }
     ]
 }
 -->

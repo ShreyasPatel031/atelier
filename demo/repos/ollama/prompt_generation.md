@@ -3,17 +3,42 @@ This module focuses on generating and rendering prompts for various chat models.
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "A", "label": "TestChatPromptTokenizeCalls"},
-    {"id": "B", "label": "TestRenderPromptResolvesDynamicGemma4Renderer"},
-    {"id": "C", "label": "TestChatPrompt"},
-    {"id": "D", "label": "TestChatPromptRendererDoesNotRewriteMessageContent"},
-    {"id": "E", "label": "TestChatPromptGLMOcrRendererAddsImageTags"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "G1", "label": "Prompt Generation Tests", "nodes": ["A", "B", "C", "D", "E"]}
-  ]
+    "nodes": [
+        {
+            "id": "A",
+            "label": "TestChatPromptTokenizeCalls"
+        },
+        {
+            "id": "B",
+            "label": "TestRenderPromptResolvesDynamicGemma4Renderer"
+        },
+        {
+            "id": "C",
+            "label": "TestChatPrompt"
+        },
+        {
+            "id": "D",
+            "label": "TestChatPromptRendererDoesNotRewriteMessageContent"
+        },
+        {
+            "id": "E",
+            "label": "TestChatPromptGLMOcrRendererAddsImageTags"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "G1",
+            "label": "Prompt Generation Tests",
+            "nodes": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

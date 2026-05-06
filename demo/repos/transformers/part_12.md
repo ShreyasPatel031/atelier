@@ -4,12 +4,30 @@ This module encompasses various Qwen language models, including multimodal capab
 {
     "direction": "TD",
     "nodes": [
-        {"id": "multimodal_qwen_models", "label": "Multimodal Qwen Models", "type": "module", "link": "multimodal_qwen_models.md"},
-        {"id": "causal_language_models", "label": "Causal Language Models", "type": "module", "link": "causal_language_models.md"}
+        {
+            "id": "multimodal_qwen_models",
+            "label": "Multimodal Qwen Models",
+            "type": "module",
+            "link": "multimodal_qwen_models.md"
+        },
+        {
+            "id": "causal_language_models",
+            "label": "Causal Language Models",
+            "type": "module",
+            "link": "causal_language_models.md"
+        }
     ],
     "edges": [],
     "groups": [
-        {"id": "qwen_implementations", "label": "Qwen Model Implementations", "role": "generative", "nodes": ["multimodal_qwen_models", "causal_language_models"]}
+        {
+            "id": "qwen_implementations",
+            "label": "Qwen Model Implementations",
+            "role": "generative",
+            "nodes": [
+                "multimodal_qwen_models",
+                "causal_language_models"
+            ]
+        }
     ]
 }
 -->

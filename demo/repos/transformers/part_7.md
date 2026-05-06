@@ -7,13 +7,37 @@ This module integrates advanced models for natural language processing and audio
 {
     "direction": "TD",
     "nodes": [
-        {"id": "language_model_implementations", "label": "Language Model Implementations", "type": "module", "link": "language_model_implementations.md"},
-        {"id": "audio_and_speech_processing", "label": "Audio and Speech Processing", "type": "module", "link": "audio_and_speech_processing.md"}
+        {
+            "id": "language_model_implementations",
+            "label": "Language Model Implementations",
+            "type": "module",
+            "link": "language_model_implementations.md"
+        },
+        {
+            "id": "audio_and_speech_processing",
+            "label": "Audio and Speech Processing",
+            "type": "module",
+            "link": "audio_and_speech_processing.md"
+        }
     ],
     "edges": [],
     "groups": [
-        {"id": "language_models_group", "label": "Language Models", "role": "analytical", "nodes": ["language_model_implementations"]},
-        {"id": "audio_models_group", "label": "Audio Models", "role": "analytical", "nodes": ["audio_and_speech_processing"]}
+        {
+            "id": "language_models_group",
+            "label": "Language Models",
+            "role": "analytical",
+            "nodes": [
+                "language_model_implementations"
+            ]
+        },
+        {
+            "id": "audio_models_group",
+            "label": "Audio Models",
+            "role": "analytical",
+            "nodes": [
+                "audio_and_speech_processing"
+            ]
+        }
     ]
 }
 -->

@@ -19,19 +19,70 @@ The `response_control_chunks` module fits into the broader Vercel AI integration
 {
     "direction": "TD",
     "nodes": [
-        {"id": "abort_chunk", "label": "Signal Abort Request", "type": "component", "link": null},
-        {"id": "message_metadata_chunk", "label": "Send Message Metadata", "type": "component", "link": null},
-        {"id": "control_chunks_mod", "label": "Control Chunks Module", "type": "external", "link": "control_chunks.md"},
-        {"id": "vercel_ai_response_types_mod", "label": "Vercel AI Response Types", "type": "external", "link": "vercel_ai_response_types.md"},
-        {"id": "ui_vercel_ai_adapter_mod", "label": "Vercel AI Integration Adapter", "type": "external", "link": "ui_vercel_ai_adapter.md"}
+        {
+            "id": "abort_chunk",
+            "label": "Signal Abort Request",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "message_metadata_chunk",
+            "label": "Send Message Metadata",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "control_chunks_mod",
+            "label": "Control Chunks Module",
+            "type": "external",
+            "link": "control_chunks.md"
+        },
+        {
+            "id": "vercel_ai_response_types_mod",
+            "label": "Vercel AI Response Types",
+            "type": "external",
+            "link": "vercel_ai_response_types.md"
+        },
+        {
+            "id": "ui_vercel_ai_adapter_mod",
+            "label": "Vercel AI Integration Adapter",
+            "type": "external",
+            "link": "ui_vercel_ai_adapter.md"
+        }
     ],
     "edges": [
-        {"source": "control_chunks_mod", "target": "abort_chunk", "label": "Generates"},
-        {"source": "control_chunks_mod", "target": "message_metadata_chunk", "label": "Generates"},
-        {"source": "abort_chunk", "target": "ui_vercel_ai_adapter_mod", "label": "Sent to UI via"},
-        {"source": "message_metadata_chunk", "target": "ui_vercel_ai_adapter_mod", "label": "Sent to UI via"},
-        {"source": "vercel_ai_response_types_mod", "target": "abort_chunk", "label": "Defines BaseChunk and structure for", "type": "dotted"},
-        {"source": "vercel_ai_response_types_mod", "target": "message_metadata_chunk", "label": "Defines BaseChunk and structure for", "type": "dotted"}
+        {
+            "source": "control_chunks_mod",
+            "target": "abort_chunk",
+            "label": "Generates"
+        },
+        {
+            "source": "control_chunks_mod",
+            "target": "message_metadata_chunk",
+            "label": "Generates"
+        },
+        {
+            "source": "abort_chunk",
+            "target": "ui_vercel_ai_adapter_mod",
+            "label": "Sent to UI via"
+        },
+        {
+            "source": "message_metadata_chunk",
+            "target": "ui_vercel_ai_adapter_mod",
+            "label": "Sent to UI via"
+        },
+        {
+            "source": "vercel_ai_response_types_mod",
+            "target": "abort_chunk",
+            "label": "Defines BaseChunk and structure for",
+            "type": "dotted"
+        },
+        {
+            "source": "vercel_ai_response_types_mod",
+            "target": "message_metadata_chunk",
+            "label": "Defines BaseChunk and structure for",
+            "type": "dotted"
+        }
     ],
     "groups": []
 }

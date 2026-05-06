@@ -50,22 +50,85 @@ When a graph execution encounters a `Fork` operation, it branches into multiple 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "join_class", "label": "Join Class", "type": "component", "link": null},
-        {"id": "reducer_func", "label": "Reducer Function", "type": "component", "link": null},
-        {"id": "initial_factory_func", "label": "Initial Factory Function", "type": "component", "link": null},
-        {"id": "perform_reduction", "label": "Perform Reduction (reduce method)", "type": "component", "link": null},
-        {"id": "create_join_node", "label": "Create JoinNode (as_node method)", "type": "component", "link": null},
-        {"id": "fork_management", "label": "Fork Management Module", "type": "external", "link": "fork_management.md"},
-        {"id": "graph_structure_definition", "label": "Graph Structure Definition Module", "type": "external", "link": "graph_structure_definition.md"}
+        {
+            "id": "join_class",
+            "label": "Join Class",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "reducer_func",
+            "label": "Reducer Function",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "initial_factory_func",
+            "label": "Initial Factory Function",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "perform_reduction",
+            "label": "Perform Reduction (reduce method)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "create_join_node",
+            "label": "Create JoinNode (as_node method)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "fork_management",
+            "label": "Fork Management Module",
+            "type": "external",
+            "link": "fork_management.md"
+        },
+        {
+            "id": "graph_structure_definition",
+            "label": "Graph Structure Definition Module",
+            "type": "external",
+            "link": "graph_structure_definition.md"
+        }
     ],
     "edges": [
-        {"source": "join_class", "target": "reducer_func", "label": "uses"},
-        {"source": "join_class", "target": "initial_factory_func", "label": "uses"},
-        {"source": "join_class", "target": "perform_reduction", "label": "implements"},
-        {"source": "join_class", "target": "create_join_node", "label": "provides"},
-        {"source": "perform_reduction", "target": "reducer_func", "label": "invokes"},
-        {"source": "create_join_node", "target": "graph_structure_definition", "label": "creates JoinNode from"},
-        {"source": "join_class", "target": "fork_management", "label": "references ForkID from"}
+        {
+            "source": "join_class",
+            "target": "reducer_func",
+            "label": "uses"
+        },
+        {
+            "source": "join_class",
+            "target": "initial_factory_func",
+            "label": "uses"
+        },
+        {
+            "source": "join_class",
+            "target": "perform_reduction",
+            "label": "implements"
+        },
+        {
+            "source": "join_class",
+            "target": "create_join_node",
+            "label": "provides"
+        },
+        {
+            "source": "perform_reduction",
+            "target": "reducer_func",
+            "label": "invokes"
+        },
+        {
+            "source": "create_join_node",
+            "target": "graph_structure_definition",
+            "label": "creates JoinNode from"
+        },
+        {
+            "source": "join_class",
+            "target": "fork_management",
+            "label": "references ForkID from"
+        }
     ],
     "groups": []
 }

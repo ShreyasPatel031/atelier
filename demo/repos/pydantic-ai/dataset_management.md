@@ -10,26 +10,59 @@ The module is composed of three primary sub-modules: [Dataset Structure Definiti
 {
     "direction": "TD",
     "nodes": [
-        {"id": "dataset_structure", "label": "Dataset Structure Definition", "type": "module", "link": "dataset_structure.md"},
-        {"id": "dataset_generation_logic", "label": "Dataset Generation Logic", "type": "module", "link": "dataset_generation_logic.md"},
-        {"id": "task_execution_runtime", "label": "Task Execution Runtime", "type": "module", "link": "task_execution_runtime.md"}
+        {
+            "id": "dataset_management",
+            "label": "Dataset Management",
+            "type": "module"
+        },
+        {
+            "id": "dataset_structure",
+            "label": "Dataset Structure Definition",
+            "type": "module",
+            "link": "dataset_structure.md"
+        },
+        {
+            "id": "dataset_generation_logic",
+            "label": "Dataset Generation Logic",
+            "type": "module",
+            "link": "dataset_generation_logic.md"
+        },
+        {
+            "id": "task_execution_runtime",
+            "label": "Task Execution Runtime",
+            "type": "module",
+            "link": "task_execution_runtime.md"
+        }
     ],
     "edges": [
-        {"source": "dataset_generation_logic", "target": "dataset_structure", "label": "creates"},
-        {"source": "dataset_structure", "target": "task_execution_runtime", "label": "executes tasks with"}
+        {
+            "source": "dataset_generation_logic",
+            "target": "dataset_structure",
+            "label": "creates"
+        },
+        {
+            "source": "dataset_structure",
+            "target": "task_execution_runtime",
+            "label": "executes tasks with"
+        }
     ],
     "groups": [
         {
             "id": "definition",
             "label": "Dataset Definition",
             "role": "data",
-            "nodes": ["dataset_structure"]
+            "nodes": [
+                "dataset_structure"
+            ]
         },
         {
             "id": "operations",
             "label": "Operations",
             "role": "generative",
-            "nodes": ["dataset_generation_logic", "task_execution_runtime"]
+            "nodes": [
+                "dataset_generation_logic",
+                "task_execution_runtime"
+            ]
         }
     ]
 }

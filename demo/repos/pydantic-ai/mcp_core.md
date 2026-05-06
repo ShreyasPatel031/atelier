@@ -12,32 +12,95 @@ The `mcp_core` module is structured into three main sub-modules, each handling a
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mcp_server_components", "label": "MCP Server Components", "type": "module", "link": "mcp_server_components.md"},
-        {"id": "mcp_resource_management", "label": "MCP Resource Management", "type": "module", "link": "mcp_resource_management.md"},
-        {"id": "mcp_model_and_tooling", "label": "MCP Model and Tooling", "type": "module", "link": "mcp_model_and_tooling.md"},
-        {"id": "model_core_interfaces", "label": "Model Core Interfaces", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "toolset_management", "label": "Toolset Management", "type": "external", "link": "toolset_management.md"},
-        {"id": "agent_execution_graph", "label": "Agent Execution Graph", "type": "external", "link": "agent_execution_graph.md"}
+        {
+            "id": "mcp_core",
+            "label": "MCP Core",
+            "type": "module"
+        },
+        {
+            "id": "mcp_server_components",
+            "label": "MCP Server Components",
+            "type": "module",
+            "link": "mcp_server_components.md"
+        },
+        {
+            "id": "mcp_resource_management",
+            "label": "MCP Resource Management",
+            "type": "module",
+            "link": "mcp_resource_management.md"
+        },
+        {
+            "id": "mcp_model_and_tooling",
+            "label": "MCP Model and Tooling",
+            "type": "module",
+            "link": "mcp_model_and_tooling.md"
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Model Core Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "agent_execution_graph",
+            "label": "Agent Execution Graph",
+            "type": "external",
+            "link": "agent_execution_graph.md"
+        }
     ],
     "edges": [
-        {"source": "mcp_server_components", "target": "mcp_model_and_tooling", "label": "provides server session"},
-        {"source": "mcp_resource_management", "target": "mcp_server_components", "label": "defines resources for"},
-        {"source": "mcp_model_and_tooling", "target": "model_core_interfaces", "label": "implements Model interface"},
-        {"source": "mcp_model_and_tooling", "target": "toolset_management", "label": "integrates AbstractToolset"},
-        {"source": "toolset_management", "target": "agent_execution_graph", "label": "tool calls flow to"}
+        {
+            "source": "mcp_server_components",
+            "target": "mcp_model_and_tooling",
+            "label": "provides server session"
+        },
+        {
+            "source": "mcp_resource_management",
+            "target": "mcp_server_components",
+            "label": "defines resources for"
+        },
+        {
+            "source": "mcp_model_and_tooling",
+            "target": "model_core_interfaces",
+            "label": "implements Model interface"
+        },
+        {
+            "source": "mcp_model_and_tooling",
+            "target": "toolset_management",
+            "label": "integrates AbstractToolset"
+        },
+        {
+            "source": "toolset_management",
+            "target": "agent_execution_graph",
+            "label": "tool calls flow to"
+        }
     ],
     "groups": [
         {
             "id": "mcp_integration",
             "label": "MCP Integration",
             "role": "generative",
-            "nodes": ["mcp_server_components", "mcp_resource_management", "mcp_model_and_tooling"]
+            "nodes": [
+                "mcp_server_components",
+                "mcp_resource_management",
+                "mcp_model_and_tooling"
+            ]
         },
         {
             "id": "external_dependencies",
             "label": "External Core",
             "role": "generative",
-            "nodes": ["model_core_interfaces", "toolset_management", "agent_execution_graph"]
+            "nodes": [
+                "model_core_interfaces",
+                "toolset_management",
+                "agent_execution_graph"
+            ]
         }
     ]
 }

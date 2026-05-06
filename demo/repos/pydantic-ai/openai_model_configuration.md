@@ -12,24 +12,47 @@ This module is structured to separate the core model definitions from the more i
 {
     "direction": "TD",
     "nodes": [
-        {"id": "openai_model_definitions", "label": "OpenAI Model Definitions", "type": "module", "link": "openai_model_definitions.md"},
-        {"id": "openai_responses_settings", "label": "OpenAI Responses Settings", "type": "module", "link": "openai_responses_settings.md"}
+        {
+            "id": "openai_model_configuration",
+            "label": "OpenAI Model Configuration",
+            "type": "module"
+        },
+        {
+            "id": "openai_model_definitions",
+            "label": "OpenAI Model Definitions",
+            "type": "module",
+            "link": "openai_model_definitions.md"
+        },
+        {
+            "id": "openai_responses_settings",
+            "label": "OpenAI Responses Settings",
+            "type": "module",
+            "link": "openai_responses_settings.md"
+        }
     ],
     "edges": [
-        {"source": "openai_model_definitions", "target": "openai_responses_settings", "label": "provides base settings"}
+        {
+            "source": "openai_model_definitions",
+            "target": "openai_responses_settings",
+            "label": "provides base settings"
+        }
     ],
     "groups": [
         {
             "id": "model_core",
             "label": "Model Core",
             "role": "generative",
-            "nodes": ["openai_model_definitions"]
+            "nodes": [
+                "openai_model_definitions"
+            ]
         },
         {
             "id": "responses_config",
             "label": "Responses Configuration",
             "role": "analytical",
-            "nodes": ["openai_responses_settings"]
+            "nodes": [
+                "openai_responses_settings"
+            ]
         }
     ]
 }

@@ -50,20 +50,46 @@ This module is a leaf module within the [model_provider_usage_mapping](model_pro
 {
     "direction": "TD",
     "nodes": [
-        {"id": "cohere_response", "label": "Cohere V2ChatResponse", "type": "component", "link": null},
-        {"id": "map_usage_function", "label": "Map Cohere Usage (_map_usage)", "type": "component", "link": null},
-        {"id": "request_usage", "label": "RequestUsage Object", "type": "external", "link": "agent_utilities.md"}
+        {
+            "id": "cohere_response",
+            "label": "Cohere V2ChatResponse",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "map_usage_function",
+            "label": "Map Cohere Usage (_map_usage)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "request_usage",
+            "label": "RequestUsage Object",
+            "type": "external",
+            "link": "agent_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "cohere_response", "target": "map_usage_function", "label": "provides raw usage data"},
-        {"source": "map_usage_function", "target": "request_usage", "label": "outputs mapped usage"}
+        {
+            "source": "cohere_response",
+            "target": "map_usage_function",
+            "label": "provides raw usage data"
+        },
+        {
+            "source": "map_usage_function",
+            "target": "request_usage",
+            "label": "outputs mapped usage"
+        }
     ],
     "groups": [
         {
             "id": "usage_mapping_process",
             "label": "Cohere Usage Mapping Process",
             "role": "analytical",
-            "nodes": ["cohere_response", "map_usage_function"]
+            "nodes": [
+                "cohere_response",
+                "map_usage_function"
+            ]
         }
     ]
 }

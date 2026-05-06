@@ -3,21 +3,23 @@ This module provides an advanced integration with Qdrant, offering a robust vect
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "QdrantVectorStore",
-      "label": "QdrantVectorStore",
-      "type": "component"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "qdrant_vector_store_advanced",
-      "label": "qdrant_vector_store_advanced",
-      "nodes": ["QdrantVectorStore"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "QdrantVectorStore",
+            "label": "QdrantVectorStore",
+            "type": "component"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "qdrant_vector_store_advanced",
+            "label": "qdrant_vector_store_advanced",
+            "nodes": [
+                "QdrantVectorStore"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

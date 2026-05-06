@@ -16,31 +16,105 @@ Together, these components facilitate a robust and transparent mechanism for hum
 {
     "direction": "TD",
     "nodes": [
-        {"id": "approval_requested", "label": "Awaiting User Approval", "type": "component", "link": null},
-        {"id": "approval_responded", "label": "User Decision Processed", "type": "component", "link": null},
-        {"id": "dynamic_tool_input_states", "label": "Dynamic Tool Input Handling", "type": "external", "link": "dynamic_tool_input_states.md"},
-        {"id": "dynamic_tool_output_states", "label": "Dynamic Tool Output Handling", "type": "external", "link": "dynamic_tool_output_states.md"},
-        {"id": "base_ui_part", "label": "Base UI Component Structure", "type": "external", "link": "vercel_ai_response_types.md"},
-        {"id": "tool_approval_type", "label": "Tool Approval Definition", "type": "external", "link": "toolset_management.md"},
-        {"id": "provider_metadata_type", "label": "Provider Metadata Schema", "type": "external", "link": "model_provider_configurations.md"}
+        {
+            "id": "approval_requested",
+            "label": "Awaiting User Approval",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "approval_responded",
+            "label": "User Decision Processed",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "dynamic_tool_input_states",
+            "label": "Dynamic Tool Input Handling",
+            "type": "external",
+            "link": "dynamic_tool_input_states.md"
+        },
+        {
+            "id": "dynamic_tool_output_states",
+            "label": "Dynamic Tool Output Handling",
+            "type": "external",
+            "link": "dynamic_tool_output_states.md"
+        },
+        {
+            "id": "base_ui_part",
+            "label": "Base UI Component Structure",
+            "type": "external",
+            "link": "vercel_ai_response_types.md"
+        },
+        {
+            "id": "tool_approval_type",
+            "label": "Tool Approval Definition",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "provider_metadata_type",
+            "label": "Provider Metadata Schema",
+            "type": "external",
+            "link": "model_provider_configurations.md"
+        }
     ],
     "edges": [
-        {"source": "dynamic_tool_input_states", "target": "approval_requested", "label": "initiates with"},
-        {"source": "approval_requested", "target": "approval_responded", "label": "user provides decision"},
-        {"source": "approval_responded", "target": "dynamic_tool_output_states", "label": "proceeds to output"},
-        {"source": "approval_requested", "target": "base_ui_part", "label": "inherits from"},
-        {"source": "approval_responded", "target": "base_ui_part", "label": "inherits from"},
-        {"source": "approval_requested", "target": "tool_approval_type", "label": "contains"},
-        {"source": "approval_responded", "target": "tool_approval_type", "label": "updates with"},
-        {"source": "approval_requested", "target": "provider_metadata_type", "label": "includes"},
-        {"source": "approval_responded", "target": "provider_metadata_type", "label": "includes"}
+        {
+            "source": "dynamic_tool_input_states",
+            "target": "approval_requested",
+            "label": "initiates with"
+        },
+        {
+            "source": "approval_requested",
+            "target": "approval_responded",
+            "label": "user provides decision"
+        },
+        {
+            "source": "approval_responded",
+            "target": "dynamic_tool_output_states",
+            "label": "proceeds to output"
+        },
+        {
+            "source": "approval_requested",
+            "target": "base_ui_part",
+            "label": "inherits from"
+        },
+        {
+            "source": "approval_responded",
+            "target": "base_ui_part",
+            "label": "inherits from"
+        },
+        {
+            "source": "approval_requested",
+            "target": "tool_approval_type",
+            "label": "contains"
+        },
+        {
+            "source": "approval_responded",
+            "target": "tool_approval_type",
+            "label": "updates with"
+        },
+        {
+            "source": "approval_requested",
+            "target": "provider_metadata_type",
+            "label": "includes"
+        },
+        {
+            "source": "approval_responded",
+            "target": "provider_metadata_type",
+            "label": "includes"
+        }
     ],
     "groups": [
         {
             "id": "dynamic_tool_approval_workflow",
             "label": "Dynamic Tool Approval Workflow",
             "role": "process",
-            "nodes": ["approval_requested", "approval_responded"]
+            "nodes": [
+                "approval_requested",
+                "approval_responded"
+            ]
         }
     ]
 }

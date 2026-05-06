@@ -12,18 +12,40 @@ The `mcp_server_components` module integrates with the broader MCP ecosystem and
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mcp_http_server", "label": "MCP HTTP Server", "type": "module", "link": "mcp_http_server.md"},
-        {"id": "mcp_server_loader", "label": "MCP Server Configuration Loader", "type": "module", "link": "mcp_server_loader.md"}
+        {
+            "id": "mcp_server_components",
+            "label": "MCP Server Components",
+            "type": "module"
+        },
+        {
+            "id": "mcp_http_server",
+            "label": "MCP HTTP Server",
+            "type": "module",
+            "link": "mcp_http_server.md"
+        },
+        {
+            "id": "mcp_server_loader",
+            "label": "MCP Server Configuration Loader",
+            "type": "module",
+            "link": "mcp_server_loader.md"
+        }
     ],
     "edges": [
-        {"source": "mcp_server_loader", "target": "mcp_http_server", "label": "configures"}
+        {
+            "source": "mcp_server_loader",
+            "target": "mcp_http_server",
+            "label": "configures"
+        }
     ],
     "groups": [
         {
             "id": "server_deployment",
             "label": "Server Deployment",
             "role": "generative",
-            "nodes": ["mcp_http_server", "mcp_server_loader"]
+            "nodes": [
+                "mcp_http_server",
+                "mcp_server_loader"
+            ]
         }
     ]
 }

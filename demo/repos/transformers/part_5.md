@@ -5,20 +5,70 @@ This module integrates a range of advanced models including Gemma for language, 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "gemma_language_models", "label": "Gemma Language Models", "type": "module", "link": "gemma_language_models.md"},
-        {"id": "vision_object_detection", "label": "Vision Object Detection", "type": "module", "link": "vision_object_detection.md"},
-        {"id": "seamless_audio_models", "label": "Seamless Audio Model", "type": "module", "link": "seamless_audio_models.md"},
-        {"id": "sam_multimodal_models", "label": "SAM Multimodal Models", "type": "module", "link": "sam_multimodal_models.md"},
-        {"id": "vision_model_converters", "label": "Vision Model Converters", "type": "module", "link": "vision_model_converters.md"}
+        {
+            "id": "part_5",
+            "label": "Part 5",
+            "type": "module"
+        },
+        {
+            "id": "c0",
+            "label": "convert_udop_checkpoint",
+            "type": "component"
+        },
+        {
+            "id": "c1",
+            "label": "convert_upernet_checkpoint",
+            "type": "component"
+        },
+        {
+            "id": "c2",
+            "label": "convert_upernet_checkpoint",
+            "type": "component"
+        },
+        {
+            "id": "c3",
+            "label": "convert_videomae_checkpoint",
+            "type": "component"
+        },
+        {
+            "id": "c4",
+            "label": "convert_vilt_checkpoint",
+            "type": "component"
+        },
+        {
+            "id": "more",
+            "label": "+6 more",
+            "type": "component"
+        }
     ],
     "edges": [
-        {"source": "vision_object_detection", "target": "vision_model_converters", "label": "converted by"},
-        {"source": "sam_multimodal_models", "target": "vision_model_converters", "label": "vision components converted by"}
+        {
+            "source": "part_5",
+            "target": "c0"
+        },
+        {
+            "source": "part_5",
+            "target": "c1"
+        },
+        {
+            "source": "part_5",
+            "target": "c2"
+        },
+        {
+            "source": "part_5",
+            "target": "c3"
+        },
+        {
+            "source": "part_5",
+            "target": "c4"
+        },
+        {
+            "source": "part_5",
+            "target": "more"
+        }
     ],
-    "groups": [
-        {"id": "core_models_group", "label": "Core Models", "role": "surface", "nodes": ["gemma_language_models", "vision_object_detection", "seamless_audio_models", "sam_multimodal_models"]},
-        {"id": "utilities_group", "label": "Model Utilities", "role": "analytical", "nodes": ["vision_model_converters"]}
-    ]
+    "groups": [],
+    "_auto_generated": true
 }
 -->
 ```mermaid

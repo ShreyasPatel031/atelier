@@ -3,13 +3,15 @@ Defines the `PreTrainedTokenizerBase` class, serving as the foundational interfa
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "C_PreTrainedTokenizerBase", "label": "PreTrainedTokenizerBase", "type": "class"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "G_tokenizer_base_interface", "label": "tokenizer_base_interface", "type": "module", "contains": ["C_PreTrainedTokenizerBase"]}
-  ]
+    "nodes": [
+        {
+            "id": "C_PreTrainedTokenizerBase",
+            "label": "PreTrainedTokenizerBase",
+            "type": "class"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

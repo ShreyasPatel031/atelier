@@ -3,26 +3,26 @@ The `lm_base_interface` module provides `BaseLM`, a foundational class for manag
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "lm_base_interface",
-      "label": "lm_base_interface",
-      "type": "module"
-    },
-    {
-      "id": "BaseLM",
-      "label": "BaseLM",
-      "type": "class"
-    }
-  ],
-  "edges": [
-    {
-      "source": "lm_base_interface",
-      "target": "BaseLM",
-      "type": "contains"
-    }
-  ],
-  "groups": []
+    "nodes": [
+        {
+            "id": "lm_base_interface",
+            "label": "lm_base_interface",
+            "type": "module"
+        },
+        {
+            "id": "BaseLM",
+            "label": "BaseLM",
+            "type": "class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "lm_base_interface",
+            "target": "BaseLM",
+            "type": "contains"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

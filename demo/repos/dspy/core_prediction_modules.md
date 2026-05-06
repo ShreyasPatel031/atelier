@@ -5,55 +5,225 @@ This module implements advanced prediction strategies such as BestOfN for repeat
 {
     "direction": "TD",
     "nodes": [
-        {"id": "best_of_n", "label": "BestOfN (Repeated Execution)", "type": "component", "link": null},
-        {"id": "refine", "label": "Refine (Execution with Feedback)", "type": "component", "link": null},
-        {"id": "react", "label": "ReAct (Reasoning and Acting)", "type": "component", "link": null},
-        {"id": "program_of_thought", "label": "ProgramOfThought (Code Execution)", "type": "component", "link": null},
-        {"id": "code_act", "label": "CodeAct (Code Execution and Tools)", "type": "component", "link": null},
-        {"id": "rlm", "label": "RLM (Recursive Language Model)", "type": "component", "link": null},
-
-        {"id": "base_modules", "label": "Base Modules", "type": "external", "link": "base_modules.md"},
-        {"id": "lm_clients", "label": "LM Clients", "type": "external", "link": "lm_clients.md"},
-        {"id": "aggregation_and_feedback", "label": "Aggregation and Feedback", "type": "external", "link": "aggregation_and_feedback.md"},
-        {"id": "signatures_and_fields", "label": "Signatures and Fields", "type": "external", "link": "signatures_and_fields.md"},
-        {"id": "general_utilities", "label": "General Utilities", "type": "external", "link": "general_utilities.md"},
-        {"id": "type_system", "label": "Type System", "type": "external", "link": "type_system.md"}
+        {
+            "id": "best_of_n",
+            "label": "BestOfN (Repeated Execution)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "refine",
+            "label": "Refine (Execution with Feedback)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "react",
+            "label": "ReAct (Reasoning and Acting)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "program_of_thought",
+            "label": "ProgramOfThought (Code Execution)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "code_act",
+            "label": "CodeAct (Code Execution and Tools)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "rlm",
+            "label": "RLM (Recursive Language Model)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "base_modules",
+            "label": "Base Modules",
+            "type": "external",
+            "link": "base_modules.md"
+        },
+        {
+            "id": "lm_clients",
+            "label": "LM Clients",
+            "type": "external",
+            "link": "lm_clients.md"
+        },
+        {
+            "id": "aggregation_and_feedback",
+            "label": "Aggregation and Feedback",
+            "type": "external",
+            "link": "aggregation_and_feedback.md"
+        },
+        {
+            "id": "signatures_and_fields",
+            "label": "Signatures and Fields",
+            "type": "external",
+            "link": "signatures_and_fields.md"
+        },
+        {
+            "id": "general_utilities",
+            "label": "General Utilities",
+            "type": "external",
+            "link": "general_utilities.md"
+        },
+        {
+            "id": "type_system",
+            "label": "Type System",
+            "type": "external",
+            "link": "type_system.md"
+        }
     ],
     "edges": [
-        {"source": "best_of_n", "target": "base_modules", "label": "inherits from"},
-        {"source": "best_of_n", "target": "lm_clients", "label": "uses"},
-        {"source": "best_of_n", "target": "aggregation_and_feedback", "label": "evaluates with"},
-
-        {"source": "refine", "target": "base_modules", "label": "inherits from"},
-        {"source": "refine", "target": "lm_clients", "label": "uses"},
-        {"source": "refine", "target": "aggregation_and_feedback", "label": "evaluates with"},
-        {"source": "refine", "target": "signatures_and_fields", "label": "defines with"},
-        {"source": "refine", "target": "general_utilities", "label": "adapts with"},
-
-        {"source": "react", "target": "base_modules", "label": "inherits from"},
-        {"source": "react", "target": "signatures_and_fields", "label": "defines with"},
-        {"source": "react", "target": "type_system", "label": "uses"},
-        {"source": "react", "target": "general_utilities", "label": "adapts with"},
-
-        {"source": "program_of_thought", "target": "base_modules", "label": "inherits from"},
-        {"source": "program_of_thought", "target": "signatures_and_fields", "label": "defines with"},
-        {"source": "program_of_thought", "target": "lm_clients", "label": "predicts with"},
-        {"source": "program_of_thought", "target": "general_utilities", "label": "executes with"},
-
-        {"source": "code_act", "target": "react", "label": "inherits from"},
-        {"source": "code_act", "target": "program_of_thought", "label": "inherits from"},
-        {"source": "code_act", "target": "signatures_and_fields", "label": "defines with"},
-        {"source": "code_act", "target": "type_system", "label": "uses"},
-        {"source": "code_act", "target": "general_utilities", "label": "executes with"},
-
-        {"source": "rlm", "target": "base_modules", "label": "inherits from"},
-        {"source": "rlm", "target": "signatures_and_fields", "label": "defines with"},
-        {"source": "rlm", "target": "lm_clients", "label": "queries with"},
-        {"source": "rlm", "target": "type_system", "label": "uses"},
-        {"source": "rlm", "target": "general_utilities", "label": "executes with"}
+        {
+            "source": "best_of_n",
+            "target": "base_modules",
+            "label": "inherits from"
+        },
+        {
+            "source": "best_of_n",
+            "target": "lm_clients",
+            "label": "uses"
+        },
+        {
+            "source": "best_of_n",
+            "target": "aggregation_and_feedback",
+            "label": "evaluates with"
+        },
+        {
+            "source": "refine",
+            "target": "base_modules",
+            "label": "inherits from"
+        },
+        {
+            "source": "refine",
+            "target": "lm_clients",
+            "label": "uses"
+        },
+        {
+            "source": "refine",
+            "target": "aggregation_and_feedback",
+            "label": "evaluates with"
+        },
+        {
+            "source": "refine",
+            "target": "signatures_and_fields",
+            "label": "defines with"
+        },
+        {
+            "source": "refine",
+            "target": "general_utilities",
+            "label": "adapts with"
+        },
+        {
+            "source": "react",
+            "target": "base_modules",
+            "label": "inherits from"
+        },
+        {
+            "source": "react",
+            "target": "signatures_and_fields",
+            "label": "defines with"
+        },
+        {
+            "source": "react",
+            "target": "type_system",
+            "label": "uses"
+        },
+        {
+            "source": "react",
+            "target": "general_utilities",
+            "label": "adapts with"
+        },
+        {
+            "source": "program_of_thought",
+            "target": "base_modules",
+            "label": "inherits from"
+        },
+        {
+            "source": "program_of_thought",
+            "target": "signatures_and_fields",
+            "label": "defines with"
+        },
+        {
+            "source": "program_of_thought",
+            "target": "lm_clients",
+            "label": "predicts with"
+        },
+        {
+            "source": "program_of_thought",
+            "target": "general_utilities",
+            "label": "executes with"
+        },
+        {
+            "source": "code_act",
+            "target": "react",
+            "label": "inherits from"
+        },
+        {
+            "source": "code_act",
+            "target": "program_of_thought",
+            "label": "inherits from"
+        },
+        {
+            "source": "code_act",
+            "target": "signatures_and_fields",
+            "label": "defines with"
+        },
+        {
+            "source": "code_act",
+            "target": "type_system",
+            "label": "uses"
+        },
+        {
+            "source": "code_act",
+            "target": "general_utilities",
+            "label": "executes with"
+        },
+        {
+            "source": "rlm",
+            "target": "base_modules",
+            "label": "inherits from"
+        },
+        {
+            "source": "rlm",
+            "target": "signatures_and_fields",
+            "label": "defines with"
+        },
+        {
+            "source": "rlm",
+            "target": "lm_clients",
+            "label": "queries with"
+        },
+        {
+            "source": "rlm",
+            "target": "type_system",
+            "label": "uses"
+        },
+        {
+            "source": "rlm",
+            "target": "general_utilities",
+            "label": "executes with"
+        }
     ],
     "groups": [
-        {"id": "prediction_strategies_grp", "label": "Prediction Strategies", "role": "generative", "nodes": ["best_of_n", "refine", "react", "program_of_thought", "code_act", "rlm"]}
+        {
+            "id": "prediction_strategies_grp",
+            "label": "Prediction Strategies",
+            "role": "generative",
+            "nodes": [
+                "best_of_n",
+                "refine",
+                "react",
+                "program_of_thought",
+                "code_act",
+                "rlm"
+            ]
+        }
     ]
 }
 -->

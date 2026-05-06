@@ -6,13 +6,36 @@ The `runnable_configuration` module facilitates dynamic configuration of `Runnab
 {
     "direction": "TD",
     "nodes": [
-        {"id": "dynamic_runnable", "label": "DynamicRunnable (Configurable)", "type": "component", "link": null},
-        {"id": "config_wrapper", "label": "Config Wrapper (Exception Handling)", "type": "component", "link": null},
-        {"id": "runnable_framework", "label": "Runnable Framework", "type": "external", "link": "runnable_framework.md"}
+        {
+            "id": "dynamic_runnable",
+            "label": "DynamicRunnable (Configurable)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "config_wrapper",
+            "label": "Config Wrapper (Exception Handling)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "runnable_framework",
+            "label": "Runnable Framework",
+            "type": "external",
+            "link": "runnable_framework.md"
+        }
     ],
     "edges": [
-        {"source": "dynamic_runnable", "target": "config_wrapper", "label": "uses for config exceptions"},
-        {"source": "runnable_framework", "target": "dynamic_runnable", "label": "integrates"}
+        {
+            "source": "dynamic_runnable",
+            "target": "config_wrapper",
+            "label": "uses for config exceptions"
+        },
+        {
+            "source": "runnable_framework",
+            "target": "dynamic_runnable",
+            "label": "integrates"
+        }
     ],
     "groups": []
 }

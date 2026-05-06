@@ -9,24 +9,47 @@ The `mcp_model_and_tooling` module provides fundamental components for integrati
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mcp_sampling_model", "label": "MCP Sampling Model", "type": "module", "link": "mcp_sampling_model.md"},
-        {"id": "fastmcp_toolset", "label": "FastMCP Toolset", "type": "module", "link": "fastmcp_toolset.md"}
+        {
+            "id": "mcp_model_and_tooling",
+            "label": "MCP Model and Tooling",
+            "type": "module"
+        },
+        {
+            "id": "mcp_sampling_model",
+            "label": "MCP Sampling Model",
+            "type": "module",
+            "link": "mcp_sampling_model.md"
+        },
+        {
+            "id": "fastmcp_toolset",
+            "label": "FastMCP Toolset",
+            "type": "module",
+            "link": "fastmcp_toolset.md"
+        }
     ],
     "edges": [
-        {"source": "fastmcp_toolset", "target": "mcp_sampling_model", "label": "provides context to"}
+        {
+            "source": "fastmcp_toolset",
+            "target": "mcp_sampling_model",
+            "label": "provides context to"
+        }
     ],
     "groups": [
         {
             "id": "model_interaction",
             "label": "Model Interaction",
             "role": "generative",
-            "nodes": ["mcp_sampling_model"]
+            "nodes": [
+                "mcp_sampling_model"
+            ]
         },
         {
             "id": "tool_integration",
             "label": "Tool Integration",
             "role": "surface",
-            "nodes": ["fastmcp_toolset"]
+            "nodes": [
+                "fastmcp_toolset"
+            ]
         }
     ]
 }

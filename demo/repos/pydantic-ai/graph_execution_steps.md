@@ -30,22 +30,57 @@ This module thus provides the essential atomic units for building complex, obser
 {
     "direction": "TD",
     "nodes": [
-        {"id": "Step", "label": "Define Execution Step (Step)", "type": "component", "link": null},
-        {"id": "StepNode", "label": "Represent Graph Node (StepNode)", "type": "component", "link": null},
-        {"id": "graph_structure_definition", "label": "Graph Structure Definition Module", "type": "external", "link": "graph_structure_definition.md"},
-        {"id": "graph_core_execution", "label": "Graph Core Execution Module", "type": "external", "link": "graph_core_execution.md"}
+        {
+            "id": "Step",
+            "label": "Define Execution Step (Step)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "StepNode",
+            "label": "Represent Graph Node (StepNode)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "graph_structure_definition",
+            "label": "Graph Structure Definition Module",
+            "type": "external",
+            "link": "graph_structure_definition.md"
+        },
+        {
+            "id": "graph_core_execution",
+            "label": "Graph Core Execution Module",
+            "type": "external",
+            "link": "graph_core_execution.md"
+        }
     ],
     "edges": [
-        {"source": "Step", "target": "StepNode", "label": "creates node representation with inputs"},
-        {"source": "StepNode", "target": "graph_structure_definition", "label": "integrated into"},
-        {"source": "graph_structure_definition", "target": "graph_core_execution", "label": "provides assembled graph to"}
+        {
+            "source": "Step",
+            "target": "StepNode",
+            "label": "creates node representation with inputs"
+        },
+        {
+            "source": "StepNode",
+            "target": "graph_structure_definition",
+            "label": "integrated into"
+        },
+        {
+            "source": "graph_structure_definition",
+            "target": "graph_core_execution",
+            "label": "provides assembled graph to"
+        }
     ],
     "groups": [
         {
             "id": "execution_unit_definition",
             "label": "Execution Unit Definition",
             "role": "structural",
-            "nodes": ["Step", "StepNode"]
+            "nodes": [
+                "Step",
+                "StepNode"
+            ]
         }
     ]
 }

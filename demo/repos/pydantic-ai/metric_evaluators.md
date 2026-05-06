@@ -10,24 +10,47 @@ The `metric_evaluators` module is organized into a core base interface and speci
 {
     "direction": "TD",
     "nodes": [
-        {"id": "base_report_evaluator", "label": "Base Report Evaluator", "type": "module", "link": "base_report_evaluator.md"},
-        {"id": "statistical_report_evaluators", "label": "Statistical Report Evaluators", "type": "module", "link": "statistical_report_evaluators.md"}
+        {
+            "id": "metric_evaluators",
+            "label": "Metric Evaluators",
+            "type": "module"
+        },
+        {
+            "id": "base_report_evaluator",
+            "label": "Base Report Evaluator",
+            "type": "module",
+            "link": "base_report_evaluator.md"
+        },
+        {
+            "id": "statistical_report_evaluators",
+            "label": "Statistical Report Evaluators",
+            "type": "module",
+            "link": "statistical_report_evaluators.md"
+        }
     ],
     "edges": [
-        {"source": "statistical_report_evaluators", "target": "base_report_evaluator", "label": "extends"}
+        {
+            "source": "statistical_report_evaluators",
+            "target": "base_report_evaluator",
+            "label": "extends"
+        }
     ],
     "groups": [
         {
             "id": "core_interfaces",
             "label": "Core Interfaces",
             "role": "generative",
-            "nodes": ["base_report_evaluator"]
+            "nodes": [
+                "base_report_evaluator"
+            ]
         },
         {
             "id": "statistical_analysis",
             "label": "Statistical Analysis",
             "role": "analytical",
-            "nodes": ["statistical_report_evaluators"]
+            "nodes": [
+                "statistical_report_evaluators"
+            ]
         }
     ]
 }

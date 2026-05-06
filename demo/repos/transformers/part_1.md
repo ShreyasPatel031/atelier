@@ -3,17 +3,17 @@ This module introduces `PreTrainedAudioTokenizerBase`, an abstract class for aud
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "src.transformers.modeling_utils.PreTrainedAudioTokenizerBase",
-      "label": "PreTrainedAudioTokenizerBase",
-      "metadata": {
-        "type": "class"
-      }
-    }
-  ],
-  "edges": [],
-  "groups": []
+    "nodes": [
+        {
+            "id": "src.transformers.modeling_utils.PreTrainedAudioTokenizerBase",
+            "label": "PreTrainedAudioTokenizerBase",
+            "metadata": {
+                "type": "class"
+            }
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

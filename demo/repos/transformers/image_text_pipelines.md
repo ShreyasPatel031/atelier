@@ -3,26 +3,28 @@ This module provides the `ImageTextToTextPipeline` for generating text from imag
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "N1",
-      "label": "ImageTextToTextPipeline",
-      "metadata": {
-        "type": "class"
-      }
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "G1",
-      "label": "image_text_pipelines",
-      "nodes": ["N1"],
-      "metadata": {
-        "type": "module"
-      }
-    }
-  ]
+    "nodes": [
+        {
+            "id": "N1",
+            "label": "ImageTextToTextPipeline",
+            "metadata": {
+                "type": "class"
+            }
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "G1",
+            "label": "image_text_pipelines",
+            "nodes": [
+                "N1"
+            ],
+            "metadata": {
+                "type": "module"
+            }
+        }
+    ]
 }
 -->
 ```mermaid

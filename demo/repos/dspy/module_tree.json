@@ -626,54 +626,7 @@
               "target": "core_prediction_modules"
             }
           ],
-          "groups": [
-            {
-              "id": "aggregation",
-              "label": "dspy.predict.aggregation",
-              "members": [
-                "majority",
-                "default_normalize"
-              ]
-            },
-            {
-              "id": "best_of_n",
-              "label": "dspy.predict.best_of_n",
-              "members": [
-                "BestOfN"
-              ]
-            },
-            {
-              "id": "code_act",
-              "label": "dspy.predict.code_act",
-              "members": [
-                "CodeAct"
-              ]
-            },
-            {
-              "id": "program_of_thought",
-              "label": "dspy.predict.program_of_thought",
-              "members": [
-                "ProgramOfThought"
-              ]
-            },
-            {
-              "id": "react",
-              "label": "dspy.predict.react",
-              "members": [
-                "ReAct"
-              ]
-            },
-            {
-              "id": "refine",
-              "label": "dspy.predict.refine",
-              "members": [
-                "Refine",
-                "WrapperAdapter",
-                "inspect_modules",
-                "OfferFeedback"
-              ]
-            }
-          ]
+          "groups": []
         }
       },
       "signatures_and_fields": {
@@ -1095,7 +1048,8 @@
           "source": "core_program_building",
           "target": "advanced_prediction"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "language_model_integration": {
@@ -2560,7 +2514,8 @@
           "source": "language_model_integration",
           "target": "embedding_services"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "program_optimization": {
@@ -2707,7 +2662,8 @@
                   "target": "GenerateSingleModuleInstruction",
                   "label": "module_description"
                 }
-              ]
+              ],
+              "groups": []
             }
           },
           "instruction_refinement_and_optimization": {
@@ -3389,7 +3345,8 @@
           "source": "program_optimization",
           "target": "optimization_utilities"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "data_and_evaluation": {
@@ -3552,25 +3509,7 @@
                   "label": "uses for metric"
                 }
               ],
-              "groups": [
-                {
-                  "id": "math_datasets",
-                  "label": "math_datasets",
-                  "contains": [
-                    "GSM8K",
-                    "MATH"
-                  ]
-                },
-                {
-                  "id": "External Libraries",
-                  "label": "External Libraries",
-                  "contains": [
-                    "huggingface_datasets",
-                    "dspy",
-                    "math_equivalence"
-                  ]
-                }
-              ]
+              "groups": []
             }
           },
           "alfworld_dataset": {
@@ -4007,17 +3946,7 @@
                   "label": "uses"
                 }
               ],
-              "groups": [
-                {
-                  "id": "answer_quality_metrics",
-                  "label": "answer_quality_metrics",
-                  "members": [
-                    "CompleteAndGrounded",
-                    "AnswerCompleteness",
-                    "AnswerGroundedness"
-                  ]
-                }
-              ]
+              "groups": []
             }
           }
         },
@@ -4127,7 +4056,8 @@
           "source": "data_and_evaluation",
           "target": "auto_evaluation"
         }
-      ]
+      ],
+      "groups": []
     }
   },
   "utilities_and_adapters": {
@@ -5090,7 +5020,8 @@
           "source": "utilities_and_adapters",
           "target": "documentation_tools"
         }
-      ]
+      ],
+      "groups": []
     }
   }
 }

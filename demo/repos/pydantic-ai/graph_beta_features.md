@@ -18,32 +18,66 @@ These sub-modules work in concert to allow users to define a graph structure and
 {
     "direction": "TD",
     "nodes": [
-        {"id": "graph_execution_engine", "label": "Graph Execution Engine", "type": "module", "link": "graph_execution_engine.md"},
-        {"id": "parallelism_management", "label": "Parallelism Management", "type": "module", "link": "parallelism_management.md"},
-        {"id": "graph_structure_definition", "label": "Graph Structure Definition", "type": "module", "link": "graph_structure_definition.md"}
+        {
+            "id": "graph_beta_features",
+            "label": "Graph Beta Features",
+            "type": "module"
+        },
+        {
+            "id": "graph_execution_engine",
+            "label": "Graph Execution Engine",
+            "type": "module",
+            "link": "graph_execution_engine.md"
+        },
+        {
+            "id": "parallelism_management",
+            "label": "Parallelism Management",
+            "type": "module",
+            "link": "parallelism_management.md"
+        },
+        {
+            "id": "graph_structure_definition",
+            "label": "Graph Structure Definition",
+            "type": "module",
+            "link": "graph_structure_definition.md"
+        }
     ],
     "edges": [
-        {"source": "graph_structure_definition", "target": "graph_execution_engine", "label": "defines structure for"},
-        {"source": "graph_execution_engine", "target": "parallelism_management", "label": "utilizes for forks/joins"}
+        {
+            "source": "graph_structure_definition",
+            "target": "graph_execution_engine",
+            "label": "defines structure for"
+        },
+        {
+            "source": "graph_execution_engine",
+            "target": "parallelism_management",
+            "label": "utilizes for forks/joins"
+        }
     ],
     "groups": [
         {
             "id": "core_workflow",
             "label": "Core Workflow",
             "role": "generative",
-            "nodes": ["graph_execution_engine"]
+            "nodes": [
+                "graph_execution_engine"
+            ]
         },
         {
             "id": "control_flow",
             "label": "Control Flow",
             "role": "analytical",
-            "nodes": ["parallelism_management"]
+            "nodes": [
+                "parallelism_management"
+            ]
         },
         {
             "id": "definition",
             "label": "Definition",
             "role": "data",
-            "nodes": ["graph_structure_definition"]
+            "nodes": [
+                "graph_structure_definition"
+            ]
         }
     ]
 }

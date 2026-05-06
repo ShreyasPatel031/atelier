@@ -29,27 +29,84 @@ When an agent utilizes a `BuiltinOrLocalTool` capability, the module performs th
 {
     "direction": "TD",
     "nodes": [
-        {"id": "builtin_or_local_tool", "label": "Builtin/Local Tool Handler", "type": "component", "link": null},
-        {"id": "abstract_capability", "label": "Abstract Capability Interface", "type": "external", "link": "capabilities_base.md"},
-        {"id": "tool_definitions", "label": "Tool Definitions (Local Fallback)", "type": "component", "link": null},
-        {"id": "builtin_tool_implementations", "label": "Builtin Tool Implementations", "type": "external", "link": "builtin_tools.md"},
-        {"id": "tool_registration_system", "label": "Tool Registration System", "type": "external", "link": "toolset_management.md"},
-        {"id": "agent_runtime", "label": "Agent Runtime (Execution Context)", "type": "external", "link": "agent_execution_graph.md"}
+        {
+            "id": "builtin_or_local_tool",
+            "label": "Builtin/Local Tool Handler",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "abstract_capability",
+            "label": "Abstract Capability Interface",
+            "type": "external",
+            "link": "capabilities_base.md"
+        },
+        {
+            "id": "tool_definitions",
+            "label": "Tool Definitions (Local Fallback)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "builtin_tool_implementations",
+            "label": "Builtin Tool Implementations",
+            "type": "external",
+            "link": "builtin_tools.md"
+        },
+        {
+            "id": "tool_registration_system",
+            "label": "Tool Registration System",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "agent_runtime",
+            "label": "Agent Runtime (Execution Context)",
+            "type": "external",
+            "link": "agent_execution_graph.md"
+        }
     ],
     "edges": [
-        {"source": "builtin_or_local_tool", "target": "abstract_capability", "label": "Implements"},
-        {"source": "builtin_or_local_tool", "target": "builtin_tool_implementations", "label": "Manages"},
-        {"source": "builtin_or_local_tool", "target": "tool_definitions", "label": "Defines"},
-        {"source": "builtin_or_local_tool", "target": "tool_registration_system", "label": "Registers tools with"},
-        {"source": "tool_registration_system", "target": "agent_runtime", "label": "Provides tools to"},
-        {"source": "builtin_or_local_tool", "target": "agent_runtime", "label": "Uses RunContext from"}
+        {
+            "source": "builtin_or_local_tool",
+            "target": "abstract_capability",
+            "label": "Implements"
+        },
+        {
+            "source": "builtin_or_local_tool",
+            "target": "builtin_tool_implementations",
+            "label": "Manages"
+        },
+        {
+            "source": "builtin_or_local_tool",
+            "target": "tool_definitions",
+            "label": "Defines"
+        },
+        {
+            "source": "builtin_or_local_tool",
+            "target": "tool_registration_system",
+            "label": "Registers tools with"
+        },
+        {
+            "source": "tool_registration_system",
+            "target": "agent_runtime",
+            "label": "Provides tools to"
+        },
+        {
+            "source": "builtin_or_local_tool",
+            "target": "agent_runtime",
+            "label": "Uses RunContext from"
+        }
     ],
     "groups": [
         {
             "id": "tool_adaptation",
             "label": "Tool Adaptation Logic",
             "role": "control",
-            "nodes": ["builtin_or_local_tool", "tool_definitions"]
+            "nodes": [
+                "builtin_or_local_tool",
+                "tool_definitions"
+            ]
         }
     ]
 }

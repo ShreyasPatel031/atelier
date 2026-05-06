@@ -17,18 +17,40 @@ These sub-modules work in conjunction to offer a comprehensive suite of evaluati
 {
     "direction": "TD",
     "nodes": [
-        {"id": "llm_based_evaluators", "label": "LLM-based Evaluation", "type": "module", "link": "llm_based_evaluators.md"},
-        {"id": "data_content_evaluators", "label": "Data Content and Type Evaluation", "type": "module", "link": "data_content_evaluators.md"}
+        {
+            "id": "standard_evaluators",
+            "label": "Standard Evaluators",
+            "type": "module"
+        },
+        {
+            "id": "llm_based_evaluators",
+            "label": "LLM-based Evaluation",
+            "type": "module",
+            "link": "llm_based_evaluators.md"
+        },
+        {
+            "id": "data_content_evaluators",
+            "label": "Data Content and Type Evaluation",
+            "type": "module",
+            "link": "data_content_evaluators.md"
+        }
     ],
     "edges": [
-        {"source": "llm_based_evaluators", "target": "data_content_evaluators", "label": "complements"}
+        {
+            "source": "llm_based_evaluators",
+            "target": "data_content_evaluators",
+            "label": "complements"
+        }
     ],
     "groups": [
         {
             "id": "evaluation_types",
             "label": "Evaluation Types",
             "role": "analytical",
-            "nodes": ["llm_based_evaluators", "data_content_evaluators"]
+            "nodes": [
+                "llm_based_evaluators",
+                "data_content_evaluators"
+            ]
         }
     ]
 }

@@ -14,28 +14,71 @@ The `static_tool_requests` module is composed of the `tool_request_states` sub-m
 {
     "direction": "TD",
     "nodes": [
-        {"id": "tool_request_states", "label": "Manage Tool Request States", "type": "module", "link": "tool_request_states.md"},
-        {"id": "vercel_ai_request_types", "label": "Vercel AI Request Types", "type": "external", "link": "vercel_ai_request_types.md"},
-        {"id": "ui_step_management", "label": "UI Step Management", "type": "external", "link": "ui_step_management.md"},
-        {"id": "dynamic_tool_requests", "label": "Dynamic Tool Requests", "type": "external", "link": "dynamic_tool_requests.md"}
+        {
+            "id": "static_tool_requests",
+            "label": "Static Tool Interaction Requests",
+            "type": "module"
+        },
+        {
+            "id": "tool_request_states",
+            "label": "Manage Tool Request States",
+            "type": "module",
+            "link": "tool_request_states.md"
+        },
+        {
+            "id": "vercel_ai_request_types",
+            "label": "Vercel AI Request Types",
+            "type": "external",
+            "link": "vercel_ai_request_types.md"
+        },
+        {
+            "id": "ui_step_management",
+            "label": "UI Step Management",
+            "type": "external",
+            "link": "ui_step_management.md"
+        },
+        {
+            "id": "dynamic_tool_requests",
+            "label": "Dynamic Tool Requests",
+            "type": "external",
+            "link": "dynamic_tool_requests.md"
+        }
     ],
     "edges": [
-        {"source": "vercel_ai_request_types", "target": "tool_request_states", "label": "contains definitions"},
-        {"source": "tool_request_states", "target": "ui_step_management", "label": "informs UI flow"},
-        {"source": "tool_request_states", "target": "dynamic_tool_requests", "label": "related to tool states"}
+        {
+            "source": "vercel_ai_request_types",
+            "target": "tool_request_states",
+            "label": "contains definitions"
+        },
+        {
+            "source": "tool_request_states",
+            "target": "ui_step_management",
+            "label": "informs UI flow"
+        },
+        {
+            "source": "tool_request_states",
+            "target": "dynamic_tool_requests",
+            "label": "related to tool states"
+        }
     ],
     "groups": [
         {
             "id": "static_requests",
             "label": "Static Tool Request Handling",
             "role": "generative",
-            "nodes": ["tool_request_states"]
+            "nodes": [
+                "tool_request_states"
+            ]
         },
         {
             "id": "interaction_context",
             "label": "UI Interaction Context",
             "role": "surface",
-            "nodes": ["vercel_ai_request_types", "ui_step_management", "dynamic_tool_requests"]
+            "nodes": [
+                "vercel_ai_request_types",
+                "ui_step_management",
+                "dynamic_tool_requests"
+            ]
         }
     ]
 }

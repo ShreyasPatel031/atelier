@@ -6,46 +6,215 @@ The Chains module provides a framework for creating structured sequences of call
 {
     "direction": "TD",
     "nodes": [
-        {"id": "core_chains", "label": "Core Chain Abstractions", "type": "module", "link": "core_chains.md"},
-        {"id": "conversational_retrieval_chains", "label": "Conversational & Retrieval Chains", "type": "module", "link": "conversational_retrieval_chains.md"},
-        {"id": "specialized_workflow_chains", "label": "Specialized Workflow Chains", "type": "module", "link": "specialized_workflow_chains.md"},
-        {"id": "openai_function_tool_chains", "label": "OpenAI Function & Tool Chains", "type": "module", "link": "openai_function_tool_chains.md"},
-        {"id": "router_chains", "label": "Routing Chains", "type": "module", "link": "router_chains.md"},
-        {"id": "chain_loading_utilities", "label": "Chain Loading & Construction", "type": "module", "link": "chain_loading_utilities.md"},
-        {"id": "document_qa_summarization_chains", "label": "Document QA & Summarization Chains", "type": "module", "link": "document_qa_summarization_chains.md"},
-        {"id": "models_and_embeddings", "label": "Models & Embeddings", "type": "external"},
-        {"id": "runnable_framework", "label": "Runnable Framework", "type": "external"},
-        {"id": "callbacks_and_tracing", "label": "Callbacks & Tracing", "type": "external"},
-        {"id": "memory", "label": "Memory", "type": "external"},
-        {"id": "retrieval_systems", "label": "Retrieval Systems", "type": "external"},
-        {"id": "document_management", "label": "Document Management", "type": "external"},
-        {"id": "agents", "label": "Agents", "type": "external"}
+        {
+            "id": "chains",
+            "label": "Chains",
+            "type": "module"
+        },
+        {
+            "id": "core_chains",
+            "label": "Core Chain Abstractions",
+            "type": "module",
+            "link": "core_chains.md"
+        },
+        {
+            "id": "conversational_retrieval_chains",
+            "label": "Conversational & Retrieval Chains",
+            "type": "module",
+            "link": "conversational_retrieval_chains.md"
+        },
+        {
+            "id": "specialized_workflow_chains",
+            "label": "Specialized Workflow Chains",
+            "type": "module",
+            "link": "specialized_workflow_chains.md"
+        },
+        {
+            "id": "openai_function_tool_chains",
+            "label": "OpenAI Function & Tool Chains",
+            "type": "module",
+            "link": "openai_function_tool_chains.md"
+        },
+        {
+            "id": "router_chains",
+            "label": "Routing Chains",
+            "type": "module",
+            "link": "router_chains.md"
+        },
+        {
+            "id": "chain_loading_utilities",
+            "label": "Chain Loading & Construction",
+            "type": "module",
+            "link": "chain_loading_utilities.md"
+        },
+        {
+            "id": "document_qa_summarization_chains",
+            "label": "Document QA & Summarization Chains",
+            "type": "module",
+            "link": "document_qa_summarization_chains.md"
+        },
+        {
+            "id": "models_and_embeddings",
+            "label": "Models & Embeddings",
+            "type": "external"
+        },
+        {
+            "id": "runnable_framework",
+            "label": "Runnable Framework",
+            "type": "external"
+        },
+        {
+            "id": "callbacks_and_tracing",
+            "label": "Callbacks & Tracing",
+            "type": "external"
+        },
+        {
+            "id": "memory",
+            "label": "Memory",
+            "type": "external"
+        },
+        {
+            "id": "retrieval_systems",
+            "label": "Retrieval Systems",
+            "type": "external"
+        },
+        {
+            "id": "document_management",
+            "label": "Document Management",
+            "type": "external"
+        },
+        {
+            "id": "agents",
+            "label": "Agents",
+            "type": "external"
+        }
     ],
     "edges": [
-        {"source": "core_chains", "target": "runnable_framework", "label": "builds upon"},
-        {"source": "core_chains", "target": "callbacks_and_tracing", "label": "integrates"},
-        {"source": "core_chains", "target": "memory", "label": "manages state with"},
-        {"source": "chain_loading_utilities", "target": "core_chains", "label": "constructs"},
-        {"source": "conversational_retrieval_chains", "target": "core_chains", "label": "extends"},
-        {"source": "conversational_retrieval_chains", "target": "retrieval_systems", "label": "uses"},
-        {"source": "conversational_retrieval_chains", "target": "models_and_embeddings", "label": "generates questions with"},
-        {"source": "specialized_workflow_chains", "target": "core_chains", "label": "implements"},
-        {"source": "specialized_workflow_chains", "target": "models_and_embeddings", "label": "interacts with"},
-        {"source": "specialized_workflow_chains", "target": "retrieval_systems", "label": "utilizes"},
-        {"source": "openai_function_tool_chains", "target": "core_chains", "label": "leverages"},
-        {"source": "openai_function_tool_chains", "target": "models_and_embeddings", "label": "uses OpenAI functions/tools"},
-        {"source": "router_chains", "target": "core_chains", "label": "orchestrates"},
-        {"source": "router_chains", "target": "models_and_embeddings", "label": "decides routes with"},
-        {"source": "router_chains", "target": "retrieval_systems", "label": "routes to"},
-        {"source": "document_qa_summarization_chains", "target": "core_chains", "label": "processes via"},
-        {"source": "document_qa_summarization_chains", "target": "models_and_embeddings", "label": "summarizes and answers with"},
-        {"source": "document_qa_summarization_chains", "target": "document_management", "label": "manages documents from"},
-        {"source": "agents", "target": "core_chains", "label": "integrates with"}
+        {
+            "source": "core_chains",
+            "target": "runnable_framework",
+            "label": "builds upon"
+        },
+        {
+            "source": "core_chains",
+            "target": "callbacks_and_tracing",
+            "label": "integrates"
+        },
+        {
+            "source": "core_chains",
+            "target": "memory",
+            "label": "manages state with"
+        },
+        {
+            "source": "chain_loading_utilities",
+            "target": "core_chains",
+            "label": "constructs"
+        },
+        {
+            "source": "conversational_retrieval_chains",
+            "target": "core_chains",
+            "label": "extends"
+        },
+        {
+            "source": "conversational_retrieval_chains",
+            "target": "retrieval_systems",
+            "label": "uses"
+        },
+        {
+            "source": "conversational_retrieval_chains",
+            "target": "models_and_embeddings",
+            "label": "generates questions with"
+        },
+        {
+            "source": "specialized_workflow_chains",
+            "target": "core_chains",
+            "label": "implements"
+        },
+        {
+            "source": "specialized_workflow_chains",
+            "target": "models_and_embeddings",
+            "label": "interacts with"
+        },
+        {
+            "source": "specialized_workflow_chains",
+            "target": "retrieval_systems",
+            "label": "utilizes"
+        },
+        {
+            "source": "openai_function_tool_chains",
+            "target": "core_chains",
+            "label": "leverages"
+        },
+        {
+            "source": "openai_function_tool_chains",
+            "target": "models_and_embeddings",
+            "label": "uses OpenAI functions/tools"
+        },
+        {
+            "source": "router_chains",
+            "target": "core_chains",
+            "label": "orchestrates"
+        },
+        {
+            "source": "router_chains",
+            "target": "models_and_embeddings",
+            "label": "decides routes with"
+        },
+        {
+            "source": "router_chains",
+            "target": "retrieval_systems",
+            "label": "routes to"
+        },
+        {
+            "source": "document_qa_summarization_chains",
+            "target": "core_chains",
+            "label": "processes via"
+        },
+        {
+            "source": "document_qa_summarization_chains",
+            "target": "models_and_embeddings",
+            "label": "summarizes and answers with"
+        },
+        {
+            "source": "document_qa_summarization_chains",
+            "target": "document_management",
+            "label": "manages documents from"
+        },
+        {
+            "source": "agents",
+            "target": "core_chains",
+            "label": "integrates with"
+        }
     ],
     "groups": [
-        {"id": "foundations", "label": "Foundational Abstractions", "role": "analytical", "nodes": ["core_chains"]},
-        {"id": "utilities", "label": "Chain Utilities", "role": "analytical", "nodes": ["chain_loading_utilities"]},
-        {"id": "flows", "label": "Interaction Flows", "role": "generative", "nodes": ["conversational_retrieval_chains", "specialized_workflow_chains", "openai_function_tool_chains", "router_chains", "document_qa_summarization_chains"]}
+        {
+            "id": "foundations",
+            "label": "Foundational Abstractions",
+            "role": "analytical",
+            "nodes": [
+                "core_chains"
+            ]
+        },
+        {
+            "id": "utilities",
+            "label": "Chain Utilities",
+            "role": "analytical",
+            "nodes": [
+                "chain_loading_utilities"
+            ]
+        },
+        {
+            "id": "flows",
+            "label": "Interaction Flows",
+            "role": "generative",
+            "nodes": [
+                "conversational_retrieval_chains",
+                "specialized_workflow_chains",
+                "openai_function_tool_chains",
+                "router_chains",
+                "document_qa_summarization_chains"
+            ]
+        }
     ]
 }
 -->

@@ -21,24 +21,47 @@ The `edge_collection` prepares the necessary graph data, which is then consumed 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "edge_collection", "label": "Collect Graph Edges", "type": "module", "link": "edge_collection.md"},
-        {"id": "graph_renderer", "label": "Render Mermaid Diagram", "type": "module", "link": "graph_renderer.md"}
+        {
+            "id": "mermaid_graph_rendering",
+            "label": "Mermaid Graph Rendering",
+            "type": "module"
+        },
+        {
+            "id": "edge_collection",
+            "label": "Collect Graph Edges",
+            "type": "module",
+            "link": "edge_collection.md"
+        },
+        {
+            "id": "graph_renderer",
+            "label": "Render Mermaid Diagram",
+            "type": "module",
+            "link": "graph_renderer.md"
+        }
     ],
     "edges": [
-        {"source": "edge_collection", "target": "graph_renderer", "label": "prepared edges"}
+        {
+            "source": "edge_collection",
+            "target": "graph_renderer",
+            "label": "prepared edges"
+        }
     ],
     "groups": [
         {
             "id": "graph_data_preparation",
             "label": "Graph Data Preparation",
             "role": "analytical",
-            "nodes": ["edge_collection"]
+            "nodes": [
+                "edge_collection"
+            ]
         },
         {
             "id": "visualization_rendering",
             "label": "Visualization Rendering",
             "role": "generative",
-            "nodes": ["graph_renderer"]
+            "nodes": [
+                "graph_renderer"
+            ]
         }
     ]
 }

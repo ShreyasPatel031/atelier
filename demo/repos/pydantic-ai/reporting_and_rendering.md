@@ -20,24 +20,47 @@ This sub-module is dedicated to converting raw duration values (in seconds) into
 {
     "direction": "TD",
     "nodes": [
-        {"id": "difference_rendering", "label": "Render Value Differences", "type": "module", "link": "difference_rendering.md"},
-        {"id": "duration_formatting", "label": "Format Durations", "type": "module", "link": "duration_formatting.md"}
+        {
+            "id": "reporting_and_rendering",
+            "label": "Reporting and Rendering",
+            "type": "module"
+        },
+        {
+            "id": "difference_rendering",
+            "label": "Render Value Differences",
+            "type": "module",
+            "link": "difference_rendering.md"
+        },
+        {
+            "id": "duration_formatting",
+            "label": "Format Durations",
+            "type": "module",
+            "link": "duration_formatting.md"
+        }
     ],
     "edges": [
-        {"source": "difference_rendering", "target": "duration_formatting", "label": "uses to format"}
+        {
+            "source": "difference_rendering",
+            "target": "duration_formatting",
+            "label": "uses to format"
+        }
     ],
     "groups": [
         {
             "id": "rendering_logic",
             "label": "Rendering Logic",
             "role": "generative",
-            "nodes": ["difference_rendering"]
+            "nodes": [
+                "difference_rendering"
+            ]
         },
         {
             "id": "formatting_utilities",
             "label": "Formatting Utilities",
             "role": "generative",
-            "nodes": ["duration_formatting"]
+            "nodes": [
+                "duration_formatting"
+            ]
         }
     ]
 }

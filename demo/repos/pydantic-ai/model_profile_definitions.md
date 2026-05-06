@@ -10,30 +10,83 @@ This module is a part of the `model_provider_configurations` and defines special
 {
     "direction": "TD",
     "nodes": [
-        {"id": "model_provider_configurations", "label": "Model Provider Configurations", "type": "external", "link": "model_provider_configurations.md"},
-        {"id": "bedrock_profile", "label": "Bedrock Amazon Profiles", "type": "module", "link": "bedrock_profile.md"},
-        {"id": "groq_profiles", "label": "Groq Model Profiles", "type": "module", "link": "groq_profiles.md"},
-        {"id": "harmony_profile", "label": "Harmony Model Profile", "type": "module", "link": "harmony_profile.md"},
-        {"id": "openrouter_google_profile", "label": "OpenRouter Google Profiles", "type": "module", "link": "openrouter_google_profile.md"}
+        {
+            "id": "model_profile_definitions",
+            "label": "Model Profile Definitions",
+            "type": "module"
+        },
+        {
+            "id": "model_provider_configurations",
+            "label": "Model Provider Configurations",
+            "type": "external",
+            "link": "model_provider_configurations.md"
+        },
+        {
+            "id": "bedrock_profile",
+            "label": "Bedrock Amazon Profiles",
+            "type": "module",
+            "link": "bedrock_profile.md"
+        },
+        {
+            "id": "groq_profiles",
+            "label": "Groq Model Profiles",
+            "type": "module",
+            "link": "groq_profiles.md"
+        },
+        {
+            "id": "harmony_profile",
+            "label": "Harmony Model Profile",
+            "type": "module",
+            "link": "harmony_profile.md"
+        },
+        {
+            "id": "openrouter_google_profile",
+            "label": "OpenRouter Google Profiles",
+            "type": "module",
+            "link": "openrouter_google_profile.md"
+        }
     ],
     "edges": [
-        {"source": "model_provider_configurations", "target": "bedrock_profile", "label": "defines profile"},
-        {"source": "model_provider_configurations", "target": "groq_profiles", "label": "defines profile"},
-        {"source": "model_provider_configurations", "target": "harmony_profile", "label": "defines profile"},
-        {"source": "model_provider_configurations", "target": "openrouter_google_profile", "label": "defines profile"}
+        {
+            "source": "model_provider_configurations",
+            "target": "bedrock_profile",
+            "label": "defines profile"
+        },
+        {
+            "source": "model_provider_configurations",
+            "target": "groq_profiles",
+            "label": "defines profile"
+        },
+        {
+            "source": "model_provider_configurations",
+            "target": "harmony_profile",
+            "label": "defines profile"
+        },
+        {
+            "source": "model_provider_configurations",
+            "target": "openrouter_google_profile",
+            "label": "defines profile"
+        }
     ],
     "groups": [
         {
             "id": "model_profiles",
             "label": "Model Profiles",
             "role": "data",
-            "nodes": ["bedrock_profile", "groq_profiles", "harmony_profile", "openrouter_google_profile"]
+            "nodes": [
+                "bedrock_profile",
+                "groq_profiles",
+                "harmony_profile",
+                "openrouter_google_profile"
+            ]
         },
         {
             "id": "external_configs",
             "label": "External Configurations",
             "role": "analytical",
-            "nodes": ["model_provider_configurations"]
+            "nodes": [
+                "model_provider_configurations"
+            ]
         }
     ]
 }

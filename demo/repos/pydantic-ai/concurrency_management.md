@@ -31,34 +31,25 @@ The `ConcurrencyLimiter` class is a high-level concurrency control mechanism bui
 {
     "direction": "TD",
     "nodes": [
-        {"id": "concurrency_limiter_class", "label": "ConcurrencyLimiter Class", "type": "component", "link": null},
-        {"id": "acquire_method", "label": "Acquire Slot", "type": "component", "link": null},
-        {"id": "release_method", "label": "Release Slot", "type": "component", "link": null},
-        {"id": "monitor_status", "label": "Monitor Limiter Status", "type": "component", "link": null},
-        {"id": "anyio_capacity_limiter", "label": "anyio.CapacityLimiter", "type": "external", "link": null},
-        {"id": "opentelemetry_tracer", "label": "OpenTelemetry Tracer", "type": "external", "link": null},
-        {"id": "concurrency_limit_exceeded", "label": "ConcurrencyLimitExceeded Exception", "type": "external", "link": "exceptions.md"},
-        {"id": "asynchronous_utilities", "label": "Asynchronous Utilities Module", "type": "external", "link": "asynchronous_utilities.md"},
-        {"id": "model_concurrency_limiting", "label": "Model Concurrency Limiting", "type": "external", "link": "model_utilities.md"}
+        {
+            "id": "concurrency_management",
+            "label": "Concurrency Management",
+            "type": "module"
+        },
+        {
+            "id": "c0",
+            "label": "limit_model_concurrency",
+            "type": "component"
+        }
     ],
     "edges": [
-        {"source": "concurrency_limiter_class", "target": "anyio_capacity_limiter", "label": "wraps and manages"},
-        {"source": "acquire_method", "target": "concurrency_limiter_class", "label": "requests slot from"},
-        {"source": "release_method", "target": "concurrency_limiter_class", "label": "returns slot to"},
-        {"source": "monitor_status", "target": "concurrency_limiter_class", "label": "reads metrics from"},
-        {"source": "acquire_method", "target": "opentelemetry_tracer", "label": "emits waiting spans to"},
-        {"source": "acquire_method", "target": "concurrency_limit_exceeded", "label": "raises if queue full"},
-        {"source": "asynchronous_utilities", "target": "concurrency_limiter_class", "label": "utilizes for async ops"},
-        {"source": "concurrency_limiter_class", "target": "model_concurrency_limiting", "label": "provides limits for"}
-    ],
-    "groups": [
         {
-            "id": "concurrency_flow",
-            "label": "Concurrency Control Flow",
-            "role": "control",
-            "nodes": ["acquire_method", "release_method", "monitor_status"]
+            "source": "concurrency_management",
+            "target": "c0"
         }
-    ]
+    ],
+    "groups": [],
+    "_auto_generated": true
 }
 -->
 ```

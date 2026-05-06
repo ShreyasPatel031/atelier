@@ -24,6 +24,7 @@ Usage:
 """
 
 import asyncio
+import copy
 import json
 import logging
 import os
@@ -68,6 +69,28 @@ class IssueType(Enum):
     LLM_CONTEXT_EXCEEDED = "llm_context_exceeded"
     LLM_TIMEOUT = "llm_timeout"
     LLM_API_ERROR = "llm_api_error"
+
+    # Diagram IR (R2/R4) — values match issue_type prefix diagram_ir_<code>
+    DIAGRAM_IR_G3_LIFT_INLINE_NODE = "diagram_ir_g3_lift_inline_node"
+    DIAGRAM_IR_G3_DROP_NON_STRING_MEMBER = "diagram_ir_g3_drop_non_string_member"
+    DIAGRAM_IR_G3_DROP_UNKNOWN_MEMBER = "diagram_ir_g3_drop_unknown_member"
+    DIAGRAM_IR_G3_DROPPED_EMPTY_GROUP = "diagram_ir_g3_dropped_empty_group"
+    DIAGRAM_IR_G2_INJECTED_EXTERNAL = "diagram_ir_g2_injected_external"
+    DIAGRAM_IR_G2_ENDPOINT_IS_GROUP_ID = "diagram_ir_g2_endpoint_is_group_id"
+    DIAGRAM_IR_G2_SKIP_EDGE_MISSING_ENDPOINT = "diagram_ir_g2_skip_edge_missing_endpoint"
+    DIAGRAM_IR_R4_NODE_ID_COLLIDES_WITH_GROUP = "diagram_ir_r4_node_id_collides_with_group"
+    DIAGRAM_IR_R4_SKIP_EDGE_MISSING_ENDPOINT = "diagram_ir_r4_skip_edge_missing_endpoint"
+    DIAGRAM_IR_R4_EDGE_UNKNOWN_SOURCE = "diagram_ir_r4_edge_unknown_source"
+    DIAGRAM_IR_R4_EDGE_UNKNOWN_TARGET = "diagram_ir_r4_edge_unknown_target"
+    DIAGRAM_IR_R4_VALIDATE_FAILED = "diagram_ir_r4_validate_failed"
+    DIAGRAM_IR_R4_EDGE_PLACEMENT_VIOLATIONS = "diagram_ir_r4_edge_placement_violations"
+    DIAGRAM_IR_OVERVIEW_NO_DIAGRAM_JSON = "diagram_ir_overview_no_diagram_json"
+    DIAGRAM_IR_OVERVIEW_MERMAID_PARSE_FAILED = "diagram_ir_overview_mermaid_parse_failed"
+    # R1-style codes on overview Mermaid (details carry raw warning/reason)
+    DIAGRAM_IR_R1_UNMATCHED_END = "diagram_ir_r1_unmatched_end"
+    DIAGRAM_IR_R1_UNCLOSED_SUBGRAPH = "diagram_ir_r1_unclosed_subgraph"
+    DIAGRAM_IR_R1_EMPTY_MERMAID = "diagram_ir_r1_empty_mermaid"
+    DIAGRAM_IR_R1_TOO_MANY_UNSUPPORTED_LINES = "diagram_ir_r1_too_many_unsupported_lines"
 
 
 @dataclass
@@ -517,6 +540,1044 @@ def audit_mermaid_syntax_state(docs_dir: str) -> Dict[str, Any]:
     return asyncio.run(_audit_mermaid_syntax_state_async(docs_dir, operational))
 
 
+_DIAGRAM_JSON_BLOCK_RE = re.compile(
+    r"<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->", re.IGNORECASE
+)
+
+_MAX_SAMPLES_PER_DIAGRAM_IR_CODE = 50
+
+
+def overview_mermaid_to_diagram_json(text: str) -> Dict[str, Any]:
+    """Python port of demo/pipeline-overview-mermaid.js (narrow subset)."""
+    warnings: List[str] = []
+    unsupported_lines: List[str] = []
+    if not text or not str(text).strip():
+        return {
+            "ok": False,
+            "reason": "empty_mermaid",
+            "warnings": warnings,
+            "unsupportedLines": unsupported_lines,
+        }
+
+    nodes_map: Dict[str, Dict[str, Any]] = {}
+    edges: List[Dict[str, Any]] = []
+    groups_map: Dict[str, Dict[str, Any]] = {}
+    click_map: Dict[str, str] = {}
+    direction = "TD"
+    subgraph_stack: List[str] = []
+
+    def ensure_node(nid: str, label: Any, extra: Optional[Dict[str, Any]] = None) -> None:
+        if not nid:
+            return
+        lab = str(label if label is not None else nid).strip()
+        prev = nodes_map.get(nid)
+        if prev:
+            if lab and prev.get("label") == nid and lab != nid:
+                prev["label"] = lab
+            if extra:
+                prev.update(extra)
+            return
+        node: Dict[str, Any] = {"id": nid, "label": lab or nid, "type": "component"}
+        if extra:
+            node.update(extra)
+        nodes_map[nid] = node
+
+    def add_node_to_current_groups(node_id: str) -> None:
+        if not subgraph_stack:
+            return
+        gid = subgraph_stack[-1]
+        g = groups_map.get(gid)
+        if g and node_id not in g["nodes"]:
+            g["nodes"].append(node_id)
+
+    lines: List[str] = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith("%%"):
+            continue
+        lines.append(line)
+
+    for line in lines:
+        if (
+            re.match(r"^classDef\s", line, re.I)
+            or re.match(r"^class\s+", line, re.I)
+            or re.match(r"^style\s+", line, re.I)
+        ):
+            continue
+
+        click_m = re.match(r'^click\s+(\w+)\s+"([^"]+)"', line)
+        if click_m:
+            raw_path = click_m.group(2)
+            base = re.sub(r"\.md$", "", raw_path, flags=re.I)
+            click_map[click_m.group(1)] = base + ".md"
+            continue
+
+        sub_open = re.match(r'^subgraph\s+(\w+)(?:\["([^"]*)"\])?', line, re.I)
+        if sub_open:
+            gid = sub_open.group(1)
+            glabel = sub_open.group(2) if sub_open.group(2) is not None else gid
+            if gid not in groups_map:
+                groups_map[gid] = {"id": gid, "label": glabel, "nodes": []}
+            subgraph_stack.append(gid)
+            continue
+
+        if re.match(r"^end\s*$", line, re.I):
+            if not subgraph_stack:
+                warnings.append("unmatched_end")
+            else:
+                subgraph_stack.pop()
+            continue
+
+        hdr = re.match(r"^(flowchart|graph)\s+(\w+)\s*$", line, re.I)
+        if hdr:
+            direction = hdr.group(2).upper()
+            continue
+
+        edge_labeled = re.match(
+            r'^(\w+)\s*(-->|==>|-\.->)\s*\|\s*"([^"]*)"\s*\|\s*(\w+)\s*$', line
+        )
+        if edge_labeled:
+            edges.append(
+                {
+                    "source": edge_labeled.group(1),
+                    "target": edge_labeled.group(4),
+                    "label": edge_labeled.group(3),
+                }
+            )
+            ensure_node(edge_labeled.group(1), edge_labeled.group(1))
+            ensure_node(edge_labeled.group(4), edge_labeled.group(4))
+            continue
+
+        edge_plain = re.match(r"^(\w+)\s*(-->|==>|-\.->)\s*(\w+)\s*$", line)
+        if edge_plain:
+            edges.append(
+                {"source": edge_plain.group(1), "target": edge_plain.group(3), "label": ""}
+            )
+            ensure_node(edge_plain.group(1), edge_plain.group(1))
+            ensure_node(edge_plain.group(3), edge_plain.group(3))
+            continue
+
+        node_match = re.match(r'^(\w+)\s*\[\s*"([^"]*)"\s*\]\s*$', line)
+        if node_match:
+            ensure_node(node_match.group(1), node_match.group(2))
+            add_node_to_current_groups(node_match.group(1))
+            continue
+
+        node_match = re.match(r"^(\w+)\s*\[\s*([^\]]+?)\s*\]\s*$", line)
+        if node_match:
+            inner = re.sub(r'^["\']|["\']$', "", node_match.group(2).strip()).strip()
+            ensure_node(node_match.group(1), inner)
+            add_node_to_current_groups(node_match.group(1))
+            continue
+
+        node_match = re.match(r'^(\w+)\s*\(\s*"([^"]*)"\s*\)\s*$', line)
+        if node_match:
+            ensure_node(node_match.group(1), node_match.group(2))
+            add_node_to_current_groups(node_match.group(1))
+            continue
+
+        node_match = re.match(r'^(\w+)\s*\(\(\s*"([^"]*)"\s*\)\)\s*$', line)
+        if node_match:
+            ensure_node(node_match.group(1), node_match.group(2))
+            add_node_to_current_groups(node_match.group(1))
+            continue
+
+        node_match = re.match(r"^(\w+)\s*\(\(\s*([^)]+?)\s*\)\)\s*$", line)
+        if node_match:
+            inner = re.sub(r'^["\']|["\']$', "", node_match.group(2).strip()).strip()
+            ensure_node(node_match.group(1), inner)
+            add_node_to_current_groups(node_match.group(1))
+            continue
+
+        unsupported_lines.append(line)
+
+    if subgraph_stack:
+        warnings.append("unclosed_subgraph:" + ",".join(subgraph_stack))
+
+    for nid, md_path in click_map.items():
+        n = nodes_map.get(nid)
+        if n:
+            n["type"] = "module"
+            n["link"] = md_path
+        else:
+            ensure_node(nid, nid, {"type": "module", "link": md_path})
+
+    nodes = sorted(nodes_map.values(), key=lambda x: str(x["id"]))
+    groups = [{"id": g["id"], "label": g["label"], "nodes": list(g["nodes"])} for g in groups_map.values()]
+
+    diagram = {"direction": direction, "nodes": nodes, "edges": edges, "groups": groups}
+
+    ok = len(unsupported_lines) == 0 or len(unsupported_lines) <= max(
+        3, int(len(lines) * 0.15)
+    )
+    if not ok:
+        return {
+            "ok": False,
+            "reason": "too_many_unsupported_lines",
+            "diagram": diagram,
+            "warnings": warnings,
+            "unsupportedLines": unsupported_lines,
+            "unsupportedLineCount": len(unsupported_lines),
+        }
+
+    return {
+        "ok": True,
+        "diagram": diagram,
+        "warnings": warnings,
+        "unsupportedLines": unsupported_lines,
+        "unsupportedLineCount": len(unsupported_lines),
+        "counts": {"nodes": len(nodes), "edges": len(edges), "groups": len(groups)},
+    }
+
+
+def repair_diagram_ir(
+    diagram: Optional[Dict[str, Any]],
+) -> Tuple[bool, Optional[Dict[str, Any]], List[Dict[str, Any]], Dict[str, Any]]:
+    """
+    Deterministic R2 repair — parity with demo/pipeline-ir-repair.js.
+    Returns (ok, diagram_or_none, warnings, summary).
+    """
+    warnings: List[Dict[str, Any]] = []
+    summary: Dict[str, Any] = {
+        "g2Injected": [],
+        "g2EndpointIsGroupId": [],
+        "g3Lifted": [],
+        "g3DroppedNonString": [],
+        "g3DroppedUnknownMember": [],
+        "g3DroppedEmptyGroups": [],
+        "before": {"nodeCount": 0, "edgeCount": 0, "groupCount": 0},
+        "after": {"nodeCount": 0, "edgeCount": 0, "groupCount": 0},
+    }
+
+    if not diagram or not isinstance(diagram, dict):
+        return False, None, warnings, summary
+
+    try:
+        data = copy.deepcopy(diagram)
+    except Exception as e:
+        return (
+            False,
+            None,
+            [{"code": "clone_error", "detail": str(e)}],
+            summary,
+        )
+
+    if not isinstance(data.get("nodes"), list):
+        data["nodes"] = []
+    if not isinstance(data.get("edges"), list):
+        data["edges"] = []
+    if not isinstance(data.get("groups"), list):
+        data["groups"] = []
+
+    summary["before"] = {
+        "nodeCount": len(data["nodes"]),
+        "edgeCount": len(data["edges"]),
+        "groupCount": len(data["groups"]),
+    }
+
+    def collect_node_ids() -> Set[str]:
+        ids: Set[str] = set()
+        for n in data["nodes"]:
+            if n and n.get("id") is not None:
+                ids.add(str(n["id"]))
+        return ids
+
+    def collect_group_ids() -> Set[str]:
+        ids: Set[str] = set()
+        for g in data["groups"]:
+            if g and g.get("id") is not None:
+                ids.add(str(g["id"]))
+        return ids
+
+    group_ids = collect_group_ids()
+
+    for g in data["groups"]:
+        if not g or g.get("id") is None:
+            continue
+        gid = str(g["id"])
+        if not isinstance(g.get("nodes"), list):
+            g["nodes"] = []
+
+        next_members: List[str] = []
+        for i, entry in enumerate(g["nodes"]):
+            if entry and isinstance(entry, dict) and not isinstance(entry, list) and entry.get("id") is not None:
+                nid = str(entry["id"])
+                label = str(entry["label"]) if entry.get("label") is not None else nid
+                ntype = str(entry["type"]) if entry.get("type") is not None else "component"
+                link = entry.get("link")
+                existing = next((x for x in data["nodes"] if x and str(x.get("id")) == nid), None)
+                if not existing:
+                    new_node: Dict[str, Any] = {
+                        "id": nid,
+                        "label": label,
+                        "type": ntype,
+                        "_repaired": "g3_lifted_from_group",
+                    }
+                    if link is not None:
+                        new_node["link"] = link
+                    data["nodes"].append(new_node)
+                else:
+                    if label and existing.get("label") == existing.get("id"):
+                        existing["label"] = label
+                    if ntype and not existing.get("type"):
+                        existing["type"] = ntype
+                summary["g3Lifted"].append({"groupId": gid, "nodeId": nid})
+                warnings.append({"code": "g3_lift_inline_node", "groupId": gid, "nodeId": nid})
+                next_members.append(nid)
+                continue
+            if not isinstance(entry, str):
+                summary["g3DroppedNonString"].append(
+                    {"groupId": gid, "index": i, "entryType": type(entry).__name__}
+                )
+                warnings.append({"code": "g3_drop_non_string_member", "groupId": gid, "index": i})
+                continue
+            next_members.append(entry)
+        g["nodes"] = next_members
+
+    node_ids = collect_node_ids()
+
+    for g in data["groups"]:
+        if not g or g.get("id") is None:
+            continue
+        gid = str(g["id"])
+        kept: List[str] = []
+        for mid in g["nodes"]:
+            sid = str(mid)
+            if sid not in node_ids:
+                summary["g3DroppedUnknownMember"].append({"groupId": gid, "memberId": sid})
+                warnings.append({"code": "g3_drop_unknown_member", "groupId": gid, "memberId": sid})
+                continue
+            kept.append(sid)
+        g["nodes"] = kept
+
+    kept_groups: List[Dict[str, Any]] = []
+    for g in data["groups"]:
+        if not g or g.get("id") is None:
+            continue
+        if not g.get("nodes") or len(g["nodes"]) == 0:
+            summary["g3DroppedEmptyGroups"].append(str(g["id"]))
+            warnings.append({"code": "g3_dropped_empty_group", "groupId": str(g["id"])})
+            continue
+        kept_groups.append(g)
+    data["groups"] = kept_groups
+
+    group_ids = collect_group_ids()
+    node_ids = collect_node_ids()
+
+    def first_group_member(gid: str) -> Optional[str]:
+        for g in data["groups"]:
+            if not g or g.get("id") is None:
+                continue
+            if str(g["id"]) != gid:
+                continue
+            members = g.get("nodes") or []
+            if not members:
+                return None
+            return str(members[0])
+
+    def ensure_external_node(eid: str) -> None:
+        sid = str(eid)
+        if sid in node_ids:
+            return
+        if sid in group_ids:
+            return
+        data["nodes"].append(
+            {
+                "id": sid,
+                "label": sid,
+                "type": "external",
+                "_repaired": "g2_injected_endpoint",
+            }
+        )
+        node_ids.add(sid)
+        summary["g2Injected"].append(sid)
+        warnings.append({"code": "g2_injected_external", "nodeId": sid})
+
+    # Normalize edges: drop malformed; rewire endpoints that reference group ids to the group's first member.
+    kept_edges: List[Dict[str, Any]] = []
+    for e in data["edges"]:
+        if not e:
+            continue
+        src = str(e["source"]) if e.get("source") is not None else ""
+        tgt = str(e["target"]) if e.get("target") is not None else ""
+        if not src or not tgt:
+            warnings.append({"code": "g2_removed_edge_missing_endpoint", "edge": e})
+            continue
+        if src in group_ids:
+            rep = first_group_member(src)
+            if rep:
+                warnings.append(
+                    {"code": "g2_rewired_group_endpoint", "role": "source", "from": src, "to": rep}
+                )
+                src = rep
+            else:
+                warnings.append({"code": "g2_dropped_edge_group_endpoint", "role": "source", "id": src})
+                continue
+        if tgt in group_ids:
+            rep = first_group_member(tgt)
+            if rep:
+                warnings.append(
+                    {"code": "g2_rewired_group_endpoint", "role": "target", "from": tgt, "to": rep}
+                )
+                tgt = rep
+            else:
+                warnings.append({"code": "g2_dropped_edge_group_endpoint", "role": "target", "id": tgt})
+                continue
+        ne = dict(e)
+        ne["source"] = src
+        ne["target"] = tgt
+        kept_edges.append(ne)
+    data["edges"] = kept_edges
+
+    # R4 prep: ELK cannot use the same id for a leaf node and a compound group — rename colliding groups.
+    node_ids = collect_node_ids()
+    group_ids = collect_group_ids()
+    used_ids: Set[str] = set(node_ids) | set(group_ids)
+    for g in data["groups"]:
+        if not g or g.get("id") is None:
+            continue
+        gid = str(g["id"])
+        if gid not in node_ids:
+            continue
+        base = f"{gid}__group"
+        new_gid = base
+        n = 1
+        while new_gid in used_ids:
+            new_gid = f"{base}_{n}"
+            n += 1
+        g["id"] = new_gid
+        g["_repaired"] = "r4_group_renamed_avoid_node_collision"
+        used_ids.add(new_gid)
+        warnings.append({"code": "r4_renamed_group_for_node_collision", "from": gid, "to": new_gid})
+
+    group_ids = collect_group_ids()
+    node_ids = collect_node_ids()
+
+    for e in data["edges"]:
+        if not e:
+            continue
+        src = str(e["source"]) if e.get("source") is not None else ""
+        tgt = str(e["target"]) if e.get("target") is not None else ""
+        if src not in node_ids:
+            ensure_external_node(src)
+        if tgt not in node_ids:
+            ensure_external_node(tgt)
+
+    summary["after"] = {
+        "nodeCount": len(data["nodes"]),
+        "edgeCount": len(data["edges"]),
+        "groupCount": len(data["groups"]),
+    }
+
+    return True, data, warnings, summary
+
+
+def _elk_label(parent_id: str, index: int, text: str, w: float, h: float) -> Dict[str, Any]:
+    return {
+        "id": f"{parent_id}__label_{index}",
+        "text": text,
+        "width": w,
+        "height": h,
+    }
+
+
+def _estimate_leaf_size(label: Any, max_node_width: int = 280) -> Tuple[float, float, str]:
+    text = str(label if label is not None else "").strip() or "?"
+    w = float(min(max_node_width, max(72, len(text) * 7 + 36)))
+    return w, 44.0, text
+
+
+def _estimate_group_label_size(label: Any) -> Tuple[float, float, str]:
+    text = str(label if label is not None else "").strip() or "?"
+    w = float(max(120, min(360, len(text) * 7 + 32)))
+    return w, 28.0, text
+
+
+def _map_diagram_direction_to_elk(diagram_direction: Any) -> str:
+    d = str(diagram_direction or "TD").upper()
+    if d in ("LR", "RL"):
+        return "RIGHT" if d == "LR" else "LEFT"
+    if d == "BT":
+        return "UP"
+    return "DOWN"
+
+
+def _root_layout_options(elk_direction: str, target: str) -> Dict[str, Any]:
+    if target == "elkjs":
+        return {
+            "elk.algorithm": "layered",
+            "elk.direction": elk_direction,
+            "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+            "elk.spacing.nodeNode": "48",
+            "elk.layered.spacing.nodeNodeBetweenLayers": "56",
+            "elk.padding": "[top=20,left=20,bottom=20,right=20]",
+        }
+    return {"algorithm": "layered", "direction": elk_direction, "hierarchyHandling": "INCLUDE_CHILDREN"}
+
+
+def _compound_layout_options(target: str) -> Dict[str, Any]:
+    if target == "elkjs":
+        return {
+            "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+            "elk.padding": "[top=24,left=14,bottom=14,right=14]",
+            "elk.spacing.nodeNode": "28",
+        }
+    return {"algorithm": "layered", "direction": "DOWN", "hierarchyHandling": "INCLUDE_CHILDREN"}
+
+
+def _collect_elk_node_ids(node: Dict[str, Any], out: Set[str]) -> None:
+    if not node or node.get("id") is None:
+        return
+    out.add(str(node["id"]))
+    for ch in node.get("children") or []:
+        _collect_elk_node_ids(ch, out)
+
+
+def _collect_all_elk_edges(node: Dict[str, Any], out: List[Any]) -> None:
+    if not node:
+        return
+    for e in node.get("edges") or []:
+        out.append(e)
+    for ch in node.get("children") or []:
+        _collect_all_elk_edges(ch, out)
+
+
+def _validate_elk_input_identifiers(elk_graph: Dict[str, Any]) -> Dict[str, Any]:
+    missing: List[Dict[str, Any]] = []
+    if not elk_graph or elk_graph.get("id") is None:
+        return {"ok": False, "missingEndpoints": ["root"], "edgeIds": []}
+    ids: Set[str] = set()
+    _collect_elk_node_ids(elk_graph, ids)
+    edges_all: List[Any] = []
+    _collect_all_elk_edges(elk_graph, edges_all)
+    for e in edges_all:
+        if not e:
+            continue
+        eid = e.get("id")
+        for s in e.get("sources") or []:
+            if str(s) not in ids:
+                missing.append({"edgeId": eid, "role": "source", "id": s})
+        for t in e.get("targets") or []:
+            if str(t) not in ids:
+                missing.append({"edgeId": eid, "role": "target", "id": t})
+    return {
+        "ok": len(missing) == 0,
+        "missingEndpoints": missing,
+        "edgeIds": [e.get("id") if e else None for e in edges_all],
+    }
+
+
+def _validate_elk_edge_placement(elk_graph: Dict[str, Any]) -> Dict[str, Any]:
+    if not elk_graph or elk_graph.get("id") is None:
+        return {"ok": False, "violations": [{"reason": "no_root_id"}]}
+    parent_by_id: Dict[str, str] = {}
+
+    def walk(parent_id: Optional[str], node: Dict[str, Any]) -> None:
+        if not node or node.get("id") is None:
+            return
+        nid = str(node["id"])
+        if parent_id is not None:
+            parent_by_id[nid] = str(parent_id)
+        for ch in node.get("children") or []:
+            walk(nid, ch)
+
+    walk(None, elk_graph)
+
+    def ancestors_of(iid: str) -> List[str]:
+        chain: List[str] = []
+        cur: Optional[str] = str(iid)
+        seen: Set[str] = set()
+        while cur is not None and cur not in seen:
+            seen.add(cur)
+            chain.append(cur)
+            cur = parent_by_id.get(cur)
+        return chain
+
+    def lca_of(a: str, b: str) -> Optional[str]:
+        a_chain = ancestors_of(a)
+        b_set = set(ancestors_of(b))
+        for x in a_chain:
+            if x in b_set:
+                return x
+        return None
+
+    violations: List[Dict[str, Any]] = []
+
+    def walk_edges(node: Dict[str, Any]) -> None:
+        if not node:
+            return
+        here_id = str(node["id"]) if node.get("id") is not None else None
+        for e in node.get("edges") or []:
+            if not e:
+                continue
+            srcs = e.get("sources") or []
+            tgts = e.get("targets") or []
+            for s in srcs:
+                for t in tgts:
+                    lca = lca_of(str(s), str(t))
+                    if lca != here_id:
+                        violations.append(
+                            {
+                                "edgeId": e.get("id"),
+                                "placedIn": here_id,
+                                "expectedLca": lca,
+                                "source": s,
+                                "target": t,
+                            }
+                        )
+        for ch in node.get("children") or []:
+            walk_edges(ch)
+
+    walk_edges(elk_graph)
+    return {"ok": len(violations) == 0, "violations": violations}
+
+
+def diagram_to_elk_input_warnings(
+    diagram: Optional[Dict[str, Any]], target: str = "elkjs"
+) -> List[Dict[str, Any]]:
+    """R4 structural warnings — parity with demo/pipeline-diagram-to-elk.js."""
+    warnings: List[Dict[str, Any]] = []
+    if not diagram or not isinstance(diagram, dict):
+        return warnings
+
+    nodes = diagram.get("nodes") or []
+    edges = diagram.get("edges") or []
+    groups = diagram.get("groups") or []
+
+    node_by_id: Dict[str, Any] = {}
+    for n in nodes:
+        if n and n.get("id") is not None:
+            node_by_id[str(n["id"])] = n
+
+    parent_of: Dict[str, str] = {}
+    for gr in groups:
+        if not gr or gr.get("id") is None:
+            continue
+        gid = str(gr["id"])
+        members = gr.get("nodes") or []
+        if not isinstance(members, list):
+            continue
+        for m in members:
+            nid = str(m)
+            if nid not in parent_of:
+                parent_of[nid] = gid
+
+    group_compound_by_id: Dict[str, Dict[str, Any]] = {}
+    root_children: List[Dict[str, Any]] = []
+    elk_direction = _map_diagram_direction_to_elk(diagram.get("direction"))
+
+    for gg in groups:
+        if not gg or gg.get("id") is None:
+            continue
+        g_id = str(gg["id"])
+        g_label = str(gg["label"]) if gg.get("label") is not None else g_id
+        lw, lh, ltext = _estimate_group_label_size(g_label)
+        member_ids = [str(x) for x in (gg.get("nodes") or [])]
+        compound_children: List[Dict[str, Any]] = []
+        for mid in member_ids:
+            raw = node_by_id.get(mid)
+            lab = raw.get("label") if raw and raw.get("label") is not None else mid
+            szw, szh, stext = _estimate_leaf_size(lab)
+            compound_children.append(
+                {
+                    "id": mid,
+                    "width": szw,
+                    "height": szh,
+                    "labels": [_elk_label(mid, 0, stext, szw, szh)],
+                }
+            )
+        compound = {
+            "id": g_id,
+            "width": lw,
+            "height": lh,
+            "labels": [_elk_label(g_id, 0, ltext, lw, lh)],
+            "layoutOptions": _compound_layout_options(target),
+            "children": compound_children,
+        }
+        group_compound_by_id[g_id] = compound
+        root_children.append(compound)
+
+    in_any_group = set(parent_of.keys())
+    for node in nodes:
+        if not node or node.get("id") is None:
+            continue
+        id_str = str(node["id"])
+        if id_str in group_compound_by_id:
+            warnings.append({"code": "r4_node_id_collides_with_group", "id": id_str})
+            continue
+        if id_str in in_any_group:
+            continue
+        lab2 = node.get("label") if node.get("label") is not None else id_str
+        szw, szh, stext = _estimate_leaf_size(lab2)
+        root_children.append(
+            {
+                "id": id_str,
+                "width": szw,
+                "height": szh,
+                "labels": [_elk_label(id_str, 0, stext, szw, szh)],
+            }
+        )
+
+    root_id = "root"
+    elk_graph: Dict[str, Any] = {
+        "id": root_id,
+        "layoutOptions": _root_layout_options(elk_direction, target),
+        "children": root_children,
+        "edges": [],
+    }
+
+    elk_node_by_id: Dict[str, Any] = {}
+    parent_by_elk_id: Dict[str, str] = {}
+
+    def index_elk(parent_id: Optional[str], node: Dict[str, Any]) -> None:
+        if not node or node.get("id") is None:
+            return
+        elk_node_by_id[str(node["id"])] = node
+        if parent_id is not None:
+            parent_by_elk_id[str(node["id"])] = str(parent_id)
+        for ch in node.get("children") or []:
+            index_elk(str(node["id"]), ch)
+
+    index_elk(None, elk_graph)
+
+    def ancestors_of_elk(iid: str) -> List[str]:
+        chain: List[str] = []
+        cur: Optional[str] = str(iid)
+        seen: Set[str] = set()
+        while cur is not None and cur not in seen:
+            seen.add(cur)
+            chain.append(cur)
+            cur = parent_by_elk_id.get(cur)
+        return chain
+
+    def lca_container_id(src_id: str, tgt_id: str) -> str:
+        a_chain = ancestors_of_elk(src_id)
+        b_set = set(ancestors_of_elk(tgt_id))
+        for x in a_chain:
+            if x in b_set:
+                return x
+        return root_id
+
+    for ei, ed in enumerate(edges):
+        if not ed or ed.get("source") is None or ed.get("target") is None:
+            warnings.append({"code": "r4_skip_edge_missing_endpoint", "index": ei})
+            continue
+        sid = str(ed["source"])
+        tid = str(ed["target"])
+        if sid not in elk_node_by_id:
+            warnings.append(
+                {"code": "r4_edge_unknown_source", "index": ei, "source": sid, "target": tid}
+            )
+            continue
+        if tid not in elk_node_by_id:
+            warnings.append(
+                {"code": "r4_edge_unknown_target", "index": ei, "source": sid, "target": tid}
+            )
+            continue
+        elk_edge = {"id": f"e_{sid}_{tid}_{ei}", "sources": [sid], "targets": [tid]}
+        container_id = lca_container_id(sid, tid)
+        container = elk_node_by_id.get(container_id) or elk_graph
+        if container.get("edges") is None:
+            container["edges"] = []
+        container["edges"].append(elk_edge)
+
+    validate = _validate_elk_input_identifiers(elk_graph)
+    if not validate["ok"]:
+        warnings.append({"code": "r4_validate_failed", "missing": validate["missingEndpoints"]})
+
+    placement = _validate_elk_edge_placement(elk_graph)
+    if not placement["ok"]:
+        warnings.append({"code": "r4_edge_placement_violations", "violations": placement["violations"]})
+
+    return warnings
+
+
+def _flatten_diagram_ir_warnings(warnings: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+    by_code: Dict[str, List[Dict[str, Any]]] = {}
+    for w in warnings:
+        code = str(w.get("code", "unknown"))
+        by_code.setdefault(code, []).append(w)
+    return by_code
+
+
+def _merge_samples(
+    dest: Dict[str, List[Dict[str, Any]]],
+    module_name: str,
+    module_path: str,
+    by_code_flat: Dict[str, List[Dict[str, Any]]],
+) -> None:
+    for code, items in by_code_flat.items():
+        bucket = dest.setdefault(code, [])
+        if len(bucket) >= _MAX_SAMPLES_PER_DIAGRAM_IR_CODE:
+            continue
+        for it in items:
+            if len(bucket) >= _MAX_SAMPLES_PER_DIAGRAM_IR_CODE:
+                break
+            sample = dict(it)
+            sample["module"] = module_name
+            sample["path"] = module_path
+            bucket.append(sample)
+
+
+def audit_diagram_ir_state(docs_dir: str) -> Dict[str, Any]:
+    """
+    Walk module_tree.json diagrams + overview.md; return histograms and capped samples.
+    """
+    docs_path = Path(docs_dir)
+    tree_path = docs_path / "module_tree.json"
+    out: Dict[str, Any] = {
+        "module_diagrams_total": 0,
+        "overview_has_diagram_json": False,
+        "overview_mermaid_parse_ok": True,
+        "overview_r1_reason": None,
+        "by_code": Counter(),
+        "samples_by_code": {},
+    }
+    samples_acc: Dict[str, List[Dict[str, Any]]] = {}
+
+    if tree_path.exists():
+        try:
+            tree = json.loads(tree_path.read_text(encoding="utf-8", errors="replace"))
+        except Exception:
+            tree = {}
+        if isinstance(tree, dict):
+            for module_name, module_path, module_data in get_all_modules_in_tree(tree):
+                if module_name == "overview":
+                    continue
+                raw_d = module_data.get("diagram")
+                if not isinstance(raw_d, dict):
+                    continue
+                if not isinstance(raw_d.get("nodes"), list):
+                    continue
+                out["module_diagrams_total"] += 1
+                ok_r, repaired, r2_w, _summ = repair_diagram_ir(raw_d)
+                r4_w: List[Dict[str, Any]] = []
+                if ok_r and repaired:
+                    r4_w = diagram_to_elk_input_warnings(repaired, target="elkjs")
+                merged: List[Dict[str, Any]] = []
+                for w in r2_w:
+                    if isinstance(w, dict) and w.get("code"):
+                        merged.append(w)
+                merged.extend(r4_w)
+                fc = _flatten_diagram_ir_warnings(merged)
+                for code, lst in fc.items():
+                    out["by_code"][code] += len(lst)
+                _merge_samples(samples_acc, module_name, module_path, fc)
+
+    overview_path = docs_path / "overview.md"
+    if overview_path.exists():
+        try:
+            oc = overview_path.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            oc = ""
+        has_dj = bool(_DIAGRAM_JSON_BLOCK_RE.search(oc))
+        out["overview_has_diagram_json"] = has_dj
+        if has_dj:
+            m = _DIAGRAM_JSON_BLOCK_RE.search(oc)
+            if m:
+                try:
+                    overview_diagram = json.loads(m.group(1).strip())
+                except Exception:
+                    overview_diagram = None
+                if isinstance(overview_diagram, dict):
+                    ok_r, repaired, r2_w, _ = repair_diagram_ir(overview_diagram)
+                    r4_w = diagram_to_elk_input_warnings(repaired, target="elkjs") if ok_r and repaired else []
+                    merged = [w for w in r2_w if isinstance(w, dict) and w.get("code")] + r4_w
+                    fc = _flatten_diagram_ir_warnings(merged)
+                    for code, lst in fc.items():
+                        out["by_code"][code] += len(lst)
+                    _merge_samples(samples_acc, "overview", "overview", fc)
+        else:
+            out["overview_mermaid_parse_ok"] = False
+            fence_m = re.search(r"```mermaid\s*([\s\S]*?)```", oc, re.IGNORECASE)
+            if not fence_m:
+                out["overview_r1_reason"] = "empty_mermaid"
+                out["by_code"]["overview_no_diagram_json"] += 1
+                samples_acc.setdefault("overview_no_diagram_json", []).append(
+                    {"module": "overview", "path": "overview", "reason": "no_mermaid_fence"}
+                )
+            else:
+                body = fence_m.group(1).strip()
+                r1 = overview_mermaid_to_diagram_json(body)
+                out["by_code"]["overview_no_diagram_json"] += 1
+                samples_acc.setdefault("overview_no_diagram_json", []).append(
+                    {"module": "overview", "path": "overview"}
+                )
+                if not r1.get("ok"):
+                    out["overview_mermaid_parse_ok"] = False
+                    out["overview_r1_reason"] = r1.get("reason", "parse_failed")
+                    out["by_code"]["overview_mermaid_parse_failed"] += 1
+                    samples_acc.setdefault("overview_mermaid_parse_failed", []).append(
+                        {
+                            "module": "overview",
+                            "path": "overview",
+                            "reason": r1.get("reason"),
+                        }
+                    )
+                else:
+                    out["overview_mermaid_parse_ok"] = True
+                for w in r1.get("warnings") or []:
+                    if w == "unmatched_end":
+                        out["by_code"]["r1_unmatched_end"] += 1
+                        samples_acc.setdefault("r1_unmatched_end", []).append(
+                            {"module": "overview", "path": "overview", "warning": w}
+                        )
+                    elif isinstance(w, str) and w.startswith("unclosed_subgraph:"):
+                        out["by_code"]["r1_unclosed_subgraph"] += 1
+                        samples_acc.setdefault("r1_unclosed_subgraph", []).append(
+                            {"module": "overview", "path": "overview", "warning": w}
+                        )
+                if r1.get("unsupportedLineCount", 0) and not r1.get("ok"):
+                    out["by_code"]["r1_too_many_unsupported_lines"] += 1
+
+    out["by_code"] = dict(out["by_code"])
+    for k in list(samples_acc.keys()):
+        samples_acc[k] = samples_acc[k][: _MAX_SAMPLES_PER_DIAGRAM_IR_CODE]
+    out["samples_by_code"] = samples_acc
+    return out
+
+
+def _write_diagram_json_back_to_md(md_path: Path, repaired: Dict[str, Any]) -> bool:
+    """
+    Replace the DIAGRAM_JSON block in a .md file with the repaired diagram.
+    Returns True if the file was rewritten, False otherwise.
+    """
+    if not md_path.exists():
+        return False
+    try:
+        content = md_path.read_text(encoding="utf-8", errors="replace")
+        new_block = "<!-- DIAGRAM_JSON\n" + json.dumps(repaired, indent=4) + "\n-->"
+        new_content, n = _DIAGRAM_JSON_BLOCK_RE.subn(new_block, content, count=1)
+        if n > 0 and new_content != content:
+            md_path.write_text(new_content, encoding="utf-8")
+            return True
+    except Exception:
+        pass
+    return False
+
+
+def apply_diagram_ir_repairs_to_docs_dir(docs_dir: str) -> Dict[str, Any]:
+    """
+    Mutate module_tree.json diagrams via R2; inject overview DIAGRAM_JSON via R1 when absent.
+    Also writes repaired DIAGRAM_JSON back to the source .md files so Stage 3.5 re-reads
+    clean data on the next generation run.
+    Returns aggregate repair summary counters.
+    """
+    docs_path = Path(docs_dir)
+    tree_path = docs_path / "module_tree.json"
+    agg = {
+        "modules_repaired": 0,
+        "g2_injected_total": 0,
+        "g3_lifted_total": 0,
+        "overview_diagram_json_injected": False,
+        "overview_diagram_json_repaired": False,
+    }
+
+    if tree_path.exists():
+        try:
+            tree = json.loads(tree_path.read_text(encoding="utf-8", errors="replace"))
+        except Exception:
+            tree = {}
+        if isinstance(tree, dict):
+
+            def walk_and_repair(node: Dict[str, Any], module_name: str) -> None:
+                nonlocal agg
+                d = node.get("diagram")
+                if isinstance(d, dict) and isinstance(d.get("nodes"), list):
+                    ok, repaired, _w, summ = repair_diagram_ir(d)
+                    if ok and repaired:
+                        node["diagram"] = repaired
+                        agg["modules_repaired"] += 1
+                        agg["g2_injected_total"] += len(summ.get("g2Injected") or [])
+                        agg["g3_lifted_total"] += len(summ.get("g3Lifted") or [])
+                        # Write back to source .md so Stage 3.5 reads clean data on regen
+                        _write_diagram_json_back_to_md(docs_path / f"{module_name}.md", repaired)
+                ch = node.get("children")
+                if isinstance(ch, dict):
+                    for cn, child in ch.items():
+                        if isinstance(child, dict):
+                            walk_and_repair(child, cn)
+
+            for _top, data in tree.items():
+                if isinstance(data, dict):
+                    walk_and_repair(data, _top)
+
+            tree_path.write_text(json.dumps(tree, indent=2), encoding="utf-8")
+
+    overview_path = docs_path / "overview.md"
+    if overview_path.exists():
+        content = overview_path.read_text(encoding="utf-8", errors="replace")
+        if not _DIAGRAM_JSON_BLOCK_RE.search(content):
+            fence_m = re.search(r"```mermaid\s*([\s\S]*?)```", content, re.IGNORECASE)
+            if fence_m:
+                body = fence_m.group(1).strip()
+                r1 = overview_mermaid_to_diagram_json(body)
+                if r1.get("ok") and isinstance(r1.get("diagram"), dict):
+                    diagram = r1["diagram"]
+                    diagram["_auto_generated"] = "r1_overview_synthesis"
+                    insert = "<!-- DIAGRAM_JSON\n" + json.dumps(diagram, indent=4) + "\n-->\n\n"
+                    idx = content.find("```mermaid")
+                    if idx >= 0:
+                        content = content[:idx] + insert + content[idx:]
+                        overview_path.write_text(content, encoding="utf-8")
+                        agg["overview_diagram_json_injected"] = True
+        else:
+            om = _DIAGRAM_JSON_BLOCK_RE.search(content)
+            if om:
+                try:
+                    overview_diagram = json.loads(om.group(1).strip())
+                except Exception:
+                    overview_diagram = None
+                if isinstance(overview_diagram, dict) and isinstance(overview_diagram.get("nodes"), list):
+                    ok_o, repaired_o, _wo, _summ_o = repair_diagram_ir(overview_diagram)
+                    if ok_o and repaired_o and _write_diagram_json_back_to_md(overview_path, repaired_o):
+                        agg["overview_diagram_json_repaired"] = True
+
+    return agg
+
+
+def _emit_diagram_ir_sync_issues(report: SyncReport, ir_audit: Dict[str, Any]) -> None:
+    """Emit capped SyncIssue rows for dashboard / sync_issues.json."""
+    samples = ir_audit.get("samples_by_code") or {}
+    code_to_issue_type = {
+        "g3_lift_inline_node": IssueType.DIAGRAM_IR_G3_LIFT_INLINE_NODE.value,
+        "g3_drop_non_string_member": IssueType.DIAGRAM_IR_G3_DROP_NON_STRING_MEMBER.value,
+        "g3_drop_unknown_member": IssueType.DIAGRAM_IR_G3_DROP_UNKNOWN_MEMBER.value,
+        "g3_dropped_empty_group": IssueType.DIAGRAM_IR_G3_DROPPED_EMPTY_GROUP.value,
+        "g2_injected_external": IssueType.DIAGRAM_IR_G2_INJECTED_EXTERNAL.value,
+        "g2_endpoint_is_group_id": IssueType.DIAGRAM_IR_G2_ENDPOINT_IS_GROUP_ID.value,
+        "g2_skip_edge_missing_endpoint": IssueType.DIAGRAM_IR_G2_SKIP_EDGE_MISSING_ENDPOINT.value,
+        "r4_node_id_collides_with_group": IssueType.DIAGRAM_IR_R4_NODE_ID_COLLIDES_WITH_GROUP.value,
+        "r4_skip_edge_missing_endpoint": IssueType.DIAGRAM_IR_R4_SKIP_EDGE_MISSING_ENDPOINT.value,
+        "r4_edge_unknown_source": IssueType.DIAGRAM_IR_R4_EDGE_UNKNOWN_SOURCE.value,
+        "r4_edge_unknown_target": IssueType.DIAGRAM_IR_R4_EDGE_UNKNOWN_TARGET.value,
+        "r4_validate_failed": IssueType.DIAGRAM_IR_R4_VALIDATE_FAILED.value,
+        "r4_edge_placement_violations": IssueType.DIAGRAM_IR_R4_EDGE_PLACEMENT_VIOLATIONS.value,
+        "overview_no_diagram_json": IssueType.DIAGRAM_IR_OVERVIEW_NO_DIAGRAM_JSON.value,
+        "overview_mermaid_parse_failed": IssueType.DIAGRAM_IR_OVERVIEW_MERMAID_PARSE_FAILED.value,
+        "r1_unmatched_end": IssueType.DIAGRAM_IR_R1_UNMATCHED_END.value,
+        "r1_unclosed_subgraph": IssueType.DIAGRAM_IR_R1_UNCLOSED_SUBGRAPH.value,
+        "r1_too_many_unsupported_lines": IssueType.DIAGRAM_IR_R1_TOO_MANY_UNSUPPORTED_LINES.value,
+        "clone_error": "diagram_ir_clone_error",
+    }
+    for code, rows in samples.items():
+        itype = code_to_issue_type.get(code, f"diagram_ir_{code}")
+        for row in rows[:_MAX_SAMPLES_PER_DIAGRAM_IR_CODE]:
+            mod = row.get("module", "?")
+            pth = row.get("path", "?")
+            details = {k: v for k, v in row.items() if k not in ("module", "path")}
+            report.add_issue(
+                SyncIssue(
+                    issue_type=itype,
+                    module_name=str(mod),
+                    module_path=str(pth),
+                    severity="warning",
+                    details=details,
+                    auto_fixed=False,
+                )
+            )
+
+
 def _metrics_delta(before: Dict[str, Any], after: Dict[str, Any]) -> Dict[str, Any]:
     """Numeric presync minus postsync (positive => problems reduced by sync)."""
     keys = set(before.keys()) | set(after.keys())
@@ -565,6 +1626,13 @@ def _build_measurement_summary(report: SyncReport, mermaid_stats: Dict[str, Any]
             "error_type_histogram_after_stage46": mermaid_stats.get("postfix_error_type_histogram") or {},
             "stage46_fixes_applied": mermaid_stats.get("stage46_fixes_applied", 0),
             "validator": "mermaid_validator (Mermaid.js 11.9 via Node, same as viewer)",
+        },
+        "3_diagram_ir": {
+            "audit_pre": report.metrics.get("diagram_ir_audit"),
+            "audit_post": report.metrics.get("diagram_ir_audit_post"),
+            "by_code_pre": (report.metrics.get("diagram_ir_audit") or {}).get("by_code", {}),
+            "by_code_post": (report.metrics.get("diagram_ir_audit_post") or {}).get("by_code", {}),
+            "repairs_applied": report.metrics.get("diagram_ir_repairs_applied") or {},
         },
     }
 
@@ -1589,6 +2657,40 @@ def run_full_sync(
     
     # Update parent diagrams to include children
     diagram_updates = update_tree_diagrams(docs_dir)
+
+    diagram_ir_repairs: Dict[str, Any] = {}
+    ir_audit_pre: Dict[str, Any] = {}
+    ir_audit_post: Dict[str, Any] = {}
+    try:
+        ir_audit_pre = audit_diagram_ir_state(docs_dir)
+        report.metrics["diagram_ir_audit"] = ir_audit_pre
+        logger.info("[STAGE 4.5] Diagram IR audit (pre-repair): %s", ir_audit_pre.get("by_code"))
+    except Exception as e:
+        logger.warning("[DOC_SYNC] diagram IR pre-audit failed: %s", e)
+        report.metrics["diagram_ir_audit"] = {"error": str(e)}
+        ir_audit_pre = {"samples_by_code": {}, "by_code": {}}
+
+    try:
+        diagram_ir_repairs = apply_diagram_ir_repairs_to_docs_dir(docs_dir)
+        report.metrics["diagram_ir_repairs_applied"] = diagram_ir_repairs
+        logger.info("[STAGE 4.5] Diagram IR repairs applied: %s", diagram_ir_repairs)
+    except Exception as e:
+        logger.warning("[DOC_SYNC] diagram IR repairs failed: %s", e)
+        report.metrics["diagram_ir_repairs_applied"] = {"error": str(e)}
+
+    try:
+        ir_audit_post = audit_diagram_ir_state(docs_dir)
+        report.metrics["diagram_ir_audit_post"] = ir_audit_post
+        logger.info("[STAGE 4.5] Diagram IR audit (post-repair): %s", ir_audit_post.get("by_code"))
+    except Exception as e:
+        logger.warning("[DOC_SYNC] diagram IR post-audit failed: %s", e)
+        report.metrics["diagram_ir_audit_post"] = {"error": str(e)}
+        ir_audit_post = {"samples_by_code": {}, "by_code": {}}
+
+    try:
+        _emit_diagram_ir_sync_issues(report, ir_audit_post)
+    except Exception as e:
+        logger.warning("[DOC_SYNC] diagram IR sync issue emit failed: %s", e)
     
     # Mermaid: structural validation (validate_mermaid), then optional Stage 4.6 LLM repair.
     # We snapshot pre-fix counts, run the fix, then re-validate so the metric also
@@ -1637,6 +2739,25 @@ def run_full_sync(
         "parent_diagram_child_nodes_injected": diagram_updates,
         "overview_md_created": int(overview_created),
         "mermaid_stage46_fixes": mermaid_stats.get("stage46_fixes_applied", 0),
+        "diagram_ir_modules_repaired": diagram_ir_repairs.get("modules_repaired", 0)
+        if isinstance(diagram_ir_repairs, dict)
+        else 0,
+        "diagram_ir_g2_injected_total": diagram_ir_repairs.get("g2_injected_total", 0)
+        if isinstance(diagram_ir_repairs, dict)
+        else 0,
+        "diagram_ir_g3_lifted_total": diagram_ir_repairs.get("g3_lifted_total", 0)
+        if isinstance(diagram_ir_repairs, dict)
+        else 0,
+        "diagram_ir_overview_json_injected": int(
+            diagram_ir_repairs.get("overview_diagram_json_injected", False)
+        )
+        if isinstance(diagram_ir_repairs, dict)
+        else 0,
+        "diagram_ir_overview_json_repaired": int(
+            diagram_ir_repairs.get("overview_diagram_json_repaired", False)
+        )
+        if isinstance(diagram_ir_repairs, dict)
+        else 0,
     }
 
     report.metrics["measurement_summary"] = _build_measurement_summary(report, mermaid_stats)

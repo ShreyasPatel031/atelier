@@ -28,44 +28,25 @@ For visualization, the `Graph` can generate Mermaid syntax, allowing developers 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "graph_class", "label": "Graph Class", "type": "component", "link": null},
-        {"id": "init_graph", "label": "Initialize Graph", "type": "component", "link": null},
-        {"id": "run_async", "label": "Run Graph (Async)", "type": "component", "link": null},
-        {"id": "run_sync", "label": "Run Graph (Sync)", "type": "component", "link": null},
-        {"id": "iterate_graph", "label": "Iterate Graph", "type": "component", "link": null},
-        {"id": "initialize_persistence", "label": "Initialize Persistence", "type": "component", "link": null},
-        {"id": "generate_mermaid_code", "label": "Generate Mermaid Code", "type": "component", "link": null},
-        {"id": "generate_mermaid_image", "label": "Generate Mermaid Image/Save", "type": "component", "link": null},
-        {"id": "base_node", "label": "BaseNode", "type": "external", "link": "node_abstraction.md"},
-        {"id": "graph_run", "label": "GraphRun / GraphRunResult", "type": "external", "link": "graph_runtime.md"},
-        {"id": "state_persistence", "label": "BaseStatePersistence", "type": "external", "link": "graph_persistence.md"},
-        {"id": "mermaid_utils", "label": "Mermaid Utilities", "type": "external", "link": "graph_visualization.md"},
-        {"id": "observability", "label": "Observability (Logfire)", "type": "external", "link": "async_execution_primitives.md"}
+        {
+            "id": "graph_definition",
+            "label": "Graph Definition",
+            "type": "module"
+        },
+        {
+            "id": "c0",
+            "label": "Graph",
+            "type": "component"
+        }
     ],
     "edges": [
-        {"source": "init_graph", "target": "graph_class", "label": "creates"},
-        {"source": "init_graph", "target": "base_node", "label": "defines graph nodes"},
-        {"source": "graph_class", "target": "run_async", "label": "executes via"},
-        {"source": "graph_class", "target": "run_sync", "label": "executes via (sync)"},
-        {"source": "graph_class", "target": "iterate_graph", "label": "iterates via"},
-        {"source": "graph_class", "target": "initialize_persistence", "label": "prepares run via"},
-        {"source": "graph_class", "target": "generate_mermaid_code", "label": "visualizes via"},
-        {"source": "graph_class", "target": "generate_mermaid_image", "label": "renders/saves via"},
-        {"source": "run_async", "target": "base_node", "label": "starts with"},
-        {"source": "run_async", "target": "state_persistence", "label": "manages state with"},
-        {"source": "run_async", "target": "graph_run", "label": "returns"},
-        {"source": "run_async", "target": "observability", "label": "instruments with"},
-        {"source": "run_sync", "target": "run_async", "label": "delegates to"},
-        {"source": "iterate_graph", "target": "base_node", "label": "starts with / executes"},
-        {"source": "iterate_graph", "target": "state_persistence", "label": "manages state with"},
-        {"source": "iterate_graph", "target": "graph_run", "label": "yields"},
-        {"source": "iterate_graph", "target": "observability", "label": "instruments with"},
-        {"source": "initialize_persistence", "target": "base_node", "label": "stores start node"},
-        {"source": "initialize_persistence", "target": "state_persistence", "label": "uses"},
-        {"source": "generate_mermaid_code", "target": "mermaid_utils", "label": "uses to generate code"},
-        {"source": "generate_mermaid_image", "target": "mermaid_utils", "label": "uses to render image"}
+        {
+            "source": "graph_definition",
+            "target": "c0"
+        }
     ],
-    "groups": []
+    "groups": [],
+    "_auto_generated": true
 }
 -->
 ```mermaid

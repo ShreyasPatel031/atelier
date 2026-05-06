@@ -65,7 +65,8 @@ DIAGRAM_SYNTAX_RULES_SECTION = """
 - **Data artifacts:** Use cylinder shape `[("label")]` for stored data nodes.
 
 **Edges and arrows:**
-- Allowed arrow types: `-->` (normal), `-.->` (dashed/reference), `==>` (heavy/primary).
+- Allowed arrow types: `-->` (normal), `-.->` (dashed/reference — exactly one hyphen before the dot), `==>` (heavy/primary).
+  WRONG: `--.->` (double hyphen before the dot) — lexical / parse errors.
   Use `==>` for primary data pipeline, `-->` for normal flow, `-.->` for reads/references.
 - Do NOT use reverse arrows (`<--`, `<==`, `<-.->`) — they cause parse errors. Swap source and target instead.
 - Do NOT use activation-style arrows such as `--|>` or `---|>`.
@@ -217,6 +218,13 @@ MANDATORY — add this block in `{module_name}.md`:
 Node types: "module" (sub-module with docs), "external" (dependency outside this module)
 Group roles: "surface" (blue), "generative" (orange), "analytical" (purple), "data" (green)
 
+GROUPS INTEGRITY (CRITICAL): Every id you list in `groups[].nodes[]` MUST exactly match an `"id"` field in your `nodes[]` array.
+Never emit a group with `"nodes": []` — if you cannot populate a group with at least one valid node id, omit that group entirely.
+
+EDGE INTEGRITY: Every `edges[].source` and `edges[].target` MUST be an `"id"` from `nodes[]`. Never use a group/subgraph id as an edge endpoint — connect actual nodes only.
+
+ID UNIQUENESS: No string may appear as both a `nodes[].id` and a `groups[].id` (layout engines treat these as separate namespaces; collisions break rendering).
+
 After DIAGRAM_JSON, include matching Mermaid:
 ```mermaid
 flowchart TD
@@ -234,6 +242,7 @@ flowchart TD
 
 <DIAGRAM_DESIGN_RULES>
 1. GROUPING: Organize nodes into subgraphs by functional role. Max 5 nodes per group.
+   Every group's `"nodes"` must be a non-empty list of ids that exist verbatim in your `nodes[]` array. Omit any group you cannot populate.
 2. NODE LABELS: Describe what happens, NOT class/file names. Good: "Parse source files". Bad: "DependencyParser".
 3. CONNECTIONS: Every arrow MUST have a label. Use ==> for primary flow, --> for normal, -.-> for references.
 4. CROSS-MODULE LINKS: Include dependencies on modules outside your siblings as external nodes.
@@ -293,6 +302,13 @@ MANDATORY — you MUST include this block in `{module_name}.md`:
 
 Node types: "component" (internal, not clickable), "external" (links to other module docs)
 Group roles: "surface" (blue), "generative" (orange), "analytical" (purple), "data" (green)
+
+GROUPS INTEGRITY (CRITICAL): Every id you list in `groups[].nodes[]` MUST exactly match an `"id"` field in your `nodes[]` array.
+Never emit a group with `"nodes": []` — if you cannot populate a group with at least one valid node id, omit that group entirely.
+
+EDGE INTEGRITY: Every `edges[].source` and `edges[].target` MUST be an `"id"` from `nodes[]`. Never use a group/subgraph id as an edge endpoint — connect actual nodes only.
+
+ID UNIQUENESS: No string may appear as both a `nodes[].id` and a `groups[].id` (layout engines treat these as separate namespaces; collisions break rendering).
 
 After DIAGRAM_JSON, include matching Mermaid:
 ```mermaid
@@ -433,6 +449,35 @@ flowchart LR
 
 The `class` lines above attach styles to **viewer** and **search** (nodes), not to subgraphs **ui** or **data_store**.
 
+<DIAGRAM_JSON_FORMAT>
+MANDATORY — you MUST include this block in the output, placed before the mermaid code block:
+
+<!-- DIAGRAM_JSON
+{{
+    "direction": "LR",
+    "nodes": [
+        {{"id": "core_building", "label": "Core Program Building", "type": "module", "link": "core_program_building.md"}},
+        {{"id": "data_eval", "label": "Data and Evaluation", "type": "module", "link": "data_evaluation.md"}},
+        {{"id": "user", "label": "Developer / User", "type": "external", "link": null}}
+    ],
+    "edges": [
+        {{"source": "user", "target": "core_building", "label": "builds programs"}},
+        {{"source": "core_building", "target": "data_eval", "label": "feeds examples"}}
+    ],
+    "groups": [
+        {{"id": "system", "label": "System", "nodes": ["core_building", "data_eval"]}}
+    ]
+}}
+-->
+
+Rules:
+- Use only module names from AVAILABLE_MODULES as node ids and links.
+- Node type "module" for repo modules, "external" for actors/dependencies outside the repo.
+- GROUPS INTEGRITY: Every id in `groups[].nodes[]` MUST exist in `nodes[]`. Never emit `"nodes": []`.
+- EDGE INTEGRITY: Every edge `source` and `target` must be ids from `nodes[]`, never group/subgraph ids.
+- ID UNIQUENESS: Do not reuse the same string as both a node id and a group id.
+</DIAGRAM_JSON_FORMAT>
+
 """ + DIAGRAM_SYNTAX_RULES_SECTION + """
 
 CRITICAL: You can ONLY link to modules that exist in the AVAILABLE_MODULES list below.
@@ -512,6 +557,32 @@ flowchart TD
     click receiver "intake.md" "View Intake"
     click transform "processing.md" "View Processing"
 ```
+
+<DIAGRAM_JSON_FORMAT>
+MANDATORY — include this block in the output, placed before the mermaid code block:
+
+<!-- DIAGRAM_JSON
+{{
+    "direction": "TD",
+    "nodes": [
+        {{"id": "intake", "label": "Intake", "type": "module", "link": "intake.md"}},
+        {{"id": "processing", "label": "Processing", "type": "module", "link": "processing.md"}}
+    ],
+    "edges": [
+        {{"source": "intake", "target": "processing", "label": "raw input"}}
+    ],
+    "groups": [
+        {{"id": "pipeline", "label": "Pipeline", "nodes": ["intake", "processing"]}}
+    ]
+}}
+-->
+
+Rules:
+- Node ids should match the clickable module names in the Mermaid diagram.
+- GROUPS INTEGRITY: Every id in `groups[].nodes[]` MUST exist in `nodes[]`. Never emit `"nodes": []`.
+- EDGE INTEGRITY: Every edge `source` and `target` must be ids from `nodes[]`, never group/subgraph ids.
+- ID UNIQUENESS: Do not reuse the same string as both a node id and a group id.
+</DIAGRAM_JSON_FORMAT>
 
 """ + DIAGRAM_SYNTAX_RULES_SECTION + """
 

@@ -3,20 +3,54 @@ The `weaviate_vector_search` module provides `WeaviateRM`, a DSPy retrieval modu
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "WeaviateRM", "label": "WeaviateRM", "type": "class"},
-    {"id": "dspy.Retrieve", "label": "dspy.Retrieve", "type": "class"},
-    {"id": "weaviate.WeaviateClient", "label": "weaviate.WeaviateClient", "type": "class"},
-    {"id": "weaviate.Client", "label": "weaviate.Client", "type": "class"}
-  ],
-  "edges": [
-    {"source": "WeaviateRM", "target": "dspy.Retrieve", "label": "inherits"},
-    {"source": "WeaviateRM", "target": "weaviate.WeaviateClient", "label": "uses"},
-    {"source": "WeaviateRM", "target": "weaviate.Client", "label": "uses"}
-  ],
-  "groups": [
-    {"id": "weaviate_vector_search_module", "label": "weaviate_vector_search", "nodes": ["WeaviateRM"]}
-  ]
+    "nodes": [
+        {
+            "id": "WeaviateRM",
+            "label": "WeaviateRM",
+            "type": "class"
+        },
+        {
+            "id": "dspy.Retrieve",
+            "label": "dspy.Retrieve",
+            "type": "class"
+        },
+        {
+            "id": "weaviate.WeaviateClient",
+            "label": "weaviate.WeaviateClient",
+            "type": "class"
+        },
+        {
+            "id": "weaviate.Client",
+            "label": "weaviate.Client",
+            "type": "class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "WeaviateRM",
+            "target": "dspy.Retrieve",
+            "label": "inherits"
+        },
+        {
+            "source": "WeaviateRM",
+            "target": "weaviate.WeaviateClient",
+            "label": "uses"
+        },
+        {
+            "source": "WeaviateRM",
+            "target": "weaviate.Client",
+            "label": "uses"
+        }
+    ],
+    "groups": [
+        {
+            "id": "weaviate_vector_search_module",
+            "label": "weaviate_vector_search",
+            "nodes": [
+                "WeaviateRM"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

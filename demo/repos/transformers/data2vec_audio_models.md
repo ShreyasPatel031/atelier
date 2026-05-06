@@ -3,29 +3,71 @@ This module provides Data2Vec Audio models tailored for X-vector speaker verific
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "Data2VecAudioForXVector", "label": "Data2VecAudioForXVector", "type": "class"},
-    {"id": "Data2VecAudioForSequenceClassification", "label": "Data2VecAudioForSequenceClassification", "type": "class"},
-    {"id": "Data2VecAudioPreTrainedModel", "label": "Data2VecAudioPreTrainedModel", "type": "class"},
-    {"id": "Data2VecAudioModel", "label": "Data2VecAudioModel", "type": "class"},
-    {"id": "TDNNLayer", "label": "TDNNLayer", "type": "class"},
-    {"id": "AMSoftmaxLoss", "label": "AMSoftmaxLoss", "type": "class"}
-  ],
-  "edges": [
-    {"source": "Data2VecAudioForXVector", "target": "Data2VecAudioPreTrainedModel", "type": "inheritance"},
-    {"source": "Data2VecAudioForSequenceClassification", "target": "Data2VecAudioPreTrainedModel", "type": "inheritance"},
-    {"source": "Data2VecAudioForXVector", "target": "Data2VecAudioModel", "type": "composition"},
-    {"source": "Data2VecAudioForSequenceClassification", "target": "Data2VecAudioModel", "type": "composition"},
-    {"source": "Data2VecAudioForXVector", "target": "TDNNLayer", "type": "composition"},
-    {"source": "Data2VecAudioForXVector", "target": "AMSoftmaxLoss", "type": "composition"}
-  ],
-  "groups": [
-    {
-      "id": "data2vec_audio_models",
-      "label": "data2vec_audio_models",
-      "members": ["Data2VecAudioForXVector", "Data2VecAudioForSequenceClassification"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "Data2VecAudioForXVector",
+            "label": "Data2VecAudioForXVector",
+            "type": "class"
+        },
+        {
+            "id": "Data2VecAudioForSequenceClassification",
+            "label": "Data2VecAudioForSequenceClassification",
+            "type": "class"
+        },
+        {
+            "id": "Data2VecAudioPreTrainedModel",
+            "label": "Data2VecAudioPreTrainedModel",
+            "type": "class"
+        },
+        {
+            "id": "Data2VecAudioModel",
+            "label": "Data2VecAudioModel",
+            "type": "class"
+        },
+        {
+            "id": "TDNNLayer",
+            "label": "TDNNLayer",
+            "type": "class"
+        },
+        {
+            "id": "AMSoftmaxLoss",
+            "label": "AMSoftmaxLoss",
+            "type": "class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "Data2VecAudioForXVector",
+            "target": "Data2VecAudioPreTrainedModel",
+            "type": "inheritance"
+        },
+        {
+            "source": "Data2VecAudioForSequenceClassification",
+            "target": "Data2VecAudioPreTrainedModel",
+            "type": "inheritance"
+        },
+        {
+            "source": "Data2VecAudioForXVector",
+            "target": "Data2VecAudioModel",
+            "type": "composition"
+        },
+        {
+            "source": "Data2VecAudioForSequenceClassification",
+            "target": "Data2VecAudioModel",
+            "type": "composition"
+        },
+        {
+            "source": "Data2VecAudioForXVector",
+            "target": "TDNNLayer",
+            "type": "composition"
+        },
+        {
+            "source": "Data2VecAudioForXVector",
+            "target": "AMSoftmaxLoss",
+            "type": "composition"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

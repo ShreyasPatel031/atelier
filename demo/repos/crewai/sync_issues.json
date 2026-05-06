@@ -1,17 +1,17 @@
 {
-  "docs_dir": "/Users/shreyaspatel/atelier/demo/repos/crewai",
-  "timestamp": "2026-04-17T03:28:15.852904",
+  "docs_dir": "demo/repos/crewai",
+  "timestamp": "2026-05-05T02:11:24.791612",
   "summary": {
     "total_modules": 54,
     "missing_files": 0,
     "failure_rate_pct": 0.0,
     "success_rate_pct": 100.0,
-    "total_issues": 1,
-    "errors": 1,
+    "total_issues": 0,
+    "errors": 0,
     "warnings": 0,
     "files_created": 0,
     "metadata_added": 0,
-    "diagrams_added": 1
+    "diagrams_added": 0
   },
   "metrics": {
     "presync_audit": {
@@ -19,24 +19,46 @@
       "missing_md": 0,
       "missing_title": 0,
       "missing_description": 0,
-      "leaf_missing_diagram": 1,
-      "parent_missing_diagram_with_children": 4,
+      "leaf_missing_diagram": 0,
+      "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 12,
-      "children_missing_from_diagram_nodes": 14,
-      "parent_diagram_gaps_to_inject": 35,
+      "diagram_edges_unknown_endpoint": 0,
+      "children_missing_from_diagram_nodes": 0,
+      "parent_diagram_gaps_to_inject": 0,
       "mermaid_fence_blocks_total": 77,
       "placeholder_md_files": 0
     },
+    "diagram_ir_audit": {
+      "module_diagrams_total": 54,
+      "overview_has_diagram_json": true,
+      "overview_mermaid_parse_ok": true,
+      "overview_r1_reason": null,
+      "by_code": {},
+      "samples_by_code": {}
+    },
+    "diagram_ir_repairs_applied": {
+      "modules_repaired": 54,
+      "g2_injected_total": 0,
+      "g3_lifted_total": 0,
+      "overview_diagram_json_injected": false,
+      "overview_diagram_json_repaired": false
+    },
+    "diagram_ir_audit_post": {
+      "module_diagrams_total": 54,
+      "overview_has_diagram_json": true,
+      "overview_mermaid_parse_ok": true,
+      "overview_r1_reason": null,
+      "by_code": {},
+      "samples_by_code": {}
+    },
     "mermaid_validation": {
       "blocks_checked": 77,
-      "blocks_invalid": 10,
-      "validation_ms": 11.9113,
-      "error_type_histogram": {
-        "warning:invalid_node_id": 14,
-        "syntax_error": 10
-      },
-      "stage46_fixes_applied": 27
+      "blocks_invalid": 0,
+      "validation_ms": 1710.1553,
+      "error_type_histogram": {},
+      "stage46_fixes_applied": 0,
+      "postfix_blocks_invalid": 0,
+      "postfix_error_type_histogram": {}
     },
     "postsync_audit": {
       "modules_total": 54,
@@ -46,33 +68,38 @@
       "leaf_missing_diagram": 0,
       "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 12,
+      "diagram_edges_unknown_endpoint": 0,
       "children_missing_from_diagram_nodes": 0,
       "parent_diagram_gaps_to_inject": 0,
       "mermaid_fence_blocks_total": 77,
       "placeholder_md_files": 0
     },
     "delta_presync_minus_postsync": {
-      "missing_md": 0.0,
-      "parent_diagram_gaps_to_inject": 35.0,
-      "diagram_nodes_with_empty_label": 0.0,
-      "children_missing_from_diagram_nodes": 14.0,
-      "parent_missing_diagram_with_children": 4.0,
-      "leaf_missing_diagram": 1.0,
       "mermaid_fence_blocks_total": 0.0,
-      "missing_title": 0.0,
-      "placeholder_md_files": 0.0,
       "modules_total": 0.0,
+      "parent_missing_diagram_with_children": 0.0,
+      "leaf_missing_diagram": 0.0,
+      "diagram_edges_unknown_endpoint": 0.0,
+      "parent_diagram_gaps_to_inject": 0.0,
+      "diagram_nodes_with_empty_label": 0.0,
+      "missing_title": 0.0,
       "missing_description": 0.0,
-      "diagram_edges_unknown_endpoint": 0.0
+      "children_missing_from_diagram_nodes": 0.0,
+      "missing_md": 0.0,
+      "placeholder_md_files": 0.0
     },
     "fixes_applied_counts": {
       "metadata_field_updates": 0,
       "placeholder_md_files_created": 0,
-      "leaf_diagrams_added": 1,
-      "parent_diagram_child_nodes_injected": 35,
+      "leaf_diagrams_added": 0,
+      "parent_diagram_child_nodes_injected": 0,
       "overview_md_created": 0,
-      "mermaid_stage46_fixes": 27
+      "mermaid_stage46_fixes": 0,
+      "diagram_ir_modules_repaired": 54,
+      "diagram_ir_g2_injected_total": 0,
+      "diagram_ir_g3_lifted_total": 0,
+      "diagram_ir_overview_json_injected": 0,
+      "diagram_ir_overview_json_repaired": 0
     },
     "measurement_summary": {
       "1_stage3_defects_before_stage45": {
@@ -82,12 +109,12 @@
           "missing_md": 0,
           "missing_title": 0,
           "missing_description": 0,
-          "leaf_missing_diagram": 1,
-          "parent_missing_diagram_with_children": 4,
+          "leaf_missing_diagram": 0,
+          "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 12,
-          "children_missing_from_diagram_nodes": 14,
-          "parent_diagram_gaps_to_inject": 35,
+          "diagram_edges_unknown_endpoint": 0,
+          "children_missing_from_diagram_nodes": 0,
+          "parent_diagram_gaps_to_inject": 0,
           "mermaid_fence_blocks_total": 77,
           "placeholder_md_files": 0
         }
@@ -95,10 +122,15 @@
       "1b_stage45_fixes_applied_counters": {
         "metadata_field_updates": 0,
         "placeholder_md_files_created": 0,
-        "leaf_diagrams_added": 1,
-        "parent_diagram_child_nodes_injected": 35,
+        "leaf_diagrams_added": 0,
+        "parent_diagram_child_nodes_injected": 0,
         "overview_md_created": 0,
-        "mermaid_stage46_fixes": 27
+        "mermaid_stage46_fixes": 0,
+        "diagram_ir_modules_repaired": 54,
+        "diagram_ir_g2_injected_total": 0,
+        "diagram_ir_g3_lifted_total": 0,
+        "diagram_ir_overview_json_injected": 0,
+        "diagram_ir_overview_json_repaired": 0
       },
       "1c_residual_after_stage45": {
         "postsync_audit": {
@@ -109,7 +141,7 @@
           "leaf_missing_diagram": 0,
           "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 12,
+          "diagram_edges_unknown_endpoint": 0,
           "children_missing_from_diagram_nodes": 0,
           "parent_diagram_gaps_to_inject": 0,
           "mermaid_fence_blocks_total": 77,
@@ -119,88 +151,65 @@
       "1d_reduction_delta_presync_minus_postsync": {
         "note": "Positive number = fewer problems after sync for that metric",
         "delta": {
-          "missing_md": 0.0,
-          "parent_diagram_gaps_to_inject": 35.0,
-          "diagram_nodes_with_empty_label": 0.0,
-          "children_missing_from_diagram_nodes": 14.0,
-          "parent_missing_diagram_with_children": 4.0,
-          "leaf_missing_diagram": 1.0,
           "mermaid_fence_blocks_total": 0.0,
-          "missing_title": 0.0,
-          "placeholder_md_files": 0.0,
           "modules_total": 0.0,
+          "parent_missing_diagram_with_children": 0.0,
+          "leaf_missing_diagram": 0.0,
+          "diagram_edges_unknown_endpoint": 0.0,
+          "parent_diagram_gaps_to_inject": 0.0,
+          "diagram_nodes_with_empty_label": 0.0,
+          "missing_title": 0.0,
           "missing_description": 0.0,
-          "diagram_edges_unknown_endpoint": 0.0
+          "children_missing_from_diagram_nodes": 0.0,
+          "missing_md": 0.0,
+          "placeholder_md_files": 0.0
         }
       },
       "1e_issues_logged_this_run_by_type": {
-        "all": {
-          "missing_diagram": 1
-        }
+        "all": {}
       },
       "2_mermaid": {
         "blocks_checked": 77,
-        "blocks_invalid_before_stage46": 10,
-        "validation_ms": 11.9113,
-        "error_type_histogram": {
-          "warning:invalid_node_id": 14,
-          "syntax_error": 10
+        "blocks_invalid_before_stage46": 0,
+        "blocks_invalid_after_stage46": 0,
+        "validation_ms": 1710.1553,
+        "error_type_histogram": {},
+        "error_type_histogram_after_stage46": {},
+        "stage46_fixes_applied": 0,
+        "validator": "mermaid_validator (Mermaid.js 11.9 via Node, same as viewer)"
+      },
+      "3_diagram_ir": {
+        "audit_pre": {
+          "module_diagrams_total": 54,
+          "overview_has_diagram_json": true,
+          "overview_mermaid_parse_ok": true,
+          "overview_r1_reason": null,
+          "by_code": {},
+          "samples_by_code": {}
         },
-        "stage46_fixes_applied": 27,
-        "viewer_regex_layers_vs_backend": [
-          {
-            "layer": "Fix 0",
-            "what": "Escape ()[]{} inside quoted [\"...\"] and some unquoted labels",
-            "backend_heuristic": "Not checked in sync (viewer-only escape path)",
-            "deep_validator": "May surface as invalid_node_id warning or missing_diagram_type if line breaks badly"
-          },
-          {
-            "layer": "Fix 1\u20132",
-            "what": "Edge labels |...| \u2014 strip numbered lists, quote edge text with .:-><",
-            "backend_heuristic": "Not checked",
-            "deep_validator": "malformed_edge_label if present"
-          },
-          {
-            "layer": "Fix 3",
-            "what": "subgraph + spaces \u2192 quote subgraph name",
-            "backend_heuristic": "validate_mermaid unbalanced_subgraph",
-            "deep_validator": "subgraph balance in mermaid_validator"
-          },
-          {
-            "layer": "Fix 4\u20135",
-            "what": "Strip HTML tags; backticks in labels",
-            "backend_heuristic": "Not checked",
-            "deep_validator": "syntax_error or warnings depending on content"
-          },
-          {
-            "layer": "doc sync validation",
-            "what": "Single pass: codewiki.src.be.mermaid_validator.validate_mermaid per fenced block (no duplicate inline heuristics)",
-            "backend_heuristic": "N/A \u2014 use validate_mermaid only",
-            "deep_validator": "Same validate_mermaid (MermaidErrorType histogram optional in metrics)"
-          }
-        ]
+        "audit_post": {
+          "module_diagrams_total": 54,
+          "overview_has_diagram_json": true,
+          "overview_mermaid_parse_ok": true,
+          "overview_r1_reason": null,
+          "by_code": {},
+          "samples_by_code": {}
+        },
+        "by_code_pre": {},
+        "by_code_post": {},
+        "repairs_applied": {
+          "modules_repaired": 54,
+          "g2_injected_total": 0,
+          "g3_lifted_total": 0,
+          "overview_diagram_json_injected": false,
+          "overview_diagram_json_repaired": false
+        }
       }
     }
   },
-  "issues_by_type": {
-    "missing_diagram": 1
-  },
-  "issues": [
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "flow_management",
-      "module_path": "crewai_core/flow_management",
-      "severity": "error",
-      "details": {
-        "component_count": 28,
-        "is_leaf": true
-      },
-      "auto_fixed": true
-    }
-  ],
+  "issues_by_type": {},
+  "issues": [],
   "files_created": [],
   "metadata_added": [],
-  "diagrams_added": [
-    "flow_management"
-  ]
+  "diagrams_added": []
 }

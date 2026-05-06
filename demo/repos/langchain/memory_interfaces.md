@@ -3,16 +3,39 @@ This module defines core interfaces for memory management in chains, providing a
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "BaseMemory", "label": "BaseMemory", "metadata": {"type": "class"}},
-    {"id": "BaseChatMemory", "label": "BaseChatMemory", "metadata": {"type": "class"}}
-  ],
-  "edges": [
-    {"source": "BaseChatMemory", "target": "BaseMemory", "label": "inherits"}
-  ],
-  "groups": [
-    {"id": "memory_interfaces", "label": "memory_interfaces", "nodes": ["BaseMemory", "BaseChatMemory"]}
-  ]
+    "nodes": [
+        {
+            "id": "BaseMemory",
+            "label": "BaseMemory",
+            "metadata": {
+                "type": "class"
+            }
+        },
+        {
+            "id": "BaseChatMemory",
+            "label": "BaseChatMemory",
+            "metadata": {
+                "type": "class"
+            }
+        }
+    ],
+    "edges": [
+        {
+            "source": "BaseChatMemory",
+            "target": "BaseMemory",
+            "label": "inherits"
+        }
+    ],
+    "groups": [
+        {
+            "id": "memory_interfaces",
+            "label": "memory_interfaces",
+            "nodes": [
+                "BaseMemory",
+                "BaseChatMemory"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

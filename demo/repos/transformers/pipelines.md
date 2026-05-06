@@ -3,18 +3,69 @@ The `pipelines` module provides specialized pipeline implementations for chunk-b
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "ChunkPipeline", "label": "ChunkPipeline"},
-    {"id": "ImageTextToTextPipeline", "label": "ImageTextToTextPipeline"},
-    {"id": "Pipeline", "label": "Pipeline", "style": "fill:#f9f,stroke:#333,stroke-width:2px"}
-  ],
-  "edges": [
-    {"source": "Pipeline", "target": "ChunkPipeline", "type": "inheritance"},
-    {"source": "Pipeline", "target": "ImageTextToTextPipeline", "type": "inheritance"}
-  ],
-  "groups": [
-    {"id": "pipelines", "label": "pipelines", "nodes": ["ChunkPipeline", "ImageTextToTextPipeline"]}
-  ]
+    "nodes": [
+        {
+            "id": "pipelines",
+            "label": "pipelines",
+            "type": "module"
+        },
+        {
+            "id": "ChunkPipeline",
+            "label": "ChunkPipeline"
+        },
+        {
+            "id": "ImageTextToTextPipeline",
+            "label": "ImageTextToTextPipeline"
+        },
+        {
+            "id": "Pipeline",
+            "label": "Pipeline",
+            "style": "fill:#f9f,stroke:#333,stroke-width:2px"
+        },
+        {
+            "id": "base_pipelines",
+            "label": "Base Pipeline Utilities",
+            "type": "module",
+            "link": "base_pipelines.md"
+        },
+        {
+            "id": "image_text_pipelines",
+            "label": "Image and Text Generation",
+            "type": "module",
+            "link": "image_text_pipelines.md"
+        }
+    ],
+    "edges": [
+        {
+            "source": "Pipeline",
+            "target": "ChunkPipeline",
+            "type": "inheritance"
+        },
+        {
+            "source": "Pipeline",
+            "target": "ImageTextToTextPipeline",
+            "type": "inheritance"
+        },
+        {
+            "source": "ChunkPipeline",
+            "target": "base_pipelines"
+        },
+        {
+            "source": "ChunkPipeline",
+            "target": "image_text_pipelines"
+        }
+    ],
+    "groups": [
+        {
+            "id": "pipelines__group",
+            "label": "pipelines",
+            "nodes": [
+                "ChunkPipeline",
+                "ImageTextToTextPipeline"
+            ],
+            "_repaired": "r4_group_renamed_avoid_node_collision"
+        }
+    ]
 }
 -->
 ```mermaid

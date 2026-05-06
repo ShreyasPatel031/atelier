@@ -3,32 +3,35 @@ The `databricks_integration` module facilitates interaction with Databricks for 
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "DatabricksProvider",
-      "label": "DatabricksProvider",
-      "type": "class"
-    },
-    {
-      "id": "TrainingJobDatabricks",
-      "label": "TrainingJobDatabricks",
-      "type": "class"
-    }
-  ],
-  "edges": [
-    {
-      "source": "DatabricksProvider",
-      "target": "TrainingJobDatabricks",
-      "label": "uses"
-    }
-  ],
-  "groups": [
-    {
-      "id": "databricks_integration",
-      "label": "databricks_integration",
-      "nodes": ["DatabricksProvider", "TrainingJobDatabricks"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "DatabricksProvider",
+            "label": "DatabricksProvider",
+            "type": "class"
+        },
+        {
+            "id": "TrainingJobDatabricks",
+            "label": "TrainingJobDatabricks",
+            "type": "class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "DatabricksProvider",
+            "target": "TrainingJobDatabricks",
+            "label": "uses"
+        }
+    ],
+    "groups": [
+        {
+            "id": "databricks_integration",
+            "label": "databricks_integration",
+            "nodes": [
+                "DatabricksProvider",
+                "TrainingJobDatabricks"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

@@ -3,24 +3,27 @@ The `base_parsers` module provides foundational classes for parsing language mod
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "BaseGenerationOutputParser",
-      "label": "BaseGenerationOutputParser"
-    },
-    {
-      "id": "BaseOutputParser",
-      "label": "BaseOutputParser"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "base_parsers",
-      "label": "base_parsers",
-      "nodes": ["BaseGenerationOutputParser", "BaseOutputParser"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "BaseGenerationOutputParser",
+            "label": "BaseGenerationOutputParser"
+        },
+        {
+            "id": "BaseOutputParser",
+            "label": "BaseOutputParser"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "base_parsers",
+            "label": "base_parsers",
+            "nodes": [
+                "BaseGenerationOutputParser",
+                "BaseOutputParser"
+            ]
+        }
+    ]
 }
 -->
 

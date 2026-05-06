@@ -46,35 +46,132 @@ The provider's integration with the broader system allows it to be used wherever
 {
     "direction": "TD",
     "nodes": [
-        {"id": "huggingface_provider_class", "label": "HuggingFaceProvider Class", "type": "component", "link": null},
-        {"id": "get_name_prop", "label": "Get Provider Name", "type": "component", "link": null},
-        {"id": "get_base_url_prop", "label": "Get Base URL", "type": "component", "link": null},
-        {"id": "get_client_prop", "label": "Get HF Client", "type": "component", "link": null},
-        {"id": "init_constructor", "label": "Initialize Provider", "type": "component", "link": null},
-        {"id": "static_model_profile", "label": "Map Model Profile", "type": "component", "link": null},
-        {"id": "model_profile_module", "label": "Model Profile Definitions", "type": "external", "link": "model_profile_definitions.md"},
-        {"id": "async_inference_client", "label": "Hugging Face AsyncInferenceClient", "type": "external", "link": null},
-        {"id": "provider_interface", "label": "Abstract Provider Interface", "type": "external", "link": null},
-        {"id": "model_usage_mapping", "label": "Model Usage Mapping", "type": "external", "link": "model_provider_usage_mapping.md"}
+        {
+            "id": "huggingface_provider_class",
+            "label": "HuggingFaceProvider Class",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "get_name_prop",
+            "label": "Get Provider Name",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "get_base_url_prop",
+            "label": "Get Base URL",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "get_client_prop",
+            "label": "Get HF Client",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "init_constructor",
+            "label": "Initialize Provider",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "static_model_profile",
+            "label": "Map Model Profile",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "model_profile_module",
+            "label": "Model Profile Definitions",
+            "type": "external",
+            "link": "model_profile_definitions.md"
+        },
+        {
+            "id": "async_inference_client",
+            "label": "Hugging Face AsyncInferenceClient",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "provider_interface",
+            "label": "Abstract Provider Interface",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "model_usage_mapping",
+            "label": "Model Usage Mapping",
+            "type": "external",
+            "link": "model_provider_usage_mapping.md"
+        }
     ],
     "edges": [
-        {"source": "huggingface_provider_class", "target": "get_name_prop", "label": "provides"},
-        {"source": "huggingface_provider_class", "target": "get_base_url_prop", "label": "provides"},
-        {"source": "huggingface_provider_class", "target": "get_client_prop", "label": "provides"},
-        {"source": "huggingface_provider_class", "target": "init_constructor", "label": "instantiates via"},
-        {"source": "huggingface_provider_class", "target": "static_model_profile", "label": "offers static method"},
-        {"source": "init_constructor", "target": "async_inference_client", "label": "creates/uses"},
-        {"source": "get_base_url_prop", "target": "async_inference_client", "label": "reads config from"},
-        {"source": "huggingface_provider_class", "target": "provider_interface", "label": "inherits from"},
-        {"source": "static_model_profile", "target": "model_profile_module", "label": "uses specific profiles"},
-        {"source": "huggingface_provider_class", "target": "model_usage_mapping", "label": "supports"}
+        {
+            "source": "huggingface_provider_class",
+            "target": "get_name_prop",
+            "label": "provides"
+        },
+        {
+            "source": "huggingface_provider_class",
+            "target": "get_base_url_prop",
+            "label": "provides"
+        },
+        {
+            "source": "huggingface_provider_class",
+            "target": "get_client_prop",
+            "label": "provides"
+        },
+        {
+            "source": "huggingface_provider_class",
+            "target": "init_constructor",
+            "label": "instantiates via"
+        },
+        {
+            "source": "huggingface_provider_class",
+            "target": "static_model_profile",
+            "label": "offers static method"
+        },
+        {
+            "source": "init_constructor",
+            "target": "async_inference_client",
+            "label": "creates/uses"
+        },
+        {
+            "source": "get_base_url_prop",
+            "target": "async_inference_client",
+            "label": "reads config from"
+        },
+        {
+            "source": "huggingface_provider_class",
+            "target": "provider_interface",
+            "label": "inherits from"
+        },
+        {
+            "source": "static_model_profile",
+            "target": "model_profile_module",
+            "label": "uses specific profiles"
+        },
+        {
+            "source": "huggingface_provider_class",
+            "target": "model_usage_mapping",
+            "label": "supports"
+        }
     ],
     "groups": [
         {
             "id": "huggingface_provider_internals",
             "label": "HuggingFaceProvider Internals",
             "role": "system",
-            "nodes": ["huggingface_provider_class", "get_name_prop", "get_base_url_prop", "get_client_prop", "init_constructor", "static_model_profile"]
+            "nodes": [
+                "huggingface_provider_class",
+                "get_name_prop",
+                "get_base_url_prop",
+                "get_client_prop",
+                "init_constructor",
+                "static_model_profile"
+            ]
         }
     ]
 }

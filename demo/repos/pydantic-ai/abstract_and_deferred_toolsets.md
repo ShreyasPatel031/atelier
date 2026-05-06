@@ -12,18 +12,40 @@ These components are crucial for maintaining a flexible and extensible tool ecos
 {
     "direction": "TD",
     "nodes": [
-        {"id": "abstract_toolset_interface", "label": "Abstract Toolset Interface", "type": "module", "link": "abstract_toolset_interface.md"},
-        {"id": "deferred_toolset_alias", "label": "Deferred Toolset Alias", "type": "module", "link": "deferred_toolset_alias.md"}
+        {
+            "id": "abstract_and_deferred_toolsets",
+            "label": "Abstract and Deferred Toolsets",
+            "type": "module"
+        },
+        {
+            "id": "abstract_toolset_interface",
+            "label": "Abstract Toolset Interface",
+            "type": "module",
+            "link": "abstract_toolset_interface.md"
+        },
+        {
+            "id": "deferred_toolset_alias",
+            "label": "Deferred Toolset Alias",
+            "type": "module",
+            "link": "deferred_toolset_alias.md"
+        }
     ],
     "edges": [
-        {"source": "abstract_toolset_interface", "target": "deferred_toolset_alias", "label": "extends/aliases"}
+        {
+            "source": "abstract_toolset_interface",
+            "target": "deferred_toolset_alias",
+            "label": "extends/aliases"
+        }
     ],
     "groups": [
         {
             "id": "toolset_definitions",
             "label": "Toolset Definitions",
             "role": "analytical",
-            "nodes": ["abstract_toolset_interface", "deferred_toolset_alias"]
+            "nodes": [
+                "abstract_toolset_interface",
+                "deferred_toolset_alias"
+            ]
         }
     ]
 }

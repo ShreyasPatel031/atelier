@@ -10,28 +10,66 @@ This module acts as a concrete implementation layer within the broader embedding
 {
     "direction": "TD",
     "nodes": [
-        {"id": "embedding_core", "label": "Embedding Core", "type": "external", "link": "embedding_core.md"},
-        {"id": "embedding_provider_integrations", "label": "Embedding Provider Integrations", "type": "external", "link": "embedding_provider_integrations.md"},
-        {"id": "bedrock_embedding_handlers", "label": "Bedrock Embedding Handlers", "type": "module", "link": "bedrock_embedding_handlers.md"},
-        {"id": "bedrock_embedding_model_handlers", "label": "Bedrock Model Handlers", "type": "module", "link": "bedrock_embedding_model_handlers.md"}
+        {
+            "id": "embedding_core",
+            "label": "Embedding Core",
+            "type": "external",
+            "link": "embedding_core.md"
+        },
+        {
+            "id": "embedding_provider_integrations",
+            "label": "Embedding Provider Integrations",
+            "type": "external",
+            "link": "embedding_provider_integrations.md"
+        },
+        {
+            "id": "bedrock_embedding_handlers",
+            "label": "Bedrock Embedding Handlers",
+            "type": "module",
+            "link": "bedrock_embedding_handlers.md"
+        },
+        {
+            "id": "bedrock_embedding_model_handlers",
+            "label": "Bedrock Model Handlers",
+            "type": "module",
+            "link": "bedrock_embedding_model_handlers.md"
+        }
     ],
     "edges": [
-        {"source": "embedding_core", "target": "embedding_provider_integrations", "label": "requests embedding service"},
-        {"source": "embedding_provider_integrations", "target": "bedrock_embedding_handlers", "label": "dispatches Bedrock request"},
-        {"source": "bedrock_embedding_handlers", "target": "bedrock_embedding_model_handlers", "label": "delegates to model specific handler"}
+        {
+            "source": "embedding_core",
+            "target": "embedding_provider_integrations",
+            "label": "requests embedding service"
+        },
+        {
+            "source": "embedding_provider_integrations",
+            "target": "bedrock_embedding_handlers",
+            "label": "dispatches Bedrock request"
+        },
+        {
+            "source": "bedrock_embedding_handlers",
+            "target": "bedrock_embedding_model_handlers",
+            "label": "delegates to model specific handler"
+        }
     ],
     "groups": [
         {
             "id": "embedding_system",
             "label": "Embedding System",
             "role": "analytical",
-            "nodes": ["embedding_core", "embedding_provider_integrations"]
+            "nodes": [
+                "embedding_core",
+                "embedding_provider_integrations"
+            ]
         },
         {
             "id": "bedrock_handlers_group",
             "label": "Bedrock Handlers",
             "role": "generative",
-            "nodes": ["bedrock_embedding_handlers", "bedrock_embedding_model_handlers"]
+            "nodes": [
+                "bedrock_embedding_handlers",
+                "bedrock_embedding_model_handlers"
+            ]
         }
     ]
 }

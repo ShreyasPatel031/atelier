@@ -19,20 +19,51 @@ Internal utility functions and decorators (`wrapper`, `wrapper_no_arg`, `decorat
 {
     "direction": "TD",
     "nodes": [
-        {"id": "hook_management", "label": "Manage & Dispatch Hooks", "type": "module", "link": "hook_management.md"},
-        {"id": "hook_internals", "label": "Internal Hook Utilities", "type": "module", "link": "hook_internals.md"},
-        {"id": "capabilities_base", "label": "Abstract Capability Base", "type": "external", "link": "capabilities_base.md"}
+        {
+            "id": "hook_system",
+            "label": "Agent Hook System",
+            "type": "module"
+        },
+        {
+            "id": "hook_management",
+            "label": "Manage & Dispatch Hooks",
+            "type": "module",
+            "link": "hook_management.md"
+        },
+        {
+            "id": "hook_internals",
+            "label": "Internal Hook Utilities",
+            "type": "module",
+            "link": "hook_internals.md"
+        },
+        {
+            "id": "capabilities_base",
+            "label": "Abstract Capability Base",
+            "type": "external",
+            "link": "capabilities_base.md"
+        }
     ],
     "edges": [
-        {"source": "hook_management", "target": "hook_internals", "label": "uses"},
-        {"source": "capabilities_base", "target": "hook_management", "label": "extends"}
+        {
+            "source": "hook_management",
+            "target": "hook_internals",
+            "label": "uses"
+        },
+        {
+            "source": "capabilities_base",
+            "target": "hook_management",
+            "label": "extends"
+        }
     ],
     "groups": [
         {
             "id": "hook_system_core",
             "label": "Hook System Core",
             "role": "generative",
-            "nodes": ["hook_management", "hook_internals"]
+            "nodes": [
+                "hook_management",
+                "hook_internals"
+            ]
         }
     ]
 }

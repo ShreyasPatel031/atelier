@@ -3,22 +3,65 @@ The `vector_store_memory` module provides `ConversationVectorStoreTokenBufferMem
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "vector_store_memory", "label": "vector_store_memory", "type": "Module"},
-    {"id": "ConversationVectorStoreTokenBufferMemory", "label": "ConversationVectorStoreTokenBufferMemory", "type": "Class"},
-    {"id": "ConversationTokenBufferMemory", "label": "ConversationTokenBufferMemory", "type": "Class"},
-    {"id": "VectorStoreRetriever", "label": "VectorStoreRetriever", "type": "Class"},
-    {"id": "VectorStoreRetrieverMemory", "label": "VectorStoreRetrieverMemory", "type": "Class"}
-  ],
-  "edges": [
-    {"source": "vector_store_memory", "target": "ConversationVectorStoreTokenBufferMemory", "type": "contains"},
-    {"source": "ConversationVectorStoreTokenBufferMemory", "target": "ConversationTokenBufferMemory", "type": "inherits"},
-    {"source": "ConversationVectorStoreTokenBufferMemory", "target": "VectorStoreRetriever", "type": "uses"},
-    {"source": "ConversationVectorStoreTokenBufferMemory", "target": "VectorStoreRetrieverMemory", "type": "uses"}
-  ],
-  "groups": [
-    {"id": "vector_store_memory", "label": "vector_store_memory", "nodes": ["ConversationVectorStoreTokenBufferMemory"]}
-  ]
+    "nodes": [
+        {
+            "id": "vector_store_memory",
+            "label": "vector_store_memory",
+            "type": "Module"
+        },
+        {
+            "id": "ConversationVectorStoreTokenBufferMemory",
+            "label": "ConversationVectorStoreTokenBufferMemory",
+            "type": "Class"
+        },
+        {
+            "id": "ConversationTokenBufferMemory",
+            "label": "ConversationTokenBufferMemory",
+            "type": "Class"
+        },
+        {
+            "id": "VectorStoreRetriever",
+            "label": "VectorStoreRetriever",
+            "type": "Class"
+        },
+        {
+            "id": "VectorStoreRetrieverMemory",
+            "label": "VectorStoreRetrieverMemory",
+            "type": "Class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "ConversationVectorStoreTokenBufferMemory",
+            "target": "ConversationVectorStoreTokenBufferMemory",
+            "type": "contains"
+        },
+        {
+            "source": "ConversationVectorStoreTokenBufferMemory",
+            "target": "ConversationTokenBufferMemory",
+            "type": "inherits"
+        },
+        {
+            "source": "ConversationVectorStoreTokenBufferMemory",
+            "target": "VectorStoreRetriever",
+            "type": "uses"
+        },
+        {
+            "source": "ConversationVectorStoreTokenBufferMemory",
+            "target": "VectorStoreRetrieverMemory",
+            "type": "uses"
+        }
+    ],
+    "groups": [
+        {
+            "id": "vector_store_memory__group",
+            "label": "vector_store_memory",
+            "nodes": [
+                "ConversationVectorStoreTokenBufferMemory"
+            ],
+            "_repaired": "r4_group_renamed_avoid_node_collision"
+        }
+    ]
 }
 -->
 ```mermaid

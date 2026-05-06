@@ -17,6 +17,134 @@ A new user would typically follow these steps:
 3.  **Automate Optimization:** Use teleprompters to automatically generate and refine prompts and few-shot examples.
 4.  **Evaluate and Benchmark:** Measure program performance using diverse metrics and datasets.
 
+<!-- DIAGRAM_JSON
+{
+    "direction": "LR",
+    "nodes": [
+        {
+            "id": "core_program_building_node",
+            "label": "Core Program Building",
+            "type": "module",
+            "link": "core_program_building.md"
+        },
+        {
+            "id": "data_evaluation_node",
+            "label": "Data and Evaluation",
+            "type": "module",
+            "link": "data_and_evaluation.md"
+        },
+        {
+            "id": "lm_integration_node",
+            "label": "Language Model Integration",
+            "type": "module",
+            "link": "language_model_integration.md"
+        },
+        {
+            "id": "program_optimization_node",
+            "label": "Program Optimization",
+            "type": "module",
+            "link": "program_optimization.md"
+        },
+        {
+            "id": "user",
+            "label": "User",
+            "type": "component"
+        },
+        {
+            "id": "utilities_adapters_node",
+            "label": "Utilities and Adapters",
+            "type": "module",
+            "link": "utilities_and_adapters.md"
+        }
+    ],
+    "edges": [
+        {
+            "source": "user",
+            "target": "core_program_building_node",
+            "label": "defines & runs"
+        },
+        {
+            "source": "core_program_building_node",
+            "target": "lm_integration_node",
+            "label": "executes via"
+        },
+        {
+            "source": "lm_integration_node",
+            "target": "data_evaluation_node",
+            "label": "logs interactions"
+        },
+        {
+            "source": "core_program_building_node",
+            "target": "program_optimization_node",
+            "label": "optimizes with"
+        },
+        {
+            "source": "program_optimization_node",
+            "target": "core_program_building_node",
+            "label": "returns optimized program"
+        },
+        {
+            "source": "program_optimization_node",
+            "target": "data_evaluation_node",
+            "label": "uses datasets & metrics"
+        },
+        {
+            "source": "data_evaluation_node",
+            "target": "program_optimization_node",
+            "label": "provides feedback"
+        },
+        {
+            "source": "utilities_adapters_node",
+            "target": "core_program_building_node",
+            "label": "supports"
+        },
+        {
+            "source": "utilities_adapters_node",
+            "target": "lm_integration_node",
+            "label": "provides adapters for"
+        }
+    ],
+    "groups": [
+        {
+            "id": "program_definition",
+            "label": "Program Definition",
+            "nodes": [
+                "core_program_building_node"
+            ]
+        },
+        {
+            "id": "lm_and_retrieval",
+            "label": "LM and Retrieval Integration",
+            "nodes": [
+                "lm_integration_node"
+            ]
+        },
+        {
+            "id": "optimization_engine",
+            "label": "Program Optimization Engine",
+            "nodes": [
+                "program_optimization_node"
+            ]
+        },
+        {
+            "id": "data_and_metrics",
+            "label": "Data and Evaluation Metrics",
+            "nodes": [
+                "data_evaluation_node"
+            ]
+        },
+        {
+            "id": "support_utilities",
+            "label": "Utilities and Adapters",
+            "nodes": [
+                "utilities_adapters_node"
+            ]
+        }
+    ],
+    "_auto_generated": "r1_overview_synthesis"
+}
+-->
+
 ```mermaid
 flowchart LR
     user(("User"))

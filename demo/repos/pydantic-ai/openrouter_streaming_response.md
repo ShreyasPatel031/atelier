@@ -19,35 +19,130 @@ This module (`openrouter_streaming_response`) provides the specific implementati
 {
     "direction": "TD",
     "nodes": [
-        {"id": "openrouter_streamed_response", "label": "OpenRouter Streamed Response Handler", "type": "component", "link": null},
-        {"id": "validate_response_stream", "label": "Validate Incoming Stream Chunks", "type": "component", "link": null},
-        {"id": "map_thinking_delta", "label": "Map OpenRouter Thinking Delta", "type": "component", "link": null},
-        {"id": "map_provider_metadata", "label": "Map OpenRouter Provider Metadata", "type": "component", "link": null},
-        {"id": "map_finish_reason", "label": "Map OpenRouter Finish Reason", "type": "component", "link": null},
-        {"id": "openai_streamed_response_base", "label": "OpenAI Streamed Response Base", "type": "external", "link": "model_provider_openai.md"},
-        {"id": "openrouter_completion_types", "label": "OpenRouter Completion Types", "type": "external", "link": "openrouter_nested_completion.md"},
-        {"id": "model_response_parts_manager", "label": "Model Response Parts Manager", "type": "external", "link": "agent_output_handling.md"},
-        {"id": "model_http_error", "label": "Model HTTP Error Handling", "type": "external", "link": "model_core_interfaces.md"}
+        {
+            "id": "openrouter_streamed_response",
+            "label": "OpenRouter Streamed Response Handler",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "validate_response_stream",
+            "label": "Validate Incoming Stream Chunks",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "map_thinking_delta",
+            "label": "Map OpenRouter Thinking Delta",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "map_provider_metadata",
+            "label": "Map OpenRouter Provider Metadata",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "map_finish_reason",
+            "label": "Map OpenRouter Finish Reason",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "openai_streamed_response_base",
+            "label": "OpenAI Streamed Response Base",
+            "type": "external",
+            "link": "model_provider_openai.md"
+        },
+        {
+            "id": "openrouter_completion_types",
+            "label": "OpenRouter Completion Types",
+            "type": "external",
+            "link": "openrouter_nested_completion.md"
+        },
+        {
+            "id": "model_response_parts_manager",
+            "label": "Model Response Parts Manager",
+            "type": "external",
+            "link": "agent_output_handling.md"
+        },
+        {
+            "id": "model_http_error",
+            "label": "Model HTTP Error Handling",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        }
     ],
     "edges": [
-        {"source": "openrouter_streamed_response", "target": "openai_streamed_response_base", "label": "inherits from"},
-        {"source": "openrouter_streamed_response", "target": "validate_response_stream", "label": "uses for validation"},
-        {"source": "validate_response_stream", "target": "openrouter_completion_types", "label": "validates chunks with"},
-        {"source": "validate_response_stream", "target": "model_http_error", "label": "raises on API error"},
-        {"source": "openrouter_streamed_response", "target": "map_thinking_delta", "label": "uses for thinking parts"},
-        {"source": "map_thinking_delta", "target": "openrouter_completion_types", "label": "parses reasoning details from"},
-        {"source": "map_thinking_delta", "target": "model_response_parts_manager", "label": "sends thinking events to"},
-        {"source": "openrouter_streamed_response", "target": "map_provider_metadata", "label": "uses for metadata"},
-        {"source": "map_provider_metadata", "target": "openrouter_completion_types", "label": "maps details from"},
-        {"source": "openrouter_streamed_response", "target": "map_finish_reason", "label": "uses for finish reason"},
-        {"source": "map_finish_reason", "target": "openrouter_completion_types", "label": "looks up reason in"}
+        {
+            "source": "openrouter_streamed_response",
+            "target": "openai_streamed_response_base",
+            "label": "inherits from"
+        },
+        {
+            "source": "openrouter_streamed_response",
+            "target": "validate_response_stream",
+            "label": "uses for validation"
+        },
+        {
+            "source": "validate_response_stream",
+            "target": "openrouter_completion_types",
+            "label": "validates chunks with"
+        },
+        {
+            "source": "validate_response_stream",
+            "target": "model_http_error",
+            "label": "raises on API error"
+        },
+        {
+            "source": "openrouter_streamed_response",
+            "target": "map_thinking_delta",
+            "label": "uses for thinking parts"
+        },
+        {
+            "source": "map_thinking_delta",
+            "target": "openrouter_completion_types",
+            "label": "parses reasoning details from"
+        },
+        {
+            "source": "map_thinking_delta",
+            "target": "model_response_parts_manager",
+            "label": "sends thinking events to"
+        },
+        {
+            "source": "openrouter_streamed_response",
+            "target": "map_provider_metadata",
+            "label": "uses for metadata"
+        },
+        {
+            "source": "map_provider_metadata",
+            "target": "openrouter_completion_types",
+            "label": "maps details from"
+        },
+        {
+            "source": "openrouter_streamed_response",
+            "target": "map_finish_reason",
+            "label": "uses for finish reason"
+        },
+        {
+            "source": "map_finish_reason",
+            "target": "openrouter_completion_types",
+            "label": "looks up reason in"
+        }
     ],
     "groups": [
         {
             "id": "openrouter_stream_processing",
             "label": "OpenRouter Stream Processing",
             "role": "data_flow",
-            "nodes": ["openrouter_streamed_response", "validate_response_stream", "map_thinking_delta", "map_provider_metadata", "map_finish_reason"]
+            "nodes": [
+                "openrouter_streamed_response",
+                "validate_response_stream",
+                "map_thinking_delta",
+                "map_provider_metadata",
+                "map_finish_reason"
+            ]
         }
     ]
 }

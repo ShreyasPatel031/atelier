@@ -3,16 +3,33 @@ This module provides robust file operation capabilities, including backup mechan
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "A", "label": "WriteWithBackup"},
-    {"id": "B", "label": "Trace"}
-  ],
-  "edges": [
-    {"source": "A", "target": "B", "label": "logs via"}
-  ],
-  "groups": [
-    {"id": "file_operations_logging", "label": "file_operations_logging", "nodes": ["A", "B"]}
-  ]
+    "nodes": [
+        {
+            "id": "A",
+            "label": "WriteWithBackup"
+        },
+        {
+            "id": "B",
+            "label": "Trace"
+        }
+    ],
+    "edges": [
+        {
+            "source": "A",
+            "target": "B",
+            "label": "logs via"
+        }
+    ],
+    "groups": [
+        {
+            "id": "file_operations_logging",
+            "label": "file_operations_logging",
+            "nodes": [
+                "A",
+                "B"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

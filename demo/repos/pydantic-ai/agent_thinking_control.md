@@ -26,13 +26,36 @@ The `Thinking` class is a concrete implementation of `AbstractCapability` design
 {
     "direction": "TD",
     "nodes": [
-        {"id": "thinking_capability", "label": "Manage Agent Thinking", "type": "component", "link": null},
-        {"id": "abstract_capability", "label": "Abstract Capability Base", "type": "external", "link": "capabilities_base.md"},
-        {"id": "model_settings", "label": "Model Configuration Settings", "type": "external", "link": "model_core_interfaces.md"}
+        {
+            "id": "thinking_capability",
+            "label": "Manage Agent Thinking",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "abstract_capability",
+            "label": "Abstract Capability Base",
+            "type": "external",
+            "link": "capabilities_base.md"
+        },
+        {
+            "id": "model_settings",
+            "label": "Model Configuration Settings",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        }
     ],
     "edges": [
-        {"source": "thinking_capability", "target": "abstract_capability", "label": "inherits from"},
-        {"source": "thinking_capability", "target": "model_settings", "label": "configures"}
+        {
+            "source": "thinking_capability",
+            "target": "abstract_capability",
+            "label": "inherits from"
+        },
+        {
+            "source": "thinking_capability",
+            "target": "model_settings",
+            "label": "configures"
+        }
     ],
     "groups": []
 }

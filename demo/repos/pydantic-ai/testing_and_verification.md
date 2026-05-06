@@ -12,8 +12,23 @@ This module is composed of several independent scripts designed to perform speci
 {
     "direction": "TD",
     "nodes": [
-        {"id": "vcr_cassette_verification", "label": "VCR Cassette Verification", "type": "module", "link": "vcr_cassette_verification.md"},
-        {"id": "vertex_gcs_verification", "label": "Vertex GCS Verification", "type": "module", "link": "vertex_gcs_verification.md"}
+        {
+            "id": "testing_and_verification",
+            "label": "Testing and Verification",
+            "type": "module"
+        },
+        {
+            "id": "vcr_cassette_verification",
+            "label": "VCR Cassette Verification",
+            "type": "module",
+            "link": "vcr_cassette_verification.md"
+        },
+        {
+            "id": "vertex_gcs_verification",
+            "label": "Vertex GCS Verification",
+            "type": "module",
+            "link": "vertex_gcs_verification.md"
+        }
     ],
     "edges": [],
     "groups": [
@@ -21,7 +36,10 @@ This module is composed of several independent scripts designed to perform speci
             "id": "verification_scripts",
             "label": "Verification Scripts",
             "role": "analytical",
-            "nodes": ["vcr_cassette_verification", "vertex_gcs_verification"]
+            "nodes": [
+                "vcr_cassette_verification",
+                "vertex_gcs_verification"
+            ]
         }
     ]
 }

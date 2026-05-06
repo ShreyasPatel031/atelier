@@ -20,13 +20,36 @@ The `_map_usage` function inspects the provided Mistral response object. If a `u
 {
     "direction": "TD",
     "nodes": [
-        {"id": "map_mistral_usage", "label": "Map Mistral Response Usage", "type": "component", "link": null},
-        {"id": "mistral_api_response", "label": "Mistral API Response Data", "type": "external", "link": null},
-        {"id": "usage_module", "label": "Usage Tracking Module", "type": "external", "link": "usage.md"}
+        {
+            "id": "map_mistral_usage",
+            "label": "Map Mistral Response Usage",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "mistral_api_response",
+            "label": "Mistral API Response Data",
+            "type": "external",
+            "link": null
+        },
+        {
+            "id": "usage_module",
+            "label": "Usage Tracking Module",
+            "type": "external",
+            "link": "usage.md"
+        }
     ],
     "edges": [
-        {"source": "mistral_api_response", "target": "map_mistral_usage", "label": "provides usage details"},
-        {"source": "map_mistral_usage", "target": "usage_module", "label": "generates"}
+        {
+            "source": "mistral_api_response",
+            "target": "map_mistral_usage",
+            "label": "provides usage details"
+        },
+        {
+            "source": "map_mistral_usage",
+            "target": "usage_module",
+            "label": "generates"
+        }
     ],
     "groups": []
 }

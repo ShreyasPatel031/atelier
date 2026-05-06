@@ -12,26 +12,59 @@ This module is composed of three main sub-modules: `Documentation Site Managemen
 {
     "direction": "TD",
     "nodes": [
-        {"id": "documentation_site_management", "label": "Manage Documentation Site", "type": "module", "link": "documentation_site_management.md"},
-        {"id": "search_and_indexing", "label": "Integrate Search Functionality", "type": "module", "link": "search_and_indexing.md"},
-        {"id": "developer_utility_scripts", "label": "Provide Developer Utilities", "type": "module", "link": "developer_utility_scripts.md"}
+        {
+            "id": "project_documentation_and_developer_tools",
+            "label": "Project Documentation and Developer Tools",
+            "type": "module"
+        },
+        {
+            "id": "documentation_site_management",
+            "label": "Manage Documentation Site",
+            "type": "module",
+            "link": "documentation_site_management.md"
+        },
+        {
+            "id": "search_and_indexing",
+            "label": "Integrate Search Functionality",
+            "type": "module",
+            "link": "search_and_indexing.md"
+        },
+        {
+            "id": "developer_utility_scripts",
+            "label": "Provide Developer Utilities",
+            "type": "module",
+            "link": "developer_utility_scripts.md"
+        }
     ],
     "edges": [
-        {"source": "documentation_site_management", "target": "search_and_indexing", "label": "publishes content for indexing"},
-        {"source": "developer_utility_scripts", "target": "documentation_site_management", "label": "supports doc generation/testing"}
+        {
+            "source": "documentation_site_management",
+            "target": "search_and_indexing",
+            "label": "publishes content for indexing"
+        },
+        {
+            "source": "developer_utility_scripts",
+            "target": "documentation_site_management",
+            "label": "supports doc generation/testing"
+        }
     ],
     "groups": [
         {
             "id": "documentation_flow",
             "label": "Documentation Flow",
             "role": "surface",
-            "nodes": ["documentation_site_management", "search_and_indexing"]
+            "nodes": [
+                "documentation_site_management",
+                "search_and_indexing"
+            ]
         },
         {
             "id": "development_support",
             "label": "Development Support",
             "role": "analytical",
-            "nodes": ["developer_utility_scripts"]
+            "nodes": [
+                "developer_utility_scripts"
+            ]
         }
     ]
 }

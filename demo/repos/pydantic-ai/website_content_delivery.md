@@ -10,26 +10,58 @@ This module integrates with external services like GitHub for dynamic content re
 {
     "direction": "TD",
     "nodes": [
-        {"id": "content_serving", "label": "Serve Web Content", "type": "module", "link": "content_serving.md"},
-        {"id": "changelog_management", "label": "Manage Changelogs", "type": "module", "link": "changelog_management.md"},
-        {"id": "github_api", "label": "GitHub API", "type": "external", "link": "https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps"}
+        {
+            "id": "website_content_delivery",
+            "label": "Website Content Delivery",
+            "type": "module"
+        },
+        {
+            "id": "content_serving",
+            "label": "Serve Web Content",
+            "type": "module",
+            "link": "content_serving.md"
+        },
+        {
+            "id": "changelog_management",
+            "label": "Manage Changelogs",
+            "type": "module",
+            "link": "changelog_management.md"
+        },
+        {
+            "id": "github_api",
+            "label": "GitHub API",
+            "type": "external",
+            "link": "https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps"
+        }
     ],
     "edges": [
-        {"source": "content_serving", "target": "changelog_management", "label": "requests formatted changelog"},
-        {"source": "changelog_management", "target": "github_api", "label": "fetches release data"}
+        {
+            "source": "content_serving",
+            "target": "changelog_management",
+            "label": "requests formatted changelog"
+        },
+        {
+            "source": "changelog_management",
+            "target": "github_api",
+            "label": "fetches release data"
+        }
     ],
     "groups": [
         {
             "id": "content_delivery",
             "label": "Content Delivery",
             "role": "surface",
-            "nodes": ["content_serving"]
+            "nodes": [
+                "content_serving"
+            ]
         },
         {
             "id": "data_retrieval",
             "label": "Data Retrieval",
             "role": "generative",
-            "nodes": ["changelog_management"]
+            "nodes": [
+                "changelog_management"
+            ]
         }
     ]
 }

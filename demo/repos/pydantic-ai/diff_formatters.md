@@ -10,7 +10,17 @@ The `diff_formatters` module is currently composed of a single sub-module: `diff
 {
     "direction": "TD",
     "nodes": [
-        {"id": "diff_rendering", "label": "Format Differences", "type": "module", "link": "diff_rendering.md"}
+        {
+            "id": "diff_formatters",
+            "label": "Difference Formatters",
+            "type": "module"
+        },
+        {
+            "id": "diff_rendering",
+            "label": "Format Differences",
+            "type": "module",
+            "link": "diff_rendering.md"
+        }
     ],
     "edges": [],
     "groups": [
@@ -18,7 +28,9 @@ The `diff_formatters` module is currently composed of a single sub-module: `diff
             "id": "formatters",
             "label": "Difference Formatting",
             "role": "analytical",
-            "nodes": ["diff_rendering"]
+            "nodes": [
+                "diff_rendering"
+            ]
         }
     ]
 }

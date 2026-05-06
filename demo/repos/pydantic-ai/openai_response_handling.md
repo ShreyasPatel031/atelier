@@ -12,29 +12,74 @@ While `streamed_response_parser` handles incoming data, `model_response_mapper` 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "streamed_response_parser", "label": "Parse Streamed Responses", "type": "module", "link": "streamed_response_parser.md"},
-        {"id": "model_response_mapper", "label": "Map Internal Responses to OpenAI Format", "type": "module", "link": "model_response_mapper.md"},
-        {"id": "openai_model_config", "label": "OpenAI Model Configuration", "type": "external", "link": "openai_model_configuration.md"},
-        {"id": "agent_output", "label": "Agent Internal Output (ModelResponse)", "type": "external", "link": "agent_output_handling.md"}
+        {
+            "id": "openai_response_handling",
+            "label": "OpenAI Response Handling",
+            "type": "module"
+        },
+        {
+            "id": "streamed_response_parser",
+            "label": "Parse Streamed Responses",
+            "type": "module",
+            "link": "streamed_response_parser.md"
+        },
+        {
+            "id": "model_response_mapper",
+            "label": "Map Internal Responses to OpenAI Format",
+            "type": "module",
+            "link": "model_response_mapper.md"
+        },
+        {
+            "id": "openai_model_config",
+            "label": "OpenAI Model Configuration",
+            "type": "external",
+            "link": "openai_model_configuration.md"
+        },
+        {
+            "id": "agent_output",
+            "label": "Agent Internal Output (ModelResponse)",
+            "type": "external",
+            "link": "agent_output_handling.md"
+        }
     ],
     "edges": [
-        {"source": "openai_model_config", "target": "streamed_response_parser", "label": "uses settings"},
-        {"source": "streamed_response_parser", "target": "agent_output", "label": "generates parts"},
-        {"source": "agent_output", "target": "model_response_mapper", "label": "provides ModelResponse"},
-        {"source": "model_response_mapper", "target": "openai_model_config", "label": "prepares API input"}
+        {
+            "source": "openai_model_config",
+            "target": "streamed_response_parser",
+            "label": "uses settings"
+        },
+        {
+            "source": "streamed_response_parser",
+            "target": "agent_output",
+            "label": "generates parts"
+        },
+        {
+            "source": "agent_output",
+            "target": "model_response_mapper",
+            "label": "provides ModelResponse"
+        },
+        {
+            "source": "model_response_mapper",
+            "target": "openai_model_config",
+            "label": "prepares API input"
+        }
     ],
     "groups": [
         {
             "id": "response_intake",
             "label": "Response Intake",
             "role": "generative",
-            "nodes": ["streamed_response_parser"]
+            "nodes": [
+                "streamed_response_parser"
+            ]
         },
         {
             "id": "message_preparation",
             "label": "Message Preparation",
             "role": "analytical",
-            "nodes": ["model_response_mapper"]
+            "nodes": [
+                "model_response_mapper"
+            ]
         }
     ]
 }

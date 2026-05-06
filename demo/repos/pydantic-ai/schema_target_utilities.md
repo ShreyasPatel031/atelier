@@ -24,13 +24,36 @@ This intelligent selection process ensures flexibility in how agents are defined
 {
     "direction": "TD",
     "nodes": [
-        {"id": "_get_schema_target", "label": "Determine Schema Target", "type": "component", "link": null},
-        {"id": "agent_specification", "label": "Agent Specification Module", "type": "external", "link": "agent_specification.md"},
-        {"id": "agent_spec_definition", "label": "Agent Specification Definition", "type": "external", "link": "agent_spec_definition.md"}
+        {
+            "id": "_get_schema_target",
+            "label": "Determine Schema Target",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "agent_specification",
+            "label": "Agent Specification Module",
+            "type": "external",
+            "link": "agent_specification.md"
+        },
+        {
+            "id": "agent_spec_definition",
+            "label": "Agent Specification Definition",
+            "type": "external",
+            "link": "agent_spec_definition.md"
+        }
     ],
     "edges": [
-        {"source": "agent_specification", "target": "_get_schema_target", "label": "provides class type"},
-        {"source": "_get_schema_target", "target": "agent_spec_definition", "label": "resolves schema target"}
+        {
+            "source": "agent_specification",
+            "target": "_get_schema_target",
+            "label": "provides class type"
+        },
+        {
+            "source": "_get_schema_target",
+            "target": "agent_spec_definition",
+            "label": "resolves schema target"
+        }
     ],
     "groups": []
 }

@@ -15,24 +15,47 @@ These sub-modules work in concert, where the `Graph Definition` provides the blu
 {
     "direction": "TD",
     "nodes": [
-        {"id": "graph_definition", "label": "Define Graph Structure", "type": "module", "link": "graph_definition.md"},
-        {"id": "graph_runtime", "label": "Execute Graph Logic", "type": "module", "link": "graph_runtime.md"}
+        {
+            "id": "graph_execution_engine",
+            "label": "Graph Execution Engine",
+            "type": "module"
+        },
+        {
+            "id": "graph_definition",
+            "label": "Define Graph Structure",
+            "type": "module",
+            "link": "graph_definition.md"
+        },
+        {
+            "id": "graph_runtime",
+            "label": "Execute Graph Logic",
+            "type": "module",
+            "link": "graph_runtime.md"
+        }
     ],
     "edges": [
-        {"source": "graph_definition", "target": "graph_runtime", "label": "provides blueprint"}
+        {
+            "source": "graph_definition",
+            "target": "graph_runtime",
+            "label": "provides blueprint"
+        }
     ],
     "groups": [
         {
             "id": "design_phase",
             "label": "Graph Design",
             "role": "analytical",
-            "nodes": ["graph_definition"]
+            "nodes": [
+                "graph_definition"
+            ]
         },
         {
             "id": "execution_phase",
             "label": "Graph Execution",
             "role": "generative",
-            "nodes": ["graph_runtime"]
+            "nodes": [
+                "graph_runtime"
+            ]
         }
     ]
 }

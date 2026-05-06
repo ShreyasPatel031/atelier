@@ -13,26 +13,59 @@ This module integrates closely with the `type_and_schema_utilities` module, prov
 {
     "direction": "TD",
     "nodes": [
-        {"id": "function_context_checker", "label": "Check Function Context", "type": "module", "link": "function_context_checker.md"},
-        {"id": "union_type_parser", "label": "Parse Union Types", "type": "module", "link": "union_type_parser.md"},
-        {"id": "type_and_schema_utilities", "label": "Type and Schema Utilities", "type": "external", "link": "type_and_schema_utilities.md"}
+        {
+            "id": "type_introspection",
+            "label": "Type Introspection",
+            "type": "module"
+        },
+        {
+            "id": "function_context_checker",
+            "label": "Check Function Context",
+            "type": "module",
+            "link": "function_context_checker.md"
+        },
+        {
+            "id": "union_type_parser",
+            "label": "Parse Union Types",
+            "type": "module",
+            "link": "union_type_parser.md"
+        },
+        {
+            "id": "type_and_schema_utilities",
+            "label": "Type and Schema Utilities",
+            "type": "external",
+            "link": "type_and_schema_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "function_context_checker", "target": "type_and_schema_utilities", "label": "provides analysis"},
-        {"source": "union_type_parser", "target": "type_and_schema_utilities", "label": "provides analysis"}
+        {
+            "source": "function_context_checker",
+            "target": "type_and_schema_utilities",
+            "label": "provides analysis"
+        },
+        {
+            "source": "union_type_parser",
+            "target": "type_and_schema_utilities",
+            "label": "provides analysis"
+        }
     ],
     "groups": [
         {
             "id": "introspection_utilities",
             "label": "Introspection Utilities",
             "role": "analytical",
-            "nodes": ["function_context_checker", "union_type_parser"]
+            "nodes": [
+                "function_context_checker",
+                "union_type_parser"
+            ]
         },
         {
             "id": "core_utilities",
             "label": "Core Utilities",
             "role": "generative",
-            "nodes": ["type_and_schema_utilities"]
+            "nodes": [
+                "type_and_schema_utilities"
+            ]
         }
     ]
 }

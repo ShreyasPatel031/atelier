@@ -3,27 +3,49 @@ This module provides tools for analyzing datasets by generating detailed observa
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "DatasetDescriptor", "label": "DatasetDescriptor"},
-    {"id": "DatasetDescriptorWithPriorObservations", "label": "DatasetDescriptorWithPriorObservations"},
-    {"id": "ObservationSummarizer", "label": "ObservationSummarizer"}
-  ],
-  "edges": [
-    {"source": "DatasetDescriptor", "target": "ObservationSummarizer", "label": "observations"},
-    {"source": "DatasetDescriptorWithPriorObservations", "target": "ObservationSummarizer", "label": "observations"}
-  ],
-  "groups": [
-    {
-      "id": "ObservationGeneration",
-      "label": "Observation Generation",
-      "nodes": ["DatasetDescriptor", "DatasetDescriptorWithPriorObservations"]
-    },
-    {
-      "id": "SummaryGeneration",
-      "label": "Summary Generation",
-      "nodes": ["ObservationSummarizer"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "DatasetDescriptor",
+            "label": "DatasetDescriptor"
+        },
+        {
+            "id": "DatasetDescriptorWithPriorObservations",
+            "label": "DatasetDescriptorWithPriorObservations"
+        },
+        {
+            "id": "ObservationSummarizer",
+            "label": "ObservationSummarizer"
+        }
+    ],
+    "edges": [
+        {
+            "source": "DatasetDescriptor",
+            "target": "ObservationSummarizer",
+            "label": "observations"
+        },
+        {
+            "source": "DatasetDescriptorWithPriorObservations",
+            "target": "ObservationSummarizer",
+            "label": "observations"
+        }
+    ],
+    "groups": [
+        {
+            "id": "ObservationGeneration",
+            "label": "Observation Generation",
+            "nodes": [
+                "DatasetDescriptor",
+                "DatasetDescriptorWithPriorObservations"
+            ]
+        },
+        {
+            "id": "SummaryGeneration",
+            "label": "Summary Generation",
+            "nodes": [
+                "ObservationSummarizer"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

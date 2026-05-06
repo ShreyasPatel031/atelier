@@ -34,21 +34,83 @@ The `WrapperModel` is a critical building block for creating flexible and compos
 {
     "direction": "TD",
     "nodes": [
-        {"id": "wrapper_model_component", "label": "WrapperModel Component", "type": "component", "link": null},
-        {"id": "initialize_wrapper", "label": "Initialize Wrapper", "type": "component", "link": null},
-        {"id": "delegate_requests", "label": "Delegate Model Operations", "type": "component", "link": null},
-        {"id": "expose_properties", "label": "Expose Wrapped Model Properties", "type": "component", "link": null},
-        {"id": "model_core_interfaces", "label": "Model Core Interfaces", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "model_utilities", "label": "Model Utilities", "type": "external", "link": "model_utilities.md"}
+        {
+            "id": "wrapper_model_component",
+            "label": "WrapperModel Component",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "initialize_wrapper",
+            "label": "Initialize Wrapper",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "delegate_requests",
+            "label": "Delegate Model Operations",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "expose_properties",
+            "label": "Expose Wrapped Model Properties",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Model Core Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "model_utilities",
+            "label": "Model Utilities",
+            "type": "external",
+            "link": "model_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "initialize_wrapper", "target": "wrapper_model_component", "label": "creates instance"},
-        {"source": "initialize_wrapper", "target": "model_utilities", "label": "uses 'infer_model' from", "style": "dashed"},
-        {"source": "wrapper_model_component", "target": "delegate_requests", "label": "implements"},
-        {"source": "wrapper_model_component", "target": "expose_properties", "label": "implements"},
-        {"source": "delegate_requests", "target": "model_core_interfaces", "label": "forwards requests conforming to", "style": "dashed"},
-        {"source": "expose_properties", "target": "model_core_interfaces", "label": "reads properties conforming to", "style": "dashed"},
-        {"source": "wrapper_model_component", "target": "model_core_interfaces", "label": "depends on 'Model' definition from", "style": "dashed"}
+        {
+            "source": "initialize_wrapper",
+            "target": "wrapper_model_component",
+            "label": "creates instance"
+        },
+        {
+            "source": "initialize_wrapper",
+            "target": "model_utilities",
+            "label": "uses 'infer_model' from",
+            "style": "dashed"
+        },
+        {
+            "source": "wrapper_model_component",
+            "target": "delegate_requests",
+            "label": "implements"
+        },
+        {
+            "source": "wrapper_model_component",
+            "target": "expose_properties",
+            "label": "implements"
+        },
+        {
+            "source": "delegate_requests",
+            "target": "model_core_interfaces",
+            "label": "forwards requests conforming to",
+            "style": "dashed"
+        },
+        {
+            "source": "expose_properties",
+            "target": "model_core_interfaces",
+            "label": "reads properties conforming to",
+            "style": "dashed"
+        },
+        {
+            "source": "wrapper_model_component",
+            "target": "model_core_interfaces",
+            "label": "depends on 'Model' definition from",
+            "style": "dashed"
+        }
     ],
     "groups": []
 }

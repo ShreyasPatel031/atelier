@@ -5,15 +5,42 @@ This module provides tools and tests for evaluating the performance of models an
 {
     "direction": "TD",
     "nodes": [
-        {"id": "model_benchmarking", "label": "Model Performance Benchmarking", "type": "module", "link": "model_benchmarking.md"},
-        {"id": "core_ml_transform_benchmarking", "label": "Core ML Transform Benchmarking", "type": "module", "link": "core_ml_transform_benchmarking.md"}
+        {
+            "id": "performance_benchmarking",
+            "label": "Performance Benchmarking",
+            "type": "module"
+        },
+        {
+            "id": "model_benchmarking",
+            "label": "Model Performance Benchmarking",
+            "type": "module",
+            "link": "model_benchmarking.md"
+        },
+        {
+            "id": "core_ml_transform_benchmarking",
+            "label": "Core ML Transform Benchmarking",
+            "type": "module",
+            "link": "core_ml_transform_benchmarking.md"
+        }
     ],
-    "edges": [
-
-    ],
+    "edges": [],
     "groups": [
-        {"id": "model_eval", "label": "Model Evaluation", "role": "analytical", "nodes": ["model_benchmarking"]},
-        {"id": "ml_ops_bench", "label": "ML Operations Benchmarking", "role": "analytical", "nodes": ["core_ml_transform_benchmarking"]}
+        {
+            "id": "model_eval",
+            "label": "Model Evaluation",
+            "role": "analytical",
+            "nodes": [
+                "model_benchmarking"
+            ]
+        },
+        {
+            "id": "ml_ops_bench",
+            "label": "ML Operations Benchmarking",
+            "role": "analytical",
+            "nodes": [
+                "core_ml_transform_benchmarking"
+            ]
+        }
     ]
 }
 -->

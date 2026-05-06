@@ -31,24 +31,71 @@ When an embedding operation is requested, the system typically interacts with an
 {
     "direction": "TD",
     "nodes": [
-        {"id": "embedding_model_base", "label": "EmbeddingModel (Abstract Base Class)", "type": "component", "link": null},
-        {"id": "abstract_methods", "label": "Abstract Core Methods (embed, count_tokens)", "type": "component", "link": null},
-        {"id": "utility_methods", "label": "Utility Methods (prepare_embed, properties)", "type": "component", "link": null},
-        {"id": "embedding_interface_mod", "label": "Embedder (Interface Module)", "type": "external", "link": "embedding_interface.md"},
-        {"id": "embedding_provider_mod", "label": "Embedding Provider Integrations", "type": "external", "link": "embedding_provider_integrations.md"}
+        {
+            "id": "embedding_model_base",
+            "label": "EmbeddingModel (Abstract Base Class)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "abstract_methods",
+            "label": "Abstract Core Methods (embed, count_tokens)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "utility_methods",
+            "label": "Utility Methods (prepare_embed, properties)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "embedding_interface_mod",
+            "label": "Embedder (Interface Module)",
+            "type": "external",
+            "link": "embedding_interface.md"
+        },
+        {
+            "id": "embedding_provider_mod",
+            "label": "Embedding Provider Integrations",
+            "type": "external",
+            "link": "embedding_provider_integrations.md"
+        }
     ],
     "edges": [
-        {"source": "embedding_model_base", "target": "abstract_methods", "label": "defines"},
-        {"source": "embedding_model_base", "target": "utility_methods", "label": "provides"},
-        {"source": "embedding_interface_mod", "target": "embedding_model_base", "label": "utilizes base", "type": "dashed"},
-        {"source": "embedding_provider_mod", "target": "embedding_model_base", "label": "implements abstract base", "type": "heavy"}
+        {
+            "source": "embedding_model_base",
+            "target": "abstract_methods",
+            "label": "defines"
+        },
+        {
+            "source": "embedding_model_base",
+            "target": "utility_methods",
+            "label": "provides"
+        },
+        {
+            "source": "embedding_interface_mod",
+            "target": "embedding_model_base",
+            "label": "utilizes base",
+            "type": "dashed"
+        },
+        {
+            "source": "embedding_provider_mod",
+            "target": "embedding_model_base",
+            "label": "implements abstract base",
+            "type": "heavy"
+        }
     ],
     "groups": [
         {
             "id": "base_model_definition",
             "label": "Base Model Definition",
             "role": "core",
-            "nodes": ["embedding_model_base", "abstract_methods", "utility_methods"]
+            "nodes": [
+                "embedding_model_base",
+                "abstract_methods",
+                "utility_methods"
+            ]
         }
     ]
 }

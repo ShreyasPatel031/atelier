@@ -23,28 +23,66 @@ These definitions are consumed by components in the [mcp_server_components.md](m
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mcp_resource_definitions", "label": "MCP Resource Definitions", "type": "module", "link": "mcp_resource_definitions.md"},
-        {"id": "mcp_resource_management", "label": "Resource Management", "type": "module", "link": "mcp_resource_management.md"},
-        {"id": "mcp_server_components", "label": "MCP Server Components", "type": "module", "link": "mcp_server_components.md"},
-        {"id": "mcp_model_and_tooling", "label": "MCP Model & Tooling", "type": "module", "link": "mcp_model_and_tooling.md"}
+        {
+            "id": "mcp_resource_definitions",
+            "label": "MCP Resource Definitions",
+            "type": "module",
+            "link": "mcp_resource_definitions.md"
+        },
+        {
+            "id": "mcp_resource_management",
+            "label": "Resource Management",
+            "type": "module",
+            "link": "mcp_resource_management.md"
+        },
+        {
+            "id": "mcp_server_components",
+            "label": "MCP Server Components",
+            "type": "module",
+            "link": "mcp_server_components.md"
+        },
+        {
+            "id": "mcp_model_and_tooling",
+            "label": "MCP Model & Tooling",
+            "type": "module",
+            "link": "mcp_model_and_tooling.md"
+        }
     ],
     "edges": [
-        {"source": "mcp_resource_management", "target": "mcp_resource_definitions", "label": "defines structures for"},
-        {"source": "mcp_server_components", "target": "mcp_resource_definitions", "label": "utilizes"},
-        {"source": "mcp_model_and_tooling", "target": "mcp_resource_definitions", "label": "interacts with"}
+        {
+            "source": "mcp_resource_management",
+            "target": "mcp_resource_definitions",
+            "label": "defines structures for"
+        },
+        {
+            "source": "mcp_server_components",
+            "target": "mcp_resource_definitions",
+            "label": "utilizes"
+        },
+        {
+            "source": "mcp_model_and_tooling",
+            "target": "mcp_resource_definitions",
+            "label": "interacts with"
+        }
     ],
     "groups": [
         {
             "id": "mcp_definitions",
             "label": "MCP Definitions",
             "role": "data",
-            "nodes": ["mcp_resource_definitions"]
+            "nodes": [
+                "mcp_resource_definitions"
+            ]
         },
         {
             "id": "mcp_core_operations",
             "label": "Core MCP Operations",
             "role": "generative",
-            "nodes": ["mcp_resource_management", "mcp_server_components", "mcp_model_and_tooling"]
+            "nodes": [
+                "mcp_resource_management",
+                "mcp_server_components",
+                "mcp_model_and_tooling"
+            ]
         }
     ]
 }

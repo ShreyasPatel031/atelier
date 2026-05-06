@@ -3,16 +3,35 @@ The `avatar_agent` module defines an `Avatar` class for orchestrating multi-step
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "Avatar", "label": "Avatar", "type": "class"},
-    {"id": "Actor", "label": "Actor", "type": "class"}
-  ],
-  "edges": [
-    {"source": "Avatar", "target": "Actor", "label": "uses"}
-  ],
-  "groups": [
-    {"id": "avatar_agent", "label": "avatar_agent", "nodes": ["Avatar", "Actor"]}
-  ]
+    "nodes": [
+        {
+            "id": "Avatar",
+            "label": "Avatar",
+            "type": "class"
+        },
+        {
+            "id": "Actor",
+            "label": "Actor",
+            "type": "class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "Avatar",
+            "target": "Actor",
+            "label": "uses"
+        }
+    ],
+    "groups": [
+        {
+            "id": "avatar_agent",
+            "label": "avatar_agent",
+            "nodes": [
+                "Avatar",
+                "Actor"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

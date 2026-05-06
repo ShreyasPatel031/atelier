@@ -27,26 +27,59 @@ These sub-modules work in concert, with raw model responses being processed by t
 {
     "direction": "TD",
     "nodes": [
-        {"id": "response_part_management", "label": "Manage Response Parts", "type": "module", "link": "response_part_management.md"},
-        {"id": "output_definition_and_validation", "label": "Define & Validate Output", "type": "module", "link": "output_definition_and_validation.md"},
-        {"id": "agent_output_streaming", "label": "Stream Agent Output", "type": "module", "link": "agent_output_streaming.md"}
+        {
+            "id": "agent_output_handling",
+            "label": "Agent Output Handling",
+            "type": "module"
+        },
+        {
+            "id": "response_part_management",
+            "label": "Manage Response Parts",
+            "type": "module",
+            "link": "response_part_management.md"
+        },
+        {
+            "id": "output_definition_and_validation",
+            "label": "Define & Validate Output",
+            "type": "module",
+            "link": "output_definition_and_validation.md"
+        },
+        {
+            "id": "agent_output_streaming",
+            "label": "Stream Agent Output",
+            "type": "module",
+            "link": "agent_output_streaming.md"
+        }
     ],
     "edges": [
-        {"source": "response_part_management", "target": "agent_output_streaming", "label": "raw streamed parts"},
-        {"source": "output_definition_and_validation", "target": "agent_output_streaming", "label": "output schema & validators"}
+        {
+            "source": "response_part_management",
+            "target": "agent_output_streaming",
+            "label": "raw streamed parts"
+        },
+        {
+            "source": "output_definition_and_validation",
+            "target": "agent_output_streaming",
+            "label": "output schema & validators"
+        }
     ],
     "groups": [
         {
             "id": "output_processing",
             "label": "Output Processing Core",
             "role": "generative",
-            "nodes": ["output_definition_and_validation", "response_part_management"]
+            "nodes": [
+                "output_definition_and_validation",
+                "response_part_management"
+            ]
         },
         {
             "id": "output_delivery",
             "label": "Output Delivery",
             "role": "surface",
-            "nodes": ["agent_output_streaming"]
+            "nodes": [
+                "agent_output_streaming"
+            ]
         }
     ]
 }

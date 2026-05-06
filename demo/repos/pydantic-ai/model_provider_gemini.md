@@ -12,24 +12,47 @@ The `model_provider_gemini` module is structured into distinct sub-modules that 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "gemini_api_interaction", "label": "Gemini API Interaction", "type": "module", "link": "gemini_api_interaction.md"},
-        {"id": "gemini_utility_components", "label": "Gemini Utility Components", "type": "module", "link": "gemini_utility_components.md"}
+        {
+            "id": "model_provider_gemini",
+            "label": "Model Provider: Gemini",
+            "type": "module"
+        },
+        {
+            "id": "gemini_api_interaction",
+            "label": "Gemini API Interaction",
+            "type": "module",
+            "link": "gemini_api_interaction.md"
+        },
+        {
+            "id": "gemini_utility_components",
+            "label": "Gemini Utility Components",
+            "type": "module",
+            "link": "gemini_utility_components.md"
+        }
     ],
     "edges": [
-        {"source": "gemini_api_interaction", "target": "gemini_utility_components", "label": "uses"}
+        {
+            "source": "gemini_api_interaction",
+            "target": "gemini_utility_components",
+            "label": "uses"
+        }
     ],
     "groups": [
         {
             "id": "gemini_interaction",
             "label": "Gemini Interaction Layer",
             "role": "generative",
-            "nodes": ["gemini_api_interaction"]
+            "nodes": [
+                "gemini_api_interaction"
+            ]
         },
         {
             "id": "gemini_support",
             "label": "Gemini Support Utilities",
             "role": "data",
-            "nodes": ["gemini_utility_components"]
+            "nodes": [
+                "gemini_utility_components"
+            ]
         }
     ]
 }

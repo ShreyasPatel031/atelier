@@ -32,29 +32,97 @@ The `base_report_evaluator` module integrates closely with several other modules
 {
     "direction": "TD",
     "nodes": [
-        {"id": "report_evaluator", "label": "ReportEvaluator (Abstract Base Class)", "type": "component", "link": null},
-        {"id": "evaluate_method", "label": "evaluate() Method (Core Logic)", "type": "component", "link": null},
-        {"id": "evaluate_async_method", "label": "evaluate_async() Method (Async Wrapper)", "type": "component", "link": null},
-        {"id": "evaluator_context", "label": "ReportEvaluatorContext (Experiment Data)", "type": "external", "link": "evaluator_core.md"},
-        {"id": "report_analysis_output", "label": "ReportAnalysis (Evaluation Results)", "type": "external", "link": "reporting_and_rendering.md"},
-        {"id": "base_evaluator_base", "label": "BaseEvaluator (from evaluator_core)", "type": "external", "link": "evaluator_core.md"},
-        {"id": "reporting_and_rendering", "label": "Reporting and Rendering Module", "type": "external", "link": "reporting_and_rendering.md"}
+        {
+            "id": "report_evaluator",
+            "label": "ReportEvaluator (Abstract Base Class)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "evaluate_method",
+            "label": "evaluate() Method (Core Logic)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "evaluate_async_method",
+            "label": "evaluate_async() Method (Async Wrapper)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "evaluator_context",
+            "label": "ReportEvaluatorContext (Experiment Data)",
+            "type": "external",
+            "link": "evaluator_core.md"
+        },
+        {
+            "id": "report_analysis_output",
+            "label": "ReportAnalysis (Evaluation Results)",
+            "type": "external",
+            "link": "reporting_and_rendering.md"
+        },
+        {
+            "id": "base_evaluator_base",
+            "label": "BaseEvaluator (from evaluator_core)",
+            "type": "external",
+            "link": "evaluator_core.md"
+        },
+        {
+            "id": "reporting_and_rendering",
+            "label": "Reporting and Rendering Module",
+            "type": "external",
+            "link": "reporting_and_rendering.md"
+        }
     ],
     "edges": [
-        {"source": "evaluator_context", "target": "report_evaluator", "label": "provides full report"},
-        {"source": "report_evaluator", "target": "evaluate_method", "label": "executes analysis"},
-        {"source": "report_evaluator", "target": "evaluate_async_method", "label": "provides async wrapper"},
-        {"source": "evaluate_method", "target": "report_analysis_output", "label": "generates"},
-        {"source": "evaluate_async_method", "target": "report_analysis_output", "label": "generates"},
-        {"source": "report_evaluator", "target": "base_evaluator_base", "label": "inherits from", "line_type": "dashed"},
-        {"source": "report_analysis_output", "target": "reporting_and_rendering", "label": "used by"}
+        {
+            "source": "evaluator_context",
+            "target": "report_evaluator",
+            "label": "provides full report"
+        },
+        {
+            "source": "report_evaluator",
+            "target": "evaluate_method",
+            "label": "executes analysis"
+        },
+        {
+            "source": "report_evaluator",
+            "target": "evaluate_async_method",
+            "label": "provides async wrapper"
+        },
+        {
+            "source": "evaluate_method",
+            "target": "report_analysis_output",
+            "label": "generates"
+        },
+        {
+            "source": "evaluate_async_method",
+            "target": "report_analysis_output",
+            "label": "generates"
+        },
+        {
+            "source": "report_evaluator",
+            "target": "base_evaluator_base",
+            "label": "inherits from",
+            "line_type": "dashed"
+        },
+        {
+            "source": "report_analysis_output",
+            "target": "reporting_and_rendering",
+            "label": "used by"
+        }
     ],
     "groups": [
         {
             "id": "base_report_evaluator_components",
             "label": "base_report_evaluator Module Components",
             "role": "main_logic",
-            "nodes": ["report_evaluator", "evaluate_method", "evaluate_async_method"]
+            "nodes": [
+                "report_evaluator",
+                "evaluate_method",
+                "evaluate_async_method"
+            ]
         }
     ]
 }

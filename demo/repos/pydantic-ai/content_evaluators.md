@@ -39,15 +39,47 @@ The `content_evaluators` module is designed to be straightforward, providing con
 {
     "direction": "TD",
     "nodes": [
-        {"id": "contains_evaluator", "label": "Contains Evaluator", "type": "component", "link": null},
-        {"id": "is_instance_evaluator", "label": "IsInstance Evaluator", "type": "component", "link": null},
-        {"id": "evaluator_core", "label": "Evaluator Core", "type": "external", "link": "evaluator_core.md"},
-        {"id": "type_introspection", "label": "Type Introspection Utilities", "type": "external", "link": "type_introspection.md"}
+        {
+            "id": "contains_evaluator",
+            "label": "Contains Evaluator",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "is_instance_evaluator",
+            "label": "IsInstance Evaluator",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "evaluator_core",
+            "label": "Evaluator Core",
+            "type": "external",
+            "link": "evaluator_core.md"
+        },
+        {
+            "id": "type_introspection",
+            "label": "Type Introspection Utilities",
+            "type": "external",
+            "link": "type_introspection.md"
+        }
     ],
     "edges": [
-        {"source": "contains_evaluator", "target": "evaluator_core", "label": "extends"},
-        {"source": "is_instance_evaluator", "target": "evaluator_core", "label": "extends"},
-        {"source": "contains_evaluator", "target": "type_introspection", "label": "uses 'is_model_like' from"}
+        {
+            "source": "contains_evaluator",
+            "target": "evaluator_core",
+            "label": "extends"
+        },
+        {
+            "source": "is_instance_evaluator",
+            "target": "evaluator_core",
+            "label": "extends"
+        },
+        {
+            "source": "contains_evaluator",
+            "target": "type_introspection",
+            "label": "uses 'is_model_like' from"
+        }
     ],
     "groups": []
 }

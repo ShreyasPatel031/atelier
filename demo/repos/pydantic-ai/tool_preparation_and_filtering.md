@@ -39,18 +39,63 @@ This mechanism ensures that the original tool definitions remain untouched, whil
 {
     "direction": "TD",
     "nodes": [
-        {"id": "prepare_tools", "label": "PrepareTools Capability", "type": "component", "link": null},
-        {"id": "tools_prepare_func", "label": "Tool Filtering/Modification Function", "type": "component", "link": null},
-        {"id": "abstract_capability", "label": "AbstractCapability", "type": "external", "link": "capabilities_base.md"},
-        {"id": "toolset_management", "label": "Toolset Management Module", "type": "external", "link": "toolset_management.md"},
-        {"id": "agent_definition", "label": "Agent Definition Module", "type": "external", "link": "agent_definition.md"}
+        {
+            "id": "prepare_tools",
+            "label": "PrepareTools Capability",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "tools_prepare_func",
+            "label": "Tool Filtering/Modification Function",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "abstract_capability",
+            "label": "AbstractCapability",
+            "type": "external",
+            "link": "capabilities_base.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management Module",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "agent_definition",
+            "label": "Agent Definition Module",
+            "type": "external",
+            "link": "agent_definition.md"
+        }
     ],
     "edges": [
-        {"source": "prepare_tools", "target": "abstract_capability", "label": "inherits from"},
-        {"source": "prepare_tools", "target": "tools_prepare_func", "label": "configured with"},
-        {"source": "tools_prepare_func", "target": "toolset_management", "label": "filters/modifies tool definitions"},
-        {"source": "toolset_management", "target": "prepare_tools", "label": "supplies raw toolsets"},
-        {"source": "prepare_tools", "target": "agent_definition", "label": "provides prepared toolsets to"}
+        {
+            "source": "prepare_tools",
+            "target": "abstract_capability",
+            "label": "inherits from"
+        },
+        {
+            "source": "prepare_tools",
+            "target": "tools_prepare_func",
+            "label": "configured with"
+        },
+        {
+            "source": "tools_prepare_func",
+            "target": "toolset_management",
+            "label": "filters/modifies tool definitions"
+        },
+        {
+            "source": "toolset_management",
+            "target": "prepare_tools",
+            "label": "supplies raw toolsets"
+        },
+        {
+            "source": "prepare_tools",
+            "target": "agent_definition",
+            "label": "provides prepared toolsets to"
+        }
     ],
     "groups": []
 }

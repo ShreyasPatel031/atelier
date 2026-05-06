@@ -10,24 +10,47 @@ The `async_concurrency` module is structured into two primary sub-modules: `asyn
 {
     "direction": "TD",
     "nodes": [
-        {"id": "asynchronous_utilities", "label": "Asynchronous Utilities", "type": "module", "link": "asynchronous_utilities.md"},
-        {"id": "concurrency_management", "label": "Concurrency Management", "type": "module", "link": "concurrency_management.md"}
+        {
+            "id": "async_concurrency",
+            "label": "Asynchronous Concurrency",
+            "type": "module"
+        },
+        {
+            "id": "asynchronous_utilities",
+            "label": "Asynchronous Utilities",
+            "type": "module",
+            "link": "asynchronous_utilities.md"
+        },
+        {
+            "id": "concurrency_management",
+            "label": "Concurrency Management",
+            "type": "module",
+            "link": "concurrency_management.md"
+        }
     ],
     "edges": [
-        {"source": "concurrency_management", "target": "asynchronous_utilities", "label": "uses async runtime"}
+        {
+            "source": "concurrency_management",
+            "target": "asynchronous_utilities",
+            "label": "uses async runtime"
+        }
     ],
     "groups": [
         {
             "id": "core_async",
             "label": "Core Async",
             "role": "generative",
-            "nodes": ["asynchronous_utilities"]
+            "nodes": [
+                "asynchronous_utilities"
+            ]
         },
         {
             "id": "resource_control",
             "label": "Resource Control",
             "role": "analytical",
-            "nodes": ["concurrency_management"]
+            "nodes": [
+                "concurrency_management"
+            ]
         }
     ]
 }

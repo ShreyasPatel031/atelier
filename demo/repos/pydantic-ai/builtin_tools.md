@@ -13,24 +13,47 @@ The `builtin_tools` module is organized into two primary functional sub-modules:
 {
     "direction": "TD",
     "nodes": [
-        {"id": "data_retrieval_tools", "label": "Data Retrieval Tools", "type": "module", "link": "data_retrieval_tools.md"},
-        {"id": "agent_action_tools", "label": "Agent Action Tools", "type": "module", "link": "agent_action_tools.md"}
+        {
+            "id": "builtin_tools",
+            "label": "Built-in Tools",
+            "type": "module"
+        },
+        {
+            "id": "data_retrieval_tools",
+            "label": "Data Retrieval Tools",
+            "type": "module",
+            "link": "data_retrieval_tools.md"
+        },
+        {
+            "id": "agent_action_tools",
+            "label": "Agent Action Tools",
+            "type": "module",
+            "link": "agent_action_tools.md"
+        }
     ],
     "edges": [
-        {"source": "data_retrieval_tools", "target": "agent_action_tools", "label": "provides context to"}
+        {
+            "source": "data_retrieval_tools",
+            "target": "agent_action_tools",
+            "label": "provides context to"
+        }
     ],
     "groups": [
         {
             "id": "information_gathering",
             "label": "Information Gathering",
             "role": "data",
-            "nodes": ["data_retrieval_tools"]
+            "nodes": [
+                "data_retrieval_tools"
+            ]
         },
         {
             "id": "agent_capabilities",
             "label": "Agent Capabilities",
             "role": "generative",
-            "nodes": ["agent_action_tools"]
+            "nodes": [
+                "agent_action_tools"
+            ]
         }
     ]
 }

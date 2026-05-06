@@ -14,13 +14,36 @@ The core of the `aci_toolset` module is the `ACIToolset` class. This class is re
 {
     "direction": "TD",
     "nodes": [
-        {"id": "aci_toolset", "label": "Integrate ACI.dev Tools", "type": "component", "link": null},
-        {"id": "function_toolset", "label": "Function Toolset Base", "type": "external", "link": "toolset_management.md"},
-        {"id": "aci_dev_platform", "label": "ACI.dev Platform", "type": "external", "link": null}
+        {
+            "id": "aci_toolset",
+            "label": "Integrate ACI.dev Tools",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "function_toolset",
+            "label": "Function Toolset Base",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "aci_dev_platform",
+            "label": "ACI.dev Platform",
+            "type": "external",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "aci_toolset", "target": "function_toolset", "label": "inherits from"},
-        {"source": "aci_toolset", "target": "aci_dev_platform", "label": "wraps tools from"}
+        {
+            "source": "aci_toolset",
+            "target": "function_toolset",
+            "label": "inherits from"
+        },
+        {
+            "source": "aci_toolset",
+            "target": "aci_dev_platform",
+            "label": "wraps tools from"
+        }
     ],
     "groups": []
 }

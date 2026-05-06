@@ -6,11 +6,28 @@ This module provides essential tools for managing and preparing datasets for DSP
 {
     "direction": "TD",
     "nodes": [
-        {"id": "dataset_operations", "label": "Dataset Operations", "type": "module", "link": "dataset_operations.md"}
+        {
+            "id": "dataset_management",
+            "label": "Dataset Management",
+            "type": "module"
+        },
+        {
+            "id": "dataset_operations",
+            "label": "Dataset Operations",
+            "type": "module",
+            "link": "dataset_operations.md"
+        }
     ],
     "edges": [],
     "groups": [
-        {"id": "data_handling", "label": "Data Handling", "role": "data", "nodes": ["dataset_operations"]}
+        {
+            "id": "data_handling",
+            "label": "Data Handling",
+            "role": "data",
+            "nodes": [
+                "dataset_operations"
+            ]
+        }
     ]
 }
 -->

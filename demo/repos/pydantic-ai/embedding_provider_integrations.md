@@ -10,27 +10,63 @@ This module primarily consists of two functional areas: dedicated handlers for s
 {
     "direction": "TD",
     "nodes": [
-        {"id": "embedding_core", "label": "Embedding Core", "type": "external", "link": "embedding_core.md"},
-        {"id": "bedrock_embedding_handlers", "label": "Bedrock Embedding Handlers", "type": "module", "link": "bedrock_embedding_handlers.md"},
-        {"id": "embedding_usage_mapping", "label": "Embedding Usage Mapping", "type": "module", "link": "embedding_usage_mapping.md"}
+        {
+            "id": "embedding_provider_integrations",
+            "label": "Embedding Provider Integrations",
+            "type": "module"
+        },
+        {
+            "id": "embedding_core",
+            "label": "Embedding Core",
+            "type": "external",
+            "link": "embedding_core.md"
+        },
+        {
+            "id": "bedrock_embedding_handlers",
+            "label": "Bedrock Embedding Handlers",
+            "type": "module",
+            "link": "bedrock_embedding_handlers.md"
+        },
+        {
+            "id": "embedding_usage_mapping",
+            "label": "Embedding Usage Mapping",
+            "type": "module",
+            "link": "embedding_usage_mapping.md"
+        }
     ],
     "edges": [
-        {"source": "embedding_core", "target": "bedrock_embedding_handlers", "label": "uses handlers"},
-        {"source": "embedding_core", "target": "embedding_usage_mapping", "label": "collects usage"},
-        {"source": "bedrock_embedding_handlers", "target": "embedding_usage_mapping", "label": "provides usage data"}
+        {
+            "source": "embedding_core",
+            "target": "bedrock_embedding_handlers",
+            "label": "uses handlers"
+        },
+        {
+            "source": "embedding_core",
+            "target": "embedding_usage_mapping",
+            "label": "collects usage"
+        },
+        {
+            "source": "bedrock_embedding_handlers",
+            "target": "embedding_usage_mapping",
+            "label": "provides usage data"
+        }
     ],
     "groups": [
         {
             "id": "embedding_providers",
             "label": "Embedding Providers",
             "role": "surface",
-            "nodes": ["bedrock_embedding_handlers"]
+            "nodes": [
+                "bedrock_embedding_handlers"
+            ]
         },
         {
             "id": "utilities",
             "label": "Utilities",
             "role": "data",
-            "nodes": ["embedding_usage_mapping"]
+            "nodes": [
+                "embedding_usage_mapping"
+            ]
         }
     ]
 }

@@ -3,29 +3,20 @@ This module provides the `ChatOpenRouter` class, an integration for OpenRouter's
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "libs_partners_openrouter",
-      "label": "libs_partners_openrouter",
-      "type": "module"
-    },
-    {
-      "id": "libs.partners.openrouter.langchain_openrouter.chat_models.ChatOpenRouter",
-      "label": "ChatOpenRouter",
-      "type": "class"
-    }
-  ],
-  "edges": [],
-  "groups": [
-    {
-      "id": "libs_partners_openrouter",
-      "label": "libs_partners_openrouter",
-      "type": "module",
-      "contains": [
-        "libs.partners.openrouter.langchain_openrouter.chat_models.ChatOpenRouter"
-      ]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "libs_partners_openrouter",
+            "label": "libs_partners_openrouter",
+            "type": "module"
+        },
+        {
+            "id": "libs.partners.openrouter.langchain_openrouter.chat_models.ChatOpenRouter",
+            "label": "ChatOpenRouter",
+            "type": "class"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

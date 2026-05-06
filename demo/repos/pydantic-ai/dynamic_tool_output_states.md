@@ -43,29 +43,94 @@ These output states are fundamentally `BaseUIPart` instances, ensuring consisten
 {
     "direction": "TD",
     "nodes": [
-        {"id": "output_available", "label": "Dynamic Tool Output Available", "type": "component", "link": null},
-        {"id": "output_denied", "label": "Dynamic Tool Output Denied", "type": "component", "link": null},
-        {"id": "tool_execution", "label": "Tool Execution Logic", "type": "external", "link": "tool_execution_logic.md"},
-        {"id": "tool_approval", "label": "Tool Approval States", "type": "external", "link": "dynamic_tool_approval_states.md"},
-        {"id": "ui_response_types", "label": "Vercel AI Response Types", "type": "external", "link": "vercel_ai_response_types.md"},
-        {"id": "base_ui_part", "label": "Base UI Part Definition", "type": "external", "link": "vercel_ai_request_types.md"}
+        {
+            "id": "output_available",
+            "label": "Dynamic Tool Output Available",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "output_denied",
+            "label": "Dynamic Tool Output Denied",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "tool_execution",
+            "label": "Tool Execution Logic",
+            "type": "external",
+            "link": "tool_execution_logic.md"
+        },
+        {
+            "id": "tool_approval",
+            "label": "Tool Approval States",
+            "type": "external",
+            "link": "dynamic_tool_approval_states.md"
+        },
+        {
+            "id": "ui_response_types",
+            "label": "Vercel AI Response Types",
+            "type": "external",
+            "link": "vercel_ai_response_types.md"
+        },
+        {
+            "id": "base_ui_part",
+            "label": "Base UI Part Definition",
+            "type": "external",
+            "link": "vercel_ai_request_types.md"
+        }
     ],
     "edges": [
-        {"source": "tool_execution", "target": "output_available", "label": "generates output"},
-        {"source": "tool_execution", "target": "output_denied", "label": "denied outcome"},
-        {"source": "tool_approval", "target": "output_available", "label": "influences approval"},
-        {"source": "tool_approval", "target": "output_denied", "label": "causes denial"},
-        {"source": "output_available", "target": "ui_response_types", "label": "communicates state"},
-        {"source": "output_denied", "target": "ui_response_types", "label": "communicates state"},
-        {"source": "output_available", "target": "base_ui_part", "label": "inherits from"},
-        {"source": "output_denied", "target": "base_ui_part", "label": "inherits from"}
+        {
+            "source": "tool_execution",
+            "target": "output_available",
+            "label": "generates output"
+        },
+        {
+            "source": "tool_execution",
+            "target": "output_denied",
+            "label": "denied outcome"
+        },
+        {
+            "source": "tool_approval",
+            "target": "output_available",
+            "label": "influences approval"
+        },
+        {
+            "source": "tool_approval",
+            "target": "output_denied",
+            "label": "causes denial"
+        },
+        {
+            "source": "output_available",
+            "target": "ui_response_types",
+            "label": "communicates state"
+        },
+        {
+            "source": "output_denied",
+            "target": "ui_response_types",
+            "label": "communicates state"
+        },
+        {
+            "source": "output_available",
+            "target": "base_ui_part",
+            "label": "inherits from"
+        },
+        {
+            "source": "output_denied",
+            "target": "base_ui_part",
+            "label": "inherits from"
+        }
     ],
     "groups": [
         {
             "id": "dynamic_tool_output_states_module",
             "label": "Dynamic Tool Output States Module",
             "role": "definition",
-            "nodes": ["output_available", "output_denied"]
+            "nodes": [
+                "output_available",
+                "output_denied"
+            ]
         }
     ]
 }

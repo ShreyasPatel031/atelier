@@ -3,24 +3,75 @@ This module provides specialized BART models for various tasks. It includes `Bar
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "BartPreTrainedModel", "label": "BartPreTrainedModel", "type": "class"},
-    {"id": "BartModel", "label": "BartModel", "type": "class"},
-    {"id": "BartDecoderWrapper", "label": "BartDecoderWrapper", "type": "class"},
-    {"id": "GenerationMixin", "label": "GenerationMixin", "type": "class"},
-    {"id": "BartForQuestionAnswering", "label": "BartForQuestionAnswering", "type": "class"},
-    {"id": "BartForCausalLM", "label": "BartForCausalLM", "type": "class"}
-  ],
-  "edges": [
-    {"source": "BartForQuestionAnswering", "target": "BartPreTrainedModel", "type": "inheritance"},
-    {"source": "BartForQuestionAnswering", "target": "BartModel", "type": "composition"},
-    {"source": "BartForCausalLM", "target": "BartPreTrainedModel", "type": "inheritance"},
-    {"source": "BartForCausalLM", "target": "GenerationMixin", "type": "inheritance"},
-    {"source": "BartForCausalLM", "target": "BartDecoderWrapper", "type": "composition"}
-  ],
-  "groups": [
-    {"id": "bart_models", "label": "bart_models", "nodes": ["BartForQuestionAnswering", "BartForCausalLM"]}
-  ]
+    "nodes": [
+        {
+            "id": "BartPreTrainedModel",
+            "label": "BartPreTrainedModel",
+            "type": "class"
+        },
+        {
+            "id": "BartModel",
+            "label": "BartModel",
+            "type": "class"
+        },
+        {
+            "id": "BartDecoderWrapper",
+            "label": "BartDecoderWrapper",
+            "type": "class"
+        },
+        {
+            "id": "GenerationMixin",
+            "label": "GenerationMixin",
+            "type": "class"
+        },
+        {
+            "id": "BartForQuestionAnswering",
+            "label": "BartForQuestionAnswering",
+            "type": "class"
+        },
+        {
+            "id": "BartForCausalLM",
+            "label": "BartForCausalLM",
+            "type": "class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "BartForQuestionAnswering",
+            "target": "BartPreTrainedModel",
+            "type": "inheritance"
+        },
+        {
+            "source": "BartForQuestionAnswering",
+            "target": "BartModel",
+            "type": "composition"
+        },
+        {
+            "source": "BartForCausalLM",
+            "target": "BartPreTrainedModel",
+            "type": "inheritance"
+        },
+        {
+            "source": "BartForCausalLM",
+            "target": "GenerationMixin",
+            "type": "inheritance"
+        },
+        {
+            "source": "BartForCausalLM",
+            "target": "BartDecoderWrapper",
+            "type": "composition"
+        }
+    ],
+    "groups": [
+        {
+            "id": "bart_models",
+            "label": "bart_models",
+            "nodes": [
+                "BartForQuestionAnswering",
+                "BartForCausalLM"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

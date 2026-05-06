@@ -3,15 +3,32 @@ This module provides utilities for normalizing various input types into standard
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "A", "label": "_normalize_source"},
-    {"id": "B", "label": "_FileSourceCoercer"},
-    {"id": "C", "label": "normalize_input_files"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "G1", "label": "file_source_normalization", "nodes": ["A", "B", "C"]}
-  ]
+    "nodes": [
+        {
+            "id": "A",
+            "label": "_normalize_source"
+        },
+        {
+            "id": "B",
+            "label": "_FileSourceCoercer"
+        },
+        {
+            "id": "C",
+            "label": "normalize_input_files"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "G1",
+            "label": "file_source_normalization",
+            "nodes": [
+                "A",
+                "B",
+                "C"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

@@ -16,24 +16,47 @@ These interfaces ensure that the Pydantic AI agent can interact with any complia
 {
     "direction": "TD",
     "nodes": [
-        {"id": "abstract_and_deferred_toolsets", "label": "Abstract and Deferred Toolsets", "type": "module", "link": "abstract_and_deferred_toolsets.md"},
-        {"id": "toolset_management", "label": "Toolset Management", "type": "external", "link": "toolset_management.md"}
+        {
+            "id": "toolset_interfaces",
+            "label": "Toolset Interfaces and Types",
+            "type": "module"
+        },
+        {
+            "id": "abstract_and_deferred_toolsets",
+            "label": "Abstract and Deferred Toolsets",
+            "type": "module",
+            "link": "abstract_and_deferred_toolsets.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management",
+            "type": "external",
+            "link": "toolset_management.md"
+        }
     ],
     "edges": [
-        {"source": "abstract_and_deferred_toolsets", "target": "toolset_management", "label": "inherits/integrates with"}
+        {
+            "source": "abstract_and_deferred_toolsets",
+            "target": "toolset_management",
+            "label": "inherits/integrates with"
+        }
     ],
     "groups": [
         {
             "id": "core_interfaces",
             "label": "Core Interfaces",
             "role": "generative",
-            "nodes": ["abstract_and_deferred_toolsets"]
+            "nodes": [
+                "abstract_and_deferred_toolsets"
+            ]
         },
         {
             "id": "dependencies",
             "label": "Dependencies",
             "role": "data",
-            "nodes": ["toolset_management"]
+            "nodes": [
+                "toolset_management"
+            ]
         }
     ]
 }

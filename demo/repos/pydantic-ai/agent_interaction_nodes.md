@@ -15,24 +15,47 @@ These nodes work in sequence, where user input processed by the `UserPromptNode`
 {
     "direction": "TD",
     "nodes": [
-        {"id": "user_prompt_node", "label": "Process User Prompt", "type": "module", "link": "user_prompt_node.md"},
-        {"id": "model_request_node", "label": "Execute Model Request", "type": "module", "link": "model_request_node.md"}
+        {
+            "id": "agent_interaction_nodes",
+            "label": "Agent Interaction Nodes",
+            "type": "module"
+        },
+        {
+            "id": "user_prompt_node",
+            "label": "Process User Prompt",
+            "type": "module",
+            "link": "user_prompt_node.md"
+        },
+        {
+            "id": "model_request_node",
+            "label": "Execute Model Request",
+            "type": "module",
+            "link": "model_request_node.md"
+        }
     ],
     "edges": [
-        {"source": "user_prompt_node", "target": "model_request_node", "label": "processed prompt"}
+        {
+            "source": "user_prompt_node",
+            "target": "model_request_node",
+            "label": "processed prompt"
+        }
     ],
     "groups": [
         {
-            "id": "input_handling", 
+            "id": "input_handling",
             "label": "Input Handling",
             "role": "surface",
-            "nodes": ["user_prompt_node"]
+            "nodes": [
+                "user_prompt_node"
+            ]
         },
         {
             "id": "model_interaction",
             "label": "Model Interaction",
             "role": "generative",
-            "nodes": ["model_request_node"]
+            "nodes": [
+                "model_request_node"
+            ]
         }
     ]
 }

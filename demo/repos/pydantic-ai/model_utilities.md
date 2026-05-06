@@ -10,21 +10,56 @@ The `model_utilities` module is designed to integrate seamlessly with various AI
 {
     "direction": "TD",
     "nodes": [
-        {"id": "concurrency_management", "label": "Manage Model Concurrency", "type": "module", "link": "concurrency_management.md"},
-        {"id": "model_composition", "label": "Compose & Enhance Models", "type": "module", "link": "model_composition.md"},
-        {"id": "model_core_interfaces", "label": "Base Model Interfaces", "type": "external", "link": "model_core_interfaces.md"}
+        {
+            "id": "model_utilities",
+            "label": "Model Utilities",
+            "type": "module"
+        },
+        {
+            "id": "concurrency_management",
+            "label": "Manage Model Concurrency",
+            "type": "module",
+            "link": "concurrency_management.md"
+        },
+        {
+            "id": "model_composition",
+            "label": "Compose & Enhance Models",
+            "type": "module",
+            "link": "model_composition.md"
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Base Model Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        }
     ],
     "edges": [
-        {"source": "concurrency_management", "target": "model_core_interfaces", "label": "wraps models"},
-        {"source": "model_composition", "target": "model_core_interfaces", "label": "implements/wraps models"},
-        {"source": "model_composition", "target": "concurrency_management", "label": "can include"}
+        {
+            "source": "concurrency_management",
+            "target": "model_core_interfaces",
+            "label": "wraps models"
+        },
+        {
+            "source": "model_composition",
+            "target": "model_core_interfaces",
+            "label": "implements/wraps models"
+        },
+        {
+            "source": "model_composition",
+            "target": "concurrency_management",
+            "label": "can include"
+        }
     ],
     "groups": [
         {
             "id": "operational_enhancements",
             "label": "Operational Enhancements",
             "role": "generative",
-            "nodes": ["concurrency_management", "model_composition"]
+            "nodes": [
+                "concurrency_management",
+                "model_composition"
+            ]
         }
     ]
 }

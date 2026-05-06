@@ -3,26 +3,63 @@ This module provides native integrations for various Large Language Models (LLMs
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "BaseLLM", "label": "BaseLLM"},
-    {"id": "Anthropic", "label": "AnthropicCompletion"},
-    {"id": "Azure", "label": "AzureCompletion"},
-    {"id": "Bedrock", "label": "BedrockCompletion"},
-    {"id": "Gemini", "label": "GeminiCompletion"},
-    {"id": "OpenAI", "label": "OpenAICompletion"},
-    {"id": "OpenAICompatible", "label": "OpenAICompatibleCompletion"}
-  ],
-  "edges": [
-    {"source": "Anthropic", "target": "BaseLLM"},
-    {"source": "Azure", "target": "BaseLLM"},
-    {"source": "Bedrock", "target": "BaseLLM"},
-    {"source": "Gemini", "target": "BaseLLM"},
-    {"source": "OpenAI", "target": "BaseLLM"},
-    {"source": "OpenAICompatible", "target": "OpenAI"}
-  ],
-  "groups": [
-    {"id": "Providers", "label": "LLM Providers", "members": ["Anthropic", "Azure", "Bedrock", "Gemini", "OpenAI", "OpenAICompatible"]}
-  ]
+    "nodes": [
+        {
+            "id": "BaseLLM",
+            "label": "BaseLLM"
+        },
+        {
+            "id": "Anthropic",
+            "label": "AnthropicCompletion"
+        },
+        {
+            "id": "Azure",
+            "label": "AzureCompletion"
+        },
+        {
+            "id": "Bedrock",
+            "label": "BedrockCompletion"
+        },
+        {
+            "id": "Gemini",
+            "label": "GeminiCompletion"
+        },
+        {
+            "id": "OpenAI",
+            "label": "OpenAICompletion"
+        },
+        {
+            "id": "OpenAICompatible",
+            "label": "OpenAICompatibleCompletion"
+        }
+    ],
+    "edges": [
+        {
+            "source": "Anthropic",
+            "target": "BaseLLM"
+        },
+        {
+            "source": "Azure",
+            "target": "BaseLLM"
+        },
+        {
+            "source": "Bedrock",
+            "target": "BaseLLM"
+        },
+        {
+            "source": "Gemini",
+            "target": "BaseLLM"
+        },
+        {
+            "source": "OpenAI",
+            "target": "BaseLLM"
+        },
+        {
+            "source": "OpenAICompatible",
+            "target": "OpenAI"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

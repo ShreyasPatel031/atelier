@@ -14,26 +14,58 @@ The `framework_utilities` module is designed to be a supportive layer for the `p
 {
     "direction": "TD",
     "nodes": [
-        {"id": "asynchronous_utilities", "label": "Manage Asynchronous Operations", "type": "module", "link": "asynchronous_utilities.md"},
-        {"id": "observability_utilities", "label": "Manage OpenTelemetry Spans", "type": "module", "link": "observability_utilities.md"},
-        {"id": "pydantic_evals_framework_node", "label": "Pydantic Evals Framework", "type": "external"}
+        {
+            "id": "framework_utilities",
+            "label": "Framework Utilities",
+            "type": "module"
+        },
+        {
+            "id": "asynchronous_utilities",
+            "label": "Manage Asynchronous Operations",
+            "type": "module",
+            "link": "asynchronous_utilities.md"
+        },
+        {
+            "id": "observability_utilities",
+            "label": "Manage OpenTelemetry Spans",
+            "type": "module",
+            "link": "observability_utilities.md"
+        },
+        {
+            "id": "pydantic_evals_framework_node",
+            "label": "Pydantic Evals Framework",
+            "type": "external"
+        }
     ],
     "edges": [
-        {"source": "asynchronous_utilities", "target": "pydantic_evals_framework_node", "label": "provides async services"},
-        {"source": "observability_utilities", "target": "pydantic_evals_framework_node", "label": "provides telemetry"}
+        {
+            "source": "asynchronous_utilities",
+            "target": "pydantic_evals_framework_node",
+            "label": "provides async services"
+        },
+        {
+            "source": "observability_utilities",
+            "target": "pydantic_evals_framework_node",
+            "label": "provides telemetry"
+        }
     ],
     "groups": [
         {
             "id": "framework_utilities_group",
             "label": "Framework Utilities",
-            "role": "analytical", 
-            "nodes": ["asynchronous_utilities", "observability_utilities"]
+            "role": "analytical",
+            "nodes": [
+                "asynchronous_utilities",
+                "observability_utilities"
+            ]
         },
         {
             "id": "pydantic_evals_framework_group",
             "label": "Pydantic Evals",
-            "role": "surface", 
-            "nodes": ["pydantic_evals_framework_node"]
+            "role": "surface",
+            "nodes": [
+                "pydantic_evals_framework_node"
+            ]
         }
     ]
 }

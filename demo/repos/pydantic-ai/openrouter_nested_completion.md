@@ -22,12 +22,27 @@ The `openrouter_nested_completion` module operates as a specialized data model w
 {
     "direction": "TD",
     "nodes": [
-        {"id": "nested_completion", "label": "Handle Nested OpenRouter Completion", "type": "component", "link": null},
-        {"id": "base_chat_completion", "label": "OpenRouter Chat Completion Base", "type": "external", "link": "openrouter_streaming_response.md"}
+        {
+            "id": "nested_completion",
+            "label": "Handle Nested OpenRouter Completion",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "base_chat_completion",
+            "label": "OpenRouter Chat Completion Base",
+            "type": "external",
+            "link": "openrouter_streaming_response.md"
+        }
     ],
     "edges": [
-        {"source": "nested_completion", "target": "base_chat_completion", "label": "extends via inheritance"}
-    ]
+        {
+            "source": "nested_completion",
+            "target": "base_chat_completion",
+            "label": "extends via inheritance"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

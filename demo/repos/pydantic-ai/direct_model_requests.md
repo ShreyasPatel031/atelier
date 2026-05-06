@@ -10,28 +10,71 @@ The `direct_model_requests` module orchestrates synchronous interactions with AI
 {
     "direction": "TD",
     "nodes": [
-        {"id": "synchronous_requests", "label": "Synchronous Model Requests", "type": "module", "link": "synchronous_requests.md"},
-        {"id": "synchronous_streamed_requests", "label": "Synchronous Streamed Requests", "type": "module", "link": "synchronous_streamed_requests.md"},
-        {"id": "model_core_interfaces", "label": "Model Core Interfaces", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "agent_utilities", "label": "Agent Utilities", "type": "external", "link": "agent_utilities.md"}
+        {
+            "id": "direct_model_requests",
+            "label": "Direct Model Requests",
+            "type": "module"
+        },
+        {
+            "id": "synchronous_requests",
+            "label": "Synchronous Model Requests",
+            "type": "module",
+            "link": "synchronous_requests.md"
+        },
+        {
+            "id": "synchronous_streamed_requests",
+            "label": "Synchronous Streamed Requests",
+            "type": "module",
+            "link": "synchronous_streamed_requests.md"
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Model Core Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "agent_utilities",
+            "label": "Agent Utilities",
+            "type": "external",
+            "link": "agent_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "synchronous_requests", "target": "model_core_interfaces", "label": "makes blocking request to"},
-        {"source": "synchronous_streamed_requests", "target": "model_core_interfaces", "label": "streams blocking request to"},
-        {"source": "synchronous_requests", "target": "agent_utilities", "label": "uses event loop from"}
+        {
+            "source": "synchronous_requests",
+            "target": "model_core_interfaces",
+            "label": "makes blocking request to"
+        },
+        {
+            "source": "synchronous_streamed_requests",
+            "target": "model_core_interfaces",
+            "label": "streams blocking request to"
+        },
+        {
+            "source": "synchronous_requests",
+            "target": "agent_utilities",
+            "label": "uses event loop from"
+        }
     ],
     "groups": [
         {
             "id": "direct_interaction",
             "label": "Direct Interaction Layer",
             "role": "surface",
-            "nodes": ["synchronous_requests", "synchronous_streamed_requests"]
+            "nodes": [
+                "synchronous_requests",
+                "synchronous_streamed_requests"
+            ]
         },
         {
             "id": "dependencies",
             "label": "Internal Dependencies",
-            "role": "generative", 
-            "nodes": ["model_core_interfaces", "agent_utilities"]
+            "role": "generative",
+            "nodes": [
+                "model_core_interfaces",
+                "agent_utilities"
+            ]
         }
     ]
 }

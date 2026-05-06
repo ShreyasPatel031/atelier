@@ -3,17 +3,47 @@ This module provides essential system configuration and utility components, cove
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "A", "label": "_track_install_async", "type": "function"},
-    {"id": "B", "label": "SecurityConfig", "type": "class"},
-    {"id": "C", "label": "load_resources", "type": "function"},
-    {"id": "D", "label": "string_to_callable", "type": "function"},
-    {"id": "E", "label": "StreamingOutputBase", "type": "class"}
-  ],
-  "edges": [],
-  "groups": [
-    {"id": "system_config", "label": "system_config", "nodes": ["A", "B", "C", "D", "E"]}
-  ]
+    "nodes": [
+        {
+            "id": "A",
+            "label": "_track_install_async",
+            "type": "function"
+        },
+        {
+            "id": "B",
+            "label": "SecurityConfig",
+            "type": "class"
+        },
+        {
+            "id": "C",
+            "label": "load_resources",
+            "type": "function"
+        },
+        {
+            "id": "D",
+            "label": "string_to_callable",
+            "type": "function"
+        },
+        {
+            "id": "E",
+            "label": "StreamingOutputBase",
+            "type": "class"
+        }
+    ],
+    "edges": [],
+    "groups": [
+        {
+            "id": "system_config",
+            "label": "system_config",
+            "nodes": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

@@ -12,26 +12,59 @@ The module integrates with other parts of the evaluation framework by providing 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "base_evaluator_interfaces", "label": "Evaluation Core Interfaces", "type": "module", "link": "base_evaluator_interfaces.md"},
-        {"id": "standard_evaluators", "label": "Standard Evaluators", "type": "module", "link": "standard_evaluators.md"},
-        {"id": "metric_evaluators", "label": "Metric Evaluators", "type": "module", "link": "metric_evaluators.md"}
+        {
+            "id": "evaluation_base_classes",
+            "label": "Evaluation Base Classes",
+            "type": "module"
+        },
+        {
+            "id": "base_evaluator_interfaces",
+            "label": "Evaluation Core Interfaces",
+            "type": "module",
+            "link": "base_evaluator_interfaces.md"
+        },
+        {
+            "id": "standard_evaluators",
+            "label": "Standard Evaluators",
+            "type": "module",
+            "link": "standard_evaluators.md"
+        },
+        {
+            "id": "metric_evaluators",
+            "label": "Metric Evaluators",
+            "type": "module",
+            "link": "metric_evaluators.md"
+        }
     ],
     "edges": [
-        {"source": "base_evaluator_interfaces", "target": "standard_evaluators", "label": "provides interface for"},
-        {"source": "base_evaluator_interfaces", "target": "metric_evaluators", "label": "provides interface for"}
+        {
+            "source": "base_evaluator_interfaces",
+            "target": "standard_evaluators",
+            "label": "provides interface for"
+        },
+        {
+            "source": "base_evaluator_interfaces",
+            "target": "metric_evaluators",
+            "label": "provides interface for"
+        }
     ],
     "groups": [
         {
             "id": "foundational",
             "label": "Foundational Interfaces",
             "role": "generative",
-            "nodes": ["base_evaluator_interfaces"]
+            "nodes": [
+                "base_evaluator_interfaces"
+            ]
         },
         {
             "id": "implementations",
             "label": "Evaluator Implementations",
             "role": "analytical",
-            "nodes": ["standard_evaluators", "metric_evaluators"]
+            "nodes": [
+                "standard_evaluators",
+                "metric_evaluators"
+            ]
         }
     ]
 }

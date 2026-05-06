@@ -1,0 +1,612 @@
+[
+  {
+    "sub_module_name": "enterprise_tool_integration",
+    "path_to_submodule": "tools_and_integrations/tool_adapters/enterprise_tool_integration/enterprise_tool_integration",
+    "parent_module": "enterprise_tool_integration",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:21.942057"
+  },
+  {
+    "sub_module_name": "agent_execution",
+    "path_to_submodule": "crewai_core_framework/agents_and_crews/agent_execution/agent_execution",
+    "parent_module": "agent_execution",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:22.503044"
+  },
+  {
+    "sub_module_name": "file_source_base",
+    "path_to_submodule": "data_and_files_management/knowledge_sources/file_source_base/file_source_base",
+    "parent_module": "file_source_base",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:23.717873"
+  },
+  {
+    "sub_module_name": "file_management",
+    "path_to_submodule": "tools_and_integrations/file_based_tools/file_management/file_management",
+    "parent_module": "file_management",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:28.030145"
+  },
+  {
+    "sub_module_name": "evaluation_framework",
+    "path_to_submodule": "developer_and_cli_tools/devtools_and_evaluation/evaluation_framework/evaluation_framework",
+    "parent_module": "evaluation_framework",
+    "depth": 2,
+    "component_count": 3,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:28.038283"
+  },
+  {
+    "sub_module_name": "bedrock_knowledge_base",
+    "path_to_submodule": "tools_and_integrations/aws_bedrock_tools/bedrock_knowledge_base/bedrock_knowledge_base",
+    "parent_module": "bedrock_knowledge_base",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:28.156948"
+  },
+  {
+    "sub_module_name": "data_vector_store_adapters",
+    "path_to_submodule": "tools_and_integrations/tool_adapters/data_vector_store_adapters/data_vector_store_adapters",
+    "parent_module": "data_vector_store_adapters",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:29.861390"
+  },
+  {
+    "sub_module_name": "document_specific_handlers",
+    "path_to_submodule": "data_and_files_management/knowledge_sources/document_specific_handlers/document_specific_handlers",
+    "parent_module": "document_specific_handlers",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:31.574706"
+  },
+  {
+    "sub_module_name": "method_utility_wrappers",
+    "path_to_submodule": "developer_and_cli_tools/project_utilities/method_utility_wrappers/method_utility_wrappers",
+    "parent_module": "method_utility_wrappers",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:31.740162"
+  },
+  {
+    "sub_module_name": "event_bus",
+    "path_to_submodule": "crewai_core_framework/eventing_and_context/event_bus/event_bus",
+    "parent_module": "event_bus",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:31.971488"
+  },
+  {
+    "sub_module_name": "base_rag_components",
+    "path_to_submodule": "data_and_files_management/rag_loaders_and_chunkers/base_rag_components/base_rag_components",
+    "parent_module": "base_rag_components",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:33.253766"
+  },
+  {
+    "sub_module_name": "human_feedback",
+    "path_to_submodule": "crewai_core_framework/tasks_and_flow/human_feedback/human_feedback",
+    "parent_module": "human_feedback",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:33.833765"
+  },
+  {
+    "sub_module_name": "llm_base",
+    "path_to_submodule": "crewai_core_framework/llm_integration/llm_base/llm_base",
+    "parent_module": "llm_base",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:35.827711"
+  },
+  {
+    "sub_module_name": "file_cache_management",
+    "path_to_submodule": "data_and_files_management/file_processing_and_cache/file_cache_management/file_cache_management",
+    "parent_module": "file_cache_management",
+    "depth": 2,
+    "component_count": 10,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:35.922474"
+  },
+  {
+    "sub_module_name": "qdrant_integration",
+    "path_to_submodule": "data_and_files_management/rag_vector_stores/qdrant_integration/qdrant_integration",
+    "parent_module": "qdrant_integration",
+    "depth": 2,
+    "component_count": 4,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:36.444475"
+  },
+  {
+    "sub_module_name": "agent_core",
+    "path_to_submodule": "crewai_core_framework/agents_and_crews/agent_core/agent_core",
+    "parent_module": "agent_core",
+    "depth": 2,
+    "component_count": 4,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:38.031096"
+  },
+  {
+    "sub_module_name": "directory_operations",
+    "path_to_submodule": "tools_and_integrations/file_based_tools/directory_operations/directory_operations",
+    "parent_module": "directory_operations",
+    "depth": 2,
+    "component_count": 4,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:39.403373"
+  },
+  {
+    "sub_module_name": "crew_and_flow_management",
+    "path_to_submodule": "developer_and_cli_tools/cli_commands/crew_and_flow_management/crew_and_flow_management",
+    "parent_module": "crew_and_flow_management",
+    "depth": 2,
+    "component_count": 10,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:40.405598"
+  },
+  {
+    "sub_module_name": "annotation_management",
+    "path_to_submodule": "developer_and_cli_tools/project_utilities/annotation_management/annotation_management",
+    "parent_module": "annotation_management",
+    "depth": 2,
+    "component_count": 5,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:41.143205"
+  },
+  {
+    "sub_module_name": "bedrock_agents",
+    "path_to_submodule": "tools_and_integrations/aws_bedrock_tools/bedrock_agents/bedrock_agents",
+    "parent_module": "bedrock_agents",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:41.977763"
+  },
+  {
+    "sub_module_name": "documentation_management",
+    "path_to_submodule": "developer_and_cli_tools/devtools_and_evaluation/development_tools/documentation_management/documentation_management",
+    "parent_module": "documentation_management",
+    "depth": 3,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:45.117812"
+  },
+  {
+    "sub_module_name": "a2a_configuration",
+    "path_to_submodule": "crewai_core_framework/a2a_communication/a2a_configuration/a2a_configuration",
+    "parent_module": "a2a_configuration",
+    "depth": 2,
+    "component_count": 3,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:46.105089"
+  },
+  {
+    "sub_module_name": "bedrock_toolkits",
+    "path_to_submodule": "tools_and_integrations/aws_bedrock_tools/bedrock_toolkits/bedrock_toolkits",
+    "parent_module": "bedrock_toolkits",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:47.351010"
+  },
+  {
+    "sub_module_name": "agent_adapters",
+    "path_to_submodule": "crewai_core_framework/agents_and_crews/agent_adapters/agent_adapters",
+    "parent_module": "agent_adapters",
+    "depth": 2,
+    "component_count": 3,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:47.877981"
+  },
+  {
+    "sub_module_name": "memory_analysis_logic",
+    "path_to_submodule": "system_utilities/memory_management/memory_analysis_logic/memory_analysis_logic",
+    "parent_module": "memory_analysis_logic",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:51.002905"
+  },
+  {
+    "sub_module_name": "flow_core_logic",
+    "path_to_submodule": "crewai_core_framework/tasks_and_flow/flow_core_logic/flow_core_logic",
+    "parent_module": "flow_core_logic",
+    "depth": 2,
+    "component_count": 8,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:51.516862"
+  },
+  {
+    "sub_module_name": "execution_context",
+    "path_to_submodule": "crewai_core_framework/eventing_and_context/execution_context/execution_context",
+    "parent_module": "execution_context",
+    "depth": 2,
+    "component_count": 5,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:52.425630"
+  },
+  {
+    "sub_module_name": "chromadb_integration",
+    "path_to_submodule": "data_and_files_management/rag_vector_stores/chromadb_integration/chromadb_integration",
+    "parent_module": "chromadb_integration",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:52.543879"
+  },
+  {
+    "sub_module_name": "agent_and_logging_utilities",
+    "path_to_submodule": "system_utilities/core_utilities/agent_and_logging_utilities/agent_and_logging_utilities",
+    "parent_module": "agent_and_logging_utilities",
+    "depth": 2,
+    "component_count": 3,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:52.687326"
+  },
+  {
+    "sub_module_name": "deployment_and_tools",
+    "path_to_submodule": "developer_and_cli_tools/cli_commands/deployment_and_tools/deployment_and_tools",
+    "parent_module": "deployment_and_tools",
+    "depth": 2,
+    "component_count": 10,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:53.644422"
+  },
+  {
+    "sub_module_name": "file_resolution_and_types",
+    "path_to_submodule": "data_and_files_management/file_processing_and_cache/file_resolution_and_types/file_resolution_and_types",
+    "parent_module": "file_resolution_and_types",
+    "depth": 2,
+    "component_count": 7,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:57.547702"
+  },
+  {
+    "sub_module_name": "core_security_configuration",
+    "path_to_submodule": "system_utilities/security_and_filters/core_security_configuration/core_security_configuration",
+    "parent_module": "core_security_configuration",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:00:59.894550"
+  },
+  {
+    "sub_module_name": "llm_providers",
+    "path_to_submodule": "crewai_core_framework/llm_integration/llm_providers/llm_providers",
+    "parent_module": "llm_providers",
+    "depth": 2,
+    "component_count": 5,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:00.012314"
+  },
+  {
+    "sub_module_name": "data_serialization_and_storage",
+    "path_to_submodule": "system_utilities/core_utilities/data_serialization_and_storage/data_serialization_and_storage",
+    "parent_module": "data_serialization_and_storage",
+    "depth": 2,
+    "component_count": 3,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:02.157245"
+  },
+  {
+    "sub_module_name": "task_management",
+    "path_to_submodule": "crewai_core_framework/tasks_and_flow/task_management/task_management",
+    "parent_module": "task_management",
+    "depth": 2,
+    "component_count": 3,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:02.722177"
+  },
+  {
+    "sub_module_name": "event_state_management",
+    "path_to_submodule": "system_utilities/initialization_and_skills/event_state_management/event_state_management",
+    "parent_module": "event_state_management",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:04.455479"
+  },
+  {
+    "sub_module_name": "file_storage_access",
+    "path_to_submodule": "data_and_files_management/file_processing_and_cache/file_storage_access/file_storage_access",
+    "parent_module": "file_storage_access",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:06.347434"
+  },
+  {
+    "sub_module_name": "auth_schemes",
+    "path_to_submodule": "crewai_core_framework/a2a_communication/auth_schemes/auth_schemes",
+    "parent_module": "auth_schemes",
+    "depth": 2,
+    "component_count": 14,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:07.745397"
+  },
+  {
+    "sub_module_name": "tool_access_control",
+    "path_to_submodule": "system_utilities/security_and_filters/tool_access_control/tool_access_control",
+    "parent_module": "tool_access_control",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:08.463717"
+  },
+  {
+    "sub_module_name": "rag_core_interfaces",
+    "path_to_submodule": "data_and_files_management/rag_vector_stores/rag_core_interfaces/rag_core_interfaces",
+    "parent_module": "rag_core_interfaces",
+    "depth": 2,
+    "component_count": 5,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:09.527210"
+  },
+  {
+    "sub_module_name": "lifecycle_hooks",
+    "path_to_submodule": "crewai_core_framework/eventing_and_context/lifecycle_hooks/lifecycle_hooks",
+    "parent_module": "lifecycle_hooks",
+    "depth": 2,
+    "component_count": 9,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:12.151989"
+  },
+  {
+    "sub_module_name": "flow_utilities",
+    "path_to_submodule": "crewai_core_framework/tasks_and_flow/flow_utilities/flow_utilities",
+    "parent_module": "flow_utilities",
+    "depth": 2,
+    "component_count": 7,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:14.040632"
+  },
+  {
+    "sub_module_name": "initialization_tracking",
+    "path_to_submodule": "system_utilities/initialization_and_skills/initialization_tracking/initialization_tracking",
+    "parent_module": "initialization_tracking",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:14.696401"
+  },
+  {
+    "sub_module_name": "data_loaders",
+    "path_to_submodule": "data_and_files_management/rag_loaders_and_chunkers/data_loaders/data_loaders",
+    "parent_module": "data_loaders",
+    "depth": 2,
+    "component_count": 16,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:21.603117"
+  },
+  {
+    "sub_module_name": "llm_annotations",
+    "path_to_submodule": "crewai_core_framework/llm_integration/llm_annotations/llm_annotations",
+    "parent_module": "llm_annotations",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:21.729591"
+  },
+  {
+    "sub_module_name": "file_content_search",
+    "path_to_submodule": "tools_and_integrations/file_based_tools/file_content_search/file_content_search",
+    "parent_module": "file_content_search",
+    "depth": 2,
+    "component_count": 14,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:23.095749"
+  },
+  {
+    "sub_module_name": "skill_resource_management",
+    "path_to_submodule": "system_utilities/initialization_and_skills/skill_resource_management/skill_resource_management",
+    "parent_module": "skill_resource_management",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:23.546548"
+  },
+  {
+    "sub_module_name": "update_handlers",
+    "path_to_submodule": "crewai_core_framework/a2a_communication/update_handlers/update_handlers",
+    "parent_module": "update_handlers",
+    "depth": 2,
+    "component_count": 6,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:24.818418"
+  },
+  {
+    "sub_module_name": "flow_event_definitions",
+    "path_to_submodule": "crewai_core_framework/tasks_and_flow/flow_visualization_and_events/flow_event_definitions/flow_event_definitions",
+    "parent_module": "flow_event_definitions",
+    "depth": 3,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:25.777480"
+  },
+  {
+    "sub_module_name": "utility_commands",
+    "path_to_submodule": "developer_and_cli_tools/cli_commands/utility_commands/utility_commands",
+    "parent_module": "utility_commands",
+    "depth": 2,
+    "component_count": 3,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:30.033616"
+  },
+  {
+    "sub_module_name": "online_content_search",
+    "path_to_submodule": "tools_and_integrations/file_based_tools/online_content_search/online_content_search",
+    "parent_module": "online_content_search",
+    "depth": 2,
+    "component_count": 4,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:33.127097"
+  },
+  {
+    "sub_module_name": "visualization_and_tracing",
+    "path_to_submodule": "crewai_core_framework/tasks_and_flow/flow_visualization_and_events/visualization_and_tracing/visualization_and_tracing",
+    "parent_module": "visualization_and_tracing",
+    "depth": 3,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:33.699228"
+  },
+  {
+    "sub_module_name": "llm_compatible",
+    "path_to_submodule": "crewai_core_framework/llm_integration/llm_compatible/llm_compatible",
+    "parent_module": "llm_compatible",
+    "depth": 2,
+    "component_count": 1,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:39.535081"
+  },
+  {
+    "sub_module_name": "tracing_and_memory",
+    "path_to_submodule": "developer_and_cli_tools/cli_commands/tracing_and_memory/tracing_and_memory",
+    "parent_module": "tracing_and_memory",
+    "depth": 2,
+    "component_count": 5,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:43.391357"
+  },
+  {
+    "sub_module_name": "flow_structure_analysis",
+    "path_to_submodule": "crewai_core_framework/tasks_and_flow/flow_visualization_and_events/flow_structure_analysis/flow_structure_analysis",
+    "parent_module": "flow_structure_analysis",
+    "depth": 3,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:01:45.458391"
+  },
+  {
+    "sub_module_name": "flow_execution_control",
+    "path_to_submodule": "crewai_core_framework/tasks_and_flow/flow_execution_control/flow_execution_control",
+    "parent_module": "flow_execution_control",
+    "depth": 2,
+    "component_count": 6,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:02:17.491001"
+  },
+  {
+    "sub_module_name": "content_processing_and_generation",
+    "path_to_submodule": "tools_and_integrations/general_purpose_tools/lib_crewai_tools_src/content_processing_and_generation/content_processing_and_generation",
+    "parent_module": "content_processing_and_generation",
+    "depth": 2,
+    "component_count": 4,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:02:34.125410"
+  },
+  {
+    "sub_module_name": "flow_persistence",
+    "path_to_submodule": "crewai_core_framework/tasks_and_flow/flow_persistence/flow_persistence",
+    "parent_module": "flow_persistence",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:02:34.346521"
+  },
+  {
+    "sub_module_name": "rag_and_file_management",
+    "path_to_submodule": "tools_and_integrations/general_purpose_tools/lib_crewai_tools_src/rag_and_file_management/rag_and_file_management",
+    "parent_module": "rag_and_file_management",
+    "depth": 2,
+    "component_count": 14,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:03:02.666715"
+  },
+  {
+    "sub_module_name": "tool_builders",
+    "path_to_submodule": "tools_and_integrations/general_purpose_tools/lib_crewai_src/tool_builders/tool_builders",
+    "parent_module": "tool_builders",
+    "depth": 2,
+    "component_count": 3,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:03:46.760786"
+  },
+  {
+    "sub_module_name": "tool_core",
+    "path_to_submodule": "tools_and_integrations/general_purpose_tools/lib_crewai_src/tool_core/tool_core",
+    "parent_module": "tool_core",
+    "depth": 2,
+    "component_count": 2,
+    "reason": "subagent_did_not_write_md_file",
+    "detail": "",
+    "recorded_at": "2026-05-07T03:05:14.052347"
+  }
+]

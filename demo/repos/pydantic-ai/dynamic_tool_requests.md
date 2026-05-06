@@ -14,21 +14,57 @@ The `dynamic_tool_requests` module is structured around the different states a d
 {
     "direction": "TD",
     "nodes": [
-        {"id": "dynamic_tool_input_states", "label": "Handle Tool Input", "type": "module", "link": "dynamic_tool_input_states.md"},
-        {"id": "dynamic_tool_approval_states", "label": "Manage Tool Approval", "type": "module", "link": "dynamic_tool_approval_states.md"},
-        {"id": "dynamic_tool_output_states", "label": "Process Tool Output", "type": "module", "link": "dynamic_tool_output_states.md"}
+        {
+            "id": "dynamic_tool_requests",
+            "label": "Dynamic Tool Interaction Requests",
+            "type": "module"
+        },
+        {
+            "id": "dynamic_tool_input_states",
+            "label": "Handle Tool Input",
+            "type": "module",
+            "link": "dynamic_tool_input_states.md"
+        },
+        {
+            "id": "dynamic_tool_approval_states",
+            "label": "Manage Tool Approval",
+            "type": "module",
+            "link": "dynamic_tool_approval_states.md"
+        },
+        {
+            "id": "dynamic_tool_output_states",
+            "label": "Process Tool Output",
+            "type": "module",
+            "link": "dynamic_tool_output_states.md"
+        }
     ],
     "edges": [
-        {"source": "dynamic_tool_input_states", "target": "dynamic_tool_approval_states", "label": "input ready, needs approval"},
-        {"source": "dynamic_tool_approval_states", "target": "dynamic_tool_output_states", "label": "approved, processing output"},
-        {"source": "dynamic_tool_approval_states", "target": "dynamic_tool_output_states", "label": "denied, output denied"}
+        {
+            "source": "dynamic_tool_input_states",
+            "target": "dynamic_tool_approval_states",
+            "label": "input ready, needs approval"
+        },
+        {
+            "source": "dynamic_tool_approval_states",
+            "target": "dynamic_tool_output_states",
+            "label": "approved, processing output"
+        },
+        {
+            "source": "dynamic_tool_approval_states",
+            "target": "dynamic_tool_output_states",
+            "label": "denied, output denied"
+        }
     ],
     "groups": [
         {
             "id": "tool_lifecycle",
             "label": "Dynamic Tool Lifecycle",
             "role": "surface",
-            "nodes": ["dynamic_tool_input_states", "dynamic_tool_approval_states", "dynamic_tool_output_states"]
+            "nodes": [
+                "dynamic_tool_input_states",
+                "dynamic_tool_approval_states",
+                "dynamic_tool_output_states"
+            ]
         }
     ]
 }

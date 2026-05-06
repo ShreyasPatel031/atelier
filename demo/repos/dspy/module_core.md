@@ -3,14 +3,24 @@ This module defines the foundational `BaseModule` for DSPy programs and the core
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "dspy.primitives.base_module.BaseModule", "label": "BaseModule"},
-    {"id": "dspy.primitives.module.Module", "label": "Module"}
-  ],
-  "edges": [
-    {"source": "dspy.primitives.module.Module", "target": "dspy.primitives.base_module.BaseModule", "label": "inherits"}
-  ],
-  "groups": []
+    "nodes": [
+        {
+            "id": "dspy.primitives.base_module.BaseModule",
+            "label": "BaseModule"
+        },
+        {
+            "id": "dspy.primitives.module.Module",
+            "label": "Module"
+        }
+    ],
+    "edges": [
+        {
+            "source": "dspy.primitives.module.Module",
+            "target": "dspy.primitives.base_module.BaseModule",
+            "label": "inherits"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

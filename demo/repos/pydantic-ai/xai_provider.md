@@ -23,15 +23,48 @@ This module ensures that the interaction with xAI models is consistent with othe
 {
     "direction": "TD",
     "nodes": [
-        {"id": "xai_provider_class", "label": "xAI API Provider", "type": "component", "link": null},
-        {"id": "grok_profiles_mod", "label": "Groq Model Profiles", "type": "external", "link": "groq_profiles.md"},
-        {"id": "model_provider_config", "label": "Model Provider Configurations", "type": "external", "link": "model_provider_configurations.md"},
-        {"id": "xai_sdk_client", "label": "xAI SDK Client (External)", "type": "external", "link": null}
+        {
+            "id": "xai_provider_class",
+            "label": "xAI API Provider",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "grok_profiles_mod",
+            "label": "Groq Model Profiles",
+            "type": "external",
+            "link": "groq_profiles.md"
+        },
+        {
+            "id": "model_provider_config",
+            "label": "Model Provider Configurations",
+            "type": "external",
+            "link": "model_provider_configurations.md"
+        },
+        {
+            "id": "xai_sdk_client",
+            "label": "xAI SDK Client (External)",
+            "type": "external",
+            "link": null
+        }
     ],
     "edges": [
-        {"source": "xai_provider_class", "target": "model_provider_config", "label": "Implements interface"},
-        {"source": "xai_provider_class", "target": "xai_sdk_client", "label": "Uses for API calls"},
-        {"source": "xai_provider_class", "target": "grok_profiles_mod", "label": "Retrieves model profile from", "type": ".->"}
+        {
+            "source": "xai_provider_class",
+            "target": "model_provider_config",
+            "label": "Implements interface"
+        },
+        {
+            "source": "xai_provider_class",
+            "target": "xai_sdk_client",
+            "label": "Uses for API calls"
+        },
+        {
+            "source": "xai_provider_class",
+            "target": "grok_profiles_mod",
+            "label": "Retrieves model profile from",
+            "type": ".->"
+        }
     ],
     "groups": []
 }

@@ -17,25 +17,73 @@ This bidirectional conversion is essential for seamless integration with Gemini 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "process_incoming_gemini", "label": "Process Incoming Gemini Parts", "type": "component", "link": null},
-        {"id": "generate_outgoing_gemini", "label": "Generate Outgoing Gemini Content", "type": "component", "link": null},
-        {"id": "standard_model_response", "label": "Standardized Model Response", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "gemini_api_interface", "label": "Gemini API Interaction", "type": "external", "link": "gemini_api_interaction.md"},
-        {"id": "usage_tracking", "label": "Usage Tracking", "type": "external", "link": "agent_utilities.md"}
+        {
+            "id": "process_incoming_gemini",
+            "label": "Process Incoming Gemini Parts",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "generate_outgoing_gemini",
+            "label": "Generate Outgoing Gemini Content",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "standard_model_response",
+            "label": "Standardized Model Response",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "gemini_api_interface",
+            "label": "Gemini API Interaction",
+            "type": "external",
+            "link": "gemini_api_interaction.md"
+        },
+        {
+            "id": "usage_tracking",
+            "label": "Usage Tracking",
+            "type": "external",
+            "link": "agent_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "gemini_api_interface", "target": "process_incoming_gemini", "label": "raw Gemini parts"},
-        {"source": "process_incoming_gemini", "target": "standard_model_response", "label": "standardized model response"},
-        {"source": "standard_model_response", "target": "generate_outgoing_gemini", "label": "model response object"},
-        {"source": "generate_outgoing_gemini", "target": "gemini_api_interface", "label": "formatted Gemini content"},
-        {"source": "process_incoming_gemini", "target": "usage_tracking", "label": "updates"}
+        {
+            "source": "gemini_api_interface",
+            "target": "process_incoming_gemini",
+            "label": "raw Gemini parts"
+        },
+        {
+            "source": "process_incoming_gemini",
+            "target": "standard_model_response",
+            "label": "standardized model response"
+        },
+        {
+            "source": "standard_model_response",
+            "target": "generate_outgoing_gemini",
+            "label": "model response object"
+        },
+        {
+            "source": "generate_outgoing_gemini",
+            "target": "gemini_api_interface",
+            "label": "formatted Gemini content"
+        },
+        {
+            "source": "process_incoming_gemini",
+            "target": "usage_tracking",
+            "label": "updates"
+        }
     ],
     "groups": [
         {
             "id": "gemini_conversion_logic",
             "label": "Gemini Response Conversion Logic",
             "role": "analytical",
-            "nodes": ["process_incoming_gemini", "generate_outgoing_gemini"]
+            "nodes": [
+                "process_incoming_gemini",
+                "generate_outgoing_gemini"
+            ]
         }
     ]
 }

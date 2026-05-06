@@ -3,20 +3,53 @@ This module provides utilities for aggregating predictions, such as majority vot
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "majority", "label": "majority()"},
-    {"id": "default_normalize", "label": "default_normalize()"},
-    {"id": "WrapperAdapter", "label": "WrapperAdapter"},
-    {"id": "inspect_modules", "label": "inspect_modules()"},
-    {"id": "OfferFeedback", "label": "OfferFeedback"}
-  ],
-  "edges": [
-    {"source": "majority", "target": "default_normalize"}
-  ],
-  "groups": [
-    {"id": "aggregation", "label": "Aggregation", "nodes": ["majority", "default_normalize"]},
-    {"id": "feedback", "label": "Feedback / Refinement", "nodes": ["WrapperAdapter", "inspect_modules", "OfferFeedback"]}
-  ]
+    "nodes": [
+        {
+            "id": "majority",
+            "label": "majority()"
+        },
+        {
+            "id": "default_normalize",
+            "label": "default_normalize()"
+        },
+        {
+            "id": "WrapperAdapter",
+            "label": "WrapperAdapter"
+        },
+        {
+            "id": "inspect_modules",
+            "label": "inspect_modules()"
+        },
+        {
+            "id": "OfferFeedback",
+            "label": "OfferFeedback"
+        }
+    ],
+    "edges": [
+        {
+            "source": "majority",
+            "target": "default_normalize"
+        }
+    ],
+    "groups": [
+        {
+            "id": "aggregation",
+            "label": "Aggregation",
+            "nodes": [
+                "majority",
+                "default_normalize"
+            ]
+        },
+        {
+            "id": "feedback",
+            "label": "Feedback / Refinement",
+            "nodes": [
+                "WrapperAdapter",
+                "inspect_modules",
+                "OfferFeedback"
+            ]
+        }
+    ]
 }
 -->
 ```mermaid

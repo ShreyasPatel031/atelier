@@ -3,21 +3,51 @@ This module provides core functionalities for indexing documents, including an a
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "aindex", "label": "aindex", "type": "function"},
-    {"id": "_hash_nested_dict", "label": "_hash_nested_dict", "type": "function"},
-    {"id": "DocumentIndex", "label": "DocumentIndex", "type": "class"},
-    {"id": "InMemoryDocumentIndex", "label": "InMemoryDocumentIndex", "type": "class"},
-    {"id": "VectorstoreIndexCreator", "label": "VectorstoreIndexCreator", "type": "class"}
-  ],
-  "edges": [
-    {"source": "InMemoryDocumentIndex", "target": "DocumentIndex", "type": "inherits"},
-    {"source": "aindex", "target": "DocumentIndex", "type": "uses"},
-    {"source": "aindex", "target": "_hash_nested_dict", "type": "uses"}
-  ],
-  "groups": [
-    {"id": "document_indexing", "label": "document_indexing", "members": ["aindex", "_hash_nested_dict", "DocumentIndex", "InMemoryDocumentIndex", "VectorstoreIndexCreator"]}
-  ]
+    "nodes": [
+        {
+            "id": "aindex",
+            "label": "aindex",
+            "type": "function"
+        },
+        {
+            "id": "_hash_nested_dict",
+            "label": "_hash_nested_dict",
+            "type": "function"
+        },
+        {
+            "id": "DocumentIndex",
+            "label": "DocumentIndex",
+            "type": "class"
+        },
+        {
+            "id": "InMemoryDocumentIndex",
+            "label": "InMemoryDocumentIndex",
+            "type": "class"
+        },
+        {
+            "id": "VectorstoreIndexCreator",
+            "label": "VectorstoreIndexCreator",
+            "type": "class"
+        }
+    ],
+    "edges": [
+        {
+            "source": "InMemoryDocumentIndex",
+            "target": "DocumentIndex",
+            "type": "inherits"
+        },
+        {
+            "source": "aindex",
+            "target": "DocumentIndex",
+            "type": "uses"
+        },
+        {
+            "source": "aindex",
+            "target": "_hash_nested_dict",
+            "type": "uses"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

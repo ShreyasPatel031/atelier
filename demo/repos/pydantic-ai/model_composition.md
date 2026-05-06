@@ -10,29 +10,76 @@ The `model_composition` module is structured around two core functionalities: ha
 {
     "direction": "TD",
     "nodes": [
-        {"id": "fallback_mechanism", "label": "Model Fallback Mechanism", "type": "module", "link": "fallback_mechanism.md"},
-        {"id": "model_wrapping", "label": "Model Wrapping Utility", "type": "module", "link": "model_wrapping.md"},
-        {"id": "model_core_interfaces", "label": "Core Model Interfaces", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "direct_model_requests", "label": "Direct Model Requests", "type": "external", "link": "direct_model_requests.md"}
+        {
+            "id": "model_composition",
+            "label": "Model Composition",
+            "type": "module"
+        },
+        {
+            "id": "fallback_mechanism",
+            "label": "Model Fallback Mechanism",
+            "type": "module",
+            "link": "fallback_mechanism.md"
+        },
+        {
+            "id": "model_wrapping",
+            "label": "Model Wrapping Utility",
+            "type": "module",
+            "link": "model_wrapping.md"
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Core Model Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "direct_model_requests",
+            "label": "Direct Model Requests",
+            "type": "external",
+            "link": "direct_model_requests.md"
+        }
     ],
     "edges": [
-        {"source": "fallback_mechanism", "target": "model_core_interfaces", "label": "uses models"},
-        {"source": "model_wrapping", "target": "model_core_interfaces", "label": "wraps models"},
-        {"source": "direct_model_requests", "target": "fallback_mechanism", "label": "sends requests"},
-        {"source": "direct_model_requests", "target": "model_wrapping", "label": "sends requests"}
+        {
+            "source": "fallback_mechanism",
+            "target": "model_core_interfaces",
+            "label": "uses models"
+        },
+        {
+            "source": "model_wrapping",
+            "target": "model_core_interfaces",
+            "label": "wraps models"
+        },
+        {
+            "source": "direct_model_requests",
+            "target": "fallback_mechanism",
+            "label": "sends requests"
+        },
+        {
+            "source": "direct_model_requests",
+            "target": "model_wrapping",
+            "label": "sends requests"
+        }
     ],
     "groups": [
         {
             "id": "model_handling",
             "label": "Model Handling",
             "role": "generative",
-            "nodes": ["fallback_mechanism", "model_wrapping"]
+            "nodes": [
+                "fallback_mechanism",
+                "model_wrapping"
+            ]
         },
         {
             "id": "external_dependencies",
             "label": "External Dependencies",
             "role": "data",
-            "nodes": ["model_core_interfaces", "direct_model_requests"]
+            "nodes": [
+                "model_core_interfaces",
+                "direct_model_requests"
+            ]
         }
     ]
 }

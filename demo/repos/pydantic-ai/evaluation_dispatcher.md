@@ -14,28 +14,68 @@ The `evaluation_dispatcher` module operates within the `evaluator_execution` sub
 {
     "direction": "TD",
     "nodes": [
-        {"id": "evaluator_execution_and_dispatch", "label": "Evaluator Execution and Dispatch", "type": "module", "link": "evaluator_execution_and_dispatch.md"},
-        {"id": "online_evaluator", "label": "Online Evaluator Instance", "type": "external"},
-        {"id": "evaluator_context", "label": "Evaluator Context", "type": "external"},
-        {"id": "evaluation_sink", "label": "Evaluation Sinks", "type": "external"}
+        {
+            "id": "evaluation_dispatcher",
+            "label": "Evaluation Dispatcher",
+            "type": "module"
+        },
+        {
+            "id": "evaluator_execution_and_dispatch",
+            "label": "Evaluator Execution and Dispatch",
+            "type": "module",
+            "link": "evaluator_execution_and_dispatch.md"
+        },
+        {
+            "id": "online_evaluator",
+            "label": "Online Evaluator Instance",
+            "type": "external"
+        },
+        {
+            "id": "evaluator_context",
+            "label": "Evaluator Context",
+            "type": "external"
+        },
+        {
+            "id": "evaluation_sink",
+            "label": "Evaluation Sinks",
+            "type": "external"
+        }
     ],
     "edges": [
-        {"source": "online_evaluator", "target": "evaluator_execution_and_dispatch", "label": "provides evaluator"},
-        {"source": "evaluator_context", "target": "evaluator_execution_and_dispatch", "label": "provides context"},
-        {"source": "evaluator_execution_and_dispatch", "target": "evaluation_sink", "label": "submits results/failures"}
+        {
+            "source": "online_evaluator",
+            "target": "evaluator_execution_and_dispatch",
+            "label": "provides evaluator"
+        },
+        {
+            "source": "evaluator_context",
+            "target": "evaluator_execution_and_dispatch",
+            "label": "provides context"
+        },
+        {
+            "source": "evaluator_execution_and_dispatch",
+            "target": "evaluation_sink",
+            "label": "submits results/failures"
+        }
     ],
     "groups": [
         {
             "id": "evaluation_core",
             "label": "Evaluation Core",
             "role": "generative",
-            "nodes": ["evaluator_execution_and_dispatch"]
+            "nodes": [
+                "evaluator_execution_and_dispatch"
+            ]
         },
         {
             "id": "inputs_outputs",
             "label": "Inputs & Outputs",
             "role": "data",
-            "nodes": ["online_evaluator", "evaluator_context", "evaluation_sink"]
+            "nodes": [
+                "online_evaluator",
+                "evaluator_context",
+                "evaluation_sink"
+            ]
         }
     ]
 }

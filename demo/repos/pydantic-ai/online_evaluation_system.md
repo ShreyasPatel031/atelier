@@ -21,20 +21,52 @@ These sub-modules interact to provide a seamless and configurable online evaluat
 {
     "direction": "TD",
     "nodes": [
-        {"id": "evaluation_orchestration", "label": "Evaluation Orchestration", "type": "module", "link": "evaluation_orchestration.md"},
-        {"id": "evaluator_execution", "label": "Evaluator Execution", "type": "module", "link": "evaluator_execution.md"},
-        {"id": "result_sinking", "label": "Result Sinking", "type": "module", "link": "result_sinking.md"}
+        {
+            "id": "online_evaluation_system",
+            "label": "Online Evaluation System",
+            "type": "module"
+        },
+        {
+            "id": "evaluation_orchestration",
+            "label": "Evaluation Orchestration",
+            "type": "module",
+            "link": "evaluation_orchestration.md"
+        },
+        {
+            "id": "evaluator_execution",
+            "label": "Evaluator Execution",
+            "type": "module",
+            "link": "evaluator_execution.md"
+        },
+        {
+            "id": "result_sinking",
+            "label": "Result Sinking",
+            "type": "module",
+            "link": "result_sinking.md"
+        }
     ],
     "edges": [
-        {"source": "evaluation_orchestration", "target": "evaluator_execution", "label": "dispatches evaluation"},
-        {"source": "evaluator_execution", "target": "result_sinking", "label": "submits results/failures"}
+        {
+            "source": "evaluation_orchestration",
+            "target": "evaluator_execution",
+            "label": "dispatches evaluation"
+        },
+        {
+            "source": "evaluator_execution",
+            "target": "result_sinking",
+            "label": "submits results/failures"
+        }
     ],
     "groups": [
         {
             "id": "core_evaluation_flow",
             "label": "Core Evaluation Flow",
             "role": "generative",
-            "nodes": ["evaluation_orchestration", "evaluator_execution", "result_sinking"]
+            "nodes": [
+                "evaluation_orchestration",
+                "evaluator_execution",
+                "result_sinking"
+            ]
         }
     ]
 }

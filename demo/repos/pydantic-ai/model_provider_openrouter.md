@@ -19,18 +19,40 @@ This module consists of the following key sub-modules:
 {
     "direction": "TD",
     "nodes": [
-        {"id": "openrouter_streaming_response", "label": "OpenRouter Streamed Response", "type": "module", "link": "openrouter_streaming_response.md"},
-        {"id": "openrouter_nested_completion", "label": "OpenRouter Nested Completion", "type": "module", "link": "openrouter_nested_completion.md"}
+        {
+            "id": "model_provider_openrouter",
+            "label": "model_provider_openrouter",
+            "type": "module"
+        },
+        {
+            "id": "openrouter_streaming_response",
+            "label": "OpenRouter Streamed Response",
+            "type": "module",
+            "link": "openrouter_streaming_response.md"
+        },
+        {
+            "id": "openrouter_nested_completion",
+            "label": "OpenRouter Nested Completion",
+            "type": "module",
+            "link": "openrouter_nested_completion.md"
+        }
     ],
     "edges": [
-        {"source": "openrouter_streaming_response", "target": "openrouter_nested_completion", "label": "processes"}
+        {
+            "source": "openrouter_streaming_response",
+            "target": "openrouter_nested_completion",
+            "label": "processes"
+        }
     ],
     "groups": [
         {
             "id": "openrouter_integration",
             "label": "OpenRouter Integration",
             "role": "generative",
-            "nodes": ["openrouter_streaming_response", "openrouter_nested_completion"]
+            "nodes": [
+                "openrouter_streaming_response",
+                "openrouter_nested_completion"
+            ]
         }
     ]
 }

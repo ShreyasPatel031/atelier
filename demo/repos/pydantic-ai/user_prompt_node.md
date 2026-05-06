@@ -22,39 +22,152 @@ This module ensures that user prompts and system-level instructions are correctl
 {
     "direction": "TD",
     "nodes": [
-        {"id": "user_prompt_node_component", "label": "UserPromptNode", "type": "component", "link": null},
-        {"id": "process_user_input", "label": "Process User Input", "type": "component", "link": null},
-        {"id": "handle_deferred_results", "label": "Handle Deferred Tool Results", "type": "component", "link": null},
-        {"id": "evaluate_dynamic_prompts", "label": "Evaluate Dynamic Prompts", "type": "component", "link": null},
-        {"id": "build_model_request", "label": "Build Model Request", "type": "component", "link": null},
-        {"id": "message_history", "label": "Message History", "type": "external", "link": "agent_output_handling.md"},
-        {"id": "tool_manager", "label": "Tool Manager", "type": "external", "link": "toolset_management.md"},
-        {"id": "system_prompt_runner", "label": "System Prompt Runner", "type": "external", "link": "capabilities_base.md"},
-        {"id": "model_request_node", "label": "ModelRequestNode", "type": "external", "link": "model_request_node.md"},
-        {"id": "call_tools_node", "label": "CallToolsNode", "type": "external", "link": "tool_execution_logic.md"},
-        {"id": "run_context", "label": "Graph Run Context", "type": "external", "link": "graph_core_execution.md"},
-        {"id": "captured_messages", "label": "Captured Run Messages", "type": "external", "link": "message_capture_utility.md"}
+        {
+            "id": "user_prompt_node_component",
+            "label": "UserPromptNode",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "process_user_input",
+            "label": "Process User Input",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "handle_deferred_results",
+            "label": "Handle Deferred Tool Results",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "evaluate_dynamic_prompts",
+            "label": "Evaluate Dynamic Prompts",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "build_model_request",
+            "label": "Build Model Request",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "message_history",
+            "label": "Message History",
+            "type": "external",
+            "link": "agent_output_handling.md"
+        },
+        {
+            "id": "tool_manager",
+            "label": "Tool Manager",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "system_prompt_runner",
+            "label": "System Prompt Runner",
+            "type": "external",
+            "link": "capabilities_base.md"
+        },
+        {
+            "id": "model_request_node",
+            "label": "ModelRequestNode",
+            "type": "external",
+            "link": "model_request_node.md"
+        },
+        {
+            "id": "call_tools_node",
+            "label": "CallToolsNode",
+            "type": "external",
+            "link": "tool_execution_logic.md"
+        },
+        {
+            "id": "run_context",
+            "label": "Graph Run Context",
+            "type": "external",
+            "link": "graph_core_execution.md"
+        },
+        {
+            "id": "captured_messages",
+            "label": "Captured Run Messages",
+            "type": "external",
+            "link": "message_capture_utility.md"
+        }
     ],
     "edges": [
-        {"source": "user_prompt_node_component", "target": "process_user_input", "label": "initializes with"},
-        {"source": "process_user_input", "target": "captured_messages", "label": "reads current"},
-        {"source": "process_user_input", "target": "message_history", "label": "manages"},
-        {"source": "process_user_input", "target": "handle_deferred_results", "label": "tool results present"},
-        {"source": "handle_deferred_results", "target": "call_tools_node", "label": "delegates execution to"},
-        {"source": "process_user_input", "target": "evaluate_dynamic_prompts", "label": "dynamic prompt refs"},
-        {"source": "evaluate_dynamic_prompts", "target": "system_prompt_runner", "label": "executes"},
-        {"source": "evaluate_dynamic_prompts", "target": "message_history", "label": "updates with"},
-        {"source": "process_user_input", "target": "build_model_request", "label": "no deferred results"},
-        {"source": "build_model_request", "target": "model_request_node", "label": "for AI model"},
-        {"source": "user_prompt_node_component", "target": "tool_manager", "label": "updates for step"},
-        {"source": "user_prompt_node_component", "target": "run_context", "label": "uses for execution"}
+        {
+            "source": "user_prompt_node_component",
+            "target": "process_user_input",
+            "label": "initializes with"
+        },
+        {
+            "source": "process_user_input",
+            "target": "captured_messages",
+            "label": "reads current"
+        },
+        {
+            "source": "process_user_input",
+            "target": "message_history",
+            "label": "manages"
+        },
+        {
+            "source": "process_user_input",
+            "target": "handle_deferred_results",
+            "label": "tool results present"
+        },
+        {
+            "source": "handle_deferred_results",
+            "target": "call_tools_node",
+            "label": "delegates execution to"
+        },
+        {
+            "source": "process_user_input",
+            "target": "evaluate_dynamic_prompts",
+            "label": "dynamic prompt refs"
+        },
+        {
+            "source": "evaluate_dynamic_prompts",
+            "target": "system_prompt_runner",
+            "label": "executes"
+        },
+        {
+            "source": "evaluate_dynamic_prompts",
+            "target": "message_history",
+            "label": "updates with"
+        },
+        {
+            "source": "process_user_input",
+            "target": "build_model_request",
+            "label": "no deferred results"
+        },
+        {
+            "source": "build_model_request",
+            "target": "model_request_node",
+            "label": "for AI model"
+        },
+        {
+            "source": "user_prompt_node_component",
+            "target": "tool_manager",
+            "label": "updates for step"
+        },
+        {
+            "source": "user_prompt_node_component",
+            "target": "run_context",
+            "label": "uses for execution"
+        }
     ],
     "groups": [
         {
             "id": "user_input_processing",
             "label": "User Input Processing Flow",
-            "role": "analytical", 
-            "nodes": ["process_user_input", "evaluate_dynamic_prompts", "build_model_request", "handle_deferred_results"]
+            "role": "analytical",
+            "nodes": [
+                "process_user_input",
+                "evaluate_dynamic_prompts",
+                "build_model_request",
+                "handle_deferred_results"
+            ]
         }
     ]
 }

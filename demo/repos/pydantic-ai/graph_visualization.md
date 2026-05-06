@@ -10,7 +10,17 @@ The module primarily focuses on generating Mermaid state diagrams. It processes 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "mermaid_graph_rendering", "label": "Mermaid Graph Rendering", "type": "module", "link": "mermaid_graph_rendering.md"}
+        {
+            "id": "graph_visualization",
+            "label": "Graph Visualization",
+            "type": "module"
+        },
+        {
+            "id": "mermaid_graph_rendering",
+            "label": "Mermaid Graph Rendering",
+            "type": "module",
+            "link": "mermaid_graph_rendering.md"
+        }
     ],
     "edges": [],
     "groups": [
@@ -18,7 +28,9 @@ The module primarily focuses on generating Mermaid state diagrams. It processes 
             "id": "visualization_core",
             "label": "Visualization Core",
             "role": "generative",
-            "nodes": ["mermaid_graph_rendering"]
+            "nodes": [
+                "mermaid_graph_rendering"
+            ]
         }
     ]
 }

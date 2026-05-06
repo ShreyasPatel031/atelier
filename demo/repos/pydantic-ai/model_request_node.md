@@ -12,46 +12,191 @@ The `ModelRequestNode` manages the lifecycle of a model request, from preparatio
 {
     "direction": "TD",
     "nodes": [
-        {"id": "model_request_node_entry", "label": "Model Request Node Start", "type": "component", "link": null},
-        {"id": "prepare_request", "label": "Prepare Model Request", "type": "component", "link": null},
-        {"id": "make_sync_request", "label": "Execute Synchronous Request", "type": "component", "link": null},
-        {"id": "stream_request", "label": "Execute Streaming Request", "type": "component", "link": null},
-        {"id": "process_response", "label": "Process Model Response", "type": "component", "link": null},
-        {"id": "handle_retries", "label": "Handle Model Retries", "type": "component", "link": null},
-        {"id": "finish_handling", "label": "Finalize Response Handling", "type": "component", "link": null},
-        {"id": "model_core_interfaces", "label": "Model Core Interfaces", "type": "external", "link": "model_core_interfaces.md"},
-        {"id": "toolset_management", "label": "Toolset Management", "type": "external", "link": "toolset_management.md"},
-        {"id": "capabilities_base", "label": "Capabilities Base", "type": "external", "link": "capabilities_base.md"},
-        {"id": "agent_output_handling", "label": "Agent Output Handling", "type": "external", "link": "agent_output_handling.md"},
-        {"id": "agent_utilities", "label": "Agent Utilities", "type": "external", "link": "agent_utilities.md"},
-        {"id": "graph_core_execution", "label": "Graph Core Execution", "type": "external", "link": "graph_core_execution.md"}
+        {
+            "id": "model_request_node_entry",
+            "label": "Model Request Node Start",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "prepare_request",
+            "label": "Prepare Model Request",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "make_sync_request",
+            "label": "Execute Synchronous Request",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "stream_request",
+            "label": "Execute Streaming Request",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "process_response",
+            "label": "Process Model Response",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "handle_retries",
+            "label": "Handle Model Retries",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "finish_handling",
+            "label": "Finalize Response Handling",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "model_core_interfaces",
+            "label": "Model Core Interfaces",
+            "type": "external",
+            "link": "model_core_interfaces.md"
+        },
+        {
+            "id": "toolset_management",
+            "label": "Toolset Management",
+            "type": "external",
+            "link": "toolset_management.md"
+        },
+        {
+            "id": "capabilities_base",
+            "label": "Capabilities Base",
+            "type": "external",
+            "link": "capabilities_base.md"
+        },
+        {
+            "id": "agent_output_handling",
+            "label": "Agent Output Handling",
+            "type": "external",
+            "link": "agent_output_handling.md"
+        },
+        {
+            "id": "agent_utilities",
+            "label": "Agent Utilities",
+            "type": "external",
+            "link": "agent_utilities.md"
+        },
+        {
+            "id": "graph_core_execution",
+            "label": "Graph Core Execution",
+            "type": "external",
+            "link": "graph_core_execution.md"
+        }
     ],
     "edges": [
-        {"source": "model_request_node_entry", "target": "prepare_request", "label": "initiate request"},
-        {"source": "prepare_request", "target": "model_core_interfaces", "label": "configures"},
-        {"source": "prepare_request", "target": "toolset_management", "label": "resolves tools"},
-        {"source": "prepare_request", "target": "capabilities_base", "label": "applies before_model_request hook"},
-        {"source": "prepare_request", "target": "agent_utilities", "label": "builds run context"},
-        {"source": "prepare_request", "target": "make_sync_request", "label": "prepared request for sync"},
-        {"source": "prepare_request", "target": "stream_request", "label": "prepared request for stream"},
-        {"source": "make_sync_request", "target": "model_core_interfaces", "label": "sends request to model"},
-        {"source": "stream_request", "target": "model_core_interfaces", "label": "sends streamed request to model"},
-        {"source": "make_sync_request", "target": "process_response", "label": "model response"},
-        {"source": "stream_request", "target": "process_response", "label": "streamed response"},
-        {"source": "stream_request", "target": "agent_output_handling", "label": "builds AgentStream"},
-        {"source": "process_response", "target": "capabilities_base", "label": "applies after_model_request hook"},
-        {"source": "process_response", "target": "handle_retries", "label": "on ModelRetry"},
-        {"source": "process_response", "target": "finish_handling", "label": "on success"},
-        {"source": "handle_retries", "target": "model_request_node_entry", "label": "initiates new ModelRequestNode"},
-        {"source": "finish_handling", "target": "graph_core_execution", "label": "updates GraphAgentState"},
-        {"source": "finish_handling", "target": "agent_output_handling", "label": "prepares CallToolsNode"}
+        {
+            "source": "model_request_node_entry",
+            "target": "prepare_request",
+            "label": "initiate request"
+        },
+        {
+            "source": "prepare_request",
+            "target": "model_core_interfaces",
+            "label": "configures"
+        },
+        {
+            "source": "prepare_request",
+            "target": "toolset_management",
+            "label": "resolves tools"
+        },
+        {
+            "source": "prepare_request",
+            "target": "capabilities_base",
+            "label": "applies before_model_request hook"
+        },
+        {
+            "source": "prepare_request",
+            "target": "agent_utilities",
+            "label": "builds run context"
+        },
+        {
+            "source": "prepare_request",
+            "target": "make_sync_request",
+            "label": "prepared request for sync"
+        },
+        {
+            "source": "prepare_request",
+            "target": "stream_request",
+            "label": "prepared request for stream"
+        },
+        {
+            "source": "make_sync_request",
+            "target": "model_core_interfaces",
+            "label": "sends request to model"
+        },
+        {
+            "source": "stream_request",
+            "target": "model_core_interfaces",
+            "label": "sends streamed request to model"
+        },
+        {
+            "source": "make_sync_request",
+            "target": "process_response",
+            "label": "model response"
+        },
+        {
+            "source": "stream_request",
+            "target": "process_response",
+            "label": "streamed response"
+        },
+        {
+            "source": "stream_request",
+            "target": "agent_output_handling",
+            "label": "builds AgentStream"
+        },
+        {
+            "source": "process_response",
+            "target": "capabilities_base",
+            "label": "applies after_model_request hook"
+        },
+        {
+            "source": "process_response",
+            "target": "handle_retries",
+            "label": "on ModelRetry"
+        },
+        {
+            "source": "process_response",
+            "target": "finish_handling",
+            "label": "on success"
+        },
+        {
+            "source": "handle_retries",
+            "target": "model_request_node_entry",
+            "label": "initiates new ModelRequestNode"
+        },
+        {
+            "source": "finish_handling",
+            "target": "graph_core_execution",
+            "label": "updates GraphAgentState"
+        },
+        {
+            "source": "finish_handling",
+            "target": "agent_output_handling",
+            "label": "prepares CallToolsNode"
+        }
     ],
     "groups": [
         {
             "id": "model_request_flow",
             "label": "Model Request Flow",
             "role": "main",
-            "nodes": ["model_request_node_entry", "prepare_request", "make_sync_request", "stream_request", "process_response", "handle_retries", "finish_handling"]
+            "nodes": [
+                "model_request_node_entry",
+                "prepare_request",
+                "make_sync_request",
+                "stream_request",
+                "process_response",
+                "handle_retries",
+                "finish_handling"
+            ]
         }
     ]
 }

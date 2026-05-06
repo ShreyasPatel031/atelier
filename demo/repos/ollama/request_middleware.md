@@ -5,14 +5,41 @@ This module provides an abstraction layer for handling incoming API requests and
 {
     "direction": "TD",
     "nodes": [
-        {"id": "anthropic_api_middleware", "label": "Anthropic API Middleware", "type": "module", "link": "anthropic_api_middleware.md"},
-        {"id": "openai_api_middleware", "label": "OpenAI API Middleware", "type": "module", "link": "openai_api_middleware.md"}
+        {
+            "id": "request_middleware",
+            "label": "Request Middleware",
+            "type": "module"
+        },
+        {
+            "id": "anthropic_api_middleware",
+            "label": "Anthropic API Middleware",
+            "type": "module",
+            "link": "anthropic_api_middleware.md"
+        },
+        {
+            "id": "openai_api_middleware",
+            "label": "OpenAI API Middleware",
+            "type": "module",
+            "link": "openai_api_middleware.md"
+        }
     ],
     "edges": [
-        {"source": "anthropic_api_middleware", "target": "openai_api_middleware", "label": "API request/response flow"}
+        {
+            "source": "anthropic_api_middleware",
+            "target": "openai_api_middleware",
+            "label": "API request/response flow"
+        }
     ],
     "groups": [
-        {"id": "api_handling", "label": "API Request/Response Handling", "role": "analytical", "nodes": ["anthropic_api_middleware", "openai_api_middleware"]}
+        {
+            "id": "api_handling",
+            "label": "API Request/Response Handling",
+            "role": "analytical",
+            "nodes": [
+                "anthropic_api_middleware",
+                "openai_api_middleware"
+            ]
+        }
     ]
 }
 -->

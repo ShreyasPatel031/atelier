@@ -3,15 +3,16 @@ The `in_memory_store` module provides `InMemoryVectorStore`, an in-memory vector
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {
-      "id": "in_memory_store.InMemoryVectorStore",
-      "label": "InMemoryVectorStore",
-      "type": "class",
-      "path": "libs/core/langchain_core/vectorstores/in_memory/InMemoryVectorStore.py"
-    }
-  ],
-  "edges": []
+    "nodes": [
+        {
+            "id": "in_memory_store.InMemoryVectorStore",
+            "label": "InMemoryVectorStore",
+            "type": "class",
+            "path": "libs/core/langchain_core/vectorstores/in_memory/InMemoryVectorStore.py"
+        }
+    ],
+    "edges": [],
+    "groups": []
 }
 -->
 ```mermaid

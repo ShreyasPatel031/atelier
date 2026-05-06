@@ -19,33 +19,95 @@ The `model_provider_integrations` module is structured to categorize providers b
 {
     "direction": "TD",
     "nodes": [
-        {"id": "openai_compatible_providers", "label": "OpenAI-Compatible Providers", "type": "module", "link": "openai_compatible_providers.md"},
-        {"id": "native_client_providers", "label": "Native Client Providers", "type": "module", "link": "native_client_providers.md"},
-        {"id": "gateway_wrapper_providers", "label": "Gateway and Wrapper Providers", "type": "module", "link": "gateway_wrapper_providers.md"},
-        {"id": "structured_output_providers", "label": "Structured Output Providers", "type": "module", "link": "structured_output_providers.md"}
+        {
+            "id": "model_provider_integrations",
+            "label": "Model Provider Integrations",
+            "type": "module"
+        },
+        {
+            "id": "openai_compatible_providers",
+            "label": "OpenAI-Compatible Providers",
+            "type": "module",
+            "link": "openai_compatible_providers.md"
+        },
+        {
+            "id": "native_client_providers",
+            "label": "Native Client Providers",
+            "type": "module",
+            "link": "native_client_providers.md"
+        },
+        {
+            "id": "gateway_wrapper_providers",
+            "label": "Gateway and Wrapper Providers",
+            "type": "module",
+            "link": "gateway_wrapper_providers.md"
+        },
+        {
+            "id": "structured_output_providers",
+            "label": "Structured Output Providers",
+            "type": "module",
+            "link": "structured_output_providers.md"
+        },
+        {
+            "id": "pydantic_ai_agent_core",
+            "label": "pydantic_ai_agent_core",
+            "type": "external",
+            "_repaired": "g2_injected_endpoint"
+        }
     ],
     "edges": [
-        {"source": "openai_compatible_providers", "target": "native_client_providers", "label": "can leverage concepts from"},
-        {"source": "gateway_wrapper_providers", "target": "openai_compatible_providers", "label": "wraps/proxies"},
-        {"source": "gateway_wrapper_providers", "target": "native_client_providers", "label": "wraps/proxies"},
-        {"source": "structured_output_providers", "target": "openai_compatible_providers", "label": "builds on"},
-        {"source": "pydantic_ai_agent_core", "target": "openai_compatible_providers", "label": "uses"},
-        {"source": "pydantic_ai_agent_core", "target": "native_client_providers", "label": "uses"},
-        {"source": "pydantic_ai_agent_core", "target": "gateway_wrapper_providers", "label": "uses"},
-        {"source": "pydantic_ai_agent_core", "target": "structured_output_providers", "label": "uses"}
+        {
+            "source": "openai_compatible_providers",
+            "target": "native_client_providers",
+            "label": "can leverage concepts from"
+        },
+        {
+            "source": "gateway_wrapper_providers",
+            "target": "openai_compatible_providers",
+            "label": "wraps/proxies"
+        },
+        {
+            "source": "gateway_wrapper_providers",
+            "target": "native_client_providers",
+            "label": "wraps/proxies"
+        },
+        {
+            "source": "structured_output_providers",
+            "target": "openai_compatible_providers",
+            "label": "builds on"
+        },
+        {
+            "source": "pydantic_ai_agent_core",
+            "target": "openai_compatible_providers",
+            "label": "uses"
+        },
+        {
+            "source": "pydantic_ai_agent_core",
+            "target": "native_client_providers",
+            "label": "uses"
+        },
+        {
+            "source": "pydantic_ai_agent_core",
+            "target": "gateway_wrapper_providers",
+            "label": "uses"
+        },
+        {
+            "source": "pydantic_ai_agent_core",
+            "target": "structured_output_providers",
+            "label": "uses"
+        }
     ],
     "groups": [
         {
             "id": "provider_types",
             "label": "Provider Types",
             "role": "data",
-            "nodes": ["openai_compatible_providers", "native_client_providers", "gateway_wrapper_providers", "structured_output_providers"]
-        },
-        {
-            "id": "core_system",
-            "label": "Core System",
-            "role": "generative",
-            "nodes": ["pydantic_ai_agent_core"]
+            "nodes": [
+                "openai_compatible_providers",
+                "native_client_providers",
+                "gateway_wrapper_providers",
+                "structured_output_providers"
+            ]
         }
     ]
 }

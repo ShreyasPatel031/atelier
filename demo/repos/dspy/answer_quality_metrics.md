@@ -3,22 +3,36 @@ This module provides components for evaluating the quality of AI system response
 
 <!-- DIAGRAM_JSON
 {
-  "nodes": [
-    {"id": "CompleteAndGrounded", "label": "CompleteAndGrounded", "type": "Module"},
-    {"id": "AnswerCompleteness", "label": "AnswerCompleteness", "type": "Signature"},
-    {"id": "AnswerGroundedness", "label": "AnswerGroundedness", "type": "Signature"}
-  ],
-  "edges": [
-    {"source": "CompleteAndGrounded", "target": "AnswerCompleteness", "label": "uses"},
-    {"source": "CompleteAndGrounded", "target": "AnswerGroundedness", "label": "uses"}
-  ],
-  "groups": [
-    {
-      "id": "answer_quality_metrics",
-      "label": "answer_quality_metrics",
-      "members": ["CompleteAndGrounded", "AnswerCompleteness", "AnswerGroundedness"]
-    }
-  ]
+    "nodes": [
+        {
+            "id": "CompleteAndGrounded",
+            "label": "CompleteAndGrounded",
+            "type": "Module"
+        },
+        {
+            "id": "AnswerCompleteness",
+            "label": "AnswerCompleteness",
+            "type": "Signature"
+        },
+        {
+            "id": "AnswerGroundedness",
+            "label": "AnswerGroundedness",
+            "type": "Signature"
+        }
+    ],
+    "edges": [
+        {
+            "source": "CompleteAndGrounded",
+            "target": "AnswerCompleteness",
+            "label": "uses"
+        },
+        {
+            "source": "CompleteAndGrounded",
+            "target": "AnswerGroundedness",
+            "label": "uses"
+        }
+    ],
+    "groups": []
 }
 -->
 ```mermaid

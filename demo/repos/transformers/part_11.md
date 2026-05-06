@@ -5,13 +5,37 @@ This module encompasses various language models specialized in sequence classifi
 {
     "direction": "TD",
     "nodes": [
-        {"id": "sequence_classification", "label": "Sequence Classification", "type": "module", "link": "sequence_classification.md"},
-        {"id": "conditional_generation", "label": "Conditional Text Generation", "type": "module", "link": "conditional_generation.md"},
-        {"id": "causal_language_modeling", "label": "Causal Language Modeling", "type": "module", "link": "causal_language_modeling.md"}
+        {
+            "id": "sequence_classification",
+            "label": "Sequence Classification",
+            "type": "module",
+            "link": "sequence_classification.md"
+        },
+        {
+            "id": "conditional_generation",
+            "label": "Conditional Text Generation",
+            "type": "module",
+            "link": "conditional_generation.md"
+        },
+        {
+            "id": "causal_language_modeling",
+            "label": "Causal Language Modeling",
+            "type": "module",
+            "link": "causal_language_modeling.md"
+        }
     ],
     "edges": [],
     "groups": [
-        {"id": "language_modeling", "label": "Language Model Capabilities", "role": "generative", "nodes": ["sequence_classification", "conditional_generation", "causal_language_modeling"]}
+        {
+            "id": "language_modeling",
+            "label": "Language Model Capabilities",
+            "role": "generative",
+            "nodes": [
+                "sequence_classification",
+                "conditional_generation",
+                "causal_language_modeling"
+            ]
+        }
     ]
 }
 -->

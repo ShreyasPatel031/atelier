@@ -4,38 +4,172 @@ This module provides a collection of specialized chains designed for advanced AI
 {
     "direction": "TD",
     "nodes": [
-        {"id": "FlareChain", "label": "Flare Chain (Retrieval Augmented Generation)", "type": "component", "link": null},
-        {"id": "LLMSummarizationCheckerChain", "label": "LLM Summarization Checker Chain (Self-Verification)", "type": "component", "link": null},
-        {"id": "QAGenerationChain", "label": "Q&A Generation Chain", "type": "component", "link": null},
-        {"id": "MapReduceChain", "label": "Map-Reduce Document Processing Chain", "type": "component", "link": null},
-        {"id": "OpenAIModerationChain", "label": "OpenAI Moderation Chain", "type": "component", "link": null},
-        {"id": "NatBotChain", "label": "NatBot Chain (LLM-driven Browser Automation)", "type": "component", "link": null},
-        {"id": "Crawler", "label": "Web Crawler (Playwright)", "type": "component", "link": null},
-        {"id": "runnable_framework", "label": "Runnable Framework", "type": "external", "link": "runnable_framework.md"},
-        {"id": "retrieval_systems", "label": "Retrieval Systems", "type": "external", "link": "retrieval_systems.md"},
-        {"id": "language_model_interface", "label": "Language Model Interface", "type": "external", "link": "language_model_interface.md"},
-        {"id": "document_management", "label": "Document Management", "type": "external", "link": "document_management.md"},
-        {"id": "openai_partner_integration", "label": "OpenAI Partner Integration", "type": "external", "link": "libs_partners_openai.md"},
-        {"id": "core_chains", "label": "Core Chains", "type": "external", "link": "core_chains.md"}
+        {
+            "id": "FlareChain",
+            "label": "Flare Chain (Retrieval Augmented Generation)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "LLMSummarizationCheckerChain",
+            "label": "LLM Summarization Checker Chain (Self-Verification)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "QAGenerationChain",
+            "label": "Q&A Generation Chain",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "MapReduceChain",
+            "label": "Map-Reduce Document Processing Chain",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "OpenAIModerationChain",
+            "label": "OpenAI Moderation Chain",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "NatBotChain",
+            "label": "NatBot Chain (LLM-driven Browser Automation)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "Crawler",
+            "label": "Web Crawler (Playwright)",
+            "type": "component",
+            "link": null
+        },
+        {
+            "id": "runnable_framework",
+            "label": "Runnable Framework",
+            "type": "external",
+            "link": "runnable_framework.md"
+        },
+        {
+            "id": "retrieval_systems",
+            "label": "Retrieval Systems",
+            "type": "external",
+            "link": "retrieval_systems.md"
+        },
+        {
+            "id": "language_model_interface",
+            "label": "Language Model Interface",
+            "type": "external",
+            "link": "language_model_interface.md"
+        },
+        {
+            "id": "document_management",
+            "label": "Document Management",
+            "type": "external",
+            "link": "document_management.md"
+        },
+        {
+            "id": "openai_partner_integration",
+            "label": "OpenAI Partner Integration",
+            "type": "external",
+            "link": "libs_partners_openai.md"
+        },
+        {
+            "id": "core_chains",
+            "label": "Core Chains",
+            "type": "external",
+            "link": "core_chains.md"
+        }
     ],
     "edges": [
-        {"source": "FlareChain", "target": "runnable_framework", "label": "uses Runnables"},
-        {"source": "FlareChain", "target": "retrieval_systems", "label": "retrieves documents"},
-        {"source": "FlareChain", "target": "language_model_interface", "label": "generates questions and responses"},
-        {"source": "LLMSummarizationCheckerChain", "target": "language_model_interface", "label": "uses LLMs and prompts"},
-        {"source": "LLMSummarizationCheckerChain", "target": "core_chains", "label": "builds on SequentialChain"},
-        {"source": "QAGenerationChain", "target": "language_model_interface", "label": "uses LLMs and prompts"},
-        {"source": "QAGenerationChain", "target": "document_management", "label": "splits text"},
-        {"source": "QAGenerationChain", "target": "core_chains", "label": "builds on LLMChain"},
-        {"source": "MapReduceChain", "target": "document_management", "label": "splits and processes documents"},
-        {"source": "MapReduceChain", "target": "language_model_interface", "label": "uses LLMs and prompts"},
-        {"source": "MapReduceChain", "target": "core_chains", "label": "builds on combine documents chains"},
-        {"source": "OpenAIModerationChain", "target": "openai_partner_integration", "label": "moderates content via API"},
-        {"source": "NatBotChain", "target": "language_model_interface", "label": "generates commands with LLM"},
-        {"source": "NatBotChain", "target": "Crawler", "label": "controls browser via"}
+        {
+            "source": "FlareChain",
+            "target": "runnable_framework",
+            "label": "uses Runnables"
+        },
+        {
+            "source": "FlareChain",
+            "target": "retrieval_systems",
+            "label": "retrieves documents"
+        },
+        {
+            "source": "FlareChain",
+            "target": "language_model_interface",
+            "label": "generates questions and responses"
+        },
+        {
+            "source": "LLMSummarizationCheckerChain",
+            "target": "language_model_interface",
+            "label": "uses LLMs and prompts"
+        },
+        {
+            "source": "LLMSummarizationCheckerChain",
+            "target": "core_chains",
+            "label": "builds on SequentialChain"
+        },
+        {
+            "source": "QAGenerationChain",
+            "target": "language_model_interface",
+            "label": "uses LLMs and prompts"
+        },
+        {
+            "source": "QAGenerationChain",
+            "target": "document_management",
+            "label": "splits text"
+        },
+        {
+            "source": "QAGenerationChain",
+            "target": "core_chains",
+            "label": "builds on LLMChain"
+        },
+        {
+            "source": "MapReduceChain",
+            "target": "document_management",
+            "label": "splits and processes documents"
+        },
+        {
+            "source": "MapReduceChain",
+            "target": "language_model_interface",
+            "label": "uses LLMs and prompts"
+        },
+        {
+            "source": "MapReduceChain",
+            "target": "core_chains",
+            "label": "builds on combine documents chains"
+        },
+        {
+            "source": "OpenAIModerationChain",
+            "target": "openai_partner_integration",
+            "label": "moderates content via API"
+        },
+        {
+            "source": "NatBotChain",
+            "target": "language_model_interface",
+            "label": "generates commands with LLM"
+        },
+        {
+            "source": "NatBotChain",
+            "target": "Crawler",
+            "label": "controls browser via"
+        }
     ],
     "groups": [
-        {"id": "specialized_workflow_chains_group", "label": "Specialized Workflow Chains", "role": "analytical", "nodes": ["FlareChain", "LLMSummarizationCheckerChain", "QAGenerationChain", "MapReduceChain", "OpenAIModerationChain", "NatBotChain", "Crawler"]}
+        {
+            "id": "specialized_workflow_chains_group",
+            "label": "Specialized Workflow Chains",
+            "role": "analytical",
+            "nodes": [
+                "FlareChain",
+                "LLMSummarizationCheckerChain",
+                "QAGenerationChain",
+                "MapReduceChain",
+                "OpenAIModerationChain",
+                "NatBotChain",
+                "Crawler"
+            ]
+        }
     ]
 }
 -->

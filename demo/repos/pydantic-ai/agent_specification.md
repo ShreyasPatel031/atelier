@@ -12,24 +12,47 @@ The `agent_specification` module is structured into key sub-modules that handle 
 {
     "direction": "TD",
     "nodes": [
-        {"id": "agent_spec_definition", "label": "Agent Specification Definition", "type": "module", "link": "agent_spec_definition.md"},
-        {"id": "schema_target_utilities", "label": "Schema Target Utilities", "type": "module", "link": "schema_target_utilities.md"}
+        {
+            "id": "agent_specification",
+            "label": "Agent Specification",
+            "type": "module"
+        },
+        {
+            "id": "agent_spec_definition",
+            "label": "Agent Specification Definition",
+            "type": "module",
+            "link": "agent_spec_definition.md"
+        },
+        {
+            "id": "schema_target_utilities",
+            "label": "Schema Target Utilities",
+            "type": "module",
+            "link": "schema_target_utilities.md"
+        }
     ],
     "edges": [
-        {"source": "agent_spec_definition", "target": "schema_target_utilities", "label": "uses for schema generation"}
+        {
+            "source": "agent_spec_definition",
+            "target": "schema_target_utilities",
+            "label": "uses for schema generation"
+        }
     ],
     "groups": [
         {
             "id": "agent_core",
             "label": "Agent Core",
             "role": "generative",
-            "nodes": ["agent_spec_definition"]
+            "nodes": [
+                "agent_spec_definition"
+            ]
         },
         {
             "id": "schema_helpers",
             "label": "Schema Helpers",
             "role": "analytical",
-            "nodes": ["schema_target_utilities"]
+            "nodes": [
+                "schema_target_utilities"
+            ]
         }
     ]
 }
