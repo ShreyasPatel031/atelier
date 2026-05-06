@@ -4,7 +4,7 @@
  * - G2: edge source/target not in nodes[] → inject { id, label, type: "external" }
  *       (skip if endpoint equals a group id — emit warning g2_endpoint_is_group_id instead)
  * - G3: groups[].nodes[] — lift inline node-shaped objects into nodes[]; drop non-strings;
- *       drop member ids not present in nodes[]
+ *       drop member ids that are neither nodes[] ids nor other groups' ids (nested compounds)
  * - Drop groups with zero members after cleanup (warning g3_dropped_empty_group)
  *
  * window.repairDiagramIR(diagram) → { ok, diagram?, warnings[], summary? }
@@ -110,6 +110,8 @@
         }
 
         let nodeIds = collectNodeIds();
+        /** Subgroup ids live in groups[].nodes[] but not in nodes[] — required for nested ELK compounds (RF expand-within-expand). */
+        let validSubgroupIds = collectGroupIds();
 
         for (const g of data.groups) {
             if (!g || g.id == null) continue;
@@ -117,12 +119,12 @@
             const kept = [];
             for (const mid of g.nodes) {
                 const sid = String(mid);
-                if (!nodeIds.has(sid)) {
-                    summary.g3DroppedUnknownMember.push({ groupId: gid, memberId: sid });
-                    warnings.push({ code: 'g3_drop_unknown_member', groupId: gid, memberId: sid });
+                if (nodeIds.has(sid) || validSubgroupIds.has(sid)) {
+                    kept.push(sid);
                     continue;
                 }
-                kept.push(sid);
+                summary.g3DroppedUnknownMember.push({ groupId: gid, memberId: sid });
+                warnings.push({ code: 'g3_drop_unknown_member', groupId: gid, memberId: sid });
             }
             g.nodes = kept;
         }
