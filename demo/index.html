@@ -460,6 +460,10 @@
             z-index: 1 !important;
             position: relative;
         }
+        /** Smooth edge opacity during ELK expand/collapse tween (style.opacity updated from reactflow-r6.mjs). */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__edge-path {
+            transition: opacity 180ms ease;
+        }
         /**
          * RF v12 renders nodes as flat siblings under .react-flow__nodes (no parent-child),
          * so :has(.react-flow__node:hover) never matches and previously matched the GROUP
@@ -3405,6 +3409,45 @@
                         if (rid !== reactFlowRequestEpoch) return;
                         window.__atelierRfLayoutEpoch = rid;
                         rfEnsureExpansionContext();
+
+                        const canAnimateInPlace =
+                            typeof window.__atelierR6SetNodes === 'function' &&
+                            typeof window.__atelierR6SetEdges === 'function' &&
+                            typeof window.__atelierR6GetNodes === 'function' &&
+                            typeof window.atelierRfBuildLayoutElementsForEpoch === 'function' &&
+                            typeof window.atelierRfAnimateLayoutTransition === 'function' &&
+                            root.querySelector('.react-flow');
+
+                        if (canAnimateInPlace) {
+                            const oldNodes = window.__atelierR6GetNodes();
+                            const built = await window.atelierRfBuildLayoutElementsForEpoch(rid);
+                            if (rid !== reactFlowRequestEpoch) return;
+                            if (built.ok) {
+                                await new Promise((resolve) => {
+                                    window.atelierRfAnimateLayoutTransition({
+                                        oldNodes,
+                                        targetNodes: built.nodes,
+                                        targetEdges: built.edges,
+                                        parentDbg: built.parentDbg,
+                                        epoch: rid,
+                                        onComplete() {
+                                            /**
+                                             * Don't call fitView here: it animates the viewport
+                                             * (default 300ms) and overlaps any subsequent expand/
+                                             * collapse animation, causing the morphing node to
+                                             * appear to drift on screen even though its graph
+                                             * position is locked. User keeps current pan/zoom.
+                                             */
+                                            resolve();
+                                        },
+                                    });
+                                });
+                                return;
+                            }
+                            if (built.error === 'stale') return;
+                            console.warn('[R6] in-place layout failed, remounting', built.error);
+                        }
+
                         if (typeof window.atelierUnmountReactFlowR6 === 'function') {
                             window.atelierUnmountReactFlowR6();
                         }

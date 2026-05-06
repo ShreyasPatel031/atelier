@@ -17,8 +17,8 @@ export default defineConfig({
         command: 'python3 -m http.server 9891',
         cwd: 'demo',
         url: 'http://127.0.0.1:9891/',
-        // Must be false: a stale process on 9891 may serve another tree; tests then miss viewer changes.
-        reuseExistingServer: false,
+        // CI: always spawn fresh server. Local: reuse if 9891 is already serving (avoids EADDRINUSE).
+        reuseExistingServer: !process.env.CI,
         timeout: 60_000,
     },
 });
