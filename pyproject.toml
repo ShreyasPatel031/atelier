@@ -68,6 +68,9 @@ dev = [
     "mypy>=1.5.0",
     "ruff>=0.1.0",
 ]
+mcp = [
+    "mcp>=1.0.0",
+]
 
 [project.scripts]
 codewiki = "codewiki.cli.main:cli"
@@ -95,7 +98,8 @@ packages = [
     "codewiki.src.be.dependency_analyzer.analyzers",
     "codewiki.src.be.dependency_analyzer.models",
     "codewiki.src.be.dependency_analyzer.utils",
-    "codewiki.src.fe"
+    "codewiki.src.fe",
+    "codewiki.mcp"
 ]
 
 [tool.setuptools.package-data]

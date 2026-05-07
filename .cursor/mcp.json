@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "codewiki-diagram": {
+      "type": "stdio",
+      "command": "/bin/bash",
+      "args": ["./scripts/run_codewiki_mcp.sh"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "CODEWIKI_MCP_PORT": "18765",
+        "PYTHONWARNINGS": "ignore::FutureWarning"
+      }
+    }
+  }
+}

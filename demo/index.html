@@ -323,7 +323,8 @@
         }
         #reactflowRoot {
             flex: 1;
-            min-height: min(70vh, 560px);
+            /* Allow shrinking in short viewports (embedded browser); parent chain sets min-heights */
+            min-height: 0;
             width: 100%;
             position: relative;
         }
@@ -965,23 +966,25 @@
         /* Chat in right pane - now fills entire right panel */
         .chat-section {
             margin-top: 0;
-            padding: 20px 30px;
-            padding-top: 20px;
+            padding: 12px 16px;
+            padding-top: 12px;
             display: flex;
             flex-direction: column;
             flex: 1;
             background: #ffffff;
             height: 100%;
             overflow: hidden;
+            min-height: 0;
         }
         .chat-messages {
-            flex: 1;
+            flex: 0 1 auto;
             overflow-y: auto;
-            padding: 12px 0;
+            padding: 8px 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             min-height: 0;
+            max-height: min(160px, 28vh);
         }
         .chat-message {
             padding: 8px 12px;
@@ -1042,15 +1045,19 @@
         .chat-input-row {
             display: flex;
             gap: 8px;
-            margin-top: 8px;
+            margin-top: 6px;
+            flex-shrink: 0;
         }
         .chat-input {
             flex: 1;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border: 2px solid #e2e8f0;
             border-radius: 6px;
             font-size: 13px;
             font-family: inherit;
+            min-height: 38px;
+            max-height: 120px;
+            resize: vertical;
         }
         .chat-input:focus {
             outline: none;
@@ -1072,25 +1079,38 @@
         @media (max-width: 1024px) {
             .container {
                 flex-direction: column;
+                flex: 1;
+                min-height: 0;
             }
             .pane-resizer {
                 display: none;
             }
             .diagram-pane {
+                flex: 1 1 0;
+                min-height: 0;
                 width: 100%;
-                height: 100%;
+                height: auto;
                 border-right: none;
                 border-bottom: 1px solid #e2e8f0;
             }
             .doc-pane {
+                flex: 0 0 auto;
                 width: 100% !important;
                 max-width: none !important;
-                height: 0;
+                max-height: min(220px, 36vh);
                 min-height: 0;
+                border-top: 1px solid #e2e8f0;
             }
             .doc-pane.open {
-                height: 50%;
-                min-height: 200px;
+                flex: 0 0 auto;
+                max-height: min(220px, 36vh);
+                min-height: 100px;
+            }
+            .chat-section {
+                padding: 10px 12px;
+            }
+            .chat-messages {
+                max-height: min(100px, 20vh);
             }
         }
     </style>
@@ -1246,7 +1266,7 @@
                     <div class="chat-message assistant">Ask about this codebase's architecture. Select nodes, subgraphs, or edges on the diagram for context.</div>
                 </div>
                 <div class="chat-input-row">
-                    <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="2"></textarea>
+                    <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="1"></textarea>
                     <button class="chat-send" id="chatSend">Send</button>
                 </div>
             </div>
@@ -1862,6 +1882,168 @@
                 console.error('Failed to load data:', err);
                 return false;
             }
+        }
+
+        /** Written by MCP after each repo mutation; viewer polls and hot-reloads. */
+        window.__atelierViewerEpoch = null;
+        let __atelierRepoReloadBusy = false;
+
+        /**
+         * Sub-millisecond perf instrumentation for the epoch-to-pixels pipeline.
+         * Disable with `localStorage.setItem('codewikiPerf','off')`.
+         * Enable verbose per-mark logs with `localStorage.setItem('codewikiPerf','verbose')`.
+         */
+        const __PERF = {
+            enabled: (typeof localStorage !== 'undefined') ? localStorage.getItem('codewikiPerf') !== 'off' : true,
+            verbose: (typeof localStorage !== 'undefined') ? localStorage.getItem('codewikiPerf') === 'verbose' : false,
+            seq: 0,
+            current: null,
+        };
+
+        function perfStart(reason) {
+            if (!__PERF.enabled) return null;
+            const id = ++__PERF.seq;
+            const ctx = {
+                id,
+                reason,
+                t0: performance.now(),
+                marks: { start: 0 },
+            };
+            __PERF.current = ctx;
+            try { performance.mark(`codewiki:start:${id}`); } catch (_) { /* noop */ }
+            if (__PERF.verbose) console.debug(`[codewiki-perf] #${id} start (${reason})`);
+            return ctx;
+        }
+
+        function perfMark(ctx, name) {
+            if (!ctx || !__PERF.enabled) return;
+            const elapsed = performance.now() - ctx.t0;
+            ctx.marks[name] = elapsed;
+            try { performance.mark(`codewiki:${name}:${ctx.id}`); } catch (_) { /* noop */ }
+            if (__PERF.verbose) console.debug(`[codewiki-perf] #${ctx.id} ${name}=${elapsed.toFixed(2)}ms`);
+        }
+
+        function perfFinish(ctx) {
+            if (!ctx || !__PERF.enabled) return;
+            const total = performance.now() - ctx.t0;
+            const m = ctx.marks;
+            const fetchMs = (m.fetch_complete ?? 0).toFixed(1);
+            const buildMs = ((m.build_complete ?? m.fetch_complete ?? 0) - (m.fetch_complete ?? 0)).toFixed(1);
+            const renderMs = ((m.render_complete ?? m.build_complete ?? 0) - (m.build_complete ?? 0)).toFixed(1);
+            console.debug(
+                `[codewiki-perf] #${ctx.id} ${ctx.reason}: ` +
+                `fetch=${fetchMs}ms build=${buildMs}ms render=${renderMs}ms total=${total.toFixed(1)}ms`
+            );
+            try {
+                performance.measure(`codewiki:total:${ctx.id}`, `codewiki:start:${ctx.id}`);
+            } catch (_) { /* noop */ }
+            if (__PERF.current === ctx) __PERF.current = null;
+        }
+
+        window.__codewikiPerf = {
+            summary() {
+                const measures = performance.getEntriesByType('measure').filter(e => e.name.startsWith('codewiki:'));
+                const byName = {};
+                for (const m of measures) {
+                    const key = m.name.split(':').slice(0, 2).join(':');
+                    byName[key] = byName[key] || { count: 0, totalMs: 0, samples: [] };
+                    byName[key].count++;
+                    byName[key].totalMs += m.duration;
+                    byName[key].samples.push(m.duration);
+                }
+                for (const k of Object.keys(byName)) {
+                    const s = byName[k];
+                    s.meanMs = +(s.totalMs / s.count).toFixed(2);
+                    s.totalMs = +s.totalMs.toFixed(2);
+                    delete s.samples;
+                }
+                return byName;
+            },
+            clear() {
+                performance.clearMarks();
+                performance.clearMeasures();
+            },
+        };
+
+        async function fetchViewerEpochMs() {
+            try {
+                const r = await fetch(`${basePath}/viewer_epoch.json?_t=${Date.now()}`, {
+                    cache: 'no-store',
+                });
+                if (!r.ok) return null;
+                const j = await r.json();
+                return j && typeof j.epoch === 'number' ? j.epoch : null;
+            } catch (err) {
+                return null;
+            }
+        }
+
+        async function bootstrapViewerEpochBaseline() {
+            const ep = await fetchViewerEpochMs();
+            if (ep != null) window.__atelierViewerEpoch = ep;
+        }
+
+        async function applyRepoDataReload(perfCtx) {
+            if (__atelierRepoReloadBusy) return;
+            __atelierRepoReloadBusy = true;
+            const ctx = perfCtx || perfStart('manual_reload');
+            try {
+                const ok = await loadAllData();
+                perfMark(ctx, 'fetch_complete');
+                if (!ok) return;
+                buildModuleData();
+                perfMark(ctx, 'build_complete');
+                try {
+                    AVAILABLE_REPOS = await fetchAvailableRepos();
+                    populateRepoDropdown();
+                } catch (err) {
+                    /* ignore */
+                }
+                expandedNodes.clear();
+                expandedNodeToModule.clear();
+                navigationHistory.length = 0;
+                rfExpandedNodeIds.clear();
+                rfExpandedNodeToModule.clear();
+                rfExpansionContextKey = null;
+                rfBaselineDiagramIr = null;
+                rfExpandedNodesOrder = [];
+                reactFlowRequestEpoch++;
+                currentModuleId = 'overview';
+                baseDiagramCode = moduleData['overview']?.diagram || '';
+                currentDiagramCode = baseDiagramCode;
+                openedModules.clear();
+                openedModules.add('overview');
+                updateSelection('overview');
+                await renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+                perfMark(ctx, 'render_complete');
+                updatePipelinePanel();
+            } finally {
+                __atelierRepoReloadBusy = false;
+                perfFinish(ctx);
+            }
+        }
+
+        function startViewerEpochPolling() {
+            setInterval(function () {
+                void (async function () {
+                    try {
+                        const ep = await fetchViewerEpochMs();
+                        if (ep == null) return;
+                        if (window.__atelierViewerEpoch == null) {
+                            window.__atelierViewerEpoch = ep;
+                            return;
+                        }
+                        if (ep > window.__atelierViewerEpoch) {
+                            const ctx = perfStart('epoch_reload');
+                            window.__atelierViewerEpoch = ep;
+                            perfMark(ctx, 'epoch_detected');
+                            await applyRepoDataReload(ctx);
+                        }
+                    } catch (err) {
+                        /* ignore */
+                    }
+                })();
+            }, 1500);
         }
         
         // ============================================================
@@ -6193,6 +6375,8 @@
                 populateRepoDropdown();
                 return;
             }
+
+            await bootstrapViewerEpochBaseline();
             
             buildModuleData();
             
@@ -6226,6 +6410,8 @@
                     console.warn('[expand=] Unknown node id', expandNodeId, '— known:', Object.keys(overviewLinks));
                 }
             }
+
+            startViewerEpochPolling();
         }
         
         // Track URL changes
@@ -6235,10 +6421,6 @@
         // Track hash changes
         window.addEventListener('hashchange', () => {
         });
-        
-        // Periodic state snapshot to catch unexpected resets
-        setInterval(() => {
-        }, 2000); // Every 2 seconds
         
         initZoomPan();
         initViewTuneSliders();

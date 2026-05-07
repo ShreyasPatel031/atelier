@@ -38,5 +38,15 @@
     "id": "transformers",
     "label": "Transformers",
     "description": "State-of-the-art pretrained models for NLP, vision, and more."
+  },
+  {
+    "id": "agent-smoke",
+    "label": "A-B-C test (refreshed)",
+    "description": "Compact viewer test \u2014 nodes A, B, C after MCP update."
+  },
+  {
+    "id": "atelier-tdc8",
+    "label": "Atelier \u2014 CodeWiki workspace",
+    "description": "Layout of this repository: the codewiki Python package (CLI, backend pipeline, FastAPI app, MCP integration, templates), the static demo viewer, the Vercel serverless API, and supporting tests/scripts/docker/benchmarking."
   }
 ]

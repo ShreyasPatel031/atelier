@@ -1,0 +1,305 @@
+{
+  "cli": {
+    "path": "codewiki/cli",
+    "title": "CLI",
+    "description": "Click entrypoint, generate/config commands, adapters into the backend pipeline.",
+    "components": [
+      "main.py",
+      "commands/generate.py",
+      "adapters/doc_generator.py"
+    ],
+    "children": {},
+    "diagram": {
+      "direction": "LR",
+      "nodes": [
+        {
+          "id": "cmd_gen",
+          "label": "generate",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "cmd_cfg",
+          "label": "config",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "main",
+          "label": "main",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "adapter",
+          "label": "doc_generator_adapter",
+          "type": "component",
+          "link": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "cmd_gen",
+          "target": "main"
+        },
+        {
+          "source": "cmd_cfg",
+          "target": "main"
+        },
+        {
+          "source": "main",
+          "target": "adapter"
+        }
+      ],
+      "groups": []
+    }
+  },
+  "backend": {
+    "path": "codewiki/src/be",
+    "title": "Backend",
+    "description": "Documentation generator, dependency analyzer, architectural agent, and orchestration.",
+    "components": [
+      "documentation_generator.py",
+      "dependency_analyzer/",
+      "architectural_agent.py",
+      "agent_orchestrator.py"
+    ],
+    "children": {},
+    "diagram": {
+      "direction": "LR",
+      "nodes": [
+        {
+          "id": "agent",
+          "label": "architectural_agent",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "orch",
+          "label": "agent_orchestrator",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "deps",
+          "label": "dependency_analyzer",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "docs",
+          "label": "documentation_generator",
+          "type": "component",
+          "link": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "agent",
+          "target": "docs"
+        },
+        {
+          "source": "orch",
+          "target": "docs"
+        },
+        {
+          "source": "deps",
+          "target": "docs"
+        }
+      ],
+      "groups": []
+    }
+  },
+  "frontend": {
+    "path": "codewiki/src/fe",
+    "title": "FastAPI app",
+    "description": "Web UI, routes, background worker for long-running doc jobs.",
+    "components": [
+      "web_app.py",
+      "routes.py",
+      "background_worker.py"
+    ],
+    "children": {},
+    "diagram": {
+      "direction": "LR",
+      "nodes": [
+        {
+          "id": "app",
+          "label": "web_app",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "routes",
+          "label": "routes",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "worker",
+          "label": "background_worker",
+          "type": "component",
+          "link": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "app",
+          "target": "routes"
+        },
+        {
+          "source": "app",
+          "target": "worker"
+        }
+      ],
+      "groups": []
+    }
+  },
+  "mcp": {
+    "path": "codewiki/mcp",
+    "title": "MCP server",
+    "description": "Cursor MCP: diagram tools, patch engine, lazy static server for demo/",
+    "components": [
+      "server.py",
+      "patch.py",
+      "state.py",
+      "static_server.py"
+    ],
+    "children": {},
+    "diagram": {
+      "direction": "LR",
+      "nodes": [
+        {
+          "id": "srv",
+          "label": "FastMCP_server",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "patch",
+          "label": "patch_engine",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "http",
+          "label": "static_server",
+          "type": "component",
+          "link": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "srv",
+          "target": "patch"
+        },
+        {
+          "source": "srv",
+          "target": "http"
+        }
+      ],
+      "groups": []
+    }
+  },
+  "templates": {
+    "path": "codewiki/templates/github_pages",
+    "title": "HTML templates",
+    "description": "GitHub Pages viewer shells (module + overview viewers).",
+    "components": [
+      "viewer_template.html",
+      "module_viewer.html"
+    ],
+    "children": {},
+    "diagram": {
+      "direction": "LR",
+      "nodes": [
+        {
+          "id": "vt",
+          "label": "viewer_template",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "mv",
+          "label": "module_viewer",
+          "type": "component",
+          "link": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "vt",
+          "target": "mv"
+        }
+      ],
+      "groups": []
+    }
+  },
+  "demo": {
+    "path": "demo",
+    "title": "Demo viewer",
+    "description": "Static CodeWiki viewer, ELK/React Flow pipeline, sample repos under repos/.",
+    "components": [
+      "index.html",
+      "repos/index.json"
+    ],
+    "children": {},
+    "diagram": {
+      "direction": "LR",
+      "nodes": [
+        {
+          "id": "html",
+          "label": "index.html",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "pipe",
+          "label": "diagram_pipeline",
+          "type": "component",
+          "link": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "html",
+          "target": "pipe"
+        }
+      ],
+      "groups": []
+    }
+  },
+  "api": {
+    "path": "api",
+    "title": "Vercel API",
+    "description": "Serverless /api/* handler (chat) aligned with FastAPI JSON; reads demo/repos jobs.",
+    "components": [
+      "chat.py"
+    ],
+    "children": {},
+    "diagram": {
+      "direction": "LR",
+      "nodes": [
+        {
+          "id": "handler",
+          "label": "BaseHTTP_handler",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "jobs",
+          "label": "demo_repos_jobs",
+          "type": "component",
+          "link": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "handler",
+          "target": "jobs"
+        }
+      ],
+      "groups": []
+    }
+  }
+}
