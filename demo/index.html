@@ -331,6 +331,8 @@
         #reactflowRoot .react-flow {
             width: 100%;
             height: 100%;
+            /** Match leaf hover chrome (`#3b82f6` in reactflow-r6.mjs) */
+            --xy-selection-border: 1px dotted rgba(59, 130, 246, 0.88);
         }
         /* Group label pill is portaled to .atelier-rf-pill-layer inside .react-flow__viewport
            (see reactflow-r6.mjs AtelierViewportApiBootstrap). The layer sits above
@@ -357,16 +359,49 @@
              */
             padding: 0 !important;
             border: 0 !important;
+            /** No wrapper fill — compound interior stays visually empty; border lives on .atelier-rf-group-frame */
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group.selectable:hover {
+            box-shadow: none !important;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group.selectable.selected,
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group.selectable:focus,
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group.selectable:focus-visible {
+            box-shadow: none !important;
         }
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group .react-flow__handle {
             pointer-events: auto !important;
         }
-        /** Expanded `*_sub` uses same pointer-events as other groups (none) so collapse / inner nodes stay clickable. */
-        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node[data-atelier-rf-selected='true'] {
-            outline: 2px solid #2563eb;
-            outline-offset: 2px;
-            border-radius: 8px;
+        /** Custom leaf chrome draws selection; suppress xyflow wrapper ring/shadow on non-group nodes */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node:not(.react-flow__node-group).selectable.selected,
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node:not(.react-flow__node-group).selectable:focus,
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node:not(.react-flow__node-group).selectable:focus-visible {
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        /** Leaves: selection chrome matches hover (see reactflow-r6 ElkCustomNode); only lift stacking here */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node:not(.react-flow__node-group)[data-atelier-rf-selected='true'] {
             z-index: 2147482100 !important;
+        }
+        /** Groups: selection is only the inner ELK frame border (no wrapper fill / outline) */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group[data-atelier-rf-selected='true'] {
+            outline: none !important;
+            z-index: 2147482100 !important;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group[data-atelier-rf-selected='true'] .atelier-rf-group-frame {
+            border: 2px solid #3b82f6 !important;
+            border-style: solid !important;
+        }
+        /**
+         * xyflow paints each selected node’s bbox with --xy-selection-background-color (blue tint).
+         * Selected groups span the whole compound — looks like a solid blue fill. Strip fill only;
+         * keep selection border so box-drag remains visible.
+         */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__nodesselection-rect,
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__selection {
+            background: transparent !important;
         }
         
         /* Dev: tune panel sits inside diagram viewport (bottom-left), not over the chat column */
@@ -439,9 +474,24 @@
             min-height: 0;
             overflow: hidden;
             position: relative;
-            cursor: grab;
             display: flex;
             flex-direction: column;
+        }
+        /** Grab cursor only for Mermaid / ELK panes; React Flow uses pointer + middle/right drag to pan */
+        .diagram-viewport:not(.diagram-viewport--reactflow) {
+            cursor: grab;
+        }
+        .diagram-viewport:not(.diagram-viewport--reactflow):active {
+            cursor: grabbing;
+        }
+        #diagramViewport.diagram-viewport--reactflow {
+            cursor: default;
+        }
+        #diagramViewport.diagram-viewport--reactflow:active {
+            cursor: default;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__pane {
+            cursor: default;
         }
         /** R6: node/group hover detail panels extend outside the node bbox */
         #diagramViewport.diagram-viewport--reactflow {
@@ -480,10 +530,6 @@
         #diagramViewport #mermaid-diagram svg g.node,
         #diagramViewport #mermaid-diagram svg g.node * {
             cursor: pointer !important;
-        }
-        
-        .diagram-viewport:active {
-            cursor: grabbing;
         }
         
         .diagram-canvas {
@@ -1143,7 +1189,8 @@
                 <span class="zoom-level" id="zoomLevel">100%</span>
                 <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
                 <button class="zoom-btn" onclick="fitToView()" title="Fit to View">⊡</button>
-                <span class="zoom-hint">Scroll / two-finger trackpad → pan • ⌘/Ctrl+scroll or pinch → zoom • Drag to pan • ⌘/Ctrl/Shift+click diagram shapes to multi-select</span>
+                <button type="button" class="zoom-btn" id="copyDiagramSelectionBtn" title="Copy selected diagram elements (for Cursor chat)">⎘</button>
+                <span class="zoom-hint">Scroll / two-finger trackpad → pan • ⌘/Ctrl+scroll or pinch → zoom • Mermaid: drag to pan • RF: drag on empty canvas to box-select; ⌘/Ctrl/Shift+click for multi-select • middle/right drag to pan</span>
             </div>
             <div class="diagram-render-tabs" role="tablist" aria-label="Diagram renderer">
                 <button type="button" class="diagram-tab" id="tabMermaid" role="tab" aria-selected="false" aria-controls="diagramViewport">Mermaid</button>
@@ -2412,6 +2459,24 @@
             return `${sel.kind}:${String(sel.logicalId)}`;
         }
 
+        function diagramSelectionKeySet(list) {
+            const s = new Set();
+            if (!list || !list.length) return s;
+            for (const item of list) {
+                const k = diagramSelectionKey(item);
+                if (k) s.add(k);
+            }
+            return s;
+        }
+
+        function diagramSelectionKeySetsEqual(a, b) {
+            if (a.size !== b.size) return false;
+            for (const k of a) {
+                if (!b.has(k)) return false;
+            }
+            return true;
+        }
+
         function normalizeDiagramSel(sel) {
             return {
                 kind: sel.kind || 'node',
@@ -2461,6 +2526,7 @@
             if (diagramSelections.length) {
                 refreshDiagramSelectionLabelFromDom();
             }
+            schedulePushViewerStateToMcp();
         }
 
         function clearDiagramShapeSelection() {
@@ -2469,10 +2535,30 @@
             syncLegacyDiagramSelection();
             selectedDiagramNodeId = null;
             applyDiagramSelectionHighlight();
+            schedulePushViewerStateToMcp();
         }
 
         function refreshDiagramSelectionLabelFromDom() {
             const svg = document.querySelector('#mermaid-diagram svg');
+            if (activeDiagramTab === 'reactflow') {
+                const getNodes = window.__atelierR6GetNodes;
+                if (typeof getNodes === 'function') {
+                    const nodes = getNodes();
+                    const byId = new Map();
+                    for (let i = 0; i < nodes.length; i++) {
+                        const n = nodes[i];
+                        if (n && n.id != null) byId.set(String(n.id), n);
+                    }
+                    for (const ds of diagramSelections) {
+                        if (!ds.logicalId || ds.kind === 'edge') continue;
+                        if (ds.label) continue;
+                        const n = byId.get(String(ds.logicalId));
+                        if (n && n.data && n.data.label != null) ds.label = String(n.data.label);
+                    }
+                    syncLegacyDiagramSelection();
+                }
+                return;
+            }
             if (!svg) return;
             for (const ds of diagramSelections) {
                 if (!ds.logicalId) continue;
@@ -2671,6 +2757,52 @@
             return String(id).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
         }
 
+        /** Keep xyflow node.selected in sync with diagramSelections (expansion/collapse/Mermaid paths). Suppress hook sees no diff. */
+        function syncRfNativeNodeSelectionFromDiagramSelections() {
+            if (activeDiagramTab !== 'reactflow') return;
+            const setNodes = window.__atelierR6SetNodes;
+            const getNodes = window.__atelierR6GetNodes;
+            if (typeof setNodes !== 'function' || typeof getNodes !== 'function') return;
+            const selectedIds = new Set(
+                diagramSelections
+                    .filter(
+                        (ds) =>
+                            ds &&
+                            ds.kind !== 'edge' &&
+                            ds.logicalId != null &&
+                            String(ds.logicalId) !== ''
+                    )
+                    .map((ds) => String(ds.logicalId))
+            );
+            const cur = getNodes();
+            let changed = false;
+            for (let i = 0; i < cur.length; i++) {
+                const n = cur[i];
+                const want = selectedIds.has(String(n.id));
+                if (!!n.selected !== want) {
+                    changed = true;
+                    break;
+                }
+            }
+            if (!changed) return;
+            try {
+                window.__atelierRfSuppressSelectionChangeHook = true;
+                setNodes(function (nds) {
+                    return nds.map(function (n) {
+                        const sel = selectedIds.has(String(n.id));
+                        if (!!n.selected === sel) return n;
+                        return Object.assign({}, n, { selected: sel });
+                    });
+                });
+            } catch (_) {
+                /* ignore */
+            } finally {
+                queueMicrotask(function () {
+                    window.__atelierRfSuppressSelectionChangeHook = false;
+                });
+            }
+        }
+
         /** Mirror diagramSelections onto React Flow node wrappers (Mermaid uses SVG classes). */
         function applyRfReactFlowSelectionHighlight() {
             if (activeDiagramTab !== 'reactflow') return;
@@ -2679,14 +2811,16 @@
             root.querySelectorAll('.react-flow__node[data-atelier-rf-selected]').forEach((el) => {
                 el.removeAttribute('data-atelier-rf-selected');
             });
-            if (!diagramSelections.length) return;
-            for (const ds of diagramSelections) {
-                if (!ds.logicalId || ds.kind === 'edge') continue;
-                const wrap = root.querySelector(
-                    '.react-flow__node[data-id="' + cssEscapeRfSelector(ds.logicalId) + '"]'
-                );
-                if (wrap) wrap.setAttribute('data-atelier-rf-selected', 'true');
+            if (diagramSelections.length) {
+                for (const ds of diagramSelections) {
+                    if (!ds.logicalId || ds.kind === 'edge') continue;
+                    const wrap = root.querySelector(
+                        '.react-flow__node[data-id="' + cssEscapeRfSelector(ds.logicalId) + '"]'
+                    );
+                    if (wrap) wrap.setAttribute('data-atelier-rf-selected', 'true');
+                }
             }
+            syncRfNativeNodeSelectionFromDiagramSelections();
         }
         window.atelierRfSyncSelectionHighlight = applyRfReactFlowSelectionHighlight;
 
@@ -2723,29 +2857,115 @@
             return diagramSelections.map((s) => diagramSelToChatPayload(s)).filter(Boolean);
         }
 
+        /** Persist canvas multi-select + tab to demo/repos/<repo>/viewer_state.json (MCP static server POST). */
+        let __viewerStatePushTimer = null;
+        function schedulePushViewerStateToMcp() {
+            if (__viewerStatePushTimer != null) clearTimeout(__viewerStatePushTimer);
+            __viewerStatePushTimer = setTimeout(function () {
+                __viewerStatePushTimer = null;
+                pushViewerStateToMcp();
+            }, 150);
+        }
+
+        /** Same count/base as codewiki.mcp.static_server._PORT_TRY_COUNT + CODEWIKI_MCP_PORT default. */
+        var __atelierMcpPortTryBase = 8765;
+        var __atelierMcpPortTryCount = 48;
+
+        async function pushViewerStateToMcp() {
+            try {
+                var rid = typeof repoPath !== 'undefined' ? repoPath : '';
+                if (!rid || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(rid)) return;
+                var payload = {
+                    updated_at_ms: Date.now(),
+                    repo_id: rid,
+                    current_module_id: typeof currentModuleId !== 'undefined' ? currentModuleId : null,
+                    selected_module_id: typeof selectedModuleId !== 'undefined' ? selectedModuleId : null,
+                    diagram_tab: typeof activeDiagramTab !== 'undefined' ? activeDiagramTab : null,
+                    opened_modules:
+                        typeof openedModules !== 'undefined' ? Array.from(openedModules) : [],
+                    selections:
+                        typeof buildDiagramChatPayloads === 'function'
+                            ? buildDiagramChatPayloads()
+                            : [],
+                    primary:
+                        typeof buildDiagramChatPayload === 'function'
+                            ? buildDiagramChatPayload()
+                            : null,
+                };
+                var body = JSON.stringify(payload);
+                var pathSeg = '/repos/' + encodeURIComponent(rid) + '/viewer_state.json';
+                var sameOriginUrl = new URL('repos/' + encodeURIComponent(rid) + '/viewer_state.json', window.location.href).href;
+
+                function postOne(fullUrl) {
+                    return fetch(fullUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: body,
+                        mode: 'cors',
+                        keepalive: true,
+                    }).then(function (res) {
+                        return res.ok ? res : Promise.reject(res);
+                    });
+                }
+
+                try {
+                    await postOne(sameOriginUrl);
+                    return;
+                } catch (_) {}
+
+                var cached = null;
+                try {
+                    cached = sessionStorage.getItem('atelier_mcp_sync_port');
+                } catch (_) {}
+                if (cached && /^[0-9]+$/.test(cached)) {
+                    try {
+                        await postOne('http://127.0.0.1:' + cached + pathSeg);
+                        return;
+                    } catch (_) {}
+                }
+
+                for (var pi = 0; pi < __atelierMcpPortTryCount; pi++) {
+                    var port = __atelierMcpPortTryBase + pi;
+                    try {
+                        await postOne('http://127.0.0.1:' + port + pathSeg);
+                        try {
+                            sessionStorage.setItem('atelier_mcp_sync_port', String(port));
+                        } catch (_) {}
+                        return;
+                    } catch (_) {}
+                }
+            } catch (_) {}
+        }
+        window.schedulePushViewerStateToMcp = schedulePushViewerStateToMcp;
+        window.pushViewerStateToMcp = pushViewerStateToMcp;
+
         /**
          * @param {object} sel kind: 'none'|'node'|'cluster'|'edge'; logicalId; optional label, moduleId, domRef, edge
          * @param {MouseEvent} [ev] — if ⌘/Ctrl/Shift+click, toggles this shape in the multi-selection instead of replacing.
          */
         function setDiagramSelection(sel, ev) {
-            if (!sel || sel.kind === 'none' || sel.logicalId == null || sel.logicalId === '') {
-                diagramSelections = [];
+            try {
+                if (!sel || sel.kind === 'none' || sel.logicalId == null || sel.logicalId === '') {
+                    diagramSelections = [];
+                    syncLegacyDiagramSelection();
+                    selectedDiagramNodeId = null;
+                    applyDiagramSelectionHighlight();
+                    return;
+                }
+                const normalized = normalizeDiagramSel(sel);
+                if (ev && isMultiSelectModifier(ev)) {
+                    toggleDiagramSelection(normalized);
+                    return;
+                }
+                diagramSelections = [normalized];
                 syncLegacyDiagramSelection();
-                selectedDiagramNodeId = null;
+                selectedDiagramNodeId = sel.logicalId;
                 applyDiagramSelectionHighlight();
-                return;
-            }
-            const normalized = normalizeDiagramSel(sel);
-            if (ev && isMultiSelectModifier(ev)) {
-                toggleDiagramSelection(normalized);
-                return;
-            }
-            diagramSelections = [normalized];
-            syncLegacyDiagramSelection();
-            selectedDiagramNodeId = sel.logicalId;
-            applyDiagramSelectionHighlight();
-            if (!diagramSelections[diagramSelections.length - 1].label) {
-                refreshDiagramSelectionLabelFromDom();
+                if (!diagramSelections[diagramSelections.length - 1].label) {
+                    refreshDiagramSelectionLabelFromDom();
+                }
+            } finally {
+                schedulePushViewerStateToMcp();
             }
         }
 
@@ -3470,6 +3690,47 @@
             clearDiagramShapeSelection();
         };
 
+        /**
+         * React Flow selection (box / ⌘/Ctrl/Shift multi-select) → diagramSelections for chat + highlights.
+         * Single source of truth from xyflow; node clicks that only change selection are handled here, not in atelierRfHandleNodeClick.
+         */
+        window.atelierRfOnNativeSelectionChange = function atelierRfOnNativeSelectionChange(selNodes) {
+            if (activeDiagramTab !== 'reactflow') return;
+            if (window.__atelierRfSuppressSelectionChangeHook) return;
+            const arr = Array.isArray(selNodes) ? selNodes : [];
+            const mapped = [];
+            for (let i = 0; i < arr.length; i++) {
+                const node = arr[i];
+                if (!node || node.id == null) continue;
+                const id = String(node.id);
+                const kind = node.type === 'group' ? 'cluster' : 'node';
+                let label = null;
+                if (node.data && node.data.label != null) label = String(node.data.label);
+                mapped.push(
+                    normalizeDiagramSel({
+                        kind,
+                        logicalId: id,
+                        label,
+                        moduleId: currentModuleId,
+                        domRef: null,
+                        edge: null
+                    })
+                );
+            }
+            const nextKeys = diagramSelectionKeySet(mapped);
+            const curKeys = diagramSelectionKeySet(diagramSelections);
+            if (diagramSelectionKeySetsEqual(nextKeys, curKeys)) return;
+
+            diagramSelections = mapped;
+            syncLegacyDiagramSelection();
+            selectedDiagramNodeId = mapped.length ? mapped[mapped.length - 1].logicalId : null;
+            applyDiagramSelectionHighlight();
+            if (diagramSelections.length) {
+                refreshDiagramSelectionLabelFromDom();
+            }
+            schedulePushViewerStateToMcp();
+        };
+
         window.atelierRfHandleNodeClick = function atelierRfHandleNodeClick(payload) {
             const ev = payload && payload.event;
             const nodeId = payload && payload.nodeId != null ? String(payload.nodeId) : '';
@@ -3480,13 +3741,6 @@
                 if (window.atelierRfDebugLayout && typeof window.atelierRfLogLayoutDebug === 'function') {
                     queueMicrotask(() => window.atelierRfLogLayoutDebug(reason));
                 }
-            }
-
-            if (ev && typeof isMultiSelectModifier === 'function' && isMultiSelectModifier(ev)) {
-                const kind = nodeType === 'group' ? 'cluster' : 'node';
-                setDiagramSelection({ kind, logicalId: nodeId, moduleId: currentModuleId }, ev);
-                rfDbgSel('rf-click multi ' + nodeId);
-                return;
             }
 
             if (payload && payload.isCollapse) {
@@ -3532,9 +3786,7 @@
             }
 
             expandDiagramSelectionEpoch += 1;
-            const kind = nodeType === 'group' ? 'cluster' : 'node';
-            setDiagramSelection({ kind, logicalId: nodeId, moduleId: currentModuleId }, ev);
-            rfDbgSel('rf-click ' + kind + ' ' + nodeId);
+            rfDbgSel('rf-click passthrough selection ' + nodeType + ' ' + nodeId);
         };
 
         /** R5: ELK layout → SVG inside diagram canvas (shared pan/zoom transform). */
@@ -3715,6 +3967,7 @@
                 if (isElk) refreshElkSvgView();
             }
             updatePipelinePanel();
+            schedulePushViewerStateToMcp();
         }
 
         function updatePipelinePanel() {
@@ -6412,6 +6665,7 @@
             }
 
             startViewerEpochPolling();
+            schedulePushViewerStateToMcp();
         }
         
         // Track URL changes
@@ -6447,6 +6701,69 @@
             console.log('[chat] diagram_selections (all):', all);
             return { diagram_selection: one, diagram_selections: all };
         };
+
+        /** Human-readable + JSON for pasting into Cursor chat (same logical payloads as arch-agent POST). */
+        function formatDiagramSelectionForCursorPaste() {
+            const payloads = buildDiagramChatPayloads();
+            if (!payloads.length) return '';
+            const repoLabel =
+                typeof repoPath !== 'undefined' && repoPath
+                    ? String(repoPath)
+                    : typeof urlParams !== 'undefined' && urlParams && typeof urlParams.get === 'function'
+                      ? urlParams.get('repo') || ''
+                      : '';
+            const lines = payloads.map((p, i) => {
+                const kind = p.kind || 'node';
+                const lid = p.logical_id || '';
+                const lbl = p.label ? ` — ${p.label}` : '';
+                const mid = p.module_id ? ` (module: ${p.module_id})` : '';
+                return `${i + 1}. [${kind}] ${lid}${lbl}${mid}`;
+            });
+            const header = repoLabel ? `Diagram selection (repo: ${repoLabel})` : 'Diagram selection';
+            return `${header}\n${lines.join('\n')}\n\nStructured (JSON):\n${JSON.stringify(payloads, null, 2)}`;
+        }
+
+        async function copyDiagramSelectionToClipboard() {
+            const text = formatDiagramSelectionForCursorPaste();
+            const btn = document.getElementById('copyDiagramSelectionBtn');
+            if (!text) {
+                if (btn) {
+                    const prevTitle = btn.title;
+                    btn.title = 'Nothing selected on the diagram';
+                    setTimeout(() => {
+                        if (btn) btn.title = prevTitle;
+                    }, 2000);
+                }
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(text);
+                if (btn) {
+                    const prev = btn.textContent;
+                    const prevTitle = btn.title;
+                    btn.textContent = '✓';
+                    btn.title = 'Copied';
+                    setTimeout(() => {
+                        if (btn) {
+                            btn.textContent = prev;
+                            btn.title = prevTitle;
+                        }
+                    }, 1600);
+                }
+            } catch (err) {
+                console.warn('Clipboard write failed', err);
+                if (btn) btn.title = 'Copy failed — check permissions';
+            }
+        }
+        window.formatDiagramSelectionForCursorPaste = formatDiagramSelectionForCursorPaste;
+        window.copyDiagramSelectionToClipboard = copyDiagramSelectionToClipboard;
+
+        const copyDiagramSelectionBtnEl = document.getElementById('copyDiagramSelectionBtn');
+        if (copyDiagramSelectionBtnEl) {
+            copyDiagramSelectionBtnEl.addEventListener('click', function () {
+                void copyDiagramSelectionToClipboard();
+            });
+        }
 
         /** Playwright / automated tests: read pan zoom and measure node vs expanded cluster frame (viewport px). */
         window.__diagramViewState = () => ({

@@ -13,6 +13,7 @@ Layout written to disk (consumed by ``demo/index.html``):
     demo/repos/<repo_id>/module_tree.json      ← hierarchical modules + diagrams
     demo/repos/<repo_id>/<module_id>.md        ← optional drill-down pages
     demo/repos/<repo_id>/viewer_epoch.json    ← bump so browser viewer hot-reloads
+    demo/repos/<repo_id>/viewer_state.json    ← viewer POSTs canvas selection + tab (MCP reads)
 
 Granular mutation:
     get_diagram / patch_diagram / list_diagrams let an IDE LLM read and modify
@@ -50,6 +51,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 _DEMO_ROOT = _REPO_ROOT / "demo"
 _REPOS_ROOT = _DEMO_ROOT / "repos"
 _INDEX_FILE = _REPOS_ROOT / "index.json"
+_VIEWER_STATE_FILE = "viewer_state.json"
 
 _DEFAULT_PORT = int(os.environ.get("CODEWIKI_MCP_PORT", "8765"))
 
@@ -126,6 +128,50 @@ def _ensure_repo_dir(repo_id: str) -> Path:
     path = _repo_dir(repo_id)
     path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def _viewer_state_path(repo_id: str) -> Path:
+    return _repo_dir(repo_id) / _VIEWER_STATE_FILE
+
+
+def _read_viewer_state(repo_id: str) -> dict[str, Any]:
+    """Latest canvas/UI state written by ``demo/index.html`` (POST to static server)."""
+    path = _viewer_state_path(repo_id)
+    if not path.is_file():
+        return {
+            "synced": False,
+            "path": str(path.relative_to(_REPO_ROOT)),
+            "selections": [],
+            "primary": None,
+            "current_module_id": None,
+            "selected_module_id": None,
+            "diagram_tab": None,
+            "opened_modules": [],
+        }
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {
+            "synced": False,
+            "error": "invalid_or_unreadable",
+            "path": str(path.relative_to(_REPO_ROOT)),
+            "selections": [],
+            "primary": None,
+        }
+    if not isinstance(data, dict):
+        return {
+            "synced": False,
+            "error": "not_an_object",
+            "path": str(path.relative_to(_REPO_ROOT)),
+            "selections": [],
+            "primary": None,
+        }
+    out = dict(data)
+    out["synced"] = True
+    out["path"] = str(path.relative_to(_REPO_ROOT))
+    out.setdefault("selections", [])
+    out.setdefault("primary", None)
+    return out
 
 
 def _bump_viewer_epoch(repo_id: str) -> None:
@@ -249,9 +295,12 @@ _INSTRUCTIONS = (
     "  6. Call open_viewer(repo_id) and return the URL to the user.\n"
     "\n"
     "Iterative edits (preferred for any IDE — no file access needed):\n"
-    "  • list_diagrams(repo_id) — see what's there.\n"
+    "  • list_diagrams(repo_id) — see what's there (+ live viewer selection if synced).\n"
     "  • get_diagram(repo_id, target?) — read the current IR for overview\n"
-    "    or a top-level module.\n"
+    "    or a top-level module (+ viewer canvas state).\n"
+    "  • get_viewer_state(repo_id) — read demo/repos/<repo_id>/viewer_state.json\n"
+    "    (multi-select, module, diagram tab). Written by the browser when you use\n"
+    "    the MCP-spawned static server; POST /repos/<repo_id>/viewer_state.json.\n"
     "  • patch_diagram(repo_id, target?, operations=[...]) — atomic batch of\n"
     "    fine-grained mutations: add_node, remove_node, update_node,\n"
     "    add_edge, remove_edge, update_edge, add_group, remove_group,\n"
@@ -399,6 +448,7 @@ def build_server() -> FastMCP:
                 "groups": len(ov.diagram.groups),
             },
             "modules": modules,
+            "viewer": _read_viewer_state(repo_id),
         }
 
     @mcp.tool(
@@ -420,7 +470,30 @@ def build_server() -> FastMCP:
             "title": title,
             "description": description,
             "diagram": diagram.to_diagram_dict(),
+            "viewer": _read_viewer_state(repo_id),
         }
+
+    @mcp.tool(
+        title="Get viewer canvas state",
+        description=(
+            "Return the latest diagram canvas selection and UI context written by "
+            "demo/index.html to demo/repos/<repo_id>/viewer_state.json (multi-select, "
+            "primary shape, current module, renderer tab). The viewer POSTs to this "
+            "file either on the same origin or cross-origin to the MCP demo server "
+            "(127.0.0.1:8765–8812) with CORS, so a plain http.server on another port "
+            "(e.g. :18765) still syncs while Cursor runs the codewiki MCP. Restart MCP "
+            "after upgrading; hard-refresh the viewer once so the new client runs."
+        ),
+    )
+    @timed("tool_call", tool="get_viewer_state")
+    def get_viewer_state(repo_id: str) -> dict:
+        _validate_repo_id(repo_id)
+        if not _repo_dir(repo_id).exists():
+            return {"ok": False, "exists": False, "repo_id": repo_id}
+        state = _read_viewer_state(repo_id)
+        out: dict[str, Any] = {"ok": True, "repo_id": repo_id}
+        out.update(state)
+        return out
 
     # -- mutation -----------------------------------------------------------
 
@@ -469,6 +542,11 @@ def build_server() -> FastMCP:
                 f"No diagrams written yet for {repo_id!r}. "
                 f"Call set_overview / set_module_tree first."
             )
+        # Always ensure the MCP POST-capable static server is running (for viewer_state sync).
+        with span("static_server_start"):
+            _STATIC.ensure_running()
+        mcp_url = _STATIC.url_for(repo_id)
+
         existing = _find_existing_viewer_url(repo_id)
         if existing is not None:
             url, port = existing
@@ -476,16 +554,15 @@ def build_server() -> FastMCP:
                 "ok": True,
                 "url": url,
                 "port": port,
+                "mcp_server_port": _STATIC.port,
                 "reused_existing_server": True,
                 "repo_dir": str(repo_path.relative_to(_REPO_ROOT)),
             }
-        with span("static_server_start"):
-            _STATIC.ensure_running()
-        url = _STATIC.url_for(repo_id)
         return {
             "ok": True,
-            "url": url,
+            "url": mcp_url,
             "port": _STATIC.port,
+            "mcp_server_port": _STATIC.port,
             "reused_existing_server": False,
             "repo_dir": str(repo_path.relative_to(_REPO_ROOT)),
         }

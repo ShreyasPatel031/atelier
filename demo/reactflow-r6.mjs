@@ -107,7 +107,7 @@ function containsNode(ancestor, node) {
  * so edges no longer meet the visible border.
  */
 /** RF v12 passes width/height from node.{width,height}; prefer those over data so boxes stay ELK-sized. */
-function ElkCustomNode({ data, width: rw, height: rh }) {
+function ElkCustomNode({ data, width: rw, height: rh, selected: rfSelected }) {
     const [hovered, setHovered] = useState(false);
     const rootRef = useRef(null);
     const panelRef = useRef(null);
@@ -117,6 +117,9 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
     const expandable = !!(data && data.expandable);
     const collapseBtn = !!(data && data.rfIsCollapse);
     const leafInteractive = expandable || collapseBtn;
+    const selected = !!rfSelected;
+    /** Match hover chrome (blue when expandable/collapse + hover); selected uses the same border, no extra outline */
+    const chromeAccent = (hovered && leafInteractive) || selected;
     const showHoverPanel = hovered && detail.length > 0;
     const w = rw ?? data.width ?? 80;
     const h = rh ?? data.height ?? 40;
@@ -287,10 +290,7 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
                     height: '100%',
                     boxSizing: 'border-box',
                     background: '#fff',
-                    border:
-                        hovered && leafInteractive
-                            ? '2px solid #3b82f6'
-                            : '1px solid #475569',
+                    border: chromeAccent ? '2px solid #3b82f6' : '1px solid #475569',
                     borderRadius: LEAF_NODE_BORDER_RADIUS,
                     boxShadow: '0 1px 3px rgba(15,23,42,0.12)',
                     overflow: 'hidden',
@@ -563,6 +563,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
          */
         React.createElement('div', {
             key: 'group-frame',
+            className: 'atelier-rf-group-frame',
             style: {
                 position: 'absolute',
                 inset: 0,
@@ -570,6 +571,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                 border: '1px dashed #64748b',
                 borderRadius: GROUP_NODE_BORDER_RADIUS,
                 pointerEvents: 'none',
+                backgroundColor: 'transparent',
             },
         }),
         labelPill,
@@ -1169,6 +1171,7 @@ function Inner(props) {
                 nodeId: node.id,
                 nodeType: node.type,
                 event: ev && ev.nativeEvent ? ev.nativeEvent : ev,
+                label: node.data && node.data.label != null ? String(node.data.label) : '',
                 expandable: !!(node.data && node.data.expandable),
                 targetModuleId: node.data && node.data.targetModuleId,
                 isCollapse: !!(node.data && node.data.rfIsCollapse),
@@ -1179,6 +1182,13 @@ function Inner(props) {
     const onPaneClick = useCallback(function () {
         if (typeof window.atelierRfOnPaneClick === 'function') {
             window.atelierRfOnPaneClick();
+        }
+    }, []);
+
+    const onSelectionChange = useCallback(function (params) {
+        var sel = params && params.nodes ? params.nodes : [];
+        if (typeof window.atelierRfOnNativeSelectionChange === 'function') {
+            window.atelierRfOnNativeSelectionChange(sel);
         }
     }, []);
 
@@ -1204,6 +1214,7 @@ function Inner(props) {
             onEdgesChange,
             onNodeClick,
             onPaneClick,
+            onSelectionChange,
             nodeTypes,
             edgeTypes,
             fitView: true,
@@ -1211,6 +1222,11 @@ function Inner(props) {
             nodesDraggable: false,
             nodesConnectable: false,
             elementsSelectable: true,
+            /** Box-select with primary button on empty pane; pan with middle/right drag or scroll (no hand cursor on pane). */
+            selectionOnDrag: true,
+            selectionMode: 'partial',
+            panOnDrag: [1, 2],
+            selectNodesOnDrag: false,
             proOptions: { hideAttribution: true },
             minZoom: 0.08,
             maxZoom: 2,
