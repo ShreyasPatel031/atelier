@@ -40,27 +40,6 @@
             gap: 15px;
         }
 
-        .back-button {
-            padding: 8px 16px;
-            background: #0039A6;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            display: inline-block;
-        }
-
-        .back-button:hover {
-            background: #1d4ed8;
-        }
-
-        .back-button:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-        }
-
         .title {
             font-size: 18px;
             font-weight: 600;
@@ -186,117 +165,7 @@
             text-align: center;
             font-weight: 500;
         }
-        
-        .zoom-hint {
-            font-size: 11px;
-            color: #94a3b8;
-            margin-left: auto;
-        }
 
-        /* R0 / R1: Mermaid vs React Flow tab + pipeline inspector */
-        .diagram-render-tabs {
-            display: flex;
-            gap: 0;
-            padding: 0 12px;
-            background: #f1f5f9;
-            border-bottom: 1px solid #e2e8f0;
-            flex-shrink: 0;
-        }
-        .diagram-tab {
-            padding: 10px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #64748b;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            margin-bottom: -1px;
-        }
-        .diagram-tab:hover {
-            color: #0039A6;
-        }
-        .diagram-tab.active {
-            color: #0039A6;
-            border-bottom-color: #0039A6;
-            background: #fff;
-        }
-        .pipeline-panel {
-            flex-shrink: 0;
-            max-height: 18vh;
-            overflow: auto;
-            border-bottom: 1px solid #e2e8f0;
-            background: #fafafa;
-            font-size: 10px;
-        }
-        .pipeline-section {
-            border-bottom: 1px solid #e8e8e8;
-        }
-        .pipeline-section summary {
-            padding: 4px 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 10px;
-            color: #334155;
-            background: #f1f5f9;
-            user-select: none;
-        }
-        .pipeline-section summary:hover {
-            background: #e2e8f0;
-        }
-        .pipeline-pre {
-            margin: 0;
-            padding: 6px 10px;
-            white-space: pre-wrap;
-            word-break: break-word;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
-            font-size: 10px;
-            color: #0f172a;
-            max-height: 12vh;
-            overflow: auto;
-        }
-        .pipeline-r4-hint {
-            margin: 0;
-            padding: 8px 12px 0;
-            font-size: 11px;
-            color: #475569;
-            line-height: 1.4;
-        }
-        .pipeline-r4-hint a {
-            color: #0039a6;
-        }
-        .pipeline-r4-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            flex-wrap: wrap;
-        }
-        .pipeline-copy-btn {
-            font: inherit;
-            font-size: 11px;
-            padding: 4px 10px;
-            cursor: pointer;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            background: #fff;
-            color: #0f172a;
-        }
-        .pipeline-copy-btn:hover:not(:disabled) {
-            background: #f1f5f9;
-        }
-        .pipeline-copy-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .pipeline-copy-feedback {
-            font-size: 11px;
-            color: #15803d;
-        }
-        .pipeline-section.pipeline-nested summary {
-            padding-left: 20px;
-            font-weight: 500;
-        }
         #elkSvgPane {
             width: 100%;
             flex: 1;
@@ -339,6 +208,38 @@
            .react-flow__nodes so labels never get covered by sibling nodes/edges. */
         #reactflowRoot .atelier-rf-pill-layer {
             pointer-events: none;
+        }
+        /** Help “?” on RF nodes — layer is pointer-events:none; pill opts in */
+        .atelier-rf-help-pill {
+            pointer-events: auto;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border: 1px solid rgba(100, 116, 139, 0.55);
+            background: #f8fafc;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .atelier-rf-help-pill:hover {
+            background: #e2e8f0;
+            border-color: #3b82f6;
+            color: #1e293b;
+        }
+        .atelier-rf-help-pill:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 1px;
+        }
+        /** Portaled help pills ride .atelier-rf-pill-layer (above RF handles / wrappers) */
+        #reactflowRoot .atelier-rf-pill-layer .atelier-rf-help-pill {
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.22);
         }
         /**
          * RF v12 renders all nodes flat as siblings under .react-flow__nodes (groups have no
@@ -385,10 +286,17 @@
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node:not(.react-flow__node-group)[data-atelier-rf-selected='true'] {
             z-index: 2147482100 !important;
         }
-        /** Groups: selection is only the inner ELK frame border (no wrapper fill / outline) */
+        /**
+         * Groups: selection is only the inner ELK frame border (no wrapper fill / outline).
+         * Keep z-index BELOW default leaves (5000 in pipeline-elk-reactflow.js): the group
+         * wrapper uses pointer-events:auto (ElkGroupNode) for hover/help; if a selected group
+         * is boosted to an ultrahigh z-index it stacks above sibling leaves inside the frame
+         * and steals clicks — inner nodes become unselectable until the group is deselected.
+         * 4900 > unselected groups (4000), still < leaves (5000) and collapse badges (6500).
+         */
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group[data-atelier-rf-selected='true'] {
             outline: none !important;
-            z-index: 2147482100 !important;
+            z-index: 4900 !important;
         }
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group[data-atelier-rf-selected='true'] .atelier-rf-group-frame {
             border: 2px solid #3b82f6 !important;
@@ -1088,6 +996,70 @@
             align-self: flex-start;
             font-style: italic;
         }
+        .chat-message.streaming {
+            background: #f8fafc;
+            color: #334155;
+            align-self: flex-start;
+            font-style: normal;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .atelier-diagram-help-activity {
+            margin: 6px 0 4px;
+            padding: 6px 10px;
+            font-size: 11px;
+            line-height: 1.35;
+            color: #475569;
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 6px;
+            align-self: stretch;
+        }
+        .atelier-diagram-help-activity[hidden] {
+            display: none !important;
+        }
+        .atelier-diagram-help-activity .atelier-dha-label {
+            font-weight: 600;
+            color: #4338ca;
+            margin-right: 6px;
+        }
+        .atelier-sdk-trace-wrap {
+            flex-shrink: 0;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 4px;
+            padding-top: 6px;
+            min-height: 0;
+        }
+        .atelier-sdk-trace-head {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .atelier-sdk-trace-head span {
+            font-weight: 400;
+            color: #94a3b8;
+        }
+        .atelier-sdk-trace-log {
+            margin: 0;
+            padding: 6px 8px;
+            height: calc(2 * 1.35 * 11px + 12px);
+            max-height: calc(2 * 1.35 * 11px + 12px);
+            overflow: auto;
+            font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+            font-size: 11px;
+            line-height: 1.35;
+            color: #475569;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
         .chat-input-row {
             display: flex;
             gap: 8px;
@@ -1163,7 +1135,6 @@
 </head>
 <body>
     <div class="header">
-        <button class="back-button" id="backButton" onclick="goBack()">← Back</button>
         <div class="title" id="moduleTitle">Loading...</div>
         <select class="repo-dropdown" id="repoDropdown" onchange="switchRepo(this.value)">
             <option value="">Switch Repo...</option>
@@ -1189,50 +1160,6 @@
                 <span class="zoom-level" id="zoomLevel">100%</span>
                 <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
                 <button class="zoom-btn" onclick="fitToView()" title="Fit to View">⊡</button>
-                <button type="button" class="zoom-btn" id="copyDiagramSelectionBtn" title="Copy selected diagram elements (for Cursor chat)">⎘</button>
-                <span class="zoom-hint">Scroll / two-finger trackpad → pan • ⌘/Ctrl+scroll or pinch → zoom • Mermaid: drag to pan • RF: drag on empty canvas to box-select; ⌘/Ctrl/Shift+click for multi-select • middle/right drag to pan</span>
-            </div>
-            <div class="diagram-render-tabs" role="tablist" aria-label="Diagram renderer">
-                <button type="button" class="diagram-tab" id="tabMermaid" role="tab" aria-selected="false" aria-controls="diagramViewport">Mermaid</button>
-                <button type="button" class="diagram-tab active" id="tabReactFlow" role="tab" aria-selected="true" aria-controls="diagramViewport">React Flow</button>
-                <button type="button" class="diagram-tab" id="tabElkSvg" role="tab" aria-selected="false" aria-controls="diagramViewport">ELK → SVG</button>
-            </div>
-            <div class="pipeline-panel" id="pipelinePanel">
-                <details class="pipeline-section">
-                    <summary>Pipeline · Source (R0)</summary>
-                    <pre class="pipeline-pre" id="pipelinePreSource"></pre>
-                </details>
-                <details class="pipeline-section">
-                    <summary>Pipeline · Overview Mermaid excerpt</summary>
-                    <pre class="pipeline-pre" id="pipelinePreMermaid"></pre>
-                </details>
-                <details class="pipeline-section">
-                    <summary>Pipeline · R1 · Mermaid → DIAGRAM_JSON</summary>
-                    <pre class="pipeline-pre" id="pipelinePreR1"></pre>
-                </details>
-                <details class="pipeline-section">
-                    <summary>Pipeline · R2 · IR repair (G2 edges / G3 groups)</summary>
-                    <pre class="pipeline-pre" id="pipelinePreR2"></pre>
-                </details>
-                <details class="pipeline-section">
-                    <summary>Pipeline · R4 · IR → ELK JSON (ELK Live paste)</summary>
-                    <p class="pipeline-r4-hint">
-                        Graph only — paste into
-                        <a href="https://rtsys.informatik.uni-kiel.de/elklive/json.html" target="_blank" rel="noopener noreferrer">ELK JSON Editor</a>
-                        or use the
-                        <a href="https://eclipse.dev/elk/" target="_blank" rel="noopener noreferrer">Eclipse ELK</a>
-                        toolchain. (Wrapping metadata breaks import: every JSON object must be a graph element with an <code>id</code>.)
-                    </p>
-                    <div class="pipeline-r4-toolbar">
-                        <button type="button" class="pipeline-copy-btn" id="pipelineR4CopyBtn" disabled>Copy ELK graph JSON</button>
-                        <span class="pipeline-copy-feedback" id="pipelineR4CopyFeedback" hidden>Copied</span>
-                    </div>
-                    <pre class="pipeline-pre" id="pipelinePreR4"></pre>
-                    <details class="pipeline-section pipeline-nested">
-                        <summary>R4 · Converter metadata (not for ELK Live)</summary>
-                        <pre class="pipeline-pre" id="pipelinePreR4Meta"></pre>
-                    </details>
-                </details>
             </div>
             <div class="diagram-viewport" id="diagramViewport">
                 <div class="diagram-canvas" id="diagramCanvas" style="display: none">
@@ -1309,8 +1236,16 @@
         <div class="pane-resizer" id="paneResizer" role="separator" aria-orientation="vertical" aria-label="Resize chat panel" tabindex="0" title="Drag to resize chat"></div>
         <div class="doc-pane open">
             <div class="chat-section">
+                <div id="atelierDiagramHelpActivity" class="atelier-diagram-help-activity" aria-live="polite" hidden></div>
                 <div class="chat-messages" id="chatMessages">
                     <div class="chat-message assistant">Ask about this codebase's architecture. Select nodes, subgraphs, or edges on the diagram for context.</div>
+                </div>
+                <div id="atelierSdkTraceWrap" class="atelier-sdk-trace-wrap" hidden>
+                    <div class="atelier-sdk-trace-head">
+                        SDK trace
+                        <span id="atelierSdkSseStatus"></span>
+                    </div>
+                    <pre id="atelierSdkTraceLog" class="atelier-sdk-trace-log"></pre>
                 </div>
                 <div class="chat-input-row">
                     <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="1"></textarea>
@@ -1348,7 +1283,7 @@
         let expandedNodes = new Set();
         let expandedNodeToModule = new Map();  // Maps nodeId -> moduleId for expanded nodes
         let currentModuleId = 'overview';
-        /** R0 / R5 / R6: 'mermaid' | 'reactflow' | 'elk' */
+        /** R0 / R5 / R6: viewer is always React Flow; value kept for viewer_state.json compatibility. */
         let activeDiagramTab = 'reactflow';
         let elkSvgRequestEpoch = 0;
         let reactFlowRequestEpoch = 0;
@@ -2874,7 +2809,12 @@
         async function pushViewerStateToMcp() {
             try {
                 var rid = typeof repoPath !== 'undefined' ? repoPath : '';
-                if (!rid || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(rid)) return;
+                if (!rid || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(rid)) return false;
+                var lastAsk = null;
+                try {
+                    lastAsk = window.__atelierLastDiagramAsk || null;
+                } catch (_) {}
+
                 var payload = {
                     updated_at_ms: Date.now(),
                     repo_id: rid,
@@ -2891,6 +2831,8 @@
                         typeof buildDiagramChatPayload === 'function'
                             ? buildDiagramChatPayload()
                             : null,
+                    /** Latest “?” pill question — read via MCP get_viewer_state(repo_id).last_diagram_ask */
+                    last_diagram_ask: lastAsk,
                 };
                 var body = JSON.stringify(payload);
                 var pathSeg = '/repos/' + encodeURIComponent(rid) + '/viewer_state.json';
@@ -2903,14 +2845,21 @@
                         body: body,
                         mode: 'cors',
                         keepalive: true,
-                    }).then(function (res) {
-                        return res.ok ? res : Promise.reject(res);
+                    }).then(async function (res) {
+                        if (!res.ok) return Promise.reject(res);
+                        var ct = res.headers.get('content-type') || '';
+                        if (!ct.includes('application/json')) return Promise.reject(res);
+                        try {
+                            var j = await res.json();
+                            if (j && j.ok === true) return res;
+                        } catch (_) {}
+                        return Promise.reject(res);
                     });
                 }
 
                 try {
                     await postOne(sameOriginUrl);
-                    return;
+                    return true;
                 } catch (_) {}
 
                 var cached = null;
@@ -2920,7 +2869,30 @@
                 if (cached && /^[0-9]+$/.test(cached)) {
                     try {
                         await postOne('http://127.0.0.1:' + cached + pathSeg);
-                        return;
+                        return true;
+                    } catch (_) {}
+                }
+
+                var diagramWatcherPorts = [];
+                try {
+                    var dwp = new URLSearchParams(window.location.search).get('diagram_watcher_port');
+                    if (dwp && /^[0-9]+$/.test(dwp)) {
+                        diagramWatcherPorts = [parseInt(dwp, 10)];
+                    } else if (window.location.port && /^[0-9]+$/.test(window.location.port)) {
+                        diagramWatcherPorts = [parseInt(window.location.port, 10)];
+                    } else {
+                        diagramWatcherPorts = [9878];
+                    }
+                } catch (_) {
+                    diagramWatcherPorts = [9878];
+                }
+                for (var dwi = 0; dwi < diagramWatcherPorts.length; dwi++) {
+                    try {
+                        await postOne('http://127.0.0.1:' + diagramWatcherPorts[dwi] + pathSeg);
+                        try {
+                            sessionStorage.setItem('atelier_mcp_sync_port', String(diagramWatcherPorts[dwi]));
+                        } catch (_) {}
+                        return true;
                     } catch (_) {}
                 }
 
@@ -2931,13 +2903,44 @@
                         try {
                             sessionStorage.setItem('atelier_mcp_sync_port', String(port));
                         } catch (_) {}
-                        return;
+                        return true;
                     } catch (_) {}
                 }
-            } catch (_) {}
+                return false;
+            } catch (_) {
+                return false;
+            }
         }
         window.schedulePushViewerStateToMcp = schedulePushViewerStateToMcp;
         window.pushViewerStateToMcp = pushViewerStateToMcp;
+
+        async function pushViewerStateToMcpImmediate() {
+            if (__viewerStatePushTimer != null) {
+                clearTimeout(__viewerStatePushTimer);
+                __viewerStatePushTimer = null;
+            }
+            return await pushViewerStateToMcp();
+        }
+
+        /**
+         * Persist a diagram “?” question so Cursor / MCP can answer via get_viewer_state(repo_id).
+         * @returns {Promise<boolean>} true if viewer_state.json was POSTed somewhere that accepts it
+         */
+        async function recordLastDiagramAskForMcp(message, selectionOverride) {
+            const msg = String(message || '').trim();
+            if (!msg) return false;
+            const body = buildArchAgentChatRequestBody(msg, selectionOverride);
+            window.__atelierLastDiagramAsk = {
+                asked_at_ms: Date.now(),
+                message: msg,
+                diagram_selection: body.diagram_selection,
+                diagram_selections: body.diagram_selections,
+                opened_modules: body.opened_modules,
+                job_id: body.job_id,
+                source: 'help_pill',
+            };
+            return await pushViewerStateToMcpImmediate();
+        }
 
         /**
          * @param {object} sel kind: 'none'|'node'|'cluster'|'edge'; logicalId; optional label, moduleId, domRef, edge
@@ -3298,7 +3301,7 @@
                 rfExpandedNodeToModule.clear();
                 return;
             }
-            /** Repo/overview hydrates after the first RF refresh (script runs setDiagramRenderTab before init). */
+            /** Repo/overview hydrates after the first RF refresh (script runs ensureReactFlowDiagramViewport before init). */
             if (!rfBaselineDiagramIr) {
                 const resolved = resolveStructuredIrForPipeline();
                 if (resolved.diagram && typeof resolved.diagram === 'object') {
@@ -3915,57 +3918,26 @@
             await reactFlowRefreshChain;
         }
 
-        /** Re-run ELK layout → R5 SVG / R6 React Flow and refresh pipeline R4 when sizing inputs change. */
+        /** Re-run ELK layout → R6 React Flow when sizing inputs change. */
         async function refreshElkDerivedDiagramViews() {
-            if (activeDiagramTab === 'reactflow') await refreshReactFlowView();
-            else if (activeDiagramTab === 'elk') await refreshElkSvgView();
+            await refreshReactFlowView();
             updatePipelinePanel();
         }
         window.refreshElkDerivedDiagramViews = refreshElkDerivedDiagramViews;
 
-        function setDiagramRenderTab(which) {
-            activeDiagramTab = which;
-            const tabM = document.getElementById('tabMermaid');
-            const tabR = document.getElementById('tabReactFlow');
-            const tabE = document.getElementById('tabElkSvg');
+        /** Diagram viewer is React Flow only (Mermaid / ELK-SVG / pipeline inspector UI removed). */
+        function ensureReactFlowDiagramViewport() {
+            activeDiagramTab = 'reactflow';
             const canvas = document.getElementById('diagramCanvas');
             const placeholder = document.getElementById('reactflowPlaceholder');
-            const mermaidEl = document.getElementById('mermaid-diagram');
-            const elkPane = document.getElementById('elkSvgPane');
             const diagramViewportEl = document.getElementById('diagramViewport');
 
-            const isM = which === 'mermaid';
-            const isRf = which === 'reactflow';
-            const isElk = which === 'elk';
-
             if (diagramViewportEl) {
-                diagramViewportEl.classList.toggle('diagram-viewport--reactflow', isRf);
+                diagramViewportEl.classList.add('diagram-viewport--reactflow');
             }
-
-            if (tabM) {
-                tabM.classList.toggle('active', isM);
-                tabM.setAttribute('aria-selected', isM ? 'true' : 'false');
-            }
-            if (tabR) {
-                tabR.classList.toggle('active', isRf);
-                tabR.setAttribute('aria-selected', isRf ? 'true' : 'false');
-            }
-            if (tabE) {
-                tabE.classList.toggle('active', isElk);
-                tabE.setAttribute('aria-selected', isElk ? 'true' : 'false');
-            }
-
-            if (isRf) {
-                if (canvas) canvas.style.display = 'none';
-                if (placeholder) placeholder.hidden = false;
-                refreshReactFlowView();
-            } else {
-                if (canvas) canvas.style.display = '';
-                if (placeholder) placeholder.hidden = true;
-                if (mermaidEl) mermaidEl.hidden = !isM;
-                if (elkPane) elkPane.hidden = !isElk;
-                if (isElk) refreshElkSvgView();
-            }
+            if (canvas) canvas.style.display = 'none';
+            if (placeholder) placeholder.hidden = false;
+            refreshReactFlowView();
             updatePipelinePanel();
             schedulePushViewerStateToMcp();
         }
@@ -4154,52 +4126,7 @@
             }
         }
 
-        (function setupPipelineR4Copy() {
-            const btn = document.getElementById('pipelineR4CopyBtn');
-            const fb = document.getElementById('pipelineR4CopyFeedback');
-            if (!btn) return;
-            let hideTimer = null;
-            btn.addEventListener('click', async () => {
-                const s = pipelineR4ElkPasteJson;
-                if (!s) return;
-                try {
-                    await navigator.clipboard.writeText(s);
-                } catch {
-                    try {
-                        const ta = document.createElement('textarea');
-                        ta.value = s;
-                        ta.setAttribute('readonly', '');
-                        ta.style.position = 'fixed';
-                        ta.style.left = '-9999px';
-                        document.body.appendChild(ta);
-                        ta.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(ta);
-                    } catch (e2) {
-                        console.warn('R4 copy failed', e2);
-                        return;
-                    }
-                }
-                if (fb) {
-                    fb.hidden = false;
-                    if (hideTimer) clearTimeout(hideTimer);
-                    hideTimer = setTimeout(() => {
-                        fb.hidden = true;
-                    }, 2000);
-                }
-            });
-        })();
-
-        document.getElementById('tabMermaid')?.addEventListener('click', () =>
-            setDiagramRenderTab('mermaid')
-        );
-        document.getElementById('tabReactFlow')?.addEventListener('click', () =>
-            setDiagramRenderTab('reactflow')
-        );
-        document.getElementById('tabElkSvg')?.addEventListener('click', () =>
-            setDiagramRenderTab('elk')
-        );
-        setDiagramRenderTab('reactflow');
+        ensureReactFlowDiagramViewport();
 
         // ============================================================
         // BUILD MODULE DATA
@@ -6725,45 +6652,17 @@
 
         async function copyDiagramSelectionToClipboard() {
             const text = formatDiagramSelectionForCursorPaste();
-            const btn = document.getElementById('copyDiagramSelectionBtn');
             if (!text) {
-                if (btn) {
-                    const prevTitle = btn.title;
-                    btn.title = 'Nothing selected on the diagram';
-                    setTimeout(() => {
-                        if (btn) btn.title = prevTitle;
-                    }, 2000);
-                }
                 return;
             }
             try {
                 await navigator.clipboard.writeText(text);
-                if (btn) {
-                    const prev = btn.textContent;
-                    const prevTitle = btn.title;
-                    btn.textContent = '✓';
-                    btn.title = 'Copied';
-                    setTimeout(() => {
-                        if (btn) {
-                            btn.textContent = prev;
-                            btn.title = prevTitle;
-                        }
-                    }, 1600);
-                }
             } catch (err) {
                 console.warn('Clipboard write failed', err);
-                if (btn) btn.title = 'Copy failed — check permissions';
             }
         }
         window.formatDiagramSelectionForCursorPaste = formatDiagramSelectionForCursorPaste;
         window.copyDiagramSelectionToClipboard = copyDiagramSelectionToClipboard;
-
-        const copyDiagramSelectionBtnEl = document.getElementById('copyDiagramSelectionBtn');
-        if (copyDiagramSelectionBtnEl) {
-            copyDiagramSelectionBtnEl.addEventListener('click', function () {
-                void copyDiagramSelectionToClipboard();
-            });
-        }
 
         /** Playwright / automated tests: read pan zoom and measure node vs expanded cluster frame (viewport px). */
         window.__diagramViewState = () => ({
@@ -6790,6 +6689,11 @@
         
         // API base: when on port 8080 (static demo server), use FastAPI on 8000; else same origin
         const CHAT_API_BASE = (window.location.port === '8080') ? 'http://127.0.0.1:8001' : '';
+
+        function getArchAgentChatUrl() {
+            if (!CHAT_API_BASE || String(CHAT_API_BASE).trim() === '') return null;
+            return String(CHAT_API_BASE).replace(/\/$/, '') + '/api/arch-agent/chat';
+        }
         
         function getChatJobId() {
             return (typeof repoPath !== 'undefined' ? repoPath : urlParams.get('repo') || 'search-agents');
@@ -6802,18 +6706,38 @@
          * Exact JSON body for POST /api/arch-agent/chat (same as Send). Use in console:
          *   peekArchAgentChat()
          *   peekArchAgentChat('what are common groups between them?')
+         *
+         * @param {string} message
+         * @param {{ diagram_selection?: object, diagram_selections?: object[] } | null} selectionOverride
+         *        When set (e.g. “?” pill on a node), attach that shape as diagram context instead of the live canvas selection.
          */
-        function buildArchAgentChatRequestBody(message) {
-            const diagramPayloads = buildDiagramChatPayloads();
+        function buildArchAgentChatRequestBody(message, selectionOverride) {
+            let diagramPayloads;
+            let primary;
+            if (
+                selectionOverride &&
+                selectionOverride.diagram_selection != null
+            ) {
+                primary = selectionOverride.diagram_selection;
+                diagramPayloads =
+                    selectionOverride.diagram_selections != null &&
+                    selectionOverride.diagram_selections.length
+                        ? selectionOverride.diagram_selections
+                        : [primary];
+            } else {
+                diagramPayloads = buildDiagramChatPayloads();
+                primary =
+                    diagramPayloads.length > 0
+                        ? diagramPayloads[diagramPayloads.length - 1]
+                        : null;
+            }
             return {
                 job_id: getChatJobId(),
                 message: message,
                 opened_modules: Array.from(openedModules),
-                diagram_selection:
-                    diagramPayloads.length > 0
-                        ? diagramPayloads[diagramPayloads.length - 1]
-                        : null,
-                diagram_selections: diagramPayloads.length > 0 ? diagramPayloads : null,
+                diagram_selection: primary,
+                diagram_selections:
+                    diagramPayloads.length > 0 ? diagramPayloads : null,
                 history: chatHistory
             };
         }
@@ -6825,7 +6749,7 @@
                     : (chatInput && chatInput.value.trim()) ||
                       '(no message — type in the chat box or run peekArchAgentChat("your question"))';
             const body = buildArchAgentChatRequestBody(msg);
-            const url = `${CHAT_API_BASE}/api/arch-agent/chat`;
+            const url = getArchAgentChatUrl() || '(no Architectural Agent — CHAT_API_BASE empty)';
             console.log('[peekArchAgentChat] POST', url);
             console.log('[peekArchAgentChat] body object:', body);
             console.log('[peekArchAgentChat] JSON.stringify (exact wire payload):\n' + JSON.stringify(body, null, 2));
@@ -6845,46 +6769,386 @@
             } else {
                 el.textContent = content;
             }
-            chatMessages.appendChild(el);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            if (chatMessages) {
+                chatMessages.appendChild(el);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
             return el;
         }
-        
-        async function sendChatMessage() {
-            if (!chatInput.value.trim()) return;
-            const msg = chatInput.value.trim();
-            chatInput.value = '';
-            addChatMessage(msg, 'user');
-            const loadingEl = addChatMessage('Thinking...', 'loading');
-            chatSend.disabled = true;
+
+        function atelierSummarizeSdkTraceRow(channel, payload) {
             try {
-                console.log('[MODULE TRACKING] Sending chat request with opened modules:', Array.from(openedModules));
-                const res = await fetch(`${CHAT_API_BASE}/api/arch-agent/chat`, {
+                if (channel === 'stream' && payload && payload.type) {
+                    if (payload.type === 'tool_call') {
+                        return (payload.name || '?') + ' — ' + (payload.status || '');
+                    }
+                    return String(payload.type);
+                }
+                if (channel === 'delta' && payload && payload.update && payload.update.type) {
+                    return String(payload.update.type);
+                }
+                if (channel === 'step' && payload && payload.step && payload.step.type) {
+                    return String(payload.step.type);
+                }
+                if (channel === 'conversation') {
+                    return payload.error ? 'error: ' + payload.error : 'turns summary';
+                }
+                const s = JSON.stringify(payload);
+                return s.length > 160 ? s.slice(0, 160) + '…' : s;
+            } catch (_) {
+                return String(channel);
+            }
+        }
+
+        function atelierAppendSdkTrace(channel, payload) {
+            try {
+                if (new URLSearchParams(window.location.search).get('sdk_trace') !== '1') return;
+            } catch (_) {
+                return;
+            }
+            const wrap = document.getElementById('atelierSdkTraceWrap');
+            const pre = document.getElementById('atelierSdkTraceLog');
+            if (!pre || !wrap) return;
+            wrap.hidden = false;
+            const t = new Date().toISOString().slice(11, 23);
+            const line = '[' + t + '] ' + channel + ': ' + atelierSummarizeSdkTraceRow(channel, payload);
+            pre.textContent += line + '\n';
+            pre.scrollTop = pre.scrollHeight;
+            console.log('[atelier sdk_trace]', line);
+        }
+
+        function atelierClearSdkAnswerPoll() {
+            window.__atelierSdkAnswerPollActive = false;
+            if (window.__atelierSdkAnswerPollTimer != null) {
+                clearTimeout(window.__atelierSdkAnswerPollTimer);
+                clearInterval(window.__atelierSdkAnswerPollTimer);
+                window.__atelierSdkAnswerPollTimer = null;
+            }
+        }
+
+        /**
+         * Few one-shot GETs of viewer_sdk_answer.json — only to recover if the final SSE was missed
+         * (watcher can finish before EventSource connects). Not a poll loop; primary path is SSE.
+         */
+        function atelierScheduleSdkAnswerGapFill(askedAt, applyAnswerFn) {
+            const repoId = getChatJobId();
+            const pollUrl = new URL(
+                'repos/' + encodeURIComponent(repoId) + '/viewer_sdk_answer.json',
+                window.location.href
+            ).href;
+            const delays = [350, 1200, 3500, 9000, 20000, 45000, 75000, 105000];
+            delays.forEach(function (ms) {
+                setTimeout(async function () {
+                    if (!window.__atelierSdkAnswerCallback) return;
+                    try {
+                        const res = await fetch(pollUrl, { cache: 'no-store' });
+                        if (!res.ok) return;
+                        const data = await res.json();
+                        if (!data || String(data.asked_at_ms) !== String(askedAt)) return;
+                        const hasFinal =
+                            data.answered_at_ms != null ||
+                            data.kind === 'diagram_answer' ||
+                            data.ok === false ||
+                            (typeof data.answer === 'string' && data.answer.trim() !== '') ||
+                            (data.error != null && String(data.error).trim() !== '');
+                        if (!hasFinal) return;
+                        if (window.__atelierSdkAnswerCallback) applyAnswerFn(data);
+                    } catch (_) {}
+                }, ms);
+            });
+        }
+
+        function atelierClearDiagramHelpActivity() {
+            const box = document.getElementById('atelierDiagramHelpActivity');
+            if (!box) return;
+            box.innerHTML = '';
+            box.hidden = true;
+            window.__atelierDiagramHelpActivityCount = 0;
+        }
+
+        function atelierOnDiagramActivity(data) {
+            if (data == null || data.asked_at_ms == null || window.__atelierDiagramHelpAskedAtMs == null) return;
+            if (String(data.asked_at_ms) !== String(window.__atelierDiagramHelpAskedAtMs)) return;
+            const label = data.label != null ? String(data.label).trim() : '';
+            if (!label) return;
+            window.__atelierDiagramHelpActivityCount = (window.__atelierDiagramHelpActivityCount || 0) + 1;
+            const box = document.getElementById('atelierDiagramHelpActivity');
+            if (!box) return;
+            box.hidden = false;
+            box.innerHTML =
+                '<span class="atelier-dha-label">Working</span><span class="atelier-dha-text"></span>';
+            const textEl = box.querySelector('.atelier-dha-text');
+            if (textEl) textEl.textContent = label;
+            if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function atelierOnAnswerProgress(data) {
+            if (data == null || data.asked_at_ms == null || window.__atelierDiagramHelpAskedAtMs == null) return;
+            if (String(data.asked_at_ms) !== String(window.__atelierDiagramHelpAskedAtMs)) return;
+            const el = window.__atelierHelpStreamingEl;
+            if (!el || !el.parentNode) return;
+            if (data.partial == null) return;
+            const p = String(data.partial);
+            if (!p) return;
+            const allow =
+                (window.__atelierDiagramHelpActivityCount || 0) > 0 ||
+                (typeof window.__atelierHelpStreamRevealAt === 'number' && Date.now() >= window.__atelierHelpStreamRevealAt);
+            if (!allow) return;
+            el.textContent = p;
+            el.classList.remove('loading');
+            el.classList.add('assistant');
+            el.classList.add('streaming');
+            if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        /**
+         * POST to Architectural Agent when URL is configured; otherwise static-demo / MCP path.
+         * @param {{ fromHelpPill?: boolean }} options — help pill syncs question to MCP viewer_state + clipboard.
+         * @returns {Promise<{ ok: boolean, mode?: string }>}
+         */
+        async function sendArchAgentChatMessage(message, selectionOverride, options) {
+            const opts = options || {};
+            const fromHelpPill = !!opts.fromHelpPill;
+            const msg = String(message || '').trim();
+            if (!msg) return { ok: false, mode: 'empty' };
+
+            const archUrl = getArchAgentChatUrl();
+            const ui = !!(chatMessages && chatSend);
+            let loadingEl = null;
+
+            async function helpPillMcpFallback() {
+                if (ui) {
+                    addChatMessage(msg, 'user');
+                }
+
+                var synced = await recordLastDiagramAskForMcp(msg, selectionOverride);
+                try {
+                    await navigator.clipboard.writeText(msg);
+                } catch (_) {
+                    /* ignore */
+                }
+                var askedAt = window.__atelierLastDiagramAsk && window.__atelierLastDiagramAsk.asked_at_ms;
+                if (ui) {
+                    window.__atelierDiagramHelpAskedAtMs = askedAt;
+                    window.__atelierDiagramHelpActivityCount = 0;
+                    window.__atelierHelpStreamRevealAt = Date.now() + 2200;
+                    atelierClearDiagramHelpActivity();
+                    const waitingEl = addChatMessage('Waiting for answer…', 'loading');
+                    window.__atelierHelpStreamingEl = waitingEl;
+                    window.__atelierSdkAnswerCallback = function (data) {
+                        if (!data || data.asked_at_ms == null || String(data.asked_at_ms) !== String(askedAt)) return;
+                        if (data.kind === 'answer_progress') return;
+                        if (data.partial && data.answered_at_ms == null && data.answer == null) return;
+                        atelierClearSdkAnswerPoll();
+                        window.__atelierDiagramHelpAskedAtMs = null;
+                        window.__atelierHelpStreamingEl = null;
+                        atelierClearDiagramHelpActivity();
+                        if (waitingEl && waitingEl.parentNode) waitingEl.remove();
+                        if (data.answer != null && String(data.answer).trim()) {
+                            addChatMessage(data.answer, 'assistant');
+                        } else {
+                            addChatMessage(
+                                'SDK finished without answer text: **' +
+                                    String(data.error || data.ok === false ? 'error' : 'empty') +
+                                    '**. Check terminal running `diagram:watch`.',
+                                'assistant'
+                            );
+                        }
+                        window.__atelierSdkAnswerCallback = null;
+                    };
+                    scheduleAnswerTimeout(askedAt, waitingEl);
+                    atelierScheduleSdkAnswerGapFill(askedAt, function (data) {
+                        if (window.__atelierSdkAnswerCallback) window.__atelierSdkAnswerCallback(data);
+                    });
+                }
+                return { ok: true, mode: 'mcp' };
+            }
+
+            function scheduleAnswerTimeout(askedAtMs, loadingEl) {
+                setTimeout(() => {
+                    if (window.__atelierSdkAnswerCallback) {
+                        window.__atelierSdkAnswerCallback = null;
+                        atelierClearSdkAnswerPoll();
+                        window.__atelierDiagramHelpAskedAtMs = null;
+                        window.__atelierHelpStreamingEl = null;
+                        atelierClearDiagramHelpActivity();
+                        if (loadingEl && loadingEl.parentNode) loadingEl.remove();
+                        addChatMessage(
+                            'Timed out waiting for SDK answer (3 min). Run `npm run diagram:watch` from repo root (same port as this page), set `CURSOR_API_KEY` in `scripts/cursor-sdk.env`, then reload.',
+                            'assistant'
+                        );
+                    }
+                }, 180000);
+            }
+
+            if (!archUrl) {
+                if (fromHelpPill) {
+                    return helpPillMcpFallback();
+                }
+                if (ui) {
+                    addChatMessage(msg, 'user');
+                }
+                if (ui) {
+                    addChatMessage(
+                        'No chat API is configured for this origin. Serve the demo on port **8080** and run CodeWiki web on **8001**, or paste your question into Cursor chat.',
+                        'assistant'
+                    );
+                }
+                return { ok: false, mode: 'no_api' };
+            }
+
+            const body = buildArchAgentChatRequestBody(msg, selectionOverride);
+            if (ui) {
+                addChatMessage(msg, 'user');
+                loadingEl = addChatMessage('Thinking...', 'loading');
+                chatSend.disabled = true;
+            }
+            try {
+                console.log(
+                    '[MODULE TRACKING] Sending chat request with opened modules:',
+                    Array.from(openedModules)
+                );
+                const res = await fetch(archUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(buildArchAgentChatRequestBody(msg))
+                    body: JSON.stringify(body),
                 });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                if (!res.ok) {
+                    const err = new Error(`HTTP ${res.status}`);
+                    if (fromHelpPill && (res.status === 501 || res.status === 404 || res.status === 405)) {
+                        if (loadingEl) loadingEl.remove();
+                        loadingEl = null;
+                        return helpPillMcpFallback();
+                    }
+                    throw err;
+                }
                 const data = await res.json();
                 chatHistory = data.history != null ? data.history : null;
-                loadingEl.remove();
-                addChatMessage(data.response || 'No response.', 'assistant');
+                if (loadingEl) loadingEl.remove();
+                if (ui) addChatMessage(data.response || 'No response.', 'assistant');
+                return { ok: true, mode: 'api' };
             } catch (e) {
-                loadingEl.remove();
-                const hint = e.message === 'Failed to fetch' || e.message === 'Load failed'
-                    ? 'Could not reach chat API. Start the CodeWiki server: cd atelier && python3 -m codewiki.run_web_app --port 8001'
-                    : (e.message || 'Could not reach chat API. Is the CodeWiki server running on port 8001?');
-                addChatMessage('Error: ' + hint, 'assistant');
+                if (loadingEl) loadingEl.remove();
+                if (fromHelpPill) {
+                    return helpPillMcpFallback();
+                }
+                const hint =
+                    e.message === 'Failed to fetch' || e.message === 'Load failed'
+                        ? 'Could not reach chat API. Start the CodeWiki server: cd atelier && python3 -m codewiki.run_web_app --port 8001'
+                        : e.message ||
+                          'Could not reach chat API. Is the CodeWiki server running on port 8001?';
+                if (ui) addChatMessage('Error: ' + hint, 'assistant');
+                return { ok: false, mode: 'error' };
             } finally {
-                chatSend.disabled = false;
-                chatInput.focus();
+                if (ui && chatSend) {
+                    chatSend.disabled = false;
+                    if (chatInput) chatInput.focus();
+                }
             }
+        }
+
+        /**
+         * React Flow “?” pill → Architectural Agent with this node/cluster as diagram_selection.
+         * If the chat API is unreachable, copies the question to the clipboard (paste into Cursor chat).
+         */
+        window.atelierRfAskBriefExplanation = async function atelierRfAskBriefExplanation(ctx) {
+            const nodeId =
+                ctx && ctx.nodeId != null && String(ctx.nodeId).length
+                    ? String(ctx.nodeId)
+                    : '';
+            const label =
+                ctx && ctx.label != null ? String(ctx.label).trim() : '';
+            const kind =
+                ctx && ctx.kind === 'cluster' ? 'cluster' : 'node';
+            const display = label || nodeId || 'this diagram element';
+            const moduleId =
+                typeof currentModuleId !== 'undefined' ? currentModuleId : null;
+            const message =
+                'Give a brief explanation of what "' +
+                display +
+                '" is in the context of this architecture diagram.';
+            const payload = {
+                kind,
+                logical_id: nodeId || null,
+                label: label || null,
+                module_id: moduleId,
+                dom_ref: null,
+                edge: null,
+            };
+            const selectionOverride = {
+                diagram_selection: payload,
+                diagram_selections: [payload],
+            };
+            await sendArchAgentChatMessage(message, selectionOverride, { fromHelpPill: true });
+        };
+        
+        async function sendChatMessage() {
+            if (!chatInput || !chatInput.value.trim()) return;
+            const msg = chatInput.value.trim();
+            chatInput.value = '';
+            await sendArchAgentChatMessage(msg, null, {});
         }
         
         chatSend.addEventListener('click', sendChatMessage);
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
         });
+
+        // --- SSE: event-driven answers + sdk_trace from diagram_ask_watcher (auto-detects current port; override with ?diagram_sse_port=XXXX) ---
+        (function connectSSE() {
+            const qp = new URLSearchParams(window.location.search).get('diagram_sse_port');
+            const parsedPort = qp && /^[0-9]+$/.test(qp) ? parseInt(qp, 10) : null;
+            const locPort = window.location.port ? String(window.location.port) : '';
+            const statusEl = document.getElementById('atelierSdkSseStatus');
+            var url =
+                parsedPort != null && String(parsedPort) !== locPort
+                    ? 'http://127.0.0.1:' + parsedPort + '/events'
+                    : '/events';
+            let es;
+            try {
+                es = new EventSource(url);
+            } catch (_) {
+                if (statusEl) statusEl.textContent = 'SSE: cannot start (EventSource)';
+                return;
+            }
+            es.onopen = function () {
+                if (statusEl) {
+                    statusEl.textContent =
+                        url.indexOf('http') === 0 ? 'SSE: connected (' + url + ')' : 'SSE: connected (same tab)';
+                }
+            };
+            es.onmessage = function (evt) {
+                try {
+                    const data = JSON.parse(evt.data);
+                    if (data.kind === 'sdk_trace') {
+                        atelierAppendSdkTrace(data.channel, data.payload);
+                        return;
+                    }
+                    if (data.kind === 'diagram_activity') {
+                        atelierOnDiagramActivity(data);
+                        return;
+                    }
+                    if (data.kind === 'answer_progress') {
+                        atelierOnAnswerProgress(data);
+                        return;
+                    }
+                    if (
+                        window.__atelierSdkAnswerCallback &&
+                        (data.kind === 'diagram_answer' || data.answered_at_ms != null)
+                    ) {
+                        window.__atelierSdkAnswerCallback(data);
+                    }
+                } catch (e) {
+                    console.warn('[atelier SSE] parse error', e);
+                }
+            };
+            es.onerror = function () {
+                if (statusEl) statusEl.textContent = 'SSE: reconnecting…';
+                es.close();
+                setTimeout(connectSSE, 5000);
+            };
+            window.__atelierSSE = es;
+        })();
     </script>
     <script type="module" src="./reactflow-r6.mjs"></script>
 </body>
