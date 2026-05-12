@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "codewiki-diagram": {
+    "atelier": {
       "type": "stdio",
       "command": "/bin/bash",
       "args": ["${workspaceFolder}/scripts/run_codewiki_mcp.sh"],

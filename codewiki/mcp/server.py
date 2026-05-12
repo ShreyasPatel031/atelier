@@ -68,7 +68,7 @@ def _reuse_viewer_url(port: int, repo_id: str) -> Optional[str]:
     try:
         req = urllib.request.Request(
             f"http://127.0.0.1:{port}/repos/index.json",
-            headers={"User-Agent": "codewiki-mcp/1.0"},
+            headers={"User-Agent": "atelier-mcp/1.0"},
             method="GET",
         )
         with urllib.request.urlopen(req, timeout=2) as resp:
@@ -322,7 +322,7 @@ _INSTRUCTIONS = (
 
 def build_server() -> FastMCP:
     mcp = FastMCP(
-        name="codewiki-diagram",
+        name="atelier",
         instructions=_INSTRUCTIONS,
     )
 

@@ -77,7 +77,7 @@ Smoke-test:
 ### Cursor MCP
 
 1. Confirm **`.cursor/mcp.json`** exists at the workspace root (it should if you used `git archive` or cloned).
-2. **Cursor → Settings → MCP** (or Features → Model Context Protocol): ensure **codewiki-diagram** is listed and enabled.
+2. **Cursor → Settings → MCP** (or Features → Model Context Protocol): ensure **atelier** is listed and enabled.
 3. **Developer: Reload Window** (or restart Cursor) after changing `mcp.json` or `.venv`.
 
 ### Demo viewer (optional)
@@ -108,7 +108,7 @@ Companion URL (default): `http://127.0.0.1:9878/?repo=atelier-tdc8` — same por
 
 ## 5. Quick verification
 
-In Cursor chat (Agent with MCP enabled), you should be able to use the diagram MCP tools (e.g. list/get diagram, `open_viewer`) once the server starts.
+In Cursor chat (Agent with MCP enabled), enable the **atelier** server and use the diagram tools (e.g. list/get diagram, `open_viewer`) once the server starts.
 
 If MCP fails to start, check **Cursor MCP logs** for:
 

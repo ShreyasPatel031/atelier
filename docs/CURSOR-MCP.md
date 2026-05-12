@@ -1,4 +1,6 @@
-# Cursor + CodeWiki diagram MCP
+# Cursor + Atelier diagram MCP
+
+The Python module is still **`codewiki.mcp`** (package name `codewiki`). In Cursor, the MCP server entry is **`atelier`** — that is the name you see under **Settings → MCP** and in tool routing.
 
 ## Use this repo as the Cursor workspace
 
@@ -36,7 +38,7 @@ If your **workspace root** is a **different** repo (e.g. `agentic-clinical-contr
 ```json
 {
   "mcpServers": {
-    "codewiki-diagram": {
+    "atelier": {
       "type": "stdio",
       "command": "/bin/bash",
       "args": ["/ABSOLUTE/PATH/TO/atelier/scripts/run_codewiki_mcp.sh"],
