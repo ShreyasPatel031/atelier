@@ -26,7 +26,7 @@ Bring these on a USB stick / secure channel if you use them:
 | Any local `.env` at repo root | If you use one for secrets |
 | Custom `.cursor/mcp.json` | Only if yours differs from the repo’s tracked copy |
 
-The repo already includes **`.cursor/mcp.json`** for the CodeWiki diagram MCP (stdio via `scripts/run_codewiki_mcp.sh`).
+The repo includes **`.cursor/mcp.json`** for the diagram MCP. It uses **`${workspaceFolder}/scripts/run_codewiki_mcp.sh`** (not `./scripts/...`) so Cursor resolves the script under the folder you opened. **Open this repo as the workspace root**, or see **[docs/CURSOR-MCP.md](docs/CURSOR-MCP.md)** for wiring MCP from another project’s workspace.
 
 ## 3. On the new laptop
 
@@ -50,9 +50,9 @@ npm install
 
 ### Install Python + MCP (`.venv` is required)
 
-The MCP launcher expects **`.venv/bin/python`** (see `scripts/run_codewiki_mcp.sh`).
+The MCP launcher uses **`.venv/bin/python`** at the repo root. If the venv is missing or `codewiki` is not installed, **`scripts/run_codewiki_mcp.sh` prints a short error to stderr** (visible in Cursor’s MCP log) instead of a raw `ModuleNotFoundError`.
 
-**Option A — uv (fastest if you use uv):**
+**Option A — uv (recommended):**
 
 ```bash
 cd /path/to/unzipped/repo
@@ -68,7 +68,7 @@ python3.12 -m venv .venv
 .venv/bin/pip install -e .
 ```
 
-Smoke-test MCP module:
+Smoke-test:
 
 ```bash
 .venv/bin/python -c "import codewiki.mcp; print('ok')"
@@ -118,4 +118,4 @@ If MCP fails to start, check **Cursor MCP logs** for:
 
 ---
 
-More project context: [README.md](README.md) · Deep docs: [docs/README.md](docs/README.md)
+More project context: [README.md](README.md) · Deep docs: [docs/README.md](docs/README.md) · **Cursor MCP:** [docs/CURSOR-MCP.md](docs/CURSOR-MCP.md)
