@@ -56,6 +56,8 @@ docs/.cache/
 *.env
 **/.env
 **/.env.*
+# Local Cursor API key (see scripts/cursor-sdk.env.example)
+scripts/cursor-sdk.env
 
 # IDEs
 .vscode/
@@ -67,6 +69,9 @@ docs/.cache/
 # OS
 .DS_Store
 Thumbs.db
+
+# Cursor SDK watcher output (local only)
+**/viewer_sdk_answer.json
 
 # Node (viewer tooling / Playwright — do not commit deps tree)
 node_modules/

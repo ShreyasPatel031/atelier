@@ -1,0 +1,55 @@
+{
+  "updated_at_ms": 1778264529749,
+  "repo_id": "atelier-tdc8",
+  "current_module_id": "overview",
+  "selected_module_id": "overview",
+  "diagram_tab": "reactflow",
+  "opened_modules": [
+    "overview"
+  ],
+  "selections": [
+    {
+      "kind": "node",
+      "logical_id": "docker",
+      "label": "docker",
+      "module_id": "overview",
+      "dom_ref": null,
+      "edge": null
+    }
+  ],
+  "primary": {
+    "kind": "node",
+    "logical_id": "docker",
+    "label": "docker",
+    "module_id": "overview",
+    "dom_ref": null,
+    "edge": null
+  },
+  "last_diagram_ask": {
+    "asked_at_ms": 1778264529749,
+    "message": "Give a brief explanation of what \"tests\" is in the context of this architecture diagram.",
+    "diagram_selection": {
+      "kind": "node",
+      "logical_id": "tests",
+      "label": "tests",
+      "module_id": "overview",
+      "dom_ref": null,
+      "edge": null
+    },
+    "diagram_selections": [
+      {
+        "kind": "node",
+        "logical_id": "tests",
+        "label": "tests",
+        "module_id": "overview",
+        "dom_ref": null,
+        "edge": null
+      }
+    ],
+    "opened_modules": [
+      "overview"
+    ],
+    "job_id": "atelier-tdc8",
+    "source": "help_pill"
+  }
+}

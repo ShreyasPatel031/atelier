@@ -1,7 +1,7 @@
 /**
  * R6: ELK → React Flow with ELK-accurate handles (ports), matching openai-realtime-elkjs-tool.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'https://esm.sh/react@18.3.1';
+import React, { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'https://esm.sh/react@18.3.1';
 import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
 import { createPortal } from 'https://esm.sh/react-dom@18.3.1?deps=react@18.3.1';
 import {
@@ -46,6 +46,17 @@ const GROUP_LABEL_PILL_BORDER = '1px solid rgba(100, 116, 139, 0.42)';
 const GROUP_LABEL_Z_INDEX = 20000;
 /** Above group title pill and local stacking context inside the node wrapper. */
 const HOVER_PANEL_Z_INDEX = 2147481000;
+
+function rfHelpPillStopPropagation(e) {
+    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+}
+
+/** Architectural Agent / Cursor paste — wired in demo/index.html */
+function rfTriggerBriefExplanation(nodeId, label, kind) {
+    const fn = typeof window !== 'undefined' ? window.atelierRfAskBriefExplanation : null;
+    if (typeof fn !== 'function') return;
+    fn({ nodeId: String(nodeId || ''), label: label || '', kind });
+}
 
 /**
  * Fixed width = 3× node width; height grows with content, caps at 2× node height then scrolls.
@@ -102,15 +113,46 @@ function containsNode(ancestor, node) {
 }
 
 /**
+ * Portaled “?” sits outside the node DOM; moving across the gap fires mouseleave on the root with
+ * relatedTarget not yet on the button. A transparent bridge keeps hover until the pointer hits the pill or leaves both.
+ */
+function rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, pillRef, bridgeRef, e) {
+    var rel = e.relatedTarget;
+    if (containsNode(rootRef.current, rel)) return;
+    if (containsNode(panelRef.current, rel)) return;
+    if (containsNode(pillRef.current, rel)) return;
+    if (containsNode(bridgeRef.current, rel)) return;
+    setHovered(false);
+}
+
+/**
  * Leaf node: handles centered on the node bbox edge (matches xyflow .react-flow__handle-* and ELK port coords).
  * Do not use negative left/right/top/bottom offsets — those move the connection point outside the ELK rectangle
  * so edges no longer meet the visible border.
  */
 /** RF v12 passes width/height from node.{width,height}; prefer those over data so boxes stay ELK-sized. */
-function ElkCustomNode({ data, width: rw, height: rh, selected: rfSelected }) {
+function ElkCustomNode({
+    id,
+    data,
+    width: rw,
+    height: rh,
+    selected: rfSelected,
+    positionAbsoluteX,
+    positionAbsoluteY,
+    position,
+}) {
     const [hovered, setHovered] = useState(false);
     const rootRef = useRef(null);
     const panelRef = useRef(null);
+    const helpBridgeRef = useRef(null);
+    const helpPillRef = useRef(null);
+
+    const zoom = useStore((s) => {
+        const t = s.transform;
+        const tz = t && typeof t[2] === 'number' && t[2] > 0 ? t[2] : 1;
+        return tz;
+    });
+    const pillLayer = usePillLayer();
 
     const label = data.label || '';
     const detail = data.hoverDetail != null ? String(data.hoverDetail).trim() : '';
@@ -245,13 +287,117 @@ function ElkCustomNode({ data, width: rw, height: rh, selected: rfSelected }) {
     const onRootLeave = function (e) {
         var rel = e.relatedTarget;
         if (containsNode(panelRef.current, rel)) return;
+        if (containsNode(helpPillRef.current, rel)) return;
+        if (containsNode(helpBridgeRef.current, rel)) return;
         setHovered(false);
     };
     const onPanelLeave = function (e) {
         var rel = e.relatedTarget;
         if (containsNode(rootRef.current, rel)) return;
+        if (containsNode(helpPillRef.current, rel)) return;
+        if (containsNode(helpBridgeRef.current, rel)) return;
         setHovered(false);
     };
+
+    const z = zoom > 0 ? zoom : 1;
+    /** Gap outside the node’s right edge (screen-constant). */
+    const helpSideGapFlow = 6 / z;
+    /** Compact “?” — padding + auto height (not full node height). */
+    const helpPadY = 3 / z;
+    const helpPadX = 6 / z;
+    const helpFontPx = Math.max(9 / z, 11 / z);
+    const nodeX =
+        typeof positionAbsoluteX === 'number'
+            ? positionAbsoluteX
+            : position && typeof position.x === 'number'
+              ? position.x
+              : 0;
+    const nodeY =
+        typeof positionAbsoluteY === 'number'
+            ? positionAbsoluteY
+            : position && typeof position.y === 'number'
+              ? position.y
+              : 0;
+
+    const helpBridgeOverlap = 4 / z;
+    const helpPillHitW = helpFontPx + 2 * helpPadX + 14 / z;
+    const helpBridgeLeft = nodeX + w - helpBridgeOverlap;
+    const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
+
+    /** Hide “?” when the side hover snippet panel has text (avoid stacking two aids). */
+    const showHelpPill = hovered && pillLayer && detail.length === 0;
+    const helpPillPortal =
+        showHelpPill &&
+        createPortal(
+            React.createElement(
+                Fragment,
+                null,
+                React.createElement('div', {
+                    ref: helpBridgeRef,
+                    key: 'help-bridge-' + id,
+                    className: 'atelier-rf-help-hover-bridge nodrag nopan',
+                    style: {
+                        position: 'absolute',
+                        left: helpBridgeLeft,
+                        top: nodeY,
+                        width: helpBridgeWidth,
+                        height: h,
+                        zIndex: GROUP_LABEL_Z_INDEX + 9,
+                        pointerEvents: 'auto',
+                        background: 'transparent',
+                    },
+                    onPointerDown: rfHelpPillStopPropagation,
+                    onMouseDown: rfHelpPillStopPropagation,
+                    onMouseEnter: function () {
+                        setHovered(true);
+                    },
+                    onMouseLeave: function (e) {
+                        rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                    },
+                }),
+                React.createElement(
+                    'button',
+                    {
+                        ref: helpPillRef,
+                        key: 'help-' + id,
+                        type: 'button',
+                        className: 'atelier-rf-help-pill nodrag nopan',
+                        'data-testid': 'atelier-rf-leaf-help',
+                        'data-node-id': id,
+                        title: 'Ask for a brief explanation (Architectural Agent)',
+                        'aria-label': 'Brief explanation for this diagram element',
+                        style: {
+                            position: 'absolute',
+                            left: nodeX + w + helpSideGapFlow,
+                            top: nodeY,
+                            width: 'auto',
+                            height: 'auto',
+                            minWidth: helpFontPx + 2 * helpPadX,
+                            boxSizing: 'border-box',
+                            padding: helpPadY + 'px ' + helpPadX + 'px',
+                            borderRadius: 9999,
+                            zIndex: GROUP_LABEL_Z_INDEX + 10,
+                            fontSize: helpFontPx,
+                        },
+                        onPointerDown: rfHelpPillStopPropagation,
+                        onMouseDown: rfHelpPillStopPropagation,
+                        onMouseEnter: function () {
+                            setHovered(true);
+                        },
+                        onMouseLeave: function (e) {
+                            rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                        },
+                        onClick: function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            rfTriggerBriefExplanation(id, label, 'node');
+                        },
+                    },
+                    '?'
+                )
+            ),
+            pillLayer
+        );
 
     return React.createElement(
         'div',
@@ -300,6 +446,7 @@ function ElkCustomNode({ data, width: rw, height: rh, selected: rfSelected }) {
             labelEl
         ),
         ...handleEls,
+        helpPillPortal,
         React.createElement(ElkSideHoverPanel, {
             visible: showHoverPanel,
             nodeWidth: w,
@@ -352,6 +499,8 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     const [hovered, setHovered] = useState(false);
     const rootRef = useRef(null);
     const panelRef = useRef(null);
+    const helpBridgeRef = useRef(null);
+    const helpPillRef = useRef(null);
 
     const gw = rw ?? data.width ?? 160;
     const gh = rh ?? data.height ?? 120;
@@ -380,6 +529,10 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     const inside = z <= thresh;
     /** 6 screen px → flow units (viewport scales by zoom; pill rides that scale via its container). */
     const padFlow = 6 / z;
+    const helpSideGapFlow = 6 / z;
+    const helpPadY = 3 / z;
+    const helpPadX = 6 / z;
+    const helpFontPx = Math.max(9 / z, 11 / z);
 
     const pillMaxFlow = inside ? Math.max(0, gw - 2 * padFlow) : gw;
 
@@ -531,13 +684,96 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     const onRootLeave = function (e) {
         var rel = e.relatedTarget;
         if (containsNode(panelRef.current, rel)) return;
+        if (containsNode(helpPillRef.current, rel)) return;
+        if (containsNode(helpBridgeRef.current, rel)) return;
         setHovered(false);
     };
     const onPanelLeave = function (e) {
         var rel = e.relatedTarget;
         if (containsNode(rootRef.current, rel)) return;
+        if (containsNode(helpPillRef.current, rel)) return;
+        if (containsNode(helpBridgeRef.current, rel)) return;
         setHovered(false);
     };
+
+    const helpBridgeOverlap = 4 / z;
+    const helpPillHitW = helpFontPx + 2 * helpPadX + 14 / z;
+    const helpBridgeLeft = nodeX + gw - helpBridgeOverlap;
+    const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
+
+    const showHelpPill = hovered && pillLayer && detail.length === 0;
+    const helpPillPortal = showHelpPill
+        ? createPortal(
+              React.createElement(
+                  Fragment,
+                  null,
+                  React.createElement('div', {
+                      ref: helpBridgeRef,
+                      key: 'help-bridge-' + id,
+                      className: 'atelier-rf-help-hover-bridge nodrag nopan',
+                      style: {
+                          position: 'absolute',
+                          left: helpBridgeLeft,
+                          top: nodeY,
+                          width: helpBridgeWidth,
+                          height: gh,
+                          zIndex: GROUP_LABEL_Z_INDEX + 1,
+                          pointerEvents: 'auto',
+                          background: 'transparent',
+                      },
+                      onPointerDown: rfHelpPillStopPropagation,
+                      onMouseDown: rfHelpPillStopPropagation,
+                      onMouseEnter: function () {
+                          setHovered(true);
+                      },
+                      onMouseLeave: function (e) {
+                          rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                      },
+                  }),
+                  React.createElement(
+                      'button',
+                      {
+                          ref: helpPillRef,
+                          key: 'help-' + id,
+                          type: 'button',
+                          className: 'atelier-rf-help-pill nodrag nopan',
+                          'data-testid': 'atelier-rf-group-help',
+                          'data-group-id': id,
+                          title: 'Ask for a brief explanation (Architectural Agent)',
+                          'aria-label': 'Brief explanation for this diagram element',
+                          style: {
+                              position: 'absolute',
+                              left: nodeX + gw + helpSideGapFlow,
+                              top: nodeY,
+                              width: 'auto',
+                              height: 'auto',
+                              minWidth: helpFontPx + 2 * helpPadX,
+                              boxSizing: 'border-box',
+                              padding: helpPadY + 'px ' + helpPadX + 'px',
+                              borderRadius: 9999,
+                              zIndex: GROUP_LABEL_Z_INDEX + 2,
+                              fontSize: helpFontPx,
+                          },
+                          onPointerDown: rfHelpPillStopPropagation,
+                          onMouseDown: rfHelpPillStopPropagation,
+                          onMouseEnter: function () {
+                              setHovered(true);
+                          },
+                          onMouseLeave: function (e) {
+                              rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                          },
+                          onClick: function (e) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              rfTriggerBriefExplanation(id, label, 'cluster');
+                          },
+                      },
+                      '?'
+                  )
+              ),
+              pillLayer
+          )
+        : null;
 
     return React.createElement(
         'div',
@@ -553,7 +789,8 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                 position: 'relative',
                 boxSizing: 'border-box',
                 overflow: 'visible',
-                pointerEvents: 'none',
+                /** Was `none`, which prevented hover for portaled help pill + hover panel over the frame. */
+                pointerEvents: 'auto',
             },
         },
         /**
@@ -575,6 +812,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
             },
         }),
         labelPill,
+        helpPillPortal,
         React.createElement(
             'div',
             {

@@ -13,7 +13,7 @@ Layout written to disk (consumed by ``demo/index.html``):
     demo/repos/<repo_id>/module_tree.json      ← hierarchical modules + diagrams
     demo/repos/<repo_id>/<module_id>.md        ← optional drill-down pages
     demo/repos/<repo_id>/viewer_epoch.json    ← bump so browser viewer hot-reloads
-    demo/repos/<repo_id>/viewer_state.json    ← viewer POSTs canvas selection + tab (MCP reads)
+    demo/repos/<repo_id>/viewer_state.json    ← viewer POSTs selection + tab + optional last_diagram_ask (MCP reads)
 
 Granular mutation:
     get_diagram / patch_diagram / list_diagrams let an IDE LLM read and modify
@@ -143,6 +143,7 @@ def _read_viewer_state(repo_id: str) -> dict[str, Any]:
             "path": str(path.relative_to(_REPO_ROOT)),
             "selections": [],
             "primary": None,
+            "last_diagram_ask": None,
             "current_module_id": None,
             "selected_module_id": None,
             "diagram_tab": None,
@@ -157,6 +158,7 @@ def _read_viewer_state(repo_id: str) -> dict[str, Any]:
             "path": str(path.relative_to(_REPO_ROOT)),
             "selections": [],
             "primary": None,
+            "last_diagram_ask": None,
         }
     if not isinstance(data, dict):
         return {
@@ -165,12 +167,14 @@ def _read_viewer_state(repo_id: str) -> dict[str, Any]:
             "path": str(path.relative_to(_REPO_ROOT)),
             "selections": [],
             "primary": None,
+            "last_diagram_ask": None,
         }
     out = dict(data)
     out["synced"] = True
     out["path"] = str(path.relative_to(_REPO_ROOT))
     out.setdefault("selections", [])
     out.setdefault("primary", None)
+    out.setdefault("last_diagram_ask", None)
     return out
 
 
@@ -478,11 +482,12 @@ def build_server() -> FastMCP:
         description=(
             "Return the latest diagram canvas selection and UI context written by "
             "demo/index.html to demo/repos/<repo_id>/viewer_state.json (multi-select, "
-            "primary shape, current module, renderer tab). The viewer POSTs to this "
-            "file either on the same origin or cross-origin to the MCP demo server "
-            "(127.0.0.1:8765–8812) with CORS, so a plain http.server on another port "
-            "(e.g. :18765) still syncs while Cursor runs the codewiki MCP. Restart MCP "
-            "after upgrading; hard-refresh the viewer once so the new client runs."
+            "primary shape, current module, renderer tab). Includes optional "
+            "`last_diagram_ask` when the user clicked a node's “?” pill — message + "
+            "diagram_selection for the agent to answer in Cursor (no HTTP chat API on "
+            "static demo servers). The viewer POSTs either same-origin or cross-origin "
+            "to the MCP demo server (127.0.0.1:8765–8812) with CORS. Restart MCP after "
+            "upgrading; hard-refresh the viewer once."
         ),
     )
     @timed("tool_call", tool="get_viewer_state")
