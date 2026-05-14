@@ -1,39 +1,45 @@
 # MCP E2E Test
 
 
-A real diagram created via MCP call from Cursor agent.
+4-tool MCP surface verified end-to-end
 
 <!-- DIAGRAM_JSON
 {
   "direction": "LR",
   "nodes": [
     {
-      "id": "user",
-      "label": "User",
+      "id": "client",
+      "label": "Client App",
       "type": "external",
       "link": null
     },
     {
-      "id": "api",
+      "id": "gateway",
       "label": "API Gateway",
       "type": "module",
-      "link": "api.md"
+      "link": "gateway.md"
     },
     {
       "id": "auth",
       "label": "Auth Service",
+      "type": "module",
+      "link": "auth.md"
+    },
+    {
+      "id": "orders",
+      "label": "Order Service",
       "type": "component",
       "link": null
     },
     {
       "id": "db",
-      "label": "Database",
+      "label": "Postgres",
       "type": "external",
       "link": null
     },
     {
       "id": "cache",
-      "label": "Redis Cache",
+      "label": "Redis",
       "type": "external",
       "link": null
     },
@@ -42,43 +48,36 @@ A real diagram created via MCP call from Cursor agent.
       "label": "Background Worker",
       "type": "component",
       "link": null
-    },
-    {
-      "id": "queue",
-      "label": "Message Queue",
-      "type": "external",
-      "link": null
-    },
-    {
-      "id": "monitor",
-      "label": "Monitoring",
-      "type": "component",
-      "link": null
     }
   ],
   "edges": [
     {
-      "source": "user",
-      "target": "api",
-      "label": "HTTP"
+      "source": "client",
+      "target": "gateway",
+      "label": "HTTPS"
     },
     {
-      "source": "api",
+      "source": "gateway",
       "target": "auth",
       "label": "validate"
     },
     {
-      "source": "api",
+      "source": "gateway",
+      "target": "orders",
+      "label": "route"
+    },
+    {
+      "source": "orders",
       "target": "db",
       "label": "query"
     },
     {
-      "source": "api",
+      "source": "gateway",
       "target": "cache",
-      "label": "read/write"
+      "label": "session"
     },
     {
-      "source": "api",
+      "source": "orders",
       "target": "worker",
       "label": "enqueue"
     },
@@ -86,35 +85,22 @@ A real diagram created via MCP call from Cursor agent.
       "source": "worker",
       "target": "db",
       "label": "process"
-    },
-    {
-      "source": "worker",
-      "target": "queue",
-      "label": "publish"
-    },
-    {
-      "source": "queue",
-      "target": "api",
-      "label": "events"
-    },
-    {
-      "source": "monitor",
-      "target": "api",
-      "label": "health"
-    },
-    {
-      "source": "monitor",
-      "target": "db",
-      "label": "metrics"
     }
   ],
   "groups": [
     {
-      "id": "g_backend",
-      "label": "Backend Services",
+      "id": "g_api",
+      "label": "API Layer",
       "nodes": [
-        "api",
-        "auth",
+        "gateway",
+        "auth"
+      ]
+    },
+    {
+      "id": "g_core",
+      "label": "Core",
+      "nodes": [
+        "orders",
         "worker"
       ]
     },
@@ -124,14 +110,6 @@ A real diagram created via MCP call from Cursor agent.
       "nodes": [
         "db",
         "cache"
-      ]
-    },
-    {
-      "id": "g_infra",
-      "label": "Infrastructure",
-      "nodes": [
-        "queue",
-        "monitor"
       ]
     }
   ]

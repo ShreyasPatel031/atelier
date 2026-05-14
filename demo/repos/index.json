@@ -52,6 +52,6 @@
   {
     "id": "mcp-e2e-test",
     "label": "MCP E2E Test",
-    "description": "A real diagram created via MCP call from Cursor agent."
+    "description": "4-tool MCP surface verified end-to-end"
   }
 ]

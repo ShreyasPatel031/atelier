@@ -213,6 +213,7 @@ def _inventory_payload(repo_id: str) -> dict[str, Any]:
             "groups": len(ov.diagram.groups),
         },
         "modules": modules,
+        "validation_errors": _validate_repo_diagrams(repo_id),
         "viewer": _read_viewer_state(repo_id),
     }
 
@@ -393,34 +394,44 @@ def _index_entries_after_upsert(
 _INSTRUCTIONS = (
     "Render diagrams of a repo into the CodeWiki ReactFlow viewer.\n"
     "\n"
-    "Bootstrap (first time on a repo):\n"
+    "TOOLS (only four):\n"
+    "  apply_repo_bundle - write overview + module_tree + module docs in one\n"
+    "    atomic call. All sections optional; write only what you pass. Validates\n"
+    "    before writing. Single viewer_epoch bump.\n"
+    "  get_diagram - read overview/module IR, or '__inventory__' for a compact\n"
+    "    repo summary with validation errors. Always includes viewer canvas state.\n"
+    "  patch_diagram - ordered batch of fine-grained mutations (add_node,\n"
+    "    remove_node, update_node, add_edge, remove_edge, update_edge, add_group,\n"
+    "    remove_group, update_group, merge_groups, move_nodes, set_direction,\n"
+    "    set_title, set_description). Pass dry_run=true to preview without writing.\n"
+    "  open_viewer - start static server, return clickable URL.\n"
+    "\n"
+    "WORKFLOW:\n"
     "  1. Pick a stable repo_id (kebab-case basename of the repo).\n"
     "  2. Inspect the repo with your own file tools to identify top-level modules.\n"
-    "  3. Prefer apply_repo_bundle: overview + module_tree + optional module_docs\n"
-    "     in one call (single viewer_epoch bump, validation before writes).\n"
-    "     Or use set_module_tree then set_overview then set_module_doc when you\n"
-    "     need separate steps.\n"
-    "  4. Top-level 'module' nodes should link to <module_id>.md for drill-down.\n"
-    "  5. Call open_viewer(repo_id) and return the URL to the user.\n"
+    "  3. Call apply_repo_bundle with overview + tree + module_docs.\n"
+    "  4. Call open_viewer(repo_id) and return the URL to the user.\n"
+    "  5. For iterative edits use patch_diagram (no need to resend the whole IR).\n"
+    "  6. Use get_diagram(target='__inventory__') to check your work.\n"
     "\n"
-    "Iterative edits (preferred for any IDE — no file access needed):\n"
-    "  • get_diagram(repo_id, target='overview' | <module_id> | '__inventory__')\n"
-    "    — full diagram IR plus viewer canvas state (selection, tab,\n"
-    "    last_diagram_ask from the “?” pill). Use target='__inventory__' for a\n"
-    "    compact repo-wide summary (overview + module counts) with the same viewer\n"
-    "    block; no full diagram JSON in that mode.\n"
-    "  • patch_diagram(repo_id, target?, operations=[...]) — atomic batch of\n"
-    "    fine-grained mutations: add_node, remove_node, update_node,\n"
-    "    add_edge, remove_edge, update_edge, add_group, remove_group,\n"
-    "    update_group, merge_groups, move_nodes, set_direction, set_title,\n"
-    "    set_description.\n"
+    "LAYOUT CONSTRAINTS (follow these, do NOT create constraint tools):\n"
+    "  Max 4 groups per diagram level.\n"
+    "  Max 4 nodes per group. If more, split into a drill-down module page.\n"
+    "  Prefer functional groupings over alphabetical.\n"
+    "  No dangling edges: every edge source/target must be a valid node id.\n"
+    "  Every module node should have link='<module_id>.md' for drill-down.\n"
     "\n"
-    "Each write bumps demo/repos/<repo_id>/viewer_epoch.json; an open viewer "
-    "polls that file and reloads the repo without a manual refresh.\n"
+    "METADATA CONVENTIONS:\n"
+    "  Every node should have a meaningful label (not just an id).\n"
+    "  Use type='module' for drill-down, 'component' for leaf, 'external' for deps.\n"
+    "  Label edges that represent a specific relationship.\n"
     "\n"
     "Diagram IR: { direction: 'TD'|'LR'|..., nodes: [{id,label,type,link}],\n"
     "  edges: [{source,target,label?}], groups: [{id,label,nodes:[...ids]}] }.\n"
-    "Use type='module' + link='<id>.md' for clickable drill-down nodes."
+    "JSON Schema: docs/diagram-ir.schema.json\n"
+    "\n"
+    "Each write bumps demo/repos/<repo_id>/viewer_epoch.json; an open viewer "
+    "polls that file and reloads the repo without a manual refresh."
 )
 
 
@@ -430,83 +441,36 @@ def build_server() -> FastMCP:
         instructions=_INSTRUCTIONS,
     )
 
-    # -- bootstrap / replacement tools --------------------------------------
-
-    @mcp.tool(
-        title="Set repo overview",
-        description=(
-            "Write demo/repos/<repo_id>/overview.md with the top-level diagram "
-            "and upsert demo/repos/index.json so the viewer's repo dropdown "
-            "lists this repo. Replaces any existing overview."
-        ),
-    )
-    @timed("tool_call", tool="set_overview")
-    def set_overview(
-        repo_id: str,
-        title: str,
-        description: str,
-        diagram: DiagramModel,
-    ) -> dict:
-        _ensure_repo_dir(repo_id)
-        overview_path = _write_overview(repo_id, title, description, diagram)
-        _upsert_index(repo_id, label=title, description=description)
-        _bump_viewer_epoch(repo_id)
-        _CACHE.invalidate(repo_id)
-        return {
-            "ok": True,
-            "wrote": str(overview_path.relative_to(_REPO_ROOT)),
-            "indexed": True,
-            "node_count": len(diagram.nodes),
-            "edge_count": len(diagram.edges),
-        }
-
-    @mcp.tool(
-        title="Set module tree",
-        description=(
-            "Write demo/repos/<repo_id>/module_tree.json with the hierarchical "
-            "module structure. Each module may carry an inline 'diagram' that "
-            "the viewer expands when the user clicks the corresponding node. "
-            "Replaces the entire tree."
-        ),
-    )
-    @timed("tool_call", tool="set_module_tree")
-    def set_module_tree(
-        repo_id: str,
-        tree: dict[str, ModuleNodeModel],
-    ) -> dict:
-        _ensure_repo_dir(repo_id)
-        out = {key: node.to_tree_dict() for key, node in tree.items()}
-        path = _write_module_tree(repo_id, out)
-        _bump_viewer_epoch(repo_id)
-        _CACHE.invalidate(repo_id)
-        return {
-            "ok": True,
-            "wrote": str(path.relative_to(_REPO_ROOT)),
-            "top_level_modules": list(out.keys()),
-        }
+    # -- write tools --------------------------------------------------------
 
     @mcp.tool(
         title="Apply repo bundle",
         description=(
-            "Validate then atomically write overview.md, module_tree.json, "
-            "optional drill-down ``module_docs`` (.md files), and upsert "
-            "demo/repos/index.json — bump viewer_epoch once at the end. "
+            "Validate then atomically write any combination of overview.md, "
+            "module_tree.json, and drill-down module_docs (.md files). Also "
+            "upserts demo/repos/index.json when overview fields are provided. "
+            "All sections are optional: pass only what you want to write. "
             "Checks diagram edge/group node references before any disk write; "
-            "each file is written via a temp file + os.replace. Use instead of "
-            "chaining set_overview + set_module_tree + many set_module_doc calls."
+            "each file is written via a temp file + os.replace. Bumps "
+            "viewer_epoch once at the end."
         ),
     )
     @timed("tool_call", tool="apply_repo_bundle")
     def apply_repo_bundle(
         repo_id: str,
-        overview_title: str,
-        overview_description: str,
-        overview_diagram: DiagramModel,
-        tree: dict[str, ModuleNodeModel],
+        overview_title: Optional[str] = None,
+        overview_description: Optional[str] = None,
+        overview_diagram: Optional[DiagramModel] = None,
+        tree: Optional[dict[str, ModuleNodeModel]] = None,
         module_docs: Optional[list[ModuleDocPayload]] = None,
     ) -> dict[str, Any]:
         _validate_repo_id(repo_id)
+        has_overview = overview_title is not None and overview_diagram is not None
+        has_tree = tree is not None
         docs = list(module_docs) if module_docs is not None else []
+
+        if not has_overview and not has_tree and not docs:
+            raise ValueError("Nothing to write: pass at least one of overview, tree, or module_docs")
 
         seen: set[str] = set()
         for d in docs:
@@ -515,44 +479,50 @@ def build_server() -> FastMCP:
                 raise ValueError(f"Duplicate module_docs entry for {d.module_id!r}")
             seen.add(d.module_id)
 
-        _validate_diagram_refs("overview", overview_diagram)
-        for ctx, diag in _walk_tree_diagrams(tree):
-            _validate_diagram_refs(ctx, diag)
+        if has_overview:
+            _validate_diagram_refs("overview", overview_diagram)  # type: ignore[arg-type]
+        if has_tree:
+            for ctx, diag in _walk_tree_diagrams(tree):  # type: ignore[arg-type]
+                _validate_diagram_refs(ctx, diag)
         for d in docs:
             if d.diagram is not None:
                 _validate_diagram_refs(f"module_docs[{d.module_id}].diagram", d.diagram)
 
         _ensure_repo_dir(repo_id)
-        tree_out = {key: node.to_tree_dict() for key, node in tree.items()}
-        tree_text = json.dumps(tree_out, indent=2) + "\n"
-        overview_text = _format_overview_md(
-            overview_title, overview_description, overview_diagram
-        )
-
-        overview_path = _repo_dir(repo_id) / "overview.md"
-        tree_path = _repo_dir(repo_id) / "module_tree.json"
+        wrote: dict[str, Any] = {}
 
         with span("bundle_write", repo=repo_id, module_docs=len(docs)):
-            _atomic_write_utf8(overview_path, overview_text)
-            _atomic_write_utf8(tree_path, tree_text)
+            if has_overview:
+                overview_path = _repo_dir(repo_id) / "overview.md"
+                ov_desc = overview_description or ""
+                overview_text = _format_overview_md(overview_title, ov_desc, overview_diagram)  # type: ignore[arg-type]
+                _atomic_write_utf8(overview_path, overview_text)
+                wrote["overview"] = str(overview_path.relative_to(_REPO_ROOT))
+
+                with span("index_upsert", repo=repo_id):
+                    index_entries = _index_entries_after_upsert(
+                        repo_id, label=overview_title, description=ov_desc,  # type: ignore[arg-type]
+                    )
+                    _atomic_write_utf8(
+                        _INDEX_FILE, json.dumps(index_entries, indent=2) + "\n"
+                    )
+                wrote["index"] = str(_INDEX_FILE.relative_to(_REPO_ROOT))
+
+            if has_tree:
+                tree_out = {key: node.to_tree_dict() for key, node in tree.items()}  # type: ignore[union-attr]
+                tree_text = json.dumps(tree_out, indent=2) + "\n"
+                tree_path = _repo_dir(repo_id) / "module_tree.json"
+                _atomic_write_utf8(tree_path, tree_text)
+                wrote["module_tree"] = str(tree_path.relative_to(_REPO_ROOT))
+
             written_docs: list[str] = []
             for d in docs:
                 doc_path = _repo_dir(repo_id) / f"{d.module_id}.md"
-                doc_body = _format_module_md(
-                    d.title, d.description, d.body_md, d.diagram
-                )
+                doc_body = _format_module_md(d.title, d.description, d.body_md, d.diagram)
                 _atomic_write_utf8(doc_path, doc_body)
                 written_docs.append(str(doc_path.relative_to(_REPO_ROOT)))
-
-            with span("index_upsert", repo=repo_id):
-                index_entries = _index_entries_after_upsert(
-                    repo_id,
-                    label=overview_title,
-                    description=overview_description,
-                )
-                _atomic_write_utf8(
-                    _INDEX_FILE, json.dumps(index_entries, indent=2) + "\n"
-                )
+            if written_docs:
+                wrote["module_docs"] = written_docs
 
         _bump_viewer_epoch(repo_id)
         _CACHE.invalidate(repo_id)
@@ -560,41 +530,8 @@ def build_server() -> FastMCP:
         return {
             "ok": True,
             "repo_id": repo_id,
-            "wrote": {
-                "overview": str(overview_path.relative_to(_REPO_ROOT)),
-                "module_tree": str(tree_path.relative_to(_REPO_ROOT)),
-                "module_docs": written_docs,
-                "index": str(_INDEX_FILE.relative_to(_REPO_ROOT)),
-            },
-            "module_doc_count": len(written_docs),
-            "top_level_modules": list(tree_out.keys()),
+            "wrote": wrote,
         }
-
-    @mcp.tool(
-        title="Set module doc",
-        description=(
-            "Write demo/repos/<repo_id>/<module_id>.md for a drill-down page. "
-            "Optional — only needed if you want prose beyond what's in "
-            "module_tree.json. Pass an optional diagram to embed a "
-            "DIAGRAM_JSON block into the page."
-        ),
-    )
-    @timed("tool_call", tool="set_module_doc")
-    def set_module_doc(
-        repo_id: str,
-        module_id: str,
-        title: str,
-        description: str = "",
-        body_md: str = "",
-        diagram: Optional[DiagramModel] = None,
-    ) -> dict:
-        _validate_module_id(module_id)
-        _ensure_repo_dir(repo_id)
-        path = _repo_dir(repo_id) / f"{module_id}.md"
-        with span("file_write", file=f"{module_id}.md", repo=repo_id):
-            path.write_text(_format_module_md(title, description, body_md, diagram))
-        _bump_viewer_epoch(repo_id)
-        return {"ok": True, "wrote": str(path.relative_to(_REPO_ROOT))}
 
     # -- inspection ---------------------------------------------------------
 
@@ -661,8 +598,8 @@ def build_server() -> FastMCP:
             "an 'op' field: add_node, remove_node, update_node, add_edge, "
             "remove_edge, update_edge, add_group, remove_group, update_group, "
             "merge_groups, move_nodes, set_direction, set_title, "
-            "set_description. Use this instead of set_overview when you only "
-            "need to change part of an existing diagram."
+            "set_description. Pass dry_run=true to preview the result "
+            "(counts_before/after + validation) without writing to disk."
         ),
     )
     @timed("tool_call", tool="patch_diagram")
@@ -670,10 +607,14 @@ def build_server() -> FastMCP:
         repo_id: str,
         operations: list[PatchOp],
         target: str = "overview",
+        dry_run: bool = False,
     ) -> dict:
         _validate_repo_id(repo_id)
         if not operations:
             raise ValueError("operations: at least one operation is required")
+
+        if dry_run:
+            return _patch_dry_run(repo_id, target, operations)
 
         if target == "overview":
             return _patch_overview(repo_id, operations)
@@ -695,7 +636,7 @@ def build_server() -> FastMCP:
         if not repo_path.exists():
             raise ValueError(
                 f"No diagrams written yet for {repo_id!r}. "
-                f"Call apply_repo_bundle or set_overview / set_module_tree first."
+                f"Call apply_repo_bundle first."
             )
         # Always ensure the MCP POST-capable static server is running (for viewer_state sync).
         with span("static_server_start"):
@@ -756,7 +697,7 @@ def _resolve_target_for_read(
 def _patch_overview(repo_id: str, operations: list[PatchOp]) -> dict:
     if not _repo_dir(repo_id).exists():
         raise ValueError(
-            f"Repo {repo_id!r} not found. Call set_overview first to bootstrap."
+            f"Repo {repo_id!r} not found. Call apply_repo_bundle first to bootstrap."
         )
     state = _CACHE.get(repo_id)
     new_diagram, result, meta = apply_operations(
@@ -809,6 +750,60 @@ def _patch_module(repo_id: str, module_id: str, operations: list[PatchOp]) -> di
         "counts_before": result.counts_before,
         "counts_after": result.counts_after,
     }
+
+
+def _patch_dry_run(repo_id: str, target: str, operations: list[PatchOp]) -> dict:
+    """Validate + apply in memory only; return counts + diff without disk writes."""
+    diagram, title, description = _resolve_target_for_read(repo_id, target)
+    new_diagram, result, meta = apply_operations(
+        diagram, operations, title=title, description=description,
+    )
+    return {
+        "ok": True,
+        "dry_run": True,
+        "target": target,
+        "applied": result.applied,
+        "operations": result.operations,
+        "counts_before": result.counts_before,
+        "counts_after": result.counts_after,
+    }
+
+
+def _validate_repo_diagrams(repo_id: str) -> list[str]:
+    """Return a list of human-readable validation errors for the repo."""
+    state = _CACHE.get(repo_id)
+    errors: list[str] = []
+
+    max_groups = 4
+    max_nodes_per_group = 4
+
+    def check_diagram(ctx: str, d: DiagramModel) -> None:
+        node_ids = {n.id for n in d.nodes}
+        for i, e in enumerate(d.edges):
+            if e.source not in node_ids:
+                errors.append(f"{ctx}: edge {i} source '{e.source}' not in nodes")
+            if e.target not in node_ids:
+                errors.append(f"{ctx}: edge {i} target '{e.target}' not in nodes")
+        for g in d.groups:
+            for nid in g.nodes:
+                if nid not in node_ids:
+                    errors.append(f"{ctx}: group '{g.id}' references unknown node '{nid}'")
+            if len(g.nodes) > max_nodes_per_group:
+                errors.append(
+                    f"{ctx}: group '{g.id}' has {len(g.nodes)} nodes (max {max_nodes_per_group})"
+                )
+        if len(d.groups) > max_groups:
+            errors.append(f"{ctx}: {len(d.groups)} groups (max {max_groups})")
+        for n in d.nodes:
+            if n.type == "module" and not n.link:
+                errors.append(f"{ctx}: module node '{n.id}' has no link")
+
+    check_diagram("overview", state.overview.diagram)
+    for mod_id, mod in state.modules.items():
+        if mod.diagram is not None:
+            check_diagram(f"module[{mod_id}]", mod.diagram)
+
+    return errors
 
 
 def main() -> None:
