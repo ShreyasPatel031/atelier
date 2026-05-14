@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11.9.0/dist/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
     <script src="./viewer-debug.js"></script>
+    <script src="./viewer-config.js"></script>
     <script src="./pipeline-overview-mermaid.js"></script>
     <script src="./pipeline-ir-repair.js"></script>
     <script src="./elk-node-dimensions.js"></script>
@@ -473,6 +474,21 @@
             padding: 0;
             display: flex;
             flex-direction: column;
+        }
+
+        body.viewer-no-chat .doc-pane,
+        body.viewer-no-chat .pane-resizer {
+            display: none !important;
+        }
+
+        body.viewer-no-chat .diagram-pane {
+            flex: 1 1 100%;
+            width: 100%;
+            max-width: none;
+        }
+
+        body.viewer-no-repo-switcher .repo-dropdown {
+            display: none !important;
         }
 
         /* Tooltip for hover — position/size finalized in JS (viewport + reflow); keep above panes */
@@ -1263,7 +1279,24 @@
         
         // Get repo path from URL query param: ?repo=flask or ?repo=repos/flask
         const urlParams = new URLSearchParams(window.location.search);
-        const repoPath = urlParams.get('repo') || 'crewai';
+        const viewerConfig = window.ATELIER_VIEWER_CONFIG || {};
+        const defaultRepoPath = viewerConfig.defaultRepo || 'crewai';
+        const repoPath = urlParams.get('repo') || defaultRepoPath;
+        function viewerFlag(queryName, configName, defaultValue) {
+            if (urlParams.has(queryName)) {
+                const raw = String(urlParams.get(queryName) || '').toLowerCase();
+                return !(raw === '0' || raw === 'false' || raw === 'no' || raw === 'off');
+            }
+            if (Object.prototype.hasOwnProperty.call(viewerConfig, configName)) {
+                return viewerConfig[configName] !== false;
+            }
+            return defaultValue;
+        }
+        const CHAT_ENABLED = viewerFlag('chat', 'chatEnabled', true);
+        const REPO_SWITCHER_ENABLED = viewerFlag('repoSwitcher', 'repoSwitcherEnabled', true);
+        window.__atelierChatEnabled = CHAT_ENABLED;
+        document.body.classList.toggle('viewer-no-chat', !CHAT_ENABLED);
+        document.body.classList.toggle('viewer-no-repo-switcher', !REPO_SWITCHER_ENABLED);
         if (urlParams.get('rfDebug') === '1') {
             window.atelierRfDebugLayout = true;
         }
@@ -1334,6 +1367,7 @@
         // ============================================================
         
         function toggleDocPanel(forceOpen = null) {
+            if (!CHAT_ENABLED) return;
             // Panel is always open now (chat-only view)
             // This function is kept for compatibility but does nothing
             const panel = document.querySelector('.doc-pane');
@@ -3331,7 +3365,6 @@
             if (!diagram || !childIr || !Array.isArray(childIr.nodes)) return null;
             const subId = `${nodeId}_sub`;
             const prefix = `${nodeId}_`;
-            const collapseId = `${prefix}collapse`;
 
             const d = JSON.parse(JSON.stringify(diagram));
             if (!Array.isArray(d.nodes)) d.nodes = [];
@@ -3376,10 +3409,6 @@
                 const copy = Object.assign({}, cn, { id: newId });
                 d.nodes.push(copy);
             }
-
-            const collapseNode = { id: collapseId, label: '[-] Collapse' };
-            d.nodes.push(collapseNode);
-            memberIds.push(collapseId);
 
             d.groups.push({
                 id: subId,
@@ -6498,6 +6527,7 @@
         }
         
         function populateRepoDropdown() {
+            if (!REPO_SWITCHER_ENABLED) return;
             const dropdown = document.getElementById('repoDropdown');
             if (!dropdown) return;
             
@@ -6516,6 +6546,7 @@
         
         function switchRepo(newRepo) {
             if (!newRepo || newRepo === repoPath) return;
+            if (!REPO_SWITCHER_ENABLED) return;
             
             // Navigate to new repo
             const currentUrl = new URL(window.location.href);
@@ -6531,7 +6562,7 @@
             AVAILABLE_REPOS = await fetchAvailableRepos();
             
             // When no ?repo= in URL, redirect to first repo so something always loads
-            if (!urlParams.get('repo')) {
+            if (!urlParams.get('repo') && !viewerConfig.defaultRepo) {
                 if (AVAILABLE_REPOS.length > 0) {
                     const first = AVAILABLE_REPOS[0].id;
                     window.location.replace(window.location.pathname + '?repo=' + encodeURIComponent(first));
@@ -6560,7 +6591,7 @@
             
             buildModuleData();
             
-            populateRepoDropdown();
+            if (REPO_SWITCHER_ENABLED) populateRepoDropdown();
             
             // Initialize with overview
             currentModuleId = 'overview';
@@ -6907,6 +6938,7 @@
          * @returns {Promise<{ ok: boolean, mode?: string }>}
          */
         async function sendArchAgentChatMessage(message, selectionOverride, options) {
+            if (!CHAT_ENABLED) return { ok: false, mode: 'disabled' };
             const opts = options || {};
             const fromHelpPill = !!opts.fromHelpPill;
             const msg = String(message || '').trim();
@@ -7052,6 +7084,7 @@
          * If the chat API is unreachable, copies the question to the clipboard (paste into Cursor chat).
          */
         window.atelierRfAskBriefExplanation = async function atelierRfAskBriefExplanation(ctx) {
+            if (!CHAT_ENABLED) return;
             const nodeId =
                 ctx && ctx.nodeId != null && String(ctx.nodeId).length
                     ? String(ctx.nodeId)
@@ -7089,13 +7122,16 @@
             await sendArchAgentChatMessage(msg, null, {});
         }
         
-        chatSend.addEventListener('click', sendChatMessage);
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
-        });
+        if (CHAT_ENABLED && chatSend && chatInput) {
+            chatSend.addEventListener('click', sendChatMessage);
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+            });
+        }
 
         // --- SSE: event-driven answers + sdk_trace from diagram_ask_watcher (auto-detects current port; override with ?diagram_sse_port=XXXX) ---
         (function connectSSE() {
+            if (!CHAT_ENABLED) return;
             const qp = new URLSearchParams(window.location.search).get('diagram_sse_port');
             const parsedPort = qp && /^[0-9]+$/.test(qp) ? parseInt(qp, 10) : null;
             const locPort = window.location.port ? String(window.location.port) : '';
@@ -7150,7 +7186,7 @@
             window.__atelierSSE = es;
         })();
     </script>
-    <script type="module" src="./reactflow-r6.mjs"></script>
+    <script type="module" src="./reactflow-r6.mjs?v=logical-palette-v2"></script>
 </body>
 </html>
 
