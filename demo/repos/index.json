@@ -48,5 +48,10 @@
     "id": "atelier-tdc8",
     "label": "Atelier \u2014 CodeWiki workspace",
     "description": "Layout of this repository: the codewiki Python package (CLI, backend pipeline, FastAPI app, MCP integration, templates), the static demo viewer, the Vercel serverless API, and supporting tests/scripts/docker/benchmarking."
+  },
+  {
+    "id": "mcp-e2e-test",
+    "label": "MCP E2E Test",
+    "description": "A real diagram created via MCP call from Cursor agent."
   }
 ]

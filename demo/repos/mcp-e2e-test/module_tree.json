@@ -1,0 +1,46 @@
+{
+  "api": {
+    "path": "src/api",
+    "title": "API Gateway",
+    "description": "FastAPI routes, middleware, request validation",
+    "components": [
+      "routes.py",
+      "middleware.py"
+    ],
+    "children": {},
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "routes",
+          "label": "Routes",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "middleware",
+          "label": "Middleware",
+          "type": "component",
+          "link": null
+        },
+        {
+          "id": "validators",
+          "label": "Validators",
+          "type": "component",
+          "link": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "routes",
+          "target": "middleware"
+        },
+        {
+          "source": "middleware",
+          "target": "validators"
+        }
+      ],
+      "groups": []
+    }
+  }
+}

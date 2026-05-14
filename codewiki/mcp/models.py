@@ -119,4 +119,17 @@ class ModuleNodeModel(BaseModel):
         return out
 
 
+class ModuleDocPayload(BaseModel):
+    """One drill-down page written as ``<module_id>.md`` under ``demo/repos/<repo_id>/``."""
+
+    module_id: str = Field(description="File basename without ``.md`` (e.g. ``orders``).")
+    title: str = Field(description="Markdown H1 title.")
+    description: str = Field(default="", description="Short prose under the title.")
+    body_md: str = Field(default="", description="Optional Markdown body.")
+    diagram: Optional[DiagramModel] = Field(
+        default=None,
+        description="Optional embedded DIAGRAM_JSON block.",
+    )
+
+
 ModuleNodeModel.model_rebuild()

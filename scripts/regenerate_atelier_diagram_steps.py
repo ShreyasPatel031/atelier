@@ -16,6 +16,7 @@ import argparse
 import asyncio
 import json
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -25,6 +26,25 @@ from mcp.client.stdio import stdio_client
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ID = "atelier-tdc8"
 DEFAULT_PAUSE_SEC = 3.0
+
+
+def clear_demo_repo_on_disk(repo_id: str) -> None:
+    """Remove ``demo/repos/<repo_id>/`` and its ``index.json`` entry (replaces MCP clear_repo)."""
+    repos_root = ROOT / "demo" / "repos"
+    path = repos_root / repo_id
+    if path.exists():
+        shutil.rmtree(path)
+    index_path = repos_root / "index.json"
+    if not index_path.is_file():
+        return
+    try:
+        entries = json.loads(index_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return
+    if not isinstance(entries, list):
+        return
+    filtered = [e for e in entries if not (isinstance(e, dict) and e.get("id") == repo_id)]
+    index_path.write_text(json.dumps(filtered, indent=2) + "\n", encoding="utf-8")
 
 
 def params() -> StdioServerParameters:
@@ -473,7 +493,7 @@ def diagram_steps() -> list[tuple[str, dict, str]]:
     ]
 
 
-# Minimal drill-down pages for overview node links (clear_repo removes prior *.md).
+# Minimal drill-down pages for overview node links (--clear removes prior *.md).
 def stub_module_doc_calls() -> list[tuple[str, dict, str]]:
     stubs: list[tuple[str, str, str]] = [
         ("cli", "CLI", "Codewiki CLI entrypoints and commands."),
@@ -518,13 +538,9 @@ async def run(args: argparse.Namespace) -> None:
             await session.initialize()
 
             if args.clear:
-                await call(
-                    session,
-                    "clear_repo",
-                    {"repo_id": REPO_ID},
-                    "0 — Clear demo/repos/atelier-tdc8 (fresh)",
-                    pause_sec=0.0,
-                )
+                print("\n=== Step: 0 — Clear demo/repos/atelier-tdc8 (fresh) ===", flush=True)
+                clear_demo_repo_on_disk(REPO_ID)
+                print("(cleared on disk)\n", flush=True)
 
             for i in range(lo - 1, hi):
                 tool, arguments, label = steps[i]

@@ -5,8 +5,8 @@ Holds parsed ``DiagramModel`` for ``overview`` and each top-level module from
 ``module_tree.json`` so ``patch_diagram`` can mutate without re-reading from
 disk every call. Lazy-load on first access; write-through on every patch.
 
-Cache key: ``repo_id``. ``set_overview``, ``set_module_tree``, and
-``clear_repo`` flush the entry so the next read re-parses from disk.
+Cache key: ``repo_id``. ``set_overview`` and ``set_module_tree`` invalidate
+the entry so the next read re-parses from disk.
 """
 
 from __future__ import annotations

@@ -140,6 +140,17 @@ Layout of this repository: the codewiki Python package (CLI, backend pipeline, F
   ],
   "groups": [
     {
+      "id": "g_eng",
+      "label": "Repo tooling",
+      "nodes": [
+        "tests",
+        "scripts",
+        "docker",
+        "benchmarking",
+        "pkg"
+      ]
+    },
+    {
       "id": "g_pkg",
       "label": "Python package",
       "nodes": [
@@ -156,17 +167,6 @@ Layout of this repository: the codewiki Python package (CLI, backend pipeline, F
       "nodes": [
         "demo",
         "api"
-      ]
-    },
-    {
-      "id": "g_eng",
-      "label": "Repo tooling",
-      "nodes": [
-        "tests",
-        "scripts",
-        "docker",
-        "benchmarking",
-        "pkg"
       ]
     }
   ]

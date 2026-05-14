@@ -32,8 +32,9 @@ from typing import Any, Callable, Iterator, Optional, TypeVar
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-# Disable logging entirely with CODEWIKI_PERF_LOG=0; route to file with =/path/file.jsonl
-_PERF_LOG_TARGET = os.environ.get("CODEWIKI_PERF_LOG", "stderr")
+# Default: no stderr spam (MCP stdio reserves stdout; noisy stderr can confuse hosts).
+# Enable with CODEWIKI_PERF_LOG=stderr or CODEWIKI_PERF_LOG=/path/to/events.jsonl
+_PERF_LOG_TARGET = os.environ.get("CODEWIKI_PERF_LOG", "0")
 
 
 @dataclass

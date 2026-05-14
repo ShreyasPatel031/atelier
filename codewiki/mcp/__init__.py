@@ -3,7 +3,8 @@ codewiki.mcp — Minimal stdio MCP server that lets an LLM emit Diagram IR for a
 repo and renders it via the existing ReactFlow viewer in ``demo/``.
 
 Tools:
-    set_overview, set_module_tree, set_module_doc, open_viewer, clear_repo
+    apply_repo_bundle, set_overview, set_module_tree, set_module_doc,
+    get_diagram, patch_diagram, open_viewer
 
 Run with::
 

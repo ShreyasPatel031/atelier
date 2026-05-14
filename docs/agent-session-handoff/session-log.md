@@ -33,7 +33,7 @@ The MCP was used directly for a small smoke diagram:
 - `set_module_tree` for an `orders` drill-down.
 - `set_module_doc` for `orders.md`.
 - `open_viewer`.
-- `list_diagrams`.
+- `get_diagram` with `target='__inventory__'` (repo summary + viewer state).
 
 This validated basic diagram creation, indexing, module tree writes, docs, epoch
 updates, and viewer serving.

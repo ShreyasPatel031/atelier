@@ -2,7 +2,7 @@
 """
 End-to-end smoke test for the new MCP mutation tools.
 
-Exercises ``list_diagrams`` -> ``get_diagram`` -> ``patch_diagram`` against the
+Exercises ``get_diagram`` (inventory + overview) -> ``patch_diagram`` against the
 live atelier-tdc8 repo, then reverts the change so re-running this script is
 idempotent. Captures server-side per-phase timing logs to
 ``/tmp/codewiki-mcp-perf.jsonl`` for inspection.
@@ -69,10 +69,12 @@ async def run() -> None:
         async with ClientSession(read, write) as session:
             await session.initialize()
 
-            print("\n[1] list_diagrams")
-            inv = await call_tool(session, "list_diagrams", {"repo_id": REPO_ID})
+            print("\n[1] get_diagram (inventory)")
+            inv = await call_tool(
+                session, "get_diagram", {"repo_id": REPO_ID, "target": "__inventory__"}
+            )
             print(json.dumps(inv, indent=2))
-            assert inv.get("ok"), "list_diagrams failed"
+            assert inv.get("ok"), "get_diagram inventory failed"
             assert inv.get("exists"), f"repo {REPO_ID!r} missing on disk"
 
             print("\n[2] get_diagram (overview)")
@@ -84,8 +86,12 @@ async def run() -> None:
                 f"{len(d['groups'])} groups, direction={d['direction']!r}"
             )
             existing_group_ids = {g["id"] for g in d["groups"]}
+            merge_buddy = d["groups"][0]["id"]
+            merge_label = d["groups"][0]["label"]
 
-            print("\n[3] patch_diagram: add temporary 'g_smoke' group + node, then merge with g_qa_ops")
+            print(
+                f"\n[3] patch_diagram: add temporary 'g_smoke' group + node (merge target will be {merge_buddy!r})"
+            )
             patch_args = {
                 "repo_id": REPO_ID,
                 "target": "overview",
@@ -108,16 +114,18 @@ async def run() -> None:
             print(json.dumps(patched, indent=2))
             assert patched.get("ok"), patched
 
-            print("\n[4] patch_diagram: merge g_smoke into g_qa_ops, then drop the marker node")
+            print(
+                f"\n[4] patch_diagram: merge g_smoke into existing group {merge_buddy!r}, then drop the marker node"
+            )
             cleanup = {
                 "repo_id": REPO_ID,
                 "target": "overview",
                 "operations": [
                     {
                         "op": "merge_groups",
-                        "group_ids": ["g_smoke", "g_qa_ops"],
-                        "new_id": "g_qa_ops",
-                        "new_label": "QA & Ops",
+                        "group_ids": ["g_smoke", merge_buddy],
+                        "new_id": merge_buddy,
+                        "new_label": merge_label,
                     },
                     {"op": "remove_node", "id": "smoke_marker", "cascade": True},
                 ],
@@ -137,11 +145,7 @@ async def run() -> None:
             )
             print(f"  OK: {len(d2['nodes'])} nodes, {len(d2['groups'])} groups (unchanged)")
 
-            print("\n[6] timing_summary (server-side aggregates)")
-            summ = await call_tool(session, "timing_summary_tool", {})
-            print(json.dumps(summ, indent=2))
-
-    print("\n[7] per-phase JSON-line log analysis")
+    print("\n[6] per-phase JSON-line log analysis")
     summarize_perf_log(PERF_LOG)
     print("\nDONE")
 

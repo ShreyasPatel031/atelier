@@ -38,7 +38,7 @@ MCP tools already used:
 - `set_module_tree`
 - `set_module_doc`
 - `open_viewer`
-- `list_diagrams`
+- `get_diagram` (including `target='__inventory__'` for listing)
 
 Missing wrapper:
 

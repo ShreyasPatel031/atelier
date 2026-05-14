@@ -165,7 +165,7 @@
             text-align: center;
             font-weight: 500;
         }
-
+        
         #elkSvgPane {
             width: 100%;
             flex: 1;
@@ -2747,13 +2747,13 @@
                 el.removeAttribute('data-atelier-rf-selected');
             });
             if (diagramSelections.length) {
-                for (const ds of diagramSelections) {
-                    if (!ds.logicalId || ds.kind === 'edge') continue;
-                    const wrap = root.querySelector(
-                        '.react-flow__node[data-id="' + cssEscapeRfSelector(ds.logicalId) + '"]'
-                    );
-                    if (wrap) wrap.setAttribute('data-atelier-rf-selected', 'true');
-                }
+            for (const ds of diagramSelections) {
+                if (!ds.logicalId || ds.kind === 'edge') continue;
+                const wrap = root.querySelector(
+                    '.react-flow__node[data-id="' + cssEscapeRfSelector(ds.logicalId) + '"]'
+                );
+                if (wrap) wrap.setAttribute('data-atelier-rf-selected', 'true');
+            }
             }
             syncRfNativeNodeSelectionFromDiagramSelections();
         }
@@ -2831,7 +2831,7 @@
                         typeof buildDiagramChatPayload === 'function'
                             ? buildDiagramChatPayload()
                             : null,
-                    /** Latest “?” pill question — read via MCP get_viewer_state(repo_id).last_diagram_ask */
+                    /** Latest “?” pill question — read via MCP get_diagram(repo_id).viewer.last_diagram_ask */
                     last_diagram_ask: lastAsk,
                 };
                 var body = JSON.stringify(payload);
@@ -2923,7 +2923,7 @@
         }
 
         /**
-         * Persist a diagram “?” question so Cursor / MCP can answer via get_viewer_state(repo_id).
+         * Persist a diagram “?” question so Cursor / MCP can answer via get_diagram(repo_id).viewer.
          * @returns {Promise<boolean>} true if viewer_state.json was POSTed somewhere that accepts it
          */
         async function recordLastDiagramAskForMcp(message, selectionOverride) {
@@ -2948,24 +2948,24 @@
          */
         function setDiagramSelection(sel, ev) {
             try {
-                if (!sel || sel.kind === 'none' || sel.logicalId == null || sel.logicalId === '') {
-                    diagramSelections = [];
-                    syncLegacyDiagramSelection();
-                    selectedDiagramNodeId = null;
-                    applyDiagramSelectionHighlight();
-                    return;
-                }
-                const normalized = normalizeDiagramSel(sel);
-                if (ev && isMultiSelectModifier(ev)) {
-                    toggleDiagramSelection(normalized);
-                    return;
-                }
-                diagramSelections = [normalized];
+            if (!sel || sel.kind === 'none' || sel.logicalId == null || sel.logicalId === '') {
+                diagramSelections = [];
                 syncLegacyDiagramSelection();
-                selectedDiagramNodeId = sel.logicalId;
+                selectedDiagramNodeId = null;
                 applyDiagramSelectionHighlight();
-                if (!diagramSelections[diagramSelections.length - 1].label) {
-                    refreshDiagramSelectionLabelFromDom();
+                return;
+            }
+            const normalized = normalizeDiagramSel(sel);
+            if (ev && isMultiSelectModifier(ev)) {
+                toggleDiagramSelection(normalized);
+                return;
+            }
+            diagramSelections = [normalized];
+            syncLegacyDiagramSelection();
+            selectedDiagramNodeId = sel.logicalId;
+            applyDiagramSelectionHighlight();
+            if (!diagramSelections[diagramSelections.length - 1].label) {
+                refreshDiagramSelectionLabelFromDom();
                 }
             } finally {
                 schedulePushViewerStateToMcp();
@@ -3935,9 +3935,9 @@
             if (diagramViewportEl) {
                 diagramViewportEl.classList.add('diagram-viewport--reactflow');
             }
-            if (canvas) canvas.style.display = 'none';
-            if (placeholder) placeholder.hidden = false;
-            refreshReactFlowView();
+                if (canvas) canvas.style.display = 'none';
+                if (placeholder) placeholder.hidden = false;
+                refreshReactFlowView();
             updatePipelinePanel();
             schedulePushViewerStateToMcp();
         }
@@ -6770,12 +6770,12 @@
                 el.textContent = content;
             }
             if (chatMessages) {
-                chatMessages.appendChild(el);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+            chatMessages.appendChild(el);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
             }
             return el;
         }
-
+        
         function atelierSummarizeSdkTraceRow(channel, payload) {
             try {
                 if (channel === 'stream' && payload && payload.type) {
@@ -6918,7 +6918,7 @@
 
             async function helpPillMcpFallback() {
                 if (ui) {
-                    addChatMessage(msg, 'user');
+            addChatMessage(msg, 'user');
                 }
 
                 var synced = await recordLastDiagramAskForMcp(msg, selectionOverride);
@@ -7001,7 +7001,7 @@
             if (ui) {
                 addChatMessage(msg, 'user');
                 loadingEl = addChatMessage('Thinking...', 'loading');
-                chatSend.disabled = true;
+            chatSend.disabled = true;
             }
             try {
                 console.log(
@@ -7034,14 +7034,14 @@
                 }
                 const hint =
                     e.message === 'Failed to fetch' || e.message === 'Load failed'
-                        ? 'Could not reach chat API. Start the CodeWiki server: cd atelier && python3 -m codewiki.run_web_app --port 8001'
+                    ? 'Could not reach chat API. Start the CodeWiki server: cd atelier && python3 -m codewiki.run_web_app --port 8001'
                         : e.message ||
                           'Could not reach chat API. Is the CodeWiki server running on port 8001?';
                 if (ui) addChatMessage('Error: ' + hint, 'assistant');
                 return { ok: false, mode: 'error' };
             } finally {
                 if (ui && chatSend) {
-                    chatSend.disabled = false;
+                chatSend.disabled = false;
                     if (chatInput) chatInput.focus();
                 }
             }
