@@ -1,7 +1,7 @@
 /**
  * R6: ELK → React Flow with ELK-accurate handles (ports), matching openai-realtime-elkjs-tool.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'https://esm.sh/react@18.3.1';
+import React, { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'https://esm.sh/react@18.3.1';
 import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
 import { createPortal } from 'https://esm.sh/react-dom@18.3.1?deps=react@18.3.1';
 import {
@@ -46,6 +46,144 @@ const GROUP_LABEL_PILL_BORDER = '1px solid rgba(100, 116, 139, 0.42)';
 const GROUP_LABEL_Z_INDEX = 20000;
 /** Above group title pill and local stacking context inside the node wrapper. */
 const HOVER_PANEL_Z_INDEX = 2147481000;
+
+const RF_SEMANTIC_NODE_STYLES = {
+    stakeholder_surface: {
+        label: 'Stakeholder work surfaces',
+        background: '#eff6ff',
+        border: '#2563eb',
+        text: '#1e3a8a',
+    },
+    external_data_source: {
+        label: 'External data sources',
+        background: '#fff7ed',
+        border: '#ea580c',
+        text: '#7c2d12',
+    },
+    control_spine: {
+        label: 'Control spine / governance',
+        background: '#f5f3ff',
+        border: '#7c3aed',
+        text: '#4c1d95',
+    },
+    neutral: {
+        label: 'Functional domains / neutral modules',
+        background: '#f8fafc',
+        border: '#64748b',
+        text: '#334155',
+    },
+    user: {
+        label: 'Users / personas',
+        background: '#eff6ff',
+        border: '#2563eb',
+        text: '#1e3a8a',
+    },
+    entry: {
+        label: 'Entrypoints / data',
+        background: '#fff7ed',
+        border: '#f97316',
+        text: '#7c2d12',
+    },
+    module: {
+        label: 'Drill-down modules',
+        background: '#f5f3ff',
+        border: '#7c3aed',
+        text: '#3b0764',
+    },
+    external: {
+        label: 'External systems',
+        background: '#fef2f2',
+        border: '#dc2626',
+        text: '#7f1d1d',
+    },
+    agent: {
+        label: 'Agents / services',
+        background: '#ecfdf5',
+        border: '#059669',
+        text: '#064e3b',
+    },
+    component: {
+        label: 'Other components',
+        background: '#f8fafc',
+        border: '#64748b',
+        text: '#0f172a',
+    },
+};
+
+const RF_SEMANTIC_LEGEND_ORDER = [
+    'stakeholder_surface',
+    'external_data_source',
+    'control_spine',
+    'neutral',
+    'user',
+    'entry',
+    'module',
+    'external',
+    'agent',
+    'component',
+];
+
+const RF_GROUP_VARIATION_LABELS = {
+    'group-only': 'Group color only',
+    'node-border': 'Node borders only',
+    'group-node-border': 'Group + node borders',
+    'group-node-border-outline': 'No group fill + node borders',
+    'group-node-border-soft': 'Soft group tint + node borders',
+    'group-node-border-medium': 'Medium group tint + node borders',
+    'group-node-border-strong': 'Strong group tint + node borders',
+    all: 'Group + filled nodes',
+};
+
+const RF_GROUP_VARIATION_STYLES = {
+    'group-only': { groupFill: 0.14, groupBorder: true, node: 'none', borderStyle: 'solid', borderWidth: 2 },
+    'node-border': { groupFill: 0, groupBorder: false, node: 'border', borderStyle: 'dashed', borderWidth: 1 },
+    'group-node-border': { groupFill: 0.12, groupBorder: true, node: 'border', borderStyle: 'solid', borderWidth: 2 },
+    'group-node-border-outline': { groupFill: 0, groupBorder: true, node: 'border', borderStyle: 'solid', borderWidth: 2 },
+    'group-node-border-soft': { groupFill: 0.07, groupBorder: true, node: 'border', borderStyle: 'solid', borderWidth: 2 },
+    'group-node-border-medium': { groupFill: 0.14, groupBorder: true, node: 'border', borderStyle: 'solid', borderWidth: 2 },
+    'group-node-border-strong': { groupFill: 0.22, groupBorder: true, node: 'border', borderStyle: 'solid', borderWidth: 2 },
+    all: { groupFill: 0.14, groupBorder: true, node: 'fill', borderStyle: 'solid', borderWidth: 2 },
+};
+
+const NODE_HOVER_EDGE_STYLE = {
+    stroke: '#3b82f6',
+    strokeDasharray: '7 5',
+    animation: 'diagram-edge-dash-flow 0.8s linear infinite',
+};
+
+function rfColorWithAlpha(color, alpha) {
+    if (alpha <= 0) return 'transparent';
+    if (!color || typeof color !== 'string') return 'transparent';
+    var hex = color.trim();
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return color;
+    var r = parseInt(hex.slice(1, 3), 16);
+    var g = parseInt(hex.slice(3, 5), 16);
+    var b = parseInt(hex.slice(5, 7), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+function rfClampAlpha(value, fallback) {
+    var n = Number(value);
+    if (!Number.isFinite(n)) n = Number(fallback);
+    if (!Number.isFinite(n)) n = 0.14;
+    return Math.max(0, Math.min(0.45, Math.round(n * 1000) / 1000));
+}
+
+function rfHelpPillStopPropagation(e) {
+    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+}
+
+/** Architectural Agent / Cursor paste — wired in demo/index.html */
+function rfChatEnabled() {
+    return !(typeof window !== 'undefined' && window.__atelierChatEnabled === false);
+}
+
+function rfTriggerBriefExplanation(nodeId, label, kind) {
+    if (!rfChatEnabled()) return;
+    const fn = typeof window !== 'undefined' ? window.atelierRfAskBriefExplanation : null;
+    if (typeof fn !== 'function') return;
+    fn({ nodeId: String(nodeId || ''), label: label || '', kind });
+}
 
 /**
  * Fixed width = 3× node width; height grows with content, caps at 2× node height then scrolls.
@@ -102,21 +240,84 @@ function containsNode(ancestor, node) {
 }
 
 /**
+ * Portaled “?” sits outside the node DOM; moving across the gap fires mouseleave on the root with
+ * relatedTarget not yet on the button. A transparent bridge keeps hover until the pointer hits the pill or leaves both.
+ */
+function rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, pillRef, bridgeRef, e) {
+    var rel = e.relatedTarget;
+    if (containsNode(rootRef.current, rel)) return;
+    if (containsNode(panelRef.current, rel)) return;
+    if (containsNode(pillRef.current, rel)) return;
+    if (containsNode(bridgeRef.current, rel)) return;
+    setHovered(false);
+}
+
+function rfCollapseExpandedNodeId(nodeId) {
+    const id = String(nodeId || '');
+    const baseId = id.endsWith('_sub') ? id.slice(0, -'_sub'.length) : id.replace(/_collapse$/, '');
+    if (!baseId || typeof window.atelierRfHandleNodeClick !== 'function') return;
+    window.atelierRfHandleNodeClick({
+        nodeId: baseId + '_collapse',
+        nodeType: 'custom',
+        event: null,
+        label: 'Collapse',
+        expandable: false,
+        targetModuleId: null,
+        isCollapse: true,
+    });
+}
+
+function rfClientPointInElement(ref, clientX, clientY) {
+    const el = ref && ref.current ? ref.current : null;
+    if (!el || typeof el.getBoundingClientRect !== 'function') return false;
+    const rect = el.getBoundingClientRect();
+    return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+}
+
+/**
  * Leaf node: handles centered on the node bbox edge (matches xyflow .react-flow__handle-* and ELK port coords).
  * Do not use negative left/right/top/bottom offsets — those move the connection point outside the ELK rectangle
  * so edges no longer meet the visible border.
  */
 /** RF v12 passes width/height from node.{width,height}; prefer those over data so boxes stay ELK-sized. */
-function ElkCustomNode({ data, width: rw, height: rh }) {
+function ElkCustomNode({
+    id,
+    data,
+    width: rw,
+    height: rh,
+    selected: rfSelected,
+    positionAbsoluteX,
+    positionAbsoluteY,
+    position,
+}) {
     const [hovered, setHovered] = useState(false);
     const rootRef = useRef(null);
     const panelRef = useRef(null);
+    const helpBridgeRef = useRef(null);
+    const helpPillRef = useRef(null);
+
+    const zoom = useStore((s) => {
+        const t = s.transform;
+        const tz = t && typeof t[2] === 'number' && t[2] > 0 ? t[2] : 1;
+        return tz;
+    });
+    const pillLayer = usePillLayer();
 
     const label = data.label || '';
     const detail = data.hoverDetail != null ? String(data.hoverDetail).trim() : '';
     const expandable = !!(data && data.expandable);
     const collapseBtn = !!(data && data.rfIsCollapse);
     const leafInteractive = expandable || collapseBtn;
+    const selected = !!rfSelected;
+    const semanticStyle = data && data.rfSemanticStyle ? data.rfSemanticStyle : null;
+    const semanticBorder = semanticStyle && semanticStyle.border ? semanticStyle.border : '#475569';
+    const semanticBackground = semanticStyle && semanticStyle.background ? semanticStyle.background : '#fff';
+    const semanticText = semanticStyle && semanticStyle.text ? semanticStyle.text : '#0f172a';
+    const semanticNodeMode = data && data.rfSemanticNodeMode ? data.rfSemanticNodeMode : 'none';
+    const colorNodeFill = semanticNodeMode === 'fill';
+    const colorNodeBorder = semanticNodeMode === 'fill' || semanticNodeMode === 'border';
+    /** Match hover chrome (blue when expandable/collapse + hover); selected uses the same border, no extra outline */
+    const chromeAccent = (hovered && leafInteractive) || selected;
     const showHoverPanel = hovered && detail.length > 0;
     const w = rw ?? data.width ?? 80;
     const h = rh ?? data.height ?? 40;
@@ -125,6 +326,55 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
     const topHandles = data.topHandles || [];
     const bottomHandles = data.bottomHandles || [];
 
+    if (collapseBtn) {
+        return React.createElement('div', {
+            'data-atelier-rf-node-kind': 'collapse-placeholder',
+            style: {
+                width: w,
+                height: h,
+                opacity: 0,
+                pointerEvents: 'none',
+            },
+        });
+    }
+
+    const morphProgress = typeof data.rfMorphProgress === 'number' ? data.rfMorphProgress : null;
+    const morphIsCollapse = !!(data.rfMorphIsCollapse);
+    if (morphIsCollapse && morphProgress != null && morphProgress < 1) {
+        return React.createElement(
+            'div',
+            {
+                'data-atelier-rf-node-kind': 'collapse-morph',
+                style: {
+                    position: 'relative',
+                    width: w,
+                    height: h,
+                    minWidth: w,
+                    maxWidth: w,
+                    minHeight: h,
+                    maxHeight: h,
+                    boxSizing: 'border-box',
+                    overflow: 'visible',
+                    pointerEvents: 'none',
+                },
+            },
+            React.createElement('div', {
+                key: 'group-ghost',
+                style: {
+                    position: 'absolute',
+                    inset: 0,
+                    boxSizing: 'border-box',
+                    border: '1px dashed #64748b',
+                    borderRadius: GROUP_NODE_BORDER_RADIUS,
+                    backgroundColor: 'transparent',
+                    pointerEvents: 'none',
+                },
+            })
+        );
+    }
+
+    const expandingParent = !!(data && data.rfExpandingParent);
+    const hideLeafHandles = expandingParent && morphProgress != null && morphProgress < 1;
     const handleEls = [];
 
     /** Exact ELK connection point → handle center (translate -50/-50 centers on top/left). */
@@ -224,7 +474,7 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
                 height: '100%',
                 padding: '8px',
                 fontSize: 11,
-                color: '#0f172a',
+                color: colorNodeFill ? semanticText : '#0f172a',
                 lineHeight: 1.25,
                 wordBreak: 'break-word',
                 overflowWrap: 'break-word',
@@ -242,13 +492,117 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
     const onRootLeave = function (e) {
         var rel = e.relatedTarget;
         if (containsNode(panelRef.current, rel)) return;
+        if (containsNode(helpPillRef.current, rel)) return;
+        if (containsNode(helpBridgeRef.current, rel)) return;
         setHovered(false);
     };
     const onPanelLeave = function (e) {
         var rel = e.relatedTarget;
         if (containsNode(rootRef.current, rel)) return;
+        if (containsNode(helpPillRef.current, rel)) return;
+        if (containsNode(helpBridgeRef.current, rel)) return;
         setHovered(false);
     };
+
+    const z = zoom > 0 ? zoom : 1;
+    /** Gap outside the node’s right edge (screen-constant). */
+    const helpSideGapFlow = 6 / z;
+    /** Compact “?” — padding + auto height (not full node height). */
+    const helpPadY = 3 / z;
+    const helpPadX = 6 / z;
+    const helpFontPx = Math.max(9 / z, 11 / z);
+    const nodeX =
+        typeof positionAbsoluteX === 'number'
+            ? positionAbsoluteX
+            : position && typeof position.x === 'number'
+              ? position.x
+              : 0;
+    const nodeY =
+        typeof positionAbsoluteY === 'number'
+            ? positionAbsoluteY
+            : position && typeof position.y === 'number'
+              ? position.y
+              : 0;
+
+    const helpBridgeOverlap = 4 / z;
+    const helpPillHitW = helpFontPx + 2 * helpPadX + 14 / z;
+    const helpBridgeLeft = nodeX + w - helpBridgeOverlap;
+    const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
+
+    /** Hide “?” when the side hover snippet panel has text (avoid stacking two aids). */
+    const showHelpPill = hovered && pillLayer && detail.length === 0 && rfChatEnabled();
+    const helpPillPortal =
+        showHelpPill &&
+        createPortal(
+            React.createElement(
+                Fragment,
+                null,
+                React.createElement('div', {
+                    ref: helpBridgeRef,
+                    key: 'help-bridge-' + id,
+                    className: 'atelier-rf-help-hover-bridge nodrag nopan',
+                    style: {
+                        position: 'absolute',
+                        left: helpBridgeLeft,
+                        top: nodeY,
+                        width: helpBridgeWidth,
+                        height: h,
+                        zIndex: GROUP_LABEL_Z_INDEX + 9,
+                        pointerEvents: 'auto',
+                        background: 'transparent',
+                    },
+                    onPointerDown: rfHelpPillStopPropagation,
+                    onMouseDown: rfHelpPillStopPropagation,
+                    onMouseEnter: function () {
+                        setHovered(true);
+                    },
+                    onMouseLeave: function (e) {
+                        rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                    },
+                }),
+                React.createElement(
+                    'button',
+                    {
+                        ref: helpPillRef,
+                        key: 'help-' + id,
+                        type: 'button',
+                        className: 'atelier-rf-help-pill nodrag nopan',
+                        'data-testid': 'atelier-rf-leaf-help',
+                        'data-node-id': id,
+                        title: 'Ask for a brief explanation (Architectural Agent)',
+                        'aria-label': 'Brief explanation for this diagram element',
+                        style: {
+                            position: 'absolute',
+                            left: nodeX + w + helpSideGapFlow,
+                            top: nodeY,
+                            width: 'auto',
+                            height: 'auto',
+                            minWidth: helpFontPx + 2 * helpPadX,
+                            boxSizing: 'border-box',
+                            padding: helpPadY + 'px ' + helpPadX + 'px',
+                            borderRadius: 9999,
+                            zIndex: GROUP_LABEL_Z_INDEX + 10,
+                            fontSize: helpFontPx,
+                        },
+                        onPointerDown: rfHelpPillStopPropagation,
+                        onMouseDown: rfHelpPillStopPropagation,
+                        onMouseEnter: function () {
+                            setHovered(true);
+                        },
+                        onMouseLeave: function (e) {
+                            rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                        },
+                        onClick: function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            rfTriggerBriefExplanation(id, label, 'node');
+                        },
+                    },
+                    '?'
+                )
+            ),
+            pillLayer
+        );
 
     return React.createElement(
         'div',
@@ -286,11 +640,12 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
                     width: '100%',
                     height: '100%',
                     boxSizing: 'border-box',
-                    background: '#fff',
-                    border:
-                        hovered && leafInteractive
-                            ? '2px solid #3b82f6'
-                            : '1px solid #475569',
+                    background: colorNodeFill ? semanticBackground : '#fff',
+                    border: chromeAccent
+                        ? '2px solid #3b82f6'
+                        : colorNodeBorder
+                          ? '1.5px solid ' + semanticBorder
+                          : '1px solid #475569',
                     borderRadius: LEAF_NODE_BORDER_RADIUS,
                     boxShadow: '0 1px 3px rgba(15,23,42,0.12)',
                     overflow: 'hidden',
@@ -299,7 +654,8 @@ function ElkCustomNode({ data, width: rw, height: rh }) {
             },
             labelEl
         ),
-        ...handleEls,
+        ...(!hideLeafHandles ? handleEls : []),
+        helpPillPortal,
         React.createElement(ElkSideHoverPanel, {
             visible: showHoverPanel,
             nodeWidth: w,
@@ -352,6 +708,8 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     const [hovered, setHovered] = useState(false);
     const rootRef = useRef(null);
     const panelRef = useRef(null);
+    const helpBridgeRef = useRef(null);
+    const helpPillRef = useRef(null);
 
     const gw = rw ?? data.width ?? 160;
     const gh = rh ?? data.height ?? 120;
@@ -374,12 +732,33 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
 
     const label = data.label || '';
     const detail = data.hoverDetail != null ? String(data.hoverDetail).trim() : '';
+    const semanticStyle = data && data.rfSemanticStyle ? data.rfSemanticStyle : null;
+    const semanticGroupStyle = data && data.rfSemanticGroupStyle ? data.rfSemanticGroupStyle : null;
+    const colorGroup = !!semanticGroupStyle;
+    const groupBorder = colorGroup && semanticStyle && semanticStyle.border ? semanticStyle.border : '#64748b';
+    const groupFillAlpha =
+        colorGroup && typeof semanticGroupStyle.groupFill === 'number' ? semanticGroupStyle.groupFill : 0;
+    const groupBackground =
+        colorGroup && semanticStyle && semanticStyle.background
+            ? rfColorWithAlpha(semanticStyle.background, groupFillAlpha)
+            : 'transparent';
+    const groupBorderEnabled = colorGroup && semanticGroupStyle.groupBorder !== false;
+    const groupBorderWidth =
+        groupBorderEnabled && typeof semanticGroupStyle.borderWidth === 'number'
+            ? semanticGroupStyle.borderWidth
+            : 1;
+    const groupBorderStyle =
+        groupBorderEnabled && semanticGroupStyle.borderStyle ? semanticGroupStyle.borderStyle : 'dashed';
     const showHoverPanel = hovered && detail.length > 0;
     const { fontPx, thresh } = readGroupLabelViewTune();
     const z = zoom > 0 ? zoom : 1;
     const inside = z <= thresh;
     /** 6 screen px → flow units (viewport scales by zoom; pill rides that scale via its container). */
     const padFlow = 6 / z;
+    const helpSideGapFlow = 6 / z;
+    const helpPadY = 3 / z;
+    const helpPadX = 6 / z;
+    const helpFontPx = Math.max(9 / z, 11 / z);
 
     const pillMaxFlow = inside ? Math.max(0, gw - 2 * padFlow) : gw;
 
@@ -423,7 +802,38 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     const topHandles = data.topHandles || [];
     const bottomHandles = data.bottomHandles || [];
 
+    const groupMorphProgress = typeof data.rfMorphProgress === 'number' ? data.rfMorphProgress : null;
+    const hideGroupHandles = groupMorphProgress != null && groupMorphProgress < 1;
+
     const parts = [];
+
+    const pointerInsideGroupControls = useCallback(
+        function (clientX, clientY) {
+            return (
+                rfClientPointInElement(rootRef, clientX, clientY) ||
+                rfClientPointInElement(panelRef, clientX, clientY) ||
+                rfClientPointInElement(helpPillRef, clientX, clientY) ||
+                rfClientPointInElement(helpBridgeRef, clientX, clientY)
+            );
+        },
+        []
+    );
+
+    useEffect(() => {
+        if (!(data && data.rfExpandedSubgraph)) return;
+        function onPointerMove(e) {
+            setHovered(pointerInsideGroupControls(e.clientX, e.clientY));
+        }
+        function onWindowBlur() {
+            setHovered(false);
+        }
+        document.addEventListener('pointermove', onPointerMove, true);
+        window.addEventListener('blur', onWindowBlur);
+        return () => {
+            document.removeEventListener('pointermove', onPointerMove, true);
+            window.removeEventListener('blur', onWindowBlur);
+        };
+    }, [data, pointerInsideGroupControls]);
 
     /** Exact ELK connection point → handle center (translate -50/-50 centers on top/left). */
     function gHandleStyle(cp) {
@@ -436,6 +846,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         };
     }
 
+    if (!hideGroupHandles) {
     leftHandles.forEach((cp, index) => {
         parts.push(
             React.createElement(Handle, {
@@ -511,6 +922,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
             })
         );
     });
+    }
 
     const labelPill = pillLayer
         ? createPortal(
@@ -529,15 +941,146 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         : null;
 
     const onRootLeave = function (e) {
+        if (typeof e.clientX === 'number' && pointerInsideGroupControls(e.clientX, e.clientY)) return;
         var rel = e.relatedTarget;
         if (containsNode(panelRef.current, rel)) return;
+        if (containsNode(helpPillRef.current, rel)) return;
+        if (containsNode(helpBridgeRef.current, rel)) return;
         setHovered(false);
     };
     const onPanelLeave = function (e) {
+        if (typeof e.clientX === 'number' && pointerInsideGroupControls(e.clientX, e.clientY)) return;
         var rel = e.relatedTarget;
         if (containsNode(rootRef.current, rel)) return;
+        if (containsNode(helpPillRef.current, rel)) return;
+        if (containsNode(helpBridgeRef.current, rel)) return;
         setHovered(false);
     };
+
+    const helpBridgeOverlap = 4 / z;
+    const helpPillHitW = helpFontPx + 2 * helpPadX + 14 / z;
+    const helpBridgeLeft = nodeX + gw - helpBridgeOverlap;
+    const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
+
+    const showCollapsePill = hovered && pillLayer && !!(data && data.rfExpandedSubgraph);
+    const showHelpPill = hovered && pillLayer && detail.length === 0 && rfChatEnabled();
+    const showControlPills = showCollapsePill || showHelpPill;
+    const controlGapFlow = 4 / z;
+    const controlPillStyle = {
+        width: 'auto',
+        height: 'auto',
+        minWidth: helpFontPx + 2 * helpPadX,
+        boxSizing: 'border-box',
+        padding: helpPadY + 'px ' + helpPadX + 'px',
+        borderRadius: 9999,
+        fontSize: helpFontPx,
+        lineHeight: 1,
+    };
+    const helpPillPortal = showControlPills
+        ? createPortal(
+              React.createElement(
+                  Fragment,
+                  null,
+                  React.createElement('div', {
+                      ref: helpBridgeRef,
+                      key: 'help-bridge-' + id,
+                      className: 'atelier-rf-help-hover-bridge nodrag nopan',
+                      style: {
+                          position: 'absolute',
+                          left: helpBridgeLeft,
+                          top: nodeY,
+                          width: helpBridgeWidth,
+                          height: gh,
+                          zIndex: GROUP_LABEL_Z_INDEX + 1,
+                          pointerEvents: 'auto',
+                          background: 'transparent',
+                      },
+                      onPointerDown: rfHelpPillStopPropagation,
+                      onMouseDown: rfHelpPillStopPropagation,
+                      onMouseEnter: function () {
+                          setHovered(true);
+                      },
+                      onMouseLeave: function (e) {
+                          rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                      },
+                  }),
+                  React.createElement(
+                      'div',
+                      {
+                          ref: helpPillRef,
+                          key: 'control-column-' + id,
+                          className: 'atelier-rf-control-column nodrag nopan',
+                          'data-group-id': id,
+                          style: {
+                              position: 'absolute',
+                              left: nodeX + gw + helpSideGapFlow,
+                              top: nodeY,
+                              zIndex: GROUP_LABEL_Z_INDEX + 2,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'flex-start',
+                              gap: controlGapFlow,
+                          },
+                          onPointerDown: rfHelpPillStopPropagation,
+                          onMouseDown: rfHelpPillStopPropagation,
+                          onMouseEnter: function () {
+                              setHovered(true);
+                          },
+                          onMouseLeave: function (e) {
+                              rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                          },
+                      },
+                      showCollapsePill
+                          ? React.createElement(
+                                'button',
+                                {
+                                    key: 'collapse-' + id,
+                                    type: 'button',
+                                    className: 'atelier-rf-help-pill atelier-rf-collapse-pill nodrag nopan',
+                                    'data-testid': 'atelier-rf-group-collapse',
+                                    'data-group-id': id,
+                                    title: 'Collapse expanded group',
+                                    'aria-label': 'Collapse this expanded group',
+                                    style: controlPillStyle,
+                                    onPointerDown: rfHelpPillStopPropagation,
+                                    onMouseDown: rfHelpPillStopPropagation,
+                                    onClick: function (e) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        rfCollapseExpandedNodeId(id);
+                                    },
+                                },
+                                '×'
+                            )
+                          : null,
+                      showHelpPill
+                          ? React.createElement(
+                                'button',
+                                {
+                                    key: 'help-' + id,
+                                    type: 'button',
+                                    className: 'atelier-rf-help-pill nodrag nopan',
+                                    'data-testid': 'atelier-rf-group-help',
+                                    'data-group-id': id,
+                                    title: 'Ask for a brief explanation (Architectural Agent)',
+                                    'aria-label': 'Brief explanation for this diagram element',
+                                    style: controlPillStyle,
+                                    onPointerDown: rfHelpPillStopPropagation,
+                                    onMouseDown: rfHelpPillStopPropagation,
+                                    onClick: function (e) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        rfTriggerBriefExplanation(id, label, 'cluster');
+                                    },
+                                },
+                                '?'
+                            )
+                          : null
+                  )
+              ),
+              pillLayer
+          )
+        : null;
 
     return React.createElement(
         'div',
@@ -553,7 +1096,8 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                 position: 'relative',
                 boxSizing: 'border-box',
                 overflow: 'visible',
-                pointerEvents: 'none',
+                /** Was `none`, which prevented hover for portaled help pill + hover panel over the frame. */
+                pointerEvents: 'auto',
             },
         },
         /**
@@ -563,16 +1107,21 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
          */
         React.createElement('div', {
             key: 'group-frame',
+            className: 'atelier-rf-group-frame',
             style: {
                 position: 'absolute',
                 inset: 0,
                 boxSizing: 'border-box',
-                border: '1px dashed #64748b',
+                border: groupBorderEnabled
+                    ? groupBorderWidth + 'px ' + groupBorderStyle + ' ' + groupBorder
+                    : '1px dashed #64748b',
                 borderRadius: GROUP_NODE_BORDER_RADIUS,
                 pointerEvents: 'none',
+                backgroundColor: groupBackground,
             },
         }),
         labelPill,
+        helpPillPortal,
         React.createElement(
             'div',
             {
@@ -724,17 +1273,202 @@ function rfCubicInOut(t) {
 var RF_LAYOUT_ANIM_MS = 350;
 var RF_LAYOUT_EXIT_MS = 200;
 
+function rfSemanticLegendEnabled(diagram) {
+    if (!diagram || typeof diagram !== 'object') return false;
+    if (diagram.legend === true) return true;
+    if (diagram.legend && diagram.legend.enabled === true) return true;
+    return false;
+}
+
+function rfNodeMetaById(diagram) {
+    var out = Object.create(null);
+    var nodes = diagram && Array.isArray(diagram.nodes) ? diagram.nodes : [];
+    for (var i = 0; i < nodes.length; i++) {
+        var n = nodes[i];
+        if (n && n.id != null) out[String(n.id)] = n;
+    }
+    return out;
+}
+
+function rfGroupPresentation(diagram) {
+    var groups = diagram && Array.isArray(diagram.groups) ? diagram.groups : [];
+    var legend = diagram && diagram.legend && typeof diagram.legend === 'object' ? diagram.legend : {};
+    var groupModes = legend.groupModes && typeof legend.groupModes === 'object' ? legend.groupModes : {};
+    var groupRoles = legend.groupRoles && typeof legend.groupRoles === 'object' ? legend.groupRoles : {};
+    var groupTint = legend.groupTint && typeof legend.groupTint === 'object' ? legend.groupTint : {};
+    var groupById = Object.create(null);
+    var memberToGroup = Object.create(null);
+    var groupOrder = Object.create(null);
+    for (var i = 0; i < groups.length; i++) {
+        var g = groups[i];
+        if (!g || g.id == null) continue;
+        var id = String(g.id);
+        groupById[id] = g;
+        groupOrder[id] = i;
+        var members = Array.isArray(g.nodes) ? g.nodes : [];
+        for (var j = 0; j < members.length; j++) {
+            memberToGroup[String(members[j])] = id;
+        }
+    }
+    return {
+        groupById: groupById,
+        memberToGroup: memberToGroup,
+        groupModes: groupModes,
+        groupRoles: groupRoles,
+        groupTint: groupTint,
+        groupOrder: groupOrder,
+    };
+}
+
+function rfLegendLabels(diagram) {
+    var out = Object.create(null);
+    var legend = diagram && diagram.legend && typeof diagram.legend === 'object' ? diagram.legend : {};
+    var roles = legend.roles && typeof legend.roles === 'object' ? legend.roles : {};
+    Object.keys(roles).forEach(function (rawRole) {
+        var role = rfNormaliseSemanticRole(rawRole);
+        var label = roles[rawRole];
+        if (role && typeof label === 'string' && label.trim()) out[role] = label.trim();
+    });
+    return out;
+}
+
+function rfLegendAllowsRole(role, legendLabels) {
+    if (!role) return false;
+    var keys = legendLabels && typeof legendLabels === 'object' ? Object.keys(legendLabels) : [];
+    if (!keys.length) return true;
+    return !!legendLabels[role];
+}
+
+function rfNormaliseSemanticRole(role) {
+    if (role == null) return null;
+    var r = String(role).trim().toLowerCase();
+    if (!r) return null;
+    if (r === 'stakeholder' || r === 'stakeholders' || r === 'stakeholder_surface' || r === 'stakeholder-surface') {
+        return 'stakeholder_surface';
+    }
+    if (
+        r === 'data_source' ||
+        r === 'data-source' ||
+        r === 'external_data' ||
+        r === 'external-data' ||
+        r === 'external_data_source' ||
+        r === 'external-data-source'
+    ) {
+        return 'external_data_source';
+    }
+    if (r === 'control' || r === 'control_spine' || r === 'control-spine' || r === 'governance_spine') {
+        return 'control_spine';
+    }
+    if (r === 'gray' || r === 'grey' || r === 'neutral_gray' || r === 'neutral-grey') return 'neutral';
+    if (r === 'persona' || r === 'role' || r === 'human') return 'user';
+    if (r === 'external_system' || r === 'vendor' || r === 'integration') return 'external';
+    if (r === 'service' || r === 'ai_agent' || r === 'system_agent') return 'agent';
+    if (r === 'workbench' || r === 'view' || r === 'task') return 'component';
+    return RF_SEMANTIC_NODE_STYLES[r] ? r : null;
+}
+
+function rfNormaliseGroupMode(mode) {
+    if (mode == null) return null;
+    var m = String(mode).trim().toLowerCase();
+    if (m === 'group' || m === 'group-color' || m === 'group_color') return 'group-only';
+    if (m === 'border' || m === 'node-borders' || m === 'node_border') return 'node-border';
+    if (m === 'group-border' || m === 'group-node-borders' || m === 'group_node_border') return 'group-node-border';
+    if (m === 'outline' || m === 'no-fill' || m === 'no_fill') return 'group-node-border-outline';
+    if (m === 'soft' || m === 'soft-fill' || m === 'soft_fill') return 'group-node-border-soft';
+    if (m === 'medium' || m === 'medium-fill' || m === 'medium_fill') return 'group-node-border-medium';
+    if (m === 'strong' || m === 'strong-fill' || m === 'strong_fill') return 'group-node-border-strong';
+    if (m === 'full' || m === 'fill' || m === 'everything') return 'all';
+    return RF_GROUP_VARIATION_LABELS[m] ? m : null;
+}
+
+function rfInferSemanticRole(nodeId, raw) {
+    var explicit =
+        raw &&
+        (raw.semanticRole != null
+            ? raw.semanticRole
+            : raw.role != null
+              ? raw.role
+              : raw.kind != null
+                ? raw.kind
+                : raw.category);
+    var role = rfNormaliseSemanticRole(explicit);
+    if (role) return role;
+
+    var id = String(nodeId || '').toLowerCase();
+    var type = raw && raw.type != null ? String(raw.type).toLowerCase() : '';
+    if (type === 'external' || id.indexOf('ext_') === 0) return 'external';
+    if (type === 'module') return 'module';
+    if (id.indexOf('role_') === 0 || id.indexOf('user_') === 0) return 'user';
+    if (id.indexOf('entry_') === 0 || id.indexOf('tile_wb_') === 0) return 'entry';
+    if (id.indexOf('agent') >= 0 || id.indexOf('orchestrator') >= 0 || id.indexOf('sentinel') >= 0) return 'agent';
+    return 'component';
+}
+
+function rfGroupRole(groupId, raw, groupRoles) {
+    var explicit =
+        raw &&
+        (raw.semanticRole != null
+            ? raw.semanticRole
+            : raw.role != null
+              ? raw.role
+              : raw.kind != null
+                ? raw.kind
+                : raw.category);
+    return (
+        rfNormaliseSemanticRole(explicit) ||
+        rfNormaliseSemanticRole(groupRoles && groupRoles[groupId]) ||
+        'component'
+    );
+}
+
+function rfResolveGroupTintAlpha(groupId, raw, groupPresentation, variationStyle) {
+    var tint = groupPresentation && groupPresentation.groupTint ? groupPresentation.groupTint : {};
+    var byGroup = tint.byGroup && typeof tint.byGroup === 'object' ? tint.byGroup : {};
+    if (raw && raw.tintAlpha != null) return rfClampAlpha(raw.tintAlpha, variationStyle.groupFill);
+    if (byGroup && byGroup[groupId] != null) return rfClampAlpha(byGroup[groupId], variationStyle.groupFill);
+    var base = rfClampAlpha(tint.baseAlpha, variationStyle.groupFill);
+    var step = Number(tint.alphaStep);
+    if (!Number.isFinite(step)) step = 0;
+    var maxAlpha = rfClampAlpha(tint.maxAlpha, 0.26);
+    var index =
+        groupPresentation && groupPresentation.groupOrder && groupPresentation.groupOrder[groupId] != null
+            ? groupPresentation.groupOrder[groupId]
+            : 0;
+    return rfClampAlpha(Math.min(maxAlpha, base + step * index), variationStyle.groupFill);
+}
+
 /** Hover / expandable metadata merged onto ELK→RF nodes (shared mount + in-place refresh). */
 function enrichRfNodesFromDiagram(diagram, nodes) {
     var hoverFn = window.atelierRfHoverDetailByNodeId;
     var hoverMap = typeof hoverFn === 'function' ? hoverFn(diagram) : Object.create(null);
     var expandFn = window.atelierRfExpandableByNodeId;
     var expandMap = typeof expandFn === 'function' ? expandFn(diagram) : Object.create(null);
+    var legendEnabled = rfSemanticLegendEnabled(diagram);
+    var metaById = legendEnabled ? rfNodeMetaById(diagram) : Object.create(null);
+    var groupPresentation = legendEnabled ? rfGroupPresentation(diagram) : null;
+    var legendLabels = legendEnabled ? rfLegendLabels(diagram) : Object.create(null);
     return nodes.map(function (n) {
         var hid = hoverMap[n.id];
         var idStr = String(n.id);
         var isCollapse = idStr.endsWith('_collapse');
         var targetMod = expandMap[idStr];
+        var groupId =
+            n.type === 'group'
+                ? idStr
+                : n.parentId != null
+                  ? String(n.parentId)
+                  : groupPresentation && groupPresentation.memberToGroup[idStr];
+        var rawGroup = groupPresentation && groupId ? groupPresentation.groupById[groupId] : null;
+        var groupMode =
+            groupPresentation && groupId
+                ? rfNormaliseGroupMode(
+                      rawGroup && rawGroup.visualMode != null
+                          ? rawGroup.visualMode
+                          : groupPresentation.groupModes[groupId]
+                  )
+                : null;
+        if (!groupMode && legendEnabled) groupMode = 'group-node-border-medium';
+        var variationStyle = RF_GROUP_VARIATION_STYLES[groupMode] || RF_GROUP_VARIATION_STYLES.all;
         var dataExtra = {
             hoverDetail: hid != null ? hid : n.data.hoverDetail,
             rfIsCollapse: isCollapse,
@@ -745,6 +1479,27 @@ function enrichRfNodesFromDiagram(diagram, nodes) {
         }
         if (n.type === 'group' && idStr.endsWith('_sub')) {
             dataExtra.rfExpandedSubgraph = true;
+        }
+        if (legendEnabled && n.type === 'group' && !isCollapse) {
+            var groupRole = rfGroupRole(idStr, rawGroup, groupPresentation.groupRoles);
+            if (rfLegendAllowsRole(groupRole, legendLabels)) {
+                dataExtra.rfSemanticRole = groupRole;
+                dataExtra.rfSemanticStyle = RF_SEMANTIC_NODE_STYLES[groupRole] || RF_SEMANTIC_NODE_STYLES.component;
+                dataExtra.rfSemanticLabel = legendLabels[groupRole] || dataExtra.rfSemanticStyle.label;
+                dataExtra.rfSemanticGroupStyle = Object.assign({}, variationStyle, {
+                    groupFill: rfResolveGroupTintAlpha(idStr, rawGroup, groupPresentation, variationStyle),
+                });
+                dataExtra.rfSemanticGroupMode = groupMode;
+            }
+        }
+        if (legendEnabled && n.type === 'custom' && !isCollapse) {
+            var semanticRole = rfInferSemanticRole(idStr, metaById[idStr]);
+            if (rfLegendAllowsRole(semanticRole, legendLabels)) {
+                dataExtra.rfSemanticRole = semanticRole;
+                dataExtra.rfSemanticStyle = RF_SEMANTIC_NODE_STYLES[semanticRole] || RF_SEMANTIC_NODE_STYLES.component;
+                dataExtra.rfSemanticLabel = legendLabels[semanticRole] || dataExtra.rfSemanticStyle.label;
+                dataExtra.rfSemanticNodeMode = variationStyle.node || 'none';
+            }
         }
         var out = Object.assign({}, n, {
             data: Object.assign({}, n.data || {}, dataExtra),
@@ -957,6 +1712,7 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
      */
     var enteringAnchor = new Map();
     var anchoredExitIds = new Set();
+    var enteringIsCollapse = new Set();
     for (var si = 0; si < targetNodes.length; si++) {
         var sn = targetNodes[si];
         var sid = String(sn.id);
@@ -973,6 +1729,39 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
                 parentId: String(sn.parentId || ''),
             });
             anchoredExitIds.add(anchorId);
+            if (!sid.endsWith('_sub')) {
+                enteringIsCollapse.add(sid);
+            }
+        }
+    }
+
+    var collapseChildExitIds = new Set();
+    if (enteringIsCollapse.size > 0) {
+        for (var cci = 0; cci < exitingIds.length; cci++) {
+            var ceid = exitingIds[cci];
+            if (anchoredExitIds.has(ceid)) continue;
+            var cGhost = oldById.get(ceid);
+            if (cGhost && cGhost.parentId && anchoredExitIds.has(String(cGhost.parentId))) {
+                collapseChildExitIds.add(ceid);
+            }
+        }
+    }
+
+    var expandingGroupIds = new Set();
+    for (var egi = 0; egi < targetNodes.length; egi++) {
+        var egn = targetNodes[egi];
+        var egid = String(egn.id);
+        if (enteringAnchor.has(egid) && !enteringIsCollapse.has(egid)) {
+            expandingGroupIds.add(egid);
+        }
+    }
+    var expandChildIds = new Set();
+    if (expandingGroupIds.size > 0) {
+        for (var eci = 0; eci < targetNodes.length; eci++) {
+            var ecn = targetNodes[eci];
+            if (ecn.parentId && expandingGroupIds.has(String(ecn.parentId))) {
+                expandChildIds.add(String(ecn.id));
+            }
         }
     }
 
@@ -1059,12 +1848,15 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
                 position: { x: px, y: py },
                 style: ns,
             });
-            if (tweenW != null || tweenH != null) {
+            var isAnchored = !oid && enteringAnchor.has(tid);
+            if (tweenW != null || tweenH != null || isAnchored) {
                 frameNode.width = tweenW != null ? tweenW : tn.width;
                 frameNode.height = tweenH != null ? tweenH : tn.height;
                 frameNode.data = Object.assign({}, tn.data || {}, {
                     width: tweenW != null ? tweenW : (tn.data && tn.data.width),
                     height: tweenH != null ? tweenH : (tn.data && tn.data.height),
+                    rfMorphProgress: easedPos,
+                    rfMorphIsCollapse: enteringIsCollapse.has(tid),
                 });
             }
             /**
@@ -1078,6 +1870,12 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
             if (!oid && enteringAnchor.has(tid) && tPos < 1) {
                 frameNode.extent = undefined;
             }
+            if (expandChildIds.has(tid) && tPos < 1) {
+                frameNode.data = Object.assign({}, frameNode.data || tn.data || {}, {
+                    rfExpandingParent: true,
+                    rfMorphProgress: easedPos,
+                });
+            }
             frameNodes.push(frameNode);
         }
 
@@ -1085,6 +1883,7 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
             var eid = exitingIds[ex];
             if (exitAlpha <= 0) continue;
             if (anchoredExitIds.has(eid)) continue;
+            if (collapseChildExitIds.has(eid)) continue;
             var ghost = oldById.get(eid);
             if (!ghost) continue;
             if (ghost.parentId && !exitingAbsPos.has(String(ghost.parentId))) {
@@ -1128,11 +1927,133 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
     return rfLayoutAnimTimer;
 };
 
+function SemanticLegend({ nodes }) {
+    var present = new Set();
+    var modePresent = new Set();
+    var roleLabels = Object.create(null);
+    var nds = Array.isArray(nodes) ? nodes : [];
+    for (var i = 0; i < nds.length; i++) {
+        var n = nds[i];
+        var role = n && n.data && n.data.rfSemanticRole;
+        if (role && RF_SEMANTIC_NODE_STYLES[role]) {
+            present.add(role);
+            if (!roleLabels[role] && n.data.rfSemanticLabel) roleLabels[role] = n.data.rfSemanticLabel;
+        }
+        var mode = n && n.data && n.data.rfSemanticGroupMode;
+        if (mode && RF_GROUP_VARIATION_LABELS[mode]) modePresent.add(mode);
+    }
+    if (!present.size) return null;
+    // Expandable module tiles are navigation affordances, not architecture categories.
+    // Keep them out of the legend so the key explains only meaningful node types.
+    present.delete('module');
+    if (present.has('neutral')) {
+        present.delete('component');
+    }
+    var rows = RF_SEMANTIC_LEGEND_ORDER.filter(function (role) {
+        return present.has(role);
+    });
+    present.forEach(function (role) {
+        if (rows.indexOf(role) < 0) rows.push(role);
+    });
+    if (!rows.length) return null;
+    var modeRows = [];
+    return React.createElement(
+        'div',
+        {
+            className: 'atelier-rf-semantic-legend',
+            'data-testid': 'atelier-rf-semantic-legend',
+            style: {
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 20,
+                padding: '10px 12px',
+                borderRadius: 10,
+                border: '1px solid rgba(148, 163, 184, 0.55)',
+                background: 'rgba(255,255,255,0.94)',
+                boxShadow: '0 8px 24px rgba(15,23,42,0.12)',
+                fontSize: 11,
+                lineHeight: 1.25,
+                color: '#334155',
+                pointerEvents: 'none',
+            },
+        },
+        React.createElement(
+            'div',
+            {
+                style: {
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    marginBottom: 6,
+                },
+            },
+            'Legend'
+        ),
+        ...rows.map(function (role) {
+            var style = RF_SEMANTIC_NODE_STYLES[role];
+            var label = roleLabels[role] || style.label;
+            return React.createElement(
+                'div',
+                {
+                    key: role,
+                    style: {
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        marginTop: 4,
+                        whiteSpace: 'nowrap',
+                    },
+                },
+                React.createElement('span', {
+                    style: {
+                        width: 12,
+                        height: 12,
+                        borderRadius: 3,
+                        background: style.background,
+                        border: '1.5px solid ' + style.border,
+                        boxSizing: 'border-box',
+                    },
+                }),
+                React.createElement('span', null, label)
+            );
+        }),
+        modeRows.length
+            ? React.createElement(
+                  'div',
+                  {
+                      style: {
+                          marginTop: 8,
+                          paddingTop: 7,
+                          borderTop: '1px solid rgba(148, 163, 184, 0.35)',
+                          fontWeight: 700,
+                          color: '#0f172a',
+                      },
+                  },
+                  'Variations'
+              )
+            : null,
+        ...modeRows.map(function (mode) {
+            return React.createElement(
+                'div',
+                {
+                    key: mode,
+                    style: {
+                        marginTop: 4,
+                        whiteSpace: 'nowrap',
+                    },
+                },
+                RF_GROUP_VARIATION_LABELS[mode]
+            );
+        })
+    );
+}
+
 function Inner(props) {
     const initialNodes = props.initialNodes || [];
     const initialEdges = props.initialEdges || [];
     const [nodes, setNodes] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    const [hoveredNodeId, setHoveredNodeId] = useState(null);
     const nodesRef = useRef(nodes);
     nodesRef.current = nodes;
 
@@ -1169,6 +2090,7 @@ function Inner(props) {
                 nodeId: node.id,
                 nodeType: node.type,
                 event: ev && ev.nativeEvent ? ev.nativeEvent : ev,
+                label: node.data && node.data.label != null ? String(node.data.label) : '',
                 expandable: !!(node.data && node.data.expandable),
                 targetModuleId: node.data && node.data.targetModuleId,
                 isCollapse: !!(node.data && node.data.rfIsCollapse),
@@ -1182,10 +2104,43 @@ function Inner(props) {
         }
     }, []);
 
+    const onSelectionChange = useCallback(function (params) {
+        var sel = params && params.nodes ? params.nodes : [];
+        if (typeof window.atelierRfOnNativeSelectionChange === 'function') {
+            window.atelierRfOnNativeSelectionChange(sel);
+        }
+    }, []);
+
+    const onNodeMouseEnter = useCallback(function (_ev, node) {
+        setHoveredNodeId(node && node.id != null ? String(node.id) : null);
+    }, []);
+
+    const onNodeMouseLeave = useCallback(function () {
+        setHoveredNodeId(null);
+    }, []);
+
+    const renderedEdges = useMemo(
+        function () {
+            if (!hoveredNodeId) return edges;
+            return edges.map(function (edge) {
+                var connected =
+                    String(edge.source) === hoveredNodeId ||
+                    String(edge.target) === hoveredNodeId;
+                if (!connected) return edge;
+                return Object.assign({}, edge, {
+                    animated: true,
+                    style: Object.assign({}, edge.style || {}, NODE_HOVER_EDGE_STYLE),
+                });
+            });
+        },
+        [edges, hoveredNodeId]
+    );
+
     useEffect(
         function () {
             setNodes(clampElkCustomNodeDimensions(initialNodes));
             setEdges(initialEdges);
+            setHoveredNodeId(null);
             queueMicrotask(function () {
                 if (typeof window.atelierRfSyncSelectionHighlight === 'function') {
                     window.atelierRfSyncSelectionHighlight();
@@ -1199,11 +2154,14 @@ function Inner(props) {
         ReactFlow,
         {
             nodes,
-            edges,
+            edges: renderedEdges,
             onNodesChange,
             onEdgesChange,
             onNodeClick,
+            onNodeMouseEnter,
+            onNodeMouseLeave,
             onPaneClick,
+            onSelectionChange,
             nodeTypes,
             edgeTypes,
             fitView: true,
@@ -1211,6 +2169,11 @@ function Inner(props) {
             nodesDraggable: false,
             nodesConnectable: false,
             elementsSelectable: true,
+            /** Box-select with primary button on empty pane; pan with middle/right drag or scroll (no hand cursor on pane). */
+            selectionOnDrag: true,
+            selectionMode: 'partial',
+            panOnDrag: [1, 2],
+            selectNodesOnDrag: false,
             proOptions: { hideAttribution: true },
             minZoom: 0.08,
             maxZoom: 2,
@@ -1229,7 +2192,8 @@ function Inner(props) {
         },
         React.createElement(AtelierViewportApiBootstrap, null),
         React.createElement(Background, { gap: 16, color: '#cbd5e1' }),
-        React.createElement(Controls, { showInteractive: false })
+        React.createElement(Controls, { showInteractive: false }),
+        React.createElement(SemanticLegend, { nodes })
     );
 }
 

@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11.9.0/dist/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
     <script src="./viewer-debug.js"></script>
+    <script src="./viewer-config.js"></script>
     <script src="./pipeline-overview-mermaid.js"></script>
     <script src="./pipeline-ir-repair.js"></script>
     <script src="./elk-node-dimensions.js"></script>
@@ -38,27 +39,6 @@
             display: flex;
             align-items: center;
             gap: 15px;
-        }
-
-        .back-button {
-            padding: 8px 16px;
-            background: #0039A6;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            display: inline-block;
-        }
-
-        .back-button:hover {
-            background: #1d4ed8;
-        }
-
-        .back-button:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
         }
 
         .title {
@@ -187,116 +167,6 @@
             font-weight: 500;
         }
         
-        .zoom-hint {
-            font-size: 11px;
-            color: #94a3b8;
-            margin-left: auto;
-        }
-
-        /* R0 / R1: Mermaid vs React Flow tab + pipeline inspector */
-        .diagram-render-tabs {
-            display: flex;
-            gap: 0;
-            padding: 0 12px;
-            background: #f1f5f9;
-            border-bottom: 1px solid #e2e8f0;
-            flex-shrink: 0;
-        }
-        .diagram-tab {
-            padding: 10px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #64748b;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            margin-bottom: -1px;
-        }
-        .diagram-tab:hover {
-            color: #0039A6;
-        }
-        .diagram-tab.active {
-            color: #0039A6;
-            border-bottom-color: #0039A6;
-            background: #fff;
-        }
-        .pipeline-panel {
-            flex-shrink: 0;
-            max-height: 18vh;
-            overflow: auto;
-            border-bottom: 1px solid #e2e8f0;
-            background: #fafafa;
-            font-size: 10px;
-        }
-        .pipeline-section {
-            border-bottom: 1px solid #e8e8e8;
-        }
-        .pipeline-section summary {
-            padding: 4px 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 10px;
-            color: #334155;
-            background: #f1f5f9;
-            user-select: none;
-        }
-        .pipeline-section summary:hover {
-            background: #e2e8f0;
-        }
-        .pipeline-pre {
-            margin: 0;
-            padding: 6px 10px;
-            white-space: pre-wrap;
-            word-break: break-word;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
-            font-size: 10px;
-            color: #0f172a;
-            max-height: 12vh;
-            overflow: auto;
-        }
-        .pipeline-r4-hint {
-            margin: 0;
-            padding: 8px 12px 0;
-            font-size: 11px;
-            color: #475569;
-            line-height: 1.4;
-        }
-        .pipeline-r4-hint a {
-            color: #0039a6;
-        }
-        .pipeline-r4-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            flex-wrap: wrap;
-        }
-        .pipeline-copy-btn {
-            font: inherit;
-            font-size: 11px;
-            padding: 4px 10px;
-            cursor: pointer;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            background: #fff;
-            color: #0f172a;
-        }
-        .pipeline-copy-btn:hover:not(:disabled) {
-            background: #f1f5f9;
-        }
-        .pipeline-copy-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .pipeline-copy-feedback {
-            font-size: 11px;
-            color: #15803d;
-        }
-        .pipeline-section.pipeline-nested summary {
-            padding-left: 20px;
-            font-weight: 500;
-        }
         #elkSvgPane {
             width: 100%;
             flex: 1;
@@ -323,19 +193,54 @@
         }
         #reactflowRoot {
             flex: 1;
-            min-height: min(70vh, 560px);
+            /* Allow shrinking in short viewports (embedded browser); parent chain sets min-heights */
+            min-height: 0;
             width: 100%;
             position: relative;
         }
         #reactflowRoot .react-flow {
             width: 100%;
             height: 100%;
+            /** Match leaf hover chrome (`#3b82f6` in reactflow-r6.mjs) */
+            --xy-selection-border: 1px dotted rgba(59, 130, 246, 0.88);
         }
         /* Group label pill is portaled to .atelier-rf-pill-layer inside .react-flow__viewport
            (see reactflow-r6.mjs AtelierViewportApiBootstrap). The layer sits above
            .react-flow__nodes so labels never get covered by sibling nodes/edges. */
         #reactflowRoot .atelier-rf-pill-layer {
             pointer-events: none;
+        }
+        /** Help “?” on RF nodes — layer is pointer-events:none; pill opts in */
+        .atelier-rf-help-pill {
+            pointer-events: auto;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border: 1px solid rgba(100, 116, 139, 0.55);
+            background: #f8fafc;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .atelier-rf-help-pill:hover {
+            background: #e2e8f0;
+            border-color: #3b82f6;
+            color: #1e293b;
+        }
+        .atelier-rf-help-pill:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 1px;
+        }
+        /** Portaled help pills ride .atelier-rf-pill-layer (above RF handles / wrappers) */
+        #reactflowRoot .atelier-rf-pill-layer .atelier-rf-help-pill {
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.22);
         }
         /**
          * RF v12 renders all nodes flat as siblings under .react-flow__nodes (groups have no
@@ -356,16 +261,56 @@
              */
             padding: 0 !important;
             border: 0 !important;
+            /** No wrapper fill — compound interior stays visually empty; border lives on .atelier-rf-group-frame */
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group.selectable:hover {
+            box-shadow: none !important;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group.selectable.selected,
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group.selectable:focus,
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group.selectable:focus-visible {
+            box-shadow: none !important;
         }
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group .react-flow__handle {
             pointer-events: auto !important;
         }
-        /** Expanded `*_sub` uses same pointer-events as other groups (none) so collapse / inner nodes stay clickable. */
-        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node[data-atelier-rf-selected='true'] {
-            outline: 2px solid #2563eb;
-            outline-offset: 2px;
-            border-radius: 8px;
+        /** Custom leaf chrome draws selection; suppress xyflow wrapper ring/shadow on non-group nodes */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node:not(.react-flow__node-group).selectable.selected,
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node:not(.react-flow__node-group).selectable:focus,
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node:not(.react-flow__node-group).selectable:focus-visible {
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        /** Leaves: selection chrome matches hover (see reactflow-r6 ElkCustomNode); only lift stacking here */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node:not(.react-flow__node-group)[data-atelier-rf-selected='true'] {
             z-index: 2147482100 !important;
+        }
+        /**
+         * Groups: selection is only the inner ELK frame border (no wrapper fill / outline).
+         * Keep z-index BELOW default leaves (5000 in pipeline-elk-reactflow.js): the group
+         * wrapper uses pointer-events:auto (ElkGroupNode) for hover/help; if a selected group
+         * is boosted to an ultrahigh z-index it stacks above sibling leaves inside the frame
+         * and steals clicks — inner nodes become unselectable until the group is deselected.
+         * 4900 > unselected groups (4000), still < leaves (5000) and collapse badges (6500).
+         */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group[data-atelier-rf-selected='true'] {
+            outline: none !important;
+            z-index: 4900 !important;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__node-group[data-atelier-rf-selected='true'] .atelier-rf-group-frame {
+            border: 2px solid #3b82f6 !important;
+            border-style: solid !important;
+        }
+        /**
+         * xyflow paints each selected node’s bbox with --xy-selection-background-color (blue tint).
+         * Selected groups span the whole compound — looks like a solid blue fill. Strip fill only;
+         * keep selection border so box-drag remains visible.
+         */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__nodesselection-rect,
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__selection {
+            background: transparent !important;
         }
         
         /* Dev: tune panel sits inside diagram viewport (bottom-left), not over the chat column */
@@ -438,9 +383,24 @@
             min-height: 0;
             overflow: hidden;
             position: relative;
-            cursor: grab;
             display: flex;
             flex-direction: column;
+        }
+        /** Grab cursor only for Mermaid / ELK panes; React Flow uses pointer + middle/right drag to pan */
+        .diagram-viewport:not(.diagram-viewport--reactflow) {
+            cursor: grab;
+        }
+        .diagram-viewport:not(.diagram-viewport--reactflow):active {
+            cursor: grabbing;
+        }
+        #diagramViewport.diagram-viewport--reactflow {
+            cursor: default;
+        }
+        #diagramViewport.diagram-viewport--reactflow:active {
+            cursor: default;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__pane {
+            cursor: default;
         }
         /** R6: node/group hover detail panels extend outside the node bbox */
         #diagramViewport.diagram-viewport--reactflow {
@@ -481,10 +441,6 @@
             cursor: pointer !important;
         }
         
-        .diagram-viewport:active {
-            cursor: grabbing;
-        }
-        
         .diagram-canvas {
             flex: 1;
             min-height: 0;
@@ -518,6 +474,21 @@
             padding: 0;
             display: flex;
             flex-direction: column;
+        }
+
+        body.viewer-no-chat .doc-pane,
+        body.viewer-no-chat .pane-resizer {
+            display: none !important;
+        }
+
+        body.viewer-no-chat .diagram-pane {
+            flex: 1 1 100%;
+            width: 100%;
+            max-width: none;
+        }
+
+        body.viewer-no-repo-switcher .repo-dropdown {
+            display: none !important;
         }
 
         /* Tooltip for hover — position/size finalized in JS (viewport + reflow); keep above panes */
@@ -965,23 +936,25 @@
         /* Chat in right pane - now fills entire right panel */
         .chat-section {
             margin-top: 0;
-            padding: 20px 30px;
-            padding-top: 20px;
+            padding: 12px 16px;
+            padding-top: 12px;
             display: flex;
             flex-direction: column;
             flex: 1;
             background: #ffffff;
             height: 100%;
             overflow: hidden;
+            min-height: 0;
         }
         .chat-messages {
-            flex: 1;
+            flex: 0 1 auto;
             overflow-y: auto;
-            padding: 12px 0;
+            padding: 8px 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             min-height: 0;
+            max-height: min(160px, 28vh);
         }
         .chat-message {
             padding: 8px 12px;
@@ -1039,18 +1012,86 @@
             align-self: flex-start;
             font-style: italic;
         }
+        .chat-message.streaming {
+            background: #f8fafc;
+            color: #334155;
+            align-self: flex-start;
+            font-style: normal;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .atelier-diagram-help-activity {
+            margin: 6px 0 4px;
+            padding: 6px 10px;
+            font-size: 11px;
+            line-height: 1.35;
+            color: #475569;
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 6px;
+            align-self: stretch;
+        }
+        .atelier-diagram-help-activity[hidden] {
+            display: none !important;
+        }
+        .atelier-diagram-help-activity .atelier-dha-label {
+            font-weight: 600;
+            color: #4338ca;
+            margin-right: 6px;
+        }
+        .atelier-sdk-trace-wrap {
+            flex-shrink: 0;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 4px;
+            padding-top: 6px;
+            min-height: 0;
+        }
+        .atelier-sdk-trace-head {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .atelier-sdk-trace-head span {
+            font-weight: 400;
+            color: #94a3b8;
+        }
+        .atelier-sdk-trace-log {
+            margin: 0;
+            padding: 6px 8px;
+            height: calc(2 * 1.35 * 11px + 12px);
+            max-height: calc(2 * 1.35 * 11px + 12px);
+            overflow: auto;
+            font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+            font-size: 11px;
+            line-height: 1.35;
+            color: #475569;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
         .chat-input-row {
             display: flex;
             gap: 8px;
-            margin-top: 8px;
+            margin-top: 6px;
+            flex-shrink: 0;
         }
         .chat-input {
             flex: 1;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border: 2px solid #e2e8f0;
             border-radius: 6px;
             font-size: 13px;
             font-family: inherit;
+            min-height: 38px;
+            max-height: 120px;
+            resize: vertical;
         }
         .chat-input:focus {
             outline: none;
@@ -1072,32 +1113,44 @@
         @media (max-width: 1024px) {
             .container {
                 flex-direction: column;
+                flex: 1;
+                min-height: 0;
             }
             .pane-resizer {
                 display: none;
             }
             .diagram-pane {
+                flex: 1 1 0;
+                min-height: 0;
                 width: 100%;
-                height: 100%;
+                height: auto;
                 border-right: none;
                 border-bottom: 1px solid #e2e8f0;
             }
             .doc-pane {
+                flex: 0 0 auto;
                 width: 100% !important;
                 max-width: none !important;
-                height: 0;
+                max-height: min(220px, 36vh);
                 min-height: 0;
+                border-top: 1px solid #e2e8f0;
             }
             .doc-pane.open {
-                height: 50%;
-                min-height: 200px;
+                flex: 0 0 auto;
+                max-height: min(220px, 36vh);
+                min-height: 100px;
+            }
+            .chat-section {
+                padding: 10px 12px;
+            }
+            .chat-messages {
+                max-height: min(100px, 20vh);
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <button class="back-button" id="backButton" onclick="goBack()">← Back</button>
         <div class="title" id="moduleTitle">Loading...</div>
         <select class="repo-dropdown" id="repoDropdown" onchange="switchRepo(this.value)">
             <option value="">Switch Repo...</option>
@@ -1123,49 +1176,6 @@
                 <span class="zoom-level" id="zoomLevel">100%</span>
                 <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
                 <button class="zoom-btn" onclick="fitToView()" title="Fit to View">⊡</button>
-                <span class="zoom-hint">Scroll / two-finger trackpad → pan • ⌘/Ctrl+scroll or pinch → zoom • Drag to pan • ⌘/Ctrl/Shift+click diagram shapes to multi-select</span>
-            </div>
-            <div class="diagram-render-tabs" role="tablist" aria-label="Diagram renderer">
-                <button type="button" class="diagram-tab" id="tabMermaid" role="tab" aria-selected="false" aria-controls="diagramViewport">Mermaid</button>
-                <button type="button" class="diagram-tab active" id="tabReactFlow" role="tab" aria-selected="true" aria-controls="diagramViewport">React Flow</button>
-                <button type="button" class="diagram-tab" id="tabElkSvg" role="tab" aria-selected="false" aria-controls="diagramViewport">ELK → SVG</button>
-            </div>
-            <div class="pipeline-panel" id="pipelinePanel">
-                <details class="pipeline-section">
-                    <summary>Pipeline · Source (R0)</summary>
-                    <pre class="pipeline-pre" id="pipelinePreSource"></pre>
-                </details>
-                <details class="pipeline-section">
-                    <summary>Pipeline · Overview Mermaid excerpt</summary>
-                    <pre class="pipeline-pre" id="pipelinePreMermaid"></pre>
-                </details>
-                <details class="pipeline-section">
-                    <summary>Pipeline · R1 · Mermaid → DIAGRAM_JSON</summary>
-                    <pre class="pipeline-pre" id="pipelinePreR1"></pre>
-                </details>
-                <details class="pipeline-section">
-                    <summary>Pipeline · R2 · IR repair (G2 edges / G3 groups)</summary>
-                    <pre class="pipeline-pre" id="pipelinePreR2"></pre>
-                </details>
-                <details class="pipeline-section">
-                    <summary>Pipeline · R4 · IR → ELK JSON (ELK Live paste)</summary>
-                    <p class="pipeline-r4-hint">
-                        Graph only — paste into
-                        <a href="https://rtsys.informatik.uni-kiel.de/elklive/json.html" target="_blank" rel="noopener noreferrer">ELK JSON Editor</a>
-                        or use the
-                        <a href="https://eclipse.dev/elk/" target="_blank" rel="noopener noreferrer">Eclipse ELK</a>
-                        toolchain. (Wrapping metadata breaks import: every JSON object must be a graph element with an <code>id</code>.)
-                    </p>
-                    <div class="pipeline-r4-toolbar">
-                        <button type="button" class="pipeline-copy-btn" id="pipelineR4CopyBtn" disabled>Copy ELK graph JSON</button>
-                        <span class="pipeline-copy-feedback" id="pipelineR4CopyFeedback" hidden>Copied</span>
-                    </div>
-                    <pre class="pipeline-pre" id="pipelinePreR4"></pre>
-                    <details class="pipeline-section pipeline-nested">
-                        <summary>R4 · Converter metadata (not for ELK Live)</summary>
-                        <pre class="pipeline-pre" id="pipelinePreR4Meta"></pre>
-                    </details>
-                </details>
             </div>
             <div class="diagram-viewport" id="diagramViewport">
                 <div class="diagram-canvas" id="diagramCanvas" style="display: none">
@@ -1242,11 +1252,19 @@
         <div class="pane-resizer" id="paneResizer" role="separator" aria-orientation="vertical" aria-label="Resize chat panel" tabindex="0" title="Drag to resize chat"></div>
         <div class="doc-pane open">
             <div class="chat-section">
+                <div id="atelierDiagramHelpActivity" class="atelier-diagram-help-activity" aria-live="polite" hidden></div>
                 <div class="chat-messages" id="chatMessages">
                     <div class="chat-message assistant">Ask about this codebase's architecture. Select nodes, subgraphs, or edges on the diagram for context.</div>
                 </div>
+                <div id="atelierSdkTraceWrap" class="atelier-sdk-trace-wrap" hidden>
+                    <div class="atelier-sdk-trace-head">
+                        SDK trace
+                        <span id="atelierSdkSseStatus"></span>
+                    </div>
+                    <pre id="atelierSdkTraceLog" class="atelier-sdk-trace-log"></pre>
+                </div>
                 <div class="chat-input-row">
-                    <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="2"></textarea>
+                    <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="1"></textarea>
                     <button class="chat-send" id="chatSend">Send</button>
                 </div>
             </div>
@@ -1261,7 +1279,24 @@
         
         // Get repo path from URL query param: ?repo=flask or ?repo=repos/flask
         const urlParams = new URLSearchParams(window.location.search);
-        const repoPath = urlParams.get('repo') || 'crewai';
+        const viewerConfig = window.ATELIER_VIEWER_CONFIG || {};
+        const defaultRepoPath = viewerConfig.defaultRepo || 'crewai';
+        const repoPath = urlParams.get('repo') || defaultRepoPath;
+        function viewerFlag(queryName, configName, defaultValue) {
+            if (urlParams.has(queryName)) {
+                const raw = String(urlParams.get(queryName) || '').toLowerCase();
+                return !(raw === '0' || raw === 'false' || raw === 'no' || raw === 'off');
+            }
+            if (Object.prototype.hasOwnProperty.call(viewerConfig, configName)) {
+                return viewerConfig[configName] !== false;
+            }
+            return defaultValue;
+        }
+        const CHAT_ENABLED = viewerFlag('chat', 'chatEnabled', true);
+        const REPO_SWITCHER_ENABLED = viewerFlag('repoSwitcher', 'repoSwitcherEnabled', true);
+        window.__atelierChatEnabled = CHAT_ENABLED;
+        document.body.classList.toggle('viewer-no-chat', !CHAT_ENABLED);
+        document.body.classList.toggle('viewer-no-repo-switcher', !REPO_SWITCHER_ENABLED);
         if (urlParams.get('rfDebug') === '1') {
             window.atelierRfDebugLayout = true;
         }
@@ -1281,7 +1316,7 @@
         let expandedNodes = new Set();
         let expandedNodeToModule = new Map();  // Maps nodeId -> moduleId for expanded nodes
         let currentModuleId = 'overview';
-        /** R0 / R5 / R6: 'mermaid' | 'reactflow' | 'elk' */
+        /** R0 / R5 / R6: viewer is always React Flow; value kept for viewer_state.json compatibility. */
         let activeDiagramTab = 'reactflow';
         let elkSvgRequestEpoch = 0;
         let reactFlowRequestEpoch = 0;
@@ -1332,6 +1367,7 @@
         // ============================================================
         
         function toggleDocPanel(forceOpen = null) {
+            if (!CHAT_ENABLED) return;
             // Panel is always open now (chat-only view)
             // This function is kept for compatibility but does nothing
             const panel = document.querySelector('.doc-pane');
@@ -1863,6 +1899,168 @@
                 return false;
             }
         }
+
+        /** Written by MCP after each repo mutation; viewer polls and hot-reloads. */
+        window.__atelierViewerEpoch = null;
+        let __atelierRepoReloadBusy = false;
+
+        /**
+         * Sub-millisecond perf instrumentation for the epoch-to-pixels pipeline.
+         * Disable with `localStorage.setItem('codewikiPerf','off')`.
+         * Enable verbose per-mark logs with `localStorage.setItem('codewikiPerf','verbose')`.
+         */
+        const __PERF = {
+            enabled: (typeof localStorage !== 'undefined') ? localStorage.getItem('codewikiPerf') !== 'off' : true,
+            verbose: (typeof localStorage !== 'undefined') ? localStorage.getItem('codewikiPerf') === 'verbose' : false,
+            seq: 0,
+            current: null,
+        };
+
+        function perfStart(reason) {
+            if (!__PERF.enabled) return null;
+            const id = ++__PERF.seq;
+            const ctx = {
+                id,
+                reason,
+                t0: performance.now(),
+                marks: { start: 0 },
+            };
+            __PERF.current = ctx;
+            try { performance.mark(`codewiki:start:${id}`); } catch (_) { /* noop */ }
+            if (__PERF.verbose) console.debug(`[codewiki-perf] #${id} start (${reason})`);
+            return ctx;
+        }
+
+        function perfMark(ctx, name) {
+            if (!ctx || !__PERF.enabled) return;
+            const elapsed = performance.now() - ctx.t0;
+            ctx.marks[name] = elapsed;
+            try { performance.mark(`codewiki:${name}:${ctx.id}`); } catch (_) { /* noop */ }
+            if (__PERF.verbose) console.debug(`[codewiki-perf] #${ctx.id} ${name}=${elapsed.toFixed(2)}ms`);
+        }
+
+        function perfFinish(ctx) {
+            if (!ctx || !__PERF.enabled) return;
+            const total = performance.now() - ctx.t0;
+            const m = ctx.marks;
+            const fetchMs = (m.fetch_complete ?? 0).toFixed(1);
+            const buildMs = ((m.build_complete ?? m.fetch_complete ?? 0) - (m.fetch_complete ?? 0)).toFixed(1);
+            const renderMs = ((m.render_complete ?? m.build_complete ?? 0) - (m.build_complete ?? 0)).toFixed(1);
+            console.debug(
+                `[codewiki-perf] #${ctx.id} ${ctx.reason}: ` +
+                `fetch=${fetchMs}ms build=${buildMs}ms render=${renderMs}ms total=${total.toFixed(1)}ms`
+            );
+            try {
+                performance.measure(`codewiki:total:${ctx.id}`, `codewiki:start:${ctx.id}`);
+            } catch (_) { /* noop */ }
+            if (__PERF.current === ctx) __PERF.current = null;
+        }
+
+        window.__codewikiPerf = {
+            summary() {
+                const measures = performance.getEntriesByType('measure').filter(e => e.name.startsWith('codewiki:'));
+                const byName = {};
+                for (const m of measures) {
+                    const key = m.name.split(':').slice(0, 2).join(':');
+                    byName[key] = byName[key] || { count: 0, totalMs: 0, samples: [] };
+                    byName[key].count++;
+                    byName[key].totalMs += m.duration;
+                    byName[key].samples.push(m.duration);
+                }
+                for (const k of Object.keys(byName)) {
+                    const s = byName[k];
+                    s.meanMs = +(s.totalMs / s.count).toFixed(2);
+                    s.totalMs = +s.totalMs.toFixed(2);
+                    delete s.samples;
+                }
+                return byName;
+            },
+            clear() {
+                performance.clearMarks();
+                performance.clearMeasures();
+            },
+        };
+
+        async function fetchViewerEpochMs() {
+            try {
+                const r = await fetch(`${basePath}/viewer_epoch.json?_t=${Date.now()}`, {
+                    cache: 'no-store',
+                });
+                if (!r.ok) return null;
+                const j = await r.json();
+                return j && typeof j.epoch === 'number' ? j.epoch : null;
+            } catch (err) {
+                return null;
+            }
+        }
+
+        async function bootstrapViewerEpochBaseline() {
+            const ep = await fetchViewerEpochMs();
+            if (ep != null) window.__atelierViewerEpoch = ep;
+        }
+
+        async function applyRepoDataReload(perfCtx) {
+            if (__atelierRepoReloadBusy) return;
+            __atelierRepoReloadBusy = true;
+            const ctx = perfCtx || perfStart('manual_reload');
+            try {
+                const ok = await loadAllData();
+                perfMark(ctx, 'fetch_complete');
+                if (!ok) return;
+                buildModuleData();
+                perfMark(ctx, 'build_complete');
+                try {
+                    AVAILABLE_REPOS = await fetchAvailableRepos();
+                    populateRepoDropdown();
+                } catch (err) {
+                    /* ignore */
+                }
+                expandedNodes.clear();
+                expandedNodeToModule.clear();
+                navigationHistory.length = 0;
+                rfExpandedNodeIds.clear();
+                rfExpandedNodeToModule.clear();
+                rfExpansionContextKey = null;
+                rfBaselineDiagramIr = null;
+                rfExpandedNodesOrder = [];
+                reactFlowRequestEpoch++;
+                currentModuleId = 'overview';
+                baseDiagramCode = moduleData['overview']?.diagram || '';
+                currentDiagramCode = baseDiagramCode;
+                openedModules.clear();
+                openedModules.add('overview');
+                updateSelection('overview');
+                await renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+                perfMark(ctx, 'render_complete');
+                updatePipelinePanel();
+            } finally {
+                __atelierRepoReloadBusy = false;
+                perfFinish(ctx);
+            }
+        }
+
+        function startViewerEpochPolling() {
+            setInterval(function () {
+                void (async function () {
+                    try {
+                        const ep = await fetchViewerEpochMs();
+                        if (ep == null) return;
+                        if (window.__atelierViewerEpoch == null) {
+                            window.__atelierViewerEpoch = ep;
+                            return;
+                        }
+                        if (ep > window.__atelierViewerEpoch) {
+                            const ctx = perfStart('epoch_reload');
+                            window.__atelierViewerEpoch = ep;
+                            perfMark(ctx, 'epoch_detected');
+                            await applyRepoDataReload(ctx);
+                        }
+                    } catch (err) {
+                        /* ignore */
+                    }
+                })();
+            }, 1500);
+        }
         
         // ============================================================
         // HELPER FUNCTIONS
@@ -2230,6 +2428,24 @@
             return `${sel.kind}:${String(sel.logicalId)}`;
         }
 
+        function diagramSelectionKeySet(list) {
+            const s = new Set();
+            if (!list || !list.length) return s;
+            for (const item of list) {
+                const k = diagramSelectionKey(item);
+                if (k) s.add(k);
+            }
+            return s;
+        }
+
+        function diagramSelectionKeySetsEqual(a, b) {
+            if (a.size !== b.size) return false;
+            for (const k of a) {
+                if (!b.has(k)) return false;
+            }
+            return true;
+        }
+
         function normalizeDiagramSel(sel) {
             return {
                 kind: sel.kind || 'node',
@@ -2279,6 +2495,7 @@
             if (diagramSelections.length) {
                 refreshDiagramSelectionLabelFromDom();
             }
+            schedulePushViewerStateToMcp();
         }
 
         function clearDiagramShapeSelection() {
@@ -2287,10 +2504,30 @@
             syncLegacyDiagramSelection();
             selectedDiagramNodeId = null;
             applyDiagramSelectionHighlight();
+            schedulePushViewerStateToMcp();
         }
 
         function refreshDiagramSelectionLabelFromDom() {
             const svg = document.querySelector('#mermaid-diagram svg');
+            if (activeDiagramTab === 'reactflow') {
+                const getNodes = window.__atelierR6GetNodes;
+                if (typeof getNodes === 'function') {
+                    const nodes = getNodes();
+                    const byId = new Map();
+                    for (let i = 0; i < nodes.length; i++) {
+                        const n = nodes[i];
+                        if (n && n.id != null) byId.set(String(n.id), n);
+                    }
+                    for (const ds of diagramSelections) {
+                        if (!ds.logicalId || ds.kind === 'edge') continue;
+                        if (ds.label) continue;
+                        const n = byId.get(String(ds.logicalId));
+                        if (n && n.data && n.data.label != null) ds.label = String(n.data.label);
+                    }
+                    syncLegacyDiagramSelection();
+                }
+                return;
+            }
             if (!svg) return;
             for (const ds of diagramSelections) {
                 if (!ds.logicalId) continue;
@@ -2489,6 +2726,52 @@
             return String(id).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
         }
 
+        /** Keep xyflow node.selected in sync with diagramSelections (expansion/collapse/Mermaid paths). Suppress hook sees no diff. */
+        function syncRfNativeNodeSelectionFromDiagramSelections() {
+            if (activeDiagramTab !== 'reactflow') return;
+            const setNodes = window.__atelierR6SetNodes;
+            const getNodes = window.__atelierR6GetNodes;
+            if (typeof setNodes !== 'function' || typeof getNodes !== 'function') return;
+            const selectedIds = new Set(
+                diagramSelections
+                    .filter(
+                        (ds) =>
+                            ds &&
+                            ds.kind !== 'edge' &&
+                            ds.logicalId != null &&
+                            String(ds.logicalId) !== ''
+                    )
+                    .map((ds) => String(ds.logicalId))
+            );
+            const cur = getNodes();
+            let changed = false;
+            for (let i = 0; i < cur.length; i++) {
+                const n = cur[i];
+                const want = selectedIds.has(String(n.id));
+                if (!!n.selected !== want) {
+                    changed = true;
+                    break;
+                }
+            }
+            if (!changed) return;
+            try {
+                window.__atelierRfSuppressSelectionChangeHook = true;
+                setNodes(function (nds) {
+                    return nds.map(function (n) {
+                        const sel = selectedIds.has(String(n.id));
+                        if (!!n.selected === sel) return n;
+                        return Object.assign({}, n, { selected: sel });
+                    });
+                });
+            } catch (_) {
+                /* ignore */
+            } finally {
+                queueMicrotask(function () {
+                    window.__atelierRfSuppressSelectionChangeHook = false;
+                });
+            }
+        }
+
         /** Mirror diagramSelections onto React Flow node wrappers (Mermaid uses SVG classes). */
         function applyRfReactFlowSelectionHighlight() {
             if (activeDiagramTab !== 'reactflow') return;
@@ -2497,7 +2780,7 @@
             root.querySelectorAll('.react-flow__node[data-atelier-rf-selected]').forEach((el) => {
                 el.removeAttribute('data-atelier-rf-selected');
             });
-            if (!diagramSelections.length) return;
+            if (diagramSelections.length) {
             for (const ds of diagramSelections) {
                 if (!ds.logicalId || ds.kind === 'edge') continue;
                 const wrap = root.querySelector(
@@ -2505,6 +2788,8 @@
                 );
                 if (wrap) wrap.setAttribute('data-atelier-rf-selected', 'true');
             }
+            }
+            syncRfNativeNodeSelectionFromDiagramSelections();
         }
         window.atelierRfSyncSelectionHighlight = applyRfReactFlowSelectionHighlight;
 
@@ -2541,11 +2826,162 @@
             return diagramSelections.map((s) => diagramSelToChatPayload(s)).filter(Boolean);
         }
 
+        /** Persist canvas multi-select + tab to demo/repos/<repo>/viewer_state.json (MCP static server POST). */
+        let __viewerStatePushTimer = null;
+        function schedulePushViewerStateToMcp() {
+            if (__viewerStatePushTimer != null) clearTimeout(__viewerStatePushTimer);
+            __viewerStatePushTimer = setTimeout(function () {
+                __viewerStatePushTimer = null;
+                pushViewerStateToMcp();
+            }, 150);
+        }
+
+        /** Same count/base as codewiki.mcp.static_server._PORT_TRY_COUNT + CODEWIKI_MCP_PORT default. */
+        var __atelierMcpPortTryBase = 8765;
+        var __atelierMcpPortTryCount = 48;
+
+        async function pushViewerStateToMcp() {
+            try {
+                var rid = typeof repoPath !== 'undefined' ? repoPath : '';
+                if (!rid || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(rid)) return false;
+                var lastAsk = null;
+                try {
+                    lastAsk = window.__atelierLastDiagramAsk || null;
+                } catch (_) {}
+
+                var payload = {
+                    updated_at_ms: Date.now(),
+                    repo_id: rid,
+                    current_module_id: typeof currentModuleId !== 'undefined' ? currentModuleId : null,
+                    selected_module_id: typeof selectedModuleId !== 'undefined' ? selectedModuleId : null,
+                    diagram_tab: typeof activeDiagramTab !== 'undefined' ? activeDiagramTab : null,
+                    opened_modules:
+                        typeof openedModules !== 'undefined' ? Array.from(openedModules) : [],
+                    selections:
+                        typeof buildDiagramChatPayloads === 'function'
+                            ? buildDiagramChatPayloads()
+                            : [],
+                    primary:
+                        typeof buildDiagramChatPayload === 'function'
+                            ? buildDiagramChatPayload()
+                            : null,
+                    /** Latest “?” pill question — read via MCP get_diagram(repo_id).viewer.last_diagram_ask */
+                    last_diagram_ask: lastAsk,
+                };
+                var body = JSON.stringify(payload);
+                var pathSeg = '/repos/' + encodeURIComponent(rid) + '/viewer_state.json';
+                var sameOriginUrl = new URL('repos/' + encodeURIComponent(rid) + '/viewer_state.json', window.location.href).href;
+
+                function postOne(fullUrl) {
+                    return fetch(fullUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: body,
+                        mode: 'cors',
+                        keepalive: true,
+                    }).then(async function (res) {
+                        if (!res.ok) return Promise.reject(res);
+                        var ct = res.headers.get('content-type') || '';
+                        if (!ct.includes('application/json')) return Promise.reject(res);
+                        try {
+                            var j = await res.json();
+                            if (j && j.ok === true) return res;
+                        } catch (_) {}
+                        return Promise.reject(res);
+                    });
+                }
+
+                try {
+                    await postOne(sameOriginUrl);
+                    return true;
+                } catch (_) {}
+
+                var cached = null;
+                try {
+                    cached = sessionStorage.getItem('atelier_mcp_sync_port');
+                } catch (_) {}
+                if (cached && /^[0-9]+$/.test(cached)) {
+                    try {
+                        await postOne('http://127.0.0.1:' + cached + pathSeg);
+                        return true;
+                    } catch (_) {}
+                }
+
+                var diagramWatcherPorts = [];
+                try {
+                    var dwp = new URLSearchParams(window.location.search).get('diagram_watcher_port');
+                    if (dwp && /^[0-9]+$/.test(dwp)) {
+                        diagramWatcherPorts = [parseInt(dwp, 10)];
+                    } else if (window.location.port && /^[0-9]+$/.test(window.location.port)) {
+                        diagramWatcherPorts = [parseInt(window.location.port, 10)];
+                    } else {
+                        diagramWatcherPorts = [9878];
+                    }
+                } catch (_) {
+                    diagramWatcherPorts = [9878];
+                }
+                for (var dwi = 0; dwi < diagramWatcherPorts.length; dwi++) {
+                    try {
+                        await postOne('http://127.0.0.1:' + diagramWatcherPorts[dwi] + pathSeg);
+                        try {
+                            sessionStorage.setItem('atelier_mcp_sync_port', String(diagramWatcherPorts[dwi]));
+                        } catch (_) {}
+                        return true;
+                    } catch (_) {}
+                }
+
+                for (var pi = 0; pi < __atelierMcpPortTryCount; pi++) {
+                    var port = __atelierMcpPortTryBase + pi;
+                    try {
+                        await postOne('http://127.0.0.1:' + port + pathSeg);
+                        try {
+                            sessionStorage.setItem('atelier_mcp_sync_port', String(port));
+                        } catch (_) {}
+                        return true;
+                    } catch (_) {}
+                }
+                return false;
+            } catch (_) {
+                return false;
+            }
+        }
+        window.schedulePushViewerStateToMcp = schedulePushViewerStateToMcp;
+        window.pushViewerStateToMcp = pushViewerStateToMcp;
+
+        async function pushViewerStateToMcpImmediate() {
+            if (__viewerStatePushTimer != null) {
+                clearTimeout(__viewerStatePushTimer);
+                __viewerStatePushTimer = null;
+            }
+            return await pushViewerStateToMcp();
+        }
+
+        /**
+         * Persist a diagram “?” question so Cursor / MCP can answer via get_diagram(repo_id).viewer.
+         * @returns {Promise<boolean>} true if viewer_state.json was POSTed somewhere that accepts it
+         */
+        async function recordLastDiagramAskForMcp(message, selectionOverride) {
+            const msg = String(message || '').trim();
+            if (!msg) return false;
+            const body = buildArchAgentChatRequestBody(msg, selectionOverride);
+            window.__atelierLastDiagramAsk = {
+                asked_at_ms: Date.now(),
+                message: msg,
+                diagram_selection: body.diagram_selection,
+                diagram_selections: body.diagram_selections,
+                opened_modules: body.opened_modules,
+                job_id: body.job_id,
+                source: 'help_pill',
+            };
+            return await pushViewerStateToMcpImmediate();
+        }
+
         /**
          * @param {object} sel kind: 'none'|'node'|'cluster'|'edge'; logicalId; optional label, moduleId, domRef, edge
          * @param {MouseEvent} [ev] — if ⌘/Ctrl/Shift+click, toggles this shape in the multi-selection instead of replacing.
          */
         function setDiagramSelection(sel, ev) {
+            try {
             if (!sel || sel.kind === 'none' || sel.logicalId == null || sel.logicalId === '') {
                 diagramSelections = [];
                 syncLegacyDiagramSelection();
@@ -2564,6 +3000,9 @@
             applyDiagramSelectionHighlight();
             if (!diagramSelections[diagramSelections.length - 1].label) {
                 refreshDiagramSelectionLabelFromDom();
+                }
+            } finally {
+                schedulePushViewerStateToMcp();
             }
         }
 
@@ -2896,7 +3335,7 @@
                 rfExpandedNodeToModule.clear();
                 return;
             }
-            /** Repo/overview hydrates after the first RF refresh (script runs setDiagramRenderTab before init). */
+            /** Repo/overview hydrates after the first RF refresh (script runs ensureReactFlowDiagramViewport before init). */
             if (!rfBaselineDiagramIr) {
                 const resolved = resolveStructuredIrForPipeline();
                 if (resolved.diagram && typeof resolved.diagram === 'object') {
@@ -2926,7 +3365,6 @@
             if (!diagram || !childIr || !Array.isArray(childIr.nodes)) return null;
             const subId = `${nodeId}_sub`;
             const prefix = `${nodeId}_`;
-            const collapseId = `${prefix}collapse`;
 
             const d = JSON.parse(JSON.stringify(diagram));
             if (!Array.isArray(d.nodes)) d.nodes = [];
@@ -2971,10 +3409,6 @@
                 const copy = Object.assign({}, cn, { id: newId });
                 d.nodes.push(copy);
             }
-
-            const collapseNode = { id: collapseId, label: '[-] Collapse' };
-            d.nodes.push(collapseNode);
-            memberIds.push(collapseId);
 
             d.groups.push({
                 id: subId,
@@ -3288,6 +3722,47 @@
             clearDiagramShapeSelection();
         };
 
+        /**
+         * React Flow selection (box / ⌘/Ctrl/Shift multi-select) → diagramSelections for chat + highlights.
+         * Single source of truth from xyflow; node clicks that only change selection are handled here, not in atelierRfHandleNodeClick.
+         */
+        window.atelierRfOnNativeSelectionChange = function atelierRfOnNativeSelectionChange(selNodes) {
+            if (activeDiagramTab !== 'reactflow') return;
+            if (window.__atelierRfSuppressSelectionChangeHook) return;
+            const arr = Array.isArray(selNodes) ? selNodes : [];
+            const mapped = [];
+            for (let i = 0; i < arr.length; i++) {
+                const node = arr[i];
+                if (!node || node.id == null) continue;
+                const id = String(node.id);
+                const kind = node.type === 'group' ? 'cluster' : 'node';
+                let label = null;
+                if (node.data && node.data.label != null) label = String(node.data.label);
+                mapped.push(
+                    normalizeDiagramSel({
+                        kind,
+                        logicalId: id,
+                        label,
+                        moduleId: currentModuleId,
+                        domRef: null,
+                        edge: null
+                    })
+                );
+            }
+            const nextKeys = diagramSelectionKeySet(mapped);
+            const curKeys = diagramSelectionKeySet(diagramSelections);
+            if (diagramSelectionKeySetsEqual(nextKeys, curKeys)) return;
+
+            diagramSelections = mapped;
+            syncLegacyDiagramSelection();
+            selectedDiagramNodeId = mapped.length ? mapped[mapped.length - 1].logicalId : null;
+            applyDiagramSelectionHighlight();
+            if (diagramSelections.length) {
+                refreshDiagramSelectionLabelFromDom();
+            }
+            schedulePushViewerStateToMcp();
+        };
+
         window.atelierRfHandleNodeClick = function atelierRfHandleNodeClick(payload) {
             const ev = payload && payload.event;
             const nodeId = payload && payload.nodeId != null ? String(payload.nodeId) : '';
@@ -3298,13 +3773,6 @@
                 if (window.atelierRfDebugLayout && typeof window.atelierRfLogLayoutDebug === 'function') {
                     queueMicrotask(() => window.atelierRfLogLayoutDebug(reason));
                 }
-            }
-
-            if (ev && typeof isMultiSelectModifier === 'function' && isMultiSelectModifier(ev)) {
-                const kind = nodeType === 'group' ? 'cluster' : 'node';
-                setDiagramSelection({ kind, logicalId: nodeId, moduleId: currentModuleId }, ev);
-                rfDbgSel('rf-click multi ' + nodeId);
-                return;
             }
 
             if (payload && payload.isCollapse) {
@@ -3350,9 +3818,7 @@
             }
 
             expandDiagramSelectionEpoch += 1;
-            const kind = nodeType === 'group' ? 'cluster' : 'node';
-            setDiagramSelection({ kind, logicalId: nodeId, moduleId: currentModuleId }, ev);
-            rfDbgSel('rf-click ' + kind + ' ' + nodeId);
+            rfDbgSel('rf-click passthrough selection ' + nodeType + ' ' + nodeId);
         };
 
         /** R5: ELK layout → SVG inside diagram canvas (shared pan/zoom transform). */
@@ -3481,58 +3947,28 @@
             await reactFlowRefreshChain;
         }
 
-        /** Re-run ELK layout → R5 SVG / R6 React Flow and refresh pipeline R4 when sizing inputs change. */
+        /** Re-run ELK layout → R6 React Flow when sizing inputs change. */
         async function refreshElkDerivedDiagramViews() {
-            if (activeDiagramTab === 'reactflow') await refreshReactFlowView();
-            else if (activeDiagramTab === 'elk') await refreshElkSvgView();
+            await refreshReactFlowView();
             updatePipelinePanel();
         }
         window.refreshElkDerivedDiagramViews = refreshElkDerivedDiagramViews;
 
-        function setDiagramRenderTab(which) {
-            activeDiagramTab = which;
-            const tabM = document.getElementById('tabMermaid');
-            const tabR = document.getElementById('tabReactFlow');
-            const tabE = document.getElementById('tabElkSvg');
+        /** Diagram viewer is React Flow only (Mermaid / ELK-SVG / pipeline inspector UI removed). */
+        function ensureReactFlowDiagramViewport() {
+            activeDiagramTab = 'reactflow';
             const canvas = document.getElementById('diagramCanvas');
             const placeholder = document.getElementById('reactflowPlaceholder');
-            const mermaidEl = document.getElementById('mermaid-diagram');
-            const elkPane = document.getElementById('elkSvgPane');
             const diagramViewportEl = document.getElementById('diagramViewport');
 
-            const isM = which === 'mermaid';
-            const isRf = which === 'reactflow';
-            const isElk = which === 'elk';
-
             if (diagramViewportEl) {
-                diagramViewportEl.classList.toggle('diagram-viewport--reactflow', isRf);
+                diagramViewportEl.classList.add('diagram-viewport--reactflow');
             }
-
-            if (tabM) {
-                tabM.classList.toggle('active', isM);
-                tabM.setAttribute('aria-selected', isM ? 'true' : 'false');
-            }
-            if (tabR) {
-                tabR.classList.toggle('active', isRf);
-                tabR.setAttribute('aria-selected', isRf ? 'true' : 'false');
-            }
-            if (tabE) {
-                tabE.classList.toggle('active', isElk);
-                tabE.setAttribute('aria-selected', isElk ? 'true' : 'false');
-            }
-
-            if (isRf) {
                 if (canvas) canvas.style.display = 'none';
                 if (placeholder) placeholder.hidden = false;
                 refreshReactFlowView();
-            } else {
-                if (canvas) canvas.style.display = '';
-                if (placeholder) placeholder.hidden = true;
-                if (mermaidEl) mermaidEl.hidden = !isM;
-                if (elkPane) elkPane.hidden = !isElk;
-                if (isElk) refreshElkSvgView();
-            }
             updatePipelinePanel();
+            schedulePushViewerStateToMcp();
         }
 
         function updatePipelinePanel() {
@@ -3719,52 +4155,7 @@
             }
         }
 
-        (function setupPipelineR4Copy() {
-            const btn = document.getElementById('pipelineR4CopyBtn');
-            const fb = document.getElementById('pipelineR4CopyFeedback');
-            if (!btn) return;
-            let hideTimer = null;
-            btn.addEventListener('click', async () => {
-                const s = pipelineR4ElkPasteJson;
-                if (!s) return;
-                try {
-                    await navigator.clipboard.writeText(s);
-                } catch {
-                    try {
-                        const ta = document.createElement('textarea');
-                        ta.value = s;
-                        ta.setAttribute('readonly', '');
-                        ta.style.position = 'fixed';
-                        ta.style.left = '-9999px';
-                        document.body.appendChild(ta);
-                        ta.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(ta);
-                    } catch (e2) {
-                        console.warn('R4 copy failed', e2);
-                        return;
-                    }
-                }
-                if (fb) {
-                    fb.hidden = false;
-                    if (hideTimer) clearTimeout(hideTimer);
-                    hideTimer = setTimeout(() => {
-                        fb.hidden = true;
-                    }, 2000);
-                }
-            });
-        })();
-
-        document.getElementById('tabMermaid')?.addEventListener('click', () =>
-            setDiagramRenderTab('mermaid')
-        );
-        document.getElementById('tabReactFlow')?.addEventListener('click', () =>
-            setDiagramRenderTab('reactflow')
-        );
-        document.getElementById('tabElkSvg')?.addEventListener('click', () =>
-            setDiagramRenderTab('elk')
-        );
-        setDiagramRenderTab('reactflow');
+        ensureReactFlowDiagramViewport();
 
         // ============================================================
         // BUILD MODULE DATA
@@ -6136,6 +6527,7 @@
         }
         
         function populateRepoDropdown() {
+            if (!REPO_SWITCHER_ENABLED) return;
             const dropdown = document.getElementById('repoDropdown');
             if (!dropdown) return;
             
@@ -6154,6 +6546,7 @@
         
         function switchRepo(newRepo) {
             if (!newRepo || newRepo === repoPath) return;
+            if (!REPO_SWITCHER_ENABLED) return;
             
             // Navigate to new repo
             const currentUrl = new URL(window.location.href);
@@ -6169,7 +6562,7 @@
             AVAILABLE_REPOS = await fetchAvailableRepos();
             
             // When no ?repo= in URL, redirect to first repo so something always loads
-            if (!urlParams.get('repo')) {
+            if (!urlParams.get('repo') && !viewerConfig.defaultRepo) {
                 if (AVAILABLE_REPOS.length > 0) {
                     const first = AVAILABLE_REPOS[0].id;
                     window.location.replace(window.location.pathname + '?repo=' + encodeURIComponent(first));
@@ -6193,10 +6586,12 @@
                 populateRepoDropdown();
                 return;
             }
+
+            await bootstrapViewerEpochBaseline();
             
             buildModuleData();
             
-            populateRepoDropdown();
+            if (REPO_SWITCHER_ENABLED) populateRepoDropdown();
             
             // Initialize with overview
             currentModuleId = 'overview';
@@ -6226,6 +6621,9 @@
                     console.warn('[expand=] Unknown node id', expandNodeId, '— known:', Object.keys(overviewLinks));
                 }
             }
+
+            startViewerEpochPolling();
+            schedulePushViewerStateToMcp();
         }
         
         // Track URL changes
@@ -6235,10 +6633,6 @@
         // Track hash changes
         window.addEventListener('hashchange', () => {
         });
-        
-        // Periodic state snapshot to catch unexpected resets
-        setInterval(() => {
-        }, 2000); // Every 2 seconds
         
         initZoomPan();
         initViewTuneSliders();
@@ -6266,6 +6660,41 @@
             return { diagram_selection: one, diagram_selections: all };
         };
 
+        /** Human-readable + JSON for pasting into Cursor chat (same logical payloads as arch-agent POST). */
+        function formatDiagramSelectionForCursorPaste() {
+            const payloads = buildDiagramChatPayloads();
+            if (!payloads.length) return '';
+            const repoLabel =
+                typeof repoPath !== 'undefined' && repoPath
+                    ? String(repoPath)
+                    : typeof urlParams !== 'undefined' && urlParams && typeof urlParams.get === 'function'
+                      ? urlParams.get('repo') || ''
+                      : '';
+            const lines = payloads.map((p, i) => {
+                const kind = p.kind || 'node';
+                const lid = p.logical_id || '';
+                const lbl = p.label ? ` — ${p.label}` : '';
+                const mid = p.module_id ? ` (module: ${p.module_id})` : '';
+                return `${i + 1}. [${kind}] ${lid}${lbl}${mid}`;
+            });
+            const header = repoLabel ? `Diagram selection (repo: ${repoLabel})` : 'Diagram selection';
+            return `${header}\n${lines.join('\n')}\n\nStructured (JSON):\n${JSON.stringify(payloads, null, 2)}`;
+        }
+
+        async function copyDiagramSelectionToClipboard() {
+            const text = formatDiagramSelectionForCursorPaste();
+            if (!text) {
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(text);
+            } catch (err) {
+                console.warn('Clipboard write failed', err);
+            }
+        }
+        window.formatDiagramSelectionForCursorPaste = formatDiagramSelectionForCursorPaste;
+        window.copyDiagramSelectionToClipboard = copyDiagramSelectionToClipboard;
+
         /** Playwright / automated tests: read pan zoom and measure node vs expanded cluster frame (viewport px). */
         window.__diagramViewState = () => ({
             panX,
@@ -6291,6 +6720,11 @@
         
         // API base: when on port 8080 (static demo server), use FastAPI on 8000; else same origin
         const CHAT_API_BASE = (window.location.port === '8080') ? 'http://127.0.0.1:8001' : '';
+
+        function getArchAgentChatUrl() {
+            if (!CHAT_API_BASE || String(CHAT_API_BASE).trim() === '') return null;
+            return String(CHAT_API_BASE).replace(/\/$/, '') + '/api/arch-agent/chat';
+        }
         
         function getChatJobId() {
             return (typeof repoPath !== 'undefined' ? repoPath : urlParams.get('repo') || 'search-agents');
@@ -6303,18 +6737,38 @@
          * Exact JSON body for POST /api/arch-agent/chat (same as Send). Use in console:
          *   peekArchAgentChat()
          *   peekArchAgentChat('what are common groups between them?')
+         *
+         * @param {string} message
+         * @param {{ diagram_selection?: object, diagram_selections?: object[] } | null} selectionOverride
+         *        When set (e.g. “?” pill on a node), attach that shape as diagram context instead of the live canvas selection.
          */
-        function buildArchAgentChatRequestBody(message) {
-            const diagramPayloads = buildDiagramChatPayloads();
+        function buildArchAgentChatRequestBody(message, selectionOverride) {
+            let diagramPayloads;
+            let primary;
+            if (
+                selectionOverride &&
+                selectionOverride.diagram_selection != null
+            ) {
+                primary = selectionOverride.diagram_selection;
+                diagramPayloads =
+                    selectionOverride.diagram_selections != null &&
+                    selectionOverride.diagram_selections.length
+                        ? selectionOverride.diagram_selections
+                        : [primary];
+            } else {
+                diagramPayloads = buildDiagramChatPayloads();
+                primary =
+                    diagramPayloads.length > 0
+                        ? diagramPayloads[diagramPayloads.length - 1]
+                        : null;
+            }
             return {
                 job_id: getChatJobId(),
                 message: message,
                 opened_modules: Array.from(openedModules),
-                diagram_selection:
-                    diagramPayloads.length > 0
-                        ? diagramPayloads[diagramPayloads.length - 1]
-                        : null,
-                diagram_selections: diagramPayloads.length > 0 ? diagramPayloads : null,
+                diagram_selection: primary,
+                diagram_selections:
+                    diagramPayloads.length > 0 ? diagramPayloads : null,
                 history: chatHistory
             };
         }
@@ -6326,7 +6780,7 @@
                     : (chatInput && chatInput.value.trim()) ||
                       '(no message — type in the chat box or run peekArchAgentChat("your question"))';
             const body = buildArchAgentChatRequestBody(msg);
-            const url = `${CHAT_API_BASE}/api/arch-agent/chat`;
+            const url = getArchAgentChatUrl() || '(no Architectural Agent — CHAT_API_BASE empty)';
             console.log('[peekArchAgentChat] POST', url);
             console.log('[peekArchAgentChat] body object:', body);
             console.log('[peekArchAgentChat] JSON.stringify (exact wire payload):\n' + JSON.stringify(body, null, 2));
@@ -6346,48 +6800,393 @@
             } else {
                 el.textContent = content;
             }
+            if (chatMessages) {
             chatMessages.appendChild(el);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
             return el;
         }
         
-        async function sendChatMessage() {
-            if (!chatInput.value.trim()) return;
-            const msg = chatInput.value.trim();
-            chatInput.value = '';
-            addChatMessage(msg, 'user');
-            const loadingEl = addChatMessage('Thinking...', 'loading');
-            chatSend.disabled = true;
+        function atelierSummarizeSdkTraceRow(channel, payload) {
             try {
-                console.log('[MODULE TRACKING] Sending chat request with opened modules:', Array.from(openedModules));
-                const res = await fetch(`${CHAT_API_BASE}/api/arch-agent/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(buildArchAgentChatRequestBody(msg))
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                chatHistory = data.history != null ? data.history : null;
-                loadingEl.remove();
-                addChatMessage(data.response || 'No response.', 'assistant');
-            } catch (e) {
-                loadingEl.remove();
-                const hint = e.message === 'Failed to fetch' || e.message === 'Load failed'
-                    ? 'Could not reach chat API. Start the CodeWiki server: cd atelier && python3 -m codewiki.run_web_app --port 8001'
-                    : (e.message || 'Could not reach chat API. Is the CodeWiki server running on port 8001?');
-                addChatMessage('Error: ' + hint, 'assistant');
-            } finally {
-                chatSend.disabled = false;
-                chatInput.focus();
+                if (channel === 'stream' && payload && payload.type) {
+                    if (payload.type === 'tool_call') {
+                        return (payload.name || '?') + ' — ' + (payload.status || '');
+                    }
+                    return String(payload.type);
+                }
+                if (channel === 'delta' && payload && payload.update && payload.update.type) {
+                    return String(payload.update.type);
+                }
+                if (channel === 'step' && payload && payload.step && payload.step.type) {
+                    return String(payload.step.type);
+                }
+                if (channel === 'conversation') {
+                    return payload.error ? 'error: ' + payload.error : 'turns summary';
+                }
+                const s = JSON.stringify(payload);
+                return s.length > 160 ? s.slice(0, 160) + '…' : s;
+            } catch (_) {
+                return String(channel);
             }
         }
+
+        function atelierAppendSdkTrace(channel, payload) {
+            try {
+                if (new URLSearchParams(window.location.search).get('sdk_trace') !== '1') return;
+            } catch (_) {
+                return;
+            }
+            const wrap = document.getElementById('atelierSdkTraceWrap');
+            const pre = document.getElementById('atelierSdkTraceLog');
+            if (!pre || !wrap) return;
+            wrap.hidden = false;
+            const t = new Date().toISOString().slice(11, 23);
+            const line = '[' + t + '] ' + channel + ': ' + atelierSummarizeSdkTraceRow(channel, payload);
+            pre.textContent += line + '\n';
+            pre.scrollTop = pre.scrollHeight;
+            console.log('[atelier sdk_trace]', line);
+        }
+
+        function atelierClearSdkAnswerPoll() {
+            window.__atelierSdkAnswerPollActive = false;
+            if (window.__atelierSdkAnswerPollTimer != null) {
+                clearTimeout(window.__atelierSdkAnswerPollTimer);
+                clearInterval(window.__atelierSdkAnswerPollTimer);
+                window.__atelierSdkAnswerPollTimer = null;
+            }
+        }
+
+        /**
+         * Few one-shot GETs of viewer_sdk_answer.json — only to recover if the final SSE was missed
+         * (watcher can finish before EventSource connects). Not a poll loop; primary path is SSE.
+         */
+        function atelierScheduleSdkAnswerGapFill(askedAt, applyAnswerFn) {
+            const repoId = getChatJobId();
+            const pollUrl = new URL(
+                'repos/' + encodeURIComponent(repoId) + '/viewer_sdk_answer.json',
+                window.location.href
+            ).href;
+            const delays = [350, 1200, 3500, 9000, 20000, 45000, 75000, 105000];
+            delays.forEach(function (ms) {
+                setTimeout(async function () {
+                    if (!window.__atelierSdkAnswerCallback) return;
+                    try {
+                        const res = await fetch(pollUrl, { cache: 'no-store' });
+                        if (!res.ok) return;
+                        const data = await res.json();
+                        if (!data || String(data.asked_at_ms) !== String(askedAt)) return;
+                        const hasFinal =
+                            data.answered_at_ms != null ||
+                            data.kind === 'diagram_answer' ||
+                            data.ok === false ||
+                            (typeof data.answer === 'string' && data.answer.trim() !== '') ||
+                            (data.error != null && String(data.error).trim() !== '');
+                        if (!hasFinal) return;
+                        if (window.__atelierSdkAnswerCallback) applyAnswerFn(data);
+                    } catch (_) {}
+                }, ms);
+            });
+        }
+
+        function atelierClearDiagramHelpActivity() {
+            const box = document.getElementById('atelierDiagramHelpActivity');
+            if (!box) return;
+            box.innerHTML = '';
+            box.hidden = true;
+            window.__atelierDiagramHelpActivityCount = 0;
+        }
+
+        function atelierOnDiagramActivity(data) {
+            if (data == null || data.asked_at_ms == null || window.__atelierDiagramHelpAskedAtMs == null) return;
+            if (String(data.asked_at_ms) !== String(window.__atelierDiagramHelpAskedAtMs)) return;
+            const label = data.label != null ? String(data.label).trim() : '';
+            if (!label) return;
+            window.__atelierDiagramHelpActivityCount = (window.__atelierDiagramHelpActivityCount || 0) + 1;
+            const box = document.getElementById('atelierDiagramHelpActivity');
+            if (!box) return;
+            box.hidden = false;
+            box.innerHTML =
+                '<span class="atelier-dha-label">Working</span><span class="atelier-dha-text"></span>';
+            const textEl = box.querySelector('.atelier-dha-text');
+            if (textEl) textEl.textContent = label;
+            if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function atelierOnAnswerProgress(data) {
+            if (data == null || data.asked_at_ms == null || window.__atelierDiagramHelpAskedAtMs == null) return;
+            if (String(data.asked_at_ms) !== String(window.__atelierDiagramHelpAskedAtMs)) return;
+            const el = window.__atelierHelpStreamingEl;
+            if (!el || !el.parentNode) return;
+            if (data.partial == null) return;
+            const p = String(data.partial);
+            if (!p) return;
+            const allow =
+                (window.__atelierDiagramHelpActivityCount || 0) > 0 ||
+                (typeof window.__atelierHelpStreamRevealAt === 'number' && Date.now() >= window.__atelierHelpStreamRevealAt);
+            if (!allow) return;
+            el.textContent = p;
+            el.classList.remove('loading');
+            el.classList.add('assistant');
+            el.classList.add('streaming');
+            if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        /**
+         * POST to Architectural Agent when URL is configured; otherwise static-demo / MCP path.
+         * @param {{ fromHelpPill?: boolean }} options — help pill syncs question to MCP viewer_state + clipboard.
+         * @returns {Promise<{ ok: boolean, mode?: string }>}
+         */
+        async function sendArchAgentChatMessage(message, selectionOverride, options) {
+            if (!CHAT_ENABLED) return { ok: false, mode: 'disabled' };
+            const opts = options || {};
+            const fromHelpPill = !!opts.fromHelpPill;
+            const msg = String(message || '').trim();
+            if (!msg) return { ok: false, mode: 'empty' };
+
+            const archUrl = getArchAgentChatUrl();
+            const ui = !!(chatMessages && chatSend);
+            let loadingEl = null;
+
+            async function helpPillMcpFallback() {
+                if (ui) {
+            addChatMessage(msg, 'user');
+                }
+
+                var synced = await recordLastDiagramAskForMcp(msg, selectionOverride);
+                try {
+                    await navigator.clipboard.writeText(msg);
+                } catch (_) {
+                    /* ignore */
+                }
+                var askedAt = window.__atelierLastDiagramAsk && window.__atelierLastDiagramAsk.asked_at_ms;
+                if (ui) {
+                    window.__atelierDiagramHelpAskedAtMs = askedAt;
+                    window.__atelierDiagramHelpActivityCount = 0;
+                    window.__atelierHelpStreamRevealAt = Date.now() + 2200;
+                    atelierClearDiagramHelpActivity();
+                    const waitingEl = addChatMessage('Waiting for answer…', 'loading');
+                    window.__atelierHelpStreamingEl = waitingEl;
+                    window.__atelierSdkAnswerCallback = function (data) {
+                        if (!data || data.asked_at_ms == null || String(data.asked_at_ms) !== String(askedAt)) return;
+                        if (data.kind === 'answer_progress') return;
+                        if (data.partial && data.answered_at_ms == null && data.answer == null) return;
+                        atelierClearSdkAnswerPoll();
+                        window.__atelierDiagramHelpAskedAtMs = null;
+                        window.__atelierHelpStreamingEl = null;
+                        atelierClearDiagramHelpActivity();
+                        if (waitingEl && waitingEl.parentNode) waitingEl.remove();
+                        if (data.answer != null && String(data.answer).trim()) {
+                            addChatMessage(data.answer, 'assistant');
+                        } else {
+                            addChatMessage(
+                                'SDK finished without answer text: **' +
+                                    String(data.error || data.ok === false ? 'error' : 'empty') +
+                                    '**. Check terminal running `diagram:watch`.',
+                                'assistant'
+                            );
+                        }
+                        window.__atelierSdkAnswerCallback = null;
+                    };
+                    scheduleAnswerTimeout(askedAt, waitingEl);
+                    atelierScheduleSdkAnswerGapFill(askedAt, function (data) {
+                        if (window.__atelierSdkAnswerCallback) window.__atelierSdkAnswerCallback(data);
+                    });
+                }
+                return { ok: true, mode: 'mcp' };
+            }
+
+            function scheduleAnswerTimeout(askedAtMs, loadingEl) {
+                setTimeout(() => {
+                    if (window.__atelierSdkAnswerCallback) {
+                        window.__atelierSdkAnswerCallback = null;
+                        atelierClearSdkAnswerPoll();
+                        window.__atelierDiagramHelpAskedAtMs = null;
+                        window.__atelierHelpStreamingEl = null;
+                        atelierClearDiagramHelpActivity();
+                        if (loadingEl && loadingEl.parentNode) loadingEl.remove();
+                        addChatMessage(
+                            'Timed out waiting for SDK answer (3 min). Run `npm run diagram:watch` from repo root (same port as this page), set `CURSOR_API_KEY` in `scripts/cursor-sdk.env`, then reload.',
+                            'assistant'
+                        );
+                    }
+                }, 180000);
+            }
+
+            if (!archUrl) {
+                if (fromHelpPill) {
+                    return helpPillMcpFallback();
+                }
+                if (ui) {
+                    addChatMessage(msg, 'user');
+                }
+                if (ui) {
+                    addChatMessage(
+                        'No chat API is configured for this origin. Serve the demo on port **8080** and run CodeWiki web on **8001**, or paste your question into Cursor chat.',
+                        'assistant'
+                    );
+                }
+                return { ok: false, mode: 'no_api' };
+            }
+
+            const body = buildArchAgentChatRequestBody(msg, selectionOverride);
+            if (ui) {
+                addChatMessage(msg, 'user');
+                loadingEl = addChatMessage('Thinking...', 'loading');
+            chatSend.disabled = true;
+            }
+            try {
+                console.log(
+                    '[MODULE TRACKING] Sending chat request with opened modules:',
+                    Array.from(openedModules)
+                );
+                const res = await fetch(archUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+                if (!res.ok) {
+                    const err = new Error(`HTTP ${res.status}`);
+                    if (fromHelpPill && (res.status === 501 || res.status === 404 || res.status === 405)) {
+                        if (loadingEl) loadingEl.remove();
+                        loadingEl = null;
+                        return helpPillMcpFallback();
+                    }
+                    throw err;
+                }
+                const data = await res.json();
+                chatHistory = data.history != null ? data.history : null;
+                if (loadingEl) loadingEl.remove();
+                if (ui) addChatMessage(data.response || 'No response.', 'assistant');
+                return { ok: true, mode: 'api' };
+            } catch (e) {
+                if (loadingEl) loadingEl.remove();
+                if (fromHelpPill) {
+                    return helpPillMcpFallback();
+                }
+                const hint =
+                    e.message === 'Failed to fetch' || e.message === 'Load failed'
+                    ? 'Could not reach chat API. Start the CodeWiki server: cd atelier && python3 -m codewiki.run_web_app --port 8001'
+                        : e.message ||
+                          'Could not reach chat API. Is the CodeWiki server running on port 8001?';
+                if (ui) addChatMessage('Error: ' + hint, 'assistant');
+                return { ok: false, mode: 'error' };
+            } finally {
+                if (ui && chatSend) {
+                chatSend.disabled = false;
+                    if (chatInput) chatInput.focus();
+                }
+            }
+        }
+
+        /**
+         * React Flow “?” pill → Architectural Agent with this node/cluster as diagram_selection.
+         * If the chat API is unreachable, copies the question to the clipboard (paste into Cursor chat).
+         */
+        window.atelierRfAskBriefExplanation = async function atelierRfAskBriefExplanation(ctx) {
+            if (!CHAT_ENABLED) return;
+            const nodeId =
+                ctx && ctx.nodeId != null && String(ctx.nodeId).length
+                    ? String(ctx.nodeId)
+                    : '';
+            const label =
+                ctx && ctx.label != null ? String(ctx.label).trim() : '';
+            const kind =
+                ctx && ctx.kind === 'cluster' ? 'cluster' : 'node';
+            const display = label || nodeId || 'this diagram element';
+            const moduleId =
+                typeof currentModuleId !== 'undefined' ? currentModuleId : null;
+            const message =
+                'Give a brief explanation of what "' +
+                display +
+                '" is in the context of this architecture diagram.';
+            const payload = {
+                kind,
+                logical_id: nodeId || null,
+                label: label || null,
+                module_id: moduleId,
+                dom_ref: null,
+                edge: null,
+            };
+            const selectionOverride = {
+                diagram_selection: payload,
+                diagram_selections: [payload],
+            };
+            await sendArchAgentChatMessage(message, selectionOverride, { fromHelpPill: true });
+        };
         
-        chatSend.addEventListener('click', sendChatMessage);
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
-        });
+        async function sendChatMessage() {
+            if (!chatInput || !chatInput.value.trim()) return;
+            const msg = chatInput.value.trim();
+            chatInput.value = '';
+            await sendArchAgentChatMessage(msg, null, {});
+        }
+        
+        if (CHAT_ENABLED && chatSend && chatInput) {
+            chatSend.addEventListener('click', sendChatMessage);
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+            });
+        }
+
+        // --- SSE: event-driven answers + sdk_trace from diagram_ask_watcher (auto-detects current port; override with ?diagram_sse_port=XXXX) ---
+        (function connectSSE() {
+            if (!CHAT_ENABLED) return;
+            const qp = new URLSearchParams(window.location.search).get('diagram_sse_port');
+            const parsedPort = qp && /^[0-9]+$/.test(qp) ? parseInt(qp, 10) : null;
+            const locPort = window.location.port ? String(window.location.port) : '';
+            const statusEl = document.getElementById('atelierSdkSseStatus');
+            var url =
+                parsedPort != null && String(parsedPort) !== locPort
+                    ? 'http://127.0.0.1:' + parsedPort + '/events'
+                    : '/events';
+            let es;
+            try {
+                es = new EventSource(url);
+            } catch (_) {
+                if (statusEl) statusEl.textContent = 'SSE: cannot start (EventSource)';
+                return;
+            }
+            es.onopen = function () {
+                if (statusEl) {
+                    statusEl.textContent =
+                        url.indexOf('http') === 0 ? 'SSE: connected (' + url + ')' : 'SSE: connected (same tab)';
+                }
+            };
+            es.onmessage = function (evt) {
+                try {
+                    const data = JSON.parse(evt.data);
+                    if (data.kind === 'sdk_trace') {
+                        atelierAppendSdkTrace(data.channel, data.payload);
+                        return;
+                    }
+                    if (data.kind === 'diagram_activity') {
+                        atelierOnDiagramActivity(data);
+                        return;
+                    }
+                    if (data.kind === 'answer_progress') {
+                        atelierOnAnswerProgress(data);
+                        return;
+                    }
+                    if (
+                        window.__atelierSdkAnswerCallback &&
+                        (data.kind === 'diagram_answer' || data.answered_at_ms != null)
+                    ) {
+                        window.__atelierSdkAnswerCallback(data);
+                    }
+                } catch (e) {
+                    console.warn('[atelier SSE] parse error', e);
+                }
+            };
+            es.onerror = function () {
+                if (statusEl) statusEl.textContent = 'SSE: reconnecting…';
+                es.close();
+                setTimeout(connectSSE, 5000);
+            };
+            window.__atelierSSE = es;
+        })();
     </script>
-    <script type="module" src="./reactflow-r6.mjs"></script>
+    <script type="module" src="./reactflow-r6.mjs?v=logical-palette-v2"></script>
 </body>
 </html>
 

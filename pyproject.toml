@@ -49,7 +49,8 @@ dependencies = [
     "networkx>=3.0",
     "psutil>=7.0.0",
     "PyYAML>=6.0.2",
-    "colorama>=0.4.6"
+    "colorama>=0.4.6",
+    "mcp>=1.0.0"
 ]
 
 [external]
@@ -68,7 +69,6 @@ dev = [
     "mypy>=1.5.0",
     "ruff>=0.1.0",
 ]
-
 [project.scripts]
 codewiki = "codewiki.cli.main:cli"
 
@@ -95,7 +95,8 @@ packages = [
     "codewiki.src.be.dependency_analyzer.analyzers",
     "codewiki.src.be.dependency_analyzer.models",
     "codewiki.src.be.dependency_analyzer.utils",
-    "codewiki.src.fe"
+    "codewiki.src.fe",
+    "codewiki.mcp"
 ]
 
 [tool.setuptools.package-data]
