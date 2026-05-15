@@ -1,0 +1,118 @@
+{
+    "title": "Model Architectures Overview",
+    "summary": "This module encompasses the core definitions of various deep learning models, utilities for converting external model checkpoints, and foundational functions for model management and optimization within the Transformers library.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "core_architectures",
+                "label": "Core Model Architectures",
+                "type": "module",
+                "link": "core_models",
+                "title": "Core Model Architectures",
+                "description": "A comprehensive collection of diverse model architectures for various tasks like language, vision, and multimodal processing, ready for use."
+            },
+            {
+                "id": "model_conversion",
+                "label": "Model Checkpoint Conversion",
+                "type": "module",
+                "link": "model_conversion",
+                "title": "Model Checkpoint Conversion",
+                "description": "Utilities to convert model checkpoints from external formats (e.g., TensorFlow, original PyTorch) into the Hugging Face Transformers format for compatibility."
+            },
+            {
+                "id": "model_utilities",
+                "label": "Model Utility Functions",
+                "type": "module",
+                "link": "model_utilities",
+                "title": "Model Utility Functions",
+                "description": "Essential functions for managing model weights, optimizing architectures through fusion, and defining interfaces for audio tokenization."
+            },
+            {
+                "id": "external_checkpoints",
+                "label": "External Model Checkpoints",
+                "type": "external",
+                "link": null,
+                "title": "External Model Checkpoints",
+                "description": "Pre-trained model weights and configurations originating from other deep learning frameworks or research implementations, requiring conversion."
+            },
+            {
+                "id": "data_processors",
+                "label": "Data Processing Modules",
+                "type": "external",
+                "link": "data_processing",
+                "title": "Data Processing Modules",
+                "description": "Components responsible for preparing raw data (text, audio, images) into a format suitable for model input, often using interfaces from this module."
+            }
+        ],
+        "edges": [
+            {
+                "source": "external_checkpoints",
+                "target": "model_conversion",
+                "label": "Provides raw weights",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_conversion",
+                "target": "core_architectures",
+                "label": "Registers converted models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_utilities",
+                "target": "core_architectures",
+                "label": "Supports model operations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_utilities",
+                "target": "model_conversion",
+                "label": "Defines conversion rules",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_processors",
+                "target": "model_utilities",
+                "label": "Implements utility interfaces",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_architectures",
+                "target": "data_processors",
+                "label": "Consumes processed data",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "internal_modules",
+                "label": "Internal Sub-Modules",
+                "nodes": [
+                    "core_architectures",
+                    "model_conversion",
+                    "model_utilities"
+                ],
+                "title": "Internal Sub-Modules",
+                "description": "The primary components within the `model_architectures` module, providing model definitions, conversion tools, and general utilities.",
+                "role": null
+            },
+            {
+                "id": "external_interactions",
+                "label": "External Data & Systems",
+                "nodes": [
+                    "external_checkpoints",
+                    "data_processors"
+                ],
+                "title": "External Data & Systems",
+                "description": "Represents external sources of models and data processing functionalities that interact with this module.",
+                "role": null
+            }
+        ]
+    }
+}

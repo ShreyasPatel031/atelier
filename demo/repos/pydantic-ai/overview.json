@@ -1,0 +1,249 @@
+{
+    "title": "pydantic-ai",
+    "summary": "Pydantic-AI is a comprehensive framework for building, running, and managing intelligent AI agents. It provides core agent logic, integrates with various language models and embedding services, and offers extensive tool management and extensible capabilities. The framework also supports durable workflow integrations for robust, fault-tolerant agent deployments. It includes UI components for interactive applications and evaluation tools for performance assessment.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "user",
+                "label": "Developer / User",
+                "type": "external",
+                "link": null,
+                "title": "Human User / Developer",
+                "description": "Interacts with the Pydantic AI framework to build, run, and evaluate AI agents and applications."
+            },
+            {
+                "id": "agent_core_node",
+                "label": "Core Agent Logic",
+                "type": "module",
+                "link": "agent_core",
+                "title": "Agent Core Module",
+                "description": "Defines the foundational architecture for AI agents, managing their execution flow, model interactions, output handling, and configuration."
+            },
+            {
+                "id": "models_embeddings_node",
+                "label": "AI Models & Embeddings",
+                "type": "module",
+                "link": "models_and_embeddings",
+                "title": "Models and Embeddings Module",
+                "description": "Provides interfaces and implementations for various large language models (LLMs) and text embedding services, abstracting provider-specific details."
+            },
+            {
+                "id": "tools_capabilities_node",
+                "label": "Agent Tools & Capabilities",
+                "type": "module",
+                "link": "tools_and_capabilities",
+                "title": "Tools and Capabilities Module",
+                "description": "Manages the discovery, execution, and lifecycle of tools and extensible capabilities that enhance an agent's functionality and interaction with external systems."
+            },
+            {
+                "id": "durable_integrations_node",
+                "label": "Durable Workflow Integrations",
+                "type": "module",
+                "link": "durable_integrations",
+                "title": "Durable Integrations Module",
+                "description": "Offers integrations with workflow orchestration systems (e.g., DBOS, Prefect, Temporal) to ensure AI agents are durable, fault-tolerant, and recoverable."
+            },
+            {
+                "id": "ui_utilities_node",
+                "label": "UI & Utility Components",
+                "type": "module",
+                "link": "ui_and_utilities",
+                "title": "UI and Utility Module",
+                "description": "Contains general-purpose utilities for asynchronous operations, concurrency, data formatting, and adapters for various user interfaces and communication protocols."
+            },
+            {
+                "id": "evaluation_node",
+                "label": "Evaluation Framework",
+                "type": "module",
+                "link": "evaluation",
+                "title": "Evaluation Module",
+                "description": "Provides a comprehensive framework for evaluating AI agent and function performance, encompassing online evaluation, dataset generation, diverse evaluator types, and robust reporting and telemetry."
+            },
+            {
+                "id": "graph_engine_node",
+                "label": "Graph Engine",
+                "type": "module",
+                "link": "graph_engine",
+                "title": "Graph Engine Module",
+                "description": "Provides a robust framework for defining, executing, persisting, and visualizing complex directed acyclic graphs (DAGs) or state machines, enabling structured workflow orchestration."
+            },
+            {
+                "id": "utilities_and_docs_node",
+                "label": "Utilities & Documentation",
+                "type": "module",
+                "link": "utilities_and_docs",
+                "title": "Utilities & Documentation Module",
+                "description": "Provides general-purpose utilities, command-line tools, and documentation generation enhancements, including scripts for testing and cloud service verification, alongside custom MkDocs hooks."
+            }
+        ],
+        "edges": [
+            {
+                "source": "user",
+                "target": "agent_core_node",
+                "label": "Develops & Configures Agents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user",
+                "target": "ui_utilities_node",
+                "label": "Interacts via UI/CLI",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user",
+                "target": "durable_integrations_node",
+                "label": "Deploys Durable Workflows",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user",
+                "target": "evaluation_node",
+                "label": "Runs Evaluations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user",
+                "target": "graph_engine_node",
+                "label": "Designs & Executes Graphs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_core_node",
+                "target": "models_embeddings_node",
+                "label": "Utilizes LLMs & Embeddings",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_core_node",
+                "target": "tools_capabilities_node",
+                "label": "Integrates Tools & Capabilities",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_core_node",
+                "target": "graph_engine_node",
+                "label": "Orchestrates via Graph",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_integrations_node",
+                "target": "agent_core_node",
+                "label": "Orchestrates Agent Runs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_integrations_node",
+                "target": "tools_capabilities_node",
+                "label": "Durable Tool Execution",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_utilities_node",
+                "target": "agent_core_node",
+                "label": "Drives Agent Interactions",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_utilities_node",
+                "target": "tools_capabilities_node",
+                "label": "Exposes UI-driven Tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_node",
+                "target": "agent_core_node",
+                "label": "Evaluates Agent Performance",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_node",
+                "target": "models_embeddings_node",
+                "label": "Uses Models for Judging",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "graph_engine_node",
+                "target": "agent_core_node",
+                "label": "Provides Workflow Orchestration",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "utilities_and_docs_node",
+                "target": "agent_core_node",
+                "label": "Supports Development & Testing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "utilities_and_docs_node",
+                "target": "evaluation_node",
+                "label": "Aids Evaluation Reporting",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "actors",
+                "label": "Actors",
+                "nodes": [
+                    "user"
+                ],
+                "title": "External Actors",
+                "description": "Represents the human users or developers interacting with the Pydantic AI system.",
+                "role": null
+            },
+            {
+                "id": "core_ai_framework",
+                "label": "Core AI Framework",
+                "nodes": [
+                    "agent_core_node",
+                    "models_embeddings_node",
+                    "tools_capabilities_node"
+                ],
+                "title": "Foundational AI Building Blocks",
+                "description": "These modules provide the essential intelligence, model interaction, and functional extensions required for building and operating AI agents.",
+                "role": null
+            },
+            {
+                "id": "system_orchestration_and_resilience",
+                "label": "Orchestration & Resilience",
+                "nodes": [
+                    "durable_integrations_node",
+                    "graph_engine_node"
+                ],
+                "title": "Workflow Orchestration & Durability",
+                "description": "Ensures the reliability, recoverability, and structured execution of AI agent operations through robust workflow systems and graph-based orchestration.",
+                "role": null
+            },
+            {
+                "id": "interfaces_and_support",
+                "label": "Interfaces & Support",
+                "nodes": [
+                    "ui_utilities_node",
+                    "evaluation_node",
+                    "utilities_and_docs_node"
+                ],
+                "title": "User Interfaces, Evaluation & Utilities",
+                "description": "This group handles user-facing interactions, performance evaluation, general system utilities, and documentation support for the entire framework.",
+                "role": null
+            }
+        ]
+    }
+}

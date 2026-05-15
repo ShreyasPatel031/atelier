@@ -1,0 +1,200 @@
+{
+  "title": "Model Quantization Techniques",
+  "summary": "This module provides a collection of quantization methods for optimizing model size and inference speed. It includes implementations for various bit-widths and techniques like BitNet, bitsandbytes (4-bit and 8-bit), FP8, FP-Quant, Metal, MXFP4, Quark, SINQ, and TorchAo, supporting both pre-quantized model loading and on-the-fly quantization.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "model_to_quantize",
+        "label": "Pre-trained Model",
+        "type": "external",
+        "link": "model_architectures",
+        "title": "Pre-trained Model",
+        "description": "Represents a pre-trained model loaded into the system, which can be subjected to various quantization techniques."
+      },
+      {
+        "id": "bitnet_quantizer",
+        "label": "BitNet Quantizer",
+        "type": "component",
+        "link": null,
+        "title": "BitNet 1.58-bit Quantization",
+        "description": "Applies 1.58-bit quantization using the BitNet method, converting linear layers to BitLinear for efficient inference. Requires 'accelerate'."
+      },
+      {
+        "id": "bnb4bit_quantizer",
+        "label": "BitsAndBytes 4-bit Quantizer",
+        "type": "component",
+        "link": null,
+        "title": "BitsAndBytes 4-bit Quantization",
+        "description": "Implements 4-bit quantization for model weights using the bitsandbytes library, reducing memory footprint. Requires 'accelerate' and 'bitsandbytes'."
+      },
+      {
+        "id": "bnb8bit_quantizer",
+        "label": "BitsAndBytes 8-bit Quantizer",
+        "type": "component",
+        "link": null,
+        "title": "BitsAndBytes 8-bit Quantization",
+        "description": "Implements 8-bit quantization for model weights using the bitsandbytes library, balancing precision and memory. Requires 'accelerate' and 'bitsandbytes'."
+      },
+      {
+        "id": "fp8_quantizer",
+        "label": "Fine-Grained FP8 Quantizer",
+        "type": "component",
+        "link": null,
+        "title": "Fine-Grained FP8 Quantization",
+        "description": "Provides FP8 quantization, supporting standard and MoE models, leveraging GPU/XPU capabilities for performance. Requires 'accelerate' and compatible GPU/XPU."
+      },
+      {
+        "id": "fpquant_quantizer",
+        "label": "FP-Quant Quantizer",
+        "type": "component",
+        "link": null,
+        "title": "FP-Quant Method",
+        "description": "Handles FP-Quant method for loading pre-quantized models or on-the-fly quantization, optimized for specific hardware. Requires GPU/XPU, 'qutlass' (for real quant), and 'fp_quant'."
+      },
+      {
+        "id": "metal_quantizer",
+        "label": "Metal Quantizer",
+        "type": "component",
+        "link": null,
+        "title": "Metal Affine Quantization (MPS)",
+        "description": "Enables Metal affine quantization for Apple Silicon (MPS) devices, utilizing low-bit uint32 tensors with fused dequantization. Requires MPS device and 'kernels'."
+      },
+      {
+        "id": "mxfp4_quantizer",
+        "label": "MXFP4 Quantizer",
+        "type": "component",
+        "link": null,
+        "title": "MXFP4 Quantization",
+        "description": "Performs FP4 quantization using FBGEMM kernels, suitable for various hardware with specific compute capabilities. Requires 'torch', 'accelerate', 'triton', 'kernels', and compatible GPU/XPU."
+      },
+      {
+        "id": "quark_quantizer",
+        "label": "Quark Quantizer",
+        "type": "component",
+        "link": null,
+        "title": "Quark Quantization",
+        "description": "Integrates Quark quantization for efficient model deployment, primarily for pre-quantized models. Requires the 'quark' library."
+      },
+      {
+        "id": "sinq_quantizer",
+        "label": "SINQ Quantizer",
+        "type": "component",
+        "link": null,
+        "title": "SINQ Quantization",
+        "description": "Applies SINQ quantization, supporting weight-only or activation-aware methods, converting linear layers to SINQLinear. Requires 'sinq' and CUDA."
+      },
+      {
+        "id": "torchao_quantizer",
+        "label": "TorchAo Quantizer",
+        "type": "component",
+        "link": null,
+        "title": "TorchAo Quantization",
+        "description": "Utilizes the torchao library for various quantization types, including 4-bit and 8-bit, with support for training. Requires 'torchao'."
+      }
+    ],
+    "edges": [
+      {
+        "source": "model_to_quantize",
+        "target": "bitnet_quantizer",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_to_quantize",
+        "target": "bnb4bit_quantizer",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_to_quantize",
+        "target": "bnb8bit_quantizer",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_to_quantize",
+        "target": "fp8_quantizer",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_to_quantize",
+        "target": "fpquant_quantizer",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_to_quantize",
+        "target": "metal_quantizer",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_to_quantize",
+        "target": "mxfp4_quantizer",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_to_quantize",
+        "target": "quark_quantizer",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_to_quantize",
+        "target": "sinq_quantizer",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_to_quantize",
+        "target": "torchao_quantizer",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "quantization_methods",
+        "label": "Quantization Methods",
+        "nodes": [
+          "bitnet_quantizer",
+          "bnb4bit_quantizer",
+          "bnb8bit_quantizer",
+          "fp8_quantizer",
+          "fpquant_quantizer",
+          "metal_quantizer",
+          "mxfp4_quantizer",
+          "quark_quantizer",
+          "sinq_quantizer",
+          "torchao_quantizer"
+        ],
+        "title": "Quantization Implementations",
+        "description": "Provides various quantization algorithms and their specific configurations.",
+        "role": "surface"
+      },
+      {
+        "id": "model_interface",
+        "label": "Model Interface",
+        "nodes": [
+          "model_to_quantize"
+        ],
+        "title": "Model to Quantize",
+        "description": "The target model that undergoes quantization.",
+        "role": "data"
+      }
+    ]
+  }
+}

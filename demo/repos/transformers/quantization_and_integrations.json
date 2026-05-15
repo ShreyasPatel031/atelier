@@ -1,0 +1,118 @@
+{
+    "title": "Quantization and Integrations",
+    "summary": "This module provides tools for optimizing model performance and integrating with external systems. It includes various quantization techniques to reduce model size and accelerate inference, as well as utilities for connecting with external libraries and services for experiment tracking, hyperparameter tuning, and efficient model serving via CLI.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "quantization_submodule",
+                "label": "Model Quantization",
+                "type": "module",
+                "link": "quantization",
+                "title": "Model Quantization Techniques",
+                "description": "Provides various techniques (e.g., 4-bit, 8-bit, FP8) to reduce model size and accelerate inference, supporting both pre-quantized models and on-the-fly quantization."
+            },
+            {
+                "id": "integrations_submodule",
+                "label": "External Integrations",
+                "type": "module",
+                "link": "external_integrations",
+                "title": "External Tools Integration",
+                "description": "Connects Hugging Face models and workflows with external platforms for experiment tracking (Wandb, DVCLive), hyperparameter search, and parameter-efficient fine-tuning (PEFT)."
+            },
+            {
+                "id": "cli_tools_submodule",
+                "label": "CLI Serving Tools",
+                "type": "module",
+                "link": "cli_tools",
+                "title": "Command-Line Serving Tools",
+                "description": "Offers command-line interfaces for serving Transformer models via an API, including features like continuous batching, dynamic model management, and integration with quantization."
+            },
+            {
+                "id": "model_architectures_ext",
+                "label": "Model Architectures",
+                "type": "external",
+                "link": "model_architectures",
+                "title": "Core Model Definitions",
+                "description": "The foundational module containing definitions of various deep learning models that are optimized and served by this module."
+            },
+            {
+                "id": "pipelines_generation_ext",
+                "label": "Pipelines & Generation",
+                "type": "external",
+                "link": "pipelines_and_generation",
+                "title": "Generation Logic & Task Pipelines",
+                "description": "Provides core text generation algorithms and high-level task-specific pipelines, which can be integrated with external tools or served via CLI."
+            }
+        ],
+        "edges": [
+            {
+                "source": "model_architectures_ext",
+                "target": "quantization_submodule",
+                "label": "Is optimized by",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "quantization_submodule",
+                "target": "cli_tools_submodule",
+                "label": "Provides optimized models for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_architectures_ext",
+                "target": "integrations_submodule",
+                "label": "Integrates with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "integrations_submodule",
+                "target": "pipelines_generation_ext",
+                "label": "Enhances workflows in",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_tools_submodule",
+                "target": "model_architectures_ext",
+                "label": "Serves",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_tools_submodule",
+                "target": "pipelines_generation_ext",
+                "label": "Leverages generation from",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "internal_components",
+                "label": "Core Sub-Modules",
+                "nodes": [
+                    "quantization_submodule",
+                    "integrations_submodule",
+                    "cli_tools_submodule"
+                ],
+                "title": "Internal Sub-Modules",
+                "description": "The primary components within the `quantization_and_integrations` module, focusing on model optimization, external tool connectivity, and serving.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "model_architectures_ext",
+                    "pipelines_generation_ext"
+                ],
+                "title": "Dependent Modules",
+                "description": "Other key modules within the Transformers library that interact with and are leveraged by the components in this module.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,17 +1,17 @@
 """
 Documentation File Sync Module
-Agent 3 (Reliability) - Ensures all modules in tree have corresponding .md files
+Agent 3 (Reliability) — Ensures all modules in ``module_tree.json`` have corresponding doc files
 
 This module provides post-processing to fix the common issue where modules are
-added to module_tree.json but no .md file is generated. This happens because:
+added to module_tree.json but no ``{module}.json`` file is generated. This happens because:
 1. The LLM adds modules to the tree via generate_sub_module_documentation
 2. But the sub-agent for small modules sometimes doesn't create the file
 
 IMPORTANT: This module does NOT silently fix issues. It:
 1. LOGS all issues found with ERROR level
-2. MARKS auto-generated content with "_auto_generated" flag
+2. MARKS auto-generated content with "_auto_generated" flag (when placeholders enabled)
 3. CREATES a sync_issues.json report for later analysis
-4. Still creates placeholder files so the viewer works
+4. Optionally creates placeholder files when CODEWIKI_SYNC_ALLOW_PLACEHOLDER_MD=1 (default: off)
 
 Usage:
     from codewiki.src.be.doc_file_sync import sync_docs_with_tree, get_sync_report
@@ -24,7 +24,6 @@ Usage:
 """
 
 import asyncio
-import copy
 import json
 import logging
 import os
@@ -40,10 +39,22 @@ from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 
+from codewiki.src.be.diagram_ir_validator import (
+    MODULE_TREE_OVERVIEW_KEY,
+    fill_missing_diagram_tooltip_fields,
+)
+from codewiki.src.config import OVERVIEW_FILENAME, module_doc_path
+from codewiki.src.be.doc_schema import validate_module_doc
+
 logger = logging.getLogger(__name__)
 
-# Written by generate_minimal_doc() when Stage 3 did not produce real docs for a tree leaf.
+# Written by generate_minimal_module_doc_dict() when Stage 3 did not produce real docs for a tree leaf.
 AUTO_GENERATED_PLACEHOLDER_MARKER = "AUTO_GENERATED_PLACEHOLDER"
+
+# Default off: missing module doc files are reported only (no synthetic placeholder pages).
+ALLOW_SYNC_PLACEHOLDER_MD = os.environ.get(
+    "CODEWIKI_SYNC_ALLOW_PLACEHOLDER_MD", ""
+).strip().lower() in ("1", "true", "yes")
 
 
 # Mermaid validation is delegated to ``mermaid_validator`` — there is exactly
@@ -706,6 +717,7 @@ def overview_mermaid_to_diagram_json(text: str) -> Dict[str, Any]:
     groups = [{"id": g["id"], "label": g["label"], "nodes": list(g["nodes"])} for g in groups_map.values()]
 
     diagram = {"direction": direction, "nodes": nodes, "edges": edges, "groups": groups}
+    fill_missing_diagram_tooltip_fields(diagram)
 
     ok = len(unsupported_lines) == 0 or len(unsupported_lines) <= max(
         3, int(len(lines) * 0.15)
@@ -728,248 +740,6 @@ def overview_mermaid_to_diagram_json(text: str) -> Dict[str, Any]:
         "unsupportedLineCount": len(unsupported_lines),
         "counts": {"nodes": len(nodes), "edges": len(edges), "groups": len(groups)},
     }
-
-
-def repair_diagram_ir(
-    diagram: Optional[Dict[str, Any]],
-) -> Tuple[bool, Optional[Dict[str, Any]], List[Dict[str, Any]], Dict[str, Any]]:
-    """
-    Deterministic R2 repair — parity with demo/pipeline-ir-repair.js.
-    Returns (ok, diagram_or_none, warnings, summary).
-    """
-    warnings: List[Dict[str, Any]] = []
-    summary: Dict[str, Any] = {
-        "g2Injected": [],
-        "g2EndpointIsGroupId": [],
-        "g3Lifted": [],
-        "g3DroppedNonString": [],
-        "g3DroppedUnknownMember": [],
-        "g3DroppedEmptyGroups": [],
-        "before": {"nodeCount": 0, "edgeCount": 0, "groupCount": 0},
-        "after": {"nodeCount": 0, "edgeCount": 0, "groupCount": 0},
-    }
-
-    if not diagram or not isinstance(diagram, dict):
-        return False, None, warnings, summary
-
-    try:
-        data = copy.deepcopy(diagram)
-    except Exception as e:
-        return (
-            False,
-            None,
-            [{"code": "clone_error", "detail": str(e)}],
-            summary,
-        )
-
-    if not isinstance(data.get("nodes"), list):
-        data["nodes"] = []
-    if not isinstance(data.get("edges"), list):
-        data["edges"] = []
-    if not isinstance(data.get("groups"), list):
-        data["groups"] = []
-
-    summary["before"] = {
-        "nodeCount": len(data["nodes"]),
-        "edgeCount": len(data["edges"]),
-        "groupCount": len(data["groups"]),
-    }
-
-    def collect_node_ids() -> Set[str]:
-        ids: Set[str] = set()
-        for n in data["nodes"]:
-            if n and n.get("id") is not None:
-                ids.add(str(n["id"]))
-        return ids
-
-    def collect_group_ids() -> Set[str]:
-        ids: Set[str] = set()
-        for g in data["groups"]:
-            if g and g.get("id") is not None:
-                ids.add(str(g["id"]))
-        return ids
-
-    group_ids = collect_group_ids()
-
-    for g in data["groups"]:
-        if not g or g.get("id") is None:
-            continue
-        gid = str(g["id"])
-        if not isinstance(g.get("nodes"), list):
-            g["nodes"] = []
-
-        next_members: List[str] = []
-        for i, entry in enumerate(g["nodes"]):
-            if entry and isinstance(entry, dict) and not isinstance(entry, list) and entry.get("id") is not None:
-                nid = str(entry["id"])
-                label = str(entry["label"]) if entry.get("label") is not None else nid
-                ntype = str(entry["type"]) if entry.get("type") is not None else "component"
-                link = entry.get("link")
-                existing = next((x for x in data["nodes"] if x and str(x.get("id")) == nid), None)
-                if not existing:
-                    new_node: Dict[str, Any] = {
-                        "id": nid,
-                        "label": label,
-                        "type": ntype,
-                        "_repaired": "g3_lifted_from_group",
-                    }
-                    if link is not None:
-                        new_node["link"] = link
-                    data["nodes"].append(new_node)
-                else:
-                    if label and existing.get("label") == existing.get("id"):
-                        existing["label"] = label
-                    if ntype and not existing.get("type"):
-                        existing["type"] = ntype
-                summary["g3Lifted"].append({"groupId": gid, "nodeId": nid})
-                warnings.append({"code": "g3_lift_inline_node", "groupId": gid, "nodeId": nid})
-                next_members.append(nid)
-                continue
-            if not isinstance(entry, str):
-                summary["g3DroppedNonString"].append(
-                    {"groupId": gid, "index": i, "entryType": type(entry).__name__}
-                )
-                warnings.append({"code": "g3_drop_non_string_member", "groupId": gid, "index": i})
-                continue
-            next_members.append(entry)
-        g["nodes"] = next_members
-
-    node_ids = collect_node_ids()
-
-    for g in data["groups"]:
-        if not g or g.get("id") is None:
-            continue
-        gid = str(g["id"])
-        kept: List[str] = []
-        for mid in g["nodes"]:
-            sid = str(mid)
-            if sid not in node_ids:
-                summary["g3DroppedUnknownMember"].append({"groupId": gid, "memberId": sid})
-                warnings.append({"code": "g3_drop_unknown_member", "groupId": gid, "memberId": sid})
-                continue
-            kept.append(sid)
-        g["nodes"] = kept
-
-    kept_groups: List[Dict[str, Any]] = []
-    for g in data["groups"]:
-        if not g or g.get("id") is None:
-            continue
-        if not g.get("nodes") or len(g["nodes"]) == 0:
-            summary["g3DroppedEmptyGroups"].append(str(g["id"]))
-            warnings.append({"code": "g3_dropped_empty_group", "groupId": str(g["id"])})
-            continue
-        kept_groups.append(g)
-    data["groups"] = kept_groups
-
-    group_ids = collect_group_ids()
-    node_ids = collect_node_ids()
-
-    def first_group_member(gid: str) -> Optional[str]:
-        for g in data["groups"]:
-            if not g or g.get("id") is None:
-                continue
-            if str(g["id"]) != gid:
-                continue
-            members = g.get("nodes") or []
-            if not members:
-                return None
-            return str(members[0])
-
-    def ensure_external_node(eid: str) -> None:
-        sid = str(eid)
-        if sid in node_ids:
-            return
-        if sid in group_ids:
-            return
-        data["nodes"].append(
-            {
-                "id": sid,
-                "label": sid,
-                "type": "external",
-                "_repaired": "g2_injected_endpoint",
-            }
-        )
-        node_ids.add(sid)
-        summary["g2Injected"].append(sid)
-        warnings.append({"code": "g2_injected_external", "nodeId": sid})
-
-    # Normalize edges: drop malformed; rewire endpoints that reference group ids to the group's first member.
-    kept_edges: List[Dict[str, Any]] = []
-    for e in data["edges"]:
-        if not e:
-            continue
-        src = str(e["source"]) if e.get("source") is not None else ""
-        tgt = str(e["target"]) if e.get("target") is not None else ""
-        if not src or not tgt:
-            warnings.append({"code": "g2_removed_edge_missing_endpoint", "edge": e})
-            continue
-        if src in group_ids:
-            rep = first_group_member(src)
-            if rep:
-                warnings.append(
-                    {"code": "g2_rewired_group_endpoint", "role": "source", "from": src, "to": rep}
-                )
-                src = rep
-            else:
-                warnings.append({"code": "g2_dropped_edge_group_endpoint", "role": "source", "id": src})
-                continue
-        if tgt in group_ids:
-            rep = first_group_member(tgt)
-            if rep:
-                warnings.append(
-                    {"code": "g2_rewired_group_endpoint", "role": "target", "from": tgt, "to": rep}
-                )
-                tgt = rep
-            else:
-                warnings.append({"code": "g2_dropped_edge_group_endpoint", "role": "target", "id": tgt})
-                continue
-        ne = dict(e)
-        ne["source"] = src
-        ne["target"] = tgt
-        kept_edges.append(ne)
-    data["edges"] = kept_edges
-
-    # R4 prep: ELK cannot use the same id for a leaf node and a compound group — rename colliding groups.
-    node_ids = collect_node_ids()
-    group_ids = collect_group_ids()
-    used_ids: Set[str] = set(node_ids) | set(group_ids)
-    for g in data["groups"]:
-        if not g or g.get("id") is None:
-            continue
-        gid = str(g["id"])
-        if gid not in node_ids:
-            continue
-        base = f"{gid}__group"
-        new_gid = base
-        n = 1
-        while new_gid in used_ids:
-            new_gid = f"{base}_{n}"
-            n += 1
-        g["id"] = new_gid
-        g["_repaired"] = "r4_group_renamed_avoid_node_collision"
-        used_ids.add(new_gid)
-        warnings.append({"code": "r4_renamed_group_for_node_collision", "from": gid, "to": new_gid})
-
-    group_ids = collect_group_ids()
-    node_ids = collect_node_ids()
-
-    for e in data["edges"]:
-        if not e:
-            continue
-        src = str(e["source"]) if e.get("source") is not None else ""
-        tgt = str(e["target"]) if e.get("target") is not None else ""
-        if src not in node_ids:
-            ensure_external_node(src)
-        if tgt not in node_ids:
-            ensure_external_node(tgt)
-
-    summary["after"] = {
-        "nodeCount": len(data["nodes"]),
-        "edgeCount": len(data["edges"]),
-        "groupCount": len(data["groups"]),
-    }
-
-    return True, data, warnings, summary
 
 
 def _elk_label(parent_id: str, index: int, text: str, w: float, h: float) -> Dict[str, Any]:
@@ -1321,7 +1091,7 @@ def _merge_samples(
 
 def audit_diagram_ir_state(docs_dir: str) -> Dict[str, Any]:
     """
-    Walk module_tree.json diagrams + overview.md; return histograms and capped samples.
+    Walk module_tree.json diagrams + overview.json (or legacy overview.md); return histograms and capped samples.
     """
     docs_path = Path(docs_dir)
     tree_path = docs_path / "module_tree.json"
@@ -1350,190 +1120,36 @@ def audit_diagram_ir_state(docs_dir: str) -> Dict[str, Any]:
                 if not isinstance(raw_d.get("nodes"), list):
                     continue
                 out["module_diagrams_total"] += 1
-                ok_r, repaired, r2_w, _summ = repair_diagram_ir(raw_d)
-                r4_w: List[Dict[str, Any]] = []
-                if ok_r and repaired:
-                    r4_w = diagram_to_elk_input_warnings(repaired, target="elkjs")
-                merged: List[Dict[str, Any]] = []
-                for w in r2_w:
-                    if isinstance(w, dict) and w.get("code"):
-                        merged.append(w)
-                merged.extend(r4_w)
-                fc = _flatten_diagram_ir_warnings(merged)
+                r4_w = diagram_to_elk_input_warnings(raw_d, target="elkjs")
+                fc = _flatten_diagram_ir_warnings(r4_w)
                 for code, lst in fc.items():
                     out["by_code"][code] += len(lst)
                 _merge_samples(samples_acc, module_name, module_path, fc)
 
-    overview_path = docs_path / "overview.md"
-    if overview_path.exists():
+    overview_json_path = docs_path / OVERVIEW_FILENAME
+    if overview_json_path.exists():
         try:
-            oc = overview_path.read_text(encoding="utf-8", errors="replace")
+            odata = json.loads(
+                overview_json_path.read_text(encoding="utf-8", errors="replace")
+            )
         except Exception:
-            oc = ""
-        has_dj = bool(_DIAGRAM_JSON_BLOCK_RE.search(oc))
-        out["overview_has_diagram_json"] = has_dj
-        if has_dj:
-            m = _DIAGRAM_JSON_BLOCK_RE.search(oc)
-            if m:
-                try:
-                    overview_diagram = json.loads(m.group(1).strip())
-                except Exception:
-                    overview_diagram = None
-                if isinstance(overview_diagram, dict):
-                    ok_r, repaired, r2_w, _ = repair_diagram_ir(overview_diagram)
-                    r4_w = diagram_to_elk_input_warnings(repaired, target="elkjs") if ok_r and repaired else []
-                    merged = [w for w in r2_w if isinstance(w, dict) and w.get("code")] + r4_w
-                    fc = _flatten_diagram_ir_warnings(merged)
-                    for code, lst in fc.items():
-                        out["by_code"][code] += len(lst)
-                    _merge_samples(samples_acc, "overview", "overview", fc)
-        else:
-            out["overview_mermaid_parse_ok"] = False
-            fence_m = re.search(r"```mermaid\s*([\s\S]*?)```", oc, re.IGNORECASE)
-            if not fence_m:
-                out["overview_r1_reason"] = "empty_mermaid"
-                out["by_code"]["overview_no_diagram_json"] += 1
-                samples_acc.setdefault("overview_no_diagram_json", []).append(
-                    {"module": "overview", "path": "overview", "reason": "no_mermaid_fence"}
-                )
-            else:
-                body = fence_m.group(1).strip()
-                r1 = overview_mermaid_to_diagram_json(body)
-                out["by_code"]["overview_no_diagram_json"] += 1
-                samples_acc.setdefault("overview_no_diagram_json", []).append(
-                    {"module": "overview", "path": "overview"}
-                )
-                if not r1.get("ok"):
-                    out["overview_mermaid_parse_ok"] = False
-                    out["overview_r1_reason"] = r1.get("reason", "parse_failed")
-                    out["by_code"]["overview_mermaid_parse_failed"] += 1
-                    samples_acc.setdefault("overview_mermaid_parse_failed", []).append(
-                        {
-                            "module": "overview",
-                            "path": "overview",
-                            "reason": r1.get("reason"),
-                        }
-                    )
-                else:
-                    out["overview_mermaid_parse_ok"] = True
-                for w in r1.get("warnings") or []:
-                    if w == "unmatched_end":
-                        out["by_code"]["r1_unmatched_end"] += 1
-                        samples_acc.setdefault("r1_unmatched_end", []).append(
-                            {"module": "overview", "path": "overview", "warning": w}
-                        )
-                    elif isinstance(w, str) and w.startswith("unclosed_subgraph:"):
-                        out["by_code"]["r1_unclosed_subgraph"] += 1
-                        samples_acc.setdefault("r1_unclosed_subgraph", []).append(
-                            {"module": "overview", "path": "overview", "warning": w}
-                        )
-                if r1.get("unsupportedLineCount", 0) and not r1.get("ok"):
-                    out["by_code"]["r1_too_many_unsupported_lines"] += 1
+            odata = None
+        overview_diagram = odata.get("diagram") if isinstance(odata, dict) else None
+        if isinstance(overview_diagram, dict) and isinstance(
+            overview_diagram.get("nodes"), list
+        ):
+            out["overview_has_diagram_json"] = True
+            r4_w = diagram_to_elk_input_warnings(overview_diagram, target="elkjs")
+            fc = _flatten_diagram_ir_warnings(r4_w)
+            for code, lst in fc.items():
+                out["by_code"][code] += len(lst)
+            _merge_samples(samples_acc, "overview", "overview", fc)
 
     out["by_code"] = dict(out["by_code"])
     for k in list(samples_acc.keys()):
         samples_acc[k] = samples_acc[k][: _MAX_SAMPLES_PER_DIAGRAM_IR_CODE]
     out["samples_by_code"] = samples_acc
     return out
-
-
-def _write_diagram_json_back_to_md(md_path: Path, repaired: Dict[str, Any]) -> bool:
-    """
-    Replace the DIAGRAM_JSON block in a .md file with the repaired diagram.
-    Returns True if the file was rewritten, False otherwise.
-    """
-    if not md_path.exists():
-        return False
-    try:
-        content = md_path.read_text(encoding="utf-8", errors="replace")
-        new_block = "<!-- DIAGRAM_JSON\n" + json.dumps(repaired, indent=4) + "\n-->"
-        new_content, n = _DIAGRAM_JSON_BLOCK_RE.subn(new_block, content, count=1)
-        if n > 0 and new_content != content:
-            md_path.write_text(new_content, encoding="utf-8")
-            return True
-    except Exception:
-        pass
-    return False
-
-
-def apply_diagram_ir_repairs_to_docs_dir(docs_dir: str) -> Dict[str, Any]:
-    """
-    Mutate module_tree.json diagrams via R2; inject overview DIAGRAM_JSON via R1 when absent.
-    Also writes repaired DIAGRAM_JSON back to the source .md files so Stage 3.5 re-reads
-    clean data on the next generation run.
-    Returns aggregate repair summary counters.
-    """
-    docs_path = Path(docs_dir)
-    tree_path = docs_path / "module_tree.json"
-    agg = {
-        "modules_repaired": 0,
-        "g2_injected_total": 0,
-        "g3_lifted_total": 0,
-        "overview_diagram_json_injected": False,
-        "overview_diagram_json_repaired": False,
-    }
-
-    if tree_path.exists():
-        try:
-            tree = json.loads(tree_path.read_text(encoding="utf-8", errors="replace"))
-        except Exception:
-            tree = {}
-        if isinstance(tree, dict):
-
-            def walk_and_repair(node: Dict[str, Any], module_name: str) -> None:
-                nonlocal agg
-                d = node.get("diagram")
-                if isinstance(d, dict) and isinstance(d.get("nodes"), list):
-                    ok, repaired, _w, summ = repair_diagram_ir(d)
-                    if ok and repaired:
-                        node["diagram"] = repaired
-                        agg["modules_repaired"] += 1
-                        agg["g2_injected_total"] += len(summ.get("g2Injected") or [])
-                        agg["g3_lifted_total"] += len(summ.get("g3Lifted") or [])
-                        # Write back to source .md so Stage 3.5 reads clean data on regen
-                        _write_diagram_json_back_to_md(docs_path / f"{module_name}.md", repaired)
-                ch = node.get("children")
-                if isinstance(ch, dict):
-                    for cn, child in ch.items():
-                        if isinstance(child, dict):
-                            walk_and_repair(child, cn)
-
-            for _top, data in tree.items():
-                if isinstance(data, dict):
-                    walk_and_repair(data, _top)
-
-            tree_path.write_text(json.dumps(tree, indent=2), encoding="utf-8")
-
-    overview_path = docs_path / "overview.md"
-    if overview_path.exists():
-        content = overview_path.read_text(encoding="utf-8", errors="replace")
-        if not _DIAGRAM_JSON_BLOCK_RE.search(content):
-            fence_m = re.search(r"```mermaid\s*([\s\S]*?)```", content, re.IGNORECASE)
-            if fence_m:
-                body = fence_m.group(1).strip()
-                r1 = overview_mermaid_to_diagram_json(body)
-                if r1.get("ok") and isinstance(r1.get("diagram"), dict):
-                    diagram = r1["diagram"]
-                    diagram["_auto_generated"] = "r1_overview_synthesis"
-                    insert = "<!-- DIAGRAM_JSON\n" + json.dumps(diagram, indent=4) + "\n-->\n\n"
-                    idx = content.find("```mermaid")
-                    if idx >= 0:
-                        content = content[:idx] + insert + content[idx:]
-                        overview_path.write_text(content, encoding="utf-8")
-                        agg["overview_diagram_json_injected"] = True
-        else:
-            om = _DIAGRAM_JSON_BLOCK_RE.search(content)
-            if om:
-                try:
-                    overview_diagram = json.loads(om.group(1).strip())
-                except Exception:
-                    overview_diagram = None
-                if isinstance(overview_diagram, dict) and isinstance(overview_diagram.get("nodes"), list):
-                    ok_o, repaired_o, _wo, _summ_o = repair_diagram_ir(overview_diagram)
-                    if ok_o and repaired_o and _write_diagram_json_back_to_md(overview_path, repaired_o):
-                        agg["overview_diagram_json_repaired"] = True
-
-    return agg
 
 
 def _emit_diagram_ir_sync_issues(report: SyncReport, ir_audit: Dict[str, Any]) -> None:
@@ -1628,11 +1244,8 @@ def _build_measurement_summary(report: SyncReport, mermaid_stats: Dict[str, Any]
             "validator": "mermaid_validator (Mermaid.js 11.9 via Node, same as viewer)",
         },
         "3_diagram_ir": {
-            "audit_pre": report.metrics.get("diagram_ir_audit"),
-            "audit_post": report.metrics.get("diagram_ir_audit_post"),
-            "by_code_pre": (report.metrics.get("diagram_ir_audit") or {}).get("by_code", {}),
-            "by_code_post": (report.metrics.get("diagram_ir_audit_post") or {}).get("by_code", {}),
-            "repairs_applied": report.metrics.get("diagram_ir_repairs_applied") or {},
+            "audit": report.metrics.get("diagram_ir_audit"),
+            "by_code": (report.metrics.get("diagram_ir_audit") or {}).get("by_code", {}),
         },
     }
 
@@ -1667,34 +1280,20 @@ def _mermaid_safe_id(name: str) -> str:
     return out or "node"
 
 
-def generate_minimal_doc(module_name: str, module_data: Dict, module_path: str, 
-                        components: Dict = None) -> str:
+def generate_minimal_module_doc_dict(
+    module_name: str,
+    module_data: Dict,
+    module_path: str,
+    components: Dict = None,
+) -> Dict[str, Any]:
     """
-    Generate viewer-grade documentation for a module that's missing a real .md file.
+    Minimal ``{module}.json`` for a tree node missing real documentation (viewer stubs).
 
-    Output shape matches successful runs: # title, opening paragraph (hover), DIAGRAM_JSON,
-    and a matching ``flowchart TD`` block. Tracking metadata stays in an HTML comment only.
-
-    Args:
-        module_name: Name of the module
-        module_data: Module data from tree (has title, description, components, children)
-        module_path: Full path in tree (e.g., "parent/child/leaf")
-        components: Optional full components dict (unused; reserved for richer future synthesis)
-
-    Returns:
-        Markdown content for the documentation file
+    Diagram child links use bare module ids (normalized by ``validate_module_doc``).
     """
     title = module_data.get("title", module_name.replace("_", " ").title())
     component_ids = module_data.get("components", []) or []
     description = _placeholder_opening_description(title, module_data, component_ids)
-
-    # Invisible tracking marker (viewer strips HTML comments from prose)
-    content = f"<!-- {AUTO_GENERATED_PLACEHOLDER_MARKER}\n"
-    content += f"  reason: LLM did not create .md file for this module\n"
-    content += f"  module_path: {module_path}\n"
-    content += f"  component_count: {len(component_ids)}\n"
-    content += f"  generated_at: {datetime.now().isoformat()}\n"
-    content += f"-->\n\n"
 
     root_id = _mermaid_safe_id(module_name)
     children = module_data.get("children") or {}
@@ -1704,13 +1303,15 @@ def generate_minimal_doc(module_name: str, module_data: Dict, module_path: str,
     nodes_json: List[Dict[str, Any]] = []
     edges_json: List[Dict[str, str]] = []
 
-    nodes_json.append({
-        "id": root_id,
-        "label": title,
-        "type": "module",
-        "title": title,
-        "description": description,
-    })
+    nodes_json.append(
+        {
+            "id": root_id,
+            "label": title,
+            "type": "module",
+            "title": title,
+            "description": description,
+        }
+    )
 
     for child_name, child_data in list(children.items())[:12]:
         if not isinstance(child_data, dict):
@@ -1722,19 +1323,23 @@ def generate_minimal_doc(module_name: str, module_data: Dict, module_path: str,
             cdesc = f"Sub-module {ctitle} under {title}."
         if len(cdesc) > 200:
             cdesc = cdesc[:197] + "..."
-        nodes_json.append({
-            "id": cid,
-            "label": ctitle,
-            "type": "module",
-            "link": f"{child_name}.md",
-            "title": ctitle,
-            "description": cdesc,
-        })
-        edges_json.append({
-            "source": root_id,
-            "target": cid,
-            "label": "contains",
-        })
+        nodes_json.append(
+            {
+                "id": cid,
+                "label": ctitle,
+                "type": "module",
+                "link": child_name,
+                "title": ctitle,
+                "description": cdesc,
+            }
+        )
+        edges_json.append(
+            {
+                "source": root_id,
+                "target": cid,
+                "label": "contains",
+            }
+        )
 
     diagram_obj = {
         "direction": "TD",
@@ -1743,38 +1348,24 @@ def generate_minimal_doc(module_name: str, module_data: Dict, module_path: str,
         "groups": [],
     }
 
-    content += f"# {title}\n\n"
-    content += f"{description}\n\n"
-    content += "<!-- DIAGRAM_JSON\n"
-    content += json.dumps(diagram_obj, indent=4)
-    content += "\n-->\n\n"
-    content += "```mermaid\n"
-    content += "flowchart TD\n"
-    content += f'    {root_id}["{title.replace(chr(34), chr(39))}"]\n'
-    for child_name, child_data in list(children.items())[:12]:
-        if not isinstance(child_data, dict):
-            continue
-        cid = _mermaid_safe_id(child_name)
-        ctitle = child_data.get("title", child_name.replace("_", " ").title())
-        safe_label = ctitle.replace('"', "'")
-        content += f'    {cid}["{safe_label}"]\n'
-        content += f'    {root_id} -->|\'\'\'contains\'\'\'| {cid}\n'
-    content += "```\n"
-
-    return content
+    doc = validate_module_doc(
+        {"title": title, "summary": description, "diagram": diagram_obj}
+    )
+    return doc.model_dump(mode="json")
 
 
 def sync_docs_with_tree(docs_dir: str, report: SyncReport, components: Dict = None) -> List[str]:
     """
-    Ensure all modules in module_tree.json have corresponding .md files.
-    
-    LOGS ERRORS for all missing files, then creates placeholders.
-    
+    Ensure all modules in module_tree.json have corresponding ``{module}.json`` (or legacy ``.md``).
+
+    LOGS ERRORS for all missing files. Placeholder JSON creation is disabled unless
+    CODEWIKI_SYNC_ALLOW_PLACEHOLDER_MD is set (see ALLOW_SYNC_PLACEHOLDER_MD).
+
     Args:
         docs_dir: Path to documentation directory
         report: SyncReport to record issues
         components: Optional full components dict for richer doc generation
-    
+
     Returns:
         List of file paths that were created
     """
@@ -1797,9 +1388,23 @@ def sync_docs_with_tree(docs_dir: str, report: SyncReport, components: Dict = No
     all_modules = get_all_modules_in_tree(tree)
     logger.info(f"[DOC_SYNC] Found {len(all_modules)} modules in tree")
     
-    # Get existing .md files
-    existing_files = {f.stem for f in docs_path.glob("*.md")}
-    logger.info(f"[DOC_SYNC] Found {len(existing_files)} existing .md files")
+    _skip_json = {
+        "module_tree",
+        "first_module_tree",
+        "metadata",
+        "entry_points",
+        "generation_report",
+        "viewer_epoch",
+        "sync_issues",
+        "overview",
+    }
+    json_stems = {f.stem for f in docs_path.glob("*.json") if f.stem not in _skip_json}
+    md_stems = {f.stem for f in docs_path.glob("*.md")}
+    existing_files = json_stems | md_stems
+    logger.info(
+        "[DOC_SYNC] Found %s module doc stems (.json/.md combined)",
+        len(existing_files),
+    )
     
     # Find missing files
     created_files = []
@@ -1826,26 +1431,34 @@ def sync_docs_with_tree(docs_dir: str, report: SyncReport, components: Dict = No
                     "has_children": bool(module_data.get("children")),
                     "parent": module_path.rsplit("/", 1)[0] if "/" in module_path else "root"
                 },
-                auto_fixed=True
+                auto_fixed=ALLOW_SYNC_PLACEHOLDER_MD,
             )
             report.add_issue(issue)
-            
-            # Generate placeholder doc (with clear markers)
-            try:
-                content = generate_minimal_doc(module_name, module_data, module_path, components)
-                file_path = docs_path / f"{module_name}.md"
-                
-                with open(file_path, 'w') as f:
-                    f.write(content)
-                
-                created_files.append(str(file_path))
-                report.files_created.append(module_name)
-                logger.info(f"[DOC_SYNC] Created placeholder: {module_name}.md")
-                
-            except Exception as e:
-                logger.error(f"[DOC_SYNC] Failed to create {module_name}.md: {e}")
-    
-    logger.info(f"[DOC_SYNC] Complete: {len(report.files_created)} placeholders created")
+
+            if ALLOW_SYNC_PLACEHOLDER_MD:
+                try:
+                    payload = generate_minimal_module_doc_dict(
+                        module_name, module_data, module_path, components
+                    )
+                    file_path = module_doc_path(docs_dir, module_name)
+                    file_path.write_text(
+                        json.dumps(payload, indent=2), encoding="utf-8"
+                    )
+
+                    created_files.append(str(file_path))
+                    report.files_created.append(module_name)
+                    logger.info("[DOC_SYNC] Created placeholder: %s", file_path.name)
+
+                except Exception as e:
+                    logger.error("[DOC_SYNC] Failed to create %s.json: %s", module_name, e)
+            else:
+                logger.warning(
+                    "[DOC_SYNC] Missing %s.json — placeholders disabled "
+                    "(set CODEWIKI_SYNC_ALLOW_PLACEHOLDER_MD=1 to create viewer stubs)",
+                    module_name,
+                )
+
+    logger.info(f"[DOC_SYNC] Complete: {len(report.files_created)} placeholder files created")
     
     return created_files
 
@@ -2371,7 +1984,7 @@ def update_tree_diagrams(docs_dir: str) -> int:
                     "id": child_name,
                     "label": child_data.get("title", child_name.replace("_", " ").title()),
                     "type": "module",
-                    "link": f"{child_name}.md"
+                    "link": child_name
                 })
                 edges.append({
                     "source": node_name,
@@ -2501,58 +2114,76 @@ def add_missing_metadata(docs_dir: str, report: SyncReport) -> int:
 
 def ensure_overview_exists(docs_dir: str) -> bool:
     """
-    Ensure overview.md exists. Create from module tree if missing.
-    
+    Ensure ``overview.json`` exists. Create from module tree if missing.
+
     Returns:
         True if overview was created, False if already exists
     """
     docs_path = Path(docs_dir)
-    overview_path = docs_path / "overview.md"
-    
+    overview_path = docs_path / OVERVIEW_FILENAME
+
     if overview_path.exists():
         return False
-    
+
     tree_path = docs_path / "module_tree.json"
     if not tree_path.exists():
         return False
-    
+
     try:
-        with open(tree_path) as f:
-            tree = json.load(f)
-    except:
+        tree = json.loads(tree_path.read_text(encoding="utf-8", errors="replace"))
+    except Exception:
         return False
-    
-    # Create overview from module tree
+
     repo_name = docs_path.parent.name if docs_path.name == "docs" else docs_path.name
-    
-    content = f"# {repo_name.replace('-', ' ').replace('_', ' ').title()}\n\n"
-    content += "## Overview\n\n"
-    content += f"This repository contains {len(tree)} main modules.\n\n"
-    content += "## Modules\n\n"
-    
+    repo_label = repo_name.replace("-", " ").replace("_", " ").title()
+    root_id = _mermaid_safe_id(repo_name)
+    nodes: List[Dict[str, Any]] = [
+        {"id": root_id, "label": repo_label, "type": "module", "title": repo_label, "description": ""}
+    ]
+    edges: List[Dict[str, str]] = []
     for module_name, module_data in tree.items():
+        mid = _mermaid_safe_id(module_name)
         title = module_data.get("title", module_name.replace("_", " ").title())
-        desc = module_data.get("description", "")
-        content += f"### [{title}]({module_name}.md)\n\n"
-        if desc:
-            content += f"{desc}\n\n"
-    
-    # Add diagram
-    content += "## Architecture\n\n"
-    content += "```mermaid\ngraph TD\n"
-    for i, (module_name, module_data) in enumerate(list(tree.items())[:10]):
-        mid = f"M{i}"
-        title = module_data.get("title", module_name)[:20]
-        content += f"    {mid}[\"{title}\"]\n"
-    content += "```\n"
-    
+        desc = (module_data.get("description") or "").strip() or f"Module {title}."
+        if len(desc) > 200:
+            desc = desc[:197] + "..."
+        nodes.append(
+            {
+                "id": mid,
+                "label": title,
+                "type": "module",
+                "link": module_name,
+                "title": title,
+                "description": desc,
+            }
+        )
+        edges.append({"source": root_id, "target": mid, "label": "contains"})
+
+    summary = (
+        f"Auto-generated overview for **{repo_label}** with {len(tree)} top-level module(s)."
+    )
+    doc = validate_module_doc(
+        {
+            "title": f"{repo_label} — Overview",
+            "summary": summary,
+            "diagram": {
+                "direction": "TD",
+                "nodes": nodes,
+                "edges": edges,
+                "groups": [],
+            },
+        }
+    )
+
     try:
-        with open(overview_path, 'w') as f:
-            f.write(content)
-        logger.info(f"[DOC_SYNC] Created overview.md")
+        overview_path.write_text(
+            json.dumps(doc.model_dump(mode="json"), indent=2),
+            encoding="utf-8",
+        )
+        logger.info("[DOC_SYNC] Created %s", OVERVIEW_FILENAME)
         return True
     except Exception as e:
-        logger.error(f"[DOC_SYNC] Failed to create overview.md: {e}")
+        logger.error("[DOC_SYNC] Failed to create %s: %s", OVERVIEW_FILENAME, e)
         return False
 
 
@@ -2642,7 +2273,7 @@ def run_full_sync(
             module_name="overview",
             module_path="root",
             severity="error",
-            details={"reason": "overview.md was not generated"},
+            details={"reason": f"{OVERVIEW_FILENAME} was not generated"},
             auto_fixed=True
         ))
     
@@ -2658,37 +2289,18 @@ def run_full_sync(
     # Update parent diagrams to include children
     diagram_updates = update_tree_diagrams(docs_dir)
 
-    diagram_ir_repairs: Dict[str, Any] = {}
-    ir_audit_pre: Dict[str, Any] = {}
-    ir_audit_post: Dict[str, Any] = {}
+    ir_audit: Dict[str, Any] = {}
     try:
-        ir_audit_pre = audit_diagram_ir_state(docs_dir)
-        report.metrics["diagram_ir_audit"] = ir_audit_pre
-        logger.info("[STAGE 4.5] Diagram IR audit (pre-repair): %s", ir_audit_pre.get("by_code"))
+        ir_audit = audit_diagram_ir_state(docs_dir)
+        report.metrics["diagram_ir_audit"] = ir_audit
+        logger.info("[STAGE 4.5] Diagram IR audit: %s", ir_audit.get("by_code"))
     except Exception as e:
-        logger.warning("[DOC_SYNC] diagram IR pre-audit failed: %s", e)
+        logger.warning("[DOC_SYNC] diagram IR audit failed: %s", e)
         report.metrics["diagram_ir_audit"] = {"error": str(e)}
-        ir_audit_pre = {"samples_by_code": {}, "by_code": {}}
+        ir_audit = {"samples_by_code": {}, "by_code": {}}
 
     try:
-        diagram_ir_repairs = apply_diagram_ir_repairs_to_docs_dir(docs_dir)
-        report.metrics["diagram_ir_repairs_applied"] = diagram_ir_repairs
-        logger.info("[STAGE 4.5] Diagram IR repairs applied: %s", diagram_ir_repairs)
-    except Exception as e:
-        logger.warning("[DOC_SYNC] diagram IR repairs failed: %s", e)
-        report.metrics["diagram_ir_repairs_applied"] = {"error": str(e)}
-
-    try:
-        ir_audit_post = audit_diagram_ir_state(docs_dir)
-        report.metrics["diagram_ir_audit_post"] = ir_audit_post
-        logger.info("[STAGE 4.5] Diagram IR audit (post-repair): %s", ir_audit_post.get("by_code"))
-    except Exception as e:
-        logger.warning("[DOC_SYNC] diagram IR post-audit failed: %s", e)
-        report.metrics["diagram_ir_audit_post"] = {"error": str(e)}
-        ir_audit_post = {"samples_by_code": {}, "by_code": {}}
-
-    try:
-        _emit_diagram_ir_sync_issues(report, ir_audit_post)
+        _emit_diagram_ir_sync_issues(report, ir_audit)
     except Exception as e:
         logger.warning("[DOC_SYNC] diagram IR sync issue emit failed: %s", e)
     
@@ -2739,25 +2351,6 @@ def run_full_sync(
         "parent_diagram_child_nodes_injected": diagram_updates,
         "overview_md_created": int(overview_created),
         "mermaid_stage46_fixes": mermaid_stats.get("stage46_fixes_applied", 0),
-        "diagram_ir_modules_repaired": diagram_ir_repairs.get("modules_repaired", 0)
-        if isinstance(diagram_ir_repairs, dict)
-        else 0,
-        "diagram_ir_g2_injected_total": diagram_ir_repairs.get("g2_injected_total", 0)
-        if isinstance(diagram_ir_repairs, dict)
-        else 0,
-        "diagram_ir_g3_lifted_total": diagram_ir_repairs.get("g3_lifted_total", 0)
-        if isinstance(diagram_ir_repairs, dict)
-        else 0,
-        "diagram_ir_overview_json_injected": int(
-            diagram_ir_repairs.get("overview_diagram_json_injected", False)
-        )
-        if isinstance(diagram_ir_repairs, dict)
-        else 0,
-        "diagram_ir_overview_json_repaired": int(
-            diagram_ir_repairs.get("overview_diagram_json_repaired", False)
-        )
-        if isinstance(diagram_ir_repairs, dict)
-        else 0,
     }
 
     report.metrics["measurement_summary"] = _build_measurement_summary(report, mermaid_stats)

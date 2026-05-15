@@ -1,0 +1,639 @@
+{
+  "title": "Tools and Retrievers Module",
+  "summary": "This module provides tools for agents and diverse retriever implementations for efficient document search and processing. It supports advanced retrieval techniques like multi-query, ensemble, and self-query, and integrates with external search services.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "BaseTool",
+        "label": "Base Tool Abstraction",
+        "type": "component",
+        "link": "base_components",
+        "title": "Base Tool Interface",
+        "description": "Defines the fundamental interface for tools that agents can use to interact with the world."
+      },
+      {
+        "id": "BaseRetriever",
+        "label": "Base Retriever Abstraction",
+        "type": "component",
+        "link": "base_components",
+        "title": "Base Retriever Interface",
+        "description": "Defines the fundamental interface for retrieving relevant documents based on a query, serving as a base for various specialized retrieval strategies."
+      },
+      {
+        "id": "Runnable",
+        "label": "Runnable Interface",
+        "type": "component",
+        "link": "base_components",
+        "title": "Composable Runnable Interface",
+        "description": "A generic interface for components that can be invoked, streamed, or batched, enabling flexible composition within larger systems."
+      },
+      {
+        "id": "LLM",
+        "label": "Large Language Model",
+        "type": "component",
+        "link": "llm_providers",
+        "title": "LLM for Text Generation",
+        "description": "Provides language understanding and generation capabilities, often used for query transformation, content extraction, or structured output generation."
+      },
+      {
+        "id": "PromptTemplate",
+        "label": "Prompt Template",
+        "type": "component",
+        "link": "prompts_and_messages",
+        "title": "Structured Prompt Generation",
+        "description": "Structures input for Large Language Models to guide their responses and behavior, ensuring consistent and effective communication."
+      },
+      {
+        "id": "VectorStore",
+        "label": "Vector Store",
+        "type": "component",
+        "link": "data_loading_and_storage",
+        "title": "Vector Embedding Storage",
+        "description": "Stores and retrieves vector embeddings, enabling semantic search, similarity operations, and efficient indexing of high-dimensional data."
+      },
+      {
+        "id": "Embeddings",
+        "label": "Embedding Model",
+        "type": "component",
+        "link": "text_processing",
+        "title": "Text Embedding Generation",
+        "description": "Converts text into numerical vector representations, allowing for semantic comparison and similarity calculations between pieces of text."
+      },
+      {
+        "id": "Document",
+        "label": "Document Object",
+        "type": "component",
+        "link": null,
+        "title": "Content Unit with Metadata",
+        "description": "Represents a piece of text content along with associated metadata, serving as the fundamental unit for retrieval and processing pipelines."
+      },
+      {
+        "id": "PydanticModel",
+        "label": "Pydantic Data Model",
+        "type": "component",
+        "link": null,
+        "title": "Data Schema Definition",
+        "description": "Used for defining and validating data schemas, particularly for tool arguments, structured outputs, and configuration management."
+      },
+      {
+        "id": "FilterToolArgs",
+        "label": "Filter Tool Arguments",
+        "type": "component",
+        "link": null,
+        "title": "Tool Argument Filtering",
+        "description": "Utility to filter and extract relevant arguments from a function's signature for tool creation, ensuring correct input parsing."
+      },
+      {
+        "id": "InferToolSchema",
+        "label": "Infer Tool Schema",
+        "type": "component",
+        "link": null,
+        "title": "Tool Argument Schema Inference",
+        "description": "Infers a Pydantic schema for tool arguments from a Runnable's input type, facilitating structured tool calls and validation."
+      },
+      {
+        "id": "CustomToolDecorator",
+        "label": "Custom Tool Decorator",
+        "type": "component",
+        "link": null,
+        "title": "Create Custom Tools",
+        "description": "A decorator to easily create custom tools from functions, automatically inferring schemas and adding metadata for agent use."
+      },
+      {
+        "id": "DeprecatedToolImport",
+        "label": "Handle Deprecated Tool Imports",
+        "type": "component",
+        "link": null,
+        "title": "Backward Compatibility for Tools",
+        "description": "Manages backward-compatible imports for classic tools, redirecting users to `langchain_community` to ensure future compatibility."
+      },
+      {
+        "id": "AsyncRetrieverFunc",
+        "label": "Asynchronous Retriever Function",
+        "type": "component",
+        "link": null,
+        "title": "Async Document Retrieval",
+        "description": "Provides an asynchronous function for a retriever tool to efficiently fetch and format documents, supporting non-blocking operations."
+      },
+      {
+        "id": "EnsembleRetriever",
+        "label": "Ensemble Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Combine Multiple Retrievers",
+        "description": "Combines results from multiple underlying retrievers using weighted reciprocal rank fusion for improved relevance and recall."
+      },
+      {
+        "id": "MultiQueryRetriever",
+        "label": "Multi-Query Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Generate & Combine Multiple Queries",
+        "description": "Generates multiple diverse queries from a single input using an LLM, then retrieves and combines documents from each for broader coverage."
+      },
+      {
+        "id": "MultiVectorRetriever",
+        "label": "Multi-Vector Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Parent Docs from Chunks",
+        "description": "Retrieves full parent documents by performing similarity searches on smaller, embedded child chunks, maintaining context."
+      },
+      {
+        "id": "SelfQueryRetriever",
+        "label": "Self-Query Retriever",
+        "type": "component",
+        "link": null,
+        "title": "LLM-Guided Structured Query",
+        "description": "Uses an LLM to construct structured queries for a vector store based on natural language input, including filters and limits."
+      },
+      {
+        "id": "LLMChainExtractor",
+        "label": "LLM Chain Document Extractor",
+        "type": "component",
+        "link": null,
+        "title": "Extract Relevant Document Parts",
+        "description": "Compresses documents by extracting only the most relevant parts using an LLM chain, reducing noise and focusing on key information."
+      },
+      {
+        "id": "LLMChainFilter",
+        "label": "LLM Chain Document Filter",
+        "type": "component",
+        "link": null,
+        "title": "Filter Documents by Relevance",
+        "description": "Filters out documents that are not relevant to a given query using an LLM chain, improving precision and reducing irrelevant data."
+      },
+      {
+        "id": "CohereRerank",
+        "label": "Cohere Rerank Compressor",
+        "type": "component",
+        "link": null,
+        "title": "Rerank Documents with Cohere",
+        "description": "Reranks a list of documents based on their relevance to a query using the Cohere Rerank API, enhancing search result quality."
+      },
+      {
+        "id": "CohereAPI",
+        "label": "Cohere Rerank API",
+        "type": "external",
+        "link": null,
+        "title": "External Reranking Service",
+        "description": "An external API service provided by Cohere for advanced document reranking capabilities."
+      },
+      {
+        "id": "SemanticSimilaritySelector",
+        "label": "Semantic Similarity Example Selector",
+        "type": "component",
+        "link": null,
+        "title": "Select Examples by Similarity",
+        "description": "Selects relevant examples from a collection based on their semantic similarity to a given input query, useful for few-shot prompting."
+      },
+      {
+        "id": "MMRExampleSelector",
+        "label": "Max Marginal Relevance Example Selector",
+        "type": "component",
+        "link": null,
+        "title": "Select Diverse Examples (MMR)",
+        "description": "Selects a diverse set of examples from a collection using Max Marginal Relevance, balancing relevance and diversity for better context."
+      },
+      {
+        "id": "ExaSearchRetriever",
+        "label": "Exa Search Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve from Exa Web Search",
+        "description": "Retrieves web search results from the Exa API, providing structured documents based on a query for RAG applications."
+      },
+      {
+        "id": "ExaSearchResultsTool",
+        "label": "Exa Search Results Tool",
+        "type": "component",
+        "link": null,
+        "title": "Perform Exa Web Search",
+        "description": "A tool that performs web searches using the Exa API and returns the results in a structured JSON format for agents."
+      },
+      {
+        "id": "ExaFindSimilarTool",
+        "label": "Exa Find Similar Tool",
+        "type": "component",
+        "link": null,
+        "title": "Find Similar Web Pages (Exa)",
+        "description": "A tool that uses the Exa API to find web pages similar to a given URL, useful for content discovery."
+      },
+      {
+        "id": "ExaAPI",
+        "label": "Exa Search API",
+        "type": "external",
+        "link": null,
+        "title": "External Web Search Service",
+        "description": "An external API service provided by Exa for advanced web search and content retrieval, enhancing agent capabilities."
+      },
+      {
+        "id": "PerplexitySearchRetriever",
+        "label": "Perplexity Search Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve from Perplexity AI Search",
+        "description": "Retrieves search results from the Perplexity AI API, offering AI-powered search capabilities for comprehensive information gathering."
+      },
+      {
+        "id": "PerplexityAPI",
+        "label": "Perplexity AI API",
+        "type": "external",
+        "link": null,
+        "title": "External AI Search Service",
+        "description": "An external API service provided by Perplexity AI for AI-powered search and answer generation, enhancing retrieval."
+      }
+    ],
+    "edges": [
+      {
+        "source": "BaseTool",
+        "target": "Runnable",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseRetriever",
+        "target": "Runnable",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FilterToolArgs",
+        "target": "PydanticModel",
+        "label": "uses to define schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InferToolSchema",
+        "target": "Runnable",
+        "label": "infers from InputType",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InferToolSchema",
+        "target": "PydanticModel",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CustomToolDecorator",
+        "target": "BaseTool",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CustomToolDecorator",
+        "target": "InferToolSchema",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DeprecatedToolImport",
+        "target": "BaseTool",
+        "label": "provides access to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AsyncRetrieverFunc",
+        "target": "BaseRetriever",
+        "label": "implements async behavior for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AsyncRetrieverFunc",
+        "target": "Document",
+        "label": "formats",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EnsembleRetriever",
+        "target": "BaseRetriever",
+        "label": "combines multiple",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EnsembleRetriever",
+        "target": "Document",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiQueryRetriever",
+        "target": "LLM",
+        "label": "generates queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiQueryRetriever",
+        "target": "PromptTemplate",
+        "label": "uses for query generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiQueryRetriever",
+        "target": "BaseRetriever",
+        "label": "invokes multiple times",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiQueryRetriever",
+        "target": "Document",
+        "label": "outputs unique union of",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiVectorRetriever",
+        "target": "VectorStore",
+        "label": "searches chunks in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiVectorRetriever",
+        "target": "Document",
+        "label": "retrieves parent",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfQueryRetriever",
+        "target": "LLM",
+        "label": "constructs queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfQueryRetriever",
+        "target": "PromptTemplate",
+        "label": "uses for query construction",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfQueryRetriever",
+        "target": "VectorStore",
+        "label": "queries with structured input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfQueryRetriever",
+        "target": "Document",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainExtractor",
+        "target": "LLM",
+        "label": "uses in chain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainExtractor",
+        "target": "Runnable",
+        "label": "is an LLM chain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainExtractor",
+        "target": "Document",
+        "label": "extracts from/outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainFilter",
+        "target": "LLM",
+        "label": "uses in chain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainFilter",
+        "target": "Runnable",
+        "label": "is an LLM chain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainFilter",
+        "target": "Document",
+        "label": "filters",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CohereRerank",
+        "target": "Document",
+        "label": "reranks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CohereRerank",
+        "target": "CohereAPI",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SemanticSimilaritySelector",
+        "target": "VectorStore",
+        "label": "searches in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SemanticSimilaritySelector",
+        "target": "Embeddings",
+        "label": "uses for similarity",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SemanticSimilaritySelector",
+        "target": "Document",
+        "label": "selects examples as",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MMRExampleSelector",
+        "target": "VectorStore",
+        "label": "searches in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MMRExampleSelector",
+        "target": "Embeddings",
+        "label": "uses for MMR",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MMRExampleSelector",
+        "target": "Document",
+        "label": "selects examples as",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaSearchRetriever",
+        "target": "ExaAPI",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaSearchRetriever",
+        "target": "Document",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaSearchResultsTool",
+        "target": "ExaAPI",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaSearchResultsTool",
+        "target": "BaseTool",
+        "label": "is a",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaFindSimilarTool",
+        "target": "ExaAPI",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaFindSimilarTool",
+        "target": "BaseTool",
+        "label": "is a",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PerplexitySearchRetriever",
+        "target": "PerplexityAPI",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PerplexitySearchRetriever",
+        "target": "Document",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "ToolDefinitionManagement",
+        "label": "Tool Definition & Management",
+        "nodes": [
+          "FilterToolArgs",
+          "InferToolSchema",
+          "CustomToolDecorator",
+          "DeprecatedToolImport",
+          "BaseTool",
+          "Runnable",
+          "PydanticModel"
+        ],
+        "title": "Tool Definition & Management",
+        "description": "Components for defining, creating, and managing tools that agents can utilize, including schema inference and handling deprecated imports.",
+        "role": "surface"
+      },
+      {
+        "id": "RetrieverOrchestrationCore",
+        "label": "Retriever Orchestration & Core",
+        "nodes": [
+          "EnsembleRetriever",
+          "MultiQueryRetriever",
+          "MultiVectorRetriever",
+          "SelfQueryRetriever",
+          "BaseRetriever",
+          "AsyncRetrieverFunc",
+          "LLM",
+          "PromptTemplate",
+          "VectorStore",
+          "Document"
+        ],
+        "title": "Retriever Orchestration & Core",
+        "description": "Core retriever implementations and orchestration strategies, enabling advanced document retrieval techniques like multi-query, ensemble, and self-query.",
+        "role": "generative"
+      },
+      {
+        "id": "DocumentProcessingCompression",
+        "label": "Document Processing & Compression",
+        "nodes": [
+          "LLMChainExtractor",
+          "LLMChainFilter",
+          "CohereRerank",
+          "Document",
+          "CohereAPI"
+        ],
+        "title": "Document Processing & Compression",
+        "description": "Components focused on processing and compressing documents, including LLM-based extraction and filtering, and external reranking services.",
+        "role": "analytical"
+      },
+      {
+        "id": "ExampleSelection",
+        "label": "Example Selection",
+        "nodes": [
+          "SemanticSimilaritySelector",
+          "MMRExampleSelector",
+          "VectorStore",
+          "Embeddings",
+          "Document"
+        ],
+        "title": "Example Selection",
+        "description": "Mechanisms for selecting relevant and diverse examples from a collection, typically used for few-shot prompting, based on semantic similarity or MMR.",
+        "role": "data"
+      },
+      {
+        "id": "ExternalSearchIntegrations",
+        "label": "External Search Integrations",
+        "nodes": [
+          "ExaSearchRetriever",
+          "ExaSearchResultsTool",
+          "ExaFindSimilarTool",
+          "PerplexitySearchRetriever",
+          "ExaAPI",
+          "PerplexityAPI"
+        ],
+        "title": "External Search Integrations",
+        "description": "Integrations with external search APIs like Exa and Perplexity AI, providing specialized web search and information retrieval capabilities.",
+        "role": "surface"
+      }
+    ]
+  }
+}

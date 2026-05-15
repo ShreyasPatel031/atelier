@@ -1,0 +1,295 @@
+{
+  "title": "Data Loading and Storage",
+  "summary": "This module provides components for loading data from external sources like LangSmith and storing it in vector databases, including in-memory and Qdrant implementations. It facilitates the creation and management of vector indexes for efficient similarity search.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "langsmith_loader",
+        "label": "Load LangSmith Examples",
+        "type": "component",
+        "link": null,
+        "title": "LangSmith Data Loader",
+        "description": "Fetches dataset examples from the LangSmith platform, converting them into structured Document objects for further processing."
+      },
+      {
+        "id": "in_memory_vector_store",
+        "label": "In-Memory Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "In-Memory Vector Database",
+        "description": "Manages and searches vector embeddings in memory, providing fast similarity lookups for retrieved documents."
+      },
+      {
+        "id": "qdrant_vector_store_new",
+        "label": "Qdrant Vector Store (New API)",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Vector Database (New API)",
+        "description": "Integrates with the Qdrant vector database, supporting advanced vector search capabilities including dense, sparse, and hybrid retrieval."
+      },
+      {
+        "id": "qdrant_vector_store_classic",
+        "label": "Qdrant Vector Store (Classic API)",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Vector Database (Classic API)",
+        "description": "Provides an interface for storing and querying vector embeddings in a Qdrant instance, offering both synchronous and asynchronous operations."
+      },
+      {
+        "id": "vectorstore_index_creator",
+        "label": "Create Vector Store Index",
+        "type": "component",
+        "link": null,
+        "title": "Vector Store Index Creator",
+        "description": "Automates the process of building a vector index from raw data, involving document loading, text splitting, and embedding generation."
+      },
+      {
+        "id": "document",
+        "label": "Document",
+        "type": "external",
+        "link": null,
+        "title": "Document Object",
+        "description": "A fundamental data structure representing a piece of content, typically text, along with associated metadata."
+      },
+      {
+        "id": "embeddings",
+        "label": "Embeddings",
+        "type": "external",
+        "link": null,
+        "title": "Embedding Model",
+        "description": "A model or function that transforms text into numerical vector representations, capturing semantic meaning."
+      },
+      {
+        "id": "sparse_embeddings",
+        "label": "Sparse Embeddings",
+        "type": "external",
+        "link": null,
+        "title": "Sparse Embedding Model",
+        "description": "A model or function generating sparse vector representations, often used in conjunction with dense embeddings for hybrid search."
+      },
+      {
+        "id": "text_splitter",
+        "label": "Text Splitter",
+        "type": "external",
+        "link": null,
+        "title": "Text Chunking Utility",
+        "description": "A utility responsible for breaking down large documents into smaller, overlapping or non-overlapping chunks suitable for embedding and indexing."
+      },
+      {
+        "id": "langsmith_api",
+        "label": "LangSmith Platform",
+        "type": "external",
+        "link": null,
+        "title": "LangSmith Platform API",
+        "description": "The external platform providing datasets and examples for evaluation and development."
+      },
+      {
+        "id": "qdrant_client",
+        "label": "Qdrant Client",
+        "type": "external",
+        "link": null,
+        "title": "Qdrant Database Client",
+        "description": "The client library used to connect and interact with a Qdrant vector database instance."
+      }
+    ],
+    "edges": [
+      {
+        "source": "langsmith_api",
+        "target": "langsmith_loader",
+        "label": "Provides datasets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "langsmith_loader",
+        "target": "document",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "langsmith_loader",
+        "label": "Uses loaders from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "document",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "text_splitter",
+        "label": "Uses for chunking",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "embeddings",
+        "label": "Uses for vectorization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document",
+        "target": "in_memory_vector_store",
+        "label": "Adds",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embeddings",
+        "target": "in_memory_vector_store",
+        "label": "Used for vectorization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "in_memory_vector_store",
+        "target": "document",
+        "label": "Returns search results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document",
+        "target": "qdrant_vector_store_new",
+        "label": "Adds",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embeddings",
+        "target": "qdrant_vector_store_new",
+        "label": "Used for dense vectors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sparse_embeddings",
+        "target": "qdrant_vector_store_new",
+        "label": "Used for sparse vectors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_client",
+        "target": "qdrant_vector_store_new",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_vector_store_new",
+        "target": "document",
+        "label": "Returns search results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document",
+        "target": "qdrant_vector_store_classic",
+        "label": "Adds",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embeddings",
+        "target": "qdrant_vector_store_classic",
+        "label": "Used for vectors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_client",
+        "target": "qdrant_vector_store_classic",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_vector_store_classic",
+        "target": "document",
+        "label": "Returns search results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "in_memory_vector_store",
+        "label": "Creates/Populates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "qdrant_vector_store_new",
+        "label": "Creates/Populates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "qdrant_vector_store_classic",
+        "label": "Creates/Populates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "data_loading",
+        "label": "Data Loading",
+        "nodes": [
+          "langsmith_loader"
+        ],
+        "title": "Data Loading",
+        "description": "Components responsible for ingesting data from various sources.",
+        "role": "data"
+      },
+      {
+        "id": "vector_storage",
+        "label": "Vector Storage",
+        "nodes": [
+          "in_memory_vector_store",
+          "qdrant_vector_store_new",
+          "qdrant_vector_store_classic"
+        ],
+        "title": "Vector Storage",
+        "description": "Implementations for storing and retrieving vector embeddings, enabling similarity search.",
+        "role": "data"
+      },
+      {
+        "id": "indexing_orchestration",
+        "label": "Indexing Orchestration",
+        "nodes": [
+          "vectorstore_index_creator"
+        ],
+        "title": "Indexing Orchestration",
+        "description": "Manages the end-to-end process of creating and populating vector indexes.",
+        "role": "generative"
+      },
+      {
+        "id": "external_integrations",
+        "label": "External Integrations",
+        "nodes": [
+          "langsmith_api",
+          "qdrant_client",
+          "embeddings",
+          "sparse_embeddings",
+          "text_splitter",
+          "document"
+        ],
+        "title": "External Integrations",
+        "description": "External services, models, and core data types that interact with the module's components.",
+        "role": "external"
+      }
+    ]
+  }
+}

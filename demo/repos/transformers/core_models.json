@@ -1,0 +1,32 @@
+{
+    "title": "Core Model Architectures",
+    "summary": "This module provides a comprehensive collection of diverse model architectures, categorized by their primary domain or task, including causal language models, multimodal models, object detection, speech processing, and more.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "causal_language_models", "label": "Causal Language Models", "type": "module", "link": "causal_language_models", "title": "Causal Language Models", "description": "Large language models designed for generative text tasks, predicting the next token in a sequence."}, 
+            {"id": "vision_detection_segmentation", "label": "Vision Detection & Segmentation", "type": "module", "link": "vision_detection_segmentation", "title": "Vision Detection & Segmentation", "description": "Models for identifying objects, their locations, and delineating regions within images and videos."},
+            {"id": "text_qa_classification", "label": "Text QA & Classification", "type": "module", "link": "text_qa_classification", "title": "Text QA & Classification", "description": "Models focused on understanding text to answer questions, categorize content, or perform token-level annotations."},
+            {"id": "multimodal_integration", "label": "Multimodal Integration", "type": "module", "link": "multimodal_integration", "title": "Multimodal Integration", "description": "Models combining multiple input modalities, such as vision, text, and audio, for joint understanding and generation tasks."},
+            {"id": "speech_audio_processing", "label": "Speech & Audio Processing", "type": "module", "link": "speech_audio_processing", "title": "Speech & Audio Processing", "description": "Models dedicated to processing, understanding, and generating speech and other audio signals."},
+            {"id": "time_series_forecasting", "label": "Time Series Forecasting", "type": "module", "link": "time_series_forecasting", "title": "Time Series Forecasting", "description": "Models specialized in analyzing and predicting patterns in sequential data over time."},
+            {"id": "protein_sequence_structure", "label": "Protein Sequence & Structure", "type": "module", "link": "protein_sequence_structure", "title": "Protein Sequence & Structure", "description": "Models for analyzing protein sequences, predicting structural properties, and understanding biological functions."},
+            {"id": "general_encoder_decoder", "label": "General Encoder-Decoder", "type": "module", "link": "general_encoder_decoder", "title": "General Encoder-Decoder Architectures", "description": "Foundational encoder-decoder architectures used for various sequence-to-sequence tasks like translation and conditional generation."}
+        ],
+        "edges": [
+            {"source": "multimodal_integration", "target": "causal_language_models", "label": "integrates with"},
+            {"source": "multimodal_integration", "target": "vision_detection_segmentation", "label": "outputs to"},
+            {"source": "multimodal_integration", "target": "speech_audio_processing", "label": "integrates with"},
+            {"source": "general_encoder_decoder", "target": "causal_language_models", "label": "adapts to"},
+            {"source": "general_encoder_decoder", "target": "text_qa_classification", "label": "powers"},
+            {"source": "speech_audio_processing", "target": "text_qa_classification", "label": "converts to text for"}
+        ],
+        "groups": [
+            {"id": "language_focused", "label": "Language Focused Models", "title": "Language Focused Models", "description": "Models primarily dealing with text understanding and generation.", "role": "analytical", "nodes": ["causal_language_models", "text_qa_classification", "general_encoder_decoder"]},
+            {"id": "vision_focused", "label": "Vision Focused Models", "title": "Vision Focused Models", "description": "Models primarily dealing with image and video analysis tasks.", "role": "analytical", "nodes": ["vision_detection_segmentation"]},
+            {"id": "cross_modal", "label": "Cross-Modal Models", "title": "Cross-Modal Models", "description": "Models that integrate and process information from multiple modalities simultaneously.", "role": "generative", "nodes": ["multimodal_integration"]},
+            {"id": "audio_focused", "label": "Audio Focused Models", "title": "Audio Focused Models", "description": "Models specialized in processing and generating audio data.", "role": "analytical", "nodes": ["speech_audio_processing"]},
+            {"id": "specialized_domains", "label": "Specialized Domain Models", "title": "Specialized Domain Models", "description": "Models tailored for specific scientific or data domains.", "role": "analytical", "nodes": ["time_series_forecasting", "protein_sequence_structure"]}
+        ]
+    }
+}

@@ -1,0 +1,265 @@
+{
+  "title": "Conversational Retrieval Chains",
+  "summary": "This module provides components for building conversational AI systems that retrieve information from documents, including deprecated chains and a recommended function for history-aware document retrieval.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "user_input",
+        "label": "User Input",
+        "type": "external",
+        "link": null,
+        "title": "User's Input Question",
+        "description": "The initial question or statement provided by the user."
+      },
+      {
+        "id": "chat_history",
+        "label": "Chat History",
+        "type": "external",
+        "link": "caching_and_history",
+        "title": "Past Conversation Context",
+        "description": "A record of previous turns in the conversation, used to contextualize new queries."
+      },
+      {
+        "id": "llm",
+        "label": "Language Model (LLM)",
+        "type": "external",
+        "link": "llm_providers",
+        "title": "Large Language Model",
+        "description": "A powerful AI model used for understanding, generating text, and rephrasing questions."
+      },
+      {
+        "id": "retriever",
+        "label": "Document Retriever",
+        "type": "external",
+        "link": "tools_and_retrievers",
+        "title": "Information Retrieval System",
+        "description": "System responsible for fetching relevant documents from a knowledge base."
+      },
+      {
+        "id": "vector_store",
+        "label": "Vector Store",
+        "type": "external",
+        "link": "data_loading_and_storage",
+        "title": "Semantic Search Store",
+        "description": "A specialized database for storing and querying vector embeddings of documents."
+      },
+      {
+        "id": "prompt_templates",
+        "label": "Prompt Templates",
+        "type": "external",
+        "link": "prompts_and_messages",
+        "title": "Structured LLM Instructions",
+        "description": "Pre-defined structures for guiding the LLM's behavior and input formatting."
+      },
+      {
+        "id": "external_user",
+        "label": "User",
+        "type": "external",
+        "link": null,
+        "title": "End User",
+        "description": "The end-user interacting with the conversational system."
+      },
+      {
+        "id": "conversational_retrieval_chain_comp",
+        "label": "ConversationalRetrievalChain",
+        "type": "component",
+        "link": "conversational_retrieval",
+        "title": "Deprecated Conversational Q&A Chain",
+        "description": "A deprecated chain that manages conversational Q&A by rephrasing questions, retrieving documents, and generating answers using an LLM."
+      },
+      {
+        "id": "chat_vector_db_chain_comp",
+        "label": "ChatVectorDBChain",
+        "type": "component",
+        "link": "conversational_retrieval",
+        "title": "Deprecated Vector DB Chat Chain",
+        "description": "A deprecated chain for conversational Q&A, specifically designed to interact with a vector database for document retrieval."
+      },
+      {
+        "id": "create_history_aware_retriever_func",
+        "label": "create_history_aware_retriever",
+        "type": "component",
+        "link": "conversational_retrieval",
+        "title": "History-Aware Retriever Factory (Recommended)",
+        "description": "A recommended function that creates a Runnable to intelligently retrieve documents, rephrasing user questions based on chat history if available."
+      }
+    ],
+    "edges": [
+      {
+        "source": "user_input",
+        "target": "conversational_retrieval_chain_comp",
+        "label": "New Question",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_history",
+        "target": "conversational_retrieval_chain_comp",
+        "label": "Conversation Context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm",
+        "target": "conversational_retrieval_chain_comp",
+        "label": "Uses for Q-Gen & Answer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "retriever",
+        "target": "conversational_retrieval_chain_comp",
+        "label": "Retrieves Documents",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prompt_templates",
+        "target": "conversational_retrieval_chain_comp",
+        "label": "Uses Prompts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conversational_retrieval_chain_comp",
+        "target": "external_user",
+        "label": "Final Answer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_input",
+        "target": "chat_vector_db_chain_comp",
+        "label": "New Question",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_history",
+        "target": "chat_vector_db_chain_comp",
+        "label": "Conversation Context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm",
+        "target": "chat_vector_db_chain_comp",
+        "label": "Uses for Q-Gen & Answer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vector_store",
+        "target": "chat_vector_db_chain_comp",
+        "label": "Searches Vector DB",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prompt_templates",
+        "target": "chat_vector_db_chain_comp",
+        "label": "Uses Prompts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_vector_db_chain_comp",
+        "target": "external_user",
+        "label": "Final Answer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_input",
+        "target": "create_history_aware_retriever_func",
+        "label": "Current Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_history",
+        "target": "create_history_aware_retriever_func",
+        "label": "Optional History",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm",
+        "target": "create_history_aware_retriever_func",
+        "label": "Rephrase Question (if history)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prompt_templates",
+        "target": "create_history_aware_retriever_func",
+        "label": "Uses Rephrasing Prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_history_aware_retriever_func",
+        "target": "retriever",
+        "label": "Rephrased Query / Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "retriever",
+        "target": "create_history_aware_retriever_func",
+        "label": "Retrieved Documents",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_components",
+        "label": "Surface Components",
+        "nodes": [
+          "conversational_retrieval_chain_comp",
+          "chat_vector_db_chain_comp",
+          "create_history_aware_retriever_func"
+        ],
+        "title": "Primary User-Facing Components",
+        "description": "These are the main interfaces or high-level components provided by the module.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_models",
+        "label": "Generative Models",
+        "nodes": [
+          "llm"
+        ],
+        "title": "Language Generation Capabilities",
+        "description": "Components responsible for generating human-like text, such as answers or rephrased questions.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_systems",
+        "label": "Analytical Systems",
+        "nodes": [
+          "retriever",
+          "vector_store"
+        ],
+        "title": "Information Processing & Search",
+        "description": "Systems that analyze data to retrieve relevant information or perform complex searches.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_sources_sinks",
+        "label": "Data Sources & Sinks",
+        "nodes": [
+          "user_input",
+          "chat_history",
+          "prompt_templates",
+          "external_user"
+        ],
+        "title": "Inputs, Outputs, and Data Stores",
+        "description": "External entities that provide input data, store information, or receive output from the module.",
+        "role": "data"
+      }
+    ]
+  }
+}

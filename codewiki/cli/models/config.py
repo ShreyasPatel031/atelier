@@ -27,11 +27,15 @@ class Configuration:
         main_model: Primary model for documentation generation
         cluster_model: Model for module clustering
         default_output: Default output directory
+        use_vertex_ai: Use Vertex AI + ADC instead of a static API key
+        gcp_project: GCP project ID for Vertex AI quota
     """
     base_url: str
     main_model: str
     cluster_model: str
     default_output: str = "docs"
+    use_vertex_ai: bool = False
+    gcp_project: str = ""
     
     def validate(self):
         """
@@ -64,6 +68,8 @@ class Configuration:
             main_model=data.get('main_model', ''),
             cluster_model=data.get('cluster_model', ''),
             default_output=data.get('default_output', 'docs'),
+            use_vertex_ai=bool(data.get('use_vertex_ai', False)),
+            gcp_project=data.get('gcp_project', ''),
         )
     
     def is_complete(self) -> bool:
@@ -84,7 +90,7 @@ class Configuration:
         Args:
             repo_path: Path to the repository to document
             output_dir: Output directory for generated documentation
-            api_key: LLM API key (from keyring)
+            api_key: LLM API key (from keyring, may be empty when use_vertex_ai=True)
             
         Returns:
             Backend Config instance ready for documentation generation
@@ -97,6 +103,8 @@ class Configuration:
             llm_base_url=self.base_url,
             llm_api_key=api_key,
             main_model=self.main_model,
-            cluster_model=self.cluster_model
+            cluster_model=self.cluster_model,
+            use_vertex_ai=self.use_vertex_ai,
+            gcp_project=self.gcp_project,
         )
 

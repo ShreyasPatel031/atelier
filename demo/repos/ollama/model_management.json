@@ -1,0 +1,180 @@
+{
+    "title": "Model Management Module",
+    "summary": "This module oversees the entire lifecycle of AI models, from their initial creation and conversion to their efficient serving, scheduling, and integration with various applications and tools.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "model_creation_conversion",
+                "label": "Model Creation & Conversion",
+                "type": "other_module",
+                "link": "model_creation_and_conversion",
+                "title": "Model Creation & Conversion",
+                "description": "Handles the ingestion, validation, conversion (e.g., Safetensors, GGUF), quantization, and metadata configuration of raw model files into Ollama's internal format."
+            },
+            {
+                "id": "model_serving_scheduling",
+                "label": "Model Serving & Scheduling",
+                "type": "other_module",
+                "link": "model_serving_and_scheduling",
+                "title": "Model Serving & Scheduling",
+                "description": "Manages the loading, execution, and efficient scheduling of models on available hardware resources, exposing them via HTTP endpoints and providing model information caching."
+            },
+            {
+                "id": "model_launch_integrations",
+                "label": "Model Launch & Integrations",
+                "type": "other_module",
+                "link": "model_launch_and_integrations",
+                "title": "Model Launch & Integrations",
+                "description": "Orchestrates the launching of models for interactive use or embedding, and manages the configuration and execution of various external tools and integrations (e.g., Codex, Claude Desktop)."
+            },
+            {
+                "id": "raw_model_inputs",
+                "label": "Raw Model Files & Modelfiles",
+                "type": "external",
+                "link": null,
+                "title": "Raw Model Inputs",
+                "description": "Source model files in various formats (Safetensors, GGUF, Diffusers) and user-defined Modelfiles specifying creation instructions."
+            },
+            {
+                "id": "ollama_api_server",
+                "label": "Ollama API Server",
+                "type": "other_module",
+                "link": "server_infrastructure",
+                "title": "Ollama API Server",
+                "description": "The central API server that exposes endpoints for model management, inference, and other core functionalities to clients."
+            },
+            {
+                "id": "model_artifact_storage",
+                "label": "Model Artifact Storage",
+                "type": "other_module",
+                "link": "data_and_storage",
+                "title": "Model Artifact Storage",
+                "description": "Persistent storage for converted model layers, manifests, and other artifacts, managed by the data and storage module."
+            },
+            {
+                "id": "external_clients_tools",
+                "label": "External Clients & Tools",
+                "type": "external",
+                "link": null,
+                "title": "External Clients & Tools",
+                "description": "User applications, CLI tools, or external integrations that interact with Ollama models and services."
+            }
+        ],
+        "edges": [
+            {
+                "source": "raw_model_inputs",
+                "target": "model_creation_conversion",
+                "label": "Provides source data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "external_clients_tools",
+                "target": "model_creation_conversion",
+                "label": "Initiates creation via API/CLI",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_creation_conversion",
+                "target": "model_artifact_storage",
+                "label": "Stores converted models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_artifact_storage",
+                "target": "model_serving_scheduling",
+                "label": "Loads models for serving",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "external_clients_tools",
+                "target": "model_launch_integrations",
+                "label": "Invokes model launch/integrations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_launch_integrations",
+                "target": "model_serving_scheduling",
+                "label": "Requests model execution",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_serving_scheduling",
+                "target": "ollama_api_server",
+                "label": "Exposes model endpoints",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ollama_api_server",
+                "target": "model_serving_scheduling",
+                "label": "Routes inference requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ollama_api_server",
+                "target": "model_creation_conversion",
+                "label": "Routes create requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ollama_api_server",
+                "target": "model_launch_integrations",
+                "label": "Routes launch/integration requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_launch_integrations",
+                "target": "external_clients_tools",
+                "label": "Manages external tool interactions",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "model_lifecycle_core",
+                "label": "Model Lifecycle Core",
+                "nodes": [
+                    "model_creation_conversion",
+                    "model_serving_scheduling"
+                ],
+                "title": "Core Model Lifecycle",
+                "description": "The central components responsible for transforming, serving, and scheduling AI models within the Ollama ecosystem.",
+                "role": null
+            },
+            {
+                "id": "user_integration_layer",
+                "label": "User & Integration Layer",
+                "nodes": [
+                    "model_launch_integrations"
+                ],
+                "title": "User & Integration Layer",
+                "description": "Components that handle direct user interactions for model launching and manage integrations with external applications and tools.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "raw_model_inputs",
+                    "ollama_api_server",
+                    "model_artifact_storage",
+                    "external_clients_tools"
+                ],
+                "title": "External Dependencies",
+                "description": "External systems and modules that provide inputs to or consume outputs from the model management process.",
+                "role": null
+            }
+        ]
+    }
+}

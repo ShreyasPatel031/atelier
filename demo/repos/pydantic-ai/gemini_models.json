@@ -1,0 +1,18 @@
+ proyect_name:
+    gemini_models:
+        title: "Gemini AI Models"
+        summary: "This module provides a robust interface for interacting with Gemini AI models, handling both synchronous and asynchronous requests, streamed responses, and advanced tool integration."
+        diagram:
+            direction: "TD"
+            nodes:
+                - {"id": "gemini_model_implementation", "label": "Gemini Model Core", "type": "module", "link": "gemini_model_implementation", "title": "Gemini Model Core Implementation", "description": "Manages the fundamental interactions with Gemini models, including request initiation, standard response parsing, and internal data serialization."}
+                - {"id": "gemini_streaming", "label": "Gemini Stream Processing", "type": "module", "link": "gemini_streaming", "title": "Gemini Streamed Response Handling", "description": "Processes and delivers streamed content and tool calls from Gemini API responses, managing partial data and event iteration."}
+                - {"id": "gemini_tool_handling", "label": "Gemini Tool Integration", "type": "module", "link": "gemini_tool_handling", "title": "Gemini Tooling and Capabilities", "description": "Handles the logic for tool forcing, validates tool usage, and maps generic tool calls for Gemini model compatibility."}
+            edges:
+                - {"source": "gemini_model_implementation", "target": "gemini_streaming", "label": "Streaming data"}
+                - {"source": "gemini_tool_handling", "target": "gemini_model_implementation", "label": "Tool definitions"}
+            groups:
+                - {"id": "model_core", "label": "Model Core Processing", "title": "Core Model Interaction", "description": "Encompasses the primary logic for sending requests to Gemini models and processing their responses, including streaming capabilities.", "role": "analytical", "nodes": ["gemini_model_implementation", "gemini_streaming"]}
+                - {"id": "tool_capabilities", "label": "Tool Capabilities", "title": "Tool Management and Integration", "description": "Manages the integration and validation of tool calls and tool forcing mechanisms specific to Gemini and related models.", "role": "analytical", "nodes": ["gemini_tool_handling"]}
+
+

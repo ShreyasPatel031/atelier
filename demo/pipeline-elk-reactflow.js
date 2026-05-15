@@ -90,16 +90,19 @@
             var edges = container.edges || [];
             for (var ei = 0; ei < edges.length; ei++) {
                 var e = edges[ei];
-                var sec = e.sections && e.sections[0];
-                if (!sec) continue;
+                var sections = e.sections || [];
+                var firstSec = sections[0];
+                /** Hierarchical / compound-crossing edges: last section ends on the target. */
+                var lastSec = sections.length ? sections[sections.length - 1] : null;
+                if (!firstSec) continue;
 
                 var ox = (abs[container.id] && abs[container.id].x) || 0;
                 var oy = (abs[container.id] && abs[container.id].y) || 0;
 
-                if (e.sources && e.sources[0] && sec.startPoint) {
+                if (e.sources && e.sources[0] && firstSec.startPoint) {
                     var sourceNodeId = e.sources[0];
-                    var startPointX = ox + sec.startPoint.x;
-                    var startPointY = oy + sec.startPoint.y;
+                    var startPointX = ox + firstSec.startPoint.x;
+                    var startPointY = oy + firstSec.startPoint.y;
                     var sourceNodePos = abs[sourceNodeId] || { x: 0, y: 0 };
                     var sourceNodeDim = nodeDimensions.get(sourceNodeId) || { width: 80, height: 40 };
                     var sourceSide = determineConnectionSide(
@@ -116,10 +119,10 @@
                     });
                 }
 
-                if (e.targets && e.targets[0] && sec.endPoint) {
+                if (e.targets && e.targets[0] && lastSec && lastSec.endPoint) {
                     var targetNodeId = e.targets[0];
-                    var endPointX = ox + sec.endPoint.x;
-                    var endPointY = oy + sec.endPoint.y;
+                    var endPointX = ox + lastSec.endPoint.x;
+                    var endPointY = oy + lastSec.endPoint.y;
                     var targetNodePos = abs[targetNodeId] || { x: 0, y: 0 };
                     var targetNodeDim = nodeDimensions.get(targetNodeId) || { width: 80, height: 40 };
                     var targetSide = determineConnectionSide(
@@ -136,10 +139,17 @@
                     });
                 }
 
-                if (sec.bendPoints && sec.bendPoints.length) {
-                    e.absoluteBendPoints = sec.bendPoints.map(function (p) {
-                        return { x: ox + p.x, y: oy + p.y };
-                    });
+                var allBends = [];
+                for (var si = 0; si < sections.length; si++) {
+                    var ssec = sections[si];
+                    if (!ssec || !ssec.bendPoints || !ssec.bendPoints.length) continue;
+                    for (var bi = 0; bi < ssec.bendPoints.length; bi++) {
+                        var bp = ssec.bendPoints[bi];
+                        allBends.push({ x: ox + bp.x, y: oy + bp.y });
+                    }
+                }
+                if (allBends.length) {
+                    e.absoluteBendPoints = allBends;
                 }
             }
             var ch = container.children || [];

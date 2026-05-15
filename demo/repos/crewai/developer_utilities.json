@@ -1,0 +1,399 @@
+{
+  "title": "Developer Utilities Module",
+  "summary": "This module provides command-line utilities for managing package versions, creating Git tags and releases, and automating documentation generation and translation based on code changes. It streamlines release processes and ensures documentation consistency.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "User",
+        "label": "Developer",
+        "type": "external",
+        "link": null,
+        "title": "Developer Interaction",
+        "description": "The human user who initiates versioning and documentation commands."
+      },
+      {
+        "id": "GitRepo",
+        "label": "Git Repository",
+        "type": "external",
+        "link": null,
+        "title": "Version Control System",
+        "description": "The local Git repository where code changes and version files are managed."
+      },
+      {
+        "id": "GitHub",
+        "label": "GitHub Platform",
+        "type": "external",
+        "link": null,
+        "title": "Remote Git Hosting & CI/CD",
+        "description": "The remote GitHub platform used for pull requests, branch management, and release creation."
+      },
+      {
+        "id": "OpenAIAPI",
+        "label": "OpenAI API",
+        "type": "external",
+        "link": null,
+        "title": "AI Content Generation & Translation",
+        "description": "An external AI service used for analyzing code diffs, generating new documentation content, and translating existing documentation."
+      },
+      {
+        "id": "BumpVersions",
+        "label": "Bump Package Versions",
+        "type": "component",
+        "link": null,
+        "title": "cli.bump",
+        "description": "Updates version strings across all packages in the 'lib/' directory to a specified new version. Handles file modifications and prepares for Git operations."
+      },
+      {
+        "id": "ManageGitBranches",
+        "label": "Manage Git Branches",
+        "type": "component",
+        "link": null,
+        "title": "cli.bump (internal)",
+        "description": "Creates or resets a Git branch for version bump changes, ensuring a clean state for commits and pull requests."
+      },
+      {
+        "id": "CommitAndPush",
+        "label": "Commit & Push Changes",
+        "type": "component",
+        "link": null,
+        "title": "cli.bump (internal)",
+        "description": "Commits the version bump changes to the local Git repository and pushes the new branch to the remote GitHub repository."
+      },
+      {
+        "id": "CreatePullRequest",
+        "label": "Create GitHub Pull Request",
+        "type": "component",
+        "link": null,
+        "title": "cli.bump (internal)",
+        "description": "Generates a new pull request on GitHub for the version bump changes, facilitating code review and merging."
+      },
+      {
+        "id": "TagAndRelease",
+        "label": "Create Version Tag & Release",
+        "type": "component",
+        "link": null,
+        "title": "cli.tag",
+        "description": "Creates a Git tag and a corresponding GitHub release based on the detected package version. Ensures the main branch is up-to-date before tagging."
+      },
+      {
+        "id": "AnalyzeCodeDiff",
+        "label": "Analyze Code Changes for Docs",
+        "type": "component",
+        "link": null,
+        "title": "docs_check.docs_check",
+        "description": "Compares the current branch with a base branch to identify code changes and determines if new or updated documentation is required."
+      },
+      {
+        "id": "GenerateDocs",
+        "label": "Generate New Documentation",
+        "type": "component",
+        "link": null,
+        "title": "docs_check.docs_check (internal)",
+        "description": "Creates new English documentation files based on the analysis of code changes, leveraging AI for content generation."
+      },
+      {
+        "id": "UpdateDocs",
+        "label": "Update Existing Documentation",
+        "type": "component",
+        "link": null,
+        "title": "docs_check.docs_check (internal)",
+        "description": "Modifies existing English documentation files to reflect code updates, using AI to integrate changes seamlessly."
+      },
+      {
+        "id": "TranslateDocs",
+        "label": "Translate Documentation",
+        "type": "component",
+        "link": null,
+        "title": "docs_check.docs_check (internal)",
+        "description": "Translates generated or updated English documentation into multiple supported languages using an AI service."
+      },
+      {
+        "id": "LocalDocsFiles",
+        "label": "Local Documentation Files",
+        "type": "component",
+        "link": null,
+        "title": "Documentation Storage",
+        "description": "The local directory where English and translated documentation files are stored and managed."
+      }
+    ],
+    "edges": [
+      {
+        "source": "User",
+        "target": "BumpVersions",
+        "label": "Initiates 'bump' command",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BumpVersions",
+        "target": "GitRepo",
+        "label": "Reads/updates version files",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BumpVersions",
+        "target": "ManageGitBranches",
+        "label": "Requests new branch",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ManageGitBranches",
+        "target": "GitRepo",
+        "label": "Creates/resets branch",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BumpVersions",
+        "target": "CommitAndPush",
+        "label": "Triggers commit/push",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CommitAndPush",
+        "target": "GitRepo",
+        "label": "Commits changes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CommitAndPush",
+        "target": "GitHub",
+        "label": "Pushes branch to remote",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BumpVersions",
+        "target": "CreatePullRequest",
+        "label": "Requests PR creation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreatePullRequest",
+        "target": "GitHub",
+        "label": "Creates PR",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "User",
+        "target": "TagAndRelease",
+        "label": "Initiates 'tag' command",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TagAndRelease",
+        "target": "GitRepo",
+        "label": "Checks out main, pulls, creates tag",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TagAndRelease",
+        "target": "GitHub",
+        "label": "Creates GitHub release",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TagAndRelease",
+        "target": "AnalyzeCodeDiff",
+        "label": "Triggers docs update check",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "User",
+        "target": "AnalyzeCodeDiff",
+        "label": "Initiates 'docs-check' command",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AnalyzeCodeDiff",
+        "target": "GitRepo",
+        "label": "Fetches code diff",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AnalyzeCodeDiff",
+        "target": "OpenAIAPI",
+        "label": "Sends diff for analysis",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIAPI",
+        "target": "AnalyzeCodeDiff",
+        "label": "Returns analysis report",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AnalyzeCodeDiff",
+        "target": "GenerateDocs",
+        "label": "Identifies new doc needs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AnalyzeCodeDiff",
+        "target": "UpdateDocs",
+        "label": "Identifies doc updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GenerateDocs",
+        "target": "OpenAIAPI",
+        "label": "Requests doc content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIAPI",
+        "target": "GenerateDocs",
+        "label": "Provides doc content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GenerateDocs",
+        "target": "LocalDocsFiles",
+        "label": "Writes new English doc",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UpdateDocs",
+        "target": "LocalDocsFiles",
+        "label": "Reads existing English doc",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UpdateDocs",
+        "target": "OpenAIAPI",
+        "label": "Requests updated doc content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIAPI",
+        "target": "UpdateDocs",
+        "label": "Provides updated doc content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UpdateDocs",
+        "target": "LocalDocsFiles",
+        "label": "Writes updated English doc",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GenerateDocs",
+        "target": "TranslateDocs",
+        "label": "Sends English doc for translation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UpdateDocs",
+        "target": "TranslateDocs",
+        "label": "Sends English doc for translation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TranslateDocs",
+        "target": "OpenAIAPI",
+        "label": "Requests translation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIAPI",
+        "target": "TranslateDocs",
+        "label": "Provides translated content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TranslateDocs",
+        "target": "LocalDocsFiles",
+        "label": "Writes translated docs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TagAndRelease",
+        "target": "LocalDocsFiles",
+        "label": "Updates docs via PR (if generated)",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "VersionControlOperations",
+        "label": "Version Control Operations",
+        "nodes": [
+          "BumpVersions",
+          "ManageGitBranches",
+          "CommitAndPush",
+          "CreatePullRequest",
+          "TagAndRelease"
+        ],
+        "title": "Version Control & Release Management",
+        "description": "Handles automated version bumping, Git branch management, committing, pushing, pull request creation, and Git tagging with GitHub releases.",
+        "role": "generative"
+      },
+      {
+        "id": "DocumentationAutomation",
+        "label": "Documentation Automation",
+        "nodes": [
+          "AnalyzeCodeDiff",
+          "GenerateDocs",
+          "UpdateDocs",
+          "TranslateDocs"
+        ],
+        "title": "Automated Documentation Generation",
+        "description": "Analyzes code changes to determine documentation needs, then generates, updates, and translates documentation files using AI.",
+        "role": "generative"
+      },
+      {
+        "id": "ExternalDependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "GitRepo",
+          "GitHub",
+          "OpenAIAPI",
+          "User"
+        ],
+        "title": "External Services Integration",
+        "description": "Represents external systems that the developer utilities interact with, including Git for version control, GitHub for remote repository management, and OpenAI for AI-powered tasks.",
+        "role": "external"
+      },
+      {
+        "id": "DataStorage",
+        "label": "Data Storage",
+        "nodes": [
+          "LocalDocsFiles"
+        ],
+        "title": "Local Data Storage",
+        "description": "Represents the local file system where documentation files are stored and managed.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,955 @@
+{
+  "title": "Generation Core Module",
+  "summary": "This module provides the core logic for auto-regressive text generation, supporting various decoding strategies like greedy, sampling, beam search, and assisted decoding, along with continuous batching capabilities.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "orchestrate_generation",
+        "label": "Orchestrate Generation Flow",
+        "type": "component",
+        "link": null,
+        "title": "Orchestrate Generation Flow",
+        "description": "Manages the overall text generation process, handling configuration, input preparation, and dispatching to specific decoding strategies."
+      },
+      {
+        "id": "enable_continuous_batching",
+        "label": "Enable Continuous Batching",
+        "type": "component",
+        "link": null,
+        "title": "Enable Continuous Batching",
+        "description": "Provides an API for efficient, continuous processing of multiple generation requests, optimizing resource utilization."
+      },
+      {
+        "id": "init_batch_manager",
+        "label": "Initialize Batch Manager",
+        "type": "component",
+        "link": null,
+        "title": "Initialize Batch Manager",
+        "description": "Sets up the ContinuousBatchingManager with model and generation configurations, preparing it for request handling."
+      },
+      {
+        "id": "manage_batch_lifecycle",
+        "label": "Manage Batch Lifecycle",
+        "type": "component",
+        "link": null,
+        "title": "Manage Batch Lifecycle",
+        "description": "A context manager that safely initializes, starts, and stops the continuous batching manager, including warmup procedures."
+      },
+      {
+        "id": "prepare_model_inputs",
+        "label": "Prepare Model Inputs",
+        "type": "component",
+        "link": null,
+        "title": "Prepare Model Inputs",
+        "description": "Transforms raw inputs and model state into the format required for the model's forward pass during generation, including attention masks and KV cache."
+      },
+      {
+        "id": "configure_generation",
+        "label": "Configure Generation Parameters",
+        "type": "component",
+        "link": null,
+        "title": "Configure Generation Parameters",
+        "description": "Loads, adjusts, and validates generation settings from GenerationConfig and keyword arguments, ensuring consistent behavior."
+      },
+      {
+        "id": "load_custom_logic",
+        "label": "Load Custom Generation Logic",
+        "type": "component",
+        "link": null,
+        "title": "Load Custom Generation Logic",
+        "description": "Dynamically loads custom `generate` functions from specified Hugging Face Hub repositories or local paths."
+      },
+      {
+        "id": "apply_logits_processing",
+        "label": "Apply Logits Processing",
+        "type": "component",
+        "link": null,
+        "title": "Apply Logits Processing",
+        "description": "Applies various processors (e.g., repetition penalty, temperature, top-k/p sampling) to raw model output logits before token selection."
+      },
+      {
+        "id": "apply_stopping_criteria",
+        "label": "Apply Stopping Criteria",
+        "type": "component",
+        "link": null,
+        "title": "Apply Stopping Criteria",
+        "description": "Evaluates conditions (e.g., max length, EOS token, stop strings) to determine when to halt the generation process for a sequence."
+      },
+      {
+        "id": "manage_kv_cache",
+        "label": "Manage KV Cache",
+        "type": "component",
+        "link": null,
+        "title": "Manage KV Cache",
+        "description": "Initializes and updates the key-value cache (static or dynamic) to store past attention states, improving generation efficiency."
+      },
+      {
+        "id": "perform_sampling",
+        "label": "Perform Multinomial Sampling",
+        "type": "component",
+        "link": null,
+        "title": "Perform Multinomial Sampling",
+        "description": "Generates tokens by sampling from the probability distribution of the next token, allowing for diverse outputs."
+      },
+      {
+        "id": "perform_beam_search",
+        "label": "Perform Beam Search",
+        "type": "component",
+        "link": null,
+        "title": "Perform Beam Search",
+        "description": "Generates sequences by exploring multiple high-probability paths simultaneously, aiming for higher quality outputs."
+      },
+      {
+        "id": "perform_assisted_decoding",
+        "label": "Perform Assisted Decoding",
+        "type": "component",
+        "link": null,
+        "title": "Perform Assisted Decoding",
+        "description": "Accelerates generation by using a smaller assistant model to propose candidate tokens, which are then verified by the main model."
+      },
+      {
+        "id": "validate_generation_params",
+        "label": "Validate Generation Parameters",
+        "type": "component",
+        "link": null,
+        "title": "Validate Generation Parameters",
+        "description": "Checks for consistency and validity of generation parameters and model-specific keyword arguments."
+      },
+      {
+        "id": "compute_scores",
+        "label": "Compute Transition Scores",
+        "type": "component",
+        "link": null,
+        "title": "Compute Transition Scores",
+        "description": "Calculates the log probabilities of generated tokens, useful for analyzing sequence quality or reconstructing scores."
+      },
+      {
+        "id": "heal_tokens",
+        "label": "Heal Input Tokens",
+        "type": "component",
+        "link": null,
+        "title": "Heal Input Tokens",
+        "description": "Adjusts input tokens to ensure proper tokenization and continuation, especially for partial words or subword units."
+      },
+      {
+        "id": "optimize_decode",
+        "label": "Optimize Model for Decoding",
+        "type": "component",
+        "link": null,
+        "title": "Optimize Model for Decoding",
+        "description": "Applies runtime optimizations to the model's architecture (e.g., expert implementation) for improved decoding performance."
+      },
+      {
+        "id": "check_compilation",
+        "label": "Check Auto-Compilation Criteria",
+        "type": "component",
+        "link": null,
+        "title": "Check Auto-Compilation Criteria",
+        "description": "Determines if the model's forward pass can be automatically compiled for performance gains based on hardware and cache type."
+      },
+      {
+        "id": "external_model",
+        "label": "Model Architecture",
+        "type": "external",
+        "link": "model_architectures",
+        "title": "Model Architecture",
+        "description": "Represents the underlying model that performs the forward pass to generate logits."
+      },
+      {
+        "id": "external_tokenizer",
+        "label": "Tokenizer & Decoder",
+        "type": "external",
+        "link": "data_processing.text_audio_processing",
+        "title": "Tokenizer & Decoder",
+        "description": "Handles tokenization of input text and decoding of generated token IDs back into human-readable text."
+      },
+      {
+        "id": "external_torch",
+        "label": "PyTorch Tensor Operations",
+        "type": "external",
+        "link": null,
+        "title": "PyTorch Tensor Operations",
+        "description": "Provides fundamental tensor computations and GPU acceleration capabilities."
+      },
+      {
+        "id": "external_logging",
+        "label": "Logging System",
+        "type": "external",
+        "link": null,
+        "title": "Logging System",
+        "description": "Records events, warnings, and errors during the generation process for debugging and monitoring."
+      },
+      {
+        "id": "external_tqdm",
+        "label": "Progress Bar Display",
+        "type": "external",
+        "link": null,
+        "title": "Progress Bar Display",
+        "description": "Visualizes the progress of batch generation tasks."
+      },
+      {
+        "id": "external_os",
+        "label": "OS Environment Interaction",
+        "type": "external",
+        "link": null,
+        "title": "OS Environment Interaction",
+        "description": "Accesses operating system environment variables and file system operations."
+      },
+      {
+        "id": "external_dist",
+        "label": "Distributed Training Utilities",
+        "type": "external",
+        "link": null,
+        "title": "Distributed Training Utilities",
+        "description": "Manages communication and synchronization across multiple GPUs in a distributed environment."
+      },
+      {
+        "id": "generation_config_obj",
+        "label": "GenerationConfig Object",
+        "type": "component",
+        "link": null,
+        "title": "GenerationConfig Object",
+        "description": "A data structure holding all parameters that control the generation process."
+      },
+      {
+        "id": "continuous_batching_config_obj",
+        "label": "ContinuousBatchingConfig Object",
+        "type": "component",
+        "link": null,
+        "title": "ContinuousBatchingConfig Object",
+        "description": "Configuration settings specific to continuous batching behavior."
+      },
+      {
+        "id": "workload_hints_obj",
+        "label": "WorkloadHints Object",
+        "type": "component",
+        "link": null,
+        "title": "WorkloadHints Object",
+        "description": "Provides information about expected input and output lengths to optimize batching."
+      },
+      {
+        "id": "continuous_batching_manager_obj",
+        "label": "ContinuousBatchingManager Object",
+        "type": "component",
+        "link": null,
+        "title": "ContinuousBatchingManager Object",
+        "description": "Manages the queue of generation requests and dispatches them for continuous processing."
+      },
+      {
+        "id": "logits_processor_list_obj",
+        "label": "LogitsProcessorList Object",
+        "type": "component",
+        "link": null,
+        "title": "LogitsProcessorList Object",
+        "description": "A collection of functions that modify the raw output logits before token selection."
+      },
+      {
+        "id": "stopping_criteria_list_obj",
+        "label": "StoppingCriteriaList Object",
+        "type": "component",
+        "link": null,
+        "title": "StoppingCriteriaList Object",
+        "description": "A collection of conditions that, when met, signal the end of sequence generation."
+      },
+      {
+        "id": "cache_obj",
+        "label": "Key-Value Cache Object",
+        "type": "component",
+        "link": null,
+        "title": "Key-Value Cache Object",
+        "description": "Stores intermediate key-value states from attention layers to speed up subsequent token generation."
+      },
+      {
+        "id": "candidate_generator_obj",
+        "label": "CandidateGenerator Object",
+        "type": "component",
+        "link": null,
+        "title": "CandidateGenerator Object",
+        "description": "Proposes sequences of candidate tokens for assisted decoding strategies."
+      }
+    ],
+    "edges": [
+      {
+        "source": "orchestrate_generation",
+        "target": "enable_continuous_batching",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "generation_config_obj",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "prepare_model_inputs",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "configure_generation",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "load_custom_logic",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "apply_logits_processing",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "apply_stopping_criteria",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "manage_kv_cache",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "perform_sampling",
+        "label": "dispatches to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "perform_beam_search",
+        "label": "dispatches to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "perform_assisted_decoding",
+        "label": "dispatches to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "validate_generation_params",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "compute_scores",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "heal_tokens",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "optimize_decode",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "check_compilation",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "external_model",
+        "label": "calls forward on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "external_tokenizer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "external_torch",
+        "label": "relies on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "external_os",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "orchestrate_generation",
+        "target": "external_dist",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_continuous_batching",
+        "target": "init_batch_manager",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_continuous_batching",
+        "target": "manage_batch_lifecycle",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_continuous_batching",
+        "target": "continuous_batching_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_continuous_batching",
+        "target": "workload_hints_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_continuous_batching",
+        "target": "generation_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_continuous_batching",
+        "target": "continuous_batching_manager_obj",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_continuous_batching",
+        "target": "external_torch",
+        "label": "relies on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_continuous_batching",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_continuous_batching",
+        "target": "external_tqdm",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_batch_manager",
+        "target": "continuous_batching_manager_obj",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_batch_manager",
+        "target": "generation_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_batch_manager",
+        "target": "continuous_batching_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_batch_manager",
+        "target": "workload_hints_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_batch_lifecycle",
+        "target": "init_batch_manager",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_batch_lifecycle",
+        "target": "continuous_batching_manager_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prepare_model_inputs",
+        "target": "external_torch",
+        "label": "relies on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prepare_model_inputs",
+        "target": "cache_obj",
+        "label": "updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prepare_model_inputs",
+        "target": "generation_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "configure_generation",
+        "target": "generation_config_obj",
+        "label": "modifies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "configure_generation",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_custom_logic",
+        "target": "external_os",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "apply_logits_processing",
+        "target": "logits_processor_list_obj",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "apply_logits_processing",
+        "target": "generation_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "apply_logits_processing",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "apply_stopping_criteria",
+        "target": "stopping_criteria_list_obj",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "apply_stopping_criteria",
+        "target": "generation_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "apply_stopping_criteria",
+        "target": "external_tokenizer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_kv_cache",
+        "target": "cache_obj",
+        "label": "creates/updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_kv_cache",
+        "target": "generation_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_kv_cache",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_sampling",
+        "target": "external_torch",
+        "label": "relies on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_sampling",
+        "target": "logits_processor_list_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_sampling",
+        "target": "stopping_criteria_list_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_sampling",
+        "target": "generation_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_sampling",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_sampling",
+        "target": "external_dist",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_sampling",
+        "target": "external_model",
+        "label": "calls forward on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_sampling",
+        "target": "cache_obj",
+        "label": "updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_beam_search",
+        "target": "external_torch",
+        "label": "relies on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_beam_search",
+        "target": "logits_processor_list_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_beam_search",
+        "target": "stopping_criteria_list_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_beam_search",
+        "target": "generation_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_beam_search",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_beam_search",
+        "target": "external_dist",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_beam_search",
+        "target": "external_model",
+        "label": "calls forward on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_beam_search",
+        "target": "cache_obj",
+        "label": "updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_assisted_decoding",
+        "target": "external_torch",
+        "label": "relies on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_assisted_decoding",
+        "target": "logits_processor_list_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_assisted_decoding",
+        "target": "stopping_criteria_list_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_assisted_decoding",
+        "target": "generation_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_assisted_decoding",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_assisted_decoding",
+        "target": "external_dist",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_assisted_decoding",
+        "target": "external_model",
+        "label": "calls forward on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_assisted_decoding",
+        "target": "candidate_generator_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_assisted_decoding",
+        "target": "external_tokenizer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_assisted_decoding",
+        "target": "cache_obj",
+        "label": "updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_generation_params",
+        "target": "generation_config_obj",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_generation_params",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "compute_scores",
+        "target": "external_torch",
+        "label": "relies on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "heal_tokens",
+        "target": "external_tokenizer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "heal_tokens",
+        "target": "external_torch",
+        "label": "relies on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "heal_tokens",
+        "target": "generation_config_obj",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "optimize_decode",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_compilation",
+        "target": "generation_config_obj",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_compilation",
+        "target": "external_logging",
+        "label": "outputs to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_compilation",
+        "target": "external_os",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_api",
+        "label": "Surface API",
+        "nodes": [
+          "orchestrate_generation"
+        ],
+        "title": "Surface API",
+        "description": "The primary entry points and interfaces for users to interact with the generation capabilities.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_algorithms",
+        "label": "Generative Algorithms",
+        "nodes": [
+          "perform_sampling",
+          "perform_beam_search",
+          "perform_assisted_decoding",
+          "enable_continuous_batching"
+        ],
+        "title": "Generative Algorithms",
+        "description": "Implementations of various decoding strategies to produce sequences of tokens.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_logic",
+        "label": "Analytical & Preparatory Logic",
+        "nodes": [
+          "prepare_model_inputs",
+          "configure_generation",
+          "load_custom_logic",
+          "apply_logits_processing",
+          "apply_stopping_criteria",
+          "manage_kv_cache",
+          "validate_generation_params",
+          "compute_scores",
+          "heal_tokens",
+          "optimize_decode",
+          "check_compilation",
+          "init_batch_manager",
+          "manage_batch_lifecycle"
+        ],
+        "title": "Analytical & Preparatory Logic",
+        "description": "Functions responsible for preparing inputs, configuring parameters, validating settings, and analyzing generation outputs.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_structures_managers",
+        "label": "Data Structures & Managers",
+        "nodes": [
+          "generation_config_obj",
+          "continuous_batching_config_obj",
+          "workload_hints_obj",
+          "continuous_batching_manager_obj",
+          "logits_processor_list_obj",
+          "stopping_criteria_list_obj",
+          "cache_obj",
+          "candidate_generator_obj"
+        ],
+        "title": "Data Structures & Managers",
+        "description": "Key data objects and manager classes that store configuration, state, and control flow for generation processes.",
+        "role": "data"
+      }
+    ]
+  }
+}

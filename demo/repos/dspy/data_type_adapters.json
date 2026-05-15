@@ -1,0 +1,452 @@
+{
+  "title": "Data Type Adapters",
+  "summary": "This module provides a collection of custom data types for DSPy, enabling structured representation and seamless integration of various data formats (e.g., audio, images, code, documents, tools) with language models. It defines a base type and specialized adapters for handling complex inputs and outputs.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_type",
+        "label": "Define Base Custom Type",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.base_type.Type",
+        "description": "Provides a foundational class for all custom DSPy data types, defining common interfaces for formatting, serialization, and LM adaptation."
+      },
+      {
+        "id": "audio_type",
+        "label": "Audio Data Adapter",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.audio.Audio",
+        "description": "Handles audio data, supporting various input sources (URL, file, array) and encoding it for use with language models."
+      },
+      {
+        "id": "code_type",
+        "label": "Code Snippet Adapter",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.code.Code",
+        "description": "Manages code snippets, allowing specification of programming language and formatting for LLM code generation or analysis tasks."
+      },
+      {
+        "id": "document_type",
+        "label": "Document Content Adapter",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.document.Document",
+        "description": "Represents textual documents with optional metadata, designed for citation-enabled language models to process and reference source material."
+      },
+      {
+        "id": "file_type",
+        "label": "Generic File Adapter",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.file.File",
+        "description": "Encapsulates generic file content, supporting local paths, raw bytes, or file IDs, and formats them for LLM consumption."
+      },
+      {
+        "id": "image_type",
+        "label": "Image Data Adapter",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.image.Image",
+        "description": "Processes image data from various sources (URL, file, PIL object), encoding it for multimodal language model inputs."
+      },
+      {
+        "id": "tool_type",
+        "label": "LLM Tool Definition",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.tool.Tool",
+        "description": "Wraps Python functions to define tools for LLMs, inferring signatures and enabling structured function calling and integration with external tool frameworks."
+      },
+      {
+        "id": "citations_type",
+        "label": "Citation Management",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.citation.Citations",
+        "description": "Manages structured citation information, allowing conversion from various formats and formatting for LLM output."
+      },
+      {
+        "id": "tool_calls_type",
+        "label": "Tool Call Management",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.tool.ToolCalls",
+        "description": "Handles structured tool call information, validating and parsing tool call inputs for LLM interactions."
+      },
+      {
+        "id": "get_file_ext",
+        "label": "Extract File Extension",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.image._get_file_extension",
+        "description": "Utility to determine the file extension from a given path or URL."
+      },
+      {
+        "id": "is_image_func",
+        "label": "Validate Image Object",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.types.image.is_image",
+        "description": "Checks if an object represents valid image data or a reference to an image file/URL."
+      },
+      {
+        "id": "pydantic_lib",
+        "label": "Pydantic Library",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic Library",
+        "description": "Provides data validation and settings management using Python type hints."
+      },
+      {
+        "id": "llm_system",
+        "label": "Language Model System",
+        "type": "external",
+        "link": null,
+        "title": "Language Model System",
+        "description": "Represents the underlying Large Language Model that consumes and produces structured data."
+      },
+      {
+        "id": "file_system",
+        "label": "Local File System",
+        "type": "external",
+        "link": null,
+        "title": "Local File System",
+        "description": "Provides access to local files for reading and writing operations."
+      },
+      {
+        "id": "network_access",
+        "label": "Network Services",
+        "type": "external",
+        "link": null,
+        "title": "Network Services",
+        "description": "Enables downloading resources from URLs and other network operations."
+      },
+      {
+        "id": "pil_library",
+        "label": "Pillow Image Library",
+        "type": "external",
+        "link": null,
+        "title": "Pillow Image Library",
+        "description": "Used for image manipulation and processing (e.g., PIL.Image objects)."
+      },
+      {
+        "id": "soundfile_lib",
+        "label": "Soundfile Library",
+        "type": "external",
+        "link": null,
+        "title": "Soundfile Library",
+        "description": "Handles reading and writing sound files, particularly for audio array processing."
+      },
+      {
+        "id": "langchain_lib",
+        "label": "LangChain Framework",
+        "type": "external",
+        "link": null,
+        "title": "LangChain Framework",
+        "description": "Provides tools and abstractions for building applications with LLMs, including tool integration."
+      },
+      {
+        "id": "mcp_lib",
+        "label": "MCP Framework",
+        "type": "external",
+        "link": null,
+        "title": "MCP Framework",
+        "description": "An external framework for managing and converting tools."
+      }
+    ],
+    "edges": [
+      {
+        "source": "audio_type",
+        "target": "base_type",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_type",
+        "target": "base_type",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_type",
+        "target": "base_type",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_type",
+        "target": "base_type",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_type",
+        "target": "base_type",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_type",
+        "target": "base_type",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "citations_type",
+        "target": "base_type",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_calls_type",
+        "target": "base_type",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_type",
+        "target": "pydantic_lib",
+        "label": "uses for validation & serialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_type",
+        "target": "file_system",
+        "label": "reads local files",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_type",
+        "target": "network_access",
+        "label": "downloads from URL",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_type",
+        "target": "soundfile_lib",
+        "label": "processes audio arrays",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_type",
+        "target": "llm_system",
+        "label": "formats for LM input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_type",
+        "target": "llm_system",
+        "label": "formats for LM input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_type",
+        "target": "llm_system",
+        "label": "formats for LM input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_type",
+        "target": "file_system",
+        "label": "reads local files",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_type",
+        "target": "llm_system",
+        "label": "formats for LM input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_type",
+        "target": "file_system",
+        "label": "reads local files",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_type",
+        "target": "network_access",
+        "label": "downloads from URL",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_type",
+        "target": "pil_library",
+        "label": "processes PIL objects",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_type",
+        "target": "llm_system",
+        "label": "formats for LM input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_type",
+        "target": "get_file_ext",
+        "label": "uses helper",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_type",
+        "target": "is_image_func",
+        "label": "uses helper",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_file_ext",
+        "target": "file_system",
+        "label": "parses paths",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_file_ext",
+        "target": "network_access",
+        "label": "parses URLs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "is_image_func",
+        "target": "pil_library",
+        "label": "checks PIL type",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "is_image_func",
+        "target": "file_system",
+        "label": "checks file existence",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "is_image_func",
+        "target": "network_access",
+        "label": "checks URL validity",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_type",
+        "target": "llm_system",
+        "label": "adapts for native tool calling",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_type",
+        "target": "langchain_lib",
+        "label": "converts from LangChain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_type",
+        "target": "mcp_lib",
+        "label": "converts from MCP",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "citations_type",
+        "target": "llm_system",
+        "label": "formats for LM output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_calls_type",
+        "target": "llm_system",
+        "label": "formats for LM output",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "base_type_group",
+        "label": "Base Type Definition",
+        "nodes": [
+          "base_type"
+        ],
+        "title": "Base Type Definition",
+        "description": "Defines the foundational `Type` class for all custom DSPy data structures, providing a consistent interface for data handling and LM integration.",
+        "role": "surface"
+      },
+      {
+        "id": "multimedia_group",
+        "label": "Multimedia Adapters",
+        "nodes": [
+          "audio_type",
+          "image_type",
+          "file_type"
+        ],
+        "title": "Multimedia Adapters",
+        "description": "Handles various multimedia data types like audio, images, and generic files, converting them into formats suitable for language model processing.",
+        "role": "data"
+      },
+      {
+        "id": "text_code_group",
+        "label": "Text and Code Adapters",
+        "nodes": [
+          "code_type",
+          "document_type",
+          "citations_type"
+        ],
+        "title": "Text and Code Adapters",
+        "description": "Manages structured text content, code snippets, and citation information, preparing them for LLM input and output.",
+        "role": "data"
+      },
+      {
+        "id": "tooling_group",
+        "label": "Tooling Adapters",
+        "nodes": [
+          "tool_type",
+          "tool_calls_type"
+        ],
+        "title": "Tooling Adapters",
+        "description": "Facilitates the definition and management of tools for LLMs, enabling structured function calling and integration with external tool frameworks.",
+        "role": "generative"
+      },
+      {
+        "id": "utility_group",
+        "label": "Helper Utilities",
+        "nodes": [
+          "get_file_ext",
+          "is_image_func"
+        ],
+        "title": "Helper Utilities",
+        "description": "Provides auxiliary functions for tasks such as file extension extraction and image object validation, supporting the core adapters.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

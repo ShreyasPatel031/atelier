@@ -1,0 +1,182 @@
+{
+    "title": "API & Middleware Overview",
+    "summary": "This module manages all external API interactions, from receiving client requests and applying middleware transformations to handling core API logic and constructing prompts for language models. It acts as the central gateway for client-server communication.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "client_request",
+                "label": "Incoming Client Request",
+                "type": "external",
+                "link": null,
+                "title": "External Client API Request",
+                "description": "Represents an external client initiating an API call to the Ollama server, typically in a specific format like Anthropic or OpenAI."
+            },
+            {
+                "id": "api_middleware_module",
+                "label": "API Request & Response Middleware",
+                "type": "other_module",
+                "link": "api_middleware",
+                "title": "API Middleware Layer",
+                "description": "This module preprocesses incoming requests, adapts various API formats (e.g., Anthropic, OpenAI) to internal structures, and post-processes responses, including integrating features like web search and handling compression."
+            },
+            {
+                "id": "api_handlers_module",
+                "label": "Core API Handlers",
+                "type": "other_module",
+                "link": "api_handlers",
+                "title": "Main API Endpoint Logic",
+                "description": "This module contains the primary API endpoints (chat, generate, pull, push, show) that process transformed requests, orchestrate model execution, and manage model lifecycle operations."
+            },
+            {
+                "id": "prompt_engine_module",
+                "label": "Prompt & Template Engine",
+                "type": "other_module",
+                "link": "prompt_and_template_engine",
+                "title": "Prompt Construction & Formatting",
+                "description": "This module constructs and formats prompts for language models, converting structured chat messages and tool data into coherent, token-limited strings using flexible templating and rendering rules."
+            },
+            {
+                "id": "model_runtime",
+                "label": "Model Execution Runtime",
+                "type": "other_module",
+                "link": "model_serving_and_scheduling",
+                "title": "LLM Inference & Scheduling",
+                "description": "The underlying system responsible for loading, scheduling, and executing language models for inference, embeddings, or other AI tasks, managing hardware resources."
+            },
+            {
+                "id": "external_services",
+                "label": "External Services & Tools",
+                "type": "external",
+                "link": null,
+                "title": "Integrated External Capabilities",
+                "description": "Represents external dependencies such as cloud inference providers, web search APIs, or other integrated tools that the API or middleware might interact with to fulfill requests."
+            },
+            {
+                "id": "client_response",
+                "label": "Outgoing Client Response",
+                "type": "external",
+                "link": null,
+                "title": "Final API Response",
+                "description": "The final, formatted response sent back to the external client after all processing, inference, and post-processing steps are complete."
+            }
+        ],
+        "edges": [
+            {
+                "source": "client_request",
+                "target": "api_middleware_module",
+                "label": "Sends API Request",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_middleware_module",
+                "target": "api_handlers_module",
+                "label": "Forwards Transformed Request",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_handlers_module",
+                "target": "prompt_engine_module",
+                "label": "Requests Prompt Construction",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prompt_engine_module",
+                "target": "api_handlers_module",
+                "label": "Returns Formatted Prompt",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_handlers_module",
+                "target": "model_runtime",
+                "label": "Sends for Model Inference",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_runtime",
+                "target": "api_handlers_module",
+                "label": "Returns Inference Results",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_handlers_module",
+                "target": "api_middleware_module",
+                "label": "Provides Raw Response",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_middleware_module",
+                "target": "client_response",
+                "label": "Sends Final Response",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_middleware_module",
+                "target": "external_services",
+                "label": "Interacts with External Tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_handlers_module",
+                "target": "external_services",
+                "label": "Utilizes Cloud Inference",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "request_entry_point",
+                "label": "Request Entry & Adaptation",
+                "nodes": [
+                    "client_request",
+                    "api_middleware_module"
+                ],
+                "title": "Request Entry & Adaptation",
+                "description": "Handles the initial reception of client requests and adapts them into a standardized internal format for further processing.",
+                "role": null
+            },
+            {
+                "id": "core_api_processing",
+                "label": "Core API Processing",
+                "nodes": [
+                    "api_handlers_module",
+                    "prompt_engine_module"
+                ],
+                "title": "Core API Processing",
+                "description": "Manages the central logic for handling API requests, orchestrating prompt construction, and dispatching tasks to the model runtime.",
+                "role": null
+            },
+            {
+                "id": "model_execution_integration",
+                "label": "Model Execution & Integration",
+                "nodes": [
+                    "model_runtime",
+                    "external_services"
+                ],
+                "title": "Model Execution & Integration",
+                "description": "Facilitates the execution of language models and integrates with various external services and tools to fulfill complex requests.",
+                "role": null
+            },
+            {
+                "id": "response_delivery",
+                "label": "Response Delivery",
+                "nodes": [
+                    "client_response"
+                ],
+                "title": "Response Delivery",
+                "description": "Responsible for sending the final, formatted response back to the client after all processing is complete.",
+                "role": null
+            }
+        ]
+    }
+}

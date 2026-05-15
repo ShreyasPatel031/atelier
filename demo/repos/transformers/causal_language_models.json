@@ -1,0 +1,17 @@
+{
+    "title": "Causal Language Models",
+    "summary": "This module provides various causal language models, including standard architectures and Mixture-of-Experts (MoE) variants, designed for text generation and other sequence-to-sequence tasks.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "causal_lm_models", "label": "Standard Causal LMs", "type": "module", "link": "causal_lm_models", "title": "Standard Causal Language Models", "description": "Implements core causal language model architectures for text generation and prediction."},
+            {"id": "moe_causal_lm_models", "label": "MoE Causal LMs", "type": "module", "link": "moe_causal_lm_models", "title": "Mixture-of-Experts Causal Language Models", "description": "Provides causal language models leveraging Mixture-of-Experts (MoE) for enhanced performance and scalability."}
+        ],
+        "edges": [
+            {"source": "causal_lm_models", "target": "moe_causal_lm_models", "label": "specialization"}
+        ],
+        "groups": [
+            {"id": "core_models", "label": "Core Model Implementations", "title": "Core Model Implementations", "description": "The foundational implementations of various causal language models, including both standard and Mixture-of-Experts (MoE) architectures.", "role": "analytical", "nodes": ["causal_lm_models", "moe_causal_lm_models"]}
+        ]
+    }
+}

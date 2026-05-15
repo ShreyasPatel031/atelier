@@ -1,0 +1,74 @@
+{
+    "title": "Text QA & Classification",
+    "summary": "This module provides various model architectures for text-based question answering, sequence classification, token classification, and masked language modeling tasks.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "qa_models",
+                "label": "Question Answering Models",
+                "type": "module",
+                "link": "question_answering_models",
+                "title": "Question Answering Models",
+                "description": "Models specialized in extracting answers from given text based on questions."
+            },
+            {
+                "id": "sequence_classification_models",
+                "label": "Sequence Classification Models",
+                "type": "module",
+                "link": "sequence_classification_models",
+                "title": "Sequence Classification Models",
+                "description": "Models for classifying entire input sequences into predefined categories (e.g., sentiment analysis, topic classification)."
+            },
+            {
+                "id": "token_classification_models",
+                "label": "Token Classification Models",
+                "type": "module",
+                "link": "token_classification_models",
+                "title": "Token Classification Models",
+                "description": "Models for assigning labels to individual tokens within an input sequence (e.g., named entity recognition)."
+            },
+            {
+                "id": "masked_lm_models",
+                "label": "Masked Language Models",
+                "type": "module",
+                "link": "masked_language_models",
+                "title": "Masked Language Models",
+                "description": "Models trained to predict masked tokens in a sequence, useful for general language understanding."
+            }
+        ],
+        "edges": [
+            {"source": "qa_models", "target": "sequence_classification_models", "label": "can be adapted"},
+            {"source": "sequence_classification_models", "target": "token_classification_models", "label": "related tasks"},
+            {"source": "masked_lm_models", "target": "sequence_classification_models", "label": "pre-trains for"},
+            {"source": "masked_lm_models", "target": "token_classification_models", "label": "pre-trains for"},
+            {"source": "masked_lm_models", "target": "qa_models", "label": "pre-trains for"}
+        ],
+        "groups": [
+            {
+                "id": "text_classification_group",
+                "label": "Text Classification",
+                "title": "Text Classification Group",
+                "description": "This group includes models for classifying text at both the sequence and token levels.",
+                "role": "analytical",
+                "nodes": ["sequence_classification_models", "token_classification_models"]
+            },
+            {
+                "id": "question_answering_group",
+                "label": "Question Answering",
+                "title": "Question Answering Group",
+                "description": "This group contains models designed to answer questions based on provided text.",
+                "role": "analytical",
+                "nodes": ["qa_models"]
+            },
+            {
+                "id": "language_understanding_group",
+                "label": "Language Understanding",
+                "title": "Language Understanding Group",
+                "description": "This group includes models focused on general language understanding tasks like masked language modeling.",
+                "role": "analytical",
+                "nodes": ["masked_lm_models"]
+            }
+        ]
+    }
+}

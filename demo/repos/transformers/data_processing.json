@@ -1,0 +1,127 @@
+{
+    "title": "Data Processing Module",
+    "summary": "This module provides comprehensive tools for preparing diverse raw data inputs, including images, text, and audio, into formats suitable for machine learning models. It encompasses tokenization, feature extraction, normalization, and model-specific preprocessing steps.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "raw_input_data",
+                "label": "Raw Input Data",
+                "type": "external",
+                "link": null,
+                "title": "Raw Input Data",
+                "description": "Unprocessed data (images, text, audio) provided by users or external sources, serving as the initial input for the processing pipeline."
+            },
+            {
+                "id": "image_preprocessing",
+                "label": "Image Preprocessing",
+                "type": "module",
+                "link": "image_processing",
+                "title": "Image Preprocessing Submodule",
+                "description": "Handles resizing, normalization, format conversion, and other transformations for raw image data, preparing it for various vision and multimodal models."
+            },
+            {
+                "id": "text_audio_preprocessing",
+                "label": "Text & Audio Preprocessing",
+                "type": "module",
+                "link": "text_audio_processing",
+                "title": "Text & Audio Preprocessing Submodule",
+                "description": "Manages tokenization, number normalization, and multimodal data preparation for text and audio inputs, including OCR and speech-to-text functionalities."
+            },
+            {
+                "id": "model_ready_features",
+                "label": "Model-Ready Features",
+                "type": "external",
+                "link": null,
+                "title": "Model-Ready Features",
+                "description": "Processed and formatted data (e.g., token IDs, image tensors, audio features) ready to be consumed by various machine learning models for inference or training."
+            },
+            {
+                "id": "external_models",
+                "label": "Machine Learning Models",
+                "type": "external",
+                "link": "model_architectures",
+                "title": "Machine Learning Models",
+                "description": "Various Transformer models that utilize the preprocessed data for tasks like generation, classification, object detection, or speech recognition."
+            }
+        ],
+        "edges": [
+            {
+                "source": "raw_input_data",
+                "target": "image_preprocessing",
+                "label": "Raw images",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "raw_input_data",
+                "target": "text_audio_preprocessing",
+                "label": "Raw text/audio",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "image_preprocessing",
+                "target": "text_audio_preprocessing",
+                "label": "Processed image components (for multimodal)",
+                "title": null,
+                "description": "Image preprocessing outputs, such as image tensors or visual prompts, are used by multimodal processors within the text and audio module."
+            },
+            {
+                "source": "image_preprocessing",
+                "target": "model_ready_features",
+                "label": "Image features",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "text_audio_preprocessing",
+                "target": "model_ready_features",
+                "label": "Text/audio features",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_ready_features",
+                "target": "external_models",
+                "label": "Input to models",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "input_sources",
+                "label": "Input Sources",
+                "nodes": [
+                    "raw_input_data"
+                ],
+                "title": "Raw Data Inputs",
+                "description": "Represents the initial, unprocessed data streams that enter the data processing pipeline.",
+                "role": null
+            },
+            {
+                "id": "core_processors",
+                "label": "Core Processors",
+                "nodes": [
+                    "image_preprocessing",
+                    "text_audio_preprocessing"
+                ],
+                "title": "Core Data Processing Submodules",
+                "description": "The main submodules responsible for transforming raw data into a model-consumable format, handling different modalities.",
+                "role": null
+            },
+            {
+                "id": "output_destination",
+                "label": "Output & Consumers",
+                "nodes": [
+                    "model_ready_features",
+                    "external_models"
+                ],
+                "title": "Processed Data Output and Consumers",
+                "description": "Represents the final, prepared data output from the module and the machine learning models that consume this data.",
+                "role": null
+            }
+        ]
+    }
+}

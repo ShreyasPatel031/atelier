@@ -1,0 +1,35 @@
+{
+    "title": "Models and Embeddings",
+    "summary": "This module provides core interfaces for language models and text embeddings, along with various provider integrations and specialized model implementations. It handles model inference, settings management, and response processing.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "embeddings_core", "label": "Embedding Core", "type": "module", "link": "embeddings_core", "title": "Embedding Core", "description": "Defines core interfaces and implementations for generating text embeddings."},
+            {"id": "llm_models", "label": "LLM Models", "type": "module", "link": "llm_models", "title": "LLM Models", "description": "Provides abstract classes and common utilities for interacting with large language models."},
+            {"id": "llm_providers", "label": "LLM Providers", "type": "module", "link": "llm_providers", "title": "LLM Providers", "description": "Integrates various third-party LLM and embedding service providers."},
+            {"id": "openai_models", "label": "OpenAI Models", "type": "module", "link": "openai_models", "title": "OpenAI Models", "description": "Handles OpenAI-specific model implementations, including Responses API and compaction features."},
+            {"id": "gemini_models", "label": "Gemini Models", "type": "module", "link": "gemini_models", "title": "Gemini Models", "description": "Manages Google Gemini model implementations and their specific response structures."},
+            {"id": "model_profiles", "label": "Model Profiles", "type": "module", "link": "model_profiles", "title": "Model Profiles", "description": "Contains functions and classes defining characteristics and capabilities of different LLM models."},
+            {"id": "mcp_and_outlines", "label": "MCP and Outlines", "type": "module", "link": "mcp_and_outlines", "title": "MCP and Outlines", "description": "Implements models leveraging the Model Context Protocol (MCP) for sampling and the Outlines library for structured generation."}
+        ],
+        "edges": [
+            {"source": "embeddings_core", "target": "llm_models", "label": "shares concepts"},
+            {"source": "llm_models", "target": "llm_providers", "label": "uses providers"},
+            {"source": "llm_providers", "target": "llm_models", "label": "instantiates models"},
+            {"source": "openai_models", "target": "llm_models", "label": "extends LLM base"},
+            {"source": "openai_models", "target": "llm_providers", "label": "uses OpenAI provider"},
+            {"source": "gemini_models", "target": "llm_models", "label": "extends LLM base"},
+            {"source": "gemini_models", "target": "llm_providers", "label": "uses Google provider"},
+            {"source": "mcp_and_outlines", "target": "llm_models", "label": "extends LLM base"},
+            {"source": "model_profiles", "target": "llm_providers", "label": "configures providers"},
+            {"source": "model_profiles", "target": "openai_models", "label": "configures OpenAI"},
+            {"source": "model_profiles", "target": "gemini_models", "label": "configures Gemini"}
+        ],
+        "groups": [
+            {"id": "core_interfaces", "label": "Core Interfaces", "title": "Core Interfaces", "description": "Fundamental abstractions for models and embeddings.", "role": "analytical", "nodes": ["embeddings_core", "llm_models"]},
+            {"id": "provider_integrations", "label": "Provider Integrations", "title": "Provider Integrations", "description": "Connects to various external AI model providers.", "role": "data", "nodes": ["llm_providers", "openai_models", "gemini_models"]},
+            {"id": "specialized_models", "label": "Specialized Models", "title": "Specialized Models", "description": "Implementations for unique model interaction patterns and libraries.", "role": "generative", "nodes": ["mcp_and_outlines"]},
+            {"id": "configuration", "label": "Configuration", "title": "Configuration", "description": "Manages model-specific settings and profiles.", "role": "analytical", "nodes": ["model_profiles"]}
+        ]
+    }
+}

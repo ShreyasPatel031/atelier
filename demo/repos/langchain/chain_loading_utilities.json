@@ -1,0 +1,1152 @@
+{
+  "title": "Chain Loading Utilities",
+  "summary": "This module provides a comprehensive set of functions for dynamically loading and constructing various types of LangChain chains from configuration dictionaries or file paths. It also includes helper functions for creating specific QA and summarization chains.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "load_llm_checker",
+        "label": "Load LLMCheckerChain",
+        "type": "component",
+        "link": null,
+        "title": "Load LLMCheckerChain",
+        "description": "Loads an LLMCheckerChain instance from a configuration dictionary or file path, requiring an LLM and multiple prompt templates."
+      },
+      {
+        "id": "load_retrieval_qa",
+        "label": "Load RetrievalQA Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load RetrievalQA Chain",
+        "description": "Loads a RetrievalQA chain from configuration, requiring a retriever and a document combination chain."
+      },
+      {
+        "id": "load_vector_db_qa",
+        "label": "Load VectorDBQA Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load VectorDBQA Chain",
+        "description": "Loads a VectorDBQA chain from configuration, requiring a vector store and a document combination chain."
+      },
+      {
+        "id": "load_llm_math",
+        "label": "Load LLMMath Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load LLMMath Chain",
+        "description": "Loads an LLMMathChain from configuration, using either an existing LLMChain or an LLM and a prompt."
+      },
+      {
+        "id": "load_llm_chain",
+        "label": "Load LLM Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load LLM Chain",
+        "description": "Loads a generic LLMChain from configuration, requiring an LLM and a prompt template."
+      },
+      {
+        "id": "load_qa_with_sources",
+        "label": "Load QAWithSources Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load QAWithSources Chain",
+        "description": "Loads a QAWithSourcesChain from configuration, primarily needing a chain to combine documents."
+      },
+      {
+        "id": "load_api_chain",
+        "label": "Load API Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load API Chain",
+        "description": "Loads an APIChain for interacting with APIs, requiring request and answer chains, and an HTTP requests wrapper."
+      },
+      {
+        "id": "load_hyde_chain",
+        "label": "Load HYDE Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load HYDE Chain",
+        "description": "Loads a HypotheticalDocumentEmbedder chain, which generates hypothetical answers for embedding, requiring an LLMChain and an embeddings model."
+      },
+      {
+        "id": "load_stuff_docs",
+        "label": "Load StuffDocuments Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load StuffDocuments Chain",
+        "description": "Loads a StuffDocumentsChain, which 'stuffs' all documents into a single prompt, requiring an LLMChain and a document prompt."
+      },
+      {
+        "id": "load_refine_docs",
+        "label": "Load RefineDocuments Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load RefineDocuments Chain",
+        "description": "Loads a RefineDocumentsChain, which iteratively refines an answer over multiple documents, requiring initial and refine LLM chains."
+      },
+      {
+        "id": "load_map_reduce_docs",
+        "label": "Load MapReduceDocuments Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load MapReduceDocuments Chain",
+        "description": "Loads a MapReduceDocumentsChain, which processes documents in map-reduce fashion, requiring an LLMChain and a reduce documents chain."
+      },
+      {
+        "id": "load_vector_db_qa_sources",
+        "label": "Load VectorDBQAWithSources Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load VectorDBQAWithSources Chain",
+        "description": "Loads a VectorDBQAWithSourcesChain from configuration, requiring a vector store and a document combination chain."
+      },
+      {
+        "id": "load_retrieval_qa_sources",
+        "label": "Load RetrievalQAWithSources Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load RetrievalQAWithSources Chain",
+        "description": "Loads a RetrievalQAWithSourcesChain from configuration, requiring a retriever and a document combination chain."
+      },
+      {
+        "id": "load_map_rerank_docs",
+        "label": "Load MapRerankDocuments Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load MapRerankDocuments Chain",
+        "description": "Loads a MapRerankDocumentsChain, which maps and reranks documents, requiring an LLMChain."
+      },
+      {
+        "id": "load_llm_requests",
+        "label": "Load LLMRequests Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load LLMRequests Chain",
+        "description": "Loads an LLMRequestsChain for making HTTP requests via an LLM, requiring an LLMChain and optionally a requests wrapper."
+      },
+      {
+        "id": "load_graph_cypher",
+        "label": "Load GraphCypherQA Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load GraphCypherQA Chain",
+        "description": "Loads a GraphCypherQAChain for querying graph databases using Cypher, requiring a graph, a Cypher generation chain, and a QA chain."
+      },
+      {
+        "id": "create_map_rerank_qa_sources",
+        "label": "Create MapRerank Chain (QA Sources)",
+        "type": "component",
+        "link": null,
+        "title": "Create MapRerank Chain (QA Sources)",
+        "description": "Constructs a MapRerankDocumentsChain for QA with sources, using an LLM and prompt to create an internal LLMChain."
+      },
+      {
+        "id": "create_stuff_qa_sources",
+        "label": "Create Stuff Chain (QA Sources)",
+        "type": "component",
+        "link": null,
+        "title": "Create Stuff Chain (QA Sources)",
+        "description": "Constructs a StuffDocumentsChain for QA with sources, using an LLM, prompt, and document prompt."
+      },
+      {
+        "id": "create_map_reduce_qa_sources",
+        "label": "Create MapReduce Chain (QA Sources)",
+        "type": "component",
+        "link": null,
+        "title": "Create MapReduce Chain (QA Sources)",
+        "description": "Constructs a MapReduceDocumentsChain for QA with sources, using LLMs and various prompts for mapping and reducing."
+      },
+      {
+        "id": "create_refine_qa_sources",
+        "label": "Create Refine Chain (QA Sources)",
+        "type": "component",
+        "link": null,
+        "title": "Create Refine Chain (QA Sources)",
+        "description": "Constructs a RefineDocumentsChain for QA with sources, using LLMs and prompts for initial and refinement steps."
+      },
+      {
+        "id": "create_map_rerank_qa_ans",
+        "label": "Create MapRerank Chain (QA Answering)",
+        "type": "component",
+        "link": null,
+        "title": "Create MapRerank Chain (QA Answering)",
+        "description": "Constructs a MapRerankDocumentsChain for general QA, using an LLM and prompt to create an internal LLMChain."
+      },
+      {
+        "id": "create_stuff_qa_ans",
+        "label": "Create Stuff Chain (QA Answering)",
+        "type": "component",
+        "link": null,
+        "title": "Create Stuff Chain (QA Answering)",
+        "description": "Constructs a StuffDocumentsChain for general QA, using an LLM and prompt."
+      },
+      {
+        "id": "create_map_reduce_qa_ans",
+        "label": "Create MapReduce Chain (QA Answering)",
+        "type": "component",
+        "link": null,
+        "title": "Create MapReduce Chain (QA Answering)",
+        "description": "Constructs a MapReduceDocumentsChain for general QA, using LLMs and various prompts for mapping and reducing."
+      },
+      {
+        "id": "create_refine_qa_ans",
+        "label": "Create Refine Chain (QA Answering)",
+        "type": "component",
+        "link": null,
+        "title": "Create Refine Chain (QA Answering)",
+        "description": "Constructs a RefineDocumentsChain for general QA, using LLMs and prompts for initial and refinement steps."
+      },
+      {
+        "id": "create_stuff_summarize",
+        "label": "Create Stuff Chain (Summarize)",
+        "type": "component",
+        "link": null,
+        "title": "Create Stuff Chain (Summarize)",
+        "description": "Constructs a StuffDocumentsChain for summarization, using an LLM and prompt."
+      },
+      {
+        "id": "create_map_reduce_summarize",
+        "label": "Create MapReduce Chain (Summarize)",
+        "type": "component",
+        "link": null,
+        "title": "Create MapReduce Chain (Summarize)",
+        "description": "Constructs a MapReduceDocumentsChain for summarization, using LLMs and various prompts for mapping and reducing."
+      },
+      {
+        "id": "create_refine_summarize",
+        "label": "Create Refine Chain (Summarize)",
+        "type": "component",
+        "link": null,
+        "title": "Create Refine Chain (Summarize)",
+        "description": "Constructs a RefineDocumentsChain for summarization, using LLMs and prompts for initial and refinement steps."
+      },
+      {
+        "id": "LLMCheckerChain",
+        "label": "LLM Checker Chain",
+        "type": "external",
+        "link": null,
+        "title": "LLM Checker Chain",
+        "description": "A chain designed to check and refine LLM-generated answers."
+      },
+      {
+        "id": "RetrievalQA",
+        "label": "Retrieval QA Chain",
+        "type": "external",
+        "link": null,
+        "title": "Retrieval QA Chain",
+        "description": "A chain for question answering over a retrieved set of documents."
+      },
+      {
+        "id": "VectorDBQA",
+        "label": "VectorDB QA Chain",
+        "type": "external",
+        "link": null,
+        "title": "VectorDB QA Chain",
+        "description": "A chain for question answering over documents stored in a vector database."
+      },
+      {
+        "id": "LLMMathChain",
+        "label": "LLM Math Chain",
+        "type": "external",
+        "link": null,
+        "title": "LLM Math Chain",
+        "description": "A chain that uses an LLM to solve mathematical problems."
+      },
+      {
+        "id": "LLMChain",
+        "label": "LLM Chain",
+        "type": "external",
+        "link": null,
+        "title": "LLM Chain",
+        "description": "A basic chain that combines an LLM with a prompt template."
+      },
+      {
+        "id": "QAWithSourcesChain",
+        "label": "QA With Sources Chain",
+        "type": "external",
+        "link": null,
+        "title": "QA With Sources Chain",
+        "description": "A chain for question answering that also extracts sources from documents."
+      },
+      {
+        "id": "APIChain",
+        "label": "API Interaction Chain",
+        "type": "external",
+        "link": null,
+        "title": "API Interaction Chain",
+        "description": "A chain for interacting with external APIs based on natural language queries."
+      },
+      {
+        "id": "HypotheticalDocumentEmbedder",
+        "label": "Hypothetical Document Embedder",
+        "type": "external",
+        "link": null,
+        "title": "Hypothetical Document Embedder",
+        "description": "Generates hypothetical answers to improve document embedding for retrieval."
+      },
+      {
+        "id": "StuffDocumentsChain",
+        "label": "Stuff Documents Chain",
+        "type": "external",
+        "link": null,
+        "title": "Stuff Documents Chain",
+        "description": "Combines all documents into a single prompt for the LLM."
+      },
+      {
+        "id": "RefineDocumentsChain",
+        "label": "Refine Documents Chain",
+        "type": "external",
+        "link": null,
+        "title": "Refine Documents Chain",
+        "description": "Iteratively refines an answer by processing documents one by one."
+      },
+      {
+        "id": "MapReduceDocumentsChain",
+        "label": "Map-Reduce Documents Chain",
+        "type": "external",
+        "link": null,
+        "title": "Map-Reduce Documents Chain",
+        "description": "Processes documents by mapping them to intermediate results and then reducing those results."
+      },
+      {
+        "id": "VectorDBQAWithSourcesChain",
+        "label": "VectorDB QA With Sources Chain",
+        "type": "external",
+        "link": null,
+        "title": "VectorDB QA With Sources Chain",
+        "description": "QA over vector database documents, providing sources."
+      },
+      {
+        "id": "RetrievalQAWithSourcesChain",
+        "label": "Retrieval QA With Sources Chain",
+        "type": "external",
+        "link": null,
+        "title": "Retrieval QA With Sources Chain",
+        "description": "QA over retrieved documents, providing sources."
+      },
+      {
+        "id": "MapRerankDocumentsChain",
+        "label": "Map-Rerank Documents Chain",
+        "type": "external",
+        "link": null,
+        "title": "Map-Rerank Documents Chain",
+        "description": "Maps documents to scores and reranks them for relevance."
+      },
+      {
+        "id": "LLMRequestsChain",
+        "label": "LLM Requests Chain",
+        "type": "external",
+        "link": null,
+        "title": "LLM Requests Chain",
+        "description": "Uses an LLM to formulate and execute HTTP requests."
+      },
+      {
+        "id": "GraphCypherQAChain",
+        "label": "Graph Cypher QA Chain",
+        "type": "external",
+        "link": null,
+        "title": "Graph Cypher QA Chain",
+        "description": "Answers questions by generating and executing Cypher queries on a graph database."
+      },
+      {
+        "id": "ReduceDocumentsChain",
+        "label": "Reduce Documents Chain",
+        "type": "external",
+        "link": null,
+        "title": "Reduce Documents Chain",
+        "description": "A chain that combines multiple documents into a single output, often used in map-reduce patterns."
+      },
+      {
+        "id": "LLM",
+        "label": "Language Model (LLM)",
+        "type": "external",
+        "link": "base_components",
+        "title": "Language Model (LLM)",
+        "description": "A large language model instance used for text generation and understanding."
+      },
+      {
+        "id": "Prompt",
+        "label": "Prompt Template",
+        "type": "external",
+        "link": "base_components",
+        "title": "Prompt Template",
+        "description": "A template for structuring input to an LLM."
+      },
+      {
+        "id": "Retriever",
+        "label": "Document Retriever",
+        "type": "external",
+        "link": "base_components",
+        "title": "Document Retriever",
+        "description": "A component that fetches relevant documents based on a query."
+      },
+      {
+        "id": "VectorStore",
+        "label": "Vector Database",
+        "type": "external",
+        "link": "base_components",
+        "title": "Vector Database",
+        "description": "A database optimized for storing and querying vector embeddings."
+      },
+      {
+        "id": "RequestsWrapper",
+        "label": "HTTP Requests Wrapper",
+        "type": "external",
+        "link": null,
+        "title": "HTTP Requests Wrapper",
+        "description": "An interface for making HTTP requests, often used by API interaction chains."
+      },
+      {
+        "id": "Embeddings",
+        "label": "Embeddings Model",
+        "type": "external",
+        "link": null,
+        "title": "Embeddings Model",
+        "description": "A model that converts text into numerical vector representations for similarity search."
+      },
+      {
+        "id": "Graph",
+        "label": "Graph Database",
+        "type": "external",
+        "link": null,
+        "title": "Graph Database",
+        "description": "A database for storing and querying highly interconnected data."
+      },
+      {
+        "id": "ChainLoader",
+        "label": "Generic Chain Loader",
+        "type": "external",
+        "link": null,
+        "title": "Generic Chain Loader",
+        "description": "An internal utility function to load a chain from a configuration dictionary or file path."
+      },
+      {
+        "id": "LLMLoader",
+        "label": "Generic LLM Loader",
+        "type": "external",
+        "link": null,
+        "title": "Generic LLM Loader",
+        "description": "An internal utility function to load an LLM from a configuration dictionary or file path."
+      },
+      {
+        "id": "PromptLoader",
+        "label": "Generic Prompt Loader",
+        "type": "external",
+        "link": null,
+        "title": "Generic Prompt Loader",
+        "description": "An internal utility function to load a prompt from a configuration dictionary or file path."
+      },
+      {
+        "id": "ReduceDocsChainLoader",
+        "label": "Reduce Documents Chain Loader",
+        "type": "external",
+        "link": null,
+        "title": "Reduce Documents Chain Loader",
+        "description": "An internal utility function to load or create a ReduceDocumentsChain."
+      }
+    ],
+    "edges": [
+      {
+        "source": "load_llm_checker",
+        "target": "LLMCheckerChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_checker",
+        "target": "LLMLoader",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_checker",
+        "target": "PromptLoader",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_retrieval_qa",
+        "target": "RetrievalQA",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_retrieval_qa",
+        "target": "Retriever",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_retrieval_qa",
+        "target": "ChainLoader",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_vector_db_qa",
+        "target": "VectorDBQA",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_vector_db_qa",
+        "target": "VectorStore",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_vector_db_qa",
+        "target": "ChainLoader",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_math",
+        "target": "LLMMathChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_math",
+        "target": "ChainLoader",
+        "label": "uses for LLMChain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_math",
+        "target": "LLMLoader",
+        "label": "uses for LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_math",
+        "target": "PromptLoader",
+        "label": "uses for Prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_chain",
+        "target": "LLMChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_chain",
+        "target": "LLMLoader",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_chain",
+        "target": "PromptLoader",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_qa_with_sources",
+        "target": "QAWithSourcesChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_qa_with_sources",
+        "target": "ChainLoader",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_api_chain",
+        "target": "APIChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_api_chain",
+        "target": "ChainLoader",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_api_chain",
+        "target": "RequestsWrapper",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_hyde_chain",
+        "target": "HypotheticalDocumentEmbedder",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_hyde_chain",
+        "target": "ChainLoader",
+        "label": "uses for LLMChain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_hyde_chain",
+        "target": "Embeddings",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_stuff_docs",
+        "target": "StuffDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_stuff_docs",
+        "target": "ChainLoader",
+        "label": "uses for LLMChain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_stuff_docs",
+        "target": "PromptLoader",
+        "label": "uses for Document Prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_refine_docs",
+        "target": "RefineDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_refine_docs",
+        "target": "ChainLoader",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_refine_docs",
+        "target": "PromptLoader",
+        "label": "uses for Document Prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_map_reduce_docs",
+        "target": "MapReduceDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_map_reduce_docs",
+        "target": "ChainLoader",
+        "label": "uses for LLMChain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_map_reduce_docs",
+        "target": "ReduceDocsChainLoader",
+        "label": "uses for Reduce Chain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_vector_db_qa_sources",
+        "target": "VectorDBQAWithSourcesChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_vector_db_qa_sources",
+        "target": "VectorStore",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_vector_db_qa_sources",
+        "target": "ChainLoader",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_retrieval_qa_sources",
+        "target": "RetrievalQAWithSourcesChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_retrieval_qa_sources",
+        "target": "Retriever",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_retrieval_qa_sources",
+        "target": "ChainLoader",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_map_rerank_docs",
+        "target": "MapRerankDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_map_rerank_docs",
+        "target": "ChainLoader",
+        "label": "uses for LLMChain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_requests",
+        "target": "LLMRequestsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_requests",
+        "target": "ChainLoader",
+        "label": "uses for LLMChain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_llm_requests",
+        "target": "RequestsWrapper",
+        "label": "optionally uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_graph_cypher",
+        "target": "GraphCypherQAChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_graph_cypher",
+        "target": "Graph",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_graph_cypher",
+        "target": "ChainLoader",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_rerank_qa_sources",
+        "target": "MapRerankDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_rerank_qa_sources",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_rerank_qa_sources",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_stuff_qa_sources",
+        "target": "StuffDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_stuff_qa_sources",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_stuff_qa_sources",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_qa_sources",
+        "target": "MapReduceDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_qa_sources",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_qa_sources",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_qa_sources",
+        "target": "ReduceDocumentsChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_refine_qa_sources",
+        "target": "RefineDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_refine_qa_sources",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_refine_qa_sources",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_rerank_qa_ans",
+        "target": "MapRerankDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_rerank_qa_ans",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_rerank_qa_ans",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_stuff_qa_ans",
+        "target": "StuffDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_stuff_qa_ans",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_stuff_qa_ans",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_qa_ans",
+        "target": "MapReduceDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_qa_ans",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_qa_ans",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_qa_ans",
+        "target": "ReduceDocumentsChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_refine_qa_ans",
+        "target": "RefineDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_refine_qa_ans",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_refine_qa_ans",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_stuff_summarize",
+        "target": "StuffDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_stuff_summarize",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_stuff_summarize",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_summarize",
+        "target": "MapReduceDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_summarize",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_summarize",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_map_reduce_summarize",
+        "target": "ReduceDocumentsChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_refine_summarize",
+        "target": "RefineDocumentsChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_refine_summarize",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_refine_summarize",
+        "target": "Prompt",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "config_loaders",
+        "label": "Config-based Chain Loaders",
+        "nodes": [
+          "load_llm_checker",
+          "load_retrieval_qa",
+          "load_vector_db_qa",
+          "load_llm_math",
+          "load_llm_chain",
+          "load_qa_with_sources",
+          "load_api_chain",
+          "load_hyde_chain",
+          "load_stuff_docs",
+          "load_refine_docs",
+          "load_map_reduce_docs",
+          "load_vector_db_qa_sources",
+          "load_retrieval_qa_sources",
+          "load_map_rerank_docs",
+          "load_llm_requests",
+          "load_graph_cypher"
+        ],
+        "title": "Config-based Chain Loaders",
+        "description": "Functions that load various chain types from configuration dictionaries or file paths, enabling dynamic instantiation.",
+        "role": "generative"
+      },
+      {
+        "id": "qa_creators",
+        "label": "QA Chain Creators",
+        "nodes": [
+          "create_map_rerank_qa_sources",
+          "create_stuff_qa_sources",
+          "create_map_reduce_qa_sources",
+          "create_refine_qa_sources",
+          "create_map_rerank_qa_ans",
+          "create_stuff_qa_ans",
+          "create_map_reduce_qa_ans",
+          "create_refine_qa_ans"
+        ],
+        "title": "QA Chain Creators",
+        "description": "Helper functions specifically designed to construct different types of Question Answering chains.",
+        "role": "generative"
+      },
+      {
+        "id": "summarization_creators",
+        "label": "Summarization Chain Creators",
+        "nodes": [
+          "create_stuff_summarize",
+          "create_map_reduce_summarize",
+          "create_refine_summarize"
+        ],
+        "title": "Summarization Chain Creators",
+        "description": "Helper functions for constructing various summarization chains, including stuff, map-reduce, and refine methods.",
+        "role": "generative"
+      },
+      {
+        "id": "core_chain_types",
+        "label": "Core Chain Types",
+        "nodes": [
+          "LLMCheckerChain",
+          "RetrievalQA",
+          "VectorDBQA",
+          "LLMMathChain",
+          "LLMChain",
+          "QAWithSourcesChain",
+          "APIChain",
+          "HypotheticalDocumentEmbedder",
+          "StuffDocumentsChain",
+          "RefineDocumentsChain",
+          "MapReduceDocumentsChain",
+          "VectorDBQAWithSourcesChain",
+          "RetrievalQAWithSourcesChain",
+          "MapRerankDocumentsChain",
+          "LLMRequestsChain",
+          "GraphCypherQAChain",
+          "ReduceDocumentsChain"
+        ],
+        "title": "Core Chain Types",
+        "description": "The fundamental LangChain chain classes that are instantiated or composed by the loading and creation utilities.",
+        "role": "surface"
+      },
+      {
+        "id": "llm_prompt_components",
+        "label": "LLM & Prompt Components",
+        "nodes": [
+          "LLM",
+          "Prompt"
+        ],
+        "title": "LLM & Prompt Components",
+        "description": "Essential building blocks like Language Models and Prompt Templates that are integrated into various chains.",
+        "role": "data"
+      },
+      {
+        "id": "data_external_services",
+        "label": "Data & External Service Integrations",
+        "nodes": [
+          "Retriever",
+          "VectorStore",
+          "RequestsWrapper",
+          "Embeddings",
+          "Graph"
+        ],
+        "title": "Data & External Service Integrations",
+        "description": "Components representing external data sources or services that chains interact with, such as databases or APIs.",
+        "role": "data"
+      },
+      {
+        "id": "loading_helpers",
+        "label": "Loading Helper Functions",
+        "nodes": [
+          "ChainLoader",
+          "LLMLoader",
+          "PromptLoader",
+          "ReduceDocsChainLoader"
+        ],
+        "title": "Loading Helper Functions",
+        "description": "Internal utility functions used by the main chain loading components to resolve and instantiate sub-components.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

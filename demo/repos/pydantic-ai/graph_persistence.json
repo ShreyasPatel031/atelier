@@ -1,0 +1,147 @@
+{
+  "title": "Graph State Persistence",
+  "summary": "This module defines abstract and concrete implementations for persisting the state of graph runs. It allows saving and loading graph execution progress, enabling features like resuming runs or inspecting historical states.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "BaseStatePersistence",
+        "label": "Define Persistence Interface",
+        "type": "component",
+        "link": null,
+        "title": "Base State Persistence",
+        "description": "Abstract base class defining the interface for storing and retrieving the state of a graph run, including node snapshots and end states."
+      },
+      {
+        "id": "FileStatePersistence",
+        "label": "Persist State to File",
+        "type": "component",
+        "link": null,
+        "title": "File State Persistence",
+        "description": "Concrete implementation of state persistence that stores graph run snapshots as JSON data in a specified file, handling atomic updates and locking."
+      },
+      {
+        "id": "FullStatePersistence",
+        "label": "Persist State In-Memory",
+        "type": "component",
+        "link": null,
+        "title": "Full State Persistence",
+        "description": "Concrete implementation of state persistence that stores graph run snapshots in memory, optionally performing deep copies of state and nodes."
+      },
+      {
+        "id": "Graph",
+        "label": "Execute Graph",
+        "type": "external",
+        "link": "graph_definition",
+        "title": "Graph Execution Engine",
+        "description": "The core graph execution engine that utilizes a persistence mechanism to manage and restore its state during runs, especially for iterative or resumable processes."
+      },
+      {
+        "id": "NodeSnapshot",
+        "label": "Node State Snapshot",
+        "type": "external",
+        "link": null,
+        "title": "Node Snapshot",
+        "description": "A data structure representing the state of the graph at a specific node, including the graph's overall state and the next node to be executed."
+      },
+      {
+        "id": "EndSnapshot",
+        "label": "Graph End Snapshot",
+        "type": "external",
+        "link": null,
+        "title": "End Snapshot",
+        "description": "A data structure representing the final state of the graph run, including the overall graph state and the result of the run."
+      }
+    ],
+    "edges": [
+      {
+        "source": "FileStatePersistence",
+        "target": "BaseStatePersistence",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FullStatePersistence",
+        "target": "BaseStatePersistence",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Graph",
+        "target": "BaseStatePersistence",
+        "label": "Uses for state management",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseStatePersistence",
+        "target": "NodeSnapshot",
+        "label": "Creates/Manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseStatePersistence",
+        "target": "EndSnapshot",
+        "label": "Creates/Manages",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "persistence_interface",
+        "label": "Persistence Interface",
+        "nodes": [
+          "BaseStatePersistence"
+        ],
+        "title": "Persistence Interface Definition",
+        "description": "Defines the abstract contract for how graph run states are stored and retrieved.",
+        "role": "surface"
+      },
+      {
+        "id": "file_persistence",
+        "label": "File-based Persistence",
+        "nodes": [
+          "FileStatePersistence"
+        ],
+        "title": "File-based State Storage",
+        "description": "Provides concrete implementation for persisting graph states to local JSON files.",
+        "role": "data"
+      },
+      {
+        "id": "in_memory_persistence",
+        "label": "In-memory Persistence",
+        "nodes": [
+          "FullStatePersistence"
+        ],
+        "title": "In-memory State Storage",
+        "description": "Provides concrete implementation for persisting graph states in volatile memory, suitable for short-lived or test runs.",
+        "role": "data"
+      },
+      {
+        "id": "graph_core",
+        "label": "Graph Core",
+        "nodes": [
+          "Graph"
+        ],
+        "title": "Graph Execution Core",
+        "description": "Represents the main graph execution logic that interacts with persistence mechanisms.",
+        "role": "generative"
+      },
+      {
+        "id": "snapshot_data",
+        "label": "Snapshot Data",
+        "nodes": [
+          "NodeSnapshot",
+          "EndSnapshot"
+        ],
+        "title": "Graph State Snapshots",
+        "description": "Data structures used to capture and represent the state of a graph at various points during its execution.",
+        "role": "data"
+      }
+    ]
+  }
+}

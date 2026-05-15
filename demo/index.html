@@ -1274,7 +1274,7 @@
     <script>
         // ============================================================
         // GENERIC VIEWER ENGINE
-        // This viewer dynamically loads repo data from JSON/MD files
+        // This viewer loads repo data from JSON only (overview.json + <module>.json).
         // ============================================================
         
         // Get repo path from URL query param: ?repo=flask or ?repo=repos/flask
@@ -1307,7 +1307,10 @@
         let REPO_TITLE = '';
         let REPO_URL = '';
         let MODULE_TREE = {};
-        let DOCS_CONTENT = {};
+        /** When set, overview + modules load from overview.json and *.json (curated demo repos). */
+        let OVERVIEW_JSON_DOC = null;
+        /** Map module_id -> parsed module JSON document (title/summary/diagram). */
+        let MODULE_JSON_DOCS = {};
         let moduleData = {};
         let overviewLinks = {};
         let currentDiagramCode = '';
@@ -1436,91 +1439,17 @@
             tooltip.style.pointerEvents = 'none';
         }
 
-        /**
-         * Opening prose from cached module *.md for hover (no character cap).
-         * - If the file has `# Title`, take everything after that line until the next ATX heading (## / ### / …).
-         * - If there is no `# ` line (many generated docs start with backticks or plain text), take from the
-         *   first content line until the first ATX heading.
-         */
-        function extractOpeningLinesForTooltip(lines) {
-            const collect = [];
-            let inCode = false;
-            let inHtmlComment = false;
-            let pastH1 = false;
-            for (const line of lines) {
-                const trim = line.trim();
-                if (trim.startsWith('```')) {
-                    inCode = !inCode;
-                    continue;
-                }
-                if (inCode) continue;
-                // Skip HTML blocks (e.g. <!-- DIAGRAM_JSON ... -->) — not fenced like ```mermaid
-                if (inHtmlComment) {
-                    if (trim.includes('-->')) inHtmlComment = false;
-                    continue;
-                }
-                if (trim.startsWith('<!--')) {
-                    if (!trim.includes('-->')) inHtmlComment = true;
-                    continue;
-                }
-                if (!pastH1) {
-                    if (line.startsWith('# ')) pastH1 = true;
-                    continue;
-                }
-                if (/^#{1,6}\s/.test(line)) break;
-                collect.push(line.replace(/\r$/, ''));
-            }
-            if (collect.length) {
-                while (collect.length && !collect[0].trim()) collect.shift();
-                while (collect.length && !collect[collect.length - 1].trim()) collect.pop();
-                return collect;
-            }
-            // No `# ` title: lead is everything until first heading (e.g. swift_compiler_core.md).
-            inCode = false;
-            inHtmlComment = false;
-            for (const line of lines) {
-                const trim = line.trim();
-                if (trim.startsWith('```')) {
-                    inCode = !inCode;
-                    continue;
-                }
-                if (inCode) continue;
-                if (inHtmlComment) {
-                    if (trim.includes('-->')) inHtmlComment = false;
-                    continue;
-                }
-                if (trim.startsWith('<!--')) {
-                    if (!trim.includes('-->')) inHtmlComment = true;
-                    continue;
-                }
-                if (/^#{1,6}\s/.test(line)) break;
-                collect.push(line.replace(/\r$/, ''));
-            }
-            while (collect.length && !collect[0].trim()) collect.shift();
-            while (collect.length && !collect[collect.length - 1].trim()) collect.pop();
-            return collect;
-        }
-
-        function stripHtmlCommentBlocks(text) {
-            return (text || '').replace(/<!--[\s\S]*?-->/g, '');
-        }
-
-        function extractModuleIntroFromMarkdown(content) {
-            if (!content || typeof content !== 'string') return '';
-            const lines = stripHtmlCommentBlocks(content).split(/\n/);
-            const intro = extractOpeningLinesForTooltip(lines);
-            if (!intro.length) return '';
-            return intro.join('\n').trim().replace(/\n{3,}/g, '\n\n');
-        }
-
         function moduleIntroFromDocsContent(moduleId) {
             if (!moduleId) return '';
-            const fn = moduleId.endsWith('.md') ? moduleId : `${moduleId}.md`;
-            const raw = DOCS_CONTENT[fn];
-            return extractModuleIntroFromMarkdown(raw);
+            const baseId = String(moduleId).replace(/\.(json)$/i, '');
+            const jdoc = MODULE_JSON_DOCS[baseId];
+            if (jdoc && jdoc.summary != null && String(jdoc.summary).trim() !== '') {
+                return String(jdoc.summary).trim();
+            }
+            return '';
         }
 
-        /** Hover body: opening prose from cached *.md only — never module_tree.description. */
+        /** Hover body: module summary from `<module>.json` (never module_tree.description). */
         function enrichModuleTooltipPayload(moduleId, base) {
             const b = base || {};
             return {
@@ -1761,7 +1690,7 @@
                     const gNode = nodeEl.closest('.node') || nodeEl;
                     gNode.classList.add(`node-${node.type}`);
                     
-                    // Add hover listeners for tooltips (full intro from cached .md when available)
+                    // Add hover listeners for tooltips (summary from module JSON when available)
                     if (moduleMetadata[node.id]) {
                         const tip = enrichModuleTooltipPayload(node.id, moduleMetadata[node.id]);
                         gNode.addEventListener('mouseenter', (e) => {
@@ -1832,8 +1761,33 @@
             }
         }
         
+
+        function isValidStructuredOverviewJson(doc) {
+            return (
+                doc &&
+                typeof doc === 'object' &&
+                typeof doc.title === 'string' &&
+                doc.title.trim() !== '' &&
+                doc.diagram &&
+                typeof doc.diagram === 'object' &&
+                Array.isArray(doc.diagram.nodes) &&
+                doc.diagram.nodes.length > 0
+            );
+        }
+
+        function isValidStructuredModuleJson(doc) {
+            return isValidStructuredOverviewJson(doc);
+        }
+
+        function moduleDocLinkToModuleId(link) {
+            if (link == null || link === '') return '';
+            return String(link).trim().replace(/\.json$/i, '');
+        }
         async function loadAllData() {
             try {
+                OVERVIEW_JSON_DOC = null;
+                MODULE_JSON_DOCS = {};
+
                 // Load metadata
                 const metadata = await loadFile('metadata.json');
                 if (metadata) {
@@ -1855,14 +1809,7 @@
                         }
                     }
                 }
-                
-                // Load overview.md
-                const overviewMd = await loadFile('overview.md');
-                if (overviewMd) {
-                    DOCS_CONTENT['overview.md'] = overviewMd;
-                }
-                
-                // Load all module documentation files (recursively from tree)
+
                 function collectAllModuleKeys(tree) {
                     let keys = [];
                     for (const [key, data] of Object.entries(tree)) {
@@ -1873,14 +1820,33 @@
                     }
                     return keys;
                 }
+
+                const overviewJson = await loadFile('overview.json');
+                if (!isValidStructuredOverviewJson(overviewJson)) {
+                    console.error(
+                        '[viewer] overview.json missing or invalid (requires title + diagram.nodes)'
+                    );
+                    return false;
+                }
+                OVERVIEW_JSON_DOC = overviewJson;
+
                 const allModuleKeys = collectAllModuleKeys(MODULE_TREE);
-                const moduleFiles = allModuleKeys.map(key => `${key}.md`);
-                await Promise.all(moduleFiles.map(async (filename) => {
-                    const content = await loadFile(filename);
-                    if (content) {
-                        DOCS_CONTENT[filename] = content;
+                const missing = [];
+                for (const key of allModuleKeys) {
+                    const j = await loadFile(`${key}.json`);
+                    if (!isValidStructuredModuleJson(j)) {
+                        missing.push(key);
+                    } else {
+                        MODULE_JSON_DOCS[key] = j;
                     }
-                }));
+                }
+                if (missing.length) {
+                    console.error(
+                        '[viewer] invalid or missing module JSON for:',
+                        missing.join(', ')
+                    );
+                    return false;
+                }
                 
                 // Update UI
                 document.title = REPO_TITLE;
@@ -3192,34 +3158,17 @@
 
         /** Same IR source as R2/R4 (overview DIAGRAM_JSON or R1 from Mermaid; modules → structuredDiagram). */
         function resolveStructuredIrForPipeline() {
-            const overviewContent = DOCS_CONTENT['overview.md'] || '';
-            const overviewMermaidRaw = extractMermaidFromMarkdown(overviewContent);
-            const overviewDjFile = extractDiagramJsonFromMarkdown(overviewContent);
-            const overviewHasDiagramJson = !!(overviewDjFile && Array.isArray(overviewDjFile.nodes));
-
-            if (currentModuleId === 'overview') {
-                if (overviewHasDiagramJson && overviewDjFile) {
-                    return {
-                        diagram: overviewDjFile,
-                        r2InputSource: 'overview.md DIAGRAM_JSON',
-                    };
+            if (currentModuleId === 'overview' && OVERVIEW_JSON_DOC && OVERVIEW_JSON_DOC.diagram) {
+                const dj = OVERVIEW_JSON_DOC.diagram;
+                if (Array.isArray(dj.nodes) && dj.nodes.length) {
+                    return { diagram: dj, r2InputSource: 'overview.json' };
                 }
-                if (overviewMermaidRaw && typeof overviewMermaidToDiagramJson === 'function') {
-                    const conv = overviewMermaidToDiagramJson(overviewMermaidRaw);
-                    if (conv.ok && conv.diagram) {
-                        return {
-                            diagram: conv.diagram,
-                            r2InputSource: 'R1 (overview Mermaid → DIAGRAM_JSON)',
-                        };
-                    }
-                }
-                return { diagram: null, r2InputSource: 'none' };
             }
             const mod = moduleData[currentModuleId];
             if (mod && mod.structuredDiagram) {
                 return {
                     diagram: mod.structuredDiagram,
-                    r2InputSource: 'module_tree.json → diagram',
+                    r2InputSource: '<module>.json',
                 };
             }
             return { diagram: null, r2InputSource: 'none' };
@@ -3231,11 +3180,10 @@
          *
          * Sources, in order:
          *  1. DIAGRAM_JSON title (header line) when authored.
-         *  2. Module intro prose from cached *.md (`moduleIntroFromDocsContent`) — same source as Mermaid hover.
-         *     For overview nodes we resolve the .md target via `overviewLinks[nodeId]`; for module pages the
-         *     diagram node `id` already equals the moduleId, optionally with `link: "<file>.md"`.
+         *  2. Module summary from `<module>.json` via `moduleIntroFromDocsContent`.
+         *     For overview nodes we resolve targets via `overviewLinks[nodeId]` from `link` fields.
          *  3. DIAGRAM_JSON description, if any.
-         *  4. Mermaid-authored shape label, only when it differs from the box label (avoids duplicating box text).
+         *  4. Mermaid-authored shape label (from synthesized Mermaid), only when it differs from the box label.
          *
          * Never repeats the ELK/React Flow box label by itself.
          */
@@ -3245,7 +3193,7 @@
 
             let rawMermaid = '';
             if (currentModuleId === 'overview') {
-                rawMermaid = extractMermaidFromMarkdown(DOCS_CONTENT['overview.md'] || '');
+                rawMermaid = moduleData['overview'] ? String(moduleData['overview'].diagram || '') : '';
             } else if (moduleData[currentModuleId]) {
                 rawMermaid = String(moduleData[currentModuleId].diagram || '');
             }
@@ -3262,14 +3210,14 @@
             }
 
             function moduleIntroForNode(idStr, irLink) {
-                /** explicit link wins (e.g. structuredDiagram nodes carry `link: "<file>.md"`). */
+                /** explicit link wins (structuredDiagram nodes may carry `link: "<module>.json"`). */
                 const link = irLink != null && String(irLink).trim() ? String(irLink).trim() : '';
                 if (link) {
                     const intro = moduleIntroFromDocsContent(link);
                     if (intro) return intro;
                 }
                 if (currentModuleId === 'overview') {
-                    /** Mermaid `click <id> "<file>.md"` was harvested into overviewLinks[nodeId] when the overview rendered. */
+                    /** Mermaid `click` targets (if synthesized) map via overviewLinks[nodeId]. */
                     const mod = overviewLinks[idStr];
                     if (mod) {
                         const intro = moduleIntroFromDocsContent(mod);
@@ -3432,7 +3380,7 @@
         function resolveRfTargetModule(nodeId, nodeText, irLink) {
             const linkRaw = irLink != null && String(irLink).trim() ? String(irLink).trim() : '';
             if (linkRaw) {
-                const stem = linkRaw.replace(/\.md$/i, '');
+                const stem = linkRaw.replace(/\.(md|json)$/i, '');
                 if (moduleData[stem]) return stem;
             }
             const mergedLinks = Object.assign(
@@ -3832,7 +3780,7 @@
                 const d = document.createElement('div');
                 d.className = 'loading';
                 d.textContent =
-                    'No structured diagram for ELK (overview: Mermaid or DIAGRAM_JSON; module: diagram on module_tree).';
+                    'No structured diagram for ELK (needs overview.json + <module>.json diagram IR).';
                 mount.appendChild(d);
                 return;
             }
@@ -3997,21 +3945,28 @@
                 }
             }
 
-            const overviewContent = DOCS_CONTENT['overview.md'] || '';
-            const overviewMermaidRaw = extractMermaidFromMarkdown(overviewContent);
-            const overviewDjFile = extractDiagramJsonFromMarkdown(overviewContent);
+            const overviewJsonObj = OVERVIEW_JSON_DOC;
+            const overviewDjFromJson =
+                overviewJsonObj &&
+                overviewJsonObj.diagram &&
+                Array.isArray(overviewJsonObj.diagram.nodes)
+                    ? overviewJsonObj.diagram
+                    : null;
+            const overviewMermaidRaw =
+                overviewDjFromJson && moduleData['overview']
+                    ? String(moduleData['overview'].diagram || '')
+                    : '';
+            const overviewDjFile = overviewDjFromJson;
             const overviewHasDiagramJson = !!(overviewDjFile && Array.isArray(overviewDjFile.nodes));
 
             let structuredDiagram = null;
             let structuredSource = '';
             if (currentModuleId === 'overview') {
-                structuredDiagram = overviewHasDiagramJson ? overviewDjFile : null;
-                structuredSource = overviewHasDiagramJson
-                    ? 'overview.md <!-- DIAGRAM_JSON -->'
-                    : 'none (mermaid only until generation fix lands)';
+                structuredDiagram = overviewDjFromJson;
+                structuredSource = overviewJsonObj ? 'overview.json' : 'none';
             } else if (moduleData[currentModuleId]) {
                 structuredDiagram = moduleData[currentModuleId].structuredDiagram || null;
-                structuredSource = structuredDiagram ? 'module_tree.json → diagram' : 'none';
+                structuredSource = structuredDiagram ? '<module>.json' : 'none';
             }
 
             const sourcePayload = {
@@ -4028,10 +3983,10 @@
             preMer.textContent = overviewMermaidRaw
                 ? overviewMermaidRaw.slice(0, 6000) +
                   (overviewMermaidRaw.length > 6000 ? '\n… [truncated]' : '')
-                : '(no ```mermaid block in overview.md)';
+                : '(overview.json — no synthesized Mermaid yet)';
 
             if (!overviewMermaidRaw) {
-                preR1.textContent = '(R1 skipped — no overview Mermaid)';
+                preR1.textContent = '(R1 skipped — overview uses overview.json structured diagram)';
             } else if (overviewHasDiagramJson) {
                 let converterSummary = null;
                 if (typeof overviewMermaidToDiagramJson === 'function') {
@@ -4046,7 +4001,7 @@
                 preR1.textContent = JSON.stringify(
                     {
                         skipped: true,
-                        reason: 'overview.md already contains DIAGRAM_JSON',
+                        reason: 'overview.json structured diagram (Mermaid is synthesized for display)',
                         fileIR: {
                             nodeCount: overviewDjFile.nodes.length,
                             edgeCount: Array.isArray(overviewDjFile.edges)
@@ -4163,29 +4118,54 @@
         
         function buildModuleData() {
             overviewLinks = {};
-            // Build overview from overview.md
-            const overviewContent = DOCS_CONTENT['overview.md'] || '';
-            const overviewDiagram = extractMermaidFromMarkdown(overviewContent);
-            const overviewDj = extractDiagramJsonFromMarkdown(overviewContent);
-            overviewDiagramNodeMeta = buildDiagramNodeMetaMap(overviewDj);
-            overviewDiagramClusterMeta = buildDiagramClusterMetaMap(overviewDj);
-            overviewDiagramEdgeMeta = buildDiagramEdgeMetaMap(overviewDj);
-            
-            // FIRST: Build module data from tree so we have all modules available
+            if (!OVERVIEW_JSON_DOC) {
+                console.error('[viewer] buildModuleData: OVERVIEW_JSON_DOC missing');
+                updatePipelinePanel();
+                return;
+            }
+
+            const dj = OVERVIEW_JSON_DOC.diagram;
+            overviewDiagramNodeMeta = buildDiagramNodeMetaMap(dj);
+            overviewDiagramClusterMeta = buildDiagramClusterMetaMap(dj);
+            overviewDiagramEdgeMeta = buildDiagramEdgeMetaMap(dj);
+
+            if (dj && Array.isArray(dj.nodes)) {
+                for (const n of dj.nodes) {
+                    if (!n || !n.id) continue;
+                    const lid = moduleDocLinkToModuleId(n.link);
+                    if (lid) overviewLinks[n.id] = lid;
+                }
+            }
+
             buildModulesFromTree(MODULE_TREE, '');
-            
+
+            const overviewContent =
+                '# ' +
+                OVERVIEW_JSON_DOC.title +
+                '\n\n' +
+                (OVERVIEW_JSON_DOC.summary ? String(OVERVIEW_JSON_DOC.summary).trim() : '');
+
+            let overviewMermaid = '';
+            if (typeof convertDiagramToMermaid === 'function' && dj) {
+                try {
+                    overviewMermaid = convertDiagramToMermaid(dj) || '';
+                } catch (e) {
+                    overviewMermaid = '';
+                }
+            }
+
+            const overviewDiagram = overviewMermaid;
             if (overviewDiagram) {
-                // Parse click statements to build node-to-module mappings (legacy support)
                 const clickRegex = /click\s+(\w+)\s+"([^"]+)"/g;
                 let match;
                 while ((match = clickRegex.exec(overviewDiagram)) !== null) {
                     const nodeId = match[1];
                     const targetFile = match[2];
-                    const moduleId = targetFile.replace('.md', '');
-                    overviewLinks[nodeId] = moduleId;
+                    const mapped =
+                        moduleDocLinkToModuleId(targetFile) ||
+                        String(targetFile).replace(/\.(md|json)$/i, '');
+                    overviewLinks[nodeId] = mapped;
                 }
-                
-                // Also build label-to-module mappings from node definitions
                 const nodeDefRegex = /(\w+)\s*\["([^"]+)"\]/g;
                 while ((match = nodeDefRegex.exec(overviewDiagram)) !== null) {
                     const nodeId = match[1];
@@ -4194,22 +4174,18 @@
                         overviewLinks[label] = overviewLinks[nodeId];
                     }
                 }
-                
-                // Map nodes to modules ONLY if they match an actual module key in MODULE_TREE
-                // No fuzzy matching - only exact matches
                 buildExactModuleMappings(overviewDiagram);
             }
-            
+
             moduleData['overview'] = {
-                name: REPO_TITLE + ' Overview',
-                diagram: stripClickStatements(overviewDiagram || ''),
+                name: OVERVIEW_JSON_DOC.title,
+                diagram: stripClickStatements(overviewMermaid || ''),
                 documentation: overviewContent || '# Overview\n\nNo overview available.',
                 links: overviewLinks,
                 diagramNodeMeta: overviewDiagramNodeMeta,
                 diagramClusterMeta: overviewDiagramClusterMeta,
                 diagramEdgeMeta: overviewDiagramEdgeMeta,
-                structuredDiagram:
-                    overviewDj && Array.isArray(overviewDj.nodes) ? overviewDj : null,
+                structuredDiagram: dj && Array.isArray(dj.nodes) ? dj : null,
             };
 
             updatePipelinePanel();
@@ -4253,20 +4229,46 @@
             for (const [key, data] of Object.entries(tree)) {
                 const moduleId = parentPath ? `${parentPath}/${key}` : key;
                 const formattedName = formatModuleName(key);
-                
-                // Try to get documentation for this module
-                const docFilename = `${key}.md`;
-                const documentation = DOCS_CONTENT[docFilename] || `# ${formattedName}\n\nNo documentation available.`;
-                
-                // Extract diagram from markdown FIRST, then fallback to generated
-                const extractedDiagram = extractMermaidFromMarkdown(documentation);
-                const diagram = extractedDiagram || generateModuleDiagram(key, data);
-                const docDj = extractDiagramJsonFromMarkdown(documentation);
-                const diagramNodeMeta = buildDiagramNodeMetaMap(docDj);
-                const diagramClusterMeta = buildDiagramClusterMetaMap(docDj);
-                const diagramEdgeMeta = buildDiagramEdgeMetaMap(docDj);
-                
-                // Build links for children and from diagram click statements
+
+                const jdoc = MODULE_JSON_DOCS[key];
+                if (!jdoc) {
+                    console.error('[viewer] missing module JSON for tree key:', key);
+                    continue;
+                }
+
+                const documentation =
+                    '# ' +
+                    (jdoc.title || formattedName) +
+                    '\n\n' +
+                    (jdoc.summary != null ? String(jdoc.summary).trim() : '');
+
+                let structuredDiagram = null;
+                if (jdoc.diagram && typeof jdoc.diagram === 'object' && Array.isArray(jdoc.diagram.nodes)) {
+                    structuredDiagram = jdoc.diagram;
+                } else if (
+                    data.diagram &&
+                    typeof data.diagram === 'object' &&
+                    Array.isArray(data.diagram.nodes)
+                ) {
+                    structuredDiagram = data.diagram;
+                }
+
+                let diagram = '';
+                if (structuredDiagram && typeof convertDiagramToMermaid === 'function') {
+                    try {
+                        diagram = convertDiagramToMermaid(structuredDiagram) || '';
+                    } catch (e) {
+                        diagram = '';
+                    }
+                }
+                if (!diagram) {
+                    diagram = generateModuleDiagram(key, data);
+                }
+
+                const diagramNodeMeta = buildDiagramNodeMetaMap(structuredDiagram);
+                const diagramClusterMeta = buildDiagramClusterMetaMap(structuredDiagram);
+                const diagramEdgeMeta = buildDiagramEdgeMetaMap(structuredDiagram);
+
                 const links = {};
                 if (data.children) {
                     for (const [childKey, childData] of Object.entries(data.children)) {
@@ -4274,19 +4276,14 @@
                         links[childFormattedName] = childKey;
                     }
                 }
-                
-                // Parse click statements from extracted diagram
-                if (extractedDiagram) {
-                    const clickRegex = /click\s+(\w+)\s+"([^"]+)"/g;
-                    let match;
-                    while ((match = clickRegex.exec(extractedDiagram)) !== null) {
-                        const nodeId = match[1];
-                        const targetFile = match[2];
-                        const targetModuleId = targetFile.replace('.md', '');
-                        links[nodeId] = targetModuleId;
+                if (structuredDiagram && Array.isArray(structuredDiagram.nodes)) {
+                    for (const n of structuredDiagram.nodes) {
+                        if (!n || !n.id) continue;
+                        const lid = moduleDocLinkToModuleId(n.link);
+                        if (lid) links[n.id] = lid;
                     }
                 }
-                
+
                 moduleData[key] = {
                     name: formattedName,
                     diagram: stripClickStatements(diagram),
@@ -4296,15 +4293,9 @@
                     diagramNodeMeta,
                     diagramClusterMeta,
                     diagramEdgeMeta,
-                    structuredDiagram:
-                        data.diagram &&
-                        typeof data.diagram === 'object' &&
-                        Array.isArray(data.diagram.nodes)
-                            ? data.diagram
-                            : null,
+                    structuredDiagram: structuredDiagram,
                 };
-                
-                // Recursively process children
+
                 if (data.children && Object.keys(data.children).length > 0) {
                     buildModulesFromTree(data.children, moduleId);
                 }
@@ -5224,7 +5215,7 @@
                     if (u) dm = diagramNodeMeta[u] || null;
                 }
                 let tooltipTitle = dm?.title || '';
-                // One source for body: linked module → opening prose from that *.md only. No module_tree.description, no chains.
+                // One source for body: linked module → summary from that module's JSON only.
                 let tooltipDesc = '';
                 if (targetModule) {
                     tooltipDesc = moduleIntroFromDocsContent(targetModule) || '';
@@ -6579,7 +6570,7 @@
                     <p><strong>Failed to load repository data</strong></p>
                     <p>Path tried: <code>${basePath}</code></p>
                     <p>Serve this app from the <strong>demo</strong> folder (e.g. <code>cd demo && python -m http.server 8080</code>) so that <code>index.html</code> and <code>repos/</code> are at the same level.</p>
-                    <p>Then open: <a href="?repo=crewai">/?repo=crewai</a> or pick a repo from the dropdown.</p>
+                    <p>Each repo must include <code>overview.json</code> and one <code>&lt;module&gt;.json</code> per <code>module_tree.json</code> entry. Try <a href="?repo=crewai">/?repo=crewai</a> or pick a repo from the dropdown.</p>
                     <p>Available repos: ${repoList || '—'}</p>
                 </div>`;
                 document.getElementById('mermaid-diagram').innerHTML = errHtml;

@@ -1,0 +1,223 @@
+{
+  "title": "Base LM and Core Clients",
+  "summary": "This module defines the abstract base class for Language Models (`BaseLM`) and provides core client functionalities, including flexible caching mechanisms (disk and memory) and configuration for LiteLLM logging. It enables robust integration with various LLM providers and efficient management of LLM interactions.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "configure_cache",
+        "label": "Configure Cache",
+        "type": "component",
+        "link": null,
+        "title": "Configure DSPy Cache",
+        "description": "Sets up the global DSPy cache with specified disk and memory caching options, including size limits and pickle restrictions for security."
+      },
+      {
+        "id": "get_dspy_cache",
+        "label": "Initialize DSPy Cache",
+        "type": "component",
+        "link": null,
+        "title": "Initialize DSPy Cache",
+        "description": "Retrieves or initializes the DSPy cache, falling back to a memory-only cache if disk initialization fails. Uses environment variables for configuration."
+      },
+      {
+        "id": "enable_litellm_logging",
+        "label": "Enable LiteLLM Logging",
+        "type": "component",
+        "link": null,
+        "title": "Enable LiteLLM Debug Logging",
+        "description": "Activates detailed debug logging for LiteLLM interactions within DSPy, providing verbose output for troubleshooting and monitoring."
+      },
+      {
+        "id": "disable_litellm_logging",
+        "label": "Disable LiteLLM Logging",
+        "type": "component",
+        "link": null,
+        "title": "Disable LiteLLM Debug Logging",
+        "description": "Deactivates detailed debug logging for LiteLLM interactions, setting the log level to error to reduce verbosity."
+      },
+      {
+        "id": "BaseLM",
+        "label": "Base Language Model",
+        "type": "component",
+        "link": null,
+        "title": "Base Language Model Class",
+        "description": "Abstract base class for all Language Models in DSPy, defining the interface for LLM calls, history management, and response processing. Subclasses must implement forward and aforward methods."
+      },
+      {
+        "id": "sync_wrapper",
+        "label": "Synchronous Cache Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Cache Decorator",
+        "description": "A decorator that wraps synchronous function calls to enable caching. It checks the cache before execution and stores results after to optimize performance."
+      },
+      {
+        "id": "async_wrapper",
+        "label": "Asynchronous Cache Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Cache Decorator",
+        "description": "A decorator that wraps asynchronous function calls to enable caching. It checks the cache before execution and stores results after to optimize performance."
+      },
+      {
+        "id": "RestrictedDisk",
+        "label": "Restricted Disk Storage",
+        "type": "component",
+        "link": null,
+        "title": "Secure Disk Serialization",
+        "description": "A specialized disk storage class that enforces restricted pickle deserialization for security when loading cached data, preventing arbitrary code execution."
+      },
+      {
+        "id": "dspy_cache_instance",
+        "label": "DSPy Global Cache",
+        "type": "external",
+        "link": null,
+        "title": "Global Cache Instance",
+        "description": "The central cache instance used by DSPy for storing and retrieving LLM responses to optimize performance and reduce redundant API calls."
+      },
+      {
+        "id": "litellm_client",
+        "label": "LiteLLM Client",
+        "type": "external",
+        "link": "lm_completion_and_embedding",
+        "title": "LiteLLM Integration",
+        "description": "An external client library used for interacting with various Language Model APIs, providing a unified interface for DSPy's LLM completion and embedding modules."
+      },
+      {
+        "id": "dspy_settings",
+        "label": "DSPy Global Settings",
+        "type": "external",
+        "link": null,
+        "title": "DSPy Configuration Settings",
+        "description": "Global configuration settings for DSPy, including options for history management, caching behavior, and other operational parameters."
+      },
+      {
+        "id": "lm_completion_and_embedding",
+        "label": "LM Completion & Embedding",
+        "type": "external",
+        "link": "lm_completion_and_embedding",
+        "title": "LM Completion & Embedding Module",
+        "description": "Module responsible for handling the actual LLM completion and embedding calls, often leveraging the LiteLLM client for diverse provider support."
+      }
+    ],
+    "edges": [
+      {
+        "source": "configure_cache",
+        "target": "dspy_cache_instance",
+        "label": "Configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_dspy_cache",
+        "target": "dspy_cache_instance",
+        "label": "Initializes/Retrieves",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enable_litellm_logging",
+        "target": "litellm_client",
+        "label": "Configures logging for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "disable_litellm_logging",
+        "target": "litellm_client",
+        "label": "Configures logging for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLM",
+        "target": "sync_wrapper",
+        "label": "Uses for synchronous calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLM",
+        "target": "async_wrapper",
+        "label": "Uses for asynchronous calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_wrapper",
+        "target": "dspy_cache_instance",
+        "label": "Accesses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_wrapper",
+        "target": "dspy_cache_instance",
+        "label": "Accesses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_cache_instance",
+        "target": "RestrictedDisk",
+        "label": "Utilizes for disk storage",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLM",
+        "target": "dspy_settings",
+        "label": "Reads history settings from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLM",
+        "target": "lm_completion_and_embedding",
+        "label": "Delegates actual LLM calls to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cache_management",
+        "label": "Cache Management",
+        "nodes": [
+          "configure_cache",
+          "get_dspy_cache",
+          "sync_wrapper",
+          "async_wrapper",
+          "RestrictedDisk",
+          "dspy_cache_instance"
+        ],
+        "title": "DSPy Cache Management",
+        "description": "Handles the configuration, initialization, and operational aspects of DSPy's caching system, including both in-memory and disk-based storage with security features.",
+        "role": "data"
+      },
+      {
+        "id": "language_model_core",
+        "label": "Language Model Core",
+        "nodes": [
+          "BaseLM"
+        ],
+        "title": "Core Language Model Abstraction",
+        "description": "Provides the foundational abstract class for all Language Models within DSPy, defining the common interface and lifecycle for interacting with LLM providers.",
+        "role": "generative"
+      },
+      {
+        "id": "litellm_logging",
+        "label": "LiteLLM Logging",
+        "nodes": [
+          "enable_litellm_logging",
+          "disable_litellm_logging",
+          "litellm_client"
+        ],
+        "title": "LiteLLM Logging Configuration",
+        "description": "Manages the enabling and disabling of detailed logging for the LiteLLM client, which is used for interacting with various LLM APIs.",
+        "role": "surface"
+      }
+    ]
+  }
+}

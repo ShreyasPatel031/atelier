@@ -158,8 +158,23 @@ class ConfigManager:
         if self._config is None:
             return False
         
-        # Check if API key is set
-        if self.get_api_key() is None:
+        # Accept ADC (Vertex AI mode) as valid credentials even without an API key
+        use_vertex = bool(getattr(self._config, 'use_vertex_ai', False))
+        if use_vertex:
+            try:
+                import google.auth
+                import google.auth.transport.requests
+                creds, _ = google.auth.default(
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"]
+                )
+                creds.refresh(google.auth.transport.requests.Request())
+                if creds.token:
+                    return self._config.is_complete()
+            except Exception:
+                pass
+        
+        # Fall back to API key check
+        if not self.get_api_key():
             return False
         
         # Check if config is complete

@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 from pydantic_ai import RunContext, Tool
 
 from .deps import CodeWikiDeps
-from ..utils import validate_mermaid_diagrams
 
 
 # There are some super strange "ascii can't decode x" errors,
@@ -476,6 +475,8 @@ class EditTool:
         if not path.parent.exists():
             self.logs.append(f"The parent directory {self._get_display_path(path.parent)} does not exist. Please create it first.")
             return
+        if path.suffix == ".md":
+            path = path.with_suffix(".json")
         # Unescape literal \n and \t that LLMs sometimes output
         file_text = file_text.replace('\\n', '\n').replace('\\t', '\t')
         self.write_file(path, file_text)
@@ -790,7 +791,7 @@ async def str_replace_editor(
     Args:
         working_dir: The working directory to use. Choose `repo` to work with the repository files, or `docs` to work with the generated documentation files.
         command: The command to run. Allowed options are: `view`, `create`, `str_replace`, `insert`, `undo_edit`.
-        path: Path to file or directory, e.g. `./chat_core.md` or `./agents/`
+        path: Path to file or directory, e.g. `./chat_core.json` or `./agents/`
         file_text: Required parameter of `create` command, with the content of the file to be created.
         view_range: Optional parameter of `view` command when `path` points to a file. If none is given, the full file is shown. If provided, the file will be shown in the indicated line number range, e.g. [11, 12] will show lines 11 and 12. Indexing at 1 to start. Setting `[start_line, -1]` shows all lines from `start_line` to the end of the file.
         old_str: Required parameter of `str_replace` command containing the string in `path` to replace.
@@ -819,10 +820,6 @@ async def str_replace_editor(
     )
 
     result = "\n".join(tool.logs)
-
-    if command != "view" and path.endswith(".md"):
-        mermaid_validation = await validate_mermaid_diagrams(absolute_path, path)
-        result = result + "\n---------- Mermaid validation ----------\n" + mermaid_validation
 
     return result
 

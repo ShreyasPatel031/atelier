@@ -257,6 +257,8 @@ def generate_command(
                 'cluster_model': config.cluster_model,
                 'base_url': config.base_url,
                 'api_key': api_key,
+                'use_vertex_ai': getattr(config, 'use_vertex_ai', False),
+                'gcp_project': getattr(config, 'gcp_project', ''),
             },
             verbose=verbose,
             generate_html=github_pages,

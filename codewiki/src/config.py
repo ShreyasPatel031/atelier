@@ -17,7 +17,18 @@ DEPENDENCY_GRAPHS_DIR = 'dependency_graphs'
 DOCS_DIR = 'docs'
 FIRST_MODULE_TREE_FILENAME = 'first_module_tree.json'
 MODULE_TREE_FILENAME = 'module_tree.json'
-OVERVIEW_FILENAME = 'overview.md'
+OVERVIEW_FILENAME = 'overview.json'
+MODULE_DOC_EXT = '.json'
+
+
+def module_doc_filename(stem: str) -> str:
+    """Per-module documentation filename (e.g. ``user_auth.json``)."""
+    return f"{stem}{MODULE_DOC_EXT}"
+
+
+def module_doc_path(docs_dir: os.PathLike | str, stem: str) -> Path:
+    """Absolute path to a module's JSON documentation file."""
+    return Path(docs_dir) / module_doc_filename(stem)
 
 # =============================================================================
 # CONSOLIDATED THRESHOLDS - All size/token limits in one place
@@ -131,6 +142,9 @@ class Config:
     main_model: str
     cluster_model: str
     fallback_model: str = FALLBACK_MODEL_1
+    # Google Cloud / Vertex AI ADC mode (no expiring API key)
+    use_vertex_ai: bool = False
+    gcp_project: str = ""
     
     @classmethod
     def from_args(cls, args: argparse.Namespace) -> 'Config':
@@ -160,7 +174,9 @@ class Config:
         llm_api_key: str,
         main_model: str,
         cluster_model: str,
-        fallback_model: str = FALLBACK_MODEL_1
+        fallback_model: str = FALLBACK_MODEL_1,
+        use_vertex_ai: bool = False,
+        gcp_project: str = "",
     ) -> 'Config':
         """
         Create configuration for CLI context.
@@ -190,5 +206,7 @@ class Config:
             llm_api_key=llm_api_key,
             main_model=main_model,
             cluster_model=cluster_model,
-            fallback_model=fallback_model
+            fallback_model=fallback_model,
+            use_vertex_ai=use_vertex_ai,
+            gcp_project=gcp_project,
         )

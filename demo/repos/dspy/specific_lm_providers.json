@@ -1,0 +1,195 @@
+{
+  "title": "Specific LM Providers",
+  "summary": "This module provides concrete implementations for managing and interacting with specific language model providers, including Databricks, local SGLang servers, and OpenAI, for tasks like finetuning and deployment.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "databricks_provider",
+        "label": "Manage Databricks Models",
+        "type": "component",
+        "link": null,
+        "title": "DatabricksProvider",
+        "description": "Handles finetuning, deployment, and data upload for models hosted on Databricks, interacting with Databricks APIs for model serving and training."
+      },
+      {
+        "id": "databricks_training_job",
+        "label": "Track Databricks Finetuning Job",
+        "type": "component",
+        "link": null,
+        "title": "TrainingJobDatabricks",
+        "description": "Represents and monitors the status of a finetuning job specifically on the Databricks platform, querying its progress and state."
+      },
+      {
+        "id": "local_provider",
+        "label": "Manage Local SGLang Models",
+        "type": "component",
+        "link": null,
+        "title": "LocalProvider",
+        "description": "Provides functionality to launch, manage, and finetune local language models using SGLang servers, including process control and data preparation."
+      },
+      {
+        "id": "tokenize_func",
+        "label": "Tokenize Data for SFT",
+        "type": "component",
+        "link": null,
+        "title": "tokenize_function",
+        "description": "A helper function used to tokenize training examples, preparing them for Supervised Fine-Tuning (SFT) of local language models."
+      },
+      {
+        "id": "openai_training_job",
+        "label": "Track OpenAI Finetuning Job",
+        "type": "component",
+        "link": null,
+        "title": "TrainingJobOpenAI",
+        "description": "Manages and tracks the lifecycle of finetuning jobs on the OpenAI platform, including capabilities for cancellation and status checks."
+      },
+      {
+        "id": "base_lm",
+        "label": "Base Language Model Interface",
+        "type": "external",
+        "link": "base_lm_and_core_clients",
+        "title": "BaseLM",
+        "description": "The foundational interface for all language models in DSPy, defining common methods and properties that providers must implement."
+      },
+      {
+        "id": "training_job_base",
+        "label": "Base Training Job Interface",
+        "type": "external",
+        "link": null,
+        "title": "TrainingJob",
+        "description": "An abstract base class for managing and tracking the status of finetuning jobs across different language model providers."
+      },
+      {
+        "id": "databricks_api",
+        "label": "Databricks Platform API",
+        "type": "external",
+        "link": null,
+        "title": "Databricks API",
+        "description": "External API for interacting with Databricks services, including model serving endpoint management, finetuning, and data storage."
+      },
+      {
+        "id": "sglang_server",
+        "label": "Local SGLang Inference Server",
+        "type": "external",
+        "link": null,
+        "title": "SGLang Server",
+        "description": "A local server powered by SGLang, used for efficient inference and serving of local language models."
+      },
+      {
+        "id": "openai_api",
+        "label": "OpenAI Platform API",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI API",
+        "description": "External API for interacting with OpenAI services, specifically for managing finetuning jobs and associated files."
+      }
+    ],
+    "edges": [
+      {
+        "source": "databricks_provider",
+        "target": "databricks_api",
+        "label": "Deploys & Finetunes Models",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "databricks_provider",
+        "target": "databricks_training_job",
+        "label": "Manages Job Status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "databricks_training_job",
+        "target": "databricks_api",
+        "label": "Queries Job Status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "local_provider",
+        "target": "sglang_server",
+        "label": "Launches & Manages Server",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "local_provider",
+        "target": "tokenize_func",
+        "label": "Uses for Data Prep",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_training_job",
+        "target": "openai_api",
+        "label": "Manages & Queries Job",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "databricks_provider",
+        "target": "base_lm",
+        "label": "Implements Provider For",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "local_provider",
+        "target": "base_lm",
+        "label": "Implements Provider For",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "databricks_training_job",
+        "target": "training_job_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_training_job",
+        "target": "training_job_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_providers",
+        "label": "Surface Providers",
+        "nodes": [
+          "databricks_provider",
+          "local_provider"
+        ],
+        "title": "LM Provider Interfaces",
+        "description": "These components serve as the primary interfaces for interacting with different language model platforms.",
+        "role": "surface"
+      },
+      {
+        "id": "data_preparation",
+        "label": "Data Preparation",
+        "nodes": [
+          "tokenize_func"
+        ],
+        "title": "Data Processing Helpers",
+        "description": "Components involved in preparing data for finetuning processes.",
+        "role": "data"
+      },
+      {
+        "id": "training_job_management",
+        "label": "Training Job Management",
+        "nodes": [
+          "databricks_training_job",
+          "openai_training_job"
+        ],
+        "title": "Finetuning Job Trackers",
+        "description": "These components manage and track the status of finetuning jobs on specific platforms.",
+        "role": "generative"
+      }
+    ]
+  }
+}

@@ -1,6 +1,20 @@
+from codewiki.src.be.diagram_ir_validator import RULES_FOR_PROMPT
+
+# Shown in module / leaf / overview agent prompts — keep in sync with demo viewer hover UI.
+HOVER_COPY_GUIDELINES = """
+<HOVER_COPY_GUIDELINES>
+`title` and `description` on every `nodes[]` and `groups[]` entry are shown in **narrow hover panels** in the web viewer. Write them so the UI stays readable:
+
+- **`title`**: Short heading, **≤56 characters** recommended (hard avoid going much past ~72). Plain language; no stacked jargon; no trailing punctuation dumps.
+- **`description`**: **Target ~120–320 characters** (about **2–4 tight sentences**). **Do not exceed ~400 characters** — put depth in the markdown body, not in JSON. No bullet lists, Markdown, or code fences inside `description`; no stack traces or long file paths — summarize in prose.
+- **`nodes[].label`**: Short on-canvas phrase; keep long explanations in `description` (still bounded as above).
+</HOVER_COPY_GUIDELINES>
+""".strip()
+
 # Single block: swap this string to change diagram-language instructions (e.g. non-Mermaid).
 # ALL Mermaid-specific syntax, types, keywords, fencing, colors, shapes, and examples
 # live here so a migration to another diagram format only touches this one constant.
+# NOT concatenated into agent prompts — only used by Stage 4.6 (doc_file_sync) for legacy repair.
 DIAGRAM_SYNTAX_RULES_SECTION = """
 <DIAGRAM_SYNTAX_RULES>
 **Diagram language:** Mermaid (replace this entire block if you change diagram format.)
@@ -82,7 +96,7 @@ DIAGRAM_SYNTAX_RULES_SECTION = """
 - Edge labels must be on the **same line** as the arrow — do not break an edge statement across multiple lines.
 - For edge labels with special characters, use quoted edge text: `A -->|"label with (parens)"| B`.
 
-**Click statements:** `click nodeId "file.md"` (optional tooltip `"View …"`). No stray spaces.
+**Click statements:** `click nodeId "module_id"` (optional tooltip `"View …"`). No stray spaces.
 
 **Colors (semantic — apply classDef and class statements):**
 - classDef userNode fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
@@ -139,8 +153,8 @@ flowchart LR
     class docs,index data
     class parser,validator analytical
 
-    click viewer "user_interface.md" "View UI Module"
-    click search "search.md" "View Search Module"
+    click viewer "user_interface" "View UI Module"
+    click search "search" "View Search Module"
 ```
 Note: `parser["Parse Input (Streaming)"]` and `validator["validate_schema()"]` use quoted brackets because their labels contain parentheses.
 
@@ -158,25 +172,26 @@ Output ONLY the corrected Mermaid diagram body: no markdown fences, no explanati
 
 SYSTEM_PROMPT = """
 <ROLE>
-You are an AI documentation assistant. Generate a concise module overview with an architecture diagram. The output is displayed in an interactive viewer — users navigate via diagrams, not prose.
+You are an AI documentation assistant. Generate a concise module overview with an architecture diagram as a JSON file. The output is displayed in an interactive React Flow viewer — users navigate via diagrams, not prose.
 </ROLE>
 
 <OUTPUT_FORMAT>
-Create `{module_name}.md` with ONLY these sections — nothing else:
+Create `{module_name}.json` containing a JSON object with exactly these keys:
+- "title": A short human-readable title (2-6 words)
+- "summary": 1-2 sentences (~200 characters) summarizing what this module does
+- "diagram": An object with keys "direction", "nodes", "edges", "groups"
 
-1. `# Title` — a short human-readable title
-2. One paragraph (~200 characters, 1-2 sentences) summarizing what this module does. This is shown as hover text in the viewer.
-3. `<!-- DIAGRAM_JSON ... -->` block (MANDATORY — see format below)
-4. A matching ` ```mermaid ``` ` diagram
-
-Do NOT write `## Architecture`, `## Key Components`, `## Usage`, code examples, or any narrative sections. The viewer only uses the summary paragraph and diagram.
 </OUTPUT_FORMAT>
 
 <WORKFLOW>
-1. Analyze the provided code components and module structure
+1. Analyze the provided code components and decide how to split them into sub-modules
 
-2. **MANDATORY: Create sub-modules using `generate_sub_module_documentation`**
-   - If you have 3+ components, you MUST create at least 2 sub-modules
+2. **IMMEDIATELY create `{module_name}.json`** with title + summary + diagram
+   - Do this FIRST, BEFORE calling generate_sub_module_documentation
+   - Your diagram nodes should reference the sub-modules you plan to create
+   - Each sub-module node: `"type": "module"`, `"link": "sub_module_name"`
+
+3. Call `generate_sub_module_documentation` to create the sub-modules
    - Group related components together based on functionality
    - Format:
    ```
@@ -189,34 +204,33 @@ Do NOT write `## Architecture`, `## Key Components`, `## Usage`, code examples, 
    }})
    ```
 
-3. Create `{module_name}.md` with title + summary + DIAGRAM_JSON + mermaid (nothing else)
-
-4. FINAL CHECK: Every sub-module key MUST appear as a node in your DIAGRAM_JSON
+4. CRITICAL: You MUST create `{module_name}.json` in step 2. If you skip it, the module has no documentation.
 </WORKFLOW>
 
-<DIAGRAM_JSON_FORMAT>
-MANDATORY — add this block in `{module_name}.md`:
-```
-<!-- DIAGRAM_JSON
+<JSON_FORMAT>
+MANDATORY — the JSON file content must be:
 {{
-    "direction": "TD",
-    "nodes": [
-        {{"id": "request_handling", "label": "Handle Incoming Requests", "type": "module", "link": "request_handling.md"}},
-        {{"id": "data_processing", "label": "Process and Transform Data", "type": "module", "link": "data_processing.md"}}
-    ],
-    "edges": [
-        {{"source": "request_handling", "target": "data_processing", "label": "validated input"}}
-    ],
-    "groups": [
-        {{"id": "intake", "label": "Intake", "role": "surface", "nodes": ["request_handling"]}},
-        {{"id": "core", "label": "Core Logic", "role": "analytical", "nodes": ["data_processing"]}}
-    ]
+    "title": "Short Module Title",
+    "summary": "One or two sentences describing what this module does.",
+    "diagram": {{
+        "direction": "TD",
+        "nodes": [
+            {{"id": "request_handling", "label": "Handle Incoming Requests", "type": "module", "link": "request_handling", "title": "Request handling", "description": "Accepts and routes incoming work into the module's pipeline."}},
+            {{"id": "data_processing", "label": "Process and Transform Data", "type": "module", "link": "data_processing", "title": "Data processing", "description": "Transforms validated inputs into outputs used by the rest of the system."}}
+        ],
+        "edges": [
+            {{"source": "request_handling", "target": "data_processing", "label": "validated input"}}
+        ],
+        "groups": [
+            {{"id": "intake", "label": "Intake", "title": "Intake surface", "description": "User-facing entry points and adapters that bring data into the module.", "role": "surface", "nodes": ["request_handling"]}},
+            {{"id": "core", "label": "Core Logic", "title": "Core logic", "description": "Internal computation and orchestration shared by sub-modules.", "role": "analytical", "nodes": ["data_processing"]}}
+        ]
+    }}
 }}
--->
-```
 
 Node types: "module" (sub-module with docs), "external" (dependency outside this module)
 Group roles: "surface" (blue), "generative" (orange), "analytical" (purple), "data" (green)
+Link format: just the module name — e.g. "link": "request_handling"
 
 GROUPS INTEGRITY (CRITICAL): Every id you list in `groups[].nodes[]` MUST exactly match an `"id"` field in your `nodes[]` array.
 Never emit a group with `"nodes": []` — if you cannot populate a group with at least one valid node id, omit that group entirely.
@@ -225,39 +239,31 @@ EDGE INTEGRITY: Every `edges[].source` and `edges[].target` MUST be an `"id"` fr
 
 ID UNIQUENESS: No string may appear as both a `nodes[].id` and a `groups[].id` (layout engines treat these as separate namespaces; collisions break rendering).
 
-After DIAGRAM_JSON, include matching Mermaid:
-```mermaid
-flowchart TD
-    subgraph intake["Intake"]
-        request_handling["Handle Incoming Requests"]
-    end
-    subgraph core["Core Logic"]
-        data_processing["Process and Transform Data"]
-    end
-    request_handling -->|"validated input"| data_processing
-    click request_handling "request_handling.md"
-    click data_processing "data_processing.md"
-```
-</DIAGRAM_JSON_FORMAT>
+NODE LABELS: Every `nodes[].label` must be a human-readable phrase rendered on-screen — never CamelCase class names or using `id` as the label.
+
+TOOLTIP FIELDS (MANDATORY): Every `nodes[]` object MUST include non-empty `title` and `description`. Every `groups[]` object MUST include non-empty `title` and `description`. Follow `<HOVER_COPY_GUIDELINES>` for length and tone.
+</JSON_FORMAT>
 
 <DIAGRAM_DESIGN_RULES>
-1. GROUPING: Organize nodes into subgraphs by functional role. Max 5 nodes per group.
+1. GROUPING: Organize nodes into groups by functional role. Max 5 nodes per group.
    Every group's `"nodes"` must be a non-empty list of ids that exist verbatim in your `nodes[]` array. Omit any group you cannot populate.
 2. NODE LABELS: Describe what happens, NOT class/file names. Good: "Parse source files". Bad: "DependencyParser".
-3. CONNECTIONS: Every arrow MUST have a label. Use ==> for primary flow, --> for normal, -.-> for references.
+   Put that phrase in every `nodes[].label` — never CamelCase or slug-as-label.
+3. CONNECTIONS: Every edge MUST have a label describing what flows between the nodes.
 4. CROSS-MODULE LINKS: Include dependencies on modules outside your siblings as external nodes.
+5. TOOLTIPS: Every node and every group MUST include non-empty `title` and `description`. Obey `<HOVER_COPY_GUIDELINES>` so hover text is not unusably long.
 </DIAGRAM_DESIGN_RULES>
 
-""" + DIAGRAM_SYNTAX_RULES_SECTION + """
+""" + "\n" + HOVER_COPY_GUIDELINES + "\n" + RULES_FOR_PROMPT + """
 
 <NAMING_RULES>
 - All names use lowercase_with_underscores: `user_auth`, NOT `UserAuth` or `user-auth`
-- Click statements: `click node_id "module_name.md"` — filename must match sub-module name exactly
+- Link values must match sub-module name exactly (no extension): `"link": "module_name"`
 - NEVER create a sub-module with the same name as the current module
 </NAMING_RULES>
 
 <AVAILABLE_TOOLS>
-- `str_replace_editor`: Create and edit documentation files
+- `str_replace_editor`: Create and edit documentation files (.json only)
 - `read_code_components`: Explore code dependencies not in the provided components
 - `generate_sub_module_documentation`: Create sub-module documentation via sub-agents
 </AVAILABLE_TOOLS>
@@ -265,98 +271,110 @@ flowchart TD
 
 LEAF_SYSTEM_PROMPT = """
 <ROLE>
-You are an AI documentation assistant. Generate a concise module overview with an architecture diagram. The output is displayed in an interactive viewer — users navigate via diagrams, not prose.
+You are an AI documentation assistant. Generate a concise module overview with an architecture diagram as a JSON file. The output is displayed in an interactive React Flow viewer.
 </ROLE>
 
 <OUTPUT_FORMAT>
-Create `{module_name}.md` with ONLY these sections — nothing else:
+Create `{module_name}.json` containing a JSON object with exactly these keys:
+- "title": A short human-readable title (2-6 words)
+- "summary": 1-2 sentences (~200 characters) summarizing what this module does
+- "diagram": An object with keys "direction", "nodes", "edges", "groups"
 
-1. `# Title` — a short human-readable title
-2. One paragraph (~200 characters, 1-2 sentences) summarizing what this module does. This is shown as hover text in the viewer.
-3. `<!-- DIAGRAM_JSON ... -->` block (MANDATORY — see format below)
-4. A matching ` ```mermaid ``` ` diagram
-
-Do NOT write `## Architecture`, `## Key Components`, `## Usage`, code examples, or any narrative sections. The viewer only uses the summary paragraph and diagram.
 </OUTPUT_FORMAT>
 
-<DIAGRAM_JSON_FORMAT>
-MANDATORY — you MUST include this block in `{module_name}.md`:
-
-<!-- DIAGRAM_JSON
+<JSON_FORMAT>
 {{
-    "direction": "TD",
-    "nodes": [
-        {{"id": "parse_input", "label": "Parse Incoming Data", "type": "component", "link": null}},
-        {{"id": "validate", "label": "Validate Against Schema", "type": "component", "link": null}},
-        {{"id": "config", "label": "Configuration Module", "type": "external", "link": "config.md"}}
-    ],
-    "edges": [
-        {{"source": "parse_input", "target": "validate", "label": "raw data"}},
-        {{"source": "validate", "target": "config", "label": "reads schema from"}}
-    ],
-    "groups": [
-        {{"id": "data_flow", "label": "Data Pipeline", "role": "analytical", "nodes": ["parse_input", "validate"]}}
-    ]
+    "title": "Short Module Title",
+    "summary": "One or two sentences describing what this module does.",
+    "diagram": {{
+        "direction": "TD",
+        "nodes": [
+            {{"id": "parse_input", "label": "Parse Incoming Data", "type": "component", "link": null, "title": "Parse input", "description": "Reads raw payloads and turns them into structured records for validation."}},
+            {{"id": "validate", "label": "Validate Against Schema", "type": "component", "link": null, "title": "Validate", "description": "Checks structured data against schemas before downstream use."}},
+            {{"id": "config", "label": "Configuration Module", "type": "external", "link": "config", "title": "Configuration", "description": "External module that owns shared settings consumed by this leaf."}}
+        ],
+        "edges": [
+            {{"source": "parse_input", "target": "validate", "label": "raw data"}},
+            {{"source": "validate", "target": "config", "label": "reads schema from"}}
+        ],
+        "groups": [
+            {{"id": "data_flow", "label": "Data Pipeline", "title": "Data pipeline", "description": "Internal steps that move data from parse to validation inside this module.", "role": "analytical", "nodes": ["parse_input", "validate"]}}
+        ]
+    }}
 }}
--->
 
 Node types: "component" (internal, not clickable), "external" (links to other module docs)
 Group roles: "surface" (blue), "generative" (orange), "analytical" (purple), "data" (green)
+Link format: just the module name — e.g. "link": "config"
 
-GROUPS INTEGRITY (CRITICAL): Every id you list in `groups[].nodes[]` MUST exactly match an `"id"` field in your `nodes[]` array.
-Never emit a group with `"nodes": []` — if you cannot populate a group with at least one valid node id, omit that group entirely.
-
-EDGE INTEGRITY: Every `edges[].source` and `edges[].target` MUST be an `"id"` from `nodes[]`. Never use a group/subgraph id as an edge endpoint — connect actual nodes only.
-
-ID UNIQUENESS: No string may appear as both a `nodes[].id` and a `groups[].id` (layout engines treat these as separate namespaces; collisions break rendering).
-
-After DIAGRAM_JSON, include matching Mermaid:
-```mermaid
-flowchart TD
-    subgraph pipeline["Data Pipeline"]
-        parse_input["Parse Incoming Data"]
-        validate["Validate Against Schema (Pydantic)"]
-    end
-    config["Configuration Module"]
-    parse_input -->|"raw data"| validate
-    validate -.->|"reads schema from"| config
-```
-</DIAGRAM_JSON_FORMAT>
+GROUPS INTEGRITY: Every id in `groups[].nodes[]` MUST match a `nodes[].id`. No empty groups.
+EDGE INTEGRITY: Every edge source/target must be a node id. No group ids as endpoints.
+ID UNIQUENESS: No string may appear as both a node id and a group id.
+NODE LABELS: Human-readable phrases only — never CamelCase or id-as-label.
+TOOLTIP FIELDS: Every node and group MUST have non-empty `title` and `description`.
+</JSON_FORMAT>
 
 <DIAGRAM_DESIGN_RULES>
-1. NODE LABELS: Describe what happens, NOT class/file names. Good: "Parse incoming data". Bad: "DataParser".
-   If label has parentheses, MUST quote: `node["func()"]`
-2. CONNECTIONS: Every arrow MUST have a label. Use ==> for primary flow, --> for normal, -.-> for references.
+1. NODE LABELS: Describe what happens, NOT class/file names.
+2. CONNECTIONS: Every edge MUST have a label describing what flows.
 3. CROSS-MODULE LINKS: Include dependencies on other modules as external nodes with links.
+4. TOOLTIPS: Follow `<HOVER_COPY_GUIDELINES>` for length and tone.
 </DIAGRAM_DESIGN_RULES>
 
-""" + DIAGRAM_SYNTAX_RULES_SECTION + """
-
 <NAMING_RULES>
-- All names use lowercase_with_underscores: `user_auth`, NOT `UserAuth`
-- Click statements: filename must match module name exactly + .md
+- Link values must match module name exactly (no extension): `"link": "module_name"`
 - NEVER create a sub-module with the same name as the current module
 </NAMING_RULES>
 
 <WORKFLOW>
 1. Analyze provided code components and module structure
 2. Explore dependencies between components if needed
-3. Generate `{module_name}.md` with title + summary + DIAGRAM_JSON + mermaid (nothing else)
+3. Create `{module_name}.json` with the JSON object
 </WORKFLOW>
 
 <AVAILABLE_TOOLS>
-- `str_replace_editor`: Create and edit documentation files
+- `str_replace_editor`: Create and edit documentation files (.json only)
 - `read_code_components`: Explore code dependencies not in the provided components
 </AVAILABLE_TOOLS>
+""" + "\n" + HOVER_COPY_GUIDELINES + "\n" + RULES_FOR_PROMPT
+
+# --- JSON-mode prompt for leaf modules (no tools, guaranteed structured output) ---
+LEAF_JSON_SYSTEM_PROMPT = """You are an AI documentation assistant. You analyze code components and produce a structured JSON object describing a module.
+
+Return a single JSON object with exactly these keys:
+- "title": A short human-readable title (2-6 words)
+- "summary": 1-2 sentences (~200 characters) summarizing what this module does
+- "diagram": An object with keys "direction", "nodes", "edges", "groups"
+
+Diagram rules:
+- "direction": "TD" or "LR"
+- "nodes": array of {{"id": str, "label": str, "type": "component"|"external", "link": null|"other_module", "title": str (<=56 chars), "description": str (120-320 chars)}}
+- "edges": array of {{"source": str, "target": str, "label": str}} — source/target must be node ids
+- "groups": array of {{"id": str, "label": str, "title": str, "description": str, "role": "surface"|"generative"|"analytical"|"data", "nodes": [node_ids]}}
+- Every group.nodes[] id must exist in nodes[].id. Every edge source/target must exist in nodes[].id.
+- Node labels: describe what happens, NOT class names. Good: "Parse Incoming Data". Bad: "DataParser".
+- No id may appear as both a node id and a group id.
+- Omit groups you cannot populate with at least one valid node.
 """.strip()
 
-USER_PROMPT = """
-Generate a diagram and brief summary for the {module_name} module. Output ONLY: title, ~200 char summary, DIAGRAM_JSON, and mermaid diagram. No narrative sections.
+LEAF_JSON_USER_PROMPT = """Analyze the {module_name} module and return a JSON object with "title", "summary", and "diagram".
 
 <MODULE_TREE>
 {module_tree}
 </MODULE_TREE>
-* All documentation files are in the same folder. Link to siblings: [alt text]([ref_module_name].md)
+
+<CORE_COMPONENT_CODES>
+{formatted_core_component_codes}
+</CORE_COMPONENT_CODES>
+""".strip()
+
+USER_PROMPT = """
+Generate a JSON documentation file for the {module_name} module. Output the JSON object with "title", "summary", and "diagram". No markdown, no narrative sections.
+
+<MODULE_TREE>
+{module_tree}
+</MODULE_TREE>
+* All documentation files are in the same folder as .json files.
 
 <CORE_COMPONENT_CODES>
 {formatted_core_component_codes}
@@ -364,237 +382,122 @@ Generate a diagram and brief summary for the {module_name} module. Output ONLY: 
 """.strip()
 
 REPO_OVERVIEW_PROMPT = """
-You are an AI documentation assistant. Your task is to generate a brief overview of the {repo_name} repository.
+You are an AI documentation assistant. Return a JSON object (NOT markdown) for the {repo_name} repository overview.
 
 Before writing, take a holistic view of the full parsed codebase:
 - Who is this software for? What problem does it solve?
 - How would a new user or developer actually use it?
 - What are the 3-4 main things someone does with this system?
 - Frame the overview around user workflows and entry points, not internal code structure or folder layout.
-- A small but critical entry point matters more than a large utility module — prioritize by importance to the user, not by size.
 
-The overview should include:
-- The purpose of the repository
-- A mermaid architecture diagram showing how users interact with the system and how the main functional areas connect
-- Each node in the diagram should be clickable and link to its documentation file
-
-IMPORTANT: Use ONLY "flowchart LR" or "flowchart TD" syntax. DO NOT use classDiagram or sequenceDiagram.
+Return a JSON object with these keys:
+- "title": Repository name / short title
+- "summary": 2-4 sentences describing the repository purpose
+- "diagram": architecture diagram object (see format below)
 
 <DIAGRAM_DESIGN_RULES>
-1. LAYOUT: Use "flowchart LR" (horizontal). Users on the left, system flows right.
-
-2. GROUPING: Organize ALL nodes into 3-4 top-level subgraphs.
-   - Each subgraph represents a functional layer (e.g., "User Interface", "Processing Engine", "Data Storage")
-   - User entry points float outside groups with distinct styling
-   - Max 5 nodes per group. If more, create nested subgroups.
-
-3. OVERVIEW LEVEL: Each functional area appears as a SINGLE collapsed node.
-   - This is the 30,000-foot view — detail lives in child docs
-   - Cross-group connections connect collapsed nodes, not internals
-
-4. CONNECTIONS:
-   - Max 2 cross-group arrows per group pair. Pick the most important data flows.
-   - Every arrow MUST have a label describing what flows ("reads structure", "writes docs")
-   - Use ==> for primary pipeline, --> for normal, -.-> for references
-   - Arrows radiate OUTWARD from user entry points
-
-5. COLORS (semantic — apply classDef and class statements):
-   - classDef userNode fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
-   - classDef surface fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
-   - classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
-   - classDef generative fill:#fed7aa,stroke:#ea580c,stroke-width:1px,color:#7c2d12
-   - classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
-   Color meanings: Gold = human actor, Blue = interactive read surface, Green = persisted data, Orange = AI-driven creation, Purple = code analysis
-   **Apply `class` to each NODE id only.** Do NOT use `class` with a subgraph id (that floods the whole group with one color). List every node: `class nodeA,nodeB generative`. Subgraphs stay visually neutral.
-
-6. NODE LABELS: Describe what happens or what the user sees, NOT class/file names.
-   - Good: "Scan source files", "Web Viewer", "Walk tree bottom-up"
-   - Bad: "DependencyParser", "ast_parser.py", "AgentOrchestrator"
-
-7. DATA ARTIFACTS: Use cylinder shape [("label")] for stored data.
-   - Group artifacts together in their own subgraph
-   - One write arrow in (from producer), 1-2 read arrows out (to consumers)
+1. LAYOUT: Use direction "LR" (horizontal). Users on the left, system flows right.
+2. GROUPING: Organize ALL nodes into 3-4 top-level groups. Max 5 nodes per group. User entry points use type "external".
+3. OVERVIEW LEVEL: Each functional area appears as a SINGLE collapsed node — detail lives in child docs.
+4. CONNECTIONS: Max 2 cross-group edges per group pair. Every edge MUST have a label.
+5. NODE LABELS: Describe what happens, NOT class/file names. Human-readable phrases only.
+6. TOOLTIP FIELDS: Every node and group MUST have non-empty `title` and `description`.
 </DIAGRAM_DESIGN_RULES>
 
-Example architecture diagram:
-```mermaid
-flowchart LR
-    user(("User"))
-    user ==>|"explores"| viewer
-
-    subgraph ui["User Interface"]
-        viewer["Web Viewer"]
-        search["Search and Navigate"]
-    end
-
-    subgraph data_store["Stored Data"]
-        docs[("Documentation")]
-        index[("Search Index")]
-    end
-
-    viewer -->|"reads content"| docs
-    search -->|"queries"| index
-
-    classDef userNode fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
-    classDef surface fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
-    classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
-
-    class user userNode
-    class viewer,search surface
-    class docs,index data
-
-    click viewer "user_interface.md" "View UI Module"
-    click search "search.md" "View Search Module"
-```
-
-The `class` lines above attach styles to **viewer** and **search** (nodes), not to subgraphs **ui** or **data_store**.
-
-<DIAGRAM_JSON_FORMAT>
-MANDATORY — you MUST include this block in the output, placed before the mermaid code block:
-
-<!-- DIAGRAM_JSON
+<JSON_FORMAT>
 {{
-    "direction": "LR",
-    "nodes": [
-        {{"id": "core_building", "label": "Core Program Building", "type": "module", "link": "core_program_building.md"}},
-        {{"id": "data_eval", "label": "Data and Evaluation", "type": "module", "link": "data_evaluation.md"}},
-        {{"id": "user", "label": "Developer / User", "type": "external", "link": null}}
-    ],
-    "edges": [
-        {{"source": "user", "target": "core_building", "label": "builds programs"}},
-        {{"source": "core_building", "target": "data_eval", "label": "feeds examples"}}
-    ],
-    "groups": [
-        {{"id": "system", "label": "System", "nodes": ["core_building", "data_eval"]}}
-    ]
+    "title": "{repo_name}",
+    "summary": "2-4 sentences about what this repository does.",
+    "diagram": {{
+        "direction": "LR",
+        "nodes": [
+            {{"id": "core_building", "label": "Core Program Building", "type": "module", "link": "core_program_building", "title": "Core program building", "description": "Turns user intent into runnable workflows."}},
+            {{"id": "user", "label": "Developer / User", "type": "external", "link": null, "title": "Human user", "description": "Starts runs, edits configuration, and reads results."}}
+        ],
+        "edges": [
+            {{"source": "user", "target": "core_building", "label": "builds programs"}}
+        ],
+        "groups": [
+            {{"id": "system", "label": "System", "title": "System core", "description": "Core services.", "nodes": ["core_building"]}}
+        ]
+    }}
 }}
--->
 
 Rules:
-- Use only module names from AVAILABLE_MODULES as node ids and links.
+- Use only module names from AVAILABLE_MODULES as node ids and link values.
+- Link format: just the module name. E.g. "link": "core_framework"
 - Node type "module" for repo modules, "external" for actors/dependencies outside the repo.
-- GROUPS INTEGRITY: Every id in `groups[].nodes[]` MUST exist in `nodes[]`. Never emit `"nodes": []`.
-- EDGE INTEGRITY: Every edge `source` and `target` must be ids from `nodes[]`, never group/subgraph ids.
-- ID UNIQUENESS: Do not reuse the same string as both a node id and a group id.
-</DIAGRAM_JSON_FORMAT>
+- GROUPS INTEGRITY: Every id in groups[].nodes[] MUST exist in nodes[]. No empty groups.
+- EDGE INTEGRITY: Every edge source/target must be a node id (never a group id).
+- ID UNIQUENESS: No string may be both a node id and a group id.
+</JSON_FORMAT>
 
-""" + DIAGRAM_SYNTAX_RULES_SECTION + """
-
-CRITICAL: You can ONLY link to modules that exist in the AVAILABLE_MODULES list below.
-DO NOT create links to files that don't exist. DO NOT infer modules from directory structure or component paths.
-If there is only one module (e.g., "main"), create a diagram showing the internal architecture without click statements,
-or use click statements ONLY for that single module.
+""" + "\n" + HOVER_COPY_GUIDELINES + "\n" + RULES_FOR_PROMPT + """
+DO NOT create links to modules that don't exist. ONLY use modules from the AVAILABLE_MODULES list.
 
 <AVAILABLE_MODULES>
 {available_modules}
 </AVAILABLE_MODULES>
 
-When creating links to module documentation, use the module's markdown file name format: [Module Name](module_name.md). 
-For example, if a module is named "chat_module", link to it as [Chat Module](chat_module.md). 
-DO NOT link to source code files - only link to the generated markdown documentation files.
-ONLY use modules from the AVAILABLE_MODULES list above.
-
-Provide `{repo_name}` repo structure and its core modules documentation:
 <REPO_STRUCTURE>
 {repo_structure}
 </REPO_STRUCTURE>
 
-Please generate the overview of the `{repo_name}` repository in markdown format with the following structure:
-<OVERVIEW>
-overview_content
-</OVERVIEW>
+Return ONLY the JSON object. No markdown, no explanation, no code fences. Start with {{ and end with }}.
 """.strip()
 
 MODULE_OVERVIEW_PROMPT = """
-You are an AI documentation assistant. Your task is to generate a brief overview of `{module_name}` module.
+You are an AI documentation assistant. Return a JSON object (NOT markdown) for the `{module_name}` module overview.
 
-The overview should be a brief documentation of the module, including:
+The JSON must describe:
 - The purpose of the module and what it does for the user
-- How the module's components work together, visualized by mermaid diagrams
-- The references to the core components documentation
+- How the module's components work together (as a diagram)
 
-IMPORTANT: Use ONLY "flowchart TD" syntax. DO NOT use classDiagram or sequenceDiagram.
+Return a JSON object with these keys:
+- "title": Short module title (2-6 words)
+- "summary": 1-2 sentences (~200 characters) summarizing what this module does
+- "diagram": architecture diagram object
 
 <DIAGRAM_DESIGN_RULES>
-1. GROUPING: Organize nodes into 3-4 subgraphs by functional role.
-   - Max 5 nodes per group. If more, create nested subgroups.
-   - Subgroups follow the same max-5 rule recursively.
-
-2. NODE LABELS: Describe what happens or what the user sees, NOT class/file names.
-   - Good: "Parse configuration", "Run validation checks", "Generate output"
-   - Bad: "ConfigParser", "validator.py", "OutputGenerator"
-
-3. CONNECTIONS:
-   - Every arrow MUST have a label describing what flows
-   - Use ==> for primary data flow, --> for normal, -.-> for references
-   - Avoid pure linear chains — show real relationships, forks, parallel paths
-
-4. COLORS (semantic):
-   - classDef surface fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
-   - classDef data fill:#d1fae5,stroke:#10b981,stroke-width:2px,color:#065f46
-   - classDef generative fill:#fed7aa,stroke:#ea580c,stroke-width:1px,color:#7c2d12
-   - classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
-   Color meanings: Blue = interactive surface, Green = persisted data, Orange = AI-driven creation, Purple = code analysis
-   Apply `class` to **node IDs only** — never to subgraph ids (avoids solid-colored group boxes).
+1. GROUPING: Organize nodes into 3-4 groups by functional role. Max 5 nodes per group.
+2. NODE LABELS: Describe what happens, NOT class/file names. Human-readable phrases only.
+3. CONNECTIONS: Every edge MUST have a label. Show real relationships, not pure linear chains.
+4. TOOLTIP FIELDS: Every node and group MUST have non-empty `title` and `description`.
 </DIAGRAM_DESIGN_RULES>
 
-Example architecture diagram with clickable nodes:
-```mermaid
-flowchart TD
-    subgraph intake["Intake"]
-        receiver["Receive Input"]
-    end
-    subgraph processing["Processing"]
-        transform["Transform Data"]
-        validate["Validate Output"]
-    end
-    receiver ==>|"raw input"| transform
-    transform -->|"processed data"| validate
-
-    classDef analytical fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px,color:#4c1d95
-    class receiver,transform,validate analytical
-
-    click receiver "intake.md" "View Intake"
-    click transform "processing.md" "View Processing"
-```
-
-<DIAGRAM_JSON_FORMAT>
-MANDATORY — include this block in the output, placed before the mermaid code block:
-
-<!-- DIAGRAM_JSON
+<JSON_FORMAT>
 {{
-    "direction": "TD",
-    "nodes": [
-        {{"id": "intake", "label": "Intake", "type": "module", "link": "intake.md"}},
-        {{"id": "processing", "label": "Processing", "type": "module", "link": "processing.md"}}
-    ],
-    "edges": [
-        {{"source": "intake", "target": "processing", "label": "raw input"}}
-    ],
-    "groups": [
-        {{"id": "pipeline", "label": "Pipeline", "nodes": ["intake", "processing"]}}
-    ]
+    "title": "Module Title",
+    "summary": "What this module does in 1-2 sentences.",
+    "diagram": {{
+        "direction": "TD",
+        "nodes": [
+            {{"id": "intake", "label": "Receive and Parse Input", "type": "module", "link": "intake", "title": "Input intake", "description": "Accepts input and normalizes it for downstream steps."}},
+            {{"id": "processing", "label": "Transform and Validate", "type": "module", "link": "processing", "title": "Processing core", "description": "Applies business rules and validates data."}}
+        ],
+        "edges": [
+            {{"source": "intake", "target": "processing", "label": "raw input"}}
+        ],
+        "groups": [
+            {{"id": "pipeline", "label": "Pipeline", "title": "Main pipeline", "description": "End-to-end path from input to output.", "nodes": ["intake", "processing"]}}
+        ]
+    }}
 }}
--->
 
 Rules:
-- Node ids should match the clickable module names in the Mermaid diagram.
-- GROUPS INTEGRITY: Every id in `groups[].nodes[]` MUST exist in `nodes[]`. Never emit `"nodes": []`.
-- EDGE INTEGRITY: Every edge `source` and `target` must be ids from `nodes[]`, never group/subgraph ids.
-- ID UNIQUENESS: Do not reuse the same string as both a node id and a group id.
-</DIAGRAM_JSON_FORMAT>
+- Link format: just the module name. E.g. "link": "intake"
+- GROUPS INTEGRITY: Every id in groups[].nodes[] MUST exist in nodes[]. No empty groups.
+- EDGE INTEGRITY: Every edge source/target must be a node id (never a group id).
+- ID UNIQUENESS: No string may be both a node id and a group id.
+</JSON_FORMAT>
 
-""" + DIAGRAM_SYNTAX_RULES_SECTION + """
+""" + "\n" + HOVER_COPY_GUIDELINES + "\n" + RULES_FOR_PROMPT + """
 
-Provide repo structure and core components documentation of the `{module_name}` module:
 <REPO_STRUCTURE>
 {repo_structure}
 </REPO_STRUCTURE>
 
-Please generate the overview of the `{module_name}` module in markdown format with the following structure:
-<OVERVIEW>
-overview_content
-</OVERVIEW>
+Return ONLY the JSON object. No markdown, no explanation, no code fences. Start with {{ and end with }}.
 """.strip()
 
 CLUSTER_REPO_PROMPT = """
@@ -658,7 +561,6 @@ from codewiki.src.file_manager import file_manager
 
 EXTENSION_TO_LANGUAGE = {
     ".py": "python",
-    ".md": "markdown",
     ".sh": "bash",
     ".json": "json",
     ".yaml": "yaml",
@@ -672,12 +574,10 @@ EXTENSION_TO_LANGUAGE = {
     ".hpp": "cpp",
     ".tsx": "typescript",
     ".cc": "cpp",
-    ".hpp": "cpp",
     ".cxx": "cpp",
     ".jsx": "javascript",
     ".mjs": "javascript",
     ".cjs": "javascript",
-    ".jsx": "javascript",
     ".cs": "csharp"
 }
 
@@ -728,20 +628,16 @@ def _format_module_tree_tiered(module_tree: dict[str, any], current_module_name:
             comp_count = len(value.get('components', []))
             is_current = (key == current_module_name)
             
-            # Module name
             if is_current:
                 lines.append(f"{'  ' * indent}{key} (current module)")
             else:
                 lines.append(f"{'  ' * indent}{key}")
             
-            # Show full component list for current module and its siblings
-            # For other modules, just show count
             if is_current or parent_is_current:
                 lines.append(f"{'  ' * (indent + 1)} Core components: {', '.join(value['components'])}")
             else:
                 lines.append(f"{'  ' * (indent + 1)} Components: {comp_count} items (use list_module_components to view)")
             
-            # Recurse into children
             if isinstance(value.get("children"), dict) and len(value["children"]) > 0:
                 lines.append(f"{'  ' * (indent + 1)} Children:")
                 _recurse(value["children"], indent + 2, parent_is_current=is_current)
@@ -756,23 +652,13 @@ def format_user_prompt(module_name: str, core_component_ids: list[str], componen
     
     For large repos (500+ components), uses tiered module tree format with summaries.
     For small repos, uses full component list format.
-    
-    Args:
-        module_name: Name of the module to document
-        core_component_ids: List of component IDs to include
-        components: Dictionary mapping component IDs to CodeComponent objects
-    
-    Returns:
-        Formatted user prompt string
     """
     from codewiki.src.config import LARGE_REPO_COMPONENT_THRESHOLD
     import logging
     logger = logging.getLogger(__name__)
 
-    # Count total components to decide formatting approach
     total_components = _count_total_components(module_tree)
     
-    # Choose module tree format based on repo size
     if total_components > LARGE_REPO_COMPONENT_THRESHOLD:
         logger.info(f"[PROMPT] Large repo detected ({total_components} components > {LARGE_REPO_COMPONENT_THRESHOLD})")
         logger.info(f"[PROMPT] Using tiered module tree format with summaries")
@@ -780,9 +666,6 @@ def format_user_prompt(module_name: str, core_component_ids: list[str], componen
     else:
         formatted_module_tree = _format_module_tree_full(module_tree, module_name)
 
-    # print(f"Formatted module tree:\n{formatted_module_tree}")
-
-    # Group core component IDs by their file path
     grouped_components: dict[str, list[str]] = {}
     for component_id in core_component_ids:
         if component_id not in components:
@@ -797,11 +680,9 @@ def format_user_prompt(module_name: str, core_component_ids: list[str], componen
     for path, component_ids_in_file in grouped_components.items():
         core_component_codes += f"# File: {path}\n\n"
         
-        # Get file extension for syntax highlighting
         ext = '.' + path.split('.')[-1] if '.' in path else '.txt'
         lang = EXTENSION_TO_LANGUAGE.get(ext, 'text')
         
-        # Include each component's source code (NOT the entire file)
         for component_id in component_ids_in_file:
             component = components[component_id]
             core_component_codes += f"## Component: {component_id}\n"
@@ -809,7 +690,6 @@ def format_user_prompt(module_name: str, core_component_ids: list[str], componen
                 core_component_codes += f"Lines {component.start_line}-{component.end_line}\n"
             core_component_codes += f"```{lang}\n"
             
-            # Use component.source_code instead of reading entire file
             if hasattr(component, 'source_code') and component.source_code:
                 core_component_codes += component.source_code
             else:

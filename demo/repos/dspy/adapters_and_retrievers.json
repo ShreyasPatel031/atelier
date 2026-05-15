@@ -1,0 +1,166 @@
+{
+    "title": "Adapters and Retrievers",
+    "summary": "This module equips DSPy programs to interact with external systems and handle diverse data. It provides adapters for structuring various data types and managing LM interactions, alongside a suite of retrievers for fetching relevant information from knowledge bases.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "data_type_adapters_module",
+                "label": "Handle Diverse Data Types",
+                "type": "module",
+                "link": "adapters_and_retrievers/data_type_adapters",
+                "title": "Data Type Adapters",
+                "description": "Provides custom data types (e.g., Audio, Image, Code, Tool) to structure and format various data formats for seamless integration with language models, both as input and output."
+            },
+            {
+                "id": "system_adapters_module",
+                "label": "Manage LM Interactions",
+                "type": "module",
+                "link": "adapters_and_retrievers/system_adapters",
+                "title": "System Adapters",
+                "description": "Defines how DSPy programs interact with Language Models, handling prompt formatting, output parsing, and integrating advanced features like function calling and multi-stage processing."
+            },
+            {
+                "id": "retrievers_module",
+                "label": "Fetch Relevant Information",
+                "type": "module",
+                "link": "adapters_and_retrievers/retrievers",
+                "title": "Retrieval Modules",
+                "description": "Offers various retrieval mechanisms (e.g., ColBERTv2, Databricks Vector Search, Weaviate) to efficiently fetch relevant passages or documents from knowledge bases for a given query."
+            },
+            {
+                "id": "dspy_program",
+                "label": "DSPy Program",
+                "type": "external",
+                "link": "core_primitives",
+                "title": "DSPy Program/Module",
+                "description": "The core DSPy program or module that orchestrates the use of adapters and retrievers to achieve complex tasks involving language models and external data."
+            },
+            {
+                "id": "language_model",
+                "label": "Language Model (LLM)",
+                "type": "external",
+                "link": "lm_and_client_management",
+                "title": "Underlying Language Model",
+                "description": "The large language model that DSPy programs interact with, receiving formatted prompts and providing raw outputs that need parsing."
+            },
+            {
+                "id": "external_data_sources",
+                "label": "External Data Sources",
+                "type": "external",
+                "link": null,
+                "title": "Raw Data Inputs",
+                "description": "Various raw data inputs such as images, audio files, code snippets, or documents that need to be structured and adapted for language model consumption."
+            },
+            {
+                "id": "knowledge_bases",
+                "label": "Knowledge Bases",
+                "type": "external",
+                "link": null,
+                "title": "External Knowledge Repositories",
+                "description": "External databases, vector stores, or search indexes (e.g., Databricks, Weaviate) from which retrievers fetch relevant documents or passages."
+            }
+        ],
+        "edges": [
+            {
+                "source": "dspy_program",
+                "target": "system_adapters_module",
+                "label": "Configures & Uses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "system_adapters_module",
+                "target": "language_model",
+                "label": "Formats Prompts & Parses Output",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_program",
+                "target": "data_type_adapters_module",
+                "label": "Structures Data With",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "external_data_sources",
+                "target": "data_type_adapters_module",
+                "label": "Provides Raw Data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_type_adapters_module",
+                "target": "system_adapters_module",
+                "label": "Prepares Data for LM",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_program",
+                "target": "retrievers_module",
+                "label": "Queries For Information",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrievers_module",
+                "target": "knowledge_bases",
+                "label": "Accesses & Retrieves From",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "knowledge_bases",
+                "target": "retrievers_module",
+                "label": "Returns Documents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrievers_module",
+                "target": "dspy_program",
+                "label": "Provides Retrieved Context",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "adapters_group",
+                "label": "Adapters for Data & LM Interaction",
+                "nodes": [
+                    "data_type_adapters_module",
+                    "system_adapters_module"
+                ],
+                "title": "Adapters for Data & LM Interaction",
+                "description": "Components responsible for structuring diverse data types and managing the intricate process of interacting with language models, including prompt formatting and output parsing.",
+                "role": null
+            },
+            {
+                "id": "retrieval_group",
+                "label": "Information Retrieval",
+                "nodes": [
+                    "retrievers_module"
+                ],
+                "title": "Information Retrieval",
+                "description": "Modules dedicated to efficiently fetching relevant information from various knowledge bases to provide context for DSPy programs and language models.",
+                "role": null
+            },
+            {
+                "id": "external_systems_group",
+                "label": "Core DSPy & External Systems",
+                "nodes": [
+                    "dspy_program",
+                    "language_model",
+                    "external_data_sources",
+                    "knowledge_bases"
+                ],
+                "title": "Core DSPy & External Systems",
+                "description": "Represents the central DSPy program, the underlying language models, and the external data sources and knowledge bases that this module integrates with.",
+                "role": null
+            }
+        ]
+    }
+}

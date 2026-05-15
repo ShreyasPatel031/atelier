@@ -1,0 +1,182 @@
+{
+  "title": "Sandbox and Bedrock Tools",
+  "summary": "This module provides tools for interacting with AWS Bedrock services, including agents, browser, code interpreter, and knowledge bases. It also offers integrations with external sandbox environments like Daytona and E2B for executing code and commands.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "bedrock_invoke_agent_tool",
+        "label": "Invoke Bedrock Agent",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Agent Invocation Tool",
+        "description": "A tool to invoke an AWS Bedrock agent, allowing it to process queries and return completions. It handles session management and optional tracing for agent interactions."
+      },
+      {
+        "id": "create_bedrock_browser_toolkit",
+        "label": "Create Bedrock Browser Toolkit",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Browser Toolkit Creator",
+        "description": "A function that initializes and returns a toolkit designed for browser-based interactions within the AWS Bedrock environment, enabling agents to perform web browsing tasks."
+      },
+      {
+        "id": "create_bedrock_code_interpreter_toolkit",
+        "label": "Create Bedrock Code Interpreter Toolkit",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Code Interpreter Toolkit Creator",
+        "description": "A function that initializes and returns a toolkit for executing code within an AWS Bedrock code interpreter environment, facilitating computational tasks for agents."
+      },
+      {
+        "id": "bedrock_kb_retriever_tool",
+        "label": "Retrieve from Bedrock Knowledge Base",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Knowledge Base Retriever",
+        "description": "A tool designed to retrieve relevant information from an Amazon Bedrock Knowledge Base based on a given query, supporting various retrieval configurations and guardrail settings."
+      },
+      {
+        "id": "daytona_base_tool",
+        "label": "Manage Daytona Sandbox",
+        "type": "component",
+        "link": null,
+        "title": "Daytona Sandbox Base Manager",
+        "description": "The foundational tool for managing the lifecycle of Daytona sandboxes, including their creation, deletion, and configuration for persistent or ephemeral use across tool calls."
+      },
+      {
+        "id": "e2b_base_tool",
+        "label": "Manage E2B Sandbox",
+        "type": "component",
+        "link": null,
+        "title": "E2B Sandbox Base Manager",
+        "description": "The foundational tool for managing the lifecycle of E2B sandboxes, including their creation, termination, and configuration for persistent or ephemeral use across tool calls."
+      },
+      {
+        "id": "e2b_exec_tool",
+        "label": "Execute E2B Sandbox Command",
+        "type": "component",
+        "link": null,
+        "title": "E2B Sandbox Command Executor",
+        "description": "A specialized tool that executes shell commands within an E2B sandbox environment, providing the command's exit code, standard output, and standard error."
+      },
+      {
+        "id": "aws_bedrock_agents_service",
+        "label": "AWS Bedrock Agents Service",
+        "type": "external",
+        "link": null,
+        "title": "AWS Bedrock Agents",
+        "description": "The Amazon Web Services (AWS) Bedrock service responsible for hosting and orchestrating AI agents, providing access to various foundation models and tools."
+      },
+      {
+        "id": "aws_bedrock_knowledge_base_service",
+        "label": "AWS Bedrock Knowledge Base Service",
+        "type": "external",
+        "link": null,
+        "title": "AWS Bedrock Knowledge Base",
+        "description": "The Amazon Web Services (AWS) Bedrock service that manages and provides access to knowledge bases for retrieval-augmented generation (RAG) workflows."
+      },
+      {
+        "id": "daytona_sandbox_environment",
+        "label": "Daytona Sandbox Environment",
+        "type": "external",
+        "link": null,
+        "title": "Daytona Sandbox",
+        "description": "An external cloud-based development environment provided by Daytona, used for secure and isolated execution of code and commands."
+      },
+      {
+        "id": "e2b_sandbox_environment",
+        "label": "E2B Sandbox Environment",
+        "type": "external",
+        "link": null,
+        "title": "E2B Sandbox",
+        "description": "An external cloud-based development environment provided by E2B, offering isolated execution for code, scripts, and shell commands."
+      }
+    ],
+    "edges": [
+      {
+        "source": "bedrock_invoke_agent_tool",
+        "target": "aws_bedrock_agents_service",
+        "label": "Invokes agent",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_bedrock_browser_toolkit",
+        "target": "aws_bedrock_agents_service",
+        "label": "Configures browser tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_bedrock_code_interpreter_toolkit",
+        "target": "aws_bedrock_agents_service",
+        "label": "Configures code interpreter tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_kb_retriever_tool",
+        "target": "aws_bedrock_knowledge_base_service",
+        "label": "Retrieves information",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "daytona_base_tool",
+        "target": "daytona_sandbox_environment",
+        "label": "Manages sandbox lifecycle",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "e2b_base_tool",
+        "target": "e2b_sandbox_environment",
+        "label": "Manages sandbox lifecycle",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "e2b_exec_tool",
+        "target": "e2b_base_tool",
+        "label": "Utilizes base management",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "e2b_exec_tool",
+        "target": "e2b_sandbox_environment",
+        "label": "Executes commands in",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "aws_bedrock_integrations",
+        "label": "AWS Bedrock Integrations",
+        "nodes": [
+          "bedrock_invoke_agent_tool",
+          "create_bedrock_browser_toolkit",
+          "create_bedrock_code_interpreter_toolkit",
+          "bedrock_kb_retriever_tool"
+        ],
+        "title": "AWS Bedrock Integrations",
+        "description": "Components facilitating interaction with various AWS Bedrock services, including agents, browser, code interpreter, and knowledge bases.",
+        "role": "surface"
+      },
+      {
+        "id": "external_sandbox_tools",
+        "label": "External Sandbox Tools",
+        "nodes": [
+          "daytona_base_tool",
+          "e2b_base_tool",
+          "e2b_exec_tool"
+        ],
+        "title": "External Sandbox Tools",
+        "description": "Tools for managing and interacting with external sandbox environments like Daytona and E2B for isolated code execution.",
+        "role": "surface"
+      }
+    ]
+  }
+}

@@ -108,41 +108,6 @@ class AgentOrchestrator:
         self.config = config
         self.fallback_models = create_fallback_models(config)
     
-    def _generate_fallback_doc(self, module_name: str, core_component_ids: List[str],
-                               components: Dict[str, Any], md_path: str) -> None:
-        """Direct LLM call to generate module docs when the agent didn't write the file."""
-        from codewiki.src.be.llm_services import call_llm
-
-        code_snippets = []
-        for cid in core_component_ids[:10]:
-            comp = components.get(cid)
-            if comp and hasattr(comp, 'source_code'):
-                snippet = comp.source_code[:3000]
-                code_snippets.append(f"### {cid}\n```python\n{snippet}\n```")
-
-        source_block = "\n\n".join(code_snippets) if code_snippets else "(no source available)"
-
-        prompt = (
-            f"Generate a minimal markdown file for a code module called **{module_name}**.\n\n"
-            f"The module contains {len(core_component_ids)} component(s).\n\n"
-            f"Source code:\n{source_block}\n\n"
-            "Requirements:\n"
-            "1. Start with `# <Title>` then a 1-2 sentence summary (~200 chars).\n"
-            "2. Include a <!-- DIAGRAM_JSON --> block with nodes, edges, and groups.\n"
-            "3. Include a matching ```mermaid flowchart TD``` diagram.\n"
-            "4. Do NOT add ## sections, narrative, or code examples.\n"
-            "Return ONLY the markdown content, no wrapping fences."
-        )
-
-        logger.info(f"[STAGE 4.7] Fallback LLM call for {module_name} ({len(prompt)} chars)")
-        content = call_llm(prompt, self.config)
-        if content and len(content.strip()) > 50:
-            with open(md_path, 'w') as f:
-                f.write(content)
-            logger.info(f"[STAGE 4.7] Wrote fallback doc: {md_path} ({len(content)} chars)")
-        else:
-            logger.error(f"[STAGE 4.7] Fallback LLM returned insufficient content ({len(content or '')} chars)")
-
     def create_agent(
         self,
         module_name: str,
@@ -376,33 +341,29 @@ class AgentOrchestrator:
     async def _generate_parent_overview(self, module_name: str, sub_modules: Dict[str, Any],
                                         working_dir: str, deps: 'CodeWikiDeps') -> None:
         """
-        Generate a simple overview document for a parent module after its sub-modules are processed.
+        Generate a simple overview JSON for a parent module after its sub-modules are processed.
         """
-        docs_path = os.path.join(working_dir, f"{module_name}.md")
-        
-        # Build simple overview
-        content = f"# {module_name.replace('_', ' ').title()}\n\n"
-        content += f"This module contains {len(sub_modules)} sub-modules:\n\n"
-        
-        for sub_name, sub_info in sub_modules.items():
-            component_count = len(sub_info.get("components", []))
-            content += f"- [{sub_name}]({sub_name}.md) - {component_count} components\n"
-        
-        content += "\n## Architecture\n\n"
-        content += "```mermaid\ngraph TD\n"
-        
-        # Create simple diagram showing sub-modules
-        parent_id = module_name.replace("_", "").upper()[:3]
-        for i, sub_name in enumerate(sub_modules.keys()):
-            sub_id = chr(65 + i)  # A, B, C, ...
-            content += f"    {parent_id} --> {sub_id}[{sub_name}]\n"
-        
-        content += "```\n"
-        
-        # Save the overview
-        file_manager.save_text(content, docs_path)
-        logger.info(f"[AUTO-SPLIT] Generated parent overview: {docs_path}")
-    
+        import json as _json
+
+        parent_id = module_name.replace(" ", "_").lower()
+        nodes = [{"id": parent_id, "label": module_name.replace("_", " ").title(), "type": "module"}]
+        edges = []
+        for sub_name in sub_modules.keys():
+            cid = sub_name.replace(" ", "_").lower()
+            nodes.append({"id": cid, "label": sub_name.replace("_", " ").title(), "type": "module", "link": sub_name})
+            edges.append({"source": parent_id, "target": cid, "label": "contains"})
+        diagram_obj = {"direction": "TD", "nodes": nodes, "edges": edges, "groups": []}
+
+        doc = {
+            "title": module_name.replace("_", " ").title(),
+            "summary": f"This module contains {len(sub_modules)} sub-modules.",
+            "diagram": diagram_obj,
+        }
+        json_path = os.path.join(working_dir, f"{module_name}.json")
+        with open(json_path, "w") as f:
+            _json.dump(doc, f, indent=2)
+        logger.info(f"[AUTO-SPLIT] Generated parent overview: {json_path}")
+
     async def process_module(self, module_name: str, components: Dict[str, Node], 
                            core_component_ids: List[str], module_path: List[str], working_dir: str,
                            module_tree_lock=None) -> Dict[str, Any]:
@@ -424,7 +385,7 @@ class AgentOrchestrator:
         doc_stem = module_path[-1] if module_path else module_name
         if module_path and module_path[-1] != module_name:
             logger.warning(
-                "[STAGE 4] module_name=%r differs from module_path[-1]=%r; using path tail for .md file",
+                "[STAGE 4] module_name=%r differs from module_path[-1]=%r; using path tail for .json file",
                 module_name,
                 module_path[-1],
             )
@@ -470,11 +431,11 @@ class AgentOrchestrator:
         
         # STAGE 4.2: Check if docs already exist
         overview_docs_path = os.path.join(working_dir, OVERVIEW_FILENAME)
-        docs_path = os.path.join(working_dir, f"{doc_stem}.md")
+        json_docs_path = os.path.join(working_dir, f"{doc_stem}.json")
         
         logger.info(f"[STAGE 4.2: DOCS CHECK] Checking for existing documentation...")
         logger.info(f"[STAGE 4.2] Overview docs path: {overview_docs_path} (exists: {os.path.exists(overview_docs_path)})")
-        logger.info(f"[STAGE 4.2] Module docs path: {docs_path} (exists: {os.path.exists(docs_path)})")
+        logger.info(f"[STAGE 4.2] Module docs path: {json_docs_path} (exists: {os.path.exists(json_docs_path)})")
         
         if os.path.exists(overview_docs_path):
             file_size = os.path.getsize(overview_docs_path)
@@ -482,9 +443,9 @@ class AgentOrchestrator:
             logger.info(f"[STAGE 4.2] Skipping module processing")
             return module_tree
 
-        if os.path.exists(docs_path):
-            file_size = os.path.getsize(docs_path)
-            logger.info(f"[STAGE 4.2] Module docs already exists at {docs_path} ({file_size} bytes)")
+        if os.path.exists(json_docs_path):
+            file_size = os.path.getsize(json_docs_path)
+            logger.info(f"[STAGE 4.2] Module docs already exists at {json_docs_path} ({file_size} bytes)")
             logger.info(f"[STAGE 4.2] Skipping module processing")
             return module_tree
 
@@ -518,6 +479,63 @@ class AgentOrchestrator:
             import traceback
             logger.error(f"[STAGE 4.4] Traceback: {traceback.format_exc()}")
             raise
+
+        # STAGE 4-FAST: Small modules → JSON mode, no agent
+        SMALL_MODULE_THRESHOLD = 50
+        if len(core_component_ids) <= SMALL_MODULE_THRESHOLD:
+            logger.info(
+                f"[STAGE 4-FAST] Small module ({len(core_component_ids)} components "
+                f"<= {SMALL_MODULE_THRESHOLD}) — using direct JSON mode for {module_name}"
+            )
+            try:
+                from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
+                import json as _json
+
+                doc = generate_leaf_doc_json(
+                    module_name=module_name,
+                    core_component_ids=core_component_ids,
+                    components=components,
+                    module_tree=module_tree,
+                    config=self.config,
+                )
+                json_path = os.path.join(working_dir, f"{doc_stem}.json")
+                with open(json_path, "w") as f:
+                    _json.dump(doc, f, indent=2)
+                logger.info(f"[STAGE 4-FAST] Wrote {json_path}")
+
+
+
+                # Update module tree
+                if module_tree_lock:
+                    async with module_tree_lock:
+                        current_tree = file_manager.load_json(module_tree_path)
+                        node = current_tree
+                        for key in module_path:
+                            node = node.setdefault(key, {})
+                        node["title"] = doc["title"]
+                        node["description"] = doc["summary"]
+                        node["diagram"] = doc["diagram"]
+                        file_manager.save_json(current_tree, module_tree_path)
+                        deps.module_tree = current_tree
+                else:
+                    node = deps.module_tree
+                    for key in module_path:
+                        node = node.setdefault(key, {})
+                    node["title"] = doc["title"]
+                    node["description"] = doc["summary"]
+                    node["diagram"] = doc["diagram"]
+                    file_manager.save_json(deps.module_tree, module_tree_path)
+
+                logger.info(
+                    f"[STAGE 4-FAST] COMPLETE for {module_name} in "
+                    f"{time.time() - module_start:.1f}s"
+                )
+                return deps.module_tree
+            except Exception as fast_err:
+                logger.warning(
+                    f"[STAGE 4-FAST] JSON mode failed for {module_name}: {fast_err} "
+                    f"— falling through to complex agent"
+                )
 
         # STAGE 4.3: Create agent
         logger.info(f"[STAGE 4.3: AGENT CREATION] Creating agent for module: {module_name}")
@@ -580,10 +598,9 @@ class AgentOrchestrator:
         
         # STAGE 4.5.5: PRE-FLIGHT CHECK - Auto-split if prompt exceeds LLM context
         MAX_LLM_CONTEXT = 100000  # Safety margin below GPT-4o's 128k context
-        MAX_AUTO_SPLIT_DEPTH = 5  # Prevent infinite recursion
         
         current_depth = len(module_path)
-        if prompt_tokens > MAX_LLM_CONTEXT and current_depth < MAX_AUTO_SPLIT_DEPTH:
+        if prompt_tokens > MAX_LLM_CONTEXT and current_depth < self.config.max_depth:
             logger.warning(f"[STAGE 4.5.5: AUTO-SPLIT] Prompt too large ({prompt_tokens} tokens > {MAX_LLM_CONTEXT})")
             logger.warning(f"[STAGE 4.5.5] Automatically splitting module '{module_name}' before LLM call")
             
@@ -657,7 +674,7 @@ class AgentOrchestrator:
             return deps.module_tree
         elif prompt_tokens > MAX_LLM_CONTEXT:
             # Hit depth limit but still too large - log warning but proceed anyway
-            logger.warning(f"[STAGE 4.5.5] Module still too large ({prompt_tokens} tokens) but hit depth limit ({current_depth})")
+            logger.warning(f"[STAGE 4.5.5] Module still too large ({prompt_tokens} tokens) but hit max_depth limit ({current_depth} >= {self.config.max_depth})")
             logger.warning(f"[STAGE 4.5.5] Proceeding with LLM call - expect possible failure")
         
         # STAGE 4.6: Run agent
@@ -719,24 +736,42 @@ class AgentOrchestrator:
             except Exception as track_err:
                 logger.debug(f"[STAGE 4.6] Token tracking failed (non-critical): {track_err}")
             
-            # Extract title/description/diagram from generated markdown for top-level modules
-            # Top-level modules have module_path of length 1 (e.g., ['operator'])
-            # Extract metadata (title, description, diagram) from generated markdown
-            # This runs for ALL modules, not just top-level - making it recursive
+            # Extract metadata from generated JSON doc
             extracted_title = None
             extracted_desc = None
             extracted_diagram = None
-            md_path = os.path.join(working_dir, f"{doc_stem}.md")
-            if not os.path.exists(md_path):
-                logger.warning(f"[STAGE 4.7] Agent did not create {doc_stem}.md — running direct LLM fallback")
+            json_doc_path = os.path.join(working_dir, f"{doc_stem}.json")
+            if not os.path.exists(json_doc_path):
+                logger.warning(
+                    "[STAGE 4] Agent did not create %s — generating via JSON mode",
+                    json_doc_path,
+                )
                 try:
-                    self._generate_fallback_doc(module_name, core_component_ids, components, md_path)
-                except Exception as fallback_err:
-                    logger.error(f"[STAGE 4.7] Fallback LLM call failed: {fallback_err}")
-            if os.path.exists(md_path):
+                    from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
+                    import json as _json
+
+                    doc = generate_leaf_doc_json(
+                        module_name=module_name,
+                        core_component_ids=core_component_ids,
+                        components=components,
+                        module_tree=deps.module_tree,
+                        config=self.config,
+                    )
+                    with open(json_doc_path, "w") as jf:
+                        _json.dump(doc, jf, indent=2)
+                    logger.info(
+                        "[STAGE 4] JSON-mode completion wrote %s",
+                        json_doc_path,
+                    )
+                except Exception as comp_err:
+                    logger.error(
+                        "[STAGE 4] JSON-mode completion failed for %s: %s",
+                        module_name, comp_err,
+                    )
+            if os.path.exists(json_doc_path):
                 try:
                     extracted_title, extracted_desc, extracted_diagram = extract_module_metadata_from_file(
-                        md_path
+                        json_doc_path
                     )
                     logger.info(f"[STAGE 4.6] Extracted metadata for '{module_name}': title='{extracted_title}'"
                                f", diagram={'yes' if extracted_diagram else 'no'}")
@@ -782,11 +817,11 @@ class AgentOrchestrator:
             try:
                 from codewiki.src.be.generation_tracker import get_generation_tracker
                 gen_tracker = get_generation_tracker()
-                md_exists = os.path.exists(os.path.join(working_dir, f"{doc_stem}.md"))
+                json_exists = os.path.exists(os.path.join(working_dir, f"{doc_stem}.json"))
                 gen_tracker.track_module_complete(
                     module_name=module_name,
                     success=True,
-                    md_file_created=md_exists,
+                    md_file_created=json_exists,
                     in_module_tree=True,
                     has_diagram=extracted_diagram is not None,
                     has_title=extracted_title is not None,
@@ -832,14 +867,14 @@ class AgentOrchestrator:
                 )
 
             # Diagnostics: why the agent failed (no result object when run raises)
-            fail_md = os.path.join(working_dir, f"{doc_stem}.md")
+            fail_json = os.path.join(working_dir, f"{doc_stem}.json")
             logger.error(
-                "[STAGE 4.6] DIAG: module_name=%r module_path=%r doc_stem=%r expected_md exists=%s path=%s",
+                "[STAGE 4.6] DIAG: module_name=%r module_path=%r doc_stem=%r expected_json exists=%s path=%s",
                 module_name,
                 module_path,
                 doc_stem,
-                os.path.exists(fail_md),
-                fail_md,
+                os.path.exists(fail_json),
+                fail_json,
             )
             if os.path.exists(fail_md):
                 try:
@@ -910,85 +945,6 @@ class AgentOrchestrator:
             logger.error(f"[STAGE 4.6] Full traceback:\n{full_tb}")
             logger.error(f"[STAGE 4: AGENT MODULE PROCESSING] FAILED in {module_duration:.1f}s for module: {module_name}")
             print(f"=== END ERROR INFO ===\n", file=sys.stderr)
-
-            # Last-resort: direct LLM doc when agent.run crashed before writing {doc_stem}.md
-            if not os.path.exists(fail_md):
-                try:
-                    logger.warning(
-                        "[STAGE 4.6] Post-failure fallback: direct LLM for %s → %s",
-                        module_name,
-                        fail_md,
-                    )
-                    self._generate_fallback_doc(module_name, core_component_ids, components, fail_md)
-                except Exception as fb_err:
-                    logger.error("[STAGE 4.6] Post-failure fallback LLM failed: %s", fb_err)
-
-            if os.path.exists(fail_md) and os.path.getsize(fail_md) > 50:
-                try:
-                    extracted_title, extracted_desc, extracted_diagram = extract_module_metadata_from_file(
-                        fail_md
-                    )
-                    logger.info(
-                        "[STAGE 4.6] Recovered via post-failure fallback for %r: title=%r diagram=%s",
-                        module_name,
-                        extracted_title,
-                        "yes" if extracted_diagram else "no",
-                    )
-                    save_start = time.time()
-                    if module_tree_lock:
-                        async with module_tree_lock:
-                            current_tree = file_manager.load_json(module_tree_path)
-                            self._merge_module_tree(current_tree, deps.module_tree)
-                            if extracted_title:
-                                apply_metadata_to_tree_path(
-                                    current_tree,
-                                    module_path,
-                                    extracted_title,
-                                    extracted_desc,
-                                    extracted_diagram,
-                                )
-                            file_manager.save_json(current_tree, module_tree_path)
-                            deps.module_tree = current_tree
-                    else:
-                        if extracted_title:
-                            apply_metadata_to_tree_path(
-                                deps.module_tree,
-                                module_path,
-                                extracted_title,
-                                extracted_desc,
-                                extracted_diagram,
-                            )
-                        file_manager.save_json(deps.module_tree, module_tree_path)
-                    logger.info(
-                        "[STAGE 4.6] Module tree saved after recovery in %.3fs",
-                        time.time() - save_start,
-                    )
-                    module_duration = time.time() - module_start
-                    logger.info(
-                        "[STAGE 4: AGENT MODULE PROCESSING] RECOVERED (post-failure fallback) in %.1fs for module: %s",
-                        module_duration,
-                        module_name,
-                    )
-                    try:
-                        from codewiki.src.be.generation_tracker import get_generation_tracker
-
-                        get_generation_tracker().track_module_complete(
-                            module_name=module_name,
-                            success=True,
-                            md_file_created=True,
-                            in_module_tree=True,
-                            has_diagram=extracted_diagram is not None,
-                            has_title=extracted_title is not None,
-                            has_description=extracted_desc is not None,
-                        )
-                    except Exception:
-                        pass
-                    return deps.module_tree
-                except Exception as recovery_err:
-                    logger.error(
-                        "[STAGE 4.6] Post-failure recovery (metadata/tree save) failed: %s",
-                        recovery_err,
-                    )
 
             # Track module failure in generation tracker
             try:

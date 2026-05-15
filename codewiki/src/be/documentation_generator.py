@@ -2,6 +2,7 @@ import logging
 import os
 import json
 import time
+from pathlib import Path
 from typing import Dict, List, Any, Optional, Callable
 from copy import deepcopy
 import traceback
@@ -21,14 +22,59 @@ from codewiki.src.config import (
     Config,
     FIRST_MODULE_TREE_FILENAME,
     MODULE_TREE_FILENAME,
-    OVERVIEW_FILENAME
+    MODULE_DOC_EXT,
+    OVERVIEW_FILENAME,
+    module_doc_path,
 )
 from codewiki.src.file_manager import file_manager
 from codewiki.src.be.agent_orchestrator import AgentOrchestrator
+from codewiki.src.be.doc_schema import validate_module_doc
 from codewiki.src.be.module_metadata import (
     apply_metadata_to_tree_path,
     extract_module_metadata_from_file,
+    extract_module_metadata_from_markdown,
 )
+
+
+def _llm_markdown_overview_to_module_doc_payload(content: str, fallback_title: str) -> Dict[str, Any]:
+    """Parse LLM output (JSON preferred, markdown fallback) into a validated module/overview JSON dict."""
+    import json as _json
+    # Try direct JSON parse first (new JSON-only pipeline)
+    try:
+        raw = _json.loads(content)
+        if isinstance(raw, dict) and ("title" in raw or "summary" in raw or "diagram" in raw):
+            t = (raw.get("title") or fallback_title or "Module").strip()
+            s = (raw.get("summary") or "").strip()
+            diagram = raw.get("diagram")
+            if not (isinstance(diagram, dict) and isinstance(diagram.get("nodes"), list)):
+                diagram = None
+            if diagram is None:
+                diagram = {
+                    "direction": "TD",
+                    "nodes": [{"id": "root", "label": t, "type": "module", "title": t, "description": (s[:200] if s else t)}],
+                    "edges": [],
+                    "groups": [],
+                }
+            doc = validate_module_doc({"title": t, "summary": s or f"Documentation for {t}.", "diagram": diagram})
+            return doc.model_dump(mode="json")
+    except (ValueError, _json.JSONDecodeError):
+        pass
+
+    # Fallback: markdown extraction (legacy LLM responses)
+    title, summary, diagram = extract_module_metadata_from_markdown(
+        content, fallback_title=fallback_title
+    )
+    t = (title or fallback_title or "Module").strip()
+    s = (summary or "").strip()
+    if diagram is None:
+        diagram = {
+            "direction": "TD",
+            "nodes": [{"id": "root", "label": t, "type": "module", "title": t, "description": (s[:200] if s else t)}],
+            "edges": [],
+            "groups": [],
+        }
+    doc = validate_module_doc({"title": t, "summary": s or f"Documentation for {t}.", "diagram": diagram})
+    return doc.model_dump(mode="json")
 
 
 class DocumentationGenerator:
@@ -72,17 +118,18 @@ class DocumentationGenerator:
                 "max_depth": self.config.max_depth
             },
             "files_generated": [
-                "overview.md",
-                "module_tree.json",
-                "first_module_tree.json"
+                OVERVIEW_FILENAME,
+                MODULE_TREE_FILENAME,
+                FIRST_MODULE_TREE_FILENAME,
             ]
         }
         
-        # Add generated markdown files to the metadata
+        # Add generated per-module JSON (and any legacy markdown) to the metadata
         try:
             for file_path in os.listdir(working_dir):
-                if file_path.endswith('.md') and file_path not in metadata["files_generated"]:
+                if file_path.endswith(MODULE_DOC_EXT) and file_path not in metadata["files_generated"]:
                     metadata["files_generated"].append(file_path)
+
         except Exception as e:
             logger.warning(f"Could not list generated files: {e}")
         
@@ -145,53 +192,49 @@ class DocumentationGenerator:
         children = module_info.get("children", {})
         return not children or (isinstance(children, dict) and len(children) == 0)
     
-    def _generate_quick_overview(self, module_tree: Dict[str, Any], components: Dict[str, Any]) -> str:
-        """Generate a quick overview based on module tree structure only (low latency)."""
+    def _build_quick_overview_doc_dict(
+        self, module_tree: Dict[str, Any], components: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Build validated overview JSON from module tree only (low latency)."""
         repo_name = os.path.basename(os.path.normpath(self.config.repo_path))
-        
-        # Build module structure diagram
-        def build_mermaid_diagram(tree: Dict[str, Any], indent: int = 0) -> str:
-            lines = []
-            for module_name, module_info in tree.items():
-                component_count = len(module_info.get("components", []))
-                lines.append(f"{'  ' * indent}{repo_name} --> {module_name}")
-                if module_info.get("children"):
-                    lines.extend(build_mermaid_diagram(module_info["children"], indent + 1).split("\n"))
-            return "\n".join(filter(None, lines))
-        
-        mermaid_diagram = f"graph TD;\n{build_mermaid_diagram(module_tree)}"
-        
-        # Generate quick overview
-        overview = f"""# {repo_name} - Repository Overview
 
-## Introduction
-This repository contains {len(module_tree)} main modules with a total of {len(components)} components.
+        root_id = repo_name.replace("-", "_").lower()
+        nodes = [{"id": root_id, "label": repo_name, "type": "module"}]
+        edges = []
+        for module_name in module_tree.keys():
+            mid = module_name.replace(" ", "_").lower()
+            nodes.append(
+                {
+                    "id": mid,
+                    "label": module_name.replace("_", " ").title(),
+                    "type": "module",
+                    "link": module_name,
+                }
+            )
+            edges.append({"source": root_id, "target": mid, "label": "contains"})
+        diagram_obj = {"direction": "TD", "nodes": nodes, "edges": edges, "groups": []}
 
-## Architecture Overview
-
-```mermaid
-{mermaid_diagram}
-```
-
-## Modules
-
-"""
+        summary_parts = [
+            f"This repository contains {len(module_tree)} main modules with a total of "
+            f"{len(components)} components."
+        ]
         for module_name, module_info in module_tree.items():
             component_count = len(module_info.get("components", []))
             path = module_info.get("path", "")
-            overview += f"### {module_name}\n"
-            overview += f"- **Path**: `{path}`\n"
-            overview += f"- **Components**: {component_count}\n"
+            line = f"**{module_name}**: path `{path}`, {component_count} components"
             if module_info.get("children"):
-                overview += f"- **Sub-modules**: {len(module_info['children'])}\n"
-            overview += "\n"
-        
-        overview += """
-## Note
-This is a quick overview generated from the module structure. Detailed documentation for each module is being generated and will be available shortly.
+                line += f", {len(module_info['children'])} sub-modules"
+            summary_parts.append(line)
+        summary = "\n\n".join(summary_parts)
 
-"""
-        return overview
+        doc = validate_module_doc(
+            {
+                "title": f"{repo_name} — Repository overview",
+                "summary": summary,
+                "diagram": diagram_obj,
+            }
+        )
+        return doc.model_dump(mode="json")
 
     def build_overview_structure(self, module_tree: Dict[str, Any], module_path: List[str],
                                  working_dir: str) -> Dict[str, Any]:
@@ -223,11 +266,11 @@ This is a quick overview generated from the module structure. Detailed documenta
             module_info = {}
 
         for child_name, child_info in module_info.items():
-            if os.path.exists(os.path.join(working_dir, f"{child_name}.md")):
-                child_info["docs"] = file_manager.load_text(os.path.join(working_dir, f"{child_name}.md"))
+            json_path = module_doc_path(working_dir, child_name)
+            if json_path.exists():
+                child_info["docs"] = json_path.read_text(encoding="utf-8", errors="replace")
             else:
-                child_path = os.path.join(working_dir, f"{child_name}.md")
-                logger.warning(f"Module docs not found at {child_path}")
+                logger.warning("Module docs not found at %s", json_path)
                 child_info["docs"] = ""
 
         return processed_module_tree
@@ -426,7 +469,7 @@ This is a quick overview generated from the module structure. Detailed documenta
                 [], working_dir
             )
             
-            # POST-PROCESSING: Extract diagrams from ALL markdown files into module_tree
+            # POST-PROCESSING: Extract diagrams from module JSON (and legacy markdown) into module_tree
             self._extract_all_diagrams(working_dir, module_tree_path)
         else:
             # No modules in tree - this should be rare after the clustering fixes
@@ -462,57 +505,64 @@ This is a quick overview generated from the module structure. Detailed documenta
                 final_module_tree = fallback_module_tree
                 logger.warning(f"[STAGE 3] Using fallback module tree without full documentation")
 
-            # rename repo_name.md to overview.md if it exists
-            repo_overview_path = os.path.join(working_dir, f"{repo_name}.md")
-            if os.path.exists(repo_overview_path):
-                os.rename(repo_overview_path, os.path.join(working_dir, OVERVIEW_FILENAME))
-                logger.info(f"[STAGE 3] Renamed {repo_name}.md to overview.md")
+            # If the LLM wrote repo_name.{json,md}, normalize to overview.json / overview.md
+            repo_base = os.path.join(working_dir, repo_name)
+            repo_json = repo_base + ".json"
+            if os.path.exists(repo_json):
+                dest = os.path.join(working_dir, OVERVIEW_FILENAME)
+                if os.path.abspath(repo_json) != os.path.abspath(dest):
+                    os.rename(repo_json, dest)
+                    logger.info("[STAGE 3] Renamed %s to %s", os.path.basename(repo_json), OVERVIEW_FILENAME)
             
-            # POST-PROCESSING: Extract diagrams from ALL markdown files into module_tree
+            # POST-PROCESSING: Extract diagrams from module JSON (and legacy markdown) into module_tree
             self._extract_all_diagrams(working_dir, module_tree_path)
         
         return working_dir
     
     def _extract_all_diagrams(self, docs_dir: str, module_tree_path: str) -> None:
         """
-        Post-process: Extract DIAGRAM_JSON from all markdown files and store in module_tree.
-        This ensures recursive diagram extraction for all modules, not just top-level.
+        Post-process: copy diagrams from per-module ``*.json``
+        into module_tree nodes.
         """
         import re
-        import json
-        from pathlib import Path
-        
-        logger.info("[STAGE 3.5] Post-processing: Extracting diagrams from all markdown files")
-        
-        # Load current module_tree
+
+        logger.info("[STAGE 3.5] Post-processing: extracting diagrams from module docs")
+
         module_tree = file_manager.load_json(module_tree_path)
-        
-        # Find all markdown files
-        md_files = list(Path(docs_dir).glob("*.md"))
         diagrams_found = 0
-        
-        for md_file in md_files:
-            module_name = md_file.stem  # filename without extension
-            if module_name in ['overview', 'README']:
+
+        skip_json_stems = {
+            "module_tree",
+            "first_module_tree",
+            "metadata",
+            "entry_points",
+            "generation_report",
+            "viewer_epoch",
+            "sync_issues",
+            "overview",
+            "README",
+        }
+
+        for json_file in Path(docs_dir).glob("*.json"):
+            stem = json_file.stem
+            if stem in skip_json_stems:
                 continue
-            
-            content = md_file.read_text()
-            
-            # Extract DIAGRAM_JSON
-            pattern = r'<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->'
-            match = re.search(pattern, content)
-            if match:
-                try:
-                    diagram = json.loads(match.group(1))
-                    # Find and update the module in tree (recursive search)
-                    if self._apply_diagram_to_tree(module_tree, module_name, diagram):
-                        diagrams_found += 1
-                except json.JSONDecodeError as e:
-                    logger.warning(f"[STAGE 3.5] Invalid DIAGRAM_JSON in {md_file.name}: {e}")
-        
-        # Save updated tree
+            try:
+                raw = json_file.read_text(encoding="utf-8", errors="replace")
+                data = json.loads(raw)
+            except Exception as e:
+                logger.warning("[STAGE 3.5] Skip %s: %s", json_file.name, e)
+                continue
+            if not isinstance(data, dict):
+                continue
+            diagram = data.get("diagram")
+            if isinstance(diagram, dict) and isinstance(diagram.get("nodes"), list):
+                if self._apply_diagram_to_tree(module_tree, stem, diagram):
+                    diagrams_found += 1
+
+
         file_manager.save_json(module_tree, module_tree_path)
-        logger.info(f"[STAGE 3.5] Extracted {diagrams_found} diagrams from markdown files")
+        logger.info("[STAGE 3.5] Extracted %s diagrams into module_tree", diagrams_found)
     
     def _apply_diagram_to_tree(self, tree: Dict, module_name: str, diagram: Dict) -> bool:
         """Recursively find module by name and apply diagram. Returns True if found."""
@@ -536,17 +586,17 @@ This is a quick overview generated from the module structure. Detailed documenta
         module_tree_path = os.path.join(working_dir, MODULE_TREE_FILENAME)
         module_tree = file_manager.load_json(module_tree_path)
 
-        # check if overview docs already exists
         overview_docs_path = os.path.join(working_dir, OVERVIEW_FILENAME)
-        if os.path.exists(overview_docs_path):
-            logger.info(f"✓ Overview docs already exists at {overview_docs_path}")
-            return module_tree
-
-        # check if parent docs already exists
-        parent_docs_path = os.path.join(working_dir, f"{module_name if len(module_path) >= 1 else OVERVIEW_FILENAME.replace('.md', '')}.md")
-        if os.path.exists(parent_docs_path):
-            logger.info(f"✓ Parent docs already exists at {parent_docs_path}")
-            return module_tree
+        if len(module_path) == 0:
+            if os.path.exists(overview_docs_path):
+                logger.info("✓ Overview docs already exists at %s", overview_docs_path)
+                return module_tree
+            parent_docs_path = overview_docs_path
+        else:
+            parent_docs_path = str(module_doc_path(working_dir, module_name))
+            if os.path.exists(parent_docs_path):
+                logger.info("✓ Parent docs already exists at %s", parent_docs_path)
+                return module_tree
 
         # Create repo structure with 1-depth children docs and target indicator
         repo_structure = self.build_overview_structure(module_tree, module_path, working_dir)
@@ -557,13 +607,13 @@ This is a quick overview generated from the module structure. Detailed documenta
             keys = []
             for key, data in tree.items():
                 full_key = f"{prefix}/{key}" if prefix else key
-                keys.append(key)  # Just the key name (maps to key.md)
+                keys.append(key)  # tree key → ``{key}.json`` module doc
                 if data.get("children"):
                     keys.extend(collect_module_keys(data["children"], full_key))
             return keys
         
         available_modules = collect_module_keys(module_tree)
-        available_modules_str = ", ".join([f'"{m}.md"' for m in available_modules]) if available_modules else "(no sub-modules)"
+        available_modules_str = ", ".join([f'"{m}"' for m in available_modules]) if available_modules else "(no sub-modules)"
         logger.info(f"[STAGE 3] Available modules for linking: {available_modules_str}")
 
         prompt = MODULE_OVERVIEW_PROMPT.format(
@@ -608,14 +658,17 @@ This is a quick overview generated from the module structure. Detailed documenta
                     parent_content = "\n".join(lines).strip()
             
             try:
-                file_manager.save_text(parent_content, parent_docs_path)
-                logger.info(f"[STAGE 3] Successfully saved parent documentation to {parent_docs_path}")
-                logger.info(f"[STAGE 3] File size: {len(parent_content)} chars")
+                payload = _llm_markdown_overview_to_module_doc_payload(parent_content, module_name)
+                file_manager.save_json(payload, parent_docs_path)
+                logger.info(
+                    "[STAGE 3] Successfully saved parent documentation to %s",
+                    parent_docs_path,
+                )
             except Exception as e:
                 logger.error(f"[STAGE 3] Failed to save parent documentation: {e}")
                 raise
 
-            # Write title/description/diagram from parent .md into module_tree (same as leaf path)
+            # Write title/description/diagram from parent JSON into module_tree (same as leaf path)
             if len(module_path) >= 1:
                 try:
                     ext_title, ext_desc, ext_diagram = extract_module_metadata_from_file(
@@ -761,8 +814,8 @@ This is a quick overview generated from the module structure. Detailed documenta
                 try:
                     logger.info("🚀 Generating low-latency overview (top-level structure only)...")
                     # Generate a quick overview based on module tree structure only
-                    quick_overview = self._generate_quick_overview(module_tree, components)
-                    file_manager.save_text(quick_overview, overview_path)
+                    quick = self._build_quick_overview_doc_dict(module_tree, components)
+                    file_manager.save_json(quick, overview_path)
                     logger.info(f"✓ Quick overview generated at {overview_path}")
                     
                     # Track first overview for metrics
@@ -787,7 +840,7 @@ This is a quick overview generated from the module structure. Detailed documenta
             self.create_documentation_metadata(working_dir, components, len(leaf_nodes))
             
             # POST-PROCESSING: Sync files with module tree
-            # This ensures all modules in tree have corresponding .md files
+            # This ensures all modules in tree have corresponding JSON docs
             try:
                 from codewiki.src.be.doc_file_sync import run_full_sync
                 sync_result = run_full_sync(working_dir, components, config=self.config)

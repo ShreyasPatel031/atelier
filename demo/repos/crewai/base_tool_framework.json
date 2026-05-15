@@ -1,0 +1,244 @@
+{
+  "title": "Base Tool Framework",
+  "summary": "This module defines the foundational structure for creating and managing AI tools, including their specification extraction, argument schema generation, and integration with agent-based systems. It provides utilities for converting tools to and from Langchain formats and handling asynchronous execution.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "tool_spec_extractor",
+        "label": "Extract Tool Specifications",
+        "type": "component",
+        "link": null,
+        "title": "Tool Specification Extractor",
+        "description": "Scans and extracts metadata, including name, description, run parameters, initialization parameters, environment variables, and package dependencies, from BaseTool classes."
+      },
+      {
+        "id": "base_agent_tool",
+        "label": "Define Base Agent Tool",
+        "type": "component",
+        "link": null,
+        "title": "Base Agent Tool Definition",
+        "description": "Provides a base class for tools specifically designed for agents, including methods for sanitizing agent names and delegating tasks to other agents within a crew."
+      },
+      {
+        "id": "to_langchain_converter",
+        "label": "Convert to Langchain Tool",
+        "type": "component",
+        "link": null,
+        "title": "Langchain Tool Converter",
+        "description": "Converts internal BaseTool or CrewStructuredTool instances into a list of CrewStructuredTool objects for compatibility with Langchain."
+      },
+      {
+        "id": "default_args_schema_generator",
+        "label": "Generate Default Arg Schema",
+        "type": "component",
+        "link": null,
+        "title": "Default Argument Schema Generator",
+        "description": "Dynamically generates Pydantic argument schemas for tool methods (_run or _arun) based on their function signatures, handling default values and type annotations."
+      },
+      {
+        "id": "make_tool_function",
+        "label": "Create Tool Instance",
+        "type": "component",
+        "link": null,
+        "title": "Tool Instance Creator",
+        "description": "A utility function to create a Tool instance from a callable function, automatically inferring its argument schema and incorporating metadata like name and description."
+      },
+      {
+        "id": "async_tool_runner",
+        "label": "Execute Tool Asynchronously",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Tool Runner",
+        "description": "Handles the asynchronous execution of a tool, including argument validation, claiming usage, and invoking the tool's _arun method."
+      },
+      {
+        "id": "tool_validator",
+        "label": "Validate Tool Instance",
+        "type": "component",
+        "link": null,
+        "title": "Tool Instance Validator",
+        "description": "Validates tool instances, ensuring they conform to the expected BaseTool structure or can be resolved from a dictionary representation."
+      },
+      {
+        "id": "from_langchain_converter",
+        "label": "Convert from Langchain Tool",
+        "type": "component",
+        "link": null,
+        "title": "Langchain Tool Importer",
+        "description": "Converts a Langchain tool object into an internal BaseTool instance, inferring the argument schema if not explicitly provided."
+      },
+      {
+        "id": "tool_decorator",
+        "label": "Decorate Function as Tool",
+        "type": "component",
+        "link": null,
+        "title": "Tool Function Decorator",
+        "description": "A decorator that transforms a regular Python function into a Tool instance, automatically using the function's name and docstring."
+      },
+      {
+        "id": "langchain_framework",
+        "label": "Langchain Framework",
+        "type": "external",
+        "link": null,
+        "title": "Langchain Integration",
+        "description": "Represents the external Langchain framework, which can provide tools to be integrated or consume tools from this framework."
+      },
+      {
+        "id": "agent_system",
+        "label": "Agent Orchestration System",
+        "type": "external",
+        "link": "agent_and_crew_orchestration",
+        "title": "Agent System",
+        "description": "The core agent orchestration system that utilizes tools, especially BaseAgentTool, for task delegation and execution."
+      }
+    ],
+    "edges": [
+      {
+        "source": "tool_spec_extractor",
+        "target": "make_tool_function",
+        "label": "Extracts specs from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "default_args_schema_generator",
+        "target": "make_tool_function",
+        "label": "Provides schemas for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "default_args_schema_generator",
+        "target": "from_langchain_converter",
+        "label": "Infers schemas for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "make_tool_function",
+        "target": "tool_decorator",
+        "label": "Used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_decorator",
+        "target": "tool_validator",
+        "label": "Produces tools for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_decorator",
+        "target": "async_tool_runner",
+        "label": "Produces tools for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "from_langchain_converter",
+        "target": "tool_validator",
+        "label": "Produces tools for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "from_langchain_converter",
+        "target": "async_tool_runner",
+        "label": "Produces tools for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "to_langchain_converter",
+        "target": "langchain_framework",
+        "label": "Converts tools for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "langchain_framework",
+        "target": "from_langchain_converter",
+        "label": "Provides tools to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_agent_tool",
+        "target": "async_tool_runner",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_agent_tool",
+        "target": "agent_system",
+        "label": "Integrated into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_system",
+        "target": "base_agent_tool",
+        "label": "Delegates tasks via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_tool_runner",
+        "target": "agent_system",
+        "label": "Returns results to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "tool_definition_creation",
+        "label": "Tool Definition & Creation",
+        "nodes": [
+          "tool_decorator",
+          "make_tool_function",
+          "default_args_schema_generator"
+        ],
+        "title": "Tool Definition & Creation",
+        "description": "Components responsible for defining, creating, and decorating functions into structured tool instances, including dynamic schema generation.",
+        "role": "generative"
+      },
+      {
+        "id": "tool_spec_metadata",
+        "label": "Tool Specification & Metadata",
+        "nodes": [
+          "tool_spec_extractor",
+          "tool_validator"
+        ],
+        "title": "Tool Specification & Metadata",
+        "description": "Handles the extraction and validation of tool specifications and metadata, ensuring tools conform to expected structures and providing detailed information about their capabilities.",
+        "role": "analytical"
+      },
+      {
+        "id": "tool_execution_agent_integration",
+        "label": "Tool Execution & Agent Integration",
+        "nodes": [
+          "async_tool_runner",
+          "base_agent_tool"
+        ],
+        "title": "Tool Execution & Agent Integration",
+        "description": "Manages the execution lifecycle of tools, particularly for agent-specific functionalities, including asynchronous execution and delegation within an agent system.",
+        "role": "surface"
+      },
+      {
+        "id": "external_framework_interoperability",
+        "label": "External Framework Interoperability",
+        "nodes": [
+          "to_langchain_converter",
+          "from_langchain_converter"
+        ],
+        "title": "External Framework Interoperability",
+        "description": "Facilitates the conversion of tools to and from external frameworks like Langchain, enabling seamless integration and broader utility.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -150,10 +150,12 @@ class CLIDocumentationGenerator:
                 repo_path=str(self.repo_path),
                 output_dir=str(self.output_dir),
                 llm_base_url=self.config.get('base_url'),
-                llm_api_key=self.config.get('api_key'),
+                llm_api_key=self.config.get('api_key') or '',
                 main_model=main_model,
                 cluster_model=self.config.get('cluster_model'),
-                fallback_model=main_model  # Use same model for fallback
+                fallback_model=main_model,
+                use_vertex_ai=bool(self.config.get('use_vertex_ai', False)),
+                gcp_project=self.config.get('gcp_project', ''),
             )
             
             # Run backend documentation generation
@@ -242,7 +244,8 @@ class CLIDocumentationGenerator:
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(STAGE_1_TIMEOUT)
         try:
-            components, leaf_nodes, _reachability = doc_generator.graph_builder.build_dependency_graph()
+            _graph_result = doc_generator.graph_builder.build_dependency_graph()
+            components, leaf_nodes = _graph_result[0], _graph_result[1]
             signal.alarm(0)  # Cancel timeout
             stage_1_duration = time.time() - stage_1_start
             self.job.statistics.total_files_analyzed = len(components)
@@ -314,7 +317,7 @@ class CLIDocumentationGenerator:
         metrics.complete_stage("Module Clustering")
         
         # Track first overview generation (low latency)
-        overview_path = os.path.join(working_dir, "overview.md")
+        overview_path = os.path.join(working_dir, "overview.json")
         if os.path.exists(overview_path):
             metrics.record_first_overview(overview_path)
         
@@ -365,19 +368,18 @@ class CLIDocumentationGenerator:
                 _log.warning("Doc sync failed (non-critical): %s", sync_err)
             
             # Collect generated files (after sync may add placeholders)
-            md_files = []
+            json_files = []
             for file_path in os.listdir(working_dir):
-                if file_path.endswith('.md') or file_path.endswith('.json'):
+                if file_path.endswith('.json'):
                     self.job.files_generated.append(file_path)
-                    if file_path.endswith('.md'):
-                        stage_metrics.files_created += 1
-                        stage_metrics.files_created_list.append(file_path)
-                        md_files.append(file_path)
+                    stage_metrics.files_created += 1
+                    stage_metrics.files_created_list.append(file_path)
+                    json_files.append(file_path)
             
-            click.echo(f"[DEBUG] [{time.time() - stage_3_start:.1f}s] Generated {len(md_files)} markdown files: {', '.join(md_files[:5])}{'...' if len(md_files) > 5 else ''}", err=True)
+            click.echo(f"[DEBUG] [{time.time() - stage_3_start:.1f}s] Generated {len(json_files)} JSON files: {', '.join(json_files[:5])}{'...' if len(json_files) > 5 else ''}", err=True)
             
             # Track first overview if created
-            overview_path = os.path.join(working_dir, "overview.md")
+            overview_path = os.path.join(working_dir, "overview.json")
             if os.path.exists(overview_path) and metrics.time_to_first_overview is None:
                 metrics.record_first_overview(overview_path)
                 click.echo(f"[DEBUG] First overview created at {metrics.time_to_first_overview:.1f}s", err=True)

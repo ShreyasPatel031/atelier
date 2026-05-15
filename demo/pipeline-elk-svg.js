@@ -1,6 +1,6 @@
 /**
  * R5: ELK laid-out graph → SVG (preview before React Flow).
- * Depends on global ELK (elk.bundled.js), diagramToElkInput, repairDiagramIR.
+ * Depends on global ELK (elk.bundled.js), diagramToElkInput.
  */
 (function (global) {
     'use strict';
@@ -199,12 +199,6 @@
         if (!diagram || typeof diagram !== 'object') {
             return { ok: false, error: 'no_diagram', warnings: mergedWarnings };
         }
-        var d = diagram;
-        if (typeof global.repairDiagramIR === 'function') {
-            var rep = global.repairDiagramIR(diagram);
-            if (rep.warnings && rep.warnings.length) mergedWarnings = mergedWarnings.concat(rep.warnings);
-            if (rep.ok && rep.diagram) d = rep.diagram;
-        }
         if (typeof global.diagramToElkInput !== 'function') {
             return { ok: false, error: 'diagramToElkInput missing', warnings: mergedWarnings };
         }
@@ -213,7 +207,7 @@
         if (vt && typeof vt.elkLeafNodeWidth === 'number' && !isNaN(vt.elkLeafNodeWidth)) {
             elkInputOpts.leafNodeWidth = vt.elkLeafNodeWidth;
         }
-        var pack = global.diagramToElkInput(d, elkInputOpts);
+        var pack = global.diagramToElkInput(diagram, elkInputOpts);
         if (pack.warnings && pack.warnings.length) mergedWarnings = mergedWarnings.concat(pack.warnings);
         if (!pack.ok || !pack.elkGraph) {
             return {

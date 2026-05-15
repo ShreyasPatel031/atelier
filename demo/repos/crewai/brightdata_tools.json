@@ -1,0 +1,104 @@
+{
+  "title": "Bright Data Integration Tools",
+  "summary": "This module provides tools for integrating with Bright Data's services, enabling AI agents to perform web search (SERP) and advanced web scraping (Web Unlocker) by interacting with Bright Data's APIs.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "brightdata_search_tool",
+        "label": "Perform Web Search (SERP)",
+        "type": "component",
+        "link": null,
+        "title": "BrightDataSearchTool",
+        "description": "Executes web search queries across various search engines (e.g., Google, Bing) using Bright Data's SERP API. It can retrieve structured search results or raw page content, with options for geotargeting, language, and device type."
+      },
+      {
+        "id": "brightdata_web_unlocker_tool",
+        "label": "Scrape Web Pages (Unlocker)",
+        "type": "component",
+        "link": null,
+        "title": "BrightDataWebUnlockerTool",
+        "description": "Performs web scraping using Bright Data's Web Unlocker API. This tool bypasses bot protection, CAPTCHAs, and geo-restrictions to extract content from web pages, returning it in raw or markdown format."
+      },
+      {
+        "id": "brightdata_serp_api",
+        "label": "Bright Data SERP API",
+        "type": "external",
+        "link": null,
+        "title": "Bright Data SERP API",
+        "description": "External Bright Data service providing search engine results page (SERP) data based on specified queries and parameters."
+      },
+      {
+        "id": "brightdata_web_unlocker_api",
+        "label": "Bright Data Web Unlocker API",
+        "type": "external",
+        "link": null,
+        "title": "Bright Data Web Unlocker API",
+        "description": "External Bright Data service for advanced web scraping, capable of bypassing bot detection, CAPTCHAs, and geo-restrictions to retrieve web content."
+      },
+      {
+        "id": "env_vars",
+        "label": "Environment Variables",
+        "type": "external",
+        "link": null,
+        "title": "API Credentials",
+        "description": "Stores sensitive configuration like Bright Data API keys (BRIGHT_DATA_API_KEY) and zone identifiers (BRIGHT_DATA_ZONE), essential for authenticating with Bright Data services."
+      }
+    ],
+    "edges": [
+      {
+        "source": "brightdata_search_tool",
+        "target": "brightdata_serp_api",
+        "label": "Sends Search Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "brightdata_web_unlocker_tool",
+        "target": "brightdata_web_unlocker_api",
+        "label": "Sends Scraping Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "env_vars",
+        "target": "brightdata_search_tool",
+        "label": "Provides API Credentials",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "env_vars",
+        "target": "brightdata_web_unlocker_tool",
+        "label": "Provides API Credentials",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_tools",
+        "label": "Agent Tools",
+        "nodes": [
+          "brightdata_search_tool",
+          "brightdata_web_unlocker_tool"
+        ],
+        "title": "Agent-Facing Tools",
+        "description": "These components are the primary interfaces for AI agents to interact with Bright Data services.",
+        "role": "surface"
+      },
+      {
+        "id": "external_data_services",
+        "label": "External Bright Data Services",
+        "nodes": [
+          "brightdata_serp_api",
+          "brightdata_web_unlocker_api",
+          "env_vars"
+        ],
+        "title": "External Bright Data Services",
+        "description": "External APIs provided by Bright Data for web search and scraping operations.",
+        "role": "data"
+      }
+    ]
+  }
+}

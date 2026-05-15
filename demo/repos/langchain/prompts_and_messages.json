@@ -1,0 +1,981 @@
+{
+  "title": "LLM Prompting and Messaging",
+  "summary": "This module provides core components for constructing and managing prompts for Large Language Models (LLMs), including various prompt templates (chat, few-shot, structured) and utilities for handling and translating message content across different LLM providers.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "ChatPromptValueConcrete",
+        "label": "Represent Concrete Chat Prompt Value",
+        "type": "component",
+        "link": null,
+        "title": "Concrete Chat Prompt Value",
+        "description": "A concrete representation of a chat prompt's value, explicitly listing the message types it contains. Used for defining external schemas and ensuring type safety in prompt construction."
+      },
+      {
+        "id": "AIMessagePromptTemplate",
+        "label": "Create AI Message Prompt",
+        "type": "component",
+        "link": null,
+        "title": "AI Message Prompt Template",
+        "description": "A specialized prompt template for generating AI messages, inheriting from the base message prompt template. It defines the structure and content for AI-generated responses."
+      },
+      {
+        "id": "SystemMessagePromptTemplate",
+        "label": "Create System Message Prompt",
+        "type": "component",
+        "link": null,
+        "title": "System Message Prompt Template",
+        "description": "A specialized prompt template for generating system messages, which provide context or instructions to the AI model without being directly visible to the end-user."
+      },
+      {
+        "id": "ChatMessagePromptTemplate",
+        "label": "Create Generic Chat Message Prompt",
+        "type": "component",
+        "link": null,
+        "title": "Chat Message Prompt Template",
+        "description": "A versatile prompt template for creating chat messages with a specified role (e.g., human, AI, system). It formats input variables into a BaseMessage object."
+      },
+      {
+        "id": "FewShotChatMessagePromptTemplate",
+        "label": "Generate Few-Shot Chat Messages",
+        "type": "component",
+        "link": null,
+        "title": "Few-Shot Chat Message Prompt Template",
+        "description": "A chat prompt template that incorporates few-shot examples to guide the language model's behavior. It can use fixed examples or dynamically select them based on input."
+      },
+      {
+        "id": "FewShotPromptWithTemplates",
+        "label": "Generate Few-Shot String Prompt",
+        "type": "component",
+        "link": null,
+        "title": "Few-Shot Prompt with Templates",
+        "description": "A string-based prompt template that includes few-shot examples, allowing for dynamic example selection and flexible formatting using prefix, suffix, and example prompts."
+      },
+      {
+        "id": "_load_few_shot_prompt",
+        "label": "Load Few-Shot Prompt from Config",
+        "type": "component",
+        "link": null,
+        "title": "Load Few-Shot Prompt",
+        "description": "A utility function responsible for loading and configuring a FewShotPromptTemplate from a dictionary-based configuration, handling example prompts and selectors."
+      },
+      {
+        "id": "_load_prompt",
+        "label": "Load Generic Prompt from Config",
+        "type": "component",
+        "link": null,
+        "title": "Load Generic Prompt",
+        "description": "A utility function to load a PromptTemplate from a configuration dictionary, supporting various template formats and ensuring proper setup of the prompt."
+      },
+      {
+        "id": "BaseMessagePromptTemplate",
+        "label": "Base for Message Prompts",
+        "type": "component",
+        "link": null,
+        "title": "Base Message Prompt Template",
+        "description": "An abstract base class for all message prompt templates, defining the interface for formatting messages from keyword arguments into a list of BaseMessage objects."
+      },
+      {
+        "id": "jinja2_formatter",
+        "label": "Format Template with Jinja2",
+        "type": "component",
+        "link": null,
+        "title": "Jinja2 Template Formatter",
+        "description": "A function that formats a given template string using the Jinja2 templating engine. It uses a sandboxed environment for security, rendering variables into the template."
+      },
+      {
+        "id": "mustache_formatter",
+        "label": "Format Template with Mustache",
+        "type": "component",
+        "link": null,
+        "title": "Mustache Template Formatter",
+        "description": "A function that formats a given template string using the Mustache templating engine. It substitutes variables in the template with provided keyword arguments."
+      },
+      {
+        "id": "StringPromptTemplate",
+        "label": "Base for String Prompts",
+        "type": "component",
+        "link": null,
+        "title": "String Prompt Template",
+        "description": "An abstract base class for prompt templates that produce a string output. It provides methods for formatting the prompt and converting it into a PromptValue."
+      },
+      {
+        "id": "StructuredPrompt",
+        "label": "Define Prompt with Output Schema",
+        "type": "component",
+        "link": null,
+        "title": "Structured Prompt Template",
+        "description": "A specialized chat prompt template designed to enforce a structured output format from the language model, typically by piping to a model with structured output capabilities."
+      },
+      {
+        "id": "_register_translators",
+        "label": "Register Provider Translators",
+        "type": "component",
+        "link": null,
+        "title": "Register Message Block Translators",
+        "description": "A function that registers all built-in message block translators for various LLM providers within the langchain-core, enabling consistent message content handling."
+      },
+      {
+        "id": "anthropic_iter_blocks",
+        "label": "Extract Anthropic Content Blocks",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Content Block Iterator",
+        "description": "Iterates through and extracts content blocks from Anthropic-specific message formats, converting them into a standardized internal representation for processing."
+      },
+      {
+        "id": "bedrock_translate_content",
+        "label": "Translate Bedrock Message",
+        "type": "component",
+        "link": null,
+        "title": "Translate Bedrock Message Content",
+        "description": "Translates the content of an AIMessage from Bedrock-specific formats into a list of standardized internal content blocks, primarily for Anthropic models on Bedrock."
+      },
+      {
+        "id": "bedrock_translate_chunk",
+        "label": "Translate Bedrock Message Chunk",
+        "type": "component",
+        "link": null,
+        "title": "Translate Bedrock Message Chunk",
+        "description": "Translates the content of an AIMessageChunk from Bedrock-specific formats into a list of standardized internal content blocks, supporting streaming responses."
+      },
+      {
+        "id": "bedrock_converse_iter_blocks",
+        "label": "Extract Bedrock Converse Blocks",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Converse Block Iterator",
+        "description": "Iterates through and extracts content blocks from Bedrock Converse API message formats, converting them into a standardized internal representation for processing."
+      },
+      {
+        "id": "google_genai_translate_content",
+        "label": "Translate Google GenAI Message",
+        "type": "component",
+        "link": null,
+        "title": "Translate Google GenAI Content",
+        "description": "Translates the content of an AIMessage from Google Generative AI-specific formats into a list of standardized internal content blocks for consistent handling."
+      },
+      {
+        "id": "google_genai_translate_chunk",
+        "label": "Translate Google GenAI Chunk",
+        "type": "component",
+        "link": null,
+        "title": "Translate Google GenAI Chunk",
+        "description": "Translates the content of an AIMessageChunk from Google Generative AI-specific formats into a list of standardized internal content blocks, supporting streaming responses."
+      },
+      {
+        "id": "groq_translate_content",
+        "label": "Translate Groq Message",
+        "type": "component",
+        "link": null,
+        "title": "Translate Groq Message Content",
+        "description": "Translates the content of an AIMessage from Groq-specific formats into a list of standardized internal content blocks for consistent handling within LangChain."
+      },
+      {
+        "id": "groq_translate_chunk",
+        "label": "Translate Groq Message Chunk",
+        "type": "component",
+        "link": null,
+        "title": "Translate Groq Message Chunk",
+        "description": "Translates the content of an AIMessageChunk from Groq-specific formats into a list of standardized internal content blocks, supporting streaming responses."
+      },
+      {
+        "id": "openai_translate_content",
+        "label": "Translate OpenAI Message",
+        "type": "component",
+        "link": null,
+        "title": "Translate OpenAI Message Content",
+        "description": "Translates the content of an AIMessage from OpenAI-specific formats (chat completions or responses) into a list of standardized internal content blocks."
+      },
+      {
+        "id": "openai_translate_chunk",
+        "label": "Translate OpenAI Message Chunk",
+        "type": "component",
+        "link": null,
+        "title": "Translate OpenAI Message Chunk",
+        "description": "Translates the content of an AIMessageChunk from OpenAI-specific formats (chat completions or responses) into a list of standardized internal content blocks, supporting streaming."
+      },
+      {
+        "id": "openai_iter_blocks",
+        "label": "Extract OpenAI Content Blocks",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Content Block Iterator",
+        "description": "Iterates through and extracts content blocks from OpenAI-specific message formats, converting them into a standardized internal representation for processing."
+      },
+      {
+        "id": "openai_convert_chat_input",
+        "label": "Convert OpenAI Chat Input",
+        "type": "component",
+        "link": null,
+        "title": "Convert OpenAI Chat Input Blocks",
+        "description": "Converts OpenAI Chat Completions format blocks into the internal v1 content block format, handling various data types like images, audio, and files."
+      },
+      {
+        "id": "create_text_block",
+        "label": "Create Text Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Text Content Block",
+        "description": "A factory function to create a standardized TextContentBlock, encapsulating text content, optional annotations, and an identifier for message construction."
+      },
+      {
+        "id": "create_image_block",
+        "label": "Create Image Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Image Content Block",
+        "description": "A factory function to create a standardized ImageContentBlock, supporting image data via URL, base64 encoding, or file ID, along with an optional MIME type."
+      },
+      {
+        "id": "create_video_block",
+        "label": "Create Video Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Video Content Block",
+        "description": "A factory function to create a standardized VideoContentBlock, supporting video data via URL, base64 encoding, or file ID, and requiring a MIME type for base64."
+      },
+      {
+        "id": "create_audio_block",
+        "label": "Create Audio Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Audio Content Block",
+        "description": "A factory function to create a standardized AudioContentBlock, supporting audio data via URL, base64 encoding, or file ID, and requiring a MIME type for base64."
+      },
+      {
+        "id": "create_file_block",
+        "label": "Create File Block",
+        "type": "component",
+        "link": null,
+        "title": "Create File Content Block",
+        "description": "A factory function to create a standardized FileContentBlock, supporting generic file data via URL, base64 encoding, or file ID, and requiring a MIME type for base64."
+      },
+      {
+        "id": "create_plaintext_block",
+        "label": "Create Plaintext Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Plaintext Content Block",
+        "description": "A factory function to create a standardized PlainTextContentBlock, encapsulating plain text content, optionally from a URL, base64, or file ID, with title and context."
+      },
+      {
+        "id": "create_reasoning_block",
+        "label": "Create Reasoning Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Reasoning Content Block",
+        "description": "A factory function to create a standardized ReasoningContentBlock, used to represent the thought process or internal reasoning of an AI model."
+      },
+      {
+        "id": "create_non_standard_block",
+        "label": "Create Non-Standard Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Non-Standard Content Block",
+        "description": "A factory function to create a NonStandardContentBlock, used to wrap provider-specific content data that does not fit into predefined standardized content block types."
+      },
+      {
+        "id": "_approximate_token_counter",
+        "label": "Approximate Token Count",
+        "type": "component",
+        "link": null,
+        "title": "Approximate Token Counter",
+        "description": "A utility function that provides an approximate count of tokens for a sequence of BaseMessage objects, useful for managing context window limits in LLMs."
+      },
+      {
+        "id": "wrapped",
+        "label": "Wrap Function as Runnable",
+        "type": "component",
+        "link": null,
+        "title": "Function Wrapper for Runnable",
+        "description": "A utility function that transforms a regular Python function into a LangChain Runnable, allowing it to be integrated into complex chains and workflows. It supports both direct invocation and deferred runnable creation."
+      },
+      {
+        "id": "merge_message_runs",
+        "label": "Merge Consecutive Messages",
+        "type": "component",
+        "link": null,
+        "title": "Merge Message Runs",
+        "description": "Merges consecutive messages of the same type into a single message, concatenating string content or combining content blocks. Useful for optimizing message history."
+      },
+      {
+        "id": "filter_messages",
+        "label": "Filter Messages by Criteria",
+        "type": "component",
+        "link": null,
+        "title": "Filter Messages",
+        "description": "Filters a sequence of messages based on various criteria such as message name, type, ID, or tool call IDs, allowing for precise control over message selection."
+      },
+      {
+        "id": "_last_max_tokens",
+        "label": "Truncate Messages by Token Count",
+        "type": "component",
+        "link": null,
+        "title": "Truncate Messages by Token Count",
+        "description": "Truncates a list of messages to fit within a specified maximum token limit, prioritizing the most recent messages while optionally preserving system messages."
+      },
+      {
+        "id": "BasePromptTemplate",
+        "label": "Base Prompt Template",
+        "type": "external",
+        "link": "base_components",
+        "title": "Base Prompt Template",
+        "description": "The foundational abstract class for all prompt templates, defining the basic interface for formatting inputs into a prompt string or value."
+      },
+      {
+        "id": "BaseMessage",
+        "label": "Base Message Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "Base Message",
+        "description": "The abstract base class for all message types in LangChain, providing a common interface for different roles like human, AI, and system messages."
+      },
+      {
+        "id": "AIMessage",
+        "label": "AI Message Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "AI Message",
+        "description": "Represents a message generated by an AI model, containing the AI's response content, which can be text, structured data, or a combination of content blocks."
+      },
+      {
+        "id": "AIMessageChunk",
+        "label": "AI Message Chunk Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "AI Message Chunk",
+        "description": "Represents a partial or streaming chunk of an AI message, used for incremental updates during real-time generation from language models."
+      },
+      {
+        "id": "ChatPromptTemplate",
+        "label": "Chat Prompt Template",
+        "type": "external",
+        "link": "base_components",
+        "title": "Chat Prompt Template",
+        "description": "A prompt template specifically designed for chat-based interactions, allowing the construction of prompts from a sequence of message-like representations."
+      },
+      {
+        "id": "ChatPromptValue",
+        "label": "Chat Prompt Value",
+        "type": "external",
+        "link": "base_components",
+        "title": "Chat Prompt Value",
+        "description": "A value object representing a chat prompt, typically containing a sequence of messages that can be passed to a chat model."
+      },
+      {
+        "id": "BaseLanguageModel",
+        "label": "Base Language Model",
+        "type": "external",
+        "link": "base_components",
+        "title": "Base Language Model",
+        "description": "The abstract base class for all language models, defining the fundamental interface for interacting with LLMs, including methods for generation and structured output."
+      },
+      {
+        "id": "Runnable",
+        "label": "Runnable Interface",
+        "type": "external",
+        "link": "base_components",
+        "title": "Runnable",
+        "description": "The core interface for all LangChain components that can be invoked, streamed, or batched, enabling flexible composition of complex applications."
+      },
+      {
+        "id": "RunnableSerializable",
+        "label": "Serializable Runnable",
+        "type": "external",
+        "link": "base_components",
+        "title": "RunnableSerializable",
+        "description": "An extension of the Runnable interface that adds serialization capabilities, allowing components to be saved and loaded for persistence and sharing."
+      },
+      {
+        "id": "PromptValue",
+        "label": "Prompt Value",
+        "type": "external",
+        "link": "base_components",
+        "title": "Prompt Value",
+        "description": "A generic value object representing a formatted prompt, which can be converted into different formats suitable for various language models."
+      },
+      {
+        "id": "ContentBlock",
+        "label": "Generic Content Block",
+        "type": "external",
+        "link": "base_components",
+        "title": "Content Block",
+        "description": "A fundamental data structure representing a single piece of content within a message, such as text, images, or tool calls, allowing for multimodal messages."
+      },
+      {
+        "id": "TextContentBlock",
+        "label": "Text Content Block Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "Text Content Block",
+        "description": "A specific type of ContentBlock dedicated to holding textual information, often including annotations or metadata related to the text."
+      },
+      {
+        "id": "ImageContentBlock",
+        "label": "Image Content Block Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "Image Content Block",
+        "description": "A specific type of ContentBlock designed to represent image data, which can be provided as a URL, base64 encoded string, or a file ID."
+      },
+      {
+        "id": "VideoContentBlock",
+        "label": "Video Content Block Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "Video Content Block",
+        "description": "A specific type of ContentBlock for video data, supporting various sources like URLs, base64 encoded strings, or file IDs, along with its MIME type."
+      },
+      {
+        "id": "AudioContentBlock",
+        "label": "Audio Content Block Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "Audio Content Block",
+        "description": "A specific type of ContentBlock for audio data, allowing specification via URL, base64 encoded string, or file ID, and its corresponding MIME type."
+      },
+      {
+        "id": "FileContentBlock",
+        "label": "File Content Block Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "File Content Block",
+        "description": "A generic ContentBlock type for arbitrary file data, which can be referenced by URL, base64 encoded content, or a file ID, and includes its MIME type."
+      },
+      {
+        "id": "PlainTextContentBlock",
+        "label": "Plain Text Content Block Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "Plain Text Content Block",
+        "description": "A specialized ContentBlock for plain text, offering options to specify content directly, or via URL, base64, or file ID, with additional title and context fields."
+      },
+      {
+        "id": "ReasoningContentBlock",
+        "label": "Reasoning Content Block Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "Reasoning Content Block",
+        "description": "A ContentBlock type specifically for representing the internal reasoning or thought process of an AI model, often used in agentic workflows."
+      },
+      {
+        "id": "NonStandardContentBlock",
+        "label": "Non-Standard Content Block Type",
+        "type": "external",
+        "link": "base_components",
+        "title": "Non-Standard Content Block",
+        "description": "A flexible ContentBlock type used to encapsulate provider-specific or custom content data that does not fit into any of the predefined standard content block types."
+      }
+    ],
+    "edges": [
+      {
+        "source": "AIMessagePromptTemplate",
+        "target": "BaseMessagePromptTemplate",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SystemMessagePromptTemplate",
+        "target": "BaseMessagePromptTemplate",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatMessagePromptTemplate",
+        "target": "BaseMessagePromptTemplate",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FewShotChatMessagePromptTemplate",
+        "target": "BaseMessagePromptTemplate",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FewShotPromptWithTemplates",
+        "target": "StringPromptTemplate",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringPromptTemplate",
+        "target": "BasePromptTemplate",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredPrompt",
+        "target": "ChatPromptTemplate",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatPromptValueConcrete",
+        "target": "ChatPromptValue",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_load_few_shot_prompt",
+        "target": "FewShotPromptWithTemplates",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_load_prompt",
+        "target": "StringPromptTemplate",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringPromptTemplate",
+        "target": "jinja2_formatter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringPromptTemplate",
+        "target": "mustache_formatter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseMessagePromptTemplate",
+        "target": "ChatPromptTemplate",
+        "label": "can combine into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringPromptTemplate",
+        "target": "PromptValue",
+        "label": "formats to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredPrompt",
+        "target": "BaseLanguageModel",
+        "label": "pipes to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredPrompt",
+        "target": "RunnableSerializable",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "anthropic_iter_blocks",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "bedrock_translate_content",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "bedrock_translate_chunk",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "bedrock_converse_iter_blocks",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "google_genai_translate_content",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "google_genai_translate_chunk",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "groq_translate_content",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "groq_translate_chunk",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "openai_translate_content",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "openai_translate_chunk",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_register_translators",
+        "target": "openai_iter_blocks",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_translate_content",
+        "target": "AIMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_translate_content",
+        "target": "ContentBlock",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_translate_chunk",
+        "target": "AIMessageChunk",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_translate_chunk",
+        "target": "ContentBlock",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "google_genai_translate_content",
+        "target": "AIMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "google_genai_translate_content",
+        "target": "ContentBlock",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "google_genai_translate_chunk",
+        "target": "AIMessageChunk",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "google_genai_translate_chunk",
+        "target": "ContentBlock",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_translate_content",
+        "target": "AIMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_translate_content",
+        "target": "ContentBlock",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_translate_chunk",
+        "target": "AIMessageChunk",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_translate_chunk",
+        "target": "ContentBlock",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_translate_content",
+        "target": "AIMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_translate_content",
+        "target": "ContentBlock",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_translate_chunk",
+        "target": "AIMessageChunk",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_translate_chunk",
+        "target": "ContentBlock",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_iter_blocks",
+        "target": "AIMessage",
+        "label": "extracts from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_iter_blocks",
+        "target": "ContentBlock",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_convert_chat_input",
+        "target": "ContentBlock",
+        "label": "converts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_text_block",
+        "target": "TextContentBlock",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_image_block",
+        "target": "ImageContentBlock",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_video_block",
+        "target": "VideoContentBlock",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_audio_block",
+        "target": "AudioContentBlock",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_file_block",
+        "target": "FileContentBlock",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_plaintext_block",
+        "target": "PlainTextContentBlock",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_reasoning_block",
+        "target": "ReasoningContentBlock",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_non_standard_block",
+        "target": "NonStandardContentBlock",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_approximate_token_counter",
+        "target": "BaseMessage",
+        "label": "counts tokens in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapped",
+        "target": "Runnable",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "merge_message_runs",
+        "target": "BaseMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "filter_messages",
+        "target": "BaseMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_last_max_tokens",
+        "target": "BaseMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_last_max_tokens",
+        "target": "_approximate_token_counter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "prompt_templates",
+        "label": "Prompt Templates",
+        "nodes": [
+          "ChatPromptValueConcrete",
+          "AIMessagePromptTemplate",
+          "SystemMessagePromptTemplate",
+          "ChatMessagePromptTemplate",
+          "FewShotChatMessagePromptTemplate",
+          "FewShotPromptWithTemplates",
+          "BaseMessagePromptTemplate",
+          "StringPromptTemplate",
+          "StructuredPrompt"
+        ],
+        "title": "Prompt Template Definitions",
+        "description": "Components for defining and structuring various types of prompts, including chat, few-shot, and structured prompts, serving as the foundation for LLM interaction.",
+        "role": "generative"
+      },
+      {
+        "id": "prompt_utilities",
+        "label": "Prompt Utilities",
+        "nodes": [
+          "_load_few_shot_prompt",
+          "_load_prompt",
+          "jinja2_formatter",
+          "mustache_formatter"
+        ],
+        "title": "Prompt Configuration and Formatting",
+        "description": "Utility functions for loading prompt configurations from various sources and formatting template strings using different templating engines like Jinja2 and Mustache.",
+        "role": "analytical"
+      },
+      {
+        "id": "message_content_translation",
+        "label": "Message Content Translation",
+        "nodes": [
+          "_register_translators",
+          "anthropic_iter_blocks",
+          "bedrock_translate_content",
+          "bedrock_translate_chunk",
+          "bedrock_converse_iter_blocks",
+          "google_genai_translate_content",
+          "google_genai_translate_chunk",
+          "groq_translate_content",
+          "groq_translate_chunk",
+          "openai_translate_content",
+          "openai_translate_chunk",
+          "openai_iter_blocks",
+          "openai_convert_chat_input"
+        ],
+        "title": "LLM Provider Message Translation",
+        "description": "Components responsible for translating and extracting message content and chunks from various LLM provider-specific formats (e.g., Anthropic, Bedrock, Google GenAI, Groq, OpenAI) into a standardized internal representation.",
+        "role": "analytical"
+      },
+      {
+        "id": "message_content_creation",
+        "label": "Message Content Creation",
+        "nodes": [
+          "create_text_block",
+          "create_image_block",
+          "create_video_block",
+          "create_audio_block",
+          "create_file_block",
+          "create_plaintext_block",
+          "create_reasoning_block",
+          "create_non_standard_block"
+        ],
+        "title": "Standardized Content Block Creation",
+        "description": "Factory functions for creating various types of standardized content blocks (text, image, video, audio, file, plaintext, reasoning, non-standard) that compose multimodal messages.",
+        "role": "generative"
+      },
+      {
+        "id": "message_processing_utilities",
+        "label": "Message Processing Utilities",
+        "nodes": [
+          "_approximate_token_counter",
+          "wrapped",
+          "merge_message_runs",
+          "filter_messages",
+          "_last_max_tokens"
+        ],
+        "title": "Message Manipulation and Analysis",
+        "description": "General utility functions for processing and manipulating message sequences, including token counting, merging consecutive messages, filtering messages, and truncating messages based on token limits.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

@@ -105,7 +105,7 @@ def display_post_generation_instructions(
     click.echo()
     
     click.echo("1. Review the generated documentation:")
-    click.echo(f"   cat {output_dir}/overview.md")
+    click.echo(f"   cat {output_dir}/overview.json")
     if github_pages:
         click.echo(f"   open {output_dir}/index.html  # View in browser")
     click.echo()

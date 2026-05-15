@@ -1,0 +1,512 @@
+{
+  "title": "LLM Output Parsers",
+  "summary": "This module provides various output parsers to transform raw LLM responses into structured formats like lists, XML, YAML, Pydantic objects, or Pandas DataFrames. It also includes parsers for specific data types like datetime and mechanisms for fixing parsing errors.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "CSL",
+        "label": "Parse Comma-Separated List",
+        "type": "component",
+        "link": null,
+        "title": "CommaSeparatedListOutputParser",
+        "description": "Parses LLM output into a list of strings separated by commas, handling CSV-like formats."
+      },
+      {
+        "id": "NL",
+        "label": "Parse Numbered List",
+        "type": "component",
+        "link": null,
+        "title": "NumberedListOutputParser",
+        "description": "Extracts items from a numbered list format (e.g., '1. item') in LLM output."
+      },
+      {
+        "id": "ML",
+        "label": "Parse Markdown List",
+        "type": "component",
+        "link": null,
+        "title": "MarkdownListOutputParser",
+        "description": "Extracts items from a Markdown-formatted list (e.g., '- item') in LLM output."
+      },
+      {
+        "id": "BTOP",
+        "label": "Base Streaming Parser",
+        "type": "component",
+        "link": null,
+        "title": "BaseTransformOutputParser",
+        "description": "Abstract base class for output parsers capable of processing streaming input chunks."
+      },
+      {
+        "id": "BCTOP",
+        "label": "Cumulative Streaming Parser",
+        "type": "component",
+        "link": null,
+        "title": "BaseCumulativeTransformOutputParser",
+        "description": "Extends BaseStreamingParser to accumulate and parse streaming input, optionally yielding diffs between parsed states."
+      },
+      {
+        "id": "XML",
+        "label": "Parse XML Output",
+        "type": "component",
+        "link": null,
+        "title": "XMLOutputParser",
+        "description": "Parses LLM output formatted as XML into a dictionary, supporting streaming and secure parsing."
+      },
+      {
+        "id": "DTOP",
+        "label": "Parse Datetime String",
+        "type": "component",
+        "link": null,
+        "title": "DatetimeOutputParser",
+        "description": "Converts LLM-generated string output into a Python datetime object based on a specified format."
+      },
+      {
+        "id": "EOP",
+        "label": "Parse Enum Value",
+        "type": "component",
+        "link": null,
+        "title": "EnumOutputParser",
+        "description": "Parses LLM output to match one of the predefined string values in a Python Enum."
+      },
+      {
+        "id": "OFP",
+        "label": "Fix Parsing Errors",
+        "type": "component",
+        "link": null,
+        "title": "OutputFixingParser",
+        "description": "Wraps another parser and attempts to fix parsing errors by sending the problematic output to an LLM for correction."
+      },
+      {
+        "id": "PDFOP",
+        "label": "Parse Pandas DataFrame Query",
+        "type": "component",
+        "link": null,
+        "title": "PandasDataFrameOutputParser",
+        "description": "Parses LLM output to extract data or perform operations on a given Pandas DataFrame."
+      },
+      {
+        "id": "ROP",
+        "label": "Retry Parsing with LLM",
+        "type": "component",
+        "link": null,
+        "title": "RetryOutputParser",
+        "description": "Wraps another parser and retries parsing with LLM assistance if an error occurs, using the original prompt context."
+      },
+      {
+        "id": "SOP",
+        "label": "Parse Structured Output",
+        "type": "component",
+        "link": null,
+        "title": "StructuredOutputParser",
+        "description": "Parses LLM output into a structured dictionary based on a list of defined response schemas."
+      },
+      {
+        "id": "YOP",
+        "label": "Parse YAML to Pydantic",
+        "type": "component",
+        "link": null,
+        "title": "YamlOutputParser",
+        "description": "Parses LLM output formatted as YAML into a Pydantic object, validating against the model schema."
+      },
+      {
+        "id": "TOP",
+        "label": "Parse Tool Calls",
+        "type": "component",
+        "link": null,
+        "title": "ToolsOutputParser",
+        "description": "Parses LLM output containing tool calls into a structured format, optionally using Pydantic schemas for validation."
+      },
+      {
+        "id": "BOP",
+        "label": "Base Output Parser Interface",
+        "type": "external",
+        "link": "base_components",
+        "title": "BaseOutputParser",
+        "description": "The foundational abstract base class for all output parsers, defining the core `parse` method."
+      },
+      {
+        "id": "BGOP",
+        "label": "Base Generation Parser Interface",
+        "type": "external",
+        "link": "base_components",
+        "title": "BaseGenerationOutputParser",
+        "description": "Abstract base class for parsers that operate on `Generation` objects, typically from chat models."
+      },
+      {
+        "id": "LLM",
+        "label": "Language Model",
+        "type": "external",
+        "link": "base_components",
+        "title": "BaseLanguageModel",
+        "description": "A language model providing raw text or message outputs, used for re-prompting in fixing/retrying parsers."
+      },
+      {
+        "id": "PT",
+        "label": "Prompt Template",
+        "type": "external",
+        "link": "base_components",
+        "title": "BasePromptTemplate",
+        "description": "Defines the structure and content for prompts given to LLMs, guiding their output or correction."
+      },
+      {
+        "id": "PS",
+        "label": "Pydantic Schema",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic Data Model",
+        "description": "A Pydantic data model defining the expected structure and types for parsed output."
+      },
+      {
+        "id": "PDF",
+        "label": "Pandas DataFrame",
+        "type": "external",
+        "link": null,
+        "title": "Pandas DataFrame Object",
+        "description": "A tabular data structure from the Pandas library, used as context or target for parsing operations."
+      },
+      {
+        "id": "RLO",
+        "label": "Raw LLM Output",
+        "type": "external",
+        "link": null,
+        "title": "Unprocessed LLM Response",
+        "description": "The initial, unprocessed text or message output generated by a Language Model."
+      },
+      {
+        "id": "SPO",
+        "label": "Structured Parsed Output",
+        "type": "external",
+        "link": null,
+        "title": "Final Structured Data",
+        "description": "The final, structured data produced by an output parser after processing the raw LLM output."
+      }
+    ],
+    "edges": [
+      {
+        "source": "RLO",
+        "target": "CSL",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "NL",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "ML",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "BTOP",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "BCTOP",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "XML",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "DTOP",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "EOP",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "OFP",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "PDFOP",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "ROP",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "SOP",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "YOP",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RLO",
+        "target": "TOP",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CSL",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "NL",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ML",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BTOP",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BCTOP",
+        "target": "BTOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "XML",
+        "target": "BTOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DTOP",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EOP",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OFP",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PDFOP",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ROP",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SOP",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "YOP",
+        "target": "BOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TOP",
+        "target": "BGOP",
+        "label": "Inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OFP",
+        "target": "LLM",
+        "label": "Uses for retry",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OFP",
+        "target": "PT",
+        "label": "Uses for retry",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OFP",
+        "target": "BOP",
+        "label": "Wraps parser",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ROP",
+        "target": "LLM",
+        "label": "Uses for retry",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ROP",
+        "target": "PT",
+        "label": "Uses for retry",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ROP",
+        "target": "BOP",
+        "label": "Wraps parser",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "YOP",
+        "target": "PS",
+        "label": "Parses into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TOP",
+        "target": "PS",
+        "label": "Parses into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PDFOP",
+        "target": "PDF",
+        "label": "Operates on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BOP",
+        "target": "SPO",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BGOP",
+        "target": "SPO",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "list_parsers",
+        "label": "List Parsers",
+        "nodes": [
+          "CSL",
+          "NL",
+          "ML"
+        ],
+        "title": "Parsers for List Formats",
+        "description": "Parsers designed to extract structured lists from LLM text output.",
+        "role": "analytical"
+      },
+      {
+        "id": "transform_parsers",
+        "label": "Transform Parsers",
+        "nodes": [
+          "BTOP",
+          "BCTOP",
+          "XML"
+        ],
+        "title": "Streaming and Transformative Parsers",
+        "description": "Parsers that handle streaming input and transform it, including cumulative parsing and XML.",
+        "role": "analytical"
+      },
+      {
+        "id": "structured_data_parsers",
+        "label": "Structured Data Parsers",
+        "nodes": [
+          "SOP",
+          "YOP",
+          "PDFOP",
+          "TOP"
+        ],
+        "title": "Parsers for Complex Structured Data",
+        "description": "Parsers for converting LLM output into complex structured data formats like JSON, YAML, or tool calls.",
+        "role": "analytical"
+      },
+      {
+        "id": "utility_parsers",
+        "label": "Utility Parsers",
+        "nodes": [
+          "DTOP",
+          "EOP",
+          "OFP",
+          "ROP"
+        ],
+        "title": "Specialized and Error-Handling Parsers",
+        "description": "Parsers for specific data types (datetime, enum) and mechanisms to fix or retry parsing errors.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

@@ -1,0 +1,211 @@
+{
+    "title": "Ollama: Local LLM Runtime & API",
+    "summary": "Ollama simplifies running large language models (LLMs) locally on your machine, providing a user-friendly command-line interface and a robust API. It enables users to easily download, create, and manage a wide range of models for chat, text generation, and embeddings. For developers, Ollama offers a powerful platform to integrate local AI capabilities into applications, fostering innovation and privacy.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "user_developer",
+                "label": "User / Developer",
+                "type": "external",
+                "link": null,
+                "title": "Human User or Developer",
+                "description": "Interacts with Ollama via CLI, desktop application, or integrates it into custom software."
+            },
+            {
+                "id": "client_applications",
+                "label": "Client Applications",
+                "type": "external",
+                "link": null,
+                "title": "Ollama Client Applications",
+                "description": "Includes the desktop UI, command-line interface, and any custom applications built on Ollama's API."
+            },
+            {
+                "id": "external_model_sources",
+                "label": "External Model Repositories",
+                "type": "external",
+                "link": null,
+                "title": "Remote Model Sources",
+                "description": "Sources like Hugging Face or other registries where pre-trained models are hosted for download and conversion."
+            },
+            {
+                "id": "core_application",
+                "label": "Core Application Services",
+                "type": "module",
+                "link": "core_application",
+                "title": "Ollama Core Application",
+                "description": "Manages application startup, server infrastructure, configuration, and persistent data storage for the entire system."
+            },
+            {
+                "id": "api_and_middleware",
+                "label": "API & Request Processing",
+                "type": "module",
+                "link": "api_and_middleware",
+                "title": "API Gateway & Middleware",
+                "description": "Processes all incoming API requests, applies middleware transformations, constructs prompts, and routes requests to the model execution layer."
+            },
+            {
+                "id": "model_management",
+                "label": "Model Lifecycle Management",
+                "type": "module",
+                "link": "model_management",
+                "title": "Model Creation, Conversion & Serving",
+                "description": "Handles the creation, conversion, quantization, serving, and scheduling of AI models, managing their entire lifecycle."
+            },
+            {
+                "id": "model_runtime_and_tools",
+                "label": "Model Execution & Tools",
+                "type": "module",
+                "link": "model_runtime_and_tools",
+                "title": "LLM Runtime & External Tools",
+                "description": "Manages the core machine learning runtime for model inference, text generation, and integrates external tools and web services to extend model capabilities."
+            },
+            {
+                "id": "integration_testing",
+                "label": "System Integration Testing",
+                "type": "module",
+                "link": "integration_testing",
+                "title": "End-to-End System Validation",
+                "description": "Comprehensive suite of tests validating the end-to-end functionality, performance, concurrency, and advanced capabilities of the Ollama application."
+            }
+        ],
+        "edges": [
+            {
+                "source": "user_developer",
+                "target": "client_applications",
+                "label": "Interacts via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "client_applications",
+                "target": "core_application",
+                "label": "Launches/Manages",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "client_applications",
+                "target": "api_and_middleware",
+                "label": "Sends API Requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_and_middleware",
+                "target": "client_applications",
+                "label": "Returns API Responses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_application",
+                "target": "api_and_middleware",
+                "label": "Provides Infrastructure",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_and_middleware",
+                "target": "model_management",
+                "label": "Requests Model Ops (Pull/Create)",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_management",
+                "target": "api_and_middleware",
+                "label": "Provides Model Metadata",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_and_middleware",
+                "target": "model_runtime_and_tools",
+                "label": "Dispatches Inference/Tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_runtime_and_tools",
+                "target": "api_and_middleware",
+                "label": "Returns Inference/Tool Results",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "external_model_sources",
+                "target": "model_management",
+                "label": "Provides Raw Models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_management",
+                "target": "core_application",
+                "label": "Utilizes Data/Config Services",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "integration_testing",
+                "target": "api_and_middleware",
+                "label": "Tests API Endpoints",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "integration_testing",
+                "target": "model_runtime_and_tools",
+                "label": "Validates Model Execution",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "user_client_layer",
+                "label": "User & Client Layer",
+                "nodes": [
+                    "user_developer",
+                    "client_applications"
+                ],
+                "title": "User Interaction & Client Apps",
+                "description": "Represents human users and the various client applications (CLI, desktop UI, custom apps) that interact with Ollama.",
+                "role": null
+            },
+            {
+                "id": "core_ollama_platform",
+                "label": "Core Ollama Platform",
+                "nodes": [
+                    "core_application",
+                    "api_and_middleware"
+                ],
+                "title": "Ollama Core Services",
+                "description": "The central components managing application infrastructure, configuration, data, and handling all API requests and responses.",
+                "role": null
+            },
+            {
+                "id": "ai_model_engine",
+                "label": "AI Model Engine",
+                "nodes": [
+                    "model_management",
+                    "model_runtime_and_tools"
+                ],
+                "title": "Model Lifecycle & Execution",
+                "description": "Manages the entire lifecycle of AI models, from creation and conversion to serving, scheduling, and integrating external tools for enhanced capabilities.",
+                "role": null
+            },
+            {
+                "id": "development_testing",
+                "label": "Development & Testing",
+                "nodes": [
+                    "integration_testing"
+                ],
+                "title": "System Validation & Quality",
+                "description": "Ensures the stability, functionality, and performance of the Ollama platform through comprehensive integration testing.",
+                "role": null
+            }
+        ]
+    }
+}

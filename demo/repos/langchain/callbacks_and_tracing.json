@@ -1,0 +1,202 @@
+{
+  "title": "Callbacks and Tracing",
+  "summary": "This module provides core components for handling events and tracing execution within LangChain applications, enabling observability and custom event processing. It includes base callback handlers, file-based logging, and utilities for managing and collecting run traces.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "async_callback_handler",
+        "label": "Base Async Event Handler",
+        "type": "component",
+        "link": null,
+        "title": "AsyncCallbackHandler",
+        "description": "Provides an abstract base for implementing asynchronous callback logic across various LangChain events like LLM calls, chains, and tools."
+      },
+      {
+        "id": "file_callback_handler",
+        "label": "File Logging Callback",
+        "type": "component",
+        "link": null,
+        "title": "FileCallbackHandler",
+        "description": "A callback handler that writes all execution events and outputs to a specified file, useful for persistent logging and debugging."
+      },
+      {
+        "id": "logging_callback_handler",
+        "label": "Logger Integration Callback",
+        "type": "component",
+        "link": null,
+        "title": "LoggingCallbackHandler",
+        "description": "A callback handler that integrates with Python's standard logging module to output events at a specified log level."
+      },
+      {
+        "id": "trace_sync_group",
+        "label": "Group Synchronous Operations",
+        "type": "component",
+        "link": null,
+        "title": "trace_as_chain_group",
+        "description": "Context manager to group multiple synchronous LangChain operations into a single logical trace run for better observability."
+      },
+      {
+        "id": "trace_async_group",
+        "label": "Group Asynchronous Operations",
+        "type": "component",
+        "link": null,
+        "title": "atrace_as_chain_group",
+        "description": "Context manager to group multiple asynchronous LangChain operations into a single logical trace run for better observability."
+      },
+      {
+        "id": "dispatch_sync_event",
+        "label": "Dispatch Custom Sync Event",
+        "type": "component",
+        "link": null,
+        "title": "dispatch_custom_event",
+        "description": "Allows dispatching arbitrary synchronous custom events to active callback handlers within a run context."
+      },
+      {
+        "id": "dispatch_async_event",
+        "label": "Dispatch Custom Async Event",
+        "type": "component",
+        "link": null,
+        "title": "adispatch_custom_event",
+        "description": "Allows dispatching arbitrary asynchronous custom events to active callback handlers within a run context."
+      },
+      {
+        "id": "collect_usage_metadata",
+        "label": "Collect LLM Usage Metrics",
+        "type": "component",
+        "link": null,
+        "title": "get_usage_metadata_callback",
+        "description": "Context manager for tracking and aggregating token usage and other metadata from LLM calls across different models."
+      },
+      {
+        "id": "collect_all_runs",
+        "label": "Collect All Execution Traces",
+        "type": "component",
+        "link": null,
+        "title": "collect_runs",
+        "description": "Context manager that gathers all run objects generated during its scope, providing a list of traced execution details."
+      },
+      {
+        "id": "tracer_core_logic",
+        "label": "Core Tracing & Run Management",
+        "type": "component",
+        "link": null,
+        "title": "_TracerCore",
+        "description": "Abstract base class that defines the fundamental mechanisms for creating, updating, and persisting execution runs and their relationships."
+      }
+    ],
+    "edges": [
+      {
+        "source": "file_callback_handler",
+        "target": "async_callback_handler",
+        "label": "Implements Callback Interface",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "logging_callback_handler",
+        "target": "async_callback_handler",
+        "label": "Implements Callback Interface",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "trace_sync_group",
+        "target": "tracer_core_logic",
+        "label": "Manages Run Lifecycle",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "trace_async_group",
+        "target": "tracer_core_logic",
+        "label": "Manages Run Lifecycle",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dispatch_sync_event",
+        "target": "async_callback_handler",
+        "label": "Notifies Handlers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dispatch_async_event",
+        "target": "async_callback_handler",
+        "label": "Notifies Handlers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "collect_usage_metadata",
+        "target": "async_callback_handler",
+        "label": "Registers Callback",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "collect_all_runs",
+        "target": "tracer_core_logic",
+        "label": "Gathers Run Data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tracer_core_logic",
+        "target": "async_callback_handler",
+        "label": "Notifies Handlers",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "callback_implementations",
+        "label": "Callback Implementations",
+        "nodes": [
+          "async_callback_handler",
+          "file_callback_handler",
+          "logging_callback_handler"
+        ],
+        "title": "Callback Implementations",
+        "description": "Concrete and abstract classes for handling various events during LangChain execution.",
+        "role": "surface"
+      },
+      {
+        "id": "tracing_context_managers",
+        "label": "Tracing Context Managers",
+        "nodes": [
+          "trace_sync_group",
+          "trace_async_group",
+          "collect_all_runs",
+          "collect_usage_metadata"
+        ],
+        "title": "Tracing Context Managers",
+        "description": "Utilities for defining and managing the scope of execution traces and run collection.",
+        "role": "analytical"
+      },
+      {
+        "id": "event_dispatchers",
+        "label": "Event Dispatchers",
+        "nodes": [
+          "dispatch_sync_event",
+          "dispatch_async_event"
+        ],
+        "title": "Event Dispatchers",
+        "description": "Functions for programmatically sending custom events to active callback handlers.",
+        "role": "generative"
+      },
+      {
+        "id": "core_tracing_engine",
+        "label": "Core Tracing Engine",
+        "nodes": [
+          "tracer_core_logic"
+        ],
+        "title": "Core Tracing Engine",
+        "description": "The foundational abstract class for managing the lifecycle and structure of execution runs.",
+        "role": "data"
+      }
+    ]
+  }
+}

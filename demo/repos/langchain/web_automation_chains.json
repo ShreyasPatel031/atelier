@@ -1,0 +1,175 @@
+{
+  "title": "Web Automation Chains",
+  "summary": "This module provides components for LLM-driven web automation, enabling an AI agent to interact with web pages. It includes a chain for generating browser commands and a crawler for executing these commands and extracting page content.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "user_objective",
+        "label": "User Automation Objective",
+        "type": "component",
+        "link": null,
+        "title": "User's Goal",
+        "description": "The high-level goal or task provided by the user for the web automation agent to achieve."
+      },
+      {
+        "id": "natbot_chain",
+        "label": "NatBot Chain",
+        "type": "component",
+        "link": "web_automation_chains.md#natbotchain",
+        "title": "LLM-Driven Browser Orchestrator",
+        "description": "The core chain that interprets the user's objective and current browser state to decide the next action to take in the web browser."
+      },
+      {
+        "id": "llm",
+        "label": "Language Model",
+        "type": "external",
+        "link": "llm_interaction_and_data_handling/llm_providers",
+        "title": "AI Command Generator",
+        "description": "An external Large Language Model that processes prompts from the NatBot Chain to generate specific browser action commands."
+      },
+      {
+        "id": "browser_command",
+        "label": "Generated Browser Command",
+        "type": "component",
+        "link": null,
+        "title": "Action Instruction",
+        "description": "A specific instruction (e.g., 'click id=5', 'type text into id=10', 'scroll down') for the web browser to execute."
+      },
+      {
+        "id": "crawler",
+        "label": "Web Page Crawler",
+        "type": "component",
+        "link": "web_automation_chains.md#crawler",
+        "title": "Browser Interaction & Content Extractor",
+        "description": "A component that uses Playwright to control a web browser, execute commands, and extract the current page's content and interactive elements."
+      },
+      {
+        "id": "web_browser",
+        "label": "Web Browser Instance",
+        "type": "external",
+        "link": null,
+        "title": "Controlled Browser",
+        "description": "The actual web browser (e.g., Chromium) that is programmatically controlled by the Crawler to perform navigation and interactions."
+      },
+      {
+        "id": "browser_content",
+        "label": "Current Browser Content",
+        "type": "component",
+        "link": null,
+        "title": "Extracted Page State",
+        "description": "The extracted textual and structural content of the web page, including visible elements and their attributes, used to inform the NatBot Chain's decisions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "user_objective",
+        "target": "natbot_chain",
+        "label": "Defines task",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "natbot_chain",
+        "target": "llm",
+        "label": "Requests next action",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm",
+        "target": "natbot_chain",
+        "label": "Suggests action",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "natbot_chain",
+        "target": "browser_command",
+        "label": "Issues command",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "browser_command",
+        "target": "crawler",
+        "label": "Executes command",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crawler",
+        "target": "web_browser",
+        "label": "Controls interaction",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "web_browser",
+        "target": "crawler",
+        "label": "Provides page state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crawler",
+        "target": "browser_content",
+        "label": "Extracts content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "browser_content",
+        "target": "natbot_chain",
+        "label": "Informs decision",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_group",
+        "label": "Web Automation Orchestration",
+        "nodes": [
+          "natbot_chain",
+          "user_objective"
+        ],
+        "title": "Orchestrates the overall web automation process",
+        "description": "This group represents the primary interface and control flow for driving web automation tasks based on user objectives.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_group",
+        "label": "LLM-driven Command Generation",
+        "nodes": [
+          "llm"
+        ],
+        "title": "Generates browser commands using an LLM",
+        "description": "This group focuses on the intelligent generation of browser actions by leveraging a Large Language Model.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_group",
+        "label": "Web Page Interaction & Analysis",
+        "nodes": [
+          "crawler",
+          "browser_content",
+          "browser_command"
+        ],
+        "title": "Handles browser interaction and content extraction",
+        "description": "This group is responsible for physically interacting with the web browser, executing commands, and analyzing the resulting page content.",
+        "role": "analytical"
+      },
+      {
+        "id": "external_group",
+        "label": "Browser Environment",
+        "nodes": [
+          "web_browser"
+        ],
+        "title": "Represents the external web browser system",
+        "description": "This group encapsulates the actual web browser instance that is being controlled and provides the environment for web interactions.",
+        "role": "external"
+      }
+    ]
+  }
+}

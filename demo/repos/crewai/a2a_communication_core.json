@@ -1,0 +1,559 @@
+{
+  "title": "A2A Communication Core Module",
+  "summary": "This module manages Agent-to-Agent (A2A) communication, including configuration, update mechanisms (polling, streaming, push notifications), and task delegation wrappers. It enables agents to interact with remote A2A agents and handle various communication protocols.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "A2AConfig",
+        "label": "Configure A2A Protocol",
+        "type": "component",
+        "link": null,
+        "title": "A2A Protocol Configuration",
+        "description": "Defines the overall configuration for Agent-to-Agent communication, including endpoint, authentication, timeouts, and update mechanisms."
+      },
+      {
+        "id": "A2AClientConfig",
+        "label": "Configure A2A Client",
+        "type": "component",
+        "link": null,
+        "title": "A2A Client Configuration",
+        "description": "Specifies client-side settings for connecting to remote A2A agents, covering communication parameters, accepted output modes, and extensions."
+      },
+      {
+        "id": "_get_default_update_config",
+        "label": "Get Default Update Config",
+        "type": "component",
+        "link": null,
+        "title": "Provide Default Update Config",
+        "description": "Provides a default configuration for the update mechanism, typically defaulting to streaming updates."
+      },
+      {
+        "id": "PollingHandlerKwargs",
+        "label": "Define Polling Parameters",
+        "type": "component",
+        "link": null,
+        "title": "Polling Handler Parameters",
+        "description": "Specifies parameters for polling-based update handlers, such as intervals, timeouts, and history length."
+      },
+      {
+        "id": "StreamingHandlerKwargs",
+        "label": "Define Streaming Parameters",
+        "type": "component",
+        "link": null,
+        "title": "Streaming Handler Parameters",
+        "description": "Defines parameters specific to streaming-based update handlers, currently an empty set but extensible."
+      },
+      {
+        "id": "PushNotificationHandlerKwargs",
+        "label": "Define Push Notification Parameters",
+        "type": "component",
+        "link": null,
+        "title": "Push Notification Handler Parameters",
+        "description": "Outlines parameters for push notification handlers, including configuration, result storage, and polling intervals."
+      },
+      {
+        "id": "PollingHandler",
+        "label": "Manage Polling Updates",
+        "type": "component",
+        "link": null,
+        "title": "Polling-based Update Handler",
+        "description": "Implements the logic for handling A2A task updates through periodic polling of the remote agent's status."
+      },
+      {
+        "id": "StreamingHandler",
+        "label": "Manage Streaming Updates",
+        "type": "component",
+        "link": null,
+        "title": "Streaming-based Update Handler",
+        "description": "Manages A2A task updates using Server-Sent Events (SSE) streaming, including interruption recovery and event processing."
+      },
+      {
+        "id": "PushNotificationHandler",
+        "label": "Manage Push Notification Updates",
+        "type": "component",
+        "link": null,
+        "title": "Push Notification Update Handler",
+        "description": "Handles A2A task updates via webhooks/push notifications, waiting for external callbacks to deliver results."
+      },
+      {
+        "id": "aexecute_task_with_a2a",
+        "label": "Execute Task Asynchronously via A2A",
+        "type": "component",
+        "link": null,
+        "title": "Async A2A Task Execution Wrapper",
+        "description": "Asynchronously executes a task by delegating it to a remote A2A agent, applying A2A configurations and extensions."
+      },
+      {
+        "id": "execute_task_with_a2a",
+        "label": "Execute Task Synchronously via A2A",
+        "type": "component",
+        "link": null,
+        "title": "Sync A2A Task Execution Wrapper",
+        "description": "Synchronously executes a task by delegating it to a remote A2A agent, applying A2A configurations and extensions."
+      },
+      {
+        "id": "kickoff_async_with_a2a",
+        "label": "Initiate Agent Asynchronously via A2A",
+        "type": "component",
+        "link": null,
+        "title": "Async A2A Agent Kickoff Wrapper",
+        "description": "Asynchronously initiates an agent's workflow, potentially delegating the kickoff to a remote A2A agent."
+      },
+      {
+        "id": "kickoff_with_a2a",
+        "label": "Initiate Agent Synchronously via A2A",
+        "type": "component",
+        "link": null,
+        "title": "Sync A2A Agent Kickoff Wrapper",
+        "description": "Synchronously initiates an agent's workflow, potentially delegating the kickoff to a remote A2A agent."
+      },
+      {
+        "id": "_fetch_card_from_config",
+        "label": "Retrieve Agent Card",
+        "type": "component",
+        "link": null,
+        "title": "Fetch Agent Card Utility",
+        "description": "Fetches the metadata (AgentCard) of a remote A2A agent using the provided A2A configuration."
+      },
+      {
+        "id": "Agent",
+        "label": "CrewAI Agent",
+        "type": "external",
+        "link": null,
+        "title": "CrewAI Agent Instance",
+        "description": "An instance of a CrewAI agent that can delegate tasks or kick off workflows."
+      },
+      {
+        "id": "Client",
+        "label": "A2A Communication Client",
+        "type": "external",
+        "link": null,
+        "title": "A2A Client Interface",
+        "description": "The underlying client responsible for making HTTP/gRPC requests to remote A2A endpoints."
+      },
+      {
+        "id": "Message",
+        "label": "A2A Communication Message",
+        "type": "external",
+        "link": null,
+        "title": "A2A Message Format",
+        "description": "The structured data format used for communication between agents in the A2A protocol."
+      },
+      {
+        "id": "AgentCard",
+        "label": "Remote Agent Metadata",
+        "type": "external",
+        "link": null,
+        "title": "AgentCard Data Structure",
+        "description": "A data structure containing information about a remote A2A agent, including its capabilities and endpoint."
+      },
+      {
+        "id": "Task",
+        "label": "CrewAI Task",
+        "type": "external",
+        "link": null,
+        "title": "Task Definition",
+        "description": "A unit of work or instruction given to an agent for execution."
+      },
+      {
+        "id": "TaskStateResult",
+        "label": "Task Execution Result",
+        "type": "external",
+        "link": null,
+        "title": "A2A Task Result",
+        "description": "The outcome of an A2A task execution, including status, result, and history."
+      },
+      {
+        "id": "UpdateConfig",
+        "label": "Base Update Configuration",
+        "type": "external",
+        "link": null,
+        "title": "Update Config Interface",
+        "description": "Abstract base configuration for different A2A update mechanisms (polling, streaming, push notifications)."
+      },
+      {
+        "id": "PushNotificationConfig",
+        "label": "Push Notification Configuration",
+        "type": "external",
+        "link": null,
+        "title": "Push Notification Settings",
+        "description": "Specific configuration details for setting up and receiving push notifications from A2A agents."
+      },
+      {
+        "id": "PushNotificationResultStore",
+        "label": "Push Notification Result Store",
+        "type": "external",
+        "link": null,
+        "title": "Result Storage for Push Notifications",
+        "description": "A mechanism for temporarily storing results received via push notifications until they are processed."
+      },
+      {
+        "id": "crewai_event_bus",
+        "label": "CrewAI Event Bus",
+        "type": "external",
+        "link": null,
+        "title": "CrewAI Event System",
+        "description": "A central system for emitting and listening to various events within the CrewAI framework, including A2A specific events."
+      },
+      {
+        "id": "extension_registry",
+        "label": "A2A Extension Registry",
+        "type": "external",
+        "link": null,
+        "title": "A2A Extension Manager",
+        "description": "A repository or manager for client-side A2A extensions that augment agent behavior."
+      }
+    ],
+    "edges": [
+      {
+        "source": "A2AConfig",
+        "target": "_get_default_update_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2AClientConfig",
+        "target": "_get_default_update_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2AConfig",
+        "target": "UpdateConfig",
+        "label": "defines",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2AClientConfig",
+        "target": "UpdateConfig",
+        "label": "defines",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PollingHandler",
+        "target": "Client",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PollingHandler",
+        "target": "Message",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PollingHandler",
+        "target": "AgentCard",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PollingHandler",
+        "target": "PollingHandlerKwargs",
+        "label": "configured by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PollingHandler",
+        "target": "crewai_event_bus",
+        "label": "emits events to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PollingHandler",
+        "target": "TaskStateResult",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StreamingHandler",
+        "target": "Client",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StreamingHandler",
+        "target": "Message",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StreamingHandler",
+        "target": "AgentCard",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StreamingHandler",
+        "target": "StreamingHandlerKwargs",
+        "label": "configured by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StreamingHandler",
+        "target": "crewai_event_bus",
+        "label": "emits events to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StreamingHandler",
+        "target": "TaskStateResult",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PushNotificationHandler",
+        "target": "Client",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PushNotificationHandler",
+        "target": "Message",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PushNotificationHandler",
+        "target": "AgentCard",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PushNotificationHandler",
+        "target": "PushNotificationHandlerKwargs",
+        "label": "configured by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PushNotificationHandler",
+        "target": "PushNotificationConfig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PushNotificationHandler",
+        "target": "PushNotificationResultStore",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PushNotificationHandler",
+        "target": "crewai_event_bus",
+        "label": "emits events to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PushNotificationHandler",
+        "target": "TaskStateResult",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aexecute_task_with_a2a",
+        "target": "Agent",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aexecute_task_with_a2a",
+        "target": "Task",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aexecute_task_with_a2a",
+        "target": "_fetch_card_from_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aexecute_task_with_a2a",
+        "target": "extension_registry",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_task_with_a2a",
+        "target": "Agent",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_task_with_a2a",
+        "target": "Task",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_task_with_a2a",
+        "target": "_fetch_card_from_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_task_with_a2a",
+        "target": "extension_registry",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kickoff_async_with_a2a",
+        "target": "Agent",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kickoff_async_with_a2a",
+        "target": "_fetch_card_from_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kickoff_async_with_a2a",
+        "target": "extension_registry",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kickoff_with_a2a",
+        "target": "Agent",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kickoff_with_a2a",
+        "target": "_fetch_card_from_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kickoff_with_a2a",
+        "target": "extension_registry",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_fetch_card_from_config",
+        "target": "A2AConfig",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_fetch_card_from_config",
+        "target": "A2AClientConfig",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_fetch_card_from_config",
+        "target": "AgentCard",
+        "label": "retrieves",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "A2A_Configuration",
+        "label": "A2A Configuration",
+        "nodes": [
+          "A2AConfig",
+          "A2AClientConfig",
+          "_get_default_update_config"
+        ],
+        "title": "A2A Configuration",
+        "description": "Manages the setup and parameters for Agent-to-Agent communication, defining how agents connect and interact.",
+        "role": "surface"
+      },
+      {
+        "id": "Update_Mechanism_Parameters",
+        "label": "Update Mechanism Parameters",
+        "nodes": [
+          "PollingHandlerKwargs",
+          "StreamingHandlerKwargs",
+          "PushNotificationHandlerKwargs"
+        ],
+        "title": "Update Mechanism Parameters",
+        "description": "Defines the specific arguments and settings for different A2A update handling strategies.",
+        "role": "data"
+      },
+      {
+        "id": "A2A_Update_Handlers",
+        "label": "A2A Update Handlers",
+        "nodes": [
+          "PollingHandler",
+          "StreamingHandler",
+          "PushNotificationHandler"
+        ],
+        "title": "A2A Update Handlers",
+        "description": "Implements the core logic for receiving and processing updates from remote A2A agents using various communication patterns.",
+        "role": "generative"
+      },
+      {
+        "id": "A2A_Delegation_Wrappers",
+        "label": "A2A Delegation Wrappers",
+        "nodes": [
+          "aexecute_task_with_a2a",
+          "execute_task_with_a2a",
+          "kickoff_async_with_a2a",
+          "kickoff_with_a2a"
+        ],
+        "title": "A2A Delegation Wrappers",
+        "description": "Provides methods for delegating tasks and initiating agent workflows to remote A2A agents, integrating A2A capabilities into existing agent functions.",
+        "role": "surface"
+      },
+      {
+        "id": "A2A_Utilities",
+        "label": "A2A Utilities",
+        "nodes": [
+          "_fetch_card_from_config"
+        ],
+        "title": "A2A Utilities",
+        "description": "Contains helper functions for common A2A operations, such as retrieving agent metadata.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

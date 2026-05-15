@@ -1,0 +1,73 @@
+{
+    "title": "Chains Module Overview",
+    "summary": "Provides a framework for linking LLM calls and other components into structured sequences, enabling complex workflows for various AI applications.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "core_chain_components", "label": "Core Chains", "type": "module", "link": "core_chain_components", "title": "Core Chain Components", "description": "Defines the foundational Chain abstraction for creating structured sequences of operations."},
+            {"id": "conversational_retrieval", "label": "Conversational Retrieval", "type": "module", "link": "conversational_retrieval", "title": "Conversational Retrieval Chains", "description": "Handles document retrieval and context management within conversational flows."},
+            {"id": "web_automation_chains", "label": "Web Automation", "type": "module", "link": "web_automation_chains", "title": "Web Automation Chains", "description": "Enables LLMs to interact with and automate web browsing tasks."},
+            {"id": "openai_function_integrations", "label": "OpenAI Function Integrations", "type": "module", "link": "openai_function_integrations", "title": "OpenAI Function/Tool Integrations", "description": "Facilitates structured output extraction, function calling, and API integration using OpenAI models."},
+            {"id": "chain_loading_utilities", "label": "Chain Loading Utilities", "type": "module", "link": "chain_loading_utilities", "title": "Chain Loading Utilities", "description": "Provides functions to load and configure various chain types from predefined configurations."},
+            {"id": "qa_generation_chains", "label": "QA Generation", "type": "module", "link": "qa_generation_chains", "title": "QA Generation Chains", "description": "Focuses on generating questions and answers, often from provided text."},
+            {"id": "routing_chains", "label": "Routing Chains", "type": "module", "link": "routing_chains", "title": "Routing Chains", "description": "Directs inputs to appropriate sub-chains or tools based on embedding or LLM-based decisions."},
+            {"id": "query_construction", "label": "Query Construction", "type": "module", "link": "query_construction", "title": "Query Construction and Parsing", "description": "Handles the creation and parsing of structured queries for information retrieval."},
+            {"id": "specialized_chains", "label": "Specialized Chains", "type": "module", "link": "specialized_chains", "title": "Specialized Chains", "description": "Implements unique chain types for specific advanced use cases like constitutional AI or FLARE."},
+            {"id": "map_reduce_chains", "label": "Map-Reduce Chains", "type": "module", "link": "map_reduce_chains", "title": "Map-Reduce Chains", "description": "Applies map-reduce pattern for processing large documents or complex data."},
+            {"id": "moderation_chains", "label": "Moderation Chains", "type": "module", "link": "moderation_chains", "title": "Moderation Chains", "description": "Provides functionality for content moderation using external services."}
+        ],
+        "edges": [
+            {"source": "core_chain_components", "target": "conversational_retrieval", "label": "extends"},
+            {"source": "core_chain_components", "target": "web_automation_chains", "label": "extends"},
+            {"source": "core_chain_components", "target": "qa_generation_chains", "label": "extends"},
+            {"source": "core_chain_components", "target": "routing_chains", "label": "extends"},
+            {"source": "core_chain_components", "target": "specialized_chains", "label": "extends"},
+            {"source": "core_chain_components", "target": "map_reduce_chains", "label": "extends"},
+            {"source": "core_chain_components", "target": "moderation_chains", "label": "extends"},
+
+            {"source": "chain_loading_utilities", "target": "conversational_retrieval", "label": "loads/configures"},
+            {"source": "chain_loading_utilities", "target": "qa_generation_chains", "label": "loads/configures"},
+            {"source": "chain_loading_utilities", "target": "map_reduce_chains", "label": "loads/configures"},
+            {"source": "chain_loading_utilities", "target": "specialized_chains", "label": "loads/configures"},
+
+            {"source": "openai_function_integrations", "target": "qa_generation_chains", "label": "provides structured output for"},
+
+            {"source": "query_construction", "target": "routing_chains", "label": "informs"},
+            {"source": "conversational_retrieval", "target": "qa_generation_chains", "label": "uses"}
+        ],
+        "groups": [
+            {
+                "id": "core_framework",
+                "label": "Core Framework",
+                "title": "Core Framework",
+                "description": "Fundamental abstractions and loading mechanisms for building chains.",
+                "role": "analytical",
+                "nodes": ["core_chain_components", "chain_loading_utilities"]
+            },
+            {
+                "id": "interaction_patterns",
+                "label": "Interaction Patterns",
+                "title": "Common Interaction Patterns",
+                "description": "Chains designed for common LLM interaction patterns like conversational AI, QA, and content generation.",
+                "role": "generative",
+                "nodes": ["conversational_retrieval", "qa_generation_chains", "map_reduce_chains", "routing_chains", "query_construction"]
+            },
+            {
+                "id": "integrations",
+                "label": "External Integrations",
+                "title": "External Tool & API Integrations",
+                "description": "Chains that integrate with external services and specialized APIs, such as OpenAI functions or web browsers.",
+                "role": "surface",
+                "nodes": ["openai_function_integrations", "web_automation_chains", "moderation_chains"]
+            },
+            {
+                "id": "advanced_techniques",
+                "label": "Advanced Techniques",
+                "title": "Advanced AI Techniques",
+                "description": "Specialized chains implementing more advanced or experimental AI patterns.",
+                "role": "analytical",
+                "nodes": ["specialized_chains"]
+            }
+        ]
+    }
+}

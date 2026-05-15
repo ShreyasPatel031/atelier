@@ -1,0 +1,83 @@
+{
+  "title": "LangChain Testing Utilities",
+  "summary": "This module provides base classes and utilities for unit and integration testing of various LangChain components, primarily focusing on chat models and vector stores, to ensure consistent behavior and feature support.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "vcr_config",
+        "label": "VCR Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Base VCR Configuration",
+        "description": "Provides base configuration for VCR (cassette library for HTTP interactions) in integration tests, handling sensitive data filtering and compression."
+      },
+      {
+        "id": "chat_model_integration_tests",
+        "label": "Chat Model Integration Tests",
+        "type": "component",
+        "link": null,
+        "title": "Comprehensive Chat Model Integration Tests",
+        "description": "Defines integration tests for chat models, covering invoke, stream, batch, conversation, tool calling, structured output, multimodal inputs, and usage metadata."
+      },
+      {
+        "id": "vector_store_integration_tests",
+        "label": "Vector Store Integration Tests",
+        "type": "component",
+        "link": null,
+        "title": "Standard Vector Store Integration Tests",
+        "description": "Provides integration tests for vector store implementations, including adding, deleting, and retrieving documents, and handling idempotency."
+      },
+      {
+        "id": "chat_model_unit_tests",
+        "label": "Chat Model Unit Tests",
+        "type": "component",
+        "link": null,
+        "title": "Core Chat Model Unit Tests",
+        "description": "Framework for unit testing chat model initialization, environment variable loading, structured output configuration, standard parameter generation, and serialization."
+      }
+    ],
+    "edges": [
+      {
+        "source": "chat_model_integration_tests",
+        "target": "vcr_config",
+        "label": "Uses for VCR tests",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "chat_testing_group",
+        "label": "Chat Model Testing",
+        "nodes": [
+          "chat_model_integration_tests",
+          "chat_model_unit_tests"
+        ],
+        "title": "Chat Model Testing Framework",
+        "description": "Groups components related to testing the functionality and behavior of chat models, both at unit and integration levels.",
+        "role": "analytical"
+      },
+      {
+        "id": "vector_store_testing_group",
+        "label": "Vector Store Testing",
+        "nodes": [
+          "vector_store_integration_tests"
+        ],
+        "title": "Vector Store Testing Framework",
+        "description": "Contains the base class for integration testing of vector store implementations, ensuring data persistence and retrieval correctness.",
+        "role": "analytical"
+      },
+      {
+        "id": "test_utilities_group",
+        "label": "Test Utilities",
+        "nodes": [
+          "vcr_config"
+        ],
+        "title": "General Testing Utilities",
+        "description": "Provides foundational utilities for testing, such as VCR configuration for recording HTTP interactions during integration tests.",
+        "role": "surface"
+      }
+    ]
+  }
+}

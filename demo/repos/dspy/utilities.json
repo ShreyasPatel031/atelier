@@ -1,0 +1,212 @@
+{
+  "title": "Core Utility Functions",
+  "summary": "This module provides essential utility functions for file downloads, asynchronous program execution, callback management, and dummy components for testing. It facilitates core DSPy operations and development workflows.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "download_file",
+        "label": "Download File",
+        "type": "component",
+        "link": null,
+        "title": "File Downloader",
+        "description": "Downloads a file from a given URL, checking for existing files and resuming if partially downloaded. Ensures file integrity by comparing sizes."
+      },
+      {
+        "id": "experimental_decorator",
+        "label": "Apply Experimental Decorator",
+        "type": "component",
+        "link": null,
+        "title": "Experimental Feature Annotation",
+        "description": "A decorator factory that marks functions as experimental, optionally specifying a version. Used for managing feature stability and warnings."
+      },
+      {
+        "id": "wrapped_program_executor",
+        "label": "Wrap Program for Execution",
+        "type": "component",
+        "link": null,
+        "title": "Program Execution Wrapper",
+        "description": "Wraps a program's execution to manage thread-local overrides, ensuring that specific settings are applied and reset correctly during its lifecycle."
+      },
+      {
+        "id": "async_program_runner",
+        "label": "Run Program Asynchronously",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Program Execution",
+        "description": "Executes a given program asynchronously in a separate thread, applying thread-local overrides and respecting a global concurrency limiter. Essential for non-blocking operations."
+      },
+      {
+        "id": "concurrency_limiter",
+        "label": "Get Concurrency Limiter",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Concurrency Control",
+        "description": "Provides a global `CapacityLimiter` instance to control the maximum number of concurrent asynchronous operations, preventing resource exhaustion."
+      },
+      {
+        "id": "async_callback_wrapper",
+        "label": "Wrap Async Function with Callbacks",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Callback Management",
+        "description": "A decorator that wraps asynchronous functions to execute registered callbacks before and after the function's execution, handling call IDs and exceptions."
+      },
+      {
+        "id": "sync_callback_wrapper",
+        "label": "Wrap Sync Function with Callbacks",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Callback Management",
+        "description": "A decorator that wraps synchronous functions to execute registered callbacks before and after the function's execution, managing call IDs and exceptions."
+      },
+      {
+        "id": "dummy_lm",
+        "label": "Simulate Language Model",
+        "type": "component",
+        "link": null,
+        "title": "Mock Language Model for Testing",
+        "description": "A mock language model implementation for testing purposes. It can return predefined responses from a list, a dictionary based on prompt content, or follow example outputs."
+      },
+      {
+        "id": "dummy_retriever_inner",
+        "label": "Simulate Retriever Logic",
+        "type": "component",
+        "link": null,
+        "title": "Mock Retriever for Testing",
+        "description": "A dummy function simulating a retriever's core logic, returning a subset of passages based on a query and a specified number of results (k). Used for testing retrieval components."
+      },
+      {
+        "id": "sync_wrapper_for_async",
+        "label": "Synchronize Async Program",
+        "type": "component",
+        "link": null,
+        "title": "Async Program Synchronizer",
+        "description": "A wrapper class that allows an asynchronous program (specifically one with an `aforward` method) to be called synchronously, facilitating integration into synchronous contexts."
+      },
+      {
+        "id": "base_lm",
+        "label": "Base Language Model",
+        "type": "external",
+        "link": "base_lm_and_core_clients",
+        "title": "BaseLM Interface",
+        "description": "The foundational interface for all language models in DSPy, defining common methods and properties."
+      },
+      {
+        "id": "thread_local_overrides",
+        "label": "Thread-Local Settings",
+        "type": "external",
+        "link": "retrievers",
+        "title": "DSPy Thread-Local Settings",
+        "description": "Manages thread-specific configuration overrides for DSPy components, ensuring isolated settings for concurrent operations."
+      },
+      {
+        "id": "chat_adapter",
+        "label": "Chat Adapter",
+        "type": "external",
+        "link": "system_adapters",
+        "title": "Chat Message Formatting",
+        "description": "Adapts messages to and from a chat-based format, handling roles and content for language model interactions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "async_program_runner",
+        "target": "wrapped_program_executor",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_program_runner",
+        "target": "concurrency_limiter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_program_runner",
+        "target": "thread_local_overrides",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapped_program_executor",
+        "target": "thread_local_overrides",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_wrapper_for_async",
+        "target": "async_program_runner",
+        "label": "wraps for sync execution",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dummy_lm",
+        "target": "base_lm",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dummy_lm",
+        "target": "chat_adapter",
+        "label": "uses for formatting",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "data_handling",
+        "label": "Data Handling",
+        "nodes": [
+          "download_file"
+        ],
+        "title": "Data Acquisition & Management",
+        "description": "Components focused on acquiring and managing external data.",
+        "role": "data"
+      },
+      {
+        "id": "execution_control",
+        "label": "Execution Control & Monitoring",
+        "nodes": [
+          "experimental_decorator",
+          "wrapped_program_executor",
+          "concurrency_limiter",
+          "async_callback_wrapper",
+          "sync_callback_wrapper"
+        ],
+        "title": "Program Flow & Observability",
+        "description": "Utilities for controlling program execution flow, managing concurrency, and integrating callbacks for monitoring.",
+        "role": "analytical"
+      },
+      {
+        "id": "program_execution_utilities",
+        "label": "Program Execution Utilities",
+        "nodes": [
+          "async_program_runner",
+          "sync_wrapper_for_async"
+        ],
+        "title": "Core Program Execution",
+        "description": "Fundamental utilities for running DSPy programs, including asynchronous execution and bridging async/sync contexts.",
+        "role": "surface"
+      },
+      {
+        "id": "mock_components",
+        "label": "Mock Components for Testing",
+        "nodes": [
+          "dummy_lm",
+          "dummy_retriever_inner"
+        ],
+        "title": "Simulated Generative Models",
+        "description": "Dummy implementations of language models and retrievers used for testing and development without external dependencies.",
+        "role": "generative"
+      }
+    ]
+  }
+}

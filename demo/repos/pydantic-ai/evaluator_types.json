@@ -1,0 +1,314 @@
+{
+  "title": "Evaluation Type Definitions",
+  "summary": "This module defines the base classes and concrete implementations for various evaluators, categorizing them into case-level and report-level analysis. It provides tools for assessing individual task outputs and generating aggregate reports like ROC curves, precision-recall, and confusion matrices.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "BaseEvaluator",
+        "label": "Base Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Base Evaluator Class",
+        "description": "Provides shared serialization, specification building, and representation logic for all evaluator types, ensuring consistent handling of evaluator definitions and their configuration."
+      },
+      {
+        "id": "Evaluator",
+        "label": "Case Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Case Evaluator",
+        "description": "Abstract base class for evaluators that assess individual task outputs. Subclasses implement the `evaluate` method to perform specific checks on inputs, outputs, and expected results for a single case."
+      },
+      {
+        "id": "LLMJudge",
+        "label": "LLM Judge",
+        "type": "component",
+        "link": null,
+        "title": "LLM-based Judge Evaluator",
+        "description": "Evaluates language model outputs by using another LLM to judge them against a specified rubric. It can optionally include the original input and expected output for comprehensive contextual assessment."
+      },
+      {
+        "id": "Contains",
+        "label": "Contains Check",
+        "type": "component",
+        "link": null,
+        "title": "Content Containment Evaluator",
+        "description": "Checks if the task output contains a specified value. Supports string substring checks, list/tuple item presence, and dictionary key-value pair matching, with an option for case sensitivity."
+      },
+      {
+        "id": "IsInstance",
+        "label": "Type Instance Check",
+        "type": "component",
+        "link": null,
+        "title": "Type Instance Evaluator",
+        "description": "Verifies if the task output is an instance of a type with a given name. It traverses the Method Resolution Order (MRO) of the output's type to find a matching class name or qualified name."
+      },
+      {
+        "id": "ReportEvaluator",
+        "label": "Report Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Report Evaluator",
+        "description": "Abstract base class for evaluators that analyze an entire report of evaluation cases, producing experiment-wide analyses rather than per-case results. Useful for aggregate metrics and visualizations."
+      },
+      {
+        "id": "ROCAUCEvaluator",
+        "label": "ROC AUC Analysis",
+        "type": "component",
+        "link": null,
+        "title": "ROC Curve and AUC Evaluator",
+        "description": "Computes and plots the Receiver Operating Characteristic (ROC) curve and its Area Under the Curve (AUC) from scored case data, providing insights into binary classifier performance and discrimination ability."
+      },
+      {
+        "id": "PrecisionRecallEvaluator",
+        "label": "Precision-Recall Analysis",
+        "type": "component",
+        "link": null,
+        "title": "Precision-Recall Curve Evaluator",
+        "description": "Calculates and plots the Precision-Recall curve from scored case data, along with its AUC. This is particularly useful for evaluating models on imbalanced datasets where positive cases are rare."
+      },
+      {
+        "id": "KolmogorovSmirnovEvaluator",
+        "label": "Kolmogorov-Smirnov Analysis",
+        "type": "component",
+        "link": null,
+        "title": "Kolmogorov-Smirnov Statistic Evaluator",
+        "description": "Generates a Kolmogorov-Smirnov (KS) plot showing empirical Cumulative Distribution Functions (CDFs) for positive and negative cases, and computes the KS statistic to measure separation between score distributions."
+      },
+      {
+        "id": "ConfusionMatrixEvaluator",
+        "label": "Confusion Matrix Analysis",
+        "type": "component",
+        "link": null,
+        "title": "Confusion Matrix Generator",
+        "description": "Constructs a confusion matrix from predicted and expected labels across all evaluation cases, providing a detailed breakdown of classification performance including true positives, false positives, etc."
+      },
+      {
+        "id": "EvaluatorContext",
+        "label": "Case Context",
+        "type": "external",
+        "link": null,
+        "title": "Context for Case Evaluation",
+        "description": "Provides the necessary inputs, outputs, and metadata for a single evaluation case to a case-level evaluator, enabling it to perform its specific assessment."
+      },
+      {
+        "id": "ReportEvaluatorContext",
+        "label": "Report Context",
+        "type": "external",
+        "link": null,
+        "title": "Context for Report Evaluation",
+        "description": "Supplies the full report, including all evaluation cases, to a report-level evaluator for aggregate analysis and generation of experiment-wide metrics or visualizations."
+      },
+      {
+        "id": "AIModel",
+        "label": "AI Model",
+        "type": "external",
+        "link": "models_and_embeddings",
+        "title": "AI Model Interface",
+        "description": "Represents an AI model used for various tasks, such as judging in the LLM Judge evaluator, providing a standardized interface for interaction with different model providers."
+      },
+      {
+        "id": "ReportAnalysisOutput",
+        "label": "Report Analysis Output",
+        "type": "external",
+        "link": null,
+        "title": "Structured Report Analysis",
+        "description": "A structured data type representing the output of a report-level evaluator, which can include plots, tables, scalar metrics, or other aggregate insights derived from the evaluation report."
+      },
+      {
+        "id": "EvaluationReasonOutput",
+        "label": "Evaluation Reason Output",
+        "type": "external",
+        "link": null,
+        "title": "Detailed Evaluation Outcome",
+        "description": "A structured result indicating a boolean evaluation outcome (pass/fail) along with an optional textual reason or explanation for that outcome, providing more context than a simple boolean."
+      },
+      {
+        "id": "CaseEvaluationOutput",
+        "label": "Case Evaluation Output",
+        "type": "external",
+        "link": null,
+        "title": "General Evaluator Result",
+        "description": "The general return type for case-level evaluators, which can be a scalar value, an EvaluationReason, or a mapping of evaluation names to either of these result types."
+      }
+    ],
+    "edges": [
+      {
+        "source": "Evaluator",
+        "target": "BaseEvaluator",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMJudge",
+        "target": "Evaluator",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Contains",
+        "target": "Evaluator",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "IsInstance",
+        "target": "Evaluator",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ReportEvaluator",
+        "target": "BaseEvaluator",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ROCAUCEvaluator",
+        "target": "ReportEvaluator",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrecisionRecallEvaluator",
+        "target": "ReportEvaluator",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "KolmogorovSmirnovEvaluator",
+        "target": "ReportEvaluator",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConfusionMatrixEvaluator",
+        "target": "ReportEvaluator",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Evaluator",
+        "target": "EvaluatorContext",
+        "label": "Receives",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ReportEvaluator",
+        "target": "ReportEvaluatorContext",
+        "label": "Receives",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMJudge",
+        "target": "AIModel",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Evaluator",
+        "target": "CaseEvaluationOutput",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Contains",
+        "target": "EvaluationReasonOutput",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "IsInstance",
+        "target": "EvaluationReasonOutput",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ReportEvaluator",
+        "target": "ReportAnalysisOutput",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "BaseEvaluatorGroup",
+        "label": "Base Evaluators",
+        "nodes": [
+          "BaseEvaluator"
+        ],
+        "title": "Core Evaluator Abstractions",
+        "description": "Contains the foundational abstract base classes that define the common interface and shared functionality for all specific evaluator implementations.",
+        "role": "surface"
+      },
+      {
+        "id": "CaseLevelEvaluators",
+        "label": "Case-Level Evaluators",
+        "nodes": [
+          "Evaluator",
+          "LLMJudge",
+          "Contains",
+          "IsInstance"
+        ],
+        "title": "Individual Case Assessment",
+        "description": "A collection of evaluators designed to assess the performance or correctness of individual task outputs based on specific criteria, inputs, and expected results.",
+        "role": "analytical"
+      },
+      {
+        "id": "ReportLevelEvaluators",
+        "label": "Report-Level Evaluators",
+        "nodes": [
+          "ReportEvaluator",
+          "ROCAUCEvaluator",
+          "PrecisionRecallEvaluator",
+          "KolmogorovSmirnovEvaluator",
+          "ConfusionMatrixEvaluator"
+        ],
+        "title": "Aggregate Report Analysis",
+        "description": "Evaluators that operate on an entire set of evaluation cases (a report) to generate aggregate statistics, plots, and comprehensive analyses of overall system performance.",
+        "role": "analytical"
+      },
+      {
+        "id": "EvaluationContexts",
+        "label": "Evaluation Contexts",
+        "nodes": [
+          "EvaluatorContext",
+          "ReportEvaluatorContext"
+        ],
+        "title": "Data Providers for Evaluation",
+        "description": "External data structures that supply the necessary information (inputs, outputs, metadata, full reports) to evaluators for their assessment tasks.",
+        "role": "data"
+      },
+      {
+        "id": "ExternalDependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "AIModel",
+          "ReportAnalysisOutput",
+          "EvaluationReasonOutput",
+          "CaseEvaluationOutput"
+        ],
+        "title": "Components Used by Evaluators",
+        "description": "Includes external components and data structures that are utilized by the evaluators, such as AI models for judging or specific output formats for results.",
+        "role": "data"
+      }
+    ]
+  }
+}

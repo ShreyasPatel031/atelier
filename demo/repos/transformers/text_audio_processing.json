@@ -1,0 +1,274 @@
+{
+  "title": "Text and Audio Processing Utilities",
+  "summary": "This module provides processors for multimodal (text and image) models, specialized tokenizers for text with additional linguistic features, and utilities for normalizing numerical text, often used in speech processing pipelines.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "text_input",
+        "label": "Raw Text Input",
+        "type": "external",
+        "link": null,
+        "title": "Raw Text Input",
+        "description": "Unprocessed text data provided by the user or an upstream system."
+      },
+      {
+        "id": "image_input",
+        "label": "Raw Image Input",
+        "type": "external",
+        "link": null,
+        "title": "Raw Image Input",
+        "description": "Unprocessed image data, potentially including multi-page documents or individual images."
+      },
+      {
+        "id": "normalized_text_output",
+        "label": "Normalized Text",
+        "type": "external",
+        "link": null,
+        "title": "Normalized Text Output",
+        "description": "Text data with numerical expressions converted into spelled-out word forms."
+      },
+      {
+        "id": "tokenized_output",
+        "label": "Model Input Tokens",
+        "type": "external",
+        "link": null,
+        "title": "Tokenized Model Input",
+        "description": "Encoded text and/or image data, ready to be fed into a machine learning model."
+      },
+      {
+        "id": "retrieval_scores",
+        "label": "Retrieval Scores",
+        "type": "external",
+        "link": null,
+        "title": "Retrieval Scores Output",
+        "description": "Numerical scores indicating the relevance or similarity between queries and passages/documents."
+      },
+      {
+        "id": "pretrained_tokenizer_base",
+        "label": "Base Tokenization Logic",
+        "type": "component",
+        "link": null,
+        "title": "PreTrainedTokenizerBase",
+        "description": "Foundation for all tokenizers, providing essential methods for text encoding, special token management, padding, and truncation."
+      },
+      {
+        "id": "rocbert_tokenizer",
+        "label": "RoCBert Text Tokenization",
+        "type": "component",
+        "link": null,
+        "title": "RoCBertTokenizer",
+        "description": "Specialized tokenizer for RoCBert models that converts raw text into token IDs, and extracts additional linguistic features like word shape and pronunciation IDs."
+      },
+      {
+        "id": "colmodernvbert_processor",
+        "label": "ColModernVBert Multimodal Processing",
+        "type": "component",
+        "link": null,
+        "title": "ColModernVBertProcessor",
+        "description": "Handles the preparation of both text and image inputs for ColModernVBert models, including visual prompting, and calculates late-interaction retrieval scores."
+      },
+      {
+        "id": "gotocr2_processor",
+        "label": "GotOcr2 Document Processing",
+        "type": "component",
+        "link": null,
+        "title": "GotOcr2Processor",
+        "description": "Manages the preprocessing of images and text for GotOcr2 models, supporting multi-page documents, bounding box annotations, and OCR-specific text formatting."
+      },
+      {
+        "id": "english_number_normalizer",
+        "label": "English Number Normalization",
+        "type": "component",
+        "link": null,
+        "title": "EnglishNumberNormalizer",
+        "description": "Converts numerical expressions (e.g., digits, currencies, percentages) within English text into their full spelled-out word forms for improved speech synthesis or text processing."
+      },
+      {
+        "id": "idefics3_image_processor",
+        "label": "Idefics3 Image Preprocessing",
+        "type": "external",
+        "link": "image_processing",
+        "title": "Idefics3ImageProcessor",
+        "description": "External component for processing images specifically for Idefics3 models, used by ColModernVBert."
+      },
+      {
+        "id": "generic_image_processor",
+        "label": "Generic Image Preprocessing",
+        "type": "external",
+        "link": "image_processing",
+        "title": "Image Processor",
+        "description": "External component for general image preprocessing, used by GotOcr2."
+      }
+    ],
+    "edges": [
+      {
+        "source": "text_input",
+        "target": "english_number_normalizer",
+        "label": "Text for normalization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "english_number_normalizer",
+        "target": "normalized_text_output",
+        "label": "Normalized text",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "normalized_text_output",
+        "target": "rocbert_tokenizer",
+        "label": "Text for tokenization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_input",
+        "target": "rocbert_tokenizer",
+        "label": "Text for tokenization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rocbert_tokenizer",
+        "target": "tokenized_output",
+        "label": "Tokenized text with shape/pronunciation IDs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pretrained_tokenizer_base",
+        "target": "rocbert_tokenizer",
+        "label": "Provides base tokenization methods",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_input",
+        "target": "colmodernvbert_processor",
+        "label": "Text for multimodal processing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_input",
+        "target": "colmodernvbert_processor",
+        "label": "Images for multimodal processing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "idefics3_image_processor",
+        "target": "colmodernvbert_processor",
+        "label": "Image processing backend",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "colmodernvbert_processor",
+        "target": "tokenized_output",
+        "label": "Multimodal model inputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "colmodernvbert_processor",
+        "target": "retrieval_scores",
+        "label": "Computed retrieval scores",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pretrained_tokenizer_base",
+        "target": "colmodernvbert_processor",
+        "label": "Uses tokenizer functionality",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_input",
+        "target": "gotocr2_processor",
+        "label": "Text for OCR processing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_input",
+        "target": "gotocr2_processor",
+        "label": "Images for OCR processing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generic_image_processor",
+        "target": "gotocr2_processor",
+        "label": "Image processing backend",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gotocr2_processor",
+        "target": "tokenized_output",
+        "label": "OCR model inputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pretrained_tokenizer_base",
+        "target": "gotocr2_processor",
+        "label": "Uses tokenizer functionality",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_components",
+        "label": "Surface Components",
+        "nodes": [
+          "colmodernvbert_processor",
+          "gotocr2_processor",
+          "rocbert_tokenizer"
+        ],
+        "title": "User-Facing Processors",
+        "description": "These components are the primary interfaces for users to prepare data for specific models or tasks.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_components",
+        "label": "Generative Components",
+        "nodes": [
+          "english_number_normalizer"
+        ],
+        "title": "Data Transformation",
+        "description": "Components responsible for transforming input data into a new format or representation.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_components",
+        "label": "Analytical Components",
+        "nodes": [
+          "colmodernvbert_processor"
+        ],
+        "title": "Data Analysis & Scoring",
+        "description": "Components that perform analysis or compute metrics on processed data.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_flow",
+        "label": "Data Flow",
+        "nodes": [
+          "text_input",
+          "image_input",
+          "normalized_text_output",
+          "tokenized_output",
+          "retrieval_scores"
+        ],
+        "title": "External Data Interactions",
+        "description": "Represents the entry and exit points for data interacting with the module's components.",
+        "role": "data"
+      }
+    ]
+  }
+}

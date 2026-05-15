@@ -1,0 +1,444 @@
+{
+  "title": "RAG Vector Store Integrations",
+  "summary": "This module provides tools and adapters for integrating various vector databases like LanceDB, Couchbase, MongoDB, Qdrant, and Weaviate into RAG workflows. It defines core abstractions for embedding functions and collection management, enabling efficient document storage and retrieval.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "rag_config_manager",
+        "label": "Manage RAG Configuration",
+        "type": "component",
+        "link": null,
+        "title": "RAG Configuration Manager",
+        "description": "Handles global RAG configuration settings and dynamically loads RAG submodules, ensuring proper setup for vector store integrations."
+      },
+      {
+        "id": "rag_client_dispatcher",
+        "label": "Dispatch RAG Client Creation",
+        "type": "component",
+        "link": null,
+        "title": "RAG Client Dispatcher",
+        "description": "Acts as a central factory to create and configure RAG clients for various providers like ChromaDB and Qdrant based on the specified configuration."
+      },
+      {
+        "id": "embedding_function_protocol",
+        "label": "Define Embedding Function Interface",
+        "type": "component",
+        "link": null,
+        "title": "Embedding Function Protocol",
+        "description": "Establishes a standard protocol for functions that convert input data (text or images) into vector embeddings, ensuring consistency across different embedding models."
+      },
+      {
+        "id": "add_document_params",
+        "label": "Specify Document Addition Parameters",
+        "type": "component",
+        "link": null,
+        "title": "Document Addition Parameters",
+        "description": "Defines the necessary parameters and structure for adding documents, including their content and metadata, to a RAG collection."
+      },
+      {
+        "id": "search_query_params",
+        "label": "Specify Search Query Parameters",
+        "type": "component",
+        "link": null,
+        "title": "Search Query Parameters",
+        "description": "Outlines the parameters required for performing a search query against a RAG collection, such as the query string, limits, and filters."
+      },
+      {
+        "id": "chromadb_settings_provider",
+        "label": "Provide Default ChromaDB Settings",
+        "type": "component",
+        "link": null,
+        "title": "ChromaDB Settings Provider",
+        "description": "Generates and manages default configuration settings for ChromaDB, including persistence directory and reset options, to ensure a consistent setup."
+      },
+      {
+        "id": "chromadb_client_builder",
+        "label": "Build ChromaDB Client",
+        "type": "component",
+        "link": null,
+        "title": "ChromaDB Client Builder",
+        "description": "Constructs and initializes a ChromaDB client instance, handling persistent storage, settings, and tenant/database configurations for RAG operations."
+      },
+      {
+        "id": "qdrant_options_provider",
+        "label": "Provide Default Qdrant Options",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Options Provider",
+        "description": "Supplies default client options for Qdrant, primarily focusing on file-based storage paths for local Qdrant instances."
+      },
+      {
+        "id": "qdrant_embedding_adapter",
+        "label": "Adapt Qdrant Embedding Function",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Embedding Adapter",
+        "description": "A wrapper class that adapts Qdrant's embedding function to conform to the internal `EmbeddingFunction` protocol, enabling Pydantic validation."
+      },
+      {
+        "id": "qdrant_collection_params_high_level",
+        "label": "Define High-Level Qdrant Collection Params",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Collection Parameters (High-Level)",
+        "description": "Specifies high-level parameters for creating a Qdrant collection, abstracting away some of the underlying Qdrant client details."
+      },
+      {
+        "id": "qdrant_collection_params_low_level",
+        "label": "Define Low-Level Qdrant Collection Params",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Collection Parameters (Low-Level)",
+        "description": "Details the specific parameters required by the Qdrant client's `create_collection` method, including the collection name and other configuration fields."
+      },
+      {
+        "id": "lancedb_integration",
+        "label": "Integrate with LanceDB",
+        "type": "component",
+        "link": null,
+        "title": "LanceDB Integration Adapter",
+        "description": "An adapter that facilitates RAG operations with LanceDB, handling embedding generation, querying, and document addition to a LanceDB table."
+      },
+      {
+        "id": "generic_rag_adapter",
+        "label": "Provide Generic RAG Adapter",
+        "type": "component",
+        "link": null,
+        "title": "Generic RAG Adapter",
+        "description": "A general-purpose RAG adapter that abstracts the underlying RAG client, allowing for flexible integration with various vector stores configured through the RAG module."
+      },
+      {
+        "id": "couchbase_search_tool",
+        "label": "Search Couchbase FTS Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "Couchbase FTS Vector Search Tool",
+        "description": "A specialized tool for performing vector-based full-text searches within a Couchbase database, leveraging its FTS capabilities and custom embedding functions."
+      },
+      {
+        "id": "mongodb_search_tool",
+        "label": "Search MongoDB Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "MongoDB Vector Search Tool",
+        "description": "A tool designed for executing vector searches against a MongoDB database, utilizing OpenAI embeddings and Atlas Search vector indexes for efficient retrieval."
+      },
+      {
+        "id": "qdrant_search_tool",
+        "label": "Search Qdrant Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Vector Search Tool",
+        "description": "A dedicated tool for performing vector similarity searches in a Qdrant vector database, supporting custom embedding functions and query filtering."
+      },
+      {
+        "id": "weaviate_search_tool",
+        "label": "Search Weaviate Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "Weaviate Vector Search Tool",
+        "description": "A tool to query a Weaviate vector database, enabling hybrid searches and leveraging OpenAI for embedding generation and generative models."
+      },
+      {
+        "id": "openai_embedding_service",
+        "label": "OpenAI Embedding Service",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI Embedding Service",
+        "description": "External service providing text embedding capabilities, used by various vector store integrations to convert text into vector representations."
+      },
+      {
+        "id": "lancedb_vector_store",
+        "label": "LanceDB Vector Store",
+        "type": "external",
+        "link": null,
+        "title": "LanceDB Vector Store",
+        "description": "An external, file-based vector database optimized for local and embedded use cases, integrated for RAG operations."
+      },
+      {
+        "id": "couchbase_database",
+        "label": "Couchbase Database",
+        "type": "external",
+        "link": null,
+        "title": "Couchbase Database",
+        "description": "An external NoSQL document database with Full-Text Search and vector search capabilities, used for storing and retrieving RAG documents."
+      },
+      {
+        "id": "mongodb_database",
+        "label": "MongoDB Database",
+        "type": "external",
+        "link": null,
+        "title": "MongoDB Database",
+        "description": "An external NoSQL document database, integrated for vector search capabilities via Atlas Search, storing RAG documents and their embeddings."
+      },
+      {
+        "id": "qdrant_vector_db",
+        "label": "Qdrant Vector Database",
+        "type": "external",
+        "link": null,
+        "title": "Qdrant Vector Database",
+        "description": "An external high-performance vector similarity search engine, used for storing and querying vector embeddings for RAG."
+      },
+      {
+        "id": "weaviate_vector_db",
+        "label": "Weaviate Vector Database",
+        "type": "external",
+        "link": null,
+        "title": "Weaviate Vector Database",
+        "description": "An external open-source vector database that supports semantic search, integrated for storing and retrieving RAG documents and their embeddings."
+      }
+    ],
+    "edges": [
+      {
+        "source": "rag_config_manager",
+        "target": "rag_client_dispatcher",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rag_client_dispatcher",
+        "target": "chromadb_client_builder",
+        "label": "creates client for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chromadb_client_builder",
+        "target": "chromadb_settings_provider",
+        "label": "uses settings from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedding_function_protocol",
+        "target": "qdrant_embedding_adapter",
+        "label": "implemented by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lancedb_integration",
+        "target": "lancedb_vector_store",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lancedb_integration",
+        "target": "embedding_function_protocol",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generic_rag_adapter",
+        "target": "rag_client_dispatcher",
+        "label": "uses internal RAG client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "couchbase_search_tool",
+        "target": "couchbase_database",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "couchbase_search_tool",
+        "target": "embedding_function_protocol",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mongodb_search_tool",
+        "target": "mongodb_database",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mongodb_search_tool",
+        "target": "openai_embedding_service",
+        "label": "generates embeddings with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_search_tool",
+        "target": "qdrant_vector_db",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_search_tool",
+        "target": "openai_embedding_service",
+        "label": "generates embeddings with (default)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_search_tool",
+        "target": "qdrant_embedding_adapter",
+        "label": "can use custom",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_search_tool",
+        "target": "qdrant_options_provider",
+        "label": "uses options from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_search_tool",
+        "target": "qdrant_collection_params_high_level",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qdrant_search_tool",
+        "target": "qdrant_collection_params_low_level",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "weaviate_search_tool",
+        "target": "weaviate_vector_db",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "weaviate_search_tool",
+        "target": "openai_embedding_service",
+        "label": "generates embeddings with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "add_document_params",
+        "target": "generic_rag_adapter",
+        "label": "defines input for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "search_query_params",
+        "target": "generic_rag_adapter",
+        "label": "defines input for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "add_document_params",
+        "target": "chromadb_client_builder",
+        "label": "defines input for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "search_query_params",
+        "target": "chromadb_client_builder",
+        "label": "defines input for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_rag_abstractions",
+        "label": "Core RAG Abstractions",
+        "nodes": [
+          "rag_config_manager",
+          "rag_client_dispatcher",
+          "embedding_function_protocol",
+          "add_document_params",
+          "search_query_params"
+        ],
+        "title": "Core RAG Abstractions",
+        "description": "Fundamental components defining the RAG framework, including configuration management, client dispatch, and interface definitions for embeddings and collection operations.",
+        "role": "generative"
+      },
+      {
+        "id": "chromadb_integration",
+        "label": "ChromaDB Integration",
+        "nodes": [
+          "chromadb_settings_provider",
+          "chromadb_client_builder"
+        ],
+        "title": "ChromaDB Integration",
+        "description": "Components specifically designed for integrating and managing ChromaDB as a vector store within the RAG system.",
+        "role": "data"
+      },
+      {
+        "id": "qdrant_integration_components",
+        "label": "Qdrant Integration Components",
+        "nodes": [
+          "qdrant_options_provider",
+          "qdrant_embedding_adapter",
+          "qdrant_collection_params_high_level",
+          "qdrant_collection_params_low_level"
+        ],
+        "title": "Qdrant Integration Components",
+        "description": "Specific components for configuring and interacting with Qdrant, including default options, embedding function adaptation, and collection parameter definitions.",
+        "role": "data"
+      },
+      {
+        "id": "vector_store_adapters",
+        "label": "Vector Store Adapters",
+        "nodes": [
+          "lancedb_integration",
+          "generic_rag_adapter"
+        ],
+        "title": "Vector Store Adapters",
+        "description": "Generic and specific adapters that provide a standardized interface for RAG operations with different vector databases.",
+        "role": "surface"
+      },
+      {
+        "id": "vector_store_search_tools",
+        "label": "Vector Store Search Tools",
+        "nodes": [
+          "couchbase_search_tool",
+          "mongodb_search_tool",
+          "qdrant_search_tool",
+          "weaviate_search_tool"
+        ],
+        "title": "Vector Store Search Tools",
+        "description": "Specialized tools that enable agents to perform vector-based searches against various external vector databases.",
+        "role": "surface"
+      },
+      {
+        "id": "external_vector_stores",
+        "label": "External Vector Stores",
+        "nodes": [
+          "lancedb_vector_store",
+          "couchbase_database",
+          "mongodb_database",
+          "qdrant_vector_db",
+          "weaviate_vector_db"
+        ],
+        "title": "External Vector Stores",
+        "description": "External database services used for storing and retrieving vector embeddings and associated documents for RAG operations.",
+        "role": "data"
+      },
+      {
+        "id": "external_embedding_services",
+        "label": "External Embedding Services",
+        "nodes": [
+          "openai_embedding_service"
+        ],
+        "title": "External Embedding Services",
+        "description": "Third-party services responsible for generating vector embeddings from text, crucial for semantic search and RAG functionality.",
+        "role": "generative"
+      }
+    ]
+  }
+}

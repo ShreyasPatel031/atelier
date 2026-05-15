@@ -707,5 +707,20 @@
     "errors": 0,
     "warnings": 0,
     "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-09T19:23:30.537633",
+    "repo": "crewai",
+    "total_modules": 70,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 1,
+    "warnings": 4,
+    "issues_by_type": {
+      "missing_title": 2,
+      "missing_description": 2,
+      "missing_diagram": 1
+    }
   }
 ]

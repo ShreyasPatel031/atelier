@@ -1,0 +1,458 @@
+{
+  "title": "UI & Utility Components",
+  "summary": "This module provides core utilities for asynchronous operations, concurrency management, data formatting, and integrates with various user interfaces (UIs) like AG-UI and Vercel AI, as well as the Model Context Protocol (MCP).",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "deprecated_decorator",
+        "label": "Deprecate Callable",
+        "type": "component",
+        "link": null,
+        "title": "Deprecated Callable Decorator",
+        "description": "Marks functions as deprecated, providing a warning message upon use to guide developers towards newer alternatives."
+      },
+      {
+        "id": "run_executor",
+        "label": "Execute Async in Thread",
+        "type": "component",
+        "link": null,
+        "title": "Run in Executor",
+        "description": "Executes synchronous functions in a thread pool, enabling non-blocking I/O for async contexts and improving responsiveness."
+      },
+      {
+        "id": "get_union_args_util",
+        "label": "Extract Union Type Args",
+        "type": "component",
+        "link": null,
+        "title": "Get Union Arguments",
+        "description": "Utility to extract component types from a Python `Union` type hint, useful for type introspection."
+      },
+      {
+        "id": "get_event_loop_util",
+        "label": "Retrieve Async Event Loop",
+        "type": "component",
+        "link": null,
+        "title": "Get Event Loop",
+        "description": "Ensures an asyncio event loop is available, creating one if none exists, for managing concurrent tasks."
+      },
+      {
+        "id": "concurrency_limiter",
+        "label": "Manage Concurrent Tasks",
+        "type": "component",
+        "link": null,
+        "title": "Concurrency Limiter",
+        "description": "Controls the maximum number of simultaneous operations, preventing resource exhaustion and ensuring stable performance."
+      },
+      {
+        "id": "format_xml",
+        "label": "Format Python to XML",
+        "type": "component",
+        "link": null,
+        "title": "Format as XML",
+        "description": "Converts Python objects into a structured XML string, often used for LLM prompts due to their parsing capabilities."
+      },
+      {
+        "id": "usage_alias",
+        "label": "Deprecated Usage Tracking",
+        "type": "component",
+        "link": null,
+        "title": "Usage (Deprecated)",
+        "description": "A deprecated alias for the `RunUsage` class, used for tracking resource consumption and model token usage."
+      },
+      {
+        "id": "mcp_server_http",
+        "label": "MCP HTTP Server",
+        "type": "component",
+        "link": null,
+        "title": "MCPServerHTTP",
+        "description": "Connects to Model Context Protocol (MCP) servers via HTTP using Server-Sent Events (SSE) for real-time communication."
+      },
+      {
+        "id": "load_mcp_servers_config",
+        "label": "Load MCP Server Configs",
+        "type": "component",
+        "link": null,
+        "title": "Load MCPServers",
+        "description": "Parses configuration files to initialize and manage MCP server connections, supporting environment variable expansion."
+      },
+      {
+        "id": "mcp_resource",
+        "label": "Define MCP Resource",
+        "type": "component",
+        "link": null,
+        "title": "Resource",
+        "description": "Represents a discoverable resource available on an MCP server, including its URI, size, and metadata."
+      },
+      {
+        "id": "mcp_resource_template",
+        "label": "Define MCP Resource Template",
+        "type": "component",
+        "link": null,
+        "title": "ResourceTemplate",
+        "description": "Describes a parameterized resource on an MCP server using URI templates, allowing dynamic resource access."
+      },
+      {
+        "id": "base_ui_adapter",
+        "label": "Base UI Adapter",
+        "type": "component",
+        "link": null,
+        "title": "UIAdapter",
+        "description": "Abstract class for integrating with UIs, translating frontend requests to agent runs and vice-versa, handling message sanitization."
+      },
+      {
+        "id": "base_ui_event_stream",
+        "label": "Base UI Event Stream",
+        "type": "component",
+        "link": null,
+        "title": "UIEventStream",
+        "description": "Abstract class for transforming internal agent events into UI-specific streaming formats, dispatching to various handlers."
+      },
+      {
+        "id": "ag_ui_run",
+        "label": "Run AG-UI Agent",
+        "type": "component",
+        "link": null,
+        "title": "run_ag_ui",
+        "description": "Executes an agent with AG-UI specific input, streaming events compatible with the AG-UI protocol for interactive experiences."
+      },
+      {
+        "id": "ag_ui_toolset",
+        "label": "AG-UI Frontend Toolset",
+        "type": "component",
+        "link": null,
+        "title": "_AGUIFrontendToolset",
+        "description": "Provides a toolset interface for tools defined and managed by the AG-UI frontend, enabling agent interaction with UI capabilities."
+      },
+      {
+        "id": "vercel_ai_adapter",
+        "label": "Vercel AI Adapter",
+        "type": "component",
+        "link": null,
+        "title": "VercelAIAdapter",
+        "description": "Specialized UI adapter for the Vercel AI protocol, handling chat requests and responses, including tool approval workflows."
+      },
+      {
+        "id": "configure_frontend_api",
+        "label": "Configure Frontend API",
+        "type": "component",
+        "link": null,
+        "title": "configure_frontend",
+        "description": "An API endpoint to provide frontend clients with configuration details like available models and tools."
+      },
+      {
+        "id": "post_chat_api",
+        "label": "Handle Vercel AI Chat",
+        "type": "component",
+        "link": null,
+        "title": "post_chat",
+        "description": "API endpoint that processes incoming chat requests from Vercel AI clients, orchestrating agent responses and streaming events."
+      },
+      {
+        "id": "vercel_step_start",
+        "label": "Vercel AI Step Start",
+        "type": "component",
+        "link": null,
+        "title": "StepStartUIPart",
+        "description": "Indicates the beginning of a distinct processing step within a Vercel AI message stream, for UI rendering."
+      },
+      {
+        "id": "vercel_tool_input_streaming",
+        "label": "Vercel AI Tool Input Streaming",
+        "type": "component",
+        "link": null,
+        "title": "ToolInputStreamingPart",
+        "description": "Represents a tool receiving streaming input from the Vercel AI frontend, indicating ongoing data transfer."
+      },
+      {
+        "id": "vercel_tool_approval_responded",
+        "label": "Vercel AI Tool Approval Responded",
+        "type": "component",
+        "link": null,
+        "title": "ToolApprovalRespondedPart",
+        "description": "Signals that a user has approved or denied a tool execution request in Vercel AI, with execution pending."
+      },
+      {
+        "id": "vercel_dynamic_tool_input_streaming",
+        "label": "Vercel AI Dynamic Tool Input Streaming",
+        "type": "component",
+        "link": null,
+        "title": "DynamicToolInputStreamingPart",
+        "description": "A dynamic tool receiving streaming input from the Vercel AI frontend, indicating active data flow."
+      },
+      {
+        "id": "vercel_dynamic_tool_input_available",
+        "label": "Vercel AI Dynamic Tool Input Available",
+        "type": "component",
+        "link": null,
+        "title": "DynamicToolInputAvailablePart",
+        "description": "A dynamic tool's input is fully available and ready for processing in Vercel AI, awaiting execution."
+      },
+      {
+        "id": "vercel_dynamic_tool_output_available",
+        "label": "Vercel AI Dynamic Tool Output Available",
+        "type": "component",
+        "link": null,
+        "title": "DynamicToolOutputAvailablePart",
+        "description": "A dynamic tool has successfully produced its output in the Vercel AI stream, ready for display."
+      },
+      {
+        "id": "vercel_dynamic_tool_approval_requested",
+        "label": "Vercel AI Dynamic Tool Approval Requested",
+        "type": "component",
+        "link": null,
+        "title": "DynamicToolApprovalRequestedPart",
+        "description": "A dynamic tool requires user approval before execution in Vercel AI, pausing the workflow."
+      },
+      {
+        "id": "vercel_dynamic_tool_approval_responded",
+        "label": "Vercel AI Dynamic Tool Approval Responded",
+        "type": "component",
+        "link": null,
+        "title": "DynamicToolApprovalRespondedPart",
+        "description": "User has responded to a dynamic tool's approval request in Vercel AI, with execution pending."
+      },
+      {
+        "id": "vercel_dynamic_tool_output_denied",
+        "label": "Vercel AI Dynamic Tool Output Denied",
+        "type": "component",
+        "link": null,
+        "title": "DynamicToolOutputDeniedPart",
+        "description": "A dynamic tool's execution or output was explicitly denied by the user in Vercel AI, reaching a terminal state."
+      },
+      {
+        "id": "vercel_source_url_chunk",
+        "label": "Vercel AI Source URL Chunk",
+        "type": "component",
+        "link": null,
+        "title": "SourceUrlChunk",
+        "description": "A response chunk containing a URL reference to a source document in Vercel AI, for displaying external links."
+      },
+      {
+        "id": "vercel_source_doc_chunk",
+        "label": "Vercel AI Source Document Chunk",
+        "type": "component",
+        "link": null,
+        "title": "SourceDocumentChunk",
+        "description": "A response chunk containing metadata for a source document in Vercel AI, for displaying document details."
+      },
+      {
+        "id": "vercel_data_chunk",
+        "label": "Vercel AI Data Chunk",
+        "type": "component",
+        "link": null,
+        "title": "DataChunk",
+        "description": "A generic data chunk for transmitting arbitrary data in Vercel AI responses, allowing flexible content."
+      },
+      {
+        "id": "vercel_abort_chunk",
+        "label": "Vercel AI Abort Chunk",
+        "type": "component",
+        "link": null,
+        "title": "AbortChunk",
+        "description": "A signal to the Vercel AI frontend to abort the current operation, typically due to an error or user cancellation."
+      },
+      {
+        "id": "vercel_message_metadata_chunk",
+        "label": "Vercel AI Message Metadata Chunk",
+        "type": "component",
+        "link": null,
+        "title": "MessageMetadataChunk",
+        "description": "A response chunk containing additional metadata for a Vercel AI message, providing context or supplementary information."
+      },
+      {
+        "id": "agent_core",
+        "label": "Agent Core",
+        "type": "external",
+        "link": "agent_core",
+        "title": "Agent Core Module",
+        "description": "Provides the fundamental agent abstractions and execution logic, including `AbstractAgent`."
+      },
+      {
+        "id": "tools_and_capabilities",
+        "label": "Tools & Capabilities",
+        "type": "external",
+        "link": "tools_and_capabilities",
+        "title": "Tools & Capabilities Module",
+        "description": "Offers toolset definitions and agent capabilities like `AbstractToolset` and `NativeTool`."
+      }
+    ],
+    "edges": [
+      {
+        "source": "run_executor",
+        "target": "get_event_loop_util",
+        "label": "Obtains loop from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ag_ui_run",
+        "target": "base_ui_adapter",
+        "label": "Uses adapter",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ag_ui_run",
+        "target": "ag_ui_toolset",
+        "label": "Integrates frontend tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_ui_adapter",
+        "target": "base_ui_event_stream",
+        "label": "Transforms events via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_ai_adapter",
+        "target": "base_ui_adapter",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_ai_adapter",
+        "target": "base_ui_event_stream",
+        "label": "Transforms events via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "post_chat_api",
+        "target": "vercel_ai_adapter",
+        "label": "Handles requests with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_server_http",
+        "target": "load_mcp_servers_config",
+        "label": "Configured by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_mcp_servers_config",
+        "target": "mcp_resource",
+        "label": "Defines",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_mcp_servers_config",
+        "target": "mcp_resource_template",
+        "label": "Defines",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_ui_adapter",
+        "target": "agent_core",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_ui_adapter",
+        "target": "tools_and_capabilities",
+        "label": "Uses toolsets from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ag_ui_run",
+        "target": "agent_core",
+        "label": "Runs agent from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_ai_adapter",
+        "target": "agent_core",
+        "label": "Runs agent from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "post_chat_api",
+        "target": "agent_core",
+        "label": "Invokes agent from",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_utilities_group",
+        "label": "Core Utilities",
+        "nodes": [
+          "deprecated_decorator",
+          "run_executor",
+          "get_union_args_util",
+          "get_event_loop_util",
+          "concurrency_limiter",
+          "format_xml",
+          "usage_alias"
+        ],
+        "title": "Core Utilities",
+        "description": "General-purpose utilities for asynchronous programming, concurrency control, and data manipulation.",
+        "role": "surface"
+      },
+      {
+        "id": "mcp_integration_group",
+        "label": "MCP Integration",
+        "nodes": [
+          "mcp_server_http",
+          "load_mcp_servers_config",
+          "mcp_resource",
+          "mcp_resource_template"
+        ],
+        "title": "Model Context Protocol (MCP) Integration",
+        "description": "Components for integrating with and defining resources for the Model Context Protocol (MCP).",
+        "role": "surface"
+      },
+      {
+        "id": "ui_adapters_api_group",
+        "label": "UI Adapters & API",
+        "nodes": [
+          "base_ui_adapter",
+          "base_ui_event_stream",
+          "ag_ui_run",
+          "ag_ui_toolset",
+          "vercel_ai_adapter",
+          "configure_frontend_api",
+          "post_chat_api"
+        ],
+        "title": "User Interface Adapters and API Endpoints",
+        "description": "Provides abstractions and concrete implementations for integrating with various UIs (AG-UI, Vercel AI) and exposing API endpoints.",
+        "role": "surface"
+      },
+      {
+        "id": "vercel_ai_protocol_types_group",
+        "label": "Vercel AI Protocol Types",
+        "nodes": [
+          "vercel_step_start",
+          "vercel_tool_input_streaming",
+          "vercel_tool_approval_responded",
+          "vercel_dynamic_tool_input_streaming",
+          "vercel_dynamic_tool_input_available",
+          "vercel_dynamic_tool_output_available",
+          "vercel_dynamic_tool_approval_requested",
+          "vercel_dynamic_tool_approval_responded",
+          "vercel_dynamic_tool_output_denied",
+          "vercel_source_url_chunk",
+          "vercel_source_doc_chunk",
+          "vercel_data_chunk",
+          "vercel_abort_chunk",
+          "vercel_message_metadata_chunk"
+        ],
+        "title": "Vercel AI Protocol Message Types",
+        "description": "Defines the data structures for various message parts and chunks used in the Vercel AI protocol for communication.",
+        "role": "data"
+      }
+    ]
+  }
+}

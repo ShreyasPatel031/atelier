@@ -1,0 +1,319 @@
+{
+  "title": "Web Scraping & Crawling Tools",
+  "summary": "This module provides a comprehensive collection of tools for web scraping and crawling, integrating with various third-party services and direct methods. It enables agents to extract content from websites, perform searches, and manage web data programmatically for diverse applications.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "browserbase_load_tool",
+        "label": "Load Webpage (Browserbase)",
+        "type": "component",
+        "link": null,
+        "title": "BrowserbaseLoadTool",
+        "description": "Utilizes Browserbase to load web pages in a headless browser, extracting their content. Supports options for text content, session management, and proxy usage to bypass common scraping obstacles."
+      },
+      {
+        "id": "firecrawl_crawl_tool",
+        "label": "Crawl Website (Firecrawl)",
+        "type": "component",
+        "link": null,
+        "title": "FirecrawlCrawlWebsiteTool",
+        "description": "Enables comprehensive website crawling through the Firecrawl v2 API. Configurable with parameters like discovery depth, sitemap ignoring, page limits, and external link handling to gather extensive web data."
+      },
+      {
+        "id": "firecrawl_scrape_tool",
+        "label": "Scrape Webpage (Firecrawl)",
+        "type": "component",
+        "link": null,
+        "title": "FirecrawlScrapeWebsiteTool",
+        "description": "Scrapes specific web pages using the Firecrawl v2 API, extracting content in various formats. Offers detailed configuration for content filtering, tag inclusion/exclusion, caching, and browser emulation for precise data retrieval."
+      },
+      {
+        "id": "firecrawl_search_tool",
+        "label": "Search Web (Firecrawl)",
+        "type": "component",
+        "link": null,
+        "title": "FirecrawlSearchTool",
+        "description": "Performs web searches via the Firecrawl v2 API, returning structured results. Allows customization of search limits, time-based filters, location, and scraping options for the search results themselves."
+      },
+      {
+        "id": "hyperbrowser_load_tool",
+        "label": "Load Web Content (Hyperbrowser)",
+        "type": "component",
+        "link": null,
+        "title": "HyperbrowserLoadTool",
+        "description": "Provides advanced web scraping and crawling capabilities using the Hyperbrowser API. It can extract content in markdown or HTML, with options for session management and detailed scrape configurations."
+      },
+      {
+        "id": "jina_scrape_tool",
+        "label": "Scrape Webpage (Jina.ai)",
+        "type": "component",
+        "link": null,
+        "title": "JinaScrapeWebsiteTool",
+        "description": "Leverages Jina.ai's reader service to convert website content into markdown format, simplifying processing for LLMs. Supports custom headers for authentication and request customization."
+      },
+      {
+        "id": "scrapfly_scrape_tool",
+        "label": "Scrape Webpage (Scrapfly)",
+        "type": "component",
+        "link": null,
+        "title": "ScrapflyScrapeWebsiteTool",
+        "description": "Utilizes the Scrapfly API to scrape web pages, returning content as markdown or plain text. Provides robust scraping capabilities with configurable options and error handling for reliable data extraction."
+      },
+      {
+        "id": "selenium_scrape_tool",
+        "label": "Scrape Webpage (Selenium)",
+        "type": "component",
+        "link": null,
+        "title": "SeleniumScrapingTool",
+        "description": "Automates web browser interactions using Selenium to scrape website content. Supports headless browsing, cookie management, and extraction of specific CSS elements or the entire page HTML/text."
+      },
+      {
+        "id": "scrape_element_tool",
+        "label": "Scrape Specific Element",
+        "type": "component",
+        "link": null,
+        "title": "ScrapeElementFromWebsiteTool",
+        "description": "Extracts specific HTML elements from a given website URL using CSS selectors. It makes direct HTTP requests and parses the response with BeautifulSoup, supporting custom headers and cookies."
+      },
+      {
+        "id": "scrape_website_tool",
+        "label": "Scrape Entire Webpage",
+        "type": "component",
+        "link": null,
+        "title": "ScrapeWebsiteTool",
+        "description": "Fetches and parses the entire content of a website, converting it into a clean, LLM-ready text format. Uses direct HTTP requests and BeautifulSoup for parsing, with support for custom headers and cookies."
+      },
+      {
+        "id": "scrapegraph_scrape_tool",
+        "label": "Intelligent Scrape (Scrapegraph)",
+        "type": "component",
+        "link": null,
+        "title": "ScrapegraphScrapeTool",
+        "description": "Intelligently scrapes website content using the Scrapegraph AI API, designed to extract main content based on a user prompt. Handles URL validation, API responses, and rate limiting for robust operation."
+      },
+      {
+        "id": "serply_markdown_tool",
+        "label": "Convert Webpage to Markdown (Serply)",
+        "type": "component",
+        "link": null,
+        "title": "SerplyWebpageToMarkdownTool",
+        "description": "Converts web pages into a clean markdown format using the Serply API, optimizing content for LLM consumption. Supports proxy location settings and custom headers for flexible requests."
+      },
+      {
+        "id": "spider_tool",
+        "label": "Scrape/Crawl (Spider.cloud)",
+        "type": "component",
+        "link": null,
+        "title": "SpiderTool",
+        "description": "Offers comprehensive web scraping and crawling functionalities through the Spider.cloud API. It can extract content from single pages or crawl multiple pages, returning LLM-ready output with configurable parameters."
+      },
+      {
+        "id": "browserbase_service",
+        "label": "Browserbase Service",
+        "type": "external",
+        "link": null,
+        "title": "Browserbase",
+        "description": "An external service providing headless browser capabilities for web automation and data extraction."
+      },
+      {
+        "id": "firecrawl_api",
+        "label": "Firecrawl API",
+        "type": "external",
+        "link": null,
+        "title": "Firecrawl",
+        "description": "An external API offering advanced web scraping, crawling, and search functionalities with structured output."
+      },
+      {
+        "id": "hyperbrowser_api",
+        "label": "Hyperbrowser API",
+        "type": "external",
+        "link": null,
+        "title": "Hyperbrowser",
+        "description": "An external service for scraping and crawling web pages, providing content in various formats like markdown or HTML."
+      },
+      {
+        "id": "jina_ai_reader_api",
+        "label": "Jina.ai Reader API",
+        "type": "external",
+        "link": null,
+        "title": "Jina.ai Reader",
+        "description": "An external API that processes web page content and converts it into a clean, readable markdown format."
+      },
+      {
+        "id": "scrapfly_api",
+        "label": "Scrapfly API",
+        "type": "external",
+        "link": null,
+        "title": "Scrapfly",
+        "description": "A web scraping API that provides tools for extracting data from websites, handling proxies, and rendering JavaScript."
+      },
+      {
+        "id": "selenium_browser",
+        "label": "Web Browser (Selenium)",
+        "type": "external",
+        "link": null,
+        "title": "Selenium",
+        "description": "A browser automation framework used for controlling web browsers programmatically, enabling dynamic content scraping."
+      },
+      {
+        "id": "website_http",
+        "label": "Website (HTTP Request)",
+        "type": "external",
+        "link": null,
+        "title": "Direct HTTP Access",
+        "description": "Represents direct HTTP/HTTPS requests made to websites to fetch raw HTML content for parsing."
+      },
+      {
+        "id": "scrapegraph_ai_api",
+        "label": "Scrapegraph AI API",
+        "type": "external",
+        "link": null,
+        "title": "Scrapegraph AI",
+        "description": "An AI-powered web scraping service that intelligently extracts relevant content from web pages based on user prompts."
+      },
+      {
+        "id": "serply_api",
+        "label": "Serply API",
+        "type": "external",
+        "link": null,
+        "title": "Serply",
+        "description": "An API service that converts web pages into markdown format, simplifying content for LLM processing and analysis."
+      },
+      {
+        "id": "spider_cloud_api",
+        "label": "Spider.cloud API",
+        "type": "external",
+        "link": null,
+        "title": "Spider.cloud",
+        "description": "A web scraping and crawling API that provides structured data extraction from websites, supporting both single-page scrapes and multi-page crawls."
+      }
+    ],
+    "edges": [
+      {
+        "source": "browserbase_load_tool",
+        "target": "browserbase_service",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "firecrawl_crawl_tool",
+        "target": "firecrawl_api",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "firecrawl_scrape_tool",
+        "target": "firecrawl_api",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "firecrawl_search_tool",
+        "target": "firecrawl_api",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hyperbrowser_load_tool",
+        "target": "hyperbrowser_api",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "jina_scrape_tool",
+        "target": "jina_ai_reader_api",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scrapfly_scrape_tool",
+        "target": "scrapfly_api",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "selenium_scrape_tool",
+        "target": "selenium_browser",
+        "label": "controls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scrape_element_tool",
+        "target": "website_http",
+        "label": "requests from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scrape_website_tool",
+        "target": "website_http",
+        "label": "requests from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "scrapegraph_scrape_tool",
+        "target": "scrapegraph_ai_api",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serply_markdown_tool",
+        "target": "serply_api",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "spider_tool",
+        "target": "spider_cloud_api",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "api_driven_scraping_services",
+        "label": "API-Driven Scraping Services",
+        "nodes": [
+          "browserbase_load_tool",
+          "firecrawl_crawl_tool",
+          "firecrawl_scrape_tool",
+          "firecrawl_search_tool",
+          "hyperbrowser_load_tool",
+          "jina_scrape_tool",
+          "scrapfly_scrape_tool",
+          "scrapegraph_scrape_tool",
+          "serply_markdown_tool",
+          "spider_tool"
+        ],
+        "title": "API-Driven Scraping Services",
+        "description": "This group includes tools that leverage external APIs for web scraping and crawling, offering robust and scalable solutions for data extraction.",
+        "role": "surface"
+      },
+      {
+        "id": "direct_web_content_extraction",
+        "label": "Direct Web Content Extraction",
+        "nodes": [
+          "selenium_scrape_tool",
+          "scrape_element_tool",
+          "scrape_website_tool"
+        ],
+        "title": "Direct Web Content Extraction",
+        "description": "This group encompasses tools that perform web scraping using local libraries or direct browser automation, providing fine-grained control over the extraction process.",
+        "role": "surface"
+      }
+    ]
+  }
+}

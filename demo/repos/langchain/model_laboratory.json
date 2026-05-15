@@ -1,0 +1,136 @@
+{
+  "title": "Model Laboratory for LLM Comparison",
+  "summary": "This module provides a utility class, `ModelLaboratory`, designed to experiment with and compare the performance of different language models or predefined chains. It allows users to input text and observe the varied outputs from multiple models, facilitating evaluation and selection.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "model_laboratory",
+        "label": "Model Laboratory",
+        "type": "component",
+        "link": null,
+        "title": "Manages LLM/Chain Comparisons",
+        "description": "A utility class designed to facilitate experimentation and performance comparison across various language models or predefined chains. It allows users to input text and observe how different models respond, aiding in model selection and evaluation."
+      },
+      {
+        "id": "user_input",
+        "label": "User Input Text",
+        "type": "external",
+        "link": null,
+        "title": "Input for Model Comparison",
+        "description": "The textual data provided by the user to be processed and compared by the different models or chains within the ModelLaboratory."
+      },
+      {
+        "id": "llm",
+        "label": "Base Language Model",
+        "type": "external",
+        "link": "core_abstractions_and_utilities/base_components",
+        "title": "Generative AI Model",
+        "description": "A foundational large language model that generates text based on given prompts. ModelLaboratory can create comparison chains directly from a list of these models."
+      },
+      {
+        "id": "prompt_template",
+        "label": "Prompt Template",
+        "type": "external",
+        "link": "llm_interaction_and_data_handling/prompts_and_messages",
+        "title": "Structured Input for LLMs",
+        "description": "A reusable blueprint for generating prompts to LLMs, defining the structure and variables for input. Used by ModelLaboratory when constructing chains from raw LLMs."
+      },
+      {
+        "id": "chain",
+        "label": "Executable LLM Chain",
+        "type": "external",
+        "link": "agent_and_workflow_orchestration/chains",
+        "title": "Sequence of LLM Operations",
+        "description": "A sequence of modular components that process input and generate output, often involving an LLM, prompt, and output parser. ModelLaboratory uses these to perform comparisons."
+      },
+      {
+        "id": "comparison_results",
+        "label": "Comparison Results Display",
+        "type": "external",
+        "link": null,
+        "title": "Visualized Model Outputs",
+        "description": "The aggregated and formatted outputs from each model or chain, displayed to the user for direct comparison and analysis."
+      }
+    ],
+    "edges": [
+      {
+        "source": "user_input",
+        "target": "model_laboratory",
+        "label": "Provides text for comparison",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_laboratory",
+        "target": "llm",
+        "label": "Creates chains from (via from_llms)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_laboratory",
+        "target": "prompt_template",
+        "label": "Applies to LLMs (via from_llms)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_laboratory",
+        "target": "chain",
+        "label": "Initializes with (via __init__)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_laboratory",
+        "target": "comparison_results",
+        "label": "Displays outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chain",
+        "target": "comparison_results",
+        "label": "Generates output for display",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_interface",
+        "label": "Surface Interface",
+        "nodes": [
+          "model_laboratory"
+        ],
+        "title": "Primary Interaction Point",
+        "description": "Components that serve as the main entry or interaction point for users or other modules.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_components",
+        "label": "Generative Components",
+        "nodes": [
+          "llm",
+          "chain"
+        ],
+        "title": "Content Generation & Processing",
+        "description": "Components responsible for generating text, processing information, or orchestrating complex workflows.",
+        "role": "generative"
+      },
+      {
+        "id": "data_elements",
+        "label": "Data Elements",
+        "nodes": [
+          "user_input",
+          "prompt_template",
+          "comparison_results"
+        ],
+        "title": "Input, Output, and Structure",
+        "description": "Components representing data inputs, outputs, or structures that define how data is handled.",
+        "role": "data"
+      }
+    ]
+  }
+}

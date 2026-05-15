@@ -1,0 +1,212 @@
+{
+  "title": "CLI Serving Tools",
+  "summary": "This module provides command-line interface tools for serving Hugging Face Transformer models via an API, including features like continuous batching, quantization, and dynamic model management.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "serve_cli",
+        "label": "CLI Server Entry Point",
+        "type": "component",
+        "link": null,
+        "title": "Serve CLI",
+        "description": "The main command-line interface for starting the model serving API. It parses arguments and orchestrates the server setup and lifecycle."
+      },
+      {
+        "id": "model_manager",
+        "label": "Manage Model Loading",
+        "type": "component",
+        "link": null,
+        "title": "Model Manager",
+        "description": "Handles the dynamic loading, unloading, and management of Transformer models based on requests and configuration, including device and quantization settings."
+      },
+      {
+        "id": "generation_state",
+        "label": "Configure Generation",
+        "type": "component",
+        "link": null,
+        "title": "Generation State",
+        "description": "Manages inference generation parameters such as continuous batching, `torch.compile` usage, and other performance-related settings for model inference."
+      },
+      {
+        "id": "chat_handler",
+        "label": "Handle Chat Completions",
+        "type": "component",
+        "link": null,
+        "title": "Chat Completion Handler",
+        "description": "Processes API requests for chat-based text generation, interacting with the model manager and generation state to produce responses."
+      },
+      {
+        "id": "completion_handler",
+        "label": "Handle Text Completions",
+        "type": "component",
+        "link": null,
+        "title": "Text Completion Handler",
+        "description": "Processes API requests for general text completion, interacting with the model manager and generation state to fulfill requests."
+      },
+      {
+        "id": "response_handler",
+        "label": "Handle Model Responses",
+        "type": "component",
+        "link": null,
+        "title": "Response Handler",
+        "description": "Manages general model response generation, providing a flexible interface for various model outputs beyond specific chat or text completions."
+      },
+      {
+        "id": "transcription_handler",
+        "label": "Handle Audio Transcription",
+        "type": "component",
+        "link": null,
+        "title": "Transcription Handler",
+        "description": "Processes API requests for audio-to-text transcription, utilizing appropriate models managed by the system for speech recognition tasks."
+      },
+      {
+        "id": "uvicorn_server",
+        "label": "Run HTTP Server",
+        "type": "external",
+        "link": null,
+        "title": "Uvicorn Server",
+        "description": "An external ASGI web server (Uvicorn) that hosts the API endpoints, handles incoming HTTP requests, and routes them to the appropriate handlers."
+      }
+    ],
+    "edges": [
+      {
+        "source": "serve_cli",
+        "target": "model_manager",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serve_cli",
+        "target": "generation_state",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serve_cli",
+        "target": "chat_handler",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serve_cli",
+        "target": "completion_handler",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serve_cli",
+        "target": "response_handler",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serve_cli",
+        "target": "transcription_handler",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serve_cli",
+        "target": "uvicorn_server",
+        "label": "Starts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_manager",
+        "target": "uvicorn_server",
+        "label": "Provides models to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generation_state",
+        "target": "uvicorn_server",
+        "label": "Provides config to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_handler",
+        "target": "uvicorn_server",
+        "label": "Registers with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "completion_handler",
+        "target": "uvicorn_server",
+        "label": "Registers with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "response_handler",
+        "target": "uvicorn_server",
+        "label": "Registers with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "transcription_handler",
+        "target": "uvicorn_server",
+        "label": "Registers with",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_components",
+        "label": "Surface Components",
+        "nodes": [
+          "serve_cli"
+        ],
+        "title": "User-Facing Interface",
+        "description": "Components that directly interact with the user or serve as the primary entry point for module functionality.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_components",
+        "label": "Generative Components",
+        "nodes": [
+          "chat_handler",
+          "completion_handler",
+          "response_handler",
+          "transcription_handler"
+        ],
+        "title": "Response Generation",
+        "description": "Components responsible for generating specific types of model outputs or responses based on input requests.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_components",
+        "label": "Analytical Components",
+        "nodes": [
+          "model_manager",
+          "generation_state"
+        ],
+        "title": "Management & Configuration",
+        "description": "Components that manage resources, state, or configuration settings crucial for the module's operation.",
+        "role": "analytical"
+      },
+      {
+        "id": "external_dependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "uvicorn_server"
+        ],
+        "title": "Third-Party Integrations",
+        "description": "External libraries or services that the module relies on for core functionality.",
+        "role": "external"
+      }
+    ]
+  }
+}

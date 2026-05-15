@@ -1,0 +1,162 @@
+{
+    "title": "Core Framework Overview",
+    "summary": "This module encompasses the fundamental building blocks of CrewAI, including agent and crew orchestration, task and flow management, LLM integrations, event and state management, and a suite of core utilities and extensions. It provides the essential infrastructure for building and running intelligent agent systems.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "agent_orchestration_node",
+                "label": "Agent & Crew Orchestration",
+                "type": "module",
+                "link": "agent_and_crew_orchestration",
+                "title": "Agent & Crew Management",
+                "description": "Manages the execution, interaction, and lifecycle of individual agents and collaborative crews, including tool usage and agent adapters for various LLM frameworks."
+            },
+            {
+                "id": "task_flow_node",
+                "label": "Task & Flow Management",
+                "type": "module",
+                "link": "task_and_flow_management",
+                "title": "Workflow & Task Orchestration",
+                "description": "Defines, orchestrates, and manages complex AI agent workflows (flows) and individual tasks. It handles state persistence, human-in-the-loop interactions, and flow visualization."
+            },
+            {
+                "id": "llm_integration_node",
+                "label": "LLM Integration",
+                "type": "module",
+                "link": "llm_integration",
+                "title": "Large Language Model Integration",
+                "description": "Provides abstract and concrete interfaces for integrating with various LLM providers (e.g., Anthropic, Azure, Gemini). It handles message formatting, tool calling, streaming, and token usage tracking."
+            },
+            {
+                "id": "event_state_node",
+                "label": "Event & State Management",
+                "type": "module",
+                "link": "event_and_state_management",
+                "title": "Event Bus & State Persistence",
+                "description": "Manages system-wide events, their emission and processing, and tracks application runtime state. This includes checkpointing, event records, and A2A communication events."
+            },
+            {
+                "id": "utilities_node",
+                "label": "Core Utilities & Extensions",
+                "type": "module",
+                "link": "utilities_and_extensions",
+                "title": "Framework Utilities & Hooks",
+                "description": "Offers a diverse set of utility functions, project structure annotations, memory analysis, logging, streaming, and custom hook management for the CrewAI framework."
+            }
+        ],
+        "edges": [
+            {
+                "source": "task_flow_node",
+                "target": "agent_orchestration_node",
+                "label": "Orchestrates Agents/Crews",
+                "title": "Flows Orchestrate Agents",
+                "description": "Flows define and orchestrate the sequence of tasks, delegating them to agents and crews for execution according to the workflow logic."
+            },
+            {
+                "source": "agent_orchestration_node",
+                "target": "llm_integration_node",
+                "label": "Utilizes LLMs for Reasoning",
+                "title": "Agents Use LLMs",
+                "description": "Agents and their adapters interact with LLMs for generating responses, planning, and making decisions based on prompts and context."
+            },
+            {
+                "source": "agent_orchestration_node",
+                "target": "event_state_node",
+                "label": "Emits Agent Events",
+                "title": "Agent Activities Generate Events",
+                "description": "Agent activities, such as tool calls, task completions, and state changes, generate events that are managed by the central event bus."
+            },
+            {
+                "source": "agent_orchestration_node",
+                "target": "utilities_node",
+                "label": "Uses Tools & Hooks",
+                "title": "Agents Leverage Utilities",
+                "description": "Agents leverage various utility functions, tools, and custom hooks for enhanced functionality, logging, and structured output."
+            },
+            {
+                "source": "task_flow_node",
+                "target": "llm_integration_node",
+                "label": "Uses LLMs for Feedback/Guardrails",
+                "title": "Flows Use LLMs for Control",
+                "description": "Flows may use LLMs for interpreting human feedback, validating content, enforcing guardrails, or making routing decisions within the workflow."
+            },
+            {
+                "source": "task_flow_node",
+                "target": "event_state_node",
+                "label": "Emits Flow Events & Persists State",
+                "title": "Flows Interact with Event/State",
+                "description": "Flows emit events for lifecycle changes, state transitions, and rely on the event and state management system for persistence and checkpointing."
+            },
+            {
+                "source": "task_flow_node",
+                "target": "utilities_node",
+                "label": "Uses Serialization & Memory",
+                "title": "Flows Use Utilities",
+                "description": "Flows utilize utilities for state serialization, memory management, and other helper functions to maintain context and structure."
+            },
+            {
+                "source": "llm_integration_node",
+                "target": "event_state_node",
+                "label": "Emits LLM Call Events",
+                "title": "LLM Calls Generate Events",
+                "description": "LLM interactions trigger events (e.g., before/after call, token usage) that are managed by the event bus for observability and custom reactions."
+            },
+            {
+                "source": "llm_integration_node",
+                "target": "utilities_node",
+                "label": "Uses Hooks & Output Validation",
+                "title": "LLM Integrations Use Utilities",
+                "description": "LLM integrations use hooks for pre/post-processing of calls and utilities for structured output validation and message formatting."
+            },
+            {
+                "source": "event_state_node",
+                "target": "utilities_node",
+                "label": "Logs & Traces via Telemetry",
+                "title": "Event System Uses Utilities",
+                "description": "The event system integrates with utilities for logging, telemetry, and tracing application activities, providing insights into execution."
+            },
+            {
+                "source": "utilities_node",
+                "target": "llm_integration_node",
+                "label": "Uses LLMs for Memory Analysis",
+                "title": "Utilities Leverage LLMs",
+                "description": "Memory analysis utilities leverage LLMs for intelligent processing and consolidation of memory records, enhancing agent context."
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_orchestration_group",
+                "label": "Core Orchestration",
+                "nodes": [
+                    "agent_orchestration_node",
+                    "task_flow_node"
+                ],
+                "title": "Agent & Workflow Core",
+                "description": "The central components responsible for defining, executing, and managing AI agents and their collaborative workflows (flows) within the CrewAI framework.",
+                "role": null
+            },
+            {
+                "id": "foundational_services_group",
+                "label": "Foundational Services",
+                "nodes": [
+                    "llm_integration_node",
+                    "event_state_node"
+                ],
+                "title": "LLM & Event Infrastructure",
+                "description": "Provides essential underlying services, including seamless integration with various Large Language Models and a robust system for event handling, state management, and checkpointing.",
+                "role": null
+            },
+            {
+                "id": "support_extensions_group",
+                "label": "Support & Extensions",
+                "nodes": [
+                    "utilities_node"
+                ],
+                "title": "Framework Utilities & Hooks",
+                "description": "A comprehensive collection of helper functions, project structure annotations, memory analysis tools, logging, streaming capabilities, and custom hook management to extend and support the core framework.",
+                "role": null
+            }
+        ]
+    }
+}

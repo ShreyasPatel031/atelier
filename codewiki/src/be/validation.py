@@ -137,6 +137,8 @@ def validate_module_tree(
     """Recursively validate module tree structure."""
     
     for module_name, module_data in tree.items():
+        if str(module_name).startswith("__") and str(module_name).endswith("__"):
+            continue
         full_name = f"{parent_name}.{module_name}" if parent_name else module_name
         
         # Skip "echo" modules - child has same name as parent (LLM artifact)
@@ -166,44 +168,84 @@ def validate_module_tree(
                 Severity.WARNING,
             )
         
-        # 2. Check documentation file exists
+        # 2. Check documentation file exists (JSON preferred; legacy .md accepted)
+        json_path = docs_path / f"{module_name}.json"
         md_file = docs_path / f"{module_name}.md"
-        if not md_file.exists():
-            result.add(module_name, "MISSING_DOCUMENTATION", 
-                      f"No documentation file: {module_name}.md")
-        else:
-            content = md_file.read_text()
-            
-            # Check documentation has content
+        doc_obj: Optional[Dict] = None
+        if json_path.exists():
+            try:
+                doc_obj = json.loads(json_path.read_text(encoding="utf-8", errors="replace"))
+            except json.JSONDecodeError as e:
+                result.add(module_name, "INVALID_MODULE_DOC_JSON", f"{module_name}.json: {e}")
+                doc_obj = None
+            if doc_obj is not None:
+                try:
+                    from codewiki.src.be.doc_schema import validate_module_doc
+
+                    validate_module_doc(doc_obj)
+                except Exception as e:
+                    result.add(
+                        module_name,
+                        "INVALID_MODULE_DOC_SCHEMA",
+                        f"{module_name}.json: {e}",
+                    )
+                    doc_obj = None
+                summary = (doc_obj.get("summary") or "").strip()
+                if len(summary) < 20:
+                    result.add(
+                        module_name,
+                        "EMPTY_DOCUMENTATION",
+                        "Documentation summary too small",
+                        Severity.WARNING,
+                    )
+        if doc_obj is None and md_file.exists():
+            content = md_file.read_text(encoding="utf-8", errors="replace")
             if len(content.strip()) < 100:
-                result.add(module_name, "EMPTY_DOCUMENTATION", 
-                          "Documentation file too small", Severity.WARNING)
-            
-            # 3. Validate diagram - EVERY module must have a diagram
-            children = module_data.get('children', {})
-            structured_diagram = module_data.get('diagram')
-            
-            if not structured_diagram:
-                if children:
-                    result.add(module_name, "MISSING_STRUCTURED_DIAGRAM", 
-                              f"Parent module has {len(children)} children but no 'diagram' JSON")
-                else:
-                    result.add(module_name, "MISSING_LEAF_DIAGRAM", 
-                              "Leaf module missing 'diagram' JSON (should show components/dependencies)")
+                result.add(
+                    module_name,
+                    "EMPTY_DOCUMENTATION",
+                    "Documentation file too small",
+                    Severity.WARNING,
+                )
+        elif doc_obj is None and not json_path.exists() and not md_file.exists():
+            result.add(
+                module_name,
+                "MISSING_DOCUMENTATION",
+                f"No documentation file: {module_name}.json or {module_name}.md",
+            )
+
+        # 3. Validate diagram on module_tree (canonical IR for the viewer)
+        children = module_data.get("children", {})
+        structured_diagram = module_data.get("diagram")
+
+        if not structured_diagram:
+            if children:
+                result.add(
+                    module_name,
+                    "MISSING_STRUCTURED_DIAGRAM",
+                    f"Parent module has {len(children)} children but no 'diagram' JSON",
+                )
             else:
-                # Validate structured diagram has required fields
-                if 'nodes' not in structured_diagram:
-                    result.add(module_name, "INVALID_DIAGRAM", "Diagram missing 'nodes' array")
-                elif 'edges' not in structured_diagram:
-                    result.add(module_name, "INVALID_DIAGRAM", "Diagram missing 'edges' array")
-                else:
-                    # For parent modules, check all children are nodes
-                    if children:
-                        node_ids = {n.get('id', '').lower() for n in structured_diagram.get('nodes', [])}
-                        for child_name in children.keys():
-                            if child_name.lower() not in node_ids:
-                                result.add(module_name, "MISSING_CHILD_NODE", 
-                                          f"Child '{child_name}' not found in diagram nodes")
+                result.add(
+                    module_name,
+                    "MISSING_LEAF_DIAGRAM",
+                    "Leaf module missing 'diagram' JSON (should show components/dependencies)",
+                )
+        else:
+            if "nodes" not in structured_diagram:
+                result.add(module_name, "INVALID_DIAGRAM", "Diagram missing 'nodes' array")
+            elif "edges" not in structured_diagram:
+                result.add(module_name, "INVALID_DIAGRAM", "Diagram missing 'edges' array")
+            else:
+                if children:
+                    node_ids = {n.get("id", "").lower() for n in structured_diagram.get("nodes", [])}
+                    for child_name in children.keys():
+                        if child_name.lower() not in node_ids:
+                            result.add(
+                                module_name,
+                                "MISSING_CHILD_NODE",
+                                f"Child '{child_name}' not found in diagram nodes",
+                            )
         
         # Recurse into children
         children = module_data.get('children', {})
@@ -244,15 +286,28 @@ def validate_docs(docs_path: Path) -> ValidationResult:
     # Validate the tree
     validate_module_tree(tree, docs_path, result)
     
-    # Check overview.md
-    overview_path = docs_path / "overview.md"
-    if not overview_path.exists():
-        result.add("root", "MISSING_OVERVIEW", "overview.md not found")
+    from codewiki.src.config import OVERVIEW_FILENAME
+
+    overview_json = docs_path / OVERVIEW_FILENAME
+    if overview_json.exists():
+        try:
+            odata = json.loads(overview_json.read_text(encoding="utf-8", errors="replace"))
+        except json.JSONDecodeError as e:
+            result.add("root", "INVALID_OVERVIEW_JSON", str(e))
+        else:
+            if isinstance(odata, dict):
+                try:
+                    from codewiki.src.be.doc_schema import validate_module_doc
+
+                    validate_module_doc(odata)
+                except Exception as e:
+                    result.add("root", "INVALID_OVERVIEW_DOC", str(e))
     else:
-        content = overview_path.read_text()
-        diagram = extract_mermaid_from_markdown(content)
-        if diagram:
-            validate_mermaid_syntax(diagram, "overview", result)
+        result.add(
+            "root",
+            "MISSING_OVERVIEW",
+            f"{OVERVIEW_FILENAME} not found",
+        )
     
     return result
 

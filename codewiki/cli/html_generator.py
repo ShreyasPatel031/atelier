@@ -187,7 +187,7 @@ class HTMLGenerator:
         
         # Check expected files before generation
         if docs_dir:
-            expected_files = ["module_tree.json", "metadata.json", "overview.md"]
+            expected_files = ["module_tree.json", "metadata.json", "overview.json"]
             logger.info(f"[STAGE 5] Checking for expected files in {docs_dir}...")
             for expected_file in expected_files:
                 file_path = docs_dir / expected_file

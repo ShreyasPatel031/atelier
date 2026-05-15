@@ -1,0 +1,256 @@
+{
+  "title": "Intelligent Routing Chains",
+  "summary": "This module provides various chain implementations for intelligently routing user inputs to different downstream chains or components. It supports routing based on embedding similarity or decisions made by a large language model (LLM).",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "embedding_router_chain",
+        "label": "Route by Embedding Similarity",
+        "type": "component",
+        "link": null,
+        "title": "EmbeddingRouterChain",
+        "description": "Routes incoming queries to a specific destination based on the semantic similarity of the query to predefined descriptions stored in a vector database."
+      },
+      {
+        "id": "llm_router_chain",
+        "label": "Route by LLM Decision",
+        "type": "component",
+        "link": null,
+        "title": "LLMRouterChain",
+        "description": "Directs queries to different downstream chains by leveraging an LLM to decide the appropriate destination and extract relevant inputs."
+      },
+      {
+        "id": "multi_prompt_chain",
+        "label": "Route to Multiple Prompts",
+        "type": "component",
+        "link": null,
+        "title": "MultiPromptChain",
+        "description": "Manages routing user inputs to one of several specialized prompt-based LLM chains, using an LLM-driven router to make the selection."
+      },
+      {
+        "id": "multi_retrieval_qa_chain",
+        "label": "Route to Multiple Retrieval QA Chains",
+        "type": "component",
+        "link": null,
+        "title": "MultiRetrievalQAChain",
+        "description": "Routes user queries to the most suitable retrieval-augmented generation (RAG) chain from a collection, based on an LLM's routing decision."
+      },
+      {
+        "id": "vector_store",
+        "label": "Vector Database",
+        "type": "external",
+        "link": "core_abstractions_and_utilities/data_loading_and_storage",
+        "title": "VectorStore",
+        "description": "Stores and retrieves vector embeddings of text, enabling semantic similarity searches for routing decisions."
+      },
+      {
+        "id": "embeddings",
+        "label": "Text Embeddings",
+        "type": "external",
+        "link": "llm_interaction_and_data_handling/text_processing",
+        "title": "Embeddings",
+        "description": "Generates numerical representations of text, capturing semantic meaning for similarity comparisons."
+      },
+      {
+        "id": "llm_chain",
+        "label": "LLM Processing Chain",
+        "type": "external",
+        "link": "agent_and_workflow_orchestration/chains",
+        "title": "LLMChain",
+        "description": "A sequence that combines a language model with a prompt template to generate responses."
+      },
+      {
+        "id": "base_llm",
+        "label": "Language Model (LLM)",
+        "type": "external",
+        "link": "core_abstractions_and_utilities/base_components",
+        "title": "BaseLanguageModel",
+        "description": "A foundational model capable of understanding and generating human-like text."
+      },
+      {
+        "id": "base_prompt_template",
+        "label": "Prompt Template",
+        "type": "external",
+        "link": "core_abstractions_and_utilities/base_components",
+        "title": "BasePromptTemplate",
+        "description": "Defines the structure and content for prompts sent to language models."
+      },
+      {
+        "id": "base_retrieval_qa",
+        "label": "Retrieval QA Chain",
+        "type": "external",
+        "link": "agent_and_workflow_orchestration/chains",
+        "title": "BaseRetrievalQA",
+        "description": "A chain designed to answer questions by retrieving relevant information from a knowledge base."
+      },
+      {
+        "id": "chain",
+        "label": "Generic Chain",
+        "type": "external",
+        "link": "agent_and_workflow_orchestration/chains/core_chain_components",
+        "title": "Chain",
+        "description": "A fundamental building block in LangChain, representing a sequence of operations."
+      },
+      {
+        "id": "document",
+        "label": "Document Data",
+        "type": "external",
+        "link": "core_abstractions_and_utilities/base_components",
+        "title": "Document",
+        "description": "Represents a piece of text content, often with associated metadata, used in vector stores."
+      },
+      {
+        "id": "router_output_parser",
+        "label": "Parse Router Output",
+        "type": "external",
+        "link": "llm_interaction_and_data_handling/output_parsing",
+        "title": "RouterOutputParser",
+        "description": "Interprets the output of an LLM to extract routing decisions and next inputs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "embedding_router_chain",
+        "target": "vector_store",
+        "label": "Uses for similarity search",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vector_store",
+        "target": "embeddings",
+        "label": "Populated by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedding_router_chain",
+        "target": "document",
+        "label": "Processes metadata from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_router_chain",
+        "target": "llm_chain",
+        "label": "Delegates routing to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_chain",
+        "target": "base_llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_chain",
+        "target": "base_prompt_template",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_chain",
+        "target": "router_output_parser",
+        "label": "Output parsed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_prompt_chain",
+        "target": "llm_router_chain",
+        "label": "Uses for routing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_prompt_chain",
+        "target": "llm_chain",
+        "label": "Routes to specific",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_prompt_chain",
+        "target": "chain",
+        "label": "Uses as default",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_retrieval_qa_chain",
+        "target": "llm_router_chain",
+        "label": "Uses for routing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_retrieval_qa_chain",
+        "target": "base_retrieval_qa",
+        "label": "Routes to specific",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_retrieval_qa_chain",
+        "target": "chain",
+        "label": "Uses as default",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_chains",
+        "label": "Routing Chains",
+        "nodes": [
+          "embedding_router_chain",
+          "llm_router_chain",
+          "multi_prompt_chain",
+          "multi_retrieval_qa_chain"
+        ],
+        "title": "Core Routing Mechanisms",
+        "description": "These components provide the primary interfaces for directing inputs to different processing paths.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_components",
+        "label": "Generative AI Components",
+        "nodes": [
+          "base_llm",
+          "llm_chain",
+          "base_prompt_template",
+          "base_retrieval_qa"
+        ],
+        "title": "LLM and Prompting",
+        "description": "Components related to large language models and their interaction via prompts and chains.",
+        "role": "generative"
+      },
+      {
+        "id": "data_management",
+        "label": "Data Management",
+        "nodes": [
+          "vector_store",
+          "embeddings",
+          "document"
+        ],
+        "title": "Data Storage and Representation",
+        "description": "Components responsible for storing, representing, and retrieving data, especially for semantic search.",
+        "role": "data"
+      },
+      {
+        "id": "analytical_tools",
+        "label": "Analytical Tools",
+        "nodes": [
+          "router_output_parser"
+        ],
+        "title": "Output Parsing and Interpretation",
+        "description": "Components focused on interpreting and structuring the outputs from other processes, particularly LLMs.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

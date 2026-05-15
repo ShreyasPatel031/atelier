@@ -1,0 +1,157 @@
+{
+    "title": "Core Application Overview",
+    "summary": "The `core_application` module serves as the central orchestrator for the Ollama application, integrating user entry points, server infrastructure, configuration management, and data storage. It ensures a cohesive and functional system by coordinating these fundamental components.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "user_interface",
+                "label": "User Interface & CLI",
+                "type": "external",
+                "link": null,
+                "title": "User Interaction Front-end",
+                "description": "Represents the various ways users interact with the Ollama application, including the desktop GUI and command-line interface."
+            },
+            {
+                "id": "entry_points_module",
+                "label": "Application Entry Points",
+                "type": "other_module",
+                "link": "entry_points",
+                "title": "Application Startup & Launch",
+                "description": "This module defines how the application starts, whether through the desktop GUI, CLI, or specialized tools, orchestrating initial setup and server startup."
+            },
+            {
+                "id": "server_infra_module",
+                "label": "Server Infrastructure",
+                "type": "other_module",
+                "link": "server_infrastructure",
+                "title": "Core Server & API Services",
+                "description": "Manages the central API server, UI serving, process lifecycle, and handles incoming requests for model interaction and data retrieval."
+            },
+            {
+                "id": "config_utils_module",
+                "label": "Configuration & Utilities",
+                "type": "other_module",
+                "link": "configuration_and_utilities",
+                "title": "App Settings & System Utilities",
+                "description": "Provides essential services for managing application configuration, logging, safe file operations, and software updates."
+            },
+            {
+                "id": "data_storage_module",
+                "label": "Data & Storage",
+                "type": "other_module",
+                "link": "data_and_storage",
+                "title": "Persistent Data Management",
+                "description": "Handles the storage and retrieval of persistent application data, user settings, chat history, and caching of AI model artifacts."
+            },
+            {
+                "id": "os_services",
+                "label": "Operating System Services",
+                "type": "external",
+                "link": null,
+                "title": "System-Level Interactions",
+                "description": "Represents the underlying operating system providing file system access, process management, and system signals to the application."
+            }
+        ],
+        "edges": [
+            {
+                "source": "user_interface",
+                "target": "entry_points_module",
+                "label": "Launches/Interacts with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "entry_points_module",
+                "target": "server_infra_module",
+                "label": "Starts/Manages",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "entry_points_module",
+                "target": "config_utils_module",
+                "label": "Initializes with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "server_infra_module",
+                "target": "data_storage_module",
+                "label": "Accesses/Persists Data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "server_infra_module",
+                "target": "config_utils_module",
+                "label": "Uses Settings/Logs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "config_utils_module",
+                "target": "data_storage_module",
+                "label": "Stores Configuration",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "os_services",
+                "target": "entry_points_module",
+                "label": "Provides signals/resources",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "os_services",
+                "target": "config_utils_module",
+                "label": "Accesses file system",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "os_services",
+                "target": "data_storage_module",
+                "label": "Manages persistent storage",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "user_interaction_layer",
+                "label": "User Interaction Layer",
+                "nodes": [
+                    "user_interface",
+                    "entry_points_module"
+                ],
+                "title": "User-Facing Components",
+                "description": "Components that directly interact with the user or initiate application processes.",
+                "role": null
+            },
+            {
+                "id": "core_application_logic",
+                "label": "Core Application Logic",
+                "nodes": [
+                    "server_infra_module",
+                    "config_utils_module",
+                    "data_storage_module"
+                ],
+                "title": "Central Processing & Management",
+                "description": "The central modules responsible for the application's main functionality, including server operations, configuration, and data handling.",
+                "role": null
+            },
+            {
+                "id": "system_environment",
+                "label": "System Environment",
+                "nodes": [
+                    "os_services"
+                ],
+                "title": "External System Dependencies",
+                "description": "External operating system services and resources that the application relies upon for its operations.",
+                "role": null
+            }
+        ]
+    }
+}

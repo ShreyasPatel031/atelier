@@ -1,0 +1,458 @@
+{
+  "title": "Durable Integrations",
+  "summary": "This module provides integrations for making AI agents durable using workflow orchestration systems like DBOS, Prefect, and Temporal. It wraps agents and toolsets to offload operations to durable tasks or steps, ensuring reliability and recoverability.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "DBOSAgent",
+        "label": "Orchestrate Agent with DBOS",
+        "type": "component",
+        "link": null,
+        "title": "DBOSAgent",
+        "description": "Wraps an existing AI agent to integrate it with DBOS durable workflows. It offloads model requests and tool calls to DBOS steps, ensuring agent runs are reliable and recoverable across failures."
+      },
+      {
+        "id": "DBOSMCPToolset",
+        "label": "Integrate MCP with DBOS Steps",
+        "type": "component",
+        "link": null,
+        "title": "DBOSMCPToolset",
+        "description": "Adapts an MCP (Multi-Capability Platform) toolset for DBOS, converting its tool listing and calling operations into durable DBOS steps. This ensures that interactions with external services via MCP are fault-tolerant."
+      },
+      {
+        "id": "PrefectAgent",
+        "label": "Orchestrate Agent with Prefect",
+        "type": "component",
+        "link": null,
+        "title": "PrefectAgent",
+        "description": "Integrates an AI agent with Prefect, a workflow orchestration system. It transforms agent operations like model requests and tool calls into Prefect tasks, enabling robust, observable, and scheduled agent executions."
+      },
+      {
+        "id": "PrefectAgentInputs",
+        "label": "Cache Prefect Agent Inputs",
+        "type": "component",
+        "link": null,
+        "title": "PrefectAgentInputs",
+        "description": "A custom cache policy for PrefectAgent, designed to generate consistent cache keys for agent inputs. It intelligently filters out non-deterministic fields like timestamps to improve caching efficiency."
+      },
+      {
+        "id": "prefectify_toolset",
+        "label": "Adapt Toolsets for Prefect",
+        "type": "component",
+        "link": null,
+        "title": "prefectify_toolset",
+        "description": "A utility function that wraps various toolsets (e.g., FunctionToolset, MCPServer) to make them compatible with Prefect. It converts toolset methods into Prefect tasks for durable execution."
+      },
+      {
+        "id": "TemporalAgent",
+        "label": "Orchestrate Agent with Temporal",
+        "type": "component",
+        "link": null,
+        "title": "TemporalAgent",
+        "description": "Enables an AI agent to run as a Temporal workflow, providing strong durability and reliability guarantees. It converts agent's model interactions and tool executions into Temporal activities for fault-tolerant operation."
+      },
+      {
+        "id": "default_setup_logfire",
+        "label": "Configure Logfire for Temporal",
+        "type": "component",
+        "link": null,
+        "title": "_default_setup_logfire",
+        "description": "Provides a default configuration for Logfire, an observability library, specifically tailored for use within Temporal workflows. It instruments Pydantic AI components for enhanced tracing and logging."
+      },
+      {
+        "id": "TemporalMCPToolset",
+        "label": "Integrate MCP with Temporal Activities",
+        "type": "component",
+        "link": null,
+        "title": "TemporalMCPToolset",
+        "description": "Wraps an MCP toolset for Temporal workflows, converting its `get_tools` and `call_tool` methods into Temporal activities. This ensures that interactions with MCP servers are durable and retryable."
+      },
+      {
+        "id": "TemporalRunContext",
+        "label": "Serialize/Deserialize Temporal Run Context",
+        "type": "component",
+        "link": null,
+        "title": "TemporalRunContext",
+        "description": "A specialized `RunContext` subclass for Temporal, handling the serialization and deserialization of agent run context data. It ensures that essential context attributes are preserved across Temporal activities."
+      },
+      {
+        "id": "temporalize_toolset",
+        "label": "Adapt Toolsets for Temporal",
+        "type": "component",
+        "link": null,
+        "title": "temporalize_toolset",
+        "description": "A function that adapts various toolsets (e.g., FunctionToolset, DynamicToolset, MCP toolsets) for execution within Temporal workflows. It wraps toolset methods as Temporal activities."
+      },
+      {
+        "id": "TemporalWrapperToolset",
+        "label": "Base for Temporal Toolset Adapters",
+        "type": "component",
+        "link": null,
+        "title": "TemporalWrapperToolset",
+        "description": "An abstract base class for toolsets that are wrapped for Temporal workflows. It provides common logic for managing the lifecycle and execution of wrapped toolsets within a Temporal environment."
+      },
+      {
+        "id": "ACIToolset",
+        "label": "Wrap ACI.dev Tools",
+        "type": "component",
+        "link": null,
+        "title": "ACIToolset",
+        "description": "A specialized toolset that integrates and wraps tools defined by the ACI.dev specification. It allows AI agents to seamlessly interact with external services exposed through ACI functions."
+      },
+      {
+        "id": "LangChainToolset",
+        "label": "Wrap LangChain Tools",
+        "type": "component",
+        "link": null,
+        "title": "LangChainToolset",
+        "description": "A toolset designed to wrap and integrate tools from the LangChain ecosystem. It enables Pydantic AI agents to leverage existing LangChain tools within their workflows."
+      },
+      {
+        "id": "AbstractAgent",
+        "label": "Core Agent Logic",
+        "type": "external",
+        "link": "agent_core",
+        "title": "AbstractAgent",
+        "description": "Defines the core interface and behavior for all AI agents, providing methods for running and streaming agent interactions. It serves as the base for concrete agent implementations."
+      },
+      {
+        "id": "AbstractToolset",
+        "label": "Core Toolset Logic",
+        "type": "external",
+        "link": "tools_and_capabilities",
+        "title": "AbstractToolset",
+        "description": "Defines the interface for collections of tools that an AI agent can use. It specifies methods for listing available tools and executing them, forming a key part of agent capabilities."
+      },
+      {
+        "id": "Model",
+        "label": "AI Model Interface",
+        "type": "external",
+        "link": "models_and_embeddings",
+        "title": "Model",
+        "description": "Represents an interface for interacting with various AI models, abstracting away provider-specific details. It handles model requests, responses, and streaming capabilities for agents."
+      },
+      {
+        "id": "DBOS",
+        "label": "DBOS Workflow System",
+        "type": "external",
+        "link": null,
+        "title": "DBOS",
+        "description": "An external workflow orchestration system that provides durable execution guarantees. It allows long-running operations to be fault-tolerant and recoverable."
+      },
+      {
+        "id": "Prefect",
+        "label": "Prefect Workflow System",
+        "type": "external",
+        "link": null,
+        "title": "Prefect",
+        "description": "An external dataflow automation and orchestration platform. It enables building, running, and monitoring robust data pipelines and workflows."
+      },
+      {
+        "id": "Temporal",
+        "label": "Temporal Workflow System",
+        "type": "external",
+        "link": null,
+        "title": "Temporal",
+        "description": "An external open-source platform for building and operating resilient applications. It provides durable execution of arbitrary business logic as workflows."
+      },
+      {
+        "id": "Logfire",
+        "label": "Logfire Observability",
+        "type": "external",
+        "link": null,
+        "title": "Logfire",
+        "description": "An external observability and logging library used for instrumenting applications. It helps in tracing and monitoring the execution of code, especially in distributed systems."
+      },
+      {
+        "id": "FunctionToolset",
+        "label": "Function-based Toolset",
+        "type": "external",
+        "link": "tools_and_capabilities",
+        "title": "FunctionToolset",
+        "description": "A standard toolset that manages and executes a collection of Python functions as tools for an AI agent. It provides a straightforward way to expose custom logic to agents."
+      },
+      {
+        "id": "MCPServer",
+        "label": "MCP Server Toolset",
+        "type": "external",
+        "link": "ui_and_utilities",
+        "title": "MCPServer",
+        "description": "A toolset that facilitates communication with an external Multi-Capability Platform (MCP) server. It allows agents to discover and utilize tools hosted on the MCP."
+      },
+      {
+        "id": "FastMCPToolset",
+        "label": "FastMCP Toolset",
+        "type": "external",
+        "link": "tools_and_capabilities",
+        "title": "FastMCPToolset",
+        "description": "An optimized toolset for interacting with an MCP server, designed for high-performance scenarios. It provides efficient mechanisms for tool discovery and execution."
+      },
+      {
+        "id": "DynamicToolset",
+        "label": "Dynamic Toolset",
+        "type": "external",
+        "link": "tools_and_capabilities",
+        "title": "DynamicToolset",
+        "description": "A toolset that can dynamically discover and manage tools at runtime. It allows agents to adapt to changing tool availability or requirements without static configuration."
+      },
+      {
+        "id": "RunContext",
+        "label": "Agent Run Context",
+        "type": "external",
+        "link": "tools_and_capabilities",
+        "title": "RunContext",
+        "description": "Provides contextual information for an agent's execution, including dependencies, run ID, metadata, and retry attempts. It's crucial for managing agent state during a run."
+      }
+    ],
+    "edges": [
+      {
+        "source": "DBOSAgent",
+        "target": "AbstractAgent",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSAgent",
+        "target": "DBOSMCPToolset",
+        "label": "Manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSAgent",
+        "target": "DBOS",
+        "label": "Orchestrates via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSMCPToolset",
+        "target": "AbstractToolset",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSMCPToolset",
+        "target": "DBOS",
+        "label": "Executes via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "AbstractAgent",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "prefectify_toolset",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "Prefect",
+        "label": "Orchestrates via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgentInputs",
+        "target": "PrefectAgent",
+        "label": "Caches for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prefectify_toolset",
+        "target": "FunctionToolset",
+        "label": "Adapts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prefectify_toolset",
+        "target": "MCPServer",
+        "label": "Adapts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "AbstractAgent",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "temporalize_toolset",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "TemporalRunContext",
+        "label": "Manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "Temporal",
+        "label": "Orchestrates via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "default_setup_logfire",
+        "label": "Initializes logging with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "default_setup_logfire",
+        "target": "Logfire",
+        "label": "Configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalMCPToolset",
+        "target": "AbstractToolset",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalMCPToolset",
+        "target": "Temporal",
+        "label": "Executes via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalMCPToolset",
+        "target": "TemporalRunContext",
+        "label": "Uses for context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalRunContext",
+        "target": "RunContext",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporalize_toolset",
+        "target": "FunctionToolset",
+        "label": "Adapts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporalize_toolset",
+        "target": "DynamicToolset",
+        "label": "Adapts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporalize_toolset",
+        "target": "MCPServer",
+        "label": "Adapts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporalize_toolset",
+        "target": "FastMCPToolset",
+        "label": "Adapts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalWrapperToolset",
+        "target": "AbstractToolset",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ACIToolset",
+        "target": "FunctionToolset",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LangChainToolset",
+        "target": "FunctionToolset",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "DBOSIntegration",
+        "label": "DBOS Integration",
+        "nodes": [
+          "DBOSAgent",
+          "DBOSMCPToolset"
+        ],
+        "title": "DBOS Integration",
+        "description": "Components for integrating AI agents with the DBOS durable workflow system.",
+        "role": "generative"
+      },
+      {
+        "id": "PrefectIntegration",
+        "label": "Prefect Integration",
+        "nodes": [
+          "PrefectAgent",
+          "PrefectAgentInputs",
+          "prefectify_toolset"
+        ],
+        "title": "Prefect Integration",
+        "description": "Components for integrating AI agents with the Prefect workflow orchestration system.",
+        "role": "generative"
+      },
+      {
+        "id": "TemporalIntegration",
+        "label": "Temporal Integration",
+        "nodes": [
+          "TemporalAgent",
+          "default_setup_logfire",
+          "TemporalMCPToolset",
+          "TemporalRunContext",
+          "temporalize_toolset",
+          "TemporalWrapperToolset"
+        ],
+        "title": "Temporal Integration",
+        "description": "Components for integrating AI agents with the Temporal durable workflow platform.",
+        "role": "generative"
+      },
+      {
+        "id": "ExternalToolsetWrappers",
+        "label": "External Toolset Wrappers",
+        "nodes": [
+          "ACIToolset",
+          "LangChainToolset"
+        ],
+        "title": "External Toolset Wrappers",
+        "description": "Toolsets designed to wrap and integrate tools from other frameworks like ACI.dev and LangChain.",
+        "role": "surface"
+      }
+    ]
+  }
+}

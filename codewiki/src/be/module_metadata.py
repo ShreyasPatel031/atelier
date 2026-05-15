@@ -1,14 +1,10 @@
 """
-Extract title, description, and DIAGRAM_JSON from generated module markdown.
+Extract title, description, and diagram from module documentation artifacts.
 
-Shared by AgentOrchestrator (leaf agents) and DocumentationGenerator (parent/overview docs).
+Primary format: ``{module_id}.json`` with ``title``, ``summary``, and ``diagram``.
+Legacy markdown (``*.md`` with ``<!-- DIAGRAM_JSON -->``) remains parseable during migration.
 
-Module-level title/description come from each ``*.md`` (``#`` heading + first paragraph, ~200 chars)
-and are written into ``module_tree`` via ``apply_metadata_to_tree_path``. Per–diagram-node tooltip
-text for the viewer lives under ``<!-- DIAGRAM_JSON -->`` → ``nodes[]`` with ``id``, ``title``, and
-``description`` (required for every shape, including non-module nodes); module links are optional.
-
-See ``codewiki/docs/diagram-and-module-metadata.md`` for the full pipeline.
+Written into ``module_tree`` via ``apply_metadata_to_tree_path``.
 """
 
 from __future__ import annotations
@@ -140,13 +136,36 @@ def extract_module_metadata_from_markdown(
     return title, description, diagram
 
 
-def extract_module_metadata_from_file(md_path: str) -> Tuple[str, str, Optional[Dict[str, Any]]]:
+def extract_module_metadata_from_doc(doc: Dict[str, Any]) -> Tuple[str, str, Optional[Dict[str, Any]]]:
     """
-    Read a markdown file and extract title, description, diagram.
+    Extract title, description, diagram from a validated module JSON dict.
+
+    Uses ``summary`` as the module_tree ``description`` field.
     """
-    with open(md_path, "r", encoding="utf-8", errors="replace") as f:
+    from codewiki.src.be.doc_schema import validate_module_doc, module_doc_to_tree_fields
+
+    validated = validate_module_doc(doc)
+    title, description, diagram = module_doc_to_tree_fields(validated)
+    return title, description, diagram
+
+
+def extract_module_metadata_from_json_file(json_path: str) -> Tuple[str, str, Optional[Dict[str, Any]]]:
+    """Read a ``*.json`` module doc and extract title, description, diagram."""
+    with open(json_path, "r", encoding="utf-8", errors="replace") as f:
+        doc = json.load(f)
+    return extract_module_metadata_from_doc(doc)
+
+
+def extract_module_metadata_from_file(path: str) -> Tuple[str, str, Optional[Dict[str, Any]]]:
+    """
+    Read a module documentation JSON file and extract metadata.
+    """
+    if path.endswith(".json"):
+        return extract_module_metadata_from_json_file(path)
+    # Legacy .md fallback — extract from markdown if JSON not available
+    with open(path, "r", encoding="utf-8", errors="replace") as f:
         content = f.read()
-    stem = os.path.basename(md_path).replace(".md", "").replace("_", " ").title()
+    stem = os.path.basename(path).replace(".md", "").replace(".json", "").replace("_", " ").title()
     return extract_module_metadata_from_markdown(content, fallback_title=stem)
 
 

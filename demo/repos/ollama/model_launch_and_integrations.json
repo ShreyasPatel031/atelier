@@ -1,0 +1,88 @@
+{
+    "title": "Model Launch & Integrations",
+    "summary": "Manages the launching of models and the configuration, execution, and lifecycle of various external integrations.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "model_launch_core",
+                "label": "Core Model Launch Logic",
+                "type": "module",
+                "link": "model_launch_core",
+                "title": "Core Model Launch Logic",
+                "description": "Handles the fundamental processes of launching interactive and embedding models, and managing their basic lifecycle operations."
+            },
+            {
+                "id": "integration_launch_framework",
+                "label": "Integration Launch Framework",
+                "type": "module",
+                "link": "integration_launch_framework",
+                "title": "Integration Launch Framework",
+                "description": "Provides the foundational infrastructure for managing and orchestrating the launch of various external integrations, including TUI interactions and policy handling."
+            },
+            {
+                "id": "integration_drivers",
+                "label": "Integration Specific Drivers",
+                "type": "module",
+                "link": "integration_drivers",
+                "title": "Integration Specific Drivers",
+                "description": "Contains the specialized logic and configurations for interacting with individual external tools and applications, such as Claude Desktop, Codex, Droid, and VSCode."
+            },
+            {
+                "id": "api_service",
+                "label": "Ollama API Service",
+                "type": "external",
+                "title": "Ollama API Service",
+                "description": "Represents the backend API service that handles model operations, status checks, and data interactions for both core model launches and integrations."
+            }
+        ],
+        "edges": [
+            {
+                "source": "model_launch_core",
+                "target": "api_service",
+                "label": "model operations"
+            },
+            {
+                "source": "integration_launch_framework",
+                "target": "model_launch_core",
+                "label": "orchestrates model runs"
+            },
+            {
+                "source": "integration_launch_framework",
+                "target": "integration_drivers",
+                "label": "manages integration actions"
+            },
+            {
+                "source": "integration_drivers",
+                "target": "api_service",
+                "label": "integration API calls"
+            }
+        ],
+        "groups": [
+            {
+                "id": "entry_points",
+                "label": "Entry Points",
+                "title": "Module Entry Points",
+                "description": "The primary interfaces and starting points for initiating model launches and managing integration workflows within the module.",
+                "role": "surface",
+                "nodes": ["model_launch_core", "integration_launch_framework"]
+            },
+            {
+                "id": "integration_logic",
+                "label": "Integration Logic",
+                "title": "Core Integration Logic",
+                "description": "Encapsulates the specific logic and implementations required for various external tools and applications to function within the system.",
+                "role": "analytical",
+                "nodes": ["integration_drivers"]
+            },
+            {
+                "id": "external_systems",
+                "label": "External Systems",
+                "title": "External Service Dependencies",
+                "description": "Represents external services that the module interacts with to perform its operations, primarily the core Ollama API for model management.",
+                "role": "data",
+                "nodes": ["api_service"]
+            }
+        ]
+    }
+}

@@ -1,0 +1,111 @@
+{
+    "title": "LLM Interaction & Data Handling",
+    "summary": "This module encompasses all components for interacting with Large Language Models, from crafting prompts and integrating various providers to parsing their outputs. It also includes utilities for text processing, data loading, and storage to support LLM applications.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "prompts_and_messages_node",
+                "label": "LLM Prompting & Messaging",
+                "type": "module",
+                "link": "prompts_and_messages",
+                "title": "LLM Prompting & Messaging",
+                "description": "Provides core components for constructing and managing prompts for LLMs, including various templates and utilities for handling message content across providers."
+            },
+            {
+                "id": "llm_providers_node",
+                "label": "LLM Provider Integrations",
+                "type": "module",
+                "link": "llm_providers",
+                "title": "LLM Provider Integrations",
+                "description": "Offers unified interfaces and utilities for integrating with various Large Language Model providers like Anthropic, Groq, Hugging Face, Mistral AI, Ollama, OpenAI, and OpenRouter."
+            },
+            {
+                "id": "output_parsing_node",
+                "label": "LLM Output Parsers",
+                "type": "module",
+                "link": "output_parsing",
+                "title": "LLM Output Parsers",
+                "description": "Provides various output parsers to transform raw LLM responses into structured formats like lists, XML, YAML, Pydantic objects, and includes mechanisms for fixing parsing errors."
+            },
+            {
+                "id": "text_processing_node",
+                "label": "Text Processing & Embeddings",
+                "type": "module",
+                "link": "text_processing",
+                "title": "Text Processing & Embeddings",
+                "description": "Offers tools for processing and splitting text from various formats into manageable chunks, and utilities for initializing and caching text embedding models."
+            },
+            {
+                "id": "data_loading_storage_node",
+                "label": "Data Loading & Storage",
+                "type": "module",
+                "link": "data_loading_and_storage",
+                "title": "Data Loading & Storage",
+                "description": "Provides components for loading data from external sources and storing it in vector databases, including in-memory and Qdrant implementations, for efficient similarity search."
+            }
+        ],
+        "edges": [
+            {
+                "source": "prompts_and_messages_node",
+                "target": "llm_providers_node",
+                "label": "Formats input for",
+                "title": "Formats input for LLMs",
+                "description": "Prompting and messaging components prepare structured input for the various LLM providers."
+            },
+            {
+                "source": "llm_providers_node",
+                "target": "output_parsing_node",
+                "label": "Produces raw output for",
+                "title": "Produces raw output for parsing",
+                "description": "Integrated LLM providers generate raw text or message outputs that are then processed by output parsers."
+            },
+            {
+                "source": "text_processing_node",
+                "target": "prompts_and_messages_node",
+                "label": "Pre-processes text for",
+                "title": "Pre-processes text for prompts",
+                "description": "Text processing (e.g., splitting, summarization) prepares content to be incorporated into prompts."
+            },
+            {
+                "source": "text_processing_node",
+                "target": "data_loading_storage_node",
+                "label": "Generates embeddings/chunks for",
+                "title": "Generates embeddings/chunks for storage",
+                "description": "Embedding models and text splitters are crucial for preparing data to be stored and indexed in vector databases."
+            },
+            {
+                "source": "data_loading_storage_node",
+                "target": "prompts_and_messages_node",
+                "label": "Provides retrieved context to",
+                "title": "Provides retrieved context to prompts",
+                "description": "Data loaded and stored (e.g., from vector stores) is often used as context within prompts for RAG applications."
+            }
+        ],
+        "groups": [
+            {
+                "id": "llm_core_interaction",
+                "label": "LLM Core Interaction",
+                "nodes": [
+                    "prompts_and_messages_node",
+                    "llm_providers_node",
+                    "output_parsing_node"
+                ],
+                "title": "Core LLM Communication Flow",
+                "description": "This group manages the end-to-end process of interacting with Large Language Models, from preparing input prompts to integrating with various providers and parsing their generated outputs.",
+                "role": "generative"
+            },
+            {
+                "id": "data_management_pipeline",
+                "label": "Data Management Pipeline",
+                "nodes": [
+                    "text_processing_node",
+                    "data_loading_storage_node"
+                ],
+                "title": "Data Preparation and Persistence",
+                "description": "This group handles the preparation of raw text data, including splitting and embedding, and its subsequent loading and storage in various data stores, often to support LLM context retrieval.",
+                "role": "data"
+            }
+        ]
+    }
+}

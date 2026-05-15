@@ -1,0 +1,166 @@
+{
+  "title": "Oxylabs Web Scraping Tools",
+  "summary": "This module provides a suite of tools for web scraping using the Oxylabs Realtime API, enabling extraction of data from Amazon product pages, Amazon search results, Google search results, and any specified website URL.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "oxylabs_amazon_product_scraper",
+        "label": "Scrape Amazon Product",
+        "type": "component",
+        "link": null,
+        "title": "Amazon Product Scraper",
+        "description": "Scrapes detailed information from specific Amazon product pages using the Oxylabs Realtime API, returning structured data."
+      },
+      {
+        "id": "oxylabs_amazon_search_scraper",
+        "label": "Scrape Amazon Search Results",
+        "type": "component",
+        "link": null,
+        "title": "Amazon Search Scraper",
+        "description": "Retrieves search results from Amazon based on a query, utilizing the Oxylabs Realtime API to bypass common scraping challenges."
+      },
+      {
+        "id": "oxylabs_google_search_scraper",
+        "label": "Scrape Google Search Results",
+        "type": "component",
+        "link": null,
+        "title": "Google Search Scraper",
+        "description": "Performs Google searches and scrapes the results, providing access to up-to-date information via the Oxylabs Realtime API."
+      },
+      {
+        "id": "oxylabs_universal_scraper",
+        "label": "Scrape Any Website URL",
+        "type": "component",
+        "link": null,
+        "title": "Universal Web Scraper",
+        "description": "Scrapes content from any specified URL using the Oxylabs Realtime API, offering a versatile solution for general web data extraction."
+      },
+      {
+        "id": "oxylabs_api",
+        "label": "Oxylabs Realtime API",
+        "type": "external",
+        "link": null,
+        "title": "Oxylabs Realtime API",
+        "description": "External API service provided by Oxylabs for real-time web scraping, handling proxy management and bypassing anti-bot measures."
+      },
+      {
+        "id": "env_vars",
+        "label": "Environment Variables",
+        "type": "external",
+        "link": null,
+        "title": "Oxylabs Credentials",
+        "description": "Provides Oxylabs API credentials (username and password) from environment variables for secure tool authentication."
+      },
+      {
+        "id": "user_interaction",
+        "label": "User Interaction",
+        "type": "external",
+        "link": null,
+        "title": "Package Installation Prompt",
+        "description": "Prompts the user to install the 'oxylabs' Python package if it's missing, ensuring necessary dependencies are met for tool functionality."
+      }
+    ],
+    "edges": [
+      {
+        "source": "oxylabs_amazon_product_scraper",
+        "target": "oxylabs_api",
+        "label": "Sends Scrape Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "oxylabs_amazon_search_scraper",
+        "target": "oxylabs_api",
+        "label": "Sends Scrape Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "oxylabs_google_search_scraper",
+        "target": "oxylabs_api",
+        "label": "Sends Scrape Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "oxylabs_universal_scraper",
+        "target": "oxylabs_api",
+        "label": "Sends Scrape Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "env_vars",
+        "target": "oxylabs_amazon_product_scraper",
+        "label": "Provides Credentials",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "env_vars",
+        "target": "oxylabs_amazon_search_scraper",
+        "label": "Provides Credentials",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "env_vars",
+        "target": "oxylabs_google_search_scraper",
+        "label": "Provides Credentials",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "env_vars",
+        "target": "oxylabs_universal_scraper",
+        "label": "Provides Credentials",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_interaction",
+        "target": "oxylabs_amazon_product_scraper",
+        "label": "Installs Dependency",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_interaction",
+        "target": "oxylabs_amazon_search_scraper",
+        "label": "Installs Dependency",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_interaction",
+        "target": "oxylabs_google_search_scraper",
+        "label": "Installs Dependency",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_interaction",
+        "target": "oxylabs_universal_scraper",
+        "label": "Installs Dependency",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "oxylabs_tools_group",
+        "label": "Oxylabs Scraping Tools",
+        "nodes": [
+          "oxylabs_amazon_product_scraper",
+          "oxylabs_amazon_search_scraper",
+          "oxylabs_google_search_scraper",
+          "oxylabs_universal_scraper"
+        ],
+        "title": "Oxylabs Scraping Tools",
+        "description": "A collection of tools designed to perform various web scraping tasks using the Oxylabs Realtime API, including Amazon product/search and Google search scraping, as well as universal website scraping.",
+        "role": "generative"
+      }
+    ]
+  }
+}

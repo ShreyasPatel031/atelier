@@ -1,0 +1,166 @@
+{
+    "title": "Integration Testing Module",
+    "summary": "This module houses a comprehensive suite of integration tests designed to validate the end-to-end functionality, performance, and stability of the Ollama application. It covers core API endpoints, advanced model capabilities, concurrency, context management, and tool-calling features.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "api_basic_tests",
+                "label": "API & Basic Functionality Tests",
+                "type": "other_module",
+                "link": "api_and_basic_functionality_tests",
+                "title": "Core API & Basic Tests",
+                "description": "Validates core API endpoints (chat, generate, list, show), basic functionalities like Unicode handling, and fundamental model interactions."
+            },
+            {
+                "id": "advanced_cap_tests",
+                "label": "Advanced Model Capability Tests",
+                "type": "other_module",
+                "link": "advanced_model_capability_tests",
+                "title": "Advanced Model Capabilities",
+                "description": "Tests advanced model features including audio processing, text embeddings, image generation, and multi-modal vision understanding."
+            },
+            {
+                "id": "concurrency_context_tests",
+                "label": "Concurrency & Context Tests",
+                "type": "other_module",
+                "link": "concurrency_and_context_tests",
+                "title": "Concurrency & Context Management",
+                "description": "Evaluates system performance under concurrent loads, resource management, and correct handling of conversational context and history."
+            },
+            {
+                "id": "tool_calling_tests_module",
+                "label": "Tool Calling Tests",
+                "type": "other_module",
+                "link": "tool_calling_tests",
+                "title": "Tool Calling Functionality",
+                "description": "Verifies the API's tool-calling capabilities, from basic execution to complex multi-turn agent interactions under stress."
+            },
+            {
+                "id": "ollama_server_api",
+                "label": "Ollama API Server",
+                "type": "other_module",
+                "link": "api_and_middleware",
+                "title": "Ollama Core API Server",
+                "description": "The central Ollama API server that processes requests for chat, generation, model management, and orchestrates model execution."
+            },
+            {
+                "id": "language_models",
+                "label": "Language Models",
+                "type": "other_module",
+                "link": "model_management",
+                "title": "Various Language Models",
+                "description": "The diverse set of language models (LLMs, vision models, embedding models) managed and served by the Ollama application."
+            },
+            {
+                "id": "openai_compatible_api_endpoint",
+                "label": "OpenAI Compatible API",
+                "type": "other_module",
+                "link": "api_and_middleware",
+                "title": "OpenAI API Endpoint",
+                "description": "An API endpoint that mimics the OpenAI API specification, used for testing compatibility with audio transcription and chat with audio."
+            }
+        ],
+        "edges": [
+            {
+                "source": "api_basic_tests",
+                "target": "ollama_server_api",
+                "label": "Calls API endpoints",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_basic_tests",
+                "target": "language_models",
+                "label": "Interacts with models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "advanced_cap_tests",
+                "target": "ollama_server_api",
+                "label": "Calls API endpoints",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "advanced_cap_tests",
+                "target": "language_models",
+                "label": "Interacts with models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "advanced_cap_tests",
+                "target": "openai_compatible_api_endpoint",
+                "label": "Tests OpenAI compatibility",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "concurrency_context_tests",
+                "target": "ollama_server_api",
+                "label": "Sends concurrent requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "concurrency_context_tests",
+                "target": "language_models",
+                "label": "Tests model resource usage",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tool_calling_tests_module",
+                "target": "ollama_server_api",
+                "label": "Invokes tool-calling API",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tool_calling_tests_module",
+                "target": "language_models",
+                "label": "Tests model tool-calling",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "test_suites",
+                "label": "Integration Test Suites",
+                "nodes": [
+                    "api_basic_tests",
+                    "advanced_cap_tests",
+                    "concurrency_context_tests",
+                    "tool_calling_tests_module"
+                ],
+                "title": "Integration Test Suites",
+                "description": "The collection of specialized test suites that validate different aspects of the Ollama application's functionality and performance.",
+                "role": null
+            },
+            {
+                "id": "ollama_system",
+                "label": "Ollama System Under Test",
+                "nodes": [
+                    "ollama_server_api"
+                ],
+                "title": "Ollama System Under Test",
+                "description": "The core components of the Ollama application that are being validated by the integration tests.",
+                "role": null
+            },
+            {
+                "id": "model_resources",
+                "label": "Model Resources & Endpoints",
+                "nodes": [
+                    "language_models",
+                    "openai_compatible_api_endpoint"
+                ],
+                "title": "Model Resources & Endpoints",
+                "description": "The language models and external API endpoints that the Ollama server utilizes and the tests interact with.",
+                "role": null
+            }
+        ]
+    }
+}

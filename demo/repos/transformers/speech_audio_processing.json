@@ -1,0 +1,105 @@
+{
+    "title": "Speech & Audio Processing",
+    "summary": "This module provides a comprehensive suite of models for various speech and audio tasks, including speech-to-text, text-to-speech, speech-to-speech translation, and speaker recognition.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "speech_to_text_models",
+                "label": "Speech-to-Text Models",
+                "type": "module",
+                "link": "speech_to_text_models",
+                "title": "Speech-to-Text Models",
+                "description": "Models that transcribe spoken audio into text, utilizing various architectures like CTC and conditional generation."
+            },
+            {
+                "id": "text_to_speech_models",
+                "label": "Text-to-Speech Models",
+                "type": "module",
+                "link": "text_to_speech_models",
+                "title": "Text-to-Speech Models",
+                "description": "Models that synthesize human-like speech from input text, supporting different languages and speaker IDs."
+            },
+            {
+                "id": "speech_to_speech_models",
+                "label": "Speech-to-Speech Models",
+                "type": "module",
+                "link": "speech_to_speech_models",
+                "title": "Speech-to-Speech Models",
+                "description": "Models designed for direct speech-to-speech translation, converting spoken input in one language to spoken output in another."
+            },
+            {
+                "id": "speaker_recognition_models",
+                "label": "Speaker Recognition Models",
+                "type": "module",
+                "link": "speaker_recognition_models",
+                "title": "Speaker Recognition Models",
+                "description": "Models that extract speaker-specific features (X-Vectors) from audio for tasks like speaker identification and verification."
+            },
+            {
+                "id": "audio_pretraining_and_classification",
+                "label": "Audio Pre-training & Classification",
+                "type": "module",
+                "link": "audio_pretraining_and_classification",
+                "title": "Audio Pre-training and Classification",
+                "description": "Models for pre-training on large audio datasets and for various audio classification tasks, such as audio frame classification."
+            }
+        ],
+        "edges": [
+            {
+                "source": "speech_to_text_models",
+                "target": "audio_pretraining_and_classification",
+                "label": "uses audio processing"
+            },
+            {
+                "source": "speaker_recognition_models",
+                "target": "audio_pretraining_and_classification",
+                "label": "uses audio processing"
+            },
+            {
+                "source": "speech_to_speech_models",
+                "target": "speech_to_text_models",
+                "label": "internal text processing"
+            },
+            {
+                "source": "speech_to_speech_models",
+                "target": "text_to_speech_models",
+                "label": "internal audio synthesis"
+            }
+        ],
+        "groups": [
+            {
+                "id": "audio_input",
+                "label": "Audio Input Processing",
+                "title": "Audio Input Processing",
+                "description": "Handles the initial processing and feature extraction from raw audio data for various downstream tasks.",
+                "role": "data",
+                "nodes": ["speech_to_text_models", "speaker_recognition_models", "speech_to_speech_models", "audio_pretraining_and_classification"]
+            },
+            {
+                "id": "text_output",
+                "label": "Text Output Generation",
+                "title": "Text Output Generation",
+                "description": "Modules responsible for generating textual output from speech or other input modalities.",
+                "role": "generative",
+                "nodes": ["speech_to_text_models"]
+            },
+            {
+                "id": "audio_output",
+                "label": "Audio Output Synthesis",
+                "title": "Audio Output Synthesis",
+                "description": "Modules dedicated to synthesizing speech or other audio outputs.",
+                "role": "generative",
+                "nodes": ["text_to_speech_models", "speech_to_speech_models"]
+            },
+            {
+                "id": "core_audio_analysis",
+                "label": "Core Audio Analysis",
+                "title": "Core Audio Analysis",
+                "description": "Fundamental components for analyzing and transforming audio data, including pre-training and classification.",
+                "role": "analytical",
+                "nodes": ["audio_pretraining_and_classification", "speaker_recognition_models"]
+            }
+        ]
+    }
+}

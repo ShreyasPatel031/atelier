@@ -1,0 +1,29 @@
+{
+    "title": "Audio Model Conversion",
+    "summary": "This module provides utilities to convert various audio, speech, and music models from their original frameworks into Hugging Face Transformers formats.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "external_audio_models", "label": "Original Audio Models", "type": "external", "title": "Original Audio Models", "description": "Represents pre-trained audio models from various external frameworks that serve as input for the conversion process."},
+            {"id": "external_multimodal_models", "label": "Original Multimodal Models", "type": "external", "title": "Original Multimodal Models", "description": "Includes external models that integrate audio with other modalities, ready for conversion to Hugging Face formats."},
+            {"id": "external_music_models", "label": "Original Music Models", "type": "external", "title": "Original Music Models", "description": "Comprises pre-trained models specifically for music generation and processing, awaiting conversion."},
+            {"id": "speech_audio_converters", "label": "Speech & Audio Converters", "type": "module", "link": "speech_audio_converters", "title": "Speech and Audio Model Converters", "description": "Handles the conversion of speech recognition, text-to-speech, and general audio processing models."},
+            {"id": "multimodal_audio_converters", "label": "Multimodal Audio Converters", "type": "module", "link": "multimodal_audio_converters", "title": "Multimodal Audio Model Converters", "description": "Manages the conversion of models integrating audio with other data types, such as text and video."},
+            {"id": "music_converters", "label": "Music Model Converters", "type": "module", "link": "music_converters", "title": "Music Model Converters", "description": "Dedicated to converting models used for music generation, analysis, and transformation into Hugging Face formats."},
+            {"id": "hf_models_and_processors", "label": "HF Models & Processors", "type": "external", "title": "Hugging Face Models and Processors", "description": "The output destination for all converted models and associated processors, compatible with the Hugging Face ecosystem."}
+        ],
+        "edges": [
+            {"source": "external_audio_models", "target": "speech_audio_converters", "label": "Original speech/audio models"},
+            {"source": "external_multimodal_models", "target": "multimodal_audio_converters", "label": "Original multimodal models"},
+            {"source": "external_music_models", "target": "music_converters", "label": "Original music models"},
+            {"source": "speech_audio_converters", "target": "hf_models_and_processors", "label": "Converted HF speech/audio models"},
+            {"source": "multimodal_audio_converters", "target": "hf_models_and_processors", "label": "Converted HF multimodal models"},
+            {"source": "music_converters", "target": "hf_models_and_processors", "label": "Converted HF music models"}
+        ],
+        "groups": [
+            {"id": "input_sources", "label": "Input Sources", "title": "External Model Inputs", "description": "Various external model formats and checkpoints serving as source material for conversion.", "role": "surface", "nodes": ["external_audio_models", "external_multimodal_models", "external_music_models"]},
+            {"id": "conversion_pipelines", "label": "Conversion Pipelines", "title": "Core Conversion Logic", "description": "The central processing units responsible for adapting model architectures and weights to Hugging Face standards.", "role": "analytical", "nodes": ["speech_audio_converters", "multimodal_audio_converters", "music_converters"]},
+            {"id": "output_destination", "label": "Output Destination", "title": "Hugging Face Ecosystem", "description": "The final repository for all converted models and their respective preprocessors, ready for use.", "role": "generative", "nodes": ["hf_models_and_processors"]}
+        ]
+    }
+}

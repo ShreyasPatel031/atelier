@@ -1,0 +1,163 @@
+{
+  "parallel_wall_seconds": 0.0092,
+  "workers": 8,
+  "repo_count": 7,
+  "total_md_documents": 727,
+  "total_pipeline_seconds_sum": 10639.111,
+  "repos": [
+    {
+      "slug": "crewai",
+      "scan_seconds": 0.0042,
+      "error": null,
+      "md_documents": 93,
+      "overview_diagram_json": true,
+      "overview_nodes": 5,
+      "module_tree_modules": 91,
+      "diagram_coverage_pct": 100.0,
+      "missing_md_vs_tree": 0,
+      "metrics_present": true,
+      "generation_stages_seconds": {
+        "Dependency Analysis": 1.786,
+        "Module Clustering": 49.355,
+        "Documentation Generation": 652.479
+      },
+      "documentation_generation_seconds": 652.479,
+      "total_pipeline_seconds": 703.824,
+      "generation_timestamp": "2026-05-09T00:10:42.593772",
+      "main_model": "gemini-2.5-flash",
+      "quality_score_heuristic": 100.0
+    },
+    {
+      "slug": "crewai-src",
+      "scan_seconds": 0.0086,
+      "error": null,
+      "md_documents": 101,
+      "overview_diagram_json": true,
+      "overview_nodes": 12,
+      "module_tree_modules": 82,
+      "diagram_coverage_pct": 100.0,
+      "missing_md_vs_tree": 0,
+      "metrics_present": true,
+      "generation_stages_seconds": {
+        "Dependency Analysis": 1.79,
+        "Module Clustering": 49.555,
+        "Documentation Generation": 1499.373
+      },
+      "documentation_generation_seconds": 1499.373,
+      "total_pipeline_seconds": 1550.971,
+      "generation_timestamp": "2026-05-08T12:14:12.857828",
+      "main_model": "gemini-2.5-flash",
+      "quality_score_heuristic": 100.0
+    },
+    {
+      "slug": "dspy",
+      "scan_seconds": 0.0049,
+      "error": null,
+      "md_documents": 53,
+      "overview_diagram_json": true,
+      "overview_nodes": 11,
+      "module_tree_modules": 49,
+      "diagram_coverage_pct": 100.0,
+      "missing_md_vs_tree": 0,
+      "metrics_present": true,
+      "generation_stages_seconds": {
+        "Dependency Analysis": 0.349,
+        "Module Clustering": 84.619,
+        "Documentation Generation": 525.119
+      },
+      "documentation_generation_seconds": 525.119,
+      "total_pipeline_seconds": 610.138,
+      "generation_timestamp": "2026-05-08T12:24:29.657179",
+      "main_model": "gemini-2.5-flash",
+      "quality_score_heuristic": 100.0
+    },
+    {
+      "slug": "langchain",
+      "scan_seconds": 0.0072,
+      "error": null,
+      "md_documents": 104,
+      "overview_diagram_json": true,
+      "overview_nodes": 6,
+      "module_tree_modules": 74,
+      "diagram_coverage_pct": 100.0,
+      "missing_md_vs_tree": 0,
+      "metrics_present": true,
+      "generation_stages_seconds": {
+        "Dependency Analysis": 1.764,
+        "Module Clustering": 48.45,
+        "Documentation Generation": 1554.827
+      },
+      "documentation_generation_seconds": 1554.827,
+      "total_pipeline_seconds": 1605.313,
+      "generation_timestamp": "2026-05-08T14:10:46.604319",
+      "main_model": "gemini-2.5-flash",
+      "quality_score_heuristic": 100.0
+    },
+    {
+      "slug": "ollama",
+      "scan_seconds": 0.0087,
+      "error": null,
+      "md_documents": 166,
+      "overview_diagram_json": true,
+      "overview_nodes": 6,
+      "module_tree_modules": 142,
+      "diagram_coverage_pct": 100.0,
+      "missing_md_vs_tree": 0,
+      "metrics_present": true,
+      "generation_stages_seconds": {
+        "Dependency Analysis": 6.141,
+        "Module Clustering": 35.124,
+        "Documentation Generation": 2755.636
+      },
+      "documentation_generation_seconds": 2755.636,
+      "total_pipeline_seconds": 2797.014,
+      "generation_timestamp": "2026-05-08T13:10:50.160282",
+      "main_model": "gemini-2.5-flash",
+      "quality_score_heuristic": 100.0
+    },
+    {
+      "slug": "pydantic-ai",
+      "scan_seconds": 0.0073,
+      "error": null,
+      "md_documents": 100,
+      "overview_diagram_json": true,
+      "overview_nodes": 5,
+      "module_tree_modules": 76,
+      "diagram_coverage_pct": 100.0,
+      "missing_md_vs_tree": 0,
+      "metrics_present": true,
+      "generation_stages_seconds": {
+        "Dependency Analysis": 0.927,
+        "Module Clustering": 37.101,
+        "Documentation Generation": 1370.767
+      },
+      "documentation_generation_seconds": 1370.767,
+      "total_pipeline_seconds": 1408.868,
+      "generation_timestamp": "2026-05-08T14:34:28.687679",
+      "main_model": "gemini-2.5-flash",
+      "quality_score_heuristic": 100.0
+    },
+    {
+      "slug": "transformers",
+      "scan_seconds": 0.0071,
+      "error": null,
+      "md_documents": 110,
+      "overview_diagram_json": true,
+      "overview_nodes": 16,
+      "module_tree_modules": 98,
+      "diagram_coverage_pct": 100.0,
+      "missing_md_vs_tree": 0,
+      "metrics_present": true,
+      "generation_stages_seconds": {
+        "Dependency Analysis": 11.541,
+        "Module Clustering": 53.043,
+        "Documentation Generation": 1897.995
+      },
+      "documentation_generation_seconds": 1897.995,
+      "total_pipeline_seconds": 1962.983,
+      "generation_timestamp": "2026-05-08T13:43:53.647701",
+      "main_model": "gemini-2.5-flash",
+      "quality_score_heuristic": 100.0
+    }
+  ]
+}

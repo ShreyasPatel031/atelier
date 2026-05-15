@@ -12,7 +12,6 @@ import asyncio
 import copy
 import logging
 import os
-from collections import defaultdict
 from typing import Dict, List, Any, Optional
 
 logger = logging.getLogger(__name__)
@@ -46,50 +45,6 @@ def _record_submodule_md_missing(
         )
     except Exception as ex:
         logger.warning("Could not record submodule_md_failure for %s: %s", sub_module_name, ex)
-
-
-def _auto_split_by_directory(
-    component_ids: List[str],
-    components: Dict[str, Any],
-    current_depth: int
-) -> Dict[str, List[str]]:
-    """
-    Auto-split components by directory path at the appropriate depth level.
-    Returns a dict mapping sub-module names to their component IDs.
-    """
-    # Group by directory component at current_depth level
-    groups = defaultdict(list)
-    
-    for comp_id in component_ids:
-        if comp_id not in components:
-            continue
-        
-        component = components[comp_id]
-        path = component.relative_path
-        parts = path.split(os.sep)
-        
-        # Use directory at current_depth + 1 level (since we're creating children)
-        depth_for_split = current_depth
-        if len(parts) > depth_for_split:
-            key = parts[depth_for_split]
-            # Clean the key for module naming
-            key = key.lower().replace("-", "_").replace(".", "_").replace(" ", "_")
-            if not key:
-                key = "other"
-        else:
-            key = "other"
-        
-        groups[key].append(comp_id)
-    
-    # Filter out groups with only 1 component (not worth splitting)
-    result = {k: v for k, v in groups.items() if len(v) >= 1}
-    
-    # Only return if we have more than 1 group (actual split happened)
-    if len(result) <= 1:
-        return {}
-    
-    return result
-
 
 
 async def generate_sub_module_documentation(
@@ -216,8 +171,16 @@ async def generate_sub_module_documentation(
         )
         wants_nested = force_subagent or normal_criteria
 
+        deps.current_module_name = sub_module_name
+        deps.path_to_current_module.append(sub_module_name)
+        deps.current_depth += 1
+
+        sub_json_path = os.path.join(deps.absolute_docs_path, f"{sub_module_name}.json")
+        ncomp = len(core_component_ids)
+
         if wants_nested and can_delegate:
-            logger.info(f"{indent}  Using complex agent (force={force_subagent}, normal={normal_criteria}, depth={ctx.deps.current_depth}, min_depth={MIN_DEPTH})")
+            # Complex module — recursive agent with sub-module delegation
+            logger.info(f"{indent}  Complex agent (force={force_subagent}, normal={normal_criteria}, depth={ctx.deps.current_depth})")
             sub_agent = Agent(
                 model=fallback_models,
                 retries=3,
@@ -226,123 +189,58 @@ async def generate_sub_module_documentation(
                 system_prompt=SYSTEM_PROMPT.format(module_name=sub_module_name),
                 tools=[read_code_components_tool, str_replace_editor_tool, generate_sub_module_documentation_tool],
             )
-        else:
-            if wants_nested and not can_delegate:
-                logger.info(f"{indent}  Using leaf agent (max_depth reached; depth={ctx.deps.current_depth}, max={ctx.deps.max_depth}, tokens={num_tokens})")
-            else:
-                logger.info(f"{indent}  Using leaf agent (depth={ctx.deps.current_depth}, tokens={num_tokens})")
-            sub_agent = Agent(
-                model=fallback_models,
-                retries=3,
-                name=sub_module_name,
-                deps_type=CodeWikiDeps,
-                system_prompt=LEAF_SYSTEM_PROMPT.format(module_name=sub_module_name),
-                tools=[read_code_components_tool, str_replace_editor_tool],
+            user_msg = format_user_prompt(
+                module_name=deps.current_module_name,
+                core_component_ids=core_component_ids,
+                components=ctx.deps.components,
+                module_tree=ctx.deps.module_tree,
             )
-        deps.current_module_name = sub_module_name
-        deps.path_to_current_module.append(sub_module_name)
-        deps.current_depth += 1
+            try:
+                await sub_agent.run(user_msg, deps=ctx.deps)
+            except Exception as sub_err:
+                logger.error(f"{indent}  Agent failed for {sub_module_name}: {sub_err}")
+                _record_submodule_md_missing(
+                    deps, sub_module_name, "agent_exception",
+                    detail=str(sub_err)[:4000], component_count=ncomp,
+                )
+        else:
+            # Leaf module — JSON mode, one shot, no agent
+            logger.info(f"{indent}  Leaf JSON mode (depth={ctx.deps.current_depth}, tokens={num_tokens})")
+            try:
+                from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
+                import json as _json
 
-        subagent_run_failed: Optional[str] = None
-        try:
-            await sub_agent.run(
-                format_user_prompt(
-                    module_name=deps.current_module_name,
+                doc = generate_leaf_doc_json(
+                    module_name=sub_module_name,
                     core_component_ids=core_component_ids,
                     components=ctx.deps.components,
-                    module_tree=ctx.deps.module_tree,
-                ),
-                deps=ctx.deps,
-            )
-        except Exception as sub_err:
-            subagent_run_failed = f"{type(sub_err).__name__}: {sub_err}"
-            logger.error(
-                "%s  sub_agent.run() failed for %s — will try direct LLM fallback if .md missing: %s",
-                indent,
-                sub_module_name,
-                subagent_run_failed,
-            )
-
-        sub_md_path = os.path.join(deps.absolute_docs_path, f"{sub_module_name}.md")
-        ncomp = len(core_component_ids)
-        fallback_failure_detail: Optional[str] = None
-        if subagent_run_failed:
-            fallback_failure_detail = f"subagent_run_exception: {subagent_run_failed}"
-        if not os.path.exists(sub_md_path):
-            logger.warning(f"{indent}  Sub-agent did not create {sub_module_name}.md — running direct LLM fallback")
-            try:
-                from codewiki.src.be.llm_services import call_llm
-                code_snippets = []
-                for cid in core_component_ids[:10]:
-                    comp = ctx.deps.components.get(cid)
-                    if comp and hasattr(comp, 'source_code'):
-                        snippet = comp.source_code[:3000]
-                        code_snippets.append(f"### {cid}\n```python\n{snippet}\n```")
-                source_block = "\n\n".join(code_snippets) if code_snippets else "(no source available)"
-                fallback_prompt = (
-                    f"Generate a minimal markdown file for a code module called **{sub_module_name}**.\n\n"
-                    f"The module contains {len(core_component_ids)} component(s).\n\n"
-                    f"Source code:\n{source_block}\n\n"
-                    "Requirements:\n"
-                    "1. Start with `# <Title>` then a 1-2 sentence summary (~200 chars).\n"
-                    "2. Include a <!-- DIAGRAM_JSON --> block with nodes, edges, and groups.\n"
-                    "3. Include a matching ```mermaid flowchart TD``` diagram.\n"
-                    "4. Do NOT add ## sections, narrative, or code examples.\n"
-                    "Return ONLY the markdown content, no wrapping fences."
+                    module_tree=ctx.deps.module_tree if isinstance(ctx.deps.module_tree, dict) else {},
+                    config=deps.config,
                 )
-                content = call_llm(fallback_prompt, deps.config)
-                if content and len(content.strip()) > 50:
-                    with open(sub_md_path, 'w') as f:
-                        f.write(content)
-                    logger.info(f"{indent}  Fallback wrote {sub_module_name}.md ({len(content)} chars)")
-                else:
-                    fb = f"fallback_insufficient response_len={len((content or '').strip())}"
-                    fallback_failure_detail = (
-                        f"{fallback_failure_detail}; {fb}" if fallback_failure_detail else fb
-                    )
-                    logger.error(f"{indent}  Fallback LLM returned insufficient content for {sub_module_name}")
-            except Exception as fallback_err:
-                fb = f"fallback_exception: {type(fallback_err).__name__}: {fallback_err}"
-                fallback_failure_detail = (
-                    f"{fallback_failure_detail}; {fb}" if fallback_failure_detail else fb
+                with open(sub_json_path, "w") as f:
+                    _json.dump(doc, f, indent=2)
+                logger.info(f"{indent}  Wrote {sub_module_name}.json")
+
+                # Update module tree directly from structured data
+                tree_node = value.get(sub_module_name, {})
+                tree_node["title"] = doc["title"]
+                tree_node["description"] = doc["summary"]
+                tree_node["diagram"] = doc["diagram"]
+                value[sub_module_name] = tree_node
+
+            except Exception as json_err:
+                logger.error(f"{indent}  JSON mode failed for {sub_module_name}: {json_err}")
+                _record_submodule_md_missing(
+                    deps, sub_module_name, "json_mode_failed",
+                    detail=str(json_err)[:4000], component_count=ncomp,
                 )
-                logger.error(f"{indent}  Fallback LLM call failed for {sub_module_name}: {fallback_err}")
-
-        if not os.path.exists(sub_md_path):
-            primary = "subagent_did_not_write_md_file"
-            reason = primary
-            detail: Optional[str] = (
-                fallback_failure_detail
-                if fallback_failure_detail
-                else "no_fallback_attempt_or_subagent_only"
-            )
-            if fallback_failure_detail and fallback_failure_detail.startswith("fallback_insufficient"):
-                reason = "subagent_no_md_fallback_insufficient"
-            elif fallback_failure_detail and fallback_failure_detail.startswith("fallback_exception"):
-                reason = "subagent_no_md_fallback_exception"
-            _record_submodule_md_missing(
-                deps,
-                sub_module_name,
-                reason,
-                detail=detail,
-                component_count=ncomp,
-            )
-
-        # FORCE sub-module creation if depth < MIN_DEPTH and agent didn't create any
-        current_module_children = value[sub_module_name].get("children", {})
-        if force_subagent and can_delegate and len(current_module_children) == 0 and len(core_component_ids) >= 2:
-            logger.info(f"{indent}  Agent did not create sub-modules, forcing directory-based split at depth {deps.current_depth}")
-            auto_split = _auto_split_by_directory(core_component_ids, ctx.deps.components, deps.current_depth)
-            if auto_split and len(auto_split) > 1:
-                logger.info(f"{indent}  Auto-split created {len(auto_split)} sub-modules: {list(auto_split.keys())}")
-                await generate_sub_module_documentation(ctx, auto_split)
 
         deps.path_to_current_module.pop()
         deps.current_depth -= 1
 
     deps.current_module_name = previous_module_name
 
-    return f"Generate successfully. Documentations: {', '.join([key + '.md' for key in sub_module_specs.keys()])} are saved in the working directory."
+    return f"Generated docs: {', '.join(sub_module_specs.keys())}"
 
 
 generate_sub_module_documentation_tool = Tool(function=generate_sub_module_documentation, name="generate_sub_module_documentation", description="Generate detailed description of a given sub-module specs to the sub-agents", takes_ctx=True)

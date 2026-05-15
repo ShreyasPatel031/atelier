@@ -292,25 +292,45 @@ def config_validate(quick: bool, verbose: bool):
         else:
             click.secho("✓ Configuration file exists", fg="green")
         
-        # Step 2: Check API key
+        # Step 2: Check API key or ADC credentials
         if verbose:
             click.echo()
-            click.echo("[2/5] Checking API key...")
-            storage = "system keychain" if manager.keyring_available else "encrypted file"
-            click.echo(f"      Storage: {storage}")
+            click.echo("[2/5] Checking credentials...")
         
         api_key = manager.get_api_key()
-        if not api_key:
-            click.secho("✗ API key missing", fg="red")
+        config_obj = manager.get_config()
+        use_vertex = bool(config_obj and getattr(config_obj, 'use_vertex_ai', False))
+
+        adc_available = False
+        if not api_key or use_vertex:
+            try:
+                import google.auth
+                import google.auth.transport.requests
+                creds, _ = google.auth.default(
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"]
+                )
+                creds.refresh(google.auth.transport.requests.Request())
+                adc_available = bool(creds.token)
+            except Exception:
+                adc_available = False
+
+        if not api_key and not adc_available:
+            click.secho("✗ No credentials found", fg="red")
             click.echo()
-            click.echo("Error: API key not set. Run 'codewiki config set --api-key <key>'")
+            click.echo("Either set an API key:  codewiki config set --api-key <key>")
+            click.echo("Or log in with gcloud:  gcloud auth application-default login")
             sys.exit(EXIT_CONFIG_ERROR)
-        
-        if verbose:
-            click.secho(f"      ✓ API key retrieved", fg="green")
-            click.secho(f"      ✓ Length: {len(api_key)} characters", fg="green")
-        else:
-            click.secho("✓ API key present (stored in keychain)", fg="green")
+
+        if use_vertex and adc_available:
+            if verbose:
+                click.secho("      ✓ Vertex AI + ADC credentials available (auto-refresh)", fg="green")
+            else:
+                click.secho("✓ Credentials: Vertex AI + ADC (no expiring API key)", fg="green")
+        elif api_key:
+            if verbose:
+                click.secho(f"      ✓ API key retrieved ({len(api_key)} chars)", fg="green")
+            else:
+                click.secho("✓ API key present", fg="green")
         
         # Step 3: Check base URL
         config = manager.get_config()
@@ -360,12 +380,35 @@ def config_validate(quick: bool, verbose: bool):
         # Step 5: API connectivity test (unless --quick)
         if not quick:
             try:
-                from openai import OpenAI
-                client = OpenAI(api_key=api_key, base_url=config.base_url)
-                response = client.models.list()
+                if use_vertex and adc_available:
+                    import google.auth
+                    import google.auth.transport.requests
+                    import requests as _requests
+                    creds2, _ = google.auth.default(
+                        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+                    )
+                    creds2.refresh(google.auth.transport.requests.Request())
+                    test_model = config.main_model or "gemini-2.5-flash"
+                    gcp_proj = getattr(config, "gcp_project", "") or "applied-ai-practice00"
+                    test_url = (
+                        f"https://us-central1-aiplatform.googleapis.com/v1/projects/{gcp_proj}"
+                        f"/locations/us-central1/publishers/google/models/{test_model}:generateContent"
+                    )
+                    resp = _requests.post(
+                        test_url,
+                        json={"contents": [{"role": "user", "parts": [{"text": "hi"}]}], "generationConfig": {"maxOutputTokens": 5}},
+                        headers={"Authorization": f"Bearer {creds2.token}", "Content-Type": "application/json"},
+                        timeout=30,
+                    )
+                    if resp.status_code != 200:
+                        raise RuntimeError(resp.json().get("error", {}).get("message", resp.text))
+                else:
+                    from openai import OpenAI
+                    client = OpenAI(api_key=api_key, base_url=config.base_url)
+                    client.models.list()
                 click.secho("✓ API connectivity test successful", fg="green")
             except Exception as e:
-                click.secho("✗ API connectivity test failed", fg="red")
+                click.secho(f"✗ API connectivity test failed: {e}", fg="red")
                 sys.exit(EXIT_CONFIG_ERROR)
         
         # Success

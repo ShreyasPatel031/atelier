@@ -1,0 +1,240 @@
+{
+  "title": "AI Model Profiles Configuration",
+  "summary": "This module defines specific model profiles for various AI providers and models, configuring their capabilities like tool support, JSON output, and thinking mechanisms. It adapts base profiles from different providers to suit specific integration requirements.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "groq_profile_func",
+        "label": "Generate Groq Model Profile",
+        "type": "component",
+        "link": null,
+        "title": "Configure Groq Model Profile",
+        "description": "Defines specific capabilities and settings for Groq models, including web search and thinking support based on the model name."
+      },
+      {
+        "id": "harmony_profile_func",
+        "label": "Generate Harmony Model Profile",
+        "type": "component",
+        "link": null,
+        "title": "Configure Harmony Model Profile",
+        "description": "Adapts an OpenAI model profile for the OpenAI Harmony Response format, disabling tool choice requirements and handling streamed whitespace."
+      },
+      {
+        "id": "bedrock_amazon_profile_func",
+        "label": "Generate Bedrock Amazon Profile",
+        "type": "component",
+        "link": null,
+        "title": "Configure Bedrock Amazon Profile",
+        "description": "Generates a model profile for Amazon models accessed via Bedrock, adding tool choice support, prompt caching, and specific native tools for 'nova-2' models."
+      },
+      {
+        "id": "groq_moonshotai_profile_func",
+        "label": "Generate Groq MoonshotAI Profile",
+        "type": "component",
+        "link": null,
+        "title": "Configure Groq MoonshotAI Profile",
+        "description": "Extends a MoonshotAI model profile with JSON object and schema output support when used with the Groq provider."
+      },
+      {
+        "id": "meta_groq_profile_func",
+        "label": "Generate Meta Groq Model Profile",
+        "type": "component",
+        "link": null,
+        "title": "Configure Meta Groq Profile",
+        "description": "Provides a model profile for Meta models used with the Groq provider, conditionally enabling JSON object/schema output for specific models."
+      },
+      {
+        "id": "openrouter_google_profile_func",
+        "label": "Generate OpenRouter Google Profile",
+        "type": "component",
+        "link": null,
+        "title": "Configure OpenRouter Google Profile",
+        "description": "Retrieves a Google model profile and applies a specific JSON schema transformer for compatibility with OpenRouter's translation layer."
+      },
+      {
+        "id": "openai_profile",
+        "label": "OpenAI Base Profile",
+        "type": "external",
+        "link": "other_module",
+        "title": "Base OpenAI Model Profile",
+        "description": "A foundational model profile for OpenAI models, used as a starting point for Harmony configurations."
+      },
+      {
+        "id": "amazon_profile",
+        "label": "Amazon Base Profile",
+        "type": "external",
+        "link": "other_module",
+        "title": "Base Amazon Model Profile",
+        "description": "A foundational model profile for Amazon models, used as a starting point for Bedrock configurations."
+      },
+      {
+        "id": "moonshotai_profile",
+        "label": "MoonshotAI Base Profile",
+        "type": "external",
+        "link": "other_module",
+        "title": "Base MoonshotAI Model Profile",
+        "description": "A foundational model profile for MoonshotAI models, extended for Groq provider usage."
+      },
+      {
+        "id": "meta_profile",
+        "label": "Meta Base Profile",
+        "type": "external",
+        "link": "other_module",
+        "title": "Base Meta Model Profile",
+        "description": "A foundational model profile for Meta models, extended for Groq provider usage."
+      },
+      {
+        "id": "google_profile",
+        "label": "Google Base Profile",
+        "type": "external",
+        "link": "other_module",
+        "title": "Base Google Model Profile",
+        "description": "A foundational model profile for Google models, adapted for OpenRouter access."
+      },
+      {
+        "id": "model_profile_output",
+        "label": "Configured Model Profile",
+        "type": "external",
+        "link": null,
+        "title": "Resulting Model Profile",
+        "description": "The final, configured ModelProfile object containing specific capabilities and settings for an AI model."
+      },
+      {
+        "id": "code_execution_tool",
+        "label": "Code Execution Tool",
+        "type": "external",
+        "link": "other_module",
+        "title": "Native Code Execution Tool",
+        "description": "A native tool representing the capability to execute code, which can be supported by certain models like Bedrock's Nova-2."
+      },
+      {
+        "id": "openrouter_transformer",
+        "label": "OpenRouter JSON Transformer",
+        "type": "external",
+        "link": "other_module",
+        "title": "OpenRouter JSON Schema Transformer",
+        "description": "A specific JSON schema transformer used to ensure compatibility with OpenRouter's translation layer for Google models."
+      }
+    ],
+    "edges": [
+      {
+        "source": "harmony_profile_func",
+        "target": "openai_profile",
+        "label": "Uses base profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "harmony_profile_func",
+        "target": "model_profile_output",
+        "label": "Outputs profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_amazon_profile_func",
+        "target": "amazon_profile",
+        "label": "Uses base profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_amazon_profile_func",
+        "target": "code_execution_tool",
+        "label": "Adds capability (Nova-2)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_amazon_profile_func",
+        "target": "model_profile_output",
+        "label": "Outputs profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_moonshotai_profile_func",
+        "target": "moonshotai_profile",
+        "label": "Uses base profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_moonshotai_profile_func",
+        "target": "model_profile_output",
+        "label": "Outputs profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "meta_groq_profile_func",
+        "target": "meta_profile",
+        "label": "Uses base profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "meta_groq_profile_func",
+        "target": "model_profile_output",
+        "label": "Outputs profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_google_profile_func",
+        "target": "google_profile",
+        "label": "Uses base profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_google_profile_func",
+        "target": "openrouter_transformer",
+        "label": "Applies transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_google_profile_func",
+        "target": "model_profile_output",
+        "label": "Outputs profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_profile_func",
+        "target": "model_profile_output",
+        "label": "Outputs profile",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "groq_profiles_group",
+        "label": "Groq Provider Profiles",
+        "nodes": [
+          "groq_profile_func",
+          "groq_moonshotai_profile_func",
+          "meta_groq_profile_func"
+        ],
+        "title": "Groq Provider Model Profiles",
+        "description": "Functions that define or adapt model profiles specifically for models accessed through the Groq provider, including MoonshotAI and Meta models.",
+        "role": "generative"
+      },
+      {
+        "id": "other_provider_profiles_group",
+        "label": "Other Provider Profiles",
+        "nodes": [
+          "harmony_profile_func",
+          "bedrock_amazon_profile_func",
+          "openrouter_google_profile_func"
+        ],
+        "title": "Other Provider Model Profiles",
+        "description": "Functions that define or adapt model profiles for various other AI providers like Harmony (OpenAI), Bedrock (Amazon), and OpenRouter (Google).",
+        "role": "generative"
+      }
+    ]
+  }
+}

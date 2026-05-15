@@ -1,0 +1,511 @@
+{
+  "title": "Specialized API Tools",
+  "summary": "This module provides a collection of specialized tools for agents to interact with various external APIs and services, enabling capabilities like data querying, web automation, document processing, and integration with third-party platforms.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "AIMindTool",
+        "label": "AIMindTool",
+        "type": "component",
+        "link": null,
+        "title": "AI-Minds Data Query",
+        "description": "A tool that queries data from various sources (PostgreSQL, MySQL, etc.) using AI-Minds, allowing natural language questions against structured data."
+      },
+      {
+        "id": "ApifyActorsTool",
+        "label": "ApifyActorsTool",
+        "type": "component",
+        "link": null,
+        "title": "Apify Actor Runner",
+        "description": "Runs Apify Actors to perform web scraping and data extraction tasks. Requires an Apify API token and uses the `langchain-apify` package."
+      },
+      {
+        "id": "ArxivPaperTool",
+        "label": "ArxivPaperTool",
+        "type": "component",
+        "link": null,
+        "title": "Arxiv Paper Fetcher",
+        "description": "Fetches metadata and optionally downloads PDF papers from Arxiv based on a search query. Handles API requests, parsing XML, and file saving."
+      },
+      {
+        "id": "BrightDataDatasetTool",
+        "label": "BrightDataDatasetTool",
+        "type": "component",
+        "link": null,
+        "title": "Bright Data Dataset Scraper",
+        "description": "Scrapes structured data from URLs using the Bright Data Dataset API. Supports various output formats and handles job triggering, polling, and result retrieval."
+      },
+      {
+        "id": "CodeDocsSearchTool",
+        "label": "CodeDocsSearchTool",
+        "type": "component",
+        "link": null,
+        "title": "Code Docs Search",
+        "description": "Performs semantic search within code documentation content from a specified URL. Extends `RagTool` for RAG capabilities."
+      },
+      {
+        "id": "ComposioTool",
+        "label": "ComposioTool",
+        "type": "component",
+        "link": null,
+        "title": "Composio Action Wrapper",
+        "description": "Wraps Composio actions, allowing agents to execute various third-party integrations. Dynamically generates tool schemas from Composio actions."
+      },
+      {
+        "id": "ContextualAICreateAgentTool",
+        "label": "ContextualAICreateAgentTool",
+        "type": "component",
+        "link": null,
+        "title": "Contextual AI Agent Creator",
+        "description": "Creates Contextual AI RAG agents by ingesting documents into a datastore. Manages datastore creation, document upload, and agent setup."
+      },
+      {
+        "id": "ContextualAIParseTool",
+        "label": "ContextualAIParseTool",
+        "type": "component",
+        "link": null,
+        "title": "Contextual AI Document Parser",
+        "description": "Parses documents using Contextual AI's advanced parser, supporting various parse modes and output types. Handles job submission and status monitoring."
+      },
+      {
+        "id": "ContextualAIQueryTool",
+        "label": "ContextualAIQueryTool",
+        "type": "component",
+        "link": null,
+        "title": "Contextual AI Agent Query",
+        "description": "Queries Contextual AI RAG agents with natural language, retrieving responses based on the agent's knowledge base. Includes logic to wait for document processing."
+      },
+      {
+        "id": "DatabricksQueryTool",
+        "label": "DatabricksQueryTool",
+        "type": "component",
+        "link": null,
+        "title": "Databricks SQL Query",
+        "description": "Executes SQL queries against Databricks workspace tables. Supports catalog/schema specification, result formatting, and includes robust error handling and DML protection."
+      },
+      {
+        "id": "DirectoryReadTool",
+        "label": "DirectoryReadTool",
+        "type": "component",
+        "link": null,
+        "title": "Directory Content Lister",
+        "description": "Recursively lists the contents (files) of a specified directory. Useful for agents needing to inspect local file structures."
+      },
+      {
+        "id": "FileCompressorTool",
+        "label": "FileCompressorTool",
+        "type": "component",
+        "link": null,
+        "title": "File/Directory Compressor",
+        "description": "Compresses a file or directory into an archive (e.g., .zip, .tar.gz). Provides options for output path and overwriting existing archives."
+      },
+      {
+        "id": "FileReadTool",
+        "label": "FileReadTool",
+        "type": "component",
+        "link": null,
+        "title": "File Content Reader",
+        "description": "Reads the content of a specified file, with optional parameters for reading specific lines or ranges. Handles file not found and permission errors."
+      },
+      {
+        "id": "GenerateCrewaiAutomationTool",
+        "label": "GenerateCrewaiAutomationTool",
+        "type": "component",
+        "link": null,
+        "title": "CrewAI Automation Generator",
+        "description": "Leverages CrewAI Studio to automatically generate CrewAI automations from natural language descriptions, translating requirements into functional implementations."
+      },
+      {
+        "id": "MergeAgentHandlerTool",
+        "label": "MergeAgentHandlerTool",
+        "type": "component",
+        "link": null,
+        "title": "Merge Agent Handler Tool",
+        "description": "Wraps Merge Agent Handler tools, enabling CrewAI agents to securely access third-party integrations via the Model Context Protocol (MCP). Manages authentication and tool execution."
+      },
+      {
+        "id": "MultiOnTool",
+        "label": "MultiOnTool",
+        "type": "component",
+        "link": null,
+        "title": "MultiOn Web Browser Control",
+        "description": "Provides LLMs with the ability to control web browsers using natural language instructions. Supports browsing, interaction, and session management."
+      },
+      {
+        "id": "NL2SQLTool",
+        "label": "NL2SQLTool",
+        "type": "component",
+        "link": null,
+        "title": "Natural Language to SQL",
+        "description": "Converts natural language queries into SQL and executes them against a database. Includes schema introspection, query validation, and DML protection."
+      },
+      {
+        "id": "OCRTool",
+        "label": "OCRTool",
+        "type": "component",
+        "link": null,
+        "title": "Optical Character Recognition",
+        "description": "Performs OCR on images (local files or URLs) using an LLM's vision capabilities to extract text. Encodes local images to base64 for API submission."
+      },
+      {
+        "id": "StagehandTool",
+        "label": "StagehandTool",
+        "type": "component",
+        "link": null,
+        "title": "Stagehand Web Automation",
+        "description": "Automates web browser interactions using natural language with atomic action handling. Supports navigation, clicking, form filling, data extraction, and element observation."
+      },
+      {
+        "id": "VisionTool",
+        "label": "VisionTool",
+        "type": "component",
+        "link": null,
+        "title": "Image Analysis with Vision LLM",
+        "description": "Analyzes images (local files or URLs) using vision models to describe their contents. Encodes local images to base64 for API submission."
+      },
+      {
+        "id": "ZapierActionTools",
+        "label": "ZapierActionTools",
+        "type": "component",
+        "link": null,
+        "title": "Zapier Action Tools Factory",
+        "description": "A factory function that returns a list of Zapier action tools, enabling agents to interact with various Zapier integrations. Requires a Zapier API key."
+      },
+      {
+        "id": "AI-Minds API",
+        "label": "AI-Minds API",
+        "type": "external",
+        "link": null,
+        "title": "AI-Minds Platform",
+        "description": "External platform for querying data sources using natural language."
+      },
+      {
+        "id": "Apify Platform",
+        "label": "Apify Platform",
+        "type": "external",
+        "link": null,
+        "title": "Apify Web Scraping Platform",
+        "description": "External platform for running web scraping and data extraction actors."
+      },
+      {
+        "id": "Arxiv API",
+        "label": "Arxiv API",
+        "type": "external",
+        "link": null,
+        "title": "Arxiv Research Paper API",
+        "description": "External API for fetching scientific paper metadata and PDFs."
+      },
+      {
+        "id": "Bright Data API",
+        "label": "Bright Data API",
+        "type": "external",
+        "link": null,
+        "title": "Bright Data Scraping API",
+        "description": "External API for structured data scraping and dataset retrieval."
+      },
+      {
+        "id": "Composio API",
+        "label": "Composio API",
+        "type": "external",
+        "link": null,
+        "title": "Composio Integration API",
+        "description": "External API for integrating with various third-party services and applications."
+      },
+      {
+        "id": "Contextual AI API",
+        "label": "Contextual AI API",
+        "type": "external",
+        "link": null,
+        "title": "Contextual AI Platform API",
+        "description": "External API for creating RAG agents, parsing documents, and querying knowledge bases."
+      },
+      {
+        "id": "Databricks SQL Warehouse",
+        "label": "Databricks SQL Warehouse",
+        "type": "external",
+        "link": null,
+        "title": "Databricks SQL Analytics",
+        "description": "External Databricks service for executing SQL queries against data warehouses."
+      },
+      {
+        "id": "CrewAI Studio API",
+        "label": "CrewAI Studio API",
+        "type": "external",
+        "link": null,
+        "title": "CrewAI Studio Automation Platform",
+        "description": "External platform for generating and managing CrewAI automations."
+      },
+      {
+        "id": "Merge Agent Handler API",
+        "label": "Merge Agent Handler API",
+        "type": "external",
+        "link": null,
+        "title": "Merge Agent Handler Platform",
+        "description": "External platform for secure access to third-party integrations via Model Context Protocol (MCP)."
+      },
+      {
+        "id": "MultiOn API",
+        "label": "MultiOn API",
+        "type": "external",
+        "link": null,
+        "title": "MultiOn Web Control API",
+        "description": "External API for controlling web browsers using natural language instructions."
+      },
+      {
+        "id": "SQL Database",
+        "label": "SQL Database",
+        "type": "external",
+        "link": null,
+        "title": "Relational Database",
+        "description": "Any external SQL-compatible database for data storage and retrieval."
+      },
+      {
+        "id": "LLM Vision API",
+        "label": "LLM Vision API",
+        "type": "external",
+        "link": null,
+        "title": "Large Language Model Vision API",
+        "description": "External LLM service with vision capabilities for image analysis and OCR."
+      },
+      {
+        "id": "Browserbase/Stagehand API",
+        "label": "Browserbase/Stagehand API",
+        "type": "external",
+        "link": null,
+        "title": "Browserbase/Stagehand Web Automation",
+        "description": "External service for advanced web browser automation and interaction."
+      },
+      {
+        "id": "LLM (OpenAI, Anthropic, Google)",
+        "label": "LLM (OpenAI, Anthropic, Google)",
+        "type": "external",
+        "link": null,
+        "title": "Various LLM Providers",
+        "description": "External Large Language Model providers used for natural language processing."
+      },
+      {
+        "id": "Zapier API",
+        "label": "Zapier API",
+        "type": "external",
+        "link": null,
+        "title": "Zapier Integration Platform",
+        "description": "External platform for connecting and automating workflows between web applications."
+      }
+    ],
+    "edges": [
+      {
+        "source": "AIMindTool",
+        "target": "AI-Minds API",
+        "label": "queries data via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ApifyActorsTool",
+        "target": "Apify Platform",
+        "label": "runs actors on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ArxivPaperTool",
+        "target": "Arxiv API",
+        "label": "fetches from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BrightDataDatasetTool",
+        "target": "Bright Data API",
+        "label": "scrapes data via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ComposioTool",
+        "target": "Composio API",
+        "label": "executes actions via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ContextualAICreateAgentTool",
+        "target": "Contextual AI API",
+        "label": "creates agents via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ContextualAIParseTool",
+        "target": "Contextual AI API",
+        "label": "parses documents via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ContextualAIQueryTool",
+        "target": "Contextual AI API",
+        "label": "queries agents via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatabricksQueryTool",
+        "target": "Databricks SQL Warehouse",
+        "label": "executes queries on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GenerateCrewaiAutomationTool",
+        "target": "CrewAI Studio API",
+        "label": "generates automation via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MergeAgentHandlerTool",
+        "target": "Merge Agent Handler API",
+        "label": "executes tools via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiOnTool",
+        "target": "MultiOn API",
+        "label": "controls browser via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "NL2SQLTool",
+        "target": "SQL Database",
+        "label": "executes SQL on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OCRTool",
+        "target": "LLM Vision API",
+        "label": "extracts text via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StagehandTool",
+        "target": "Browserbase/Stagehand API",
+        "label": "automates web via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StagehandTool",
+        "target": "LLM (OpenAI, Anthropic, Google)",
+        "label": "uses for instructions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VisionTool",
+        "target": "LLM Vision API",
+        "label": "analyzes images via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ZapierActionTools",
+        "target": "Zapier API",
+        "label": "creates actions via",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "data_query_analysis",
+        "label": "Data Query & Analysis",
+        "nodes": [
+          "AIMindTool",
+          "DatabricksQueryTool",
+          "NL2SQLTool"
+        ],
+        "title": "Data Query & Analysis Tools",
+        "description": "Tools designed for querying and analyzing structured and unstructured data from various sources.",
+        "role": "analytical"
+      },
+      {
+        "id": "web_automation",
+        "label": "Web Automation",
+        "nodes": [
+          "ApifyActorsTool",
+          "BrightDataDatasetTool",
+          "MultiOnTool",
+          "StagehandTool"
+        ],
+        "title": "Web Automation & Scraping Tools",
+        "description": "Tools for automating web browser interactions, scraping data, and running web-based actors.",
+        "role": "generative"
+      },
+      {
+        "id": "document_processing",
+        "label": "Document Processing",
+        "nodes": [
+          "ArxivPaperTool",
+          "ContextualAIParseTool",
+          "OCRTool",
+          "VisionTool"
+        ],
+        "title": "Document & Image Processing Tools",
+        "description": "Tools for fetching, parsing, and extracting information from documents and images.",
+        "role": "analytical"
+      },
+      {
+        "id": "file_system_operations",
+        "label": "File System Operations",
+        "nodes": [
+          "DirectoryReadTool",
+          "FileCompressorTool",
+          "FileReadTool"
+        ],
+        "title": "File System Management Tools",
+        "description": "Tools for interacting with the local file system, including reading, listing, and compressing files/directories.",
+        "role": "data"
+      },
+      {
+        "id": "integration_automation",
+        "label": "Integration & Automation",
+        "nodes": [
+          "ComposioTool",
+          "MergeAgentHandlerTool",
+          "ZapierActionTools"
+        ],
+        "title": "Third-Party Integration Tools",
+        "description": "Tools for integrating with and automating workflows across various external platforms and services.",
+        "role": "surface"
+      },
+      {
+        "id": "ai_agent_management",
+        "label": "AI Agent Management",
+        "nodes": [
+          "ContextualAICreateAgentTool",
+          "ContextualAIQueryTool",
+          "GenerateCrewaiAutomationTool"
+        ],
+        "title": "AI Agent Creation & Query Tools",
+        "description": "Tools for creating, managing, and querying RAG-based AI agents and their knowledge bases.",
+        "role": "generative"
+      },
+      {
+        "id": "data_retrieval",
+        "label": "Data Retrieval",
+        "nodes": [
+          "CodeDocsSearchTool"
+        ],
+        "title": "Specialized Data Retrieval",
+        "description": "Tools focused on retrieving specific types of data, such as code documentation.",
+        "role": "data"
+      }
+    ]
+  }
+}

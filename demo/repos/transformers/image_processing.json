@@ -1,0 +1,296 @@
+{
+  "title": "Image Processing Module",
+  "summary": "This module provides a collection of image processors and utility functions for various models, handling common preprocessing steps like resizing, normalization, and format conversion. It supports both Torchvision (GPU-accelerated) and PIL (CPU-based) backends, along with model-specific adaptations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "image_mixin",
+        "label": "Image Feature Extraction Mixin",
+        "type": "component",
+        "link": null,
+        "title": "Image Feature Extraction",
+        "description": "Provides common image manipulation utilities like resizing, cropping, normalization, and format conversions for various image types."
+      },
+      {
+        "id": "convert_rgb_util",
+        "label": "Convert to RGB Utility",
+        "type": "component",
+        "link": null,
+        "title": "RGB Conversion Function",
+        "description": "A standalone utility function to convert PIL images to RGB format, handling transparency blending when necessary."
+      },
+      {
+        "id": "pil_backend",
+        "label": "PIL Backend",
+        "type": "component",
+        "link": null,
+        "title": "PIL Image Processing Backend",
+        "description": "Base image processing backend using Pillow (PIL) for various image transformations and preprocessing steps, typically CPU-bound."
+      },
+      {
+        "id": "torchvision_backend",
+        "label": "Torchvision Backend",
+        "type": "component",
+        "link": null,
+        "title": "Torchvision Image Processing Backend",
+        "description": "GPU-accelerated image processing backend using Torchvision for efficient batched operations like resizing, padding, and normalization."
+      },
+      {
+        "id": "chameleon_tv_processor",
+        "label": "Chameleon Processor (TV)",
+        "type": "component",
+        "link": null,
+        "title": "Chameleon Image Processor (Torchvision)",
+        "description": "Image processor for Chameleon models, extending the Torchvision backend with custom RGB conversion and resize logic."
+      },
+      {
+        "id": "chameleon_pil_processor",
+        "label": "Chameleon Processor (PIL)",
+        "type": "component",
+        "link": null,
+        "title": "Chameleon Image Processor (PIL)",
+        "description": "Image processor for Chameleon models, extending the PIL backend with custom RGB conversion logic."
+      },
+      {
+        "id": "conditional_detr_processor",
+        "label": "Conditional DETR Processor",
+        "type": "component",
+        "link": null,
+        "title": "Conditional DETR Image Processor",
+        "description": "Image processor for Conditional DETR models, handling resizing, padding, and annotation preparation/post-processing for object detection and segmentation."
+      },
+      {
+        "id": "deformable_detr_processor",
+        "label": "Deformable DETR Processor",
+        "type": "component",
+        "link": null,
+        "title": "Deformable DETR Image Processor",
+        "description": "Image processor for Deformable DETR models, managing image transformations and annotation handling for object detection tasks."
+      },
+      {
+        "id": "detr_processor",
+        "label": "DETR Processor",
+        "type": "component",
+        "link": null,
+        "title": "DETR Image Processor",
+        "description": "Image processor for DETR models, providing image preprocessing and post-processing functionalities for object detection and segmentation tasks."
+      },
+      {
+        "id": "efficientloftr_processor",
+        "label": "EfficientLoFTR Processor",
+        "type": "component",
+        "link": null,
+        "title": "EfficientLoFTR Image Processor",
+        "description": "Image processor for EfficientLoFTR, handling image pair preprocessing (resize, rescale, grayscale) and keypoint matching post-processing."
+      },
+      {
+        "id": "grounding_dino_processor",
+        "label": "Grounding DINO Processor",
+        "type": "component",
+        "link": null,
+        "title": "Grounding DINO Image Processor",
+        "description": "Image processor for Grounding DINO models, including image resizing, padding, normalization, and object detection post-processing."
+      },
+      {
+        "id": "idefics2_processor",
+        "label": "Idefics2 Processor",
+        "type": "component",
+        "link": null,
+        "title": "Idefics2 Image Processor",
+        "description": "Image processor for Idefics2 models, supporting image splitting, resizing, padding, and normalization for multi-image inputs."
+      },
+      {
+        "id": "lightglue_processor",
+        "label": "LightGlue Processor",
+        "type": "component",
+        "link": null,
+        "title": "LightGlue Image Processor",
+        "description": "Image processor for LightGlue, handling image pair preprocessing (resize, rescale, grayscale) and keypoint matching post-processing."
+      },
+      {
+        "id": "mllama_processor",
+        "label": "M-LLaMA Processor",
+        "type": "component",
+        "link": null,
+        "title": "M-LLaMA Image Processor",
+        "description": "Image processor for M-LLaMA models, managing image tiling, resizing, padding, and aspect ratio handling for multi-image inputs."
+      },
+      {
+        "id": "nougat_processor",
+        "label": "Nougat Processor",
+        "type": "component",
+        "link": null,
+        "title": "Nougat Image Processor",
+        "description": "Image processor for Nougat models, featuring margin cropping, long axis alignment, thumbnailing, and padding for document images."
+      },
+      {
+        "id": "superglue_processor",
+        "label": "SuperGlue Processor",
+        "type": "component",
+        "link": null,
+        "title": "SuperGlue Image Processor",
+        "description": "Image processor for SuperGlue, handling image pair preprocessing (resize, rescale, grayscale) and keypoint matching post-processing."
+      }
+    ],
+    "edges": [
+      {
+        "source": "pil_backend",
+        "target": "image_mixin",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "torchvision_backend",
+        "target": "image_mixin",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "torchvision_backend",
+        "target": "convert_rgb_util",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "idefics2_processor",
+        "target": "convert_rgb_util",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chameleon_tv_processor",
+        "target": "torchvision_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chameleon_pil_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conditional_detr_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deformable_detr_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "detr_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "efficientloftr_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grounding_dino_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "idefics2_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lightglue_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mllama_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nougat_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "superglue_processor",
+        "target": "pil_backend",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_backends",
+        "label": "Core Image Processing Backends",
+        "nodes": [
+          "pil_backend",
+          "torchvision_backend"
+        ],
+        "title": "Core Image Processing Backends",
+        "description": "Fundamental classes providing image processing capabilities using different underlying libraries.",
+        "role": "surface"
+      },
+      {
+        "id": "image_utilities",
+        "label": "Image Utility Functions",
+        "nodes": [
+          "image_mixin",
+          "convert_rgb_util"
+        ],
+        "title": "Image Utility Functions",
+        "description": "Reusable functions and mixins for common image manipulation tasks.",
+        "role": "generative"
+      },
+      {
+        "id": "model_specific_processors",
+        "label": "Model-Specific Image Processors",
+        "nodes": [
+          "chameleon_tv_processor",
+          "chameleon_pil_processor",
+          "conditional_detr_processor",
+          "deformable_detr_processor",
+          "detr_processor",
+          "efficientloftr_processor",
+          "grounding_dino_processor",
+          "idefics2_processor",
+          "lightglue_processor",
+          "mllama_processor",
+          "nougat_processor",
+          "superglue_processor"
+        ],
+        "title": "Model-Specific Image Processors",
+        "description": "Specialized image processors tailored for the unique preprocessing and post-processing requirements of various models.",
+        "role": "surface"
+      }
+    ]
+  }
+}

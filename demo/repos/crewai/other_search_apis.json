@@ -1,0 +1,241 @@
+{
+  "title": "External Search API Integrations",
+  "summary": "This module provides tools for integrating with various third-party search APIs like Exa, SerpApi, and Serper.dev, enabling agents to perform web searches, news searches, and retrieve structured search results.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "exa_tool_deprecated",
+        "label": "Exa Search Tool (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "EXASearchTool",
+        "description": "A deprecated tool for performing web searches via the Exa API, issuing warnings upon use and delegating to the current ExaSearchTool implementation."
+      },
+      {
+        "id": "serpapi_tool",
+        "label": "SerpApi Base Tool",
+        "type": "component",
+        "link": null,
+        "title": "SerpApiBaseTool",
+        "description": "Provides foundational integration with the SerpApi service, handling API key management, client initialization, and filtering of search results using regular expressions."
+      },
+      {
+        "id": "serper_dev_tool",
+        "label": "Serper.dev Search Tool",
+        "type": "component",
+        "link": null,
+        "title": "SerperDevTool",
+        "description": "Facilitates web and news searches through the Serper.dev API, managing API requests, processing JSON responses, and formatting various types of search results."
+      },
+      {
+        "id": "base_tool_component",
+        "label": "Base Tool Component",
+        "type": "component",
+        "link": "base_tool_framework",
+        "title": "BaseTool",
+        "description": "The abstract base class providing common functionalities and structure for all tools within the CrewAI framework."
+      },
+      {
+        "id": "exa_api_service",
+        "label": "Exa Search API",
+        "type": "external",
+        "link": null,
+        "title": "Exa Search API",
+        "description": "An external web search service that provides search results."
+      },
+      {
+        "id": "serpapi_service_external",
+        "label": "SerpApi Service",
+        "type": "external",
+        "link": null,
+        "title": "SerpApi",
+        "description": "An external search engine results API that provides structured data from various search engines."
+      },
+      {
+        "id": "serper_dev_api_external",
+        "label": "Serper.dev API",
+        "type": "external",
+        "link": null,
+        "title": "Serper.dev",
+        "description": "An external API for Google Search results, including web and news searches."
+      },
+      {
+        "id": "http_client",
+        "label": "HTTP Request Client",
+        "type": "component",
+        "link": null,
+        "title": "requests library",
+        "description": "A utility for making synchronous HTTP requests to external web services and APIs."
+      },
+      {
+        "id": "env_var_manager",
+        "label": "Environment Variable Manager",
+        "type": "component",
+        "link": null,
+        "title": "os module",
+        "description": "Manages access to system environment variables, typically used for retrieving sensitive API keys and configurations."
+      },
+      {
+        "id": "json_parser",
+        "label": "JSON Data Parser",
+        "type": "component",
+        "link": null,
+        "title": "json module",
+        "description": "Handles the serialization and deserialization of JSON data, crucial for processing API responses."
+      },
+      {
+        "id": "warning_logger",
+        "label": "Deprecation Warning Logger",
+        "type": "component",
+        "link": null,
+        "title": "warnings module",
+        "description": "A standard Python module used to issue warnings, particularly for notifying users about deprecated functionalities."
+      },
+      {
+        "id": "regex_processor",
+        "label": "Regular Expression Processor",
+        "type": "component",
+        "link": null,
+        "title": "re module",
+        "description": "Provides operations for regular expression matching, used here for pattern-based data manipulation and filtering."
+      }
+    ],
+    "edges": [
+      {
+        "source": "exa_tool_deprecated",
+        "target": "base_tool_component",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "exa_tool_deprecated",
+        "target": "warning_logger",
+        "label": "issues warnings via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "exa_tool_deprecated",
+        "target": "exa_api_service",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serpapi_tool",
+        "target": "base_tool_component",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serpapi_tool",
+        "target": "env_var_manager",
+        "label": "retrieves API key from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serpapi_tool",
+        "target": "serpapi_service_external",
+        "label": "communicates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serpapi_tool",
+        "target": "regex_processor",
+        "label": "uses for filtering",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serper_dev_tool",
+        "target": "base_tool_component",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serper_dev_tool",
+        "target": "env_var_manager",
+        "label": "retrieves API key from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serper_dev_tool",
+        "target": "http_client",
+        "label": "makes requests via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serper_dev_tool",
+        "target": "json_parser",
+        "label": "processes responses with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serper_dev_tool",
+        "target": "serper_dev_api_external",
+        "label": "communicates with",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "search_tools",
+        "label": "Third-Party Search Tools",
+        "nodes": [
+          "exa_tool_deprecated",
+          "serpapi_tool",
+          "serper_dev_tool"
+        ],
+        "title": "Third-Party Search Tools",
+        "description": "Components that provide specialized search capabilities by integrating with various external search APIs.",
+        "role": "generative"
+      },
+      {
+        "id": "external_services",
+        "label": "External Search Services",
+        "nodes": [
+          "exa_api_service",
+          "serpapi_service_external",
+          "serper_dev_api_external"
+        ],
+        "title": "External Search Services",
+        "description": "External APIs and services that the search tools interact with to retrieve information.",
+        "role": "external"
+      },
+      {
+        "id": "core_framework",
+        "label": "Core Tool Framework",
+        "nodes": [
+          "base_tool_component"
+        ],
+        "title": "Core Tool Framework",
+        "description": "The foundational components that define the structure and common behavior for all tools.",
+        "role": "surface"
+      },
+      {
+        "id": "system_utilities",
+        "label": "System & Data Utilities",
+        "nodes": [
+          "http_client",
+          "env_var_manager",
+          "json_parser",
+          "warning_logger",
+          "regex_processor"
+        ],
+        "title": "System & Data Utilities",
+        "description": "Standard Python modules and libraries used for common tasks like HTTP communication, environment variable management, JSON processing, and warning handling.",
+        "role": "data"
+      }
+    ]
+  }
+}

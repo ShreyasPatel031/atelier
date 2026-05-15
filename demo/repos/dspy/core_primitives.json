@@ -1,0 +1,234 @@
+{
+    "title": "DSPy Core Primitives",
+    "summary": "This module defines the foundational building blocks of DSPy programs, including core module structures, signature definitions, essential utilities, and mechanisms for asynchronous execution, streaming, and sandbox serialization. It provides the fundamental abstractions for building robust LLM-powered applications.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "dspy_module",
+                "label": "Define DSPy Program Logic",
+                "type": "component",
+                "link": null,
+                "title": "DSPy Module",
+                "description": "The central class for defining DSPy programs, encapsulating forward logic, sub-modules, and interactions with language models and retrievers."
+            },
+            {
+                "id": "base_module",
+                "label": "Manage Module State",
+                "type": "component",
+                "link": null,
+                "title": "Base Module State Management",
+                "description": "Provides foundational functionalities for DSPy modules, including parameter management, deep copying, and state serialization/deserialization."
+            },
+            {
+                "id": "signature_definition",
+                "label": "Define Program Signatures",
+                "type": "component",
+                "link": null,
+                "title": "DSPy Signature Definition",
+                "description": "A metaclass responsible for dynamically creating DSPy Signature classes, handling field validation, and managing input/output definitions for language model prompts."
+            },
+            {
+                "id": "async_execution",
+                "label": "Orchestrate Async Execution",
+                "type": "component",
+                "link": null,
+                "title": "Asynchronous Program Execution",
+                "description": "Executes DSPy programs asynchronously, managing thread-local overrides and respecting global concurrency limits for non-blocking operations."
+            },
+            {
+                "id": "program_streaming",
+                "label": "Enable Program Streaming",
+                "type": "component",
+                "link": null,
+                "title": "DSPy Program Streaming",
+                "description": "Wraps standard DSPy programs to enable incremental output streaming, supporting both synchronous and asynchronous consumption and API formatting."
+            },
+            {
+                "id": "repl_variable",
+                "label": "Represent REPL Variables",
+                "type": "component",
+                "link": null,
+                "title": "REPL Variable Metadata",
+                "description": "Defines a data structure to hold metadata about a variable in a REPL environment, including its type, description, and a truncated preview for LLMs."
+            },
+            {
+                "id": "sandbox_serializable",
+                "label": "Enable Sandbox Serialization",
+                "type": "component",
+                "link": null,
+                "title": "Sandbox Serializable Interface",
+                "description": "An abstract base class for objects that need to be serialized and reconstructed within a sandboxed Python environment, providing methods for setup and code generation."
+            },
+            {
+                "id": "download_utility",
+                "label": "Download External Resources",
+                "type": "component",
+                "link": null,
+                "title": "File Download Utility",
+                "description": "Provides utility functions for downloading files from URLs, with features like resuming partial downloads and ensuring file integrity."
+            },
+            {
+                "id": "lm_predictor",
+                "label": "Execute LM Prediction",
+                "type": "external",
+                "link": "program_development_and_optimization/predictors_and_program_flow",
+                "title": "DSPy Predictor",
+                "description": "A core DSPy component used within Modules to make predictions using a language model based on a defined signature."
+            },
+            {
+                "id": "language_model",
+                "label": "Language Model (LM)",
+                "type": "external",
+                "link": "lm_and_client_management",
+                "title": "DSPy Language Model",
+                "description": "The abstract interface for all language models in DSPy, providing text generation capabilities."
+            },
+            {
+                "id": "pydantic_model",
+                "label": "Pydantic Base Model",
+                "type": "external",
+                "link": null,
+                "title": "Pydantic BaseModel",
+                "description": "A foundational class from Pydantic for creating data models, used by SignatureMeta and REPLVariable for robust and validated structures."
+            },
+            {
+                "id": "asyncio_loop",
+                "label": "Asyncio Event Loop",
+                "type": "external",
+                "link": null,
+                "title": "Python Asyncio Event Loop",
+                "description": "The core mechanism for running asynchronous operations in Python, utilized by DSPy for non-blocking execution and streaming."
+            }
+        ],
+        "edges": [
+            {
+                "source": "dspy_module",
+                "target": "base_module",
+                "label": "inherits state management from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_module",
+                "target": "signature_definition",
+                "label": "uses to define I/O",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_module",
+                "target": "lm_predictor",
+                "label": "contains & orchestrates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "async_execution",
+                "target": "dspy_module",
+                "label": "executes",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "program_streaming",
+                "target": "dspy_module",
+                "label": "wraps for incremental output",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "signature_definition",
+                "target": "pydantic_model",
+                "label": "builds upon",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "repl_variable",
+                "target": "pydantic_model",
+                "label": "is structured by",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "async_execution",
+                "target": "asyncio_loop",
+                "label": "manages via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "program_streaming",
+                "target": "asyncio_loop",
+                "label": "operates within",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_predictor",
+                "target": "language_model",
+                "label": "interacts with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sandbox_serializable",
+                "target": "repl_variable",
+                "label": "provides display info to",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "program_core",
+                "label": "Program Core & Interfaces",
+                "nodes": [
+                    "dspy_module",
+                    "base_module",
+                    "signature_definition",
+                    "lm_predictor"
+                ],
+                "title": "DSPy Program Core & Interfaces",
+                "description": "Defines the fundamental structure of DSPy programs, their state management, input/output interfaces, and core language model interaction.",
+                "role": null
+            },
+            {
+                "id": "execution_utilities",
+                "label": "Execution & General Utilities",
+                "nodes": [
+                    "async_execution",
+                    "download_utility"
+                ],
+                "title": "Program Execution & Utilities",
+                "description": "Components for managing program execution flow, including asynchronous operations, and general-purpose utilities like file downloading.",
+                "role": null
+            },
+            {
+                "id": "advanced_data_primitives",
+                "label": "Advanced Data Handling",
+                "nodes": [
+                    "program_streaming",
+                    "repl_variable",
+                    "sandbox_serializable"
+                ],
+                "title": "Advanced Data Handling Primitives",
+                "description": "Specialized primitives for handling data streams, representing variables for introspection, and enabling secure serialization for sandboxed environments.",
+                "role": null
+            },
+            {
+                "id": "external_integrations",
+                "label": "External Integrations",
+                "nodes": [
+                    "language_model",
+                    "pydantic_model",
+                    "asyncio_loop"
+                ],
+                "title": "External System Integrations",
+                "description": "Key external libraries and systems that DSPy's core primitives integrate with, such as language models, data validation frameworks, and asynchronous execution environments.",
+                "role": null
+            }
+        ]
+    }
+}

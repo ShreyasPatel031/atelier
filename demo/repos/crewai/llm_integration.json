@@ -1,0 +1,390 @@
+{
+  "title": "LLM Integration Module",
+  "summary": "This module provides abstract and concrete implementations for integrating with various Large Language Models (LLMs) such as Anthropic, Azure AI, AWS Bedrock, Google Gemini, and OpenAI-compatible services. It handles message formatting, tool calling, streaming, and token usage tracking for diverse LLM providers.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "base_llm",
+        "label": "Abstract LLM Interface",
+        "type": "component",
+        "link": null,
+        "title": "Abstract LLM Interface",
+        "description": "Defines the foundational contract for all LLM integrations, managing common functionalities like message handling, event dispatch, and token metrics, ensuring consistent interaction patterns across diverse providers."
+      },
+      {
+        "id": "anthropic_llm",
+        "label": "Anthropic LLM Integration",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic LLM Integration",
+        "description": "Connects to Anthropic's API to enable Claude models, supporting native tool use, streaming, and specific message formats, while handling authentication and error reporting."
+      },
+      {
+        "id": "azure_llm",
+        "label": "Azure AI LLM Integration",
+        "type": "component",
+        "link": null,
+        "title": "Azure AI LLM Integration",
+        "description": "Manages connections to Azure AI Inference endpoints, handling Azure-specific authentication, tool calling, and streaming for various Azure-hosted models, including Azure OpenAI."
+      },
+      {
+        "id": "bedrock_llm",
+        "label": "AWS Bedrock LLM Integration",
+        "type": "component",
+        "link": null,
+        "title": "AWS Bedrock LLM Integration",
+        "description": "Provides integration with AWS Bedrock's Converse API, supporting tool calling, streaming, guardrails, and model-specific configurations, with robust error handling for AWS services."
+      },
+      {
+        "id": "gemini_llm",
+        "label": "Google Gemini LLM Integration",
+        "type": "component",
+        "link": null,
+        "title": "Google Gemini LLM Integration",
+        "description": "Facilitates integration with Google Gemini models via the Gen AI Python SDK, enabling function calling, streaming, and Vertex AI configurations, with careful management of authentication."
+      },
+      {
+        "id": "openai_compatible_llm",
+        "label": "OpenAI-Compatible LLM Integration",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI-Compatible LLM Integration",
+        "description": "Extends OpenAI integration to support diverse compatible APIs (e.g., OpenRouter, DeepSeek, Ollama) by dynamically configuring base URLs and API keys for seamless interoperability."
+      },
+      {
+        "id": "anthropic_api",
+        "label": "Anthropic LLM Service",
+        "type": "external",
+        "link": null,
+        "title": "Anthropic LLM Service",
+        "description": "External API providing Large Language Model capabilities from Anthropic, used for generating text and handling tool calls."
+      },
+      {
+        "id": "azure_ai_api",
+        "label": "Azure AI Inference Service",
+        "type": "external",
+        "link": null,
+        "title": "Azure AI Inference Service",
+        "description": "External API providing Large Language Model capabilities from Azure AI, including advanced inference features and structured output."
+      },
+      {
+        "id": "aws_bedrock_api",
+        "label": "AWS Bedrock LLM Service",
+        "type": "external",
+        "link": null,
+        "title": "AWS Bedrock LLM Service",
+        "description": "External API providing Large Language Model capabilities from AWS Bedrock, supporting Converse API for unified model interaction."
+      },
+      {
+        "id": "google_gen_ai_api",
+        "label": "Google Gen AI Service",
+        "type": "external",
+        "link": null,
+        "title": "Google Gen AI Service",
+        "description": "External API providing Large Language Model capabilities from Google, including Gemini models and Vertex AI services."
+      },
+      {
+        "id": "openai_compatible_apis",
+        "label": "OpenAI-Compatible LLM Services",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI-Compatible LLM Services",
+        "description": "Various external API services that adhere to the OpenAI API specification, allowing flexible integration with different LLM providers."
+      },
+      {
+        "id": "crewai_event_bus",
+        "label": "Dispatch CrewAI Events",
+        "type": "component",
+        "link": null,
+        "title": "Dispatch CrewAI Events",
+        "description": "Internal system for broadcasting and managing events related to LLM operations and tool interactions, enabling observability and custom reactions within the CrewAI framework."
+      },
+      {
+        "id": "llm_call_hooks",
+        "label": "Execute LLM Call Hooks",
+        "type": "component",
+        "link": null,
+        "title": "Execute LLM Call Hooks",
+        "description": "Provides a mechanism to inject and run custom logic before and after interactions with LLM providers, allowing for pre-processing or post-processing of calls."
+      },
+      {
+        "id": "tool_conversion_util",
+        "label": "Convert Tool Definitions",
+        "type": "component",
+        "link": null,
+        "title": "Convert Tool Definitions",
+        "description": "Utility to transform generic tool specifications into the specific formats required by different LLM providers, ensuring compatibility and correct function calling."
+      },
+      {
+        "id": "structured_output_validation",
+        "label": "Validate Structured Output",
+        "type": "component",
+        "link": null,
+        "title": "Validate Structured Output",
+        "description": "Component for validating and parsing LLM-generated structured data against predefined Pydantic models, ensuring output adheres to expected schemas."
+      },
+      {
+        "id": "multimodal_file_uploader",
+        "label": "Manage Multimodal Files",
+        "type": "component",
+        "link": null,
+        "title": "Manage Multimodal Files",
+        "description": "Facilitates the upload and proper formatting of files (images, documents) for multimodal LLM inputs, adapting to provider-specific requirements."
+      },
+      {
+        "id": "llm_message_formatter",
+        "label": "Format LLM Messages",
+        "type": "component",
+        "link": null,
+        "title": "Format LLM Messages",
+        "description": "Standardizes and adapts conversational messages into the internal LLMMessage format and then into provider-specific API formats for consistent interaction."
+      },
+      {
+        "id": "token_usage_tracker",
+        "label": "Track Token Usage",
+        "type": "component",
+        "link": null,
+        "title": "Track Token Usage",
+        "description": "Monitors and aggregates token consumption metrics for all interactions with integrated LLMs, providing insights into cost and efficiency."
+      },
+      {
+        "id": "context_window_manager",
+        "label": "Determine Context Window",
+        "type": "component",
+        "link": null,
+        "title": "Determine Context Window",
+        "description": "Provides model-specific information regarding the maximum input token capacity for LLMs, aiding in prompt construction and preventing overflow errors."
+      },
+      {
+        "id": "openai_completion_base",
+        "label": "OpenAI LLM Integration Base",
+        "type": "external",
+        "link": "openai_completion",
+        "title": "OpenAI LLM Integration Base",
+        "description": "Foundational class for integrating with OpenAI's API, handling core OpenAI-specific logic and serving as a base for compatible providers."
+      }
+    ],
+    "edges": [
+      {
+        "source": "anthropic_llm",
+        "target": "base_llm",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_llm",
+        "target": "base_llm",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_llm",
+        "target": "base_llm",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gemini_llm",
+        "target": "base_llm",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_compatible_llm",
+        "target": "openai_completion_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_completion_base",
+        "target": "base_llm",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_llm",
+        "target": "anthropic_api",
+        "label": "Communicates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_llm",
+        "target": "azure_ai_api",
+        "label": "Communicates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_llm",
+        "target": "aws_bedrock_api",
+        "label": "Communicates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gemini_llm",
+        "target": "google_gen_ai_api",
+        "label": "Communicates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_compatible_llm",
+        "target": "openai_compatible_apis",
+        "label": "Communicates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_llm",
+        "target": "crewai_event_bus",
+        "label": "Emits events to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_llm",
+        "target": "llm_call_hooks",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_llm",
+        "target": "llm_message_formatter",
+        "label": "Uses to format messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_llm",
+        "target": "tool_conversion_util",
+        "label": "Uses for tool conversion",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_llm",
+        "target": "structured_output_validation",
+        "label": "Uses for structured output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_llm",
+        "target": "multimodal_file_uploader",
+        "label": "Integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_llm",
+        "target": "token_usage_tracker",
+        "label": "Updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_llm",
+        "target": "context_window_manager",
+        "label": "Queries for context size",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_llm",
+        "target": "multimodal_file_uploader",
+        "label": "Uses for file uploads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_llm",
+        "target": "multimodal_file_uploader",
+        "label": "Uses for file uploads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gemini_llm",
+        "target": "multimodal_file_uploader",
+        "label": "Uses for file uploads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_llm",
+        "target": "openai_completion_base",
+        "label": "Delegates 'responses' API calls to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "llm_abstraction_layer",
+        "label": "LLM Abstraction Layer",
+        "nodes": [
+          "base_llm"
+        ],
+        "title": "LLM Abstraction Layer",
+        "description": "The core abstract interface that defines common behaviors and properties for all LLM integrations, ensuring consistency across different providers.",
+        "role": "surface"
+      },
+      {
+        "id": "provider_specific_integrations",
+        "label": "Provider-Specific Integrations",
+        "nodes": [
+          "anthropic_llm",
+          "azure_llm",
+          "bedrock_llm",
+          "gemini_llm",
+          "openai_compatible_llm",
+          "openai_completion_base"
+        ],
+        "title": "Provider-Specific Integrations",
+        "description": "Concrete implementations for integrating with various LLM providers, each handling the unique API requirements, authentication, and features of their respective services.",
+        "role": "generative"
+      },
+      {
+        "id": "internal_llm_utilities",
+        "label": "Internal LLM Utilities",
+        "nodes": [
+          "crewai_event_bus",
+          "llm_call_hooks",
+          "tool_conversion_util",
+          "structured_output_validation",
+          "multimodal_file_uploader",
+          "llm_message_formatter",
+          "token_usage_tracker",
+          "context_window_manager"
+        ],
+        "title": "Internal LLM Utilities",
+        "description": "A collection of internal components that support and enhance the functionality of LLM integrations, including event handling, data formatting, and performance tracking.",
+        "role": "analytical"
+      },
+      {
+        "id": "external_llm_services",
+        "label": "External LLM Services",
+        "nodes": [
+          "anthropic_api",
+          "azure_ai_api",
+          "aws_bedrock_api",
+          "google_gen_ai_api",
+          "openai_compatible_apis"
+        ],
+        "title": "External LLM Services",
+        "description": "The external Large Language Model APIs that the module integrates with, representing the actual AI services providing generative capabilities.",
+        "role": "data"
+      }
+    ]
+  }
+}

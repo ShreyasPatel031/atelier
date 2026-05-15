@@ -1,0 +1,496 @@
+{
+  "title": "Agent Core Module",
+  "summary": "This module defines the core architecture for AI agents, including their execution flow, interaction with language models, output handling, and configuration. It provides the foundational components for building and running intelligent agents.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "abstract_agent",
+        "label": "Abstract Agent Interface",
+        "type": "component",
+        "link": null,
+        "title": "AbstractAgent",
+        "description": "The foundational abstract class that outlines the common properties and methods for all agent implementations, including execution and configuration."
+      },
+      {
+        "id": "wrapper_agent",
+        "label": "Extend Agent Functionality",
+        "type": "component",
+        "link": null,
+        "title": "WrapperAgent",
+        "description": "A base class for creating agents that extend or modify the behavior of another agent by wrapping its core functionalities."
+      },
+      {
+        "id": "agent_spec",
+        "label": "Agent Configuration Specification",
+        "type": "component",
+        "link": null,
+        "title": "AgentSpec",
+        "description": "A Pydantic model for defining agent configurations using declarative YAML or JSON specifications, enabling easy deployment and sharing."
+      },
+      {
+        "id": "user_prompt_node",
+        "label": "Process User Prompt & Instructions",
+        "type": "component",
+        "link": null,
+        "title": "UserPromptNode",
+        "description": "Initializes the agent's state with the user's prompt and system instructions, preparing for the first model interaction or tool execution."
+      },
+      {
+        "id": "model_request_node",
+        "label": "Request Model Response",
+        "type": "component",
+        "link": null,
+        "title": "ModelRequestNode",
+        "description": "Sends the current message history to the language model, handles streaming responses, applies capability hooks, and manages retries for model interactions."
+      },
+      {
+        "id": "call_tools_node",
+        "label": "Execute Tool Calls",
+        "type": "component",
+        "link": null,
+        "title": "CallToolsNode Logic",
+        "description": "Processes tool calls suggested by the model, executes them via the Tool Manager, and integrates their results back into the conversation history. (Logic from handle_call_or_result and _call_tool)"
+      },
+      {
+        "id": "output_schema",
+        "label": "Define Agent Output Schema",
+        "type": "component",
+        "link": null,
+        "title": "OutputSchema",
+        "description": "Specifies the expected data structure and validation rules for the agent's final output, supporting text, structured data, and image types."
+      },
+      {
+        "id": "output_toolset",
+        "label": "Manage Structured Outputs",
+        "type": "component",
+        "link": null,
+        "title": "OutputToolset",
+        "description": "Organizes and provides definitions for structured output types that the agent can produce, treating them as callable tools for the model."
+      },
+      {
+        "id": "output_validator",
+        "label": "Validate Agent Output",
+        "type": "component",
+        "link": null,
+        "title": "OutputValidator",
+        "description": "Applies custom validation logic to the agent's output, ensuring it conforms to defined rules before being returned."
+      },
+      {
+        "id": "function_signature",
+        "label": "Describe Function/Tool Signatures",
+        "type": "component",
+        "link": null,
+        "title": "FunctionSignature",
+        "description": "Captures and renders the structural details of function signatures, including parameters and return types, for tool definitions and schema generation."
+      },
+      {
+        "id": "agent_stream",
+        "label": "Stream Agent Execution & Results",
+        "type": "component",
+        "link": null,
+        "title": "AgentStream",
+        "description": "Provides an interface for asynchronously streaming events, partial outputs, and the final result from an agent's execution, including usage tracking."
+      },
+      {
+        "id": "capture_run_messages",
+        "label": "Capture Run Message History",
+        "type": "component",
+        "link": null,
+        "title": "capture_run_messages",
+        "description": "A context manager that provides access to the ModelMessage history exchanged during an agent's run, useful for debugging or error handling."
+      },
+      {
+        "id": "model_request_sync_util",
+        "label": "Synchronous Model Request",
+        "type": "component",
+        "link": null,
+        "title": "model_request_sync",
+        "description": "Provides a blocking, non-streaming interface for making direct requests to language models, useful for simple, immediate interactions."
+      },
+      {
+        "id": "model_request_stream_sync_util",
+        "label": "Synchronous Streamed Model Request",
+        "type": "component",
+        "link": null,
+        "title": "model_request_stream_sync",
+        "description": "Offers a blocking, streaming interface for direct model requests, allowing synchronous iteration over streamed model responses."
+      },
+      {
+        "id": "llm_model_ext",
+        "label": "LLM Model",
+        "type": "external",
+        "link": "other_module",
+        "title": "models_and_embeddings",
+        "description": "Represents the underlying large language model used by the agent for generating responses and making decisions."
+      },
+      {
+        "id": "tool_manager_ext",
+        "label": "Tool Manager",
+        "type": "external",
+        "link": "other_module",
+        "title": "tools_and_capabilities",
+        "description": "Handles the registration, discovery, and execution of tools and capabilities available to the agent."
+      },
+      {
+        "id": "capability_ext",
+        "label": "Agent Capabilities",
+        "type": "external",
+        "link": "other_module",
+        "title": "tools_and_capabilities",
+        "description": "Provides extensible functionalities and hooks that modify or enhance agent behavior during execution."
+      },
+      {
+        "id": "graph_context_ext",
+        "label": "Graph Run Context",
+        "type": "external",
+        "link": "other_module",
+        "title": "graph_engine",
+        "description": "Provides the execution context and state for the agent's internal graph, managing dependencies and message history."
+      },
+      {
+        "id": "messages_ext",
+        "label": "Agent Message Types",
+        "type": "external",
+        "link": null,
+        "title": "pydantic_ai_slim.pydantic_ai._messages",
+        "description": "Defines the various message types used in agent conversations, such as user prompts, model responses, and tool calls."
+      },
+      {
+        "id": "utils_ext",
+        "label": "Framework Utilities",
+        "type": "external",
+        "link": "other_module",
+        "title": "ui_and_utilities",
+        "description": "Provides common utility functions for asynchronous operations, event loops, and general helpers used across the framework."
+      }
+    ],
+    "edges": [
+      {
+        "source": "abstract_agent",
+        "target": "user_prompt_node",
+        "label": "Initiates Run With",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "abstract_agent",
+        "target": "agent_spec",
+        "label": "Configured By",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "abstract_agent",
+        "target": "llm_model_ext",
+        "label": "Uses Model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "abstract_agent",
+        "target": "tool_manager_ext",
+        "label": "Manages Tools Via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "abstract_agent",
+        "target": "capability_ext",
+        "label": "Integrates Capabilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "abstract_agent",
+        "target": "output_schema",
+        "label": "Defines Output With",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapper_agent",
+        "target": "abstract_agent",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_spec",
+        "target": "capability_ext",
+        "label": "Specifies Capabilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_spec",
+        "target": "llm_model_ext",
+        "label": "Specifies Model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_prompt_node",
+        "target": "model_request_node",
+        "label": "Prepares Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_prompt_node",
+        "target": "call_tools_node",
+        "label": "Delegates Tool Execution",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_prompt_node",
+        "target": "tool_manager_ext",
+        "label": "Resolves Dynamic Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_prompt_node",
+        "target": "graph_context_ext",
+        "label": "Updates Run Context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_node",
+        "target": "llm_model_ext",
+        "label": "Sends Request To",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_node",
+        "target": "agent_stream",
+        "label": "Provides Streamed Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_node",
+        "target": "tool_manager_ext",
+        "label": "Resolves Dynamic Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_node",
+        "target": "capability_ext",
+        "label": "Applies Hooks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_node",
+        "target": "call_tools_node",
+        "label": "Leads to Tool Calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "call_tools_node",
+        "target": "tool_manager_ext",
+        "label": "Executes Tools Via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "call_tools_node",
+        "target": "model_request_node",
+        "label": "Retries Model Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "output_schema",
+        "target": "output_toolset",
+        "label": "Defines Tools For",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "output_schema",
+        "target": "output_validator",
+        "label": "Uses For Validation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "output_toolset",
+        "target": "tool_manager_ext",
+        "label": "Registers Tools With",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "output_validator",
+        "target": "graph_context_ext",
+        "label": "Accesses Run Context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "function_signature",
+        "target": "tool_manager_ext",
+        "label": "Used for Tool Definitions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_stream",
+        "target": "output_schema",
+        "label": "Validates Output Against",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_stream",
+        "target": "output_validator",
+        "label": "Applies Validators",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_stream",
+        "target": "tool_manager_ext",
+        "label": "Handles Output Tool Calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "capture_run_messages",
+        "target": "messages_ext",
+        "label": "Captures Message History",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_sync_util",
+        "target": "llm_model_ext",
+        "label": "Directly Requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_sync_util",
+        "target": "messages_ext",
+        "label": "Sends Messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_sync_util",
+        "target": "utils_ext",
+        "label": "Uses Event Loop",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_stream_sync_util",
+        "target": "llm_model_ext",
+        "label": "Directly Streams From",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_stream_sync_util",
+        "target": "messages_ext",
+        "label": "Sends Messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_stream_sync_util",
+        "target": "utils_ext",
+        "label": "Uses Event Loop",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "graph_context_ext",
+        "target": "messages_ext",
+        "label": "Manages Message History",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "messages_ext",
+        "target": "user_prompt_node",
+        "label": "Provides User Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "messages_ext",
+        "target": "model_request_node",
+        "label": "Forms Model Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "messages_ext",
+        "target": "agent_stream",
+        "label": "Contains Stream Events",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_group",
+        "label": "Agent Definition & Configuration",
+        "nodes": [
+          "abstract_agent",
+          "wrapper_agent",
+          "agent_spec"
+        ],
+        "title": "Agent Definition & Configuration",
+        "description": "Components defining the core agent interface, its configuration via specifications, and mechanisms for wrapping existing agents to extend functionality.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_group",
+        "label": "Agent Execution Flow",
+        "nodes": [
+          "user_prompt_node",
+          "model_request_node",
+          "call_tools_node"
+        ],
+        "title": "Agent Execution Flow",
+        "description": "The sequential nodes that drive the agent's interaction loop, from processing user input to requesting model responses and executing tools.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_group",
+        "label": "Output & Schema Management",
+        "nodes": [
+          "output_schema",
+          "output_toolset",
+          "output_validator",
+          "function_signature"
+        ],
+        "title": "Output & Schema Management",
+        "description": "Components responsible for defining, validating, and processing the structured and unstructured outputs generated by the agent and its tools.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_group",
+        "label": "Data Flow & Streaming",
+        "nodes": [
+          "agent_stream",
+          "capture_run_messages",
+          "model_request_sync_util",
+          "model_request_stream_sync_util"
+        ],
+        "title": "Data Flow & Streaming",
+        "description": "Handles the real-time streaming of agent results and events, as well as capturing the message history for introspection and providing direct model interaction utilities.",
+        "role": "data"
+      }
+    ]
+  }
+}

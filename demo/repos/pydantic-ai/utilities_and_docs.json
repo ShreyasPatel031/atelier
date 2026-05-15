@@ -1,0 +1,127 @@
+{
+    "title": "Utilities & Documentation",
+    "summary": "This module provides general-purpose utilities, command-line tools, and documentation generation enhancements. It includes scripts for testing and cloud service verification, alongside custom MkDocs hooks for dynamic content injection and search optimization.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "documentation_hooks_module",
+                "label": "Documentation Hooks",
+                "type": "module",
+                "link": "documentation_hooks",
+                "title": "MkDocs Documentation Hooks",
+                "description": "Enhances documentation generation by processing Markdown and HTML, injecting code snippets, and preparing content for search indexing."
+            },
+            {
+                "id": "cli_and_scripts_module",
+                "label": "CLI & Utility Scripts",
+                "type": "module",
+                "link": "cli_and_scripts",
+                "title": "CLI and Utility Scripts",
+                "description": "Provides command-line interface tools and various utility scripts for testing, maintenance, and verification of cloud service integrations."
+            },
+            {
+                "id": "project_documentation",
+                "label": "Project Documentation",
+                "type": "external",
+                "link": null,
+                "title": "Markdown & HTML Docs",
+                "description": "The collection of Markdown source files and generated HTML documentation for the project, including READMEs and API docs."
+            },
+            {
+                "id": "project_codebase",
+                "label": "Project Codebase",
+                "type": "external",
+                "link": null,
+                "title": "Source Code Files",
+                "description": "The core source code of the project, from which documentation snippets are extracted and against which utility scripts perform tests."
+            },
+            {
+                "id": "external_services",
+                "label": "External Cloud/Search Services",
+                "type": "external",
+                "link": null,
+                "title": "Cloud Providers & Algolia",
+                "description": "External services such as cloud AI providers (e.g., Vertex AI, OpenAI) for testing, and search platforms (e.g., Algolia) for documentation indexing."
+            }
+        ],
+        "edges": [
+            {
+                "source": "documentation_hooks_module",
+                "target": "project_documentation",
+                "label": "Enhances & Processes Docs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "documentation_hooks_module",
+                "target": "project_codebase",
+                "label": "Extracts Code Snippets From",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "documentation_hooks_module",
+                "target": "external_services",
+                "label": "Prepares Content for Algolia",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_and_scripts_module",
+                "target": "project_codebase",
+                "label": "Tests & Verifies Code In",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_and_scripts_module",
+                "target": "external_services",
+                "label": "Interacts with Cloud Services",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_and_scripts_module",
+                "target": "project_documentation",
+                "label": "Updates README (CLI help)",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "documentation_pipeline",
+                "label": "Documentation Pipeline",
+                "nodes": [
+                    "documentation_hooks_module",
+                    "project_documentation"
+                ],
+                "title": "Documentation Generation & Enhancement",
+                "description": "Components involved in generating, processing, and enhancing the project's documentation, including dynamic content and search optimization.",
+                "role": null
+            },
+            {
+                "id": "development_tools",
+                "label": "Development & Testing Tools",
+                "nodes": [
+                    "cli_and_scripts_module",
+                    "project_codebase"
+                ],
+                "title": "CLI and Utility Scripts for Development",
+                "description": "Command-line tools and scripts that support development, testing, and maintenance tasks across the project's codebase.",
+                "role": null
+            },
+            {
+                "id": "external_integrations",
+                "label": "External System Interactions",
+                "nodes": [
+                    "external_services"
+                ],
+                "title": "Integration with External Platforms",
+                "description": "Represents the interaction points with external cloud providers for testing and search services for documentation indexing.",
+                "role": null
+            }
+        ]
+    }
+}

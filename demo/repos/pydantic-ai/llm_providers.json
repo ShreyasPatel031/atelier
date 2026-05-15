@@ -1,0 +1,42 @@
+{ 
+    "title": "LLM Providers",
+    "summary": "This module provides a unified interface for interacting with various Large Language Model (LLM) providers, offering both OpenAI-compatible and native client integrations.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "provider_interface", "label": "Provider Interface", "type": "module", "link": "core_provider_interface", "title": "Provider Interface", "description": "The abstract base class defining the common interface for all LLM providers, ensuring consistent interaction patterns."}, 
+            {"id": "openai_compatible", "label": "OpenAI-Compatible Providers", "type": "module", "link": "openai_compatible_providers", "title": "OpenAI-Compatible Providers", "description": "A collection of providers that adapt various LLM services to an OpenAI-compatible API interface for seamless integration."}, 
+            {"id": "native_llm", "label": "Native LLM Providers", "type": "module", "link": "native_llm_providers", "title": "Native LLM Providers", "description": "Providers that directly utilize the native SDKs and APIs of specific LLM services for optimal performance and feature access."}, 
+            {"id": "outlines_provider", "label": "Outlines Provider", "type": "module", "link": "special_purpose_providers", "title": "Outlines Provider", "description": "A specialized provider for the Outlines library, enabling structured output generation with various underlying models."}, 
+            {"id": "httpx_client", "label": "HTTPX Client", "type": "external", "title": "HTTPX Async Client", "description": "An asynchronous HTTP client library used by many providers for making network requests."}, 
+            {"id": "openai_sdk", "label": "OpenAI SDK", "type": "external", "title": "OpenAI Python SDK", "description": "The official Python client library for interacting with OpenAI's API, often used by OpenAI-compatible providers."}, 
+            {"id": "anthropic_sdk", "label": "Anthropic SDK", "type": "external", "title": "Anthropic Python SDK", "description": "The official Python client library for interacting with Anthropic's API."}, 
+            {"id": "cohere_sdk", "label": "Cohere SDK", "type": "external", "title": "Cohere Python SDK", "description": "The official Python client library for interacting with Cohere's API."}, 
+            {"id": "groq_sdk", "label": "Groq SDK", "type": "external", "title": "Groq Python SDK", "description": "The official Python client library for interacting with Groq's API."}, 
+            {"id": "huggingface_sdk", "label": "Hugging Face SDK", "type": "external", "title": "Hugging Face Inference Client", "description": "The Hugging Face Inference Client for interacting with Hugging Face models."}, 
+            {"id": "mistral_sdk", "label": "Mistral SDK", "type": "external", "title": "Mistral Python SDK", "description": "The official Python client library for interacting with Mistral AI's API."}, 
+            {"id": "voyageai_sdk", "label": "VoyageAI SDK", "type": "external", "title": "VoyageAI Python SDK", "description": "The official Python client library for interacting with VoyageAI's API."}, 
+            {"id": "xai_sdk", "label": "xAI SDK", "type": "external", "title": "xAI Python SDK", "description": "The official Python client library for interacting with xAI's API."}
+        ],
+        "edges": [
+            {"source": "provider_interface", "target": "openai_compatible", "label": "implements"}, 
+            {"source": "provider_interface", "target": "native_llm", "label": "implements"}, 
+            {"source": "provider_interface", "target": "outlines_provider", "label": "implements"}, 
+            {"source": "openai_compatible", "target": "openai_sdk", "label": "uses"}, 
+            {"source": "openai_compatible", "target": "httpx_client", "label": "uses"}, 
+            {"source": "native_llm", "target": "anthropic_sdk", "label": "uses"}, 
+            {"source": "native_llm", "target": "cohere_sdk", "label": "uses"}, 
+            {"source": "native_llm", "target": "groq_sdk", "label": "uses"}, 
+            {"source": "native_llm", "target": "huggingface_sdk", "label": "uses"}, 
+            {"source": "native_llm", "target": "mistral_sdk", "label": "uses"}, 
+            {"source": "native_llm", "target": "voyageai_sdk", "label": "uses"}, 
+            {"source": "native_llm", "target": "xai_sdk", "label": "uses"}, 
+            {"source": "native_llm", "target": "httpx_client", "label": "uses"}
+        ],
+        "groups": [
+            {"id": "provider_implementations", "label": "Provider Implementations", "title": "Provider Implementations", "description": "Concrete implementations of the Provider interface for various LLM services, categorized by their API compatibility.", "role": "generative", "nodes": ["openai_compatible", "native_llm", "outlines_provider"]}, 
+            {"id": "core_abstractions", "label": "Core Abstractions", "title": "Core Abstractions", "description": "Fundamental interfaces and base classes that define the architecture of LLM providers.", "role": "analytical", "nodes": ["provider_interface"]}, 
+            {"id": "external_sdks", "label": "External SDKs", "title": "External SDKs", "description": "Third-party client libraries and HTTP tools used by providers to interact with LLM services.", "role": "data", "nodes": ["openai_sdk", "anthropic_sdk", "cohere_sdk", "groq_sdk", "huggingface_sdk", "mistral_sdk", "voyageai_sdk", "xai_sdk", "httpx_client"]}
+        ]
+    }
+}

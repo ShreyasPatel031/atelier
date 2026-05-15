@@ -1,0 +1,296 @@
+{
+  "title": "Conversational Memory Module",
+  "summary": "This module provides various memory implementations for managing conversation history in AI applications, ranging from simple buffers to token-limited summaries and vector store-backed long-term memory.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "BaseMemory",
+        "label": "Base Memory Abstraction",
+        "type": "external",
+        "link": "base_components",
+        "title": "Base Memory Abstraction",
+        "description": "Defines the fundamental interface for all memory components, including methods for loading and saving context."
+      },
+      {
+        "id": "BaseChatMemory",
+        "label": "Base Chat Memory",
+        "type": "component",
+        "link": null,
+        "title": "Base Chat Memory",
+        "description": "Abstract base class for chat-based memory, managing message history with input/output key handling. Note: Does not support native tool calling."
+      },
+      {
+        "id": "ConversationBufferMemory",
+        "label": "Simple Conversation Buffer",
+        "type": "component",
+        "link": null,
+        "title": "Conversation Buffer Memory",
+        "description": "Stores the entire conversation history as a buffer, either as a string or a list of messages, without any summarization or pruning."
+      },
+      {
+        "id": "ConversationStringBufferMemory",
+        "label": "String Buffer Memory",
+        "type": "component",
+        "link": null,
+        "title": "Conversation String Buffer Memory",
+        "description": "Stores conversation history as a single string, suitable for models that process string-based inputs rather than structured chat messages."
+      },
+      {
+        "id": "ConversationBufferWindowMemory",
+        "label": "Sliding Window Memory",
+        "type": "component",
+        "link": null,
+        "title": "Conversation Buffer Window Memory",
+        "description": "Retains only the most recent 'k' turns of a conversation, discarding older messages to manage context length."
+      },
+      {
+        "id": "ConversationSummaryMemory",
+        "label": "Summarizing Memory",
+        "type": "component",
+        "link": null,
+        "title": "Conversation Summary Memory",
+        "description": "Continuously summarizes the conversation history, updating the summary after each turn to provide a concise context to the model."
+      },
+      {
+        "id": "ConversationSummaryBufferMemory",
+        "label": "Summary Buffer with Token Limit",
+        "type": "component",
+        "link": null,
+        "title": "Conversation Summary Buffer Memory",
+        "description": "Combines a running summary with recent messages, pruning older messages into the summary when a maximum token limit is exceeded."
+      },
+      {
+        "id": "ConversationVectorStoreTokenBufferMemory",
+        "label": "Vector Store Backed Memory",
+        "type": "component",
+        "link": null,
+        "title": "Vector Store Token Buffer Memory",
+        "description": "Stores older conversation parts in a vector store for long-term retrieval, combining them with recent messages and timestamps for context."
+      },
+      {
+        "id": "BaseChatMessageHistory",
+        "label": "Chat Message History",
+        "type": "external",
+        "link": "caching_and_history",
+        "title": "Base Chat Message History",
+        "description": "Interface for storing and retrieving chat messages, used by chat memory implementations."
+      },
+      {
+        "id": "BaseLanguageModel",
+        "label": "Language Model",
+        "type": "external",
+        "link": "base_components",
+        "title": "Base Language Model",
+        "description": "Provides core language model capabilities, used for tasks like summarization and token counting."
+      },
+      {
+        "id": "VectorStoreRetriever",
+        "label": "Vector Store Retriever",
+        "type": "external",
+        "link": "tools_and_retrievers",
+        "title": "Vector Store Retriever",
+        "description": "Component for retrieving relevant documents or information from a vector database based on similarity."
+      },
+      {
+        "id": "RecursiveCharacterTextSplitter",
+        "label": "Text Splitter",
+        "type": "external",
+        "link": "text_processing",
+        "title": "Recursive Character Text Splitter",
+        "description": "Utility for splitting long texts into smaller, manageable chunks, often used before embedding or storing in vector stores."
+      },
+      {
+        "id": "HumanAIMessages",
+        "label": "Human/AI Messages",
+        "type": "external",
+        "link": "prompts_and_messages",
+        "title": "Human and AI Messages",
+        "description": "Represents distinct messages from human users and AI assistants in a conversation."
+      },
+      {
+        "id": "SystemMessagePromptTemplate",
+        "label": "System Message Template",
+        "type": "external",
+        "link": "prompts_and_messages",
+        "title": "System Message Prompt Template",
+        "description": "A prompt template specifically for generating system-level instructions or context for an LLM."
+      },
+      {
+        "id": "SummarizationEngine",
+        "label": "Summarization Engine",
+        "type": "component",
+        "link": null,
+        "title": "Summarization Engine",
+        "description": "Internal logic for generating concise summaries of conversation segments, often powered by an LLM."
+      }
+    ],
+    "edges": [
+      {
+        "source": "BaseMemory",
+        "target": "BaseChatMemory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseMemory",
+        "target": "ConversationStringBufferMemory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseChatMemory",
+        "target": "ConversationBufferMemory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseChatMemory",
+        "target": "ConversationBufferWindowMemory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseChatMemory",
+        "target": "ConversationSummaryMemory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseChatMemory",
+        "target": "ConversationSummaryBufferMemory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseChatMemory",
+        "target": "ConversationVectorStoreTokenBufferMemory",
+        "label": "inherits (indirectly)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseChatMemory",
+        "target": "BaseChatMessageHistory",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseChatMemory",
+        "target": "HumanAIMessages",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationSummaryMemory",
+        "target": "SummarizationEngine",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationSummaryBufferMemory",
+        "target": "SummarizationEngine",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SummarizationEngine",
+        "target": "BaseLanguageModel",
+        "label": "powered by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationVectorStoreTokenBufferMemory",
+        "target": "VectorStoreRetriever",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationVectorStoreTokenBufferMemory",
+        "target": "RecursiveCharacterTextSplitter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationVectorStoreTokenBufferMemory",
+        "target": "SystemMessagePromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationVectorStoreTokenBufferMemory",
+        "target": "BaseLanguageModel",
+        "label": "counts tokens",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "MemoryAbstractions",
+        "label": "Memory Abstractions",
+        "nodes": [
+          "BaseMemory",
+          "BaseChatMemory"
+        ],
+        "title": "Memory Abstractions",
+        "description": "Base classes and interfaces that define the structure and common functionalities for memory components.",
+        "role": "surface"
+      },
+      {
+        "id": "CoreMemoryImplementations",
+        "label": "Core Memory Implementations",
+        "nodes": [
+          "ConversationBufferMemory",
+          "ConversationStringBufferMemory",
+          "ConversationBufferWindowMemory",
+          "ConversationSummaryMemory",
+          "ConversationSummaryBufferMemory",
+          "ConversationVectorStoreTokenBufferMemory"
+        ],
+        "title": "Core Memory Implementations",
+        "description": "Concrete classes providing various strategies for managing conversational history.",
+        "role": "data"
+      },
+      {
+        "id": "SummarizationComponents",
+        "label": "Summarization Components",
+        "nodes": [
+          "SummarizationEngine"
+        ],
+        "title": "Summarization Components",
+        "description": "Components specifically involved in generating and managing conversation summaries.",
+        "role": "generative"
+      },
+      {
+        "id": "ExternalDependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "BaseChatMessageHistory",
+          "BaseLanguageModel",
+          "VectorStoreRetriever",
+          "RecursiveCharacterTextSplitter",
+          "HumanAIMessages",
+          "SystemMessagePromptTemplate"
+        ],
+        "title": "External Dependencies",
+        "description": "Components from other modules that are utilized by the conversational memory implementations.",
+        "role": "data"
+      }
+    ]
+  }
+}

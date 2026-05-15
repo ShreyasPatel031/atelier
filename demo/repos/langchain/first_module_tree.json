@@ -1,10 +1,32 @@
 {
-    "foundational_components": {
+    "core_abstractions_and_utilities": {
         "path": "libs/core/langchain_core",
         "components": [],
         "children": {
-            "core_utilities": {
-                "path": "libs/core/langchain_core/_api, libs/core/langchain_core/_security, libs/core/langchain_core/load, libs/core/langchain_core/sys_info, libs/core/langchain_core/utils",
+            "base_components": {
+                "path": "libs/core/langchain_core",
+                "components": [
+                    "libs.core.langchain_core.load.serializable.Serializable",
+                    "libs.core.langchain_core.runnables.base.Runnable",
+                    "libs.core.langchain_core.runnables.base.RunnableSerializable",
+                    "libs.core.langchain_core.runnables.base.RunnableEachBase",
+                    "libs.core.langchain_core.runnables.base.RunnableBindingBase",
+                    "libs.core.langchain_core.language_models.base.BaseLanguageModel",
+                    "libs.core.langchain_core.language_models.chat_models.SimpleChatModel",
+                    "libs.core.langchain_core.language_models.llms.LLM",
+                    "libs.core.langchain_core.prompts.base.BasePromptTemplate",
+                    "libs.core.langchain_core.output_parsers.base.BaseGenerationOutputParser",
+                    "libs.core.langchain_core.output_parsers.base.BaseOutputParser",
+                    "libs.core.langchain_core.tools.base.BaseTool",
+                    "libs.core.langchain_core.retrievers.BaseRetriever",
+                    "libs.core.langchain_core.document_loaders.base.BaseLoader",
+                    "libs.core.langchain_core.vectorstores.base.VectorStore",
+                    "libs.core.langchain_core.indexing.base.DocumentIndex",
+                    "libs.langchain.langchain_classic.base_memory.BaseMemory"
+                ]
+            },
+            "security_and_api": {
+                "path": "libs/core/langchain_core/_api",
                 "components": [
                     "libs.core.langchain_core._api.beta_decorator.warning_emitting_wrapper",
                     "libs.core.langchain_core._api.beta_decorator.awarning_emitting_wrapper",
@@ -20,89 +42,50 @@
                     "libs.core.langchain_core._security._ssrf_protection._validate_url_ssrf_strict",
                     "libs.core.langchain_core._security._ssrf_protection._validate_url_ssrf_https_only",
                     "libs.core.langchain_core._security._ssrf_protection._validate_url_ssrf_relaxed",
-                    "libs.core.langchain_core._security._transport.ssrf_safe_async_client",
-                    "libs.core.langchain_core.load.serializable.Serializable",
+                    "libs.core.langchain_core._security._transport.ssrf_safe_async_client"
+                ]
+            },
+            "general_utilities": {
+                "path": "libs/core/langchain_core/utils",
+                "components": [
                     "libs.core.langchain_core.sys_info.print_sys_info",
                     "libs.core.langchain_core.utils.aiter.Tee",
                     "libs.core.langchain_core.utils.html.extract_sub_links",
                     "libs.core.langchain_core.utils.iter.Tee",
                     "libs.core.langchain_core.utils.pydantic.wrapper",
                     "libs.core.langchain_core.utils.pydantic.get_pydantic_major_version",
-                    "libs.core.langchain_core.utils.utils.wrapper"
-                ]
-            },
-            "runnable_framework": {
-                "path": "libs/core/langchain_core/runnables",
-                "components": [
-                    "libs.core.langchain_core.runnables.base.Runnable",
-                    "libs.core.langchain_core.runnables.base.RunnableSerializable",
-                    "libs.core.langchain_core.runnables.base.RunnableEachBase",
-                    "libs.core.langchain_core.runnables.base.RunnableBindingBase",
-                    "libs.core.langchain_core.runnables.config.wrapper",
-                    "libs.core.langchain_core.runnables.configurable.DynamicRunnable",
-                    "libs.core.langchain_core.runnables.history.RunnableWithMessageHistory",
-                    "libs.core.langchain_core.runnables.passthrough.RunnablePassthrough",
-                    "libs.langchain.langchain_classic.runnables.hub.HubRunnable",
-                    "libs.langchain.langchain_classic.runnables.openai_functions.OpenAIFunctionsRouter"
-                ]
-            },
-            "callbacks_and_tracing": {
-                "path": "libs/core/langchain_core/callbacks, libs/core/langchain_core/tracers, libs/langchain/langchain_classic/callbacks",
-                "components": [
-                    "libs.core.langchain_core.callbacks.base.AsyncCallbackHandler",
-                    "libs.core.langchain_core.callbacks.file.FileCallbackHandler",
-                    "libs.core.langchain_core.callbacks.manager.atrace_as_chain_group",
-                    "libs.core.langchain_core.callbacks.manager.trace_as_chain_group",
-                    "libs.core.langchain_core.callbacks.manager.wrapped",
-                    "libs.core.langchain_core.callbacks.manager.adispatch_custom_event",
-                    "libs.core.langchain_core.callbacks.manager.dispatch_custom_event",
-                    "libs.core.langchain_core.callbacks.usage.get_usage_metadata_callback",
-                    "libs.core.langchain_core.tracers.context.collect_runs",
-                    "libs.core.langchain_core.tracers.core._TracerCore",
-                    "libs.core.langchain_core.tracers.log_stream.consume_astream",
-                    "libs.langchain.langchain_classic.callbacks.tracers.logging.LoggingCallbackHandler"
-                ]
-            },
-            "caching_and_storage": {
-                "path": "libs/core/langchain_core/caches, libs/langchain/langchain_classic/storage",
-                "components": [
-                    "libs.core.langchain_core.caches.InMemoryCache",
+                    "libs.core.langchain_core.utils.utils.wrapper",
+                    "libs.core.scripts.check_version.main",
+                    "libs.langchain.langchain_classic._api.module_import.import_by_name",
+                    "libs.langchain_v1.langchain.embeddings.base.init_embeddings",
+                    "libs.langchain_v1.scripts.check_version.main",
+                    "libs.model-profiles.langchain_model_profiles.cli.main",
+                    "libs.partners.anthropic.scripts.check_version.main",
+                    "libs.langchain.langchain_classic.embeddings.cache._value_serializer",
+                    "libs.langchain.langchain_classic.embeddings.cache._value_deserializer",
                     "libs.langchain.langchain_classic.storage._lc_store._dump_as_bytes",
                     "libs.langchain.langchain_classic.storage._lc_store._dump_document_as_bytes",
                     "libs.langchain.langchain_classic.storage._lc_store._load_document_from_bytes",
                     "libs.langchain.langchain_classic.storage._lc_store._load_from_bytes"
                 ]
+            },
+            "caching_and_history": {
+                "path": "libs/core/langchain_core/caches",
+                "components": [
+                    "libs.core.langchain_core.caches.InMemoryCache",
+                    "libs.core.langchain_core.chat_history.InMemoryChatMessageHistory"
+                ]
             }
         }
     },
-    "language_model_interface": {
-        "path": "libs/core/langchain_core/language_models, libs/core/langchain_core/prompts, libs/core/langchain_core/messages, libs/core/langchain_core/output_parsers, libs/core/langchain_core/example_selectors",
+    "llm_interaction_and_data_handling": {
+        "path": "libs/core/langchain_core",
         "components": [],
         "children": {
-            "models_and_embeddings": {
-                "path": "libs/core/langchain_core/language_models, libs/langchain/langchain_classic/chat_models, libs/langchain/langchain_classic/embeddings, libs/langchain_v1/langchain/embeddings",
-                "components": [
-                    "libs.core.langchain_core.language_models.base.BaseLanguageModel",
-                    "libs.core.langchain_core.language_models.chat_models.SimpleChatModel",
-                    "libs.core.langchain_core.language_models.fake_chat_models.FakeListChatModel",
-                    "libs.core.langchain_core.language_models.fake_chat_models.FakeChatModel",
-                    "libs.core.langchain_core.language_models.fake_chat_models.FakeMessagesListChatModel",
-                    "libs.core.langchain_core.language_models.fake_chat_models.ParrotFakeChatModel",
-                    "libs.core.langchain_core.language_models.llms.LLM",
-                    "libs.core.langchain_core.language_models.llms._before_sleep",
-                    "libs.langchain.langchain_classic.chat_models.base.init_chat_model",
-                    "libs.langchain.langchain_classic.embeddings.base.init_embeddings",
-                    "libs.langchain.langchain_classic.embeddings.cache._value_serializer",
-                    "libs.langchain.langchain_classic.embeddings.cache._value_deserializer",
-                    "libs.langchain.langchain_classic.embeddings.cache.CacheBackedEmbeddings",
-                    "libs.langchain_v1.langchain.embeddings.base.init_embeddings"
-                ]
-            },
-            "prompts_and_examples": {
-                "path": "libs/core/langchain_core/prompts, libs/core/langchain_core/prompt_values, libs/core/langchain_core/example_selectors",
+            "prompts_and_messages": {
+                "path": "libs/core/langchain_core/prompts",
                 "components": [
                     "libs.core.langchain_core.prompt_values.ChatPromptValueConcrete",
-                    "libs.core.langchain_core.prompts.base.BasePromptTemplate",
                     "libs.core.langchain_core.prompts.chat.AIMessagePromptTemplate",
                     "libs.core.langchain_core.prompts.chat.SystemMessagePromptTemplate",
                     "libs.core.langchain_core.prompts.chat.ChatMessagePromptTemplate",
@@ -115,14 +98,6 @@
                     "libs.core.langchain_core.prompts.string.mustache_formatter",
                     "libs.core.langchain_core.prompts.string.StringPromptTemplate",
                     "libs.core.langchain_core.prompts.structured.StructuredPrompt",
-                    "libs.core.langchain_core.example_selectors.semantic_similarity.SemanticSimilarityExampleSelector",
-                    "libs.core.langchain_core.example_selectors.semantic_similarity.MaxMarginalRelevanceExampleSelector"
-                ]
-            },
-            "messages_and_history": {
-                "path": "libs/core/langchain_core/messages, libs/core/langchain_core/chat_history",
-                "components": [
-                    "libs.core.langchain_core.chat_history.InMemoryChatMessageHistory",
                     "libs.core.langchain_core.messages.block_translators.__init__._register_translators",
                     "libs.core.langchain_core.messages.block_translators.anthropic._iter_blocks",
                     "libs.core.langchain_core.messages.block_translators.bedrock.translate_content",
@@ -152,10 +127,8 @@
                 ]
             },
             "output_parsing": {
-                "path": "libs/core/langchain_core/output_parsers, libs/langchain/langchain_classic/output_parsers",
+                "path": "libs/core/langchain_core/output_parsers",
                 "components": [
-                    "libs.core.langchain_core.output_parsers.base.BaseGenerationOutputParser",
-                    "libs.core.langchain_core.output_parsers.base.BaseOutputParser",
                     "libs.core.langchain_core.output_parsers.list.CommaSeparatedListOutputParser",
                     "libs.core.langchain_core.output_parsers.list.NumberedListOutputParser",
                     "libs.core.langchain_core.output_parsers.list.MarkdownListOutputParser",
@@ -171,15 +144,67 @@
                     "libs.langchain.langchain_classic.output_parsers.yaml.YamlOutputParser",
                     "libs.partners.anthropic.langchain_anthropic.output_parsers.ToolsOutputParser"
                 ]
+            },
+            "llm_providers": {
+                "path": "libs/partners",
+                "components": [
+                    "libs.core.langchain_core.language_models.llms._before_sleep",
+                    "libs.langchain.langchain_classic.chat_models.base.init_chat_model",
+                    "libs.partners.anthropic.langchain_anthropic.chat_models._create_usage_metadata",
+                    "libs.partners.anthropic.langchain_anthropic.experimental._xml_to_tool_calls",
+                    "libs.partners.anthropic.langchain_anthropic.experimental.get_system_message",
+                    "libs.partners.anthropic.langchain_anthropic.llms.AnthropicLLM",
+                    "libs.partners.groq.langchain_groq.chat_models._convert_chunk_to_message_chunk",
+                    "libs.partners.groq.langchain_groq.chat_models._convert_dict_to_message",
+                    "libs.partners.groq.langchain_groq.chat_models._convert_message_to_dict",
+                    "libs.partners.groq.langchain_groq.chat_models._create_usage_metadata",
+                    "libs.partners.huggingface.langchain_huggingface.chat_models.huggingface.ChatHuggingFace",
+                    "libs.partners.huggingface.langchain_huggingface.llms.huggingface_pipeline.HuggingFacePipeline",
+                    "libs.partners.mistralai.langchain_mistralai.chat_models._convert_to_openai_response_format",
+                    "libs.partners.ollama.langchain_ollama.llms.OllamaLLM",
+                    "libs.partners.openai.langchain_openai.chat_models.base._create_usage_metadata",
+                    "libs.partners.openai.langchain_openai.chat_models.base._oai_structured_outputs_parser",
+                    "libs.partners.openrouter.langchain_openrouter.chat_models.ChatOpenRouter",
+                    "libs.partners.openrouter.langchain_openrouter.chat_models._create_usage_metadata"
+                ]
+            },
+            "data_loading_and_storage": {
+                "path": "libs/core/langchain_core/document_loaders",
+                "components": [
+                    "libs.core.langchain_core.document_loaders.langsmith._stringify",
+                    "libs.core.langchain_core.document_loaders.langsmith.LangSmithLoader",
+                    "libs.core.langchain_core.vectorstores.in_memory.InMemoryVectorStore",
+                    "libs.core.langchain_core.indexing/api.aindex",
+                    "libs.core.langchain_core.indexing/api._hash_nested_dict",
+                    "libs.core.langchain_core.indexing/in_memory.InMemoryDocumentIndex",
+                    "libs.langchain.langchain_classic.indexes.vectorstore.VectorstoreIndexCreator",
+                    "libs.langchain.langchain_classic.indexes.vectorstore._get_default_text_splitter",
+                    "libs.partners.qdrant.langchain_qdrant.qdrant.QdrantVectorStore",
+                    "libs.partners.qdrant.langchain_qdrant.vectorstores.Qdrant"
+                ]
+            },
+            "text_processing": {
+                "path": "libs/text-splitters",
+                "components": [
+                    "libs.langchain.langchain_classic.embeddings.base.init_embeddings",
+                    "libs.langchain.langchain_classic.embeddings.cache.CacheBackedEmbeddings",
+                    "libs.partners.fireworks.langchain_fireworks.embeddings.FireworksEmbeddings",
+                    "libs.text-splitters.langchain_text_splitters.base.TokenTextSplitter",
+                    "libs.text-splitters.langchain_text_splitters.html.HTMLHeaderTextSplitter",
+                    "libs.text-splitters.langchain_text_splitters.html.HTMLSemanticPreservingSplitter",
+                    "libs.text-splitters.langchain_text_splitters.html.HTMLSectionSplitter",
+                    "libs.text-splitters.langchain_text_splitters.json.RecursiveJsonSplitter",
+                    "libs.text-splitters.langchain_text_splitters.spacy.SpacyTextSplitter"
+                ]
             }
         }
     },
-    "orchestration_and_agents": {
-        "path": "libs/core/langchain_core/agents, libs/core/langchain_core/tools, libs/langchain/langchain_classic/agents, libs/langchain/langchain_classic/chains, libs/langchain/langchain_classic/memory, libs/langchain_v1/langchain/agents",
+    "agent_and_workflow_orchestration": {
+        "path": "libs/langchain/langchain_classic/agents",
         "components": [],
         "children": {
-            "agents": {
-                "path": "libs/core/langchain_core/agents, libs/langchain/langchain_classic/agents, libs/langchain_v1/langchain/agents",
+            "agent_definitions": {
+                "path": "libs/langchain/langchain_classic/agents",
                 "components": [
                     "libs.core.langchain_core.agents._convert_agent_action_to_messages",
                     "libs.core.langchain_core.agents._create_function_message",
@@ -289,32 +314,43 @@
                     "libs.langchain.langchain_classic.chains.summarize.chain._load_refine_chain"
                 ]
             },
-            "memory": {
-                "path": "libs/langchain/langchain_classic/memory, libs/langchain/langchain_classic/base_memory",
+            "runnables": {
+                "path": "libs/core/langchain_core/runnables",
                 "components": [
-                    "libs.langchain.langchain_classic.base_memory.BaseMemory",
-                    "libs.langchain.langchain_classic.memory.buffer.ConversationBufferMemory",
-                    "libs.langchain.langchain_classic.memory.buffer.ConversationStringBufferMemory",
-                    "libs.langchain.langchain_classic.memory.buffer_window.ConversationBufferWindowMemory",
-                    "libs.langchain.langchain_classic.memory.chat_memory.BaseChatMemory",
-                    "libs.langchain.langchain_classic.memory.entity.ConversationEntityMemory",
-                    "libs.langchain.langchain_classic.memory.entity.RedisEntityStore",
-                    "libs.langchain.langchain_classic.memory.entity.InMemoryEntityStore",
-                    "libs.langchain.langchain_classic.memory.entity.UpstashRedisEntityStore",
-                    "libs.langchain.langchain_classic.memory.entity.SQLiteEntityStore",
-                    "libs.langchain.langchain_classic.memory.summary.ConversationSummaryMemory",
-                    "libs.langchain.langchain_classic.memory.summary_buffer.ConversationSummaryBufferMemory",
-                    "libs.langchain.langchain_classic.memory.vectorstore_token_buffer_memory.ConversationVectorStoreTokenBufferMemory"
+                    "libs.core.langchain_core.runnables.config.wrapper",
+                    "libs.core.langchain_core.runnables.configurable.DynamicRunnable",
+                    "libs.core.langchain_core.runnables.history.RunnableWithMessageHistory",
+                    "libs.core.langchain_core.runnables.passthrough.RunnablePassthrough",
+                    "libs.langchain.langchain_classic.runnables.hub.HubRunnable",
+                    "libs.langchain.langchain_classic.runnables.openai_functions.OpenAIFunctionsRouter"
                 ]
             },
-            "tools_and_middleware": {
-                "path": "libs/core/langchain_core/tools, libs/langchain/langchain_classic/tools, libs/langchain_v1/langchain/agents/middleware",
+            "tools_and_retrievers": {
+                "path": "libs/core/langchain_core/tools",
                 "components": [
-                    "libs.core.langchain_core.tools.base.BaseTool",
                     "libs.core.langchain_core.tools.base._get_filtered_args",
                     "libs.core.langchain_core.tools.convert._get_schema_from_runnable_and_arg_types",
                     "libs.core.langchain_core.tools.retriever.afunc",
+                    "libs.core.langchain_core.example_selectors.semantic_similarity.SemanticSimilarityExampleSelector",
+                    "libs.core.langchain_core.example_selectors.semantic_similarity.MaxMarginalRelevanceExampleSelector",
+                    "libs.langchain.langchain_classic.retrievers.document_compressors.chain_extract.LLMChainExtractor",
+                    "libs.langchain.langchain_classic.retrievers.document_compressors.chain_filter.LLMChainFilter",
+                    "libs.langchain.langchain_classic.retrievers.document_compressors.cohere_rerank.CohereRerank",
+                    "libs.langchain.langchain_classic.retrievers.ensemble.EnsembleRetriever",
+                    "libs.langchain.langchain_classic.retrievers.multi_query.MultiQueryRetriever",
+                    "libs.langchain.langchain_classic.retrievers.multi_vector.MultiVectorRetriever",
+                    "libs.langchain.langchain_classic.retrievers.self_query.base.SelfQueryRetriever",
                     "libs.langchain.langchain_classic.tools.__init__.__getattr__",
+                    "libs.partners.exa.langchain_exa.retrievers.ExaSearchRetriever",
+                    "libs.partners.exa.langchain_exa.tools.ExaSearchResults",
+                    "libs.partners.exa.langchain_exa.tools.ExaFindSimilarResults",
+                    "libs.partners.openai.langchain_openai.tools.custom_tool.decorator",
+                    "libs.partners.perplexity.langchain_perplexity.retrievers.PerplexitySearchRetriever"
+                ]
+            },
+            "agent_middleware": {
+                "path": "libs/langchain_v1/langchain/agents/middleware",
+                "components": [
                     "libs.langchain_v1.langchain.agents.middleware._execution.CodexSandboxExecutionPolicy",
                     "libs.langchain_v1.langchain.agents.middleware._execution.DockerExecutionPolicy",
                     "libs.langchain_v1.langchain.agents.middleware._redaction.detect_credit_card",
@@ -335,98 +371,40 @@
                     "libs.langchain_v1.langchain.agents.middleware.tool_retry.ToolRetryMiddleware",
                     "libs.langchain_v1.langchain.agents.middleware.tool_selection.LLMToolSelectorMiddleware",
                     "libs.langchain_v1.langchain.agents.middleware.types.async_wrapped",
-                    "libs.langchain_v1.langchain.agents.middleware.types.wrapped"
-                ]
-            }
-        }
-    },
-    "data_and_integrations": {
-        "path": "libs/core/langchain_core/document_loaders, libs/core/langchain_core/indexing, libs/core/langchain_core/retrievers, libs/core/langchain_core/vectorstores, libs/langchain/langchain_classic/indexes, libs/langchain/langchain_classic/retrievers, libs/text-splitters/langchain_text_splitters, libs/partners",
-        "components": [],
-        "children": {
-            "document_management": {
-                "path": "libs/core/langchain_core/document_loaders, libs/core/langchain_core/indexing, libs/langchain/langchain_classic/indexes, libs/text-splitters/langchain_text_splitters",
-                "components": [
-                    "libs.core.langchain_core.document_loaders.base.BaseLoader",
-                    "libs.core.langchain_core.document_loaders.langsmith._stringify",
-                    "libs.core.langchain_core.document_loaders.langsmith.LangSmithLoader",
-                    "libs.core.langchain_core.indexing.api.aindex",
-                    "libs.core.langchain_core.indexing.api._hash_nested_dict",
-                    "libs.core.langchain_core.indexing.base.DocumentIndex",
-                    "libs.core.langchain_core.indexing.in_memory.InMemoryDocumentIndex",
-                    "libs.langchain.langchain_classic.indexes.vectorstore.VectorstoreIndexCreator",
-                    "libs.langchain.langchain_classic.indexes.vectorstore._get_default_text_splitter",
-                    "libs.text-splitters.langchain_text_splitters.base.TokenTextSplitter",
-                    "libs.text-splitters.langchain_text_splitters.html.HTMLHeaderTextSplitter",
-                    "libs.text-splitters.langchain_text_splitters.html.HTMLSemanticPreservingSplitter",
-                    "libs.text-splitters.langchain_text_splitters.html.HTMLSectionSplitter",
-                    "libs.text-splitters.langchain_text_splitters.json.RecursiveJsonSplitter",
-                    "libs.text-splitters.langchain_text_splitters.spacy.SpacyTextSplitter"
-                ]
-            },
-            "retrieval_systems": {
-                "path": "libs/core/langchain_core/retrievers, libs/langchain/langchain_classic/retrievers",
-                "components": [
-                    "libs.core.langchain_core.retrievers.BaseRetriever",
-                    "libs.langchain.langchain_classic.retrievers.document_compressors.chain_extract.LLMChainExtractor",
-                    "libs.langchain.langchain_classic.retrievers.document_compressors.chain_filter.LLMChainFilter",
-                    "libs.langchain.langchain_classic.retrievers.document_compressors.cohere_rerank.CohereRerank",
-                    "libs.langchain.langchain_classic.retrievers.ensemble.EnsembleRetriever",
-                    "libs.langchain.langchain_classic.retrievers.multi_query.MultiQueryRetriever",
-                    "libs.langchain.langchain_classic.retrievers.multi_vector.MultiVectorRetriever",
-                    "libs.langchain.langchain_classic.retrievers.self_query.base.SelfQueryRetriever"
-                ]
-            },
-            "vector_stores": {
-                "path": "libs/core/langchain_core/vectorstores",
-                "components": [
-                    "libs.core.langchain_core.vectorstores.base.VectorStore",
-                    "libs.core.langchain_core.vectorstores.in_memory.InMemoryVectorStore"
-                ]
-            },
-            "partner_integrations": {
-                "path": "libs/partners",
-                "components": [
-                    "libs.partners.anthropic.langchain_anthropic.chat_models._create_usage_metadata",
-                    "libs.partners.anthropic.langchain_anthropic.experimental._xml_to_tool_calls",
-                    "libs.partners.anthropic.langchain_anthropic.experimental.get_system_message",
-                    "libs.partners.anthropic.langchain_anthropic.llms.AnthropicLLM",
+                    "libs.langchain_v1.langchain.agents.middleware.types.wrapped",
                     "libs.partners.anthropic.langchain_anthropic.middleware.anthropic_tools.StateClaudeTextEditorMiddleware",
                     "libs.partners.anthropic.langchain_anthropic.middleware.anthropic_tools.StateClaudeMemoryMiddleware",
                     "libs.partners.anthropic.langchain_anthropic.middleware.anthropic_tools.FilesystemClaudeTextEditorMiddleware",
                     "libs.partners.anthropic.langchain_anthropic.middleware.anthropic_tools.FilesystemClaudeMemoryMiddleware",
                     "libs.partners.anthropic.langchain_anthropic.middleware.file_search.StateFileSearchMiddleware",
                     "libs.partners.anthropic.langchain_anthropic.middleware.prompt_caching.AnthropicPromptCachingMiddleware",
-                    "libs.partners.exa.langchain_exa.retrievers.ExaSearchRetriever",
-                    "libs.partners.exa.langchain_exa.tools.ExaSearchResults",
-                    "libs.partners.exa.langchain_exa.tools.ExaFindSimilarResults",
-                    "libs.partners.fireworks.langchain_fireworks.embeddings.FireworksEmbeddings",
-                    "libs.partners.groq.langchain_groq.chat_models._convert_chunk_to_message_chunk",
-                    "libs.partners.groq.langchain_groq.chat_models._convert_dict_to_message",
-                    "libs.partners.groq.langchain_groq.chat_models._convert_message_to_dict",
-                    "libs.partners.groq.langchain_groq.chat_models._create_usage_metadata",
-                    "libs.partners.huggingface.langchain_huggingface.chat_models.huggingface.ChatHuggingFace",
-                    "libs.partners.huggingface.langchain_huggingface.llms.huggingface_pipeline.HuggingFacePipeline",
-                    "libs.partners.mistralai.langchain_mistralai.chat_models._convert_to_openai_response_format",
-                    "libs.partners.ollama.langchain_ollama.llms.OllamaLLM",
-                    "libs.partners.openai.langchain_openai.chat_models.base._create_usage_metadata",
-                    "libs.partners.openai.langchain_openai.chat_models.base._oai_structured_outputs_parser",
-                    "libs.partners.openai.langchain_openai.middleware.openai_moderation.OpenAIModerationMiddleware",
-                    "libs.partners.openai.langchain_openai.tools.custom_tool.decorator",
-                    "libs.partners.openrouter.langchain_openrouter.chat_models.ChatOpenRouter",
-                    "libs.partners.perplexity.langchain_perplexity.retrievers.PerplexitySearchRetriever",
-                    "libs.partners.qdrant.langchain_qdrant.qdrant.QdrantVectorStore",
-                    "libs.partners.qdrant.langchain_qdrant.vectorstores.Qdrant"
+                    "libs.partners.openai.langchain_openai.middleware.openai_moderation.OpenAIModerationMiddleware"
                 ]
             }
         }
     },
-    "evaluation_and_testing": {
-        "path": "libs/langchain/langchain_classic/evaluation, libs/langchain/langchain_classic/smith, libs/standard-tests/langchain_tests, libs/core/scripts, libs/langchain_v1/scripts, libs/partners/*/scripts, libs/model-profiles",
+    "observability_and_evaluation": {
+        "path": "libs/core/langchain_core/callbacks",
         "components": [],
         "children": {
+            "callbacks_and_tracing": {
+                "path": "libs/core/langchain_core/callbacks",
+                "components": [
+                    "libs.core.langchain_core.callbacks.base.AsyncCallbackHandler",
+                    "libs.core.langchain_core.callbacks.file.FileCallbackHandler",
+                    "libs.core.langchain_core.callbacks.manager.atrace_as_chain_group",
+                    "libs.core.langchain_core.callbacks.manager.trace_as_chain_group",
+                    "libs.core.langchain_core.callbacks.manager.wrapped",
+                    "libs.core.langchain_core.callbacks.manager.adispatch_custom_event",
+                    "libs.core.langchain_core.callbacks.manager.dispatch_custom_event",
+                    "libs.core.langchain_core.callbacks.usage.get_usage_metadata_callback",
+                    "libs.core.langchain_core.tracers.context.collect_runs",
+                    "libs.core.langchain_core.tracers.core._TracerCore",
+                    "libs.langchain.langchain_classic.callbacks.tracers.logging.LoggingCallbackHandler"
+                ]
+            },
             "evaluation_framework": {
-                "path": "libs/langchain/langchain_classic/evaluation, libs/langchain/langchain_classic/smith",
+                "path": "libs/langchain/langchain_classic/evaluation",
                 "components": [
                     "libs.langchain.langchain_classic.evaluation.agents.trajectory_eval_chain.TrajectoryEvalChain",
                     "libs.langchain.langchain_classic.evaluation.comparison.eval_chain.LabeledPairwiseStringEvalChain",
@@ -440,7 +418,12 @@
                     "libs.langchain.langchain_classic.evaluation.schema.StringEvaluator",
                     "libs.langchain.langchain_classic.evaluation.schema.PairwiseStringEvaluator",
                     "libs.langchain.langchain_classic.evaluation.schema.AgentTrajectoryEvaluator",
-                    "libs.langchain.langchain_classic.evaluation.scoring.eval_chain.LabeledScoreStringEvalChain",
+                    "libs.langchain.langchain_classic.evaluation.scoring.eval_chain.LabeledScoreStringEvalChain"
+                ]
+            },
+            "langsmith_integration": {
+                "path": "libs/langchain/langchain_classic/smith",
+                "components": [
                     "libs.langchain.langchain_classic.smith.evaluation.config.LabeledScoreString",
                     "libs.langchain.langchain_classic.smith.evaluation.config.LabeledCriteria",
                     "libs.langchain.langchain_classic.smith.evaluation.config.EmbeddingDistance",
@@ -459,7 +442,7 @@
                 ]
             },
             "testing_utilities": {
-                "path": "libs/standard-tests/langchain_tests",
+                "path": "libs/standard-tests",
                 "components": [
                     "libs.standard-tests.langchain_tests.conftest._base_vcr_config",
                     "libs.standard-tests.langchain_tests.integration_tests.chat_models.ChatModelIntegrationTests",
@@ -470,16 +453,39 @@
                     "libs.standard-tests.langchain_tests.unit_tests.chat_models.test_serdes",
                     "libs.standard-tests.langchain_tests.unit_tests.chat_models.ChatModelUnitTests"
                 ]
-            },
-            "developer_tools": {
-                "path": "libs/core/scripts, libs/langchain/langchain_classic/_api, libs/langchain/langchain_classic/model_laboratory, libs/langchain_v1/scripts, libs/model-profiles, libs/partners/*/scripts",
+            }
+        }
+    },
+    "memory_and_state": {
+        "path": "libs/langchain/langchain_classic/memory",
+        "components": [],
+        "children": {
+            "conversational_memory": {
+                "path": "libs/langchain/langchain_classic/memory",
                 "components": [
-                    "libs.core.scripts.check_version.main",
-                    "libs.langchain.langchain_classic._api.module_import.import_by_name",
-                    "libs.langchain.langchain_classic.model_laboratory.ModelLaboratory",
-                    "libs.langchain_v1.langchain.scripts.check_version.main",
-                    "libs.model-profiles.langchain_model_profiles.cli.main",
-                    "libs.partners.anthropic.scripts.check_version.main"
+                    "libs.langchain.langchain_classic.memory.buffer.ConversationBufferMemory",
+                    "libs.langchain.langchain_classic.memory.buffer.ConversationStringBufferMemory",
+                    "libs.langchain.langchain_classic.memory.buffer_window.ConversationBufferWindowMemory",
+                    "libs.langchain.langchain_classic.memory.chat_memory.BaseChatMemory",
+                    "libs.langchain.langchain_classic.memory.summary.ConversationSummaryMemory",
+                    "libs.langchain.langchain_classic.memory.summary_buffer.ConversationSummaryBufferMemory",
+                    "libs.langchain.langchain_classic.memory.vectorstore_token_buffer_memory.ConversationVectorStoreTokenBufferMemory"
+                ]
+            },
+            "entity_memory": {
+                "path": "libs/langchain/langchain_classic/memory/entity",
+                "components": [
+                    "libs.langchain.langchain_classic.memory.entity.ConversationEntityMemory",
+                    "libs.langchain.langchain_classic.memory.entity.RedisEntityStore",
+                    "libs.langchain.langchain_classic.memory.entity.InMemoryEntityStore",
+                    "libs.langchain.langchain_classic.memory.entity.UpstashRedisEntityStore",
+                    "libs.langchain.langchain_classic.memory.entity.SQLiteEntityStore"
+                ]
+            },
+            "model_laboratory": {
+                "path": "libs/langchain/langchain_classic/model_laboratory.py",
+                "components": [
+                    "libs.langchain.langchain_classic.model_laboratory.ModelLaboratory"
                 ]
             }
         }

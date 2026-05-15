@@ -1,0 +1,509 @@
+{
+  "title": "General Utilities Module",
+  "summary": "This module provides a collection of general-purpose utility functions, including system information display, data stream manipulation, HTML parsing, Pydantic model helpers, serialization/deserialization, and version consistency checks. It supports various foundational operations across the LangChain ecosystem.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "print_sys_info",
+        "label": "Print System Info",
+        "type": "component",
+        "link": null,
+        "title": "Display System and Package Information",
+        "description": "Gathers and prints detailed information about the operating system, Python version, and installed LangChain-related packages for debugging and environment analysis."
+      },
+      {
+        "id": "async_tee_iterator",
+        "label": "Split Async Stream",
+        "type": "component",
+        "link": null,
+        "title": "Split Async Iterable into Multiple Streams",
+        "description": "Creates 'n' independent asynchronous iterators from a single async iterable, allowing multiple consumers to process the same data stream concurrently or sequentially."
+      },
+      {
+        "id": "extract_html_links",
+        "label": "Extract HTML Links",
+        "type": "component",
+        "link": null,
+        "title": "Parse HTML and Extract Absolute Links",
+        "description": "Analyzes raw HTML content to find all embedded links, converts them to absolute URLs, and provides options to filter by base URL, regex patterns, and exclude prefixes."
+      },
+      {
+        "id": "sync_tee_iterator",
+        "label": "Split Sync Stream",
+        "type": "component",
+        "link": null,
+        "title": "Split Iterable into Multiple Streams",
+        "description": "Creates 'n' independent synchronous iterators from a single iterable, enabling multiple consumers to process the same data stream."
+      },
+      {
+        "id": "pydantic_model_wrapper",
+        "label": "Pydantic Model Init Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Decorator for Pydantic Model Initialization",
+        "description": "A decorator that modifies Pydantic model initialization to handle default values and populate fields by alias, ensuring consistent data handling."
+      },
+      {
+        "id": "get_pydantic_version",
+        "label": "Get Pydantic Version",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Pydantic Major Version",
+        "description": "Returns the major version number of the installed Pydantic library. This function is deprecated in favor of direct `PYDANTIC_VERSION.major` access."
+      },
+      {
+        "id": "argument_validation_wrapper",
+        "label": "Exclusive Arg Validator",
+        "type": "component",
+        "link": null,
+        "title": "Decorator for Exclusive Argument Validation",
+        "description": "A decorator that ensures exactly one argument within specified groups is provided and not None, raising a ValueError if validation fails."
+      },
+      {
+        "id": "check_core_version",
+        "label": "Validate Core Version",
+        "type": "component",
+        "link": null,
+        "title": "Validate LangChain Core Version Consistency",
+        "description": "Compares the version specified in `pyproject.toml` with the version defined in `langchain_core/version.py` to ensure consistency for the core library."
+      },
+      {
+        "id": "dynamic_module_import",
+        "label": "Dynamic Module Importer",
+        "type": "component",
+        "link": null,
+        "title": "Import Modules by Name with Deprecation Handling",
+        "description": "Dynamically imports modules and their components by name, providing deprecation warnings for older import paths and handling module not found errors."
+      },
+      {
+        "id": "initialize_embeddings",
+        "label": "Initialize Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Create an Embedding Model Instance",
+        "description": "Initializes an embedding model from a given model name and optional provider, abstracting away the specific integration package details."
+      },
+      {
+        "id": "check_langchain_v1_version",
+        "label": "Validate LangChain v1 Version",
+        "type": "component",
+        "link": null,
+        "title": "Validate LangChain v1 Version Consistency",
+        "description": "Compares the version specified in `pyproject.toml` with the version defined in `langchain/__init__.py` for the LangChain v1 library."
+      },
+      {
+        "id": "refresh_model_profiles_cli",
+        "label": "Refresh Model Profiles",
+        "type": "component",
+        "link": null,
+        "title": "CLI for Model Profile Data Management",
+        "description": "Provides a command-line interface to download and merge model profile data for a specified provider from `models.dev`."
+      },
+      {
+        "id": "check_anthropic_version",
+        "label": "Validate Anthropic Version",
+        "type": "component",
+        "link": null,
+        "title": "Validate Anthropic Integration Version Consistency",
+        "description": "Compares the version specified in `pyproject.toml` with the version defined in `langchain_anthropic/_version.py` for the Anthropic integration."
+      },
+      {
+        "id": "serialize_embedding_value",
+        "label": "Serialize Embedding",
+        "type": "component",
+        "link": null,
+        "title": "Convert Embedding Vector to Bytes",
+        "description": "Serializes a list of floating-point numbers (an embedding vector) into a JSON string, then encodes it as bytes for storage or transmission."
+      },
+      {
+        "id": "deserialize_embedding_value",
+        "label": "Deserialize Embedding",
+        "type": "component",
+        "link": null,
+        "title": "Convert Bytes to Embedding Vector",
+        "description": "Decodes a byte string (expected to be JSON) into a list of floating-point numbers, reconstructing an embedding vector."
+      },
+      {
+        "id": "dump_serializable_to_bytes",
+        "label": "Dump Serializable",
+        "type": "component",
+        "link": null,
+        "title": "Serialize Serializable Object to Bytes",
+        "description": "Converts any `Serializable` object into a byte representation using JSON serialization, suitable for storage."
+      },
+      {
+        "id": "dump_document_to_bytes",
+        "label": "Dump Document",
+        "type": "component",
+        "link": null,
+        "title": "Serialize Document Object to Bytes",
+        "description": "Converts a `Document` object into a byte representation using JSON serialization, ensuring it's a valid Document instance."
+      },
+      {
+        "id": "load_document_from_bytes",
+        "label": "Load Document",
+        "type": "component",
+        "link": null,
+        "title": "Deserialize Bytes to Document Object",
+        "description": "Reconstructs a `Document` object from its byte representation, validating that the deserialized object is indeed a Document."
+      },
+      {
+        "id": "load_serializable_from_bytes",
+        "label": "Load Serializable",
+        "type": "component",
+        "link": null,
+        "title": "Deserialize Bytes to Serializable Object",
+        "description": "Reconstructs a `Serializable` object from its byte representation. Note: This process can be unsafe with untrusted input."
+      },
+      {
+        "id": "pyproject_toml",
+        "label": "pyproject.toml",
+        "type": "external",
+        "link": null,
+        "title": "Project Configuration File",
+        "description": "Standard configuration file for Python projects, containing metadata and dependencies."
+      },
+      {
+        "id": "version_files",
+        "label": "Version Files",
+        "type": "external",
+        "link": null,
+        "title": "Package Version Definition Files",
+        "description": "Python files (e.g., `version.py`, `__init__.py`) that define the version string for a package."
+      },
+      {
+        "id": "models_dev_api",
+        "label": "models.dev API",
+        "type": "external",
+        "link": null,
+        "title": "External Model Profile Data Source",
+        "description": "An external API providing structured data about various language models and their profiles."
+      },
+      {
+        "id": "embedding_providers",
+        "label": "Embedding Providers",
+        "type": "external",
+        "link": null,
+        "title": "External Embedding Services",
+        "description": "Various external services (e.g., OpenAI, Cohere, HuggingFace) that generate vector embeddings for text."
+      },
+      {
+        "id": "other_python_modules",
+        "label": "Other Python Modules",
+        "type": "external",
+        "link": null,
+        "title": "Dynamically Loadable Modules",
+        "description": "Other Python packages or modules that can be imported at runtime by name."
+      },
+      {
+        "id": "raw_html_input",
+        "label": "Raw HTML Content",
+        "type": "external",
+        "link": null,
+        "title": "Input HTML String",
+        "description": "An unstructured string containing HTML markup."
+      },
+      {
+        "id": "data_stream_input",
+        "label": "Data Stream",
+        "type": "external",
+        "link": null,
+        "title": "Generic Data Sequence",
+        "description": "A sequence of data items, which can be synchronous (iterable) or asynchronous (async iterable)."
+      },
+      {
+        "id": "pydantic_base_model",
+        "label": "Pydantic BaseModel",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic Data Model",
+        "description": "A class inheriting from Pydantic's BaseModel, used for data validation and settings management."
+      },
+      {
+        "id": "embedding_vector_data",
+        "label": "Embedding Vector",
+        "type": "external",
+        "link": null,
+        "title": "Numerical Embedding Representation",
+        "description": "A list of floating-point numbers representing a text embedding."
+      },
+      {
+        "id": "byte_representation",
+        "label": "Byte Data",
+        "type": "external",
+        "link": null,
+        "title": "Binary Data Representation",
+        "description": "Binary data (bytes) used for storage or transmission of serialized objects."
+      },
+      {
+        "id": "serializable_obj",
+        "label": "Serializable Object",
+        "type": "external",
+        "link": null,
+        "title": "Object Implementing Serializable",
+        "description": "An object that adheres to the `Serializable` interface, allowing it to be converted to and from a byte representation."
+      },
+      {
+        "id": "document_obj",
+        "label": "Document Object",
+        "type": "external",
+        "link": null,
+        "title": "LangChain Document Instance",
+        "description": "A specific LangChain `Document` object, typically containing page content and metadata."
+      }
+    ],
+    "edges": [
+      {
+        "source": "check_core_version",
+        "target": "pyproject_toml",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_core_version",
+        "target": "version_files",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_langchain_v1_version",
+        "target": "pyproject_toml",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_langchain_v1_version",
+        "target": "version_files",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_anthropic_version",
+        "target": "pyproject_toml",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "check_anthropic_version",
+        "target": "version_files",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refresh_model_profiles_cli",
+        "target": "models_dev_api",
+        "label": "Fetches data from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_stream_input",
+        "target": "async_tee_iterator",
+        "label": "Splits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "data_stream_input",
+        "target": "sync_tee_iterator",
+        "label": "Splits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "raw_html_input",
+        "target": "extract_html_links",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pydantic_base_model",
+        "target": "pydantic_model_wrapper",
+        "label": "Applies to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dynamic_module_import",
+        "target": "other_python_modules",
+        "label": "Loads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "initialize_embeddings",
+        "target": "embedding_providers",
+        "label": "Connects to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedding_vector_data",
+        "target": "serialize_embedding_value",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serialize_embedding_value",
+        "target": "byte_representation",
+        "label": "Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "byte_representation",
+        "target": "deserialize_embedding_value",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deserialize_embedding_value",
+        "target": "embedding_vector_data",
+        "label": "Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serializable_obj",
+        "target": "dump_serializable_to_bytes",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dump_serializable_to_bytes",
+        "target": "byte_representation",
+        "label": "Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_obj",
+        "target": "dump_document_to_bytes",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dump_document_to_bytes",
+        "target": "byte_representation",
+        "label": "Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "byte_representation",
+        "target": "load_document_from_bytes",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_document_from_bytes",
+        "target": "document_obj",
+        "label": "Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "byte_representation",
+        "target": "load_serializable_from_bytes",
+        "label": "Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_serializable_from_bytes",
+        "target": "serializable_obj",
+        "label": "Output",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "system_cli_tools",
+        "label": "System & CLI Tools",
+        "nodes": [
+          "print_sys_info",
+          "check_core_version",
+          "check_langchain_v1_version",
+          "check_anthropic_version",
+          "refresh_model_profiles_cli"
+        ],
+        "title": "System Information and Command-Line Utilities",
+        "description": "Functions for retrieving system information, validating package versions, and managing model profiles via command-line interfaces.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_flow_iteration",
+        "label": "Data Flow & Iteration",
+        "nodes": [
+          "async_tee_iterator",
+          "sync_tee_iterator"
+        ],
+        "title": "Utilities for Data Stream Management",
+        "description": "Tools for splitting single data streams (both synchronous and asynchronous) into multiple independent iterators for concurrent or sequential processing.",
+        "role": "data"
+      },
+      {
+        "id": "web_content_processing",
+        "label": "Web Content Processing",
+        "nodes": [
+          "extract_html_links"
+        ],
+        "title": "HTML Parsing and Link Extraction",
+        "description": "Functionality to parse HTML content, extract embedded links, and normalize them into absolute URLs with various filtering options.",
+        "role": "analytical"
+      },
+      {
+        "id": "pydantic_model_helpers",
+        "label": "Pydantic Model Helpers",
+        "nodes": [
+          "pydantic_model_wrapper",
+          "get_pydantic_version"
+        ],
+        "title": "Utilities for Pydantic Data Models",
+        "description": "Functions and decorators to assist with Pydantic model initialization, field population, and version checking.",
+        "role": "surface"
+      },
+      {
+        "id": "serialization_storage",
+        "label": "Serialization & Storage",
+        "nodes": [
+          "serialize_embedding_value",
+          "deserialize_embedding_value",
+          "dump_serializable_to_bytes",
+          "dump_document_to_bytes",
+          "load_document_from_bytes",
+          "load_serializable_from_bytes"
+        ],
+        "title": "Object to Byte Conversion for Storage",
+        "description": "Utilities for converting various LangChain objects (embeddings, `Serializable`, `Document`) to and from byte representations for persistence or transmission.",
+        "role": "data"
+      },
+      {
+        "id": "core_utilities_integrations",
+        "label": "Core Utilities & Integrations",
+        "nodes": [
+          "argument_validation_wrapper",
+          "dynamic_module_import",
+          "initialize_embeddings"
+        ],
+        "title": "General-Purpose Helpers and Integration Initializers",
+        "description": "Includes decorators for argument validation, dynamic module loading, and simplified initialization of embedding models from various providers.",
+        "role": "generative"
+      }
+    ]
+  }
+}

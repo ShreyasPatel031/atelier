@@ -1,0 +1,205 @@
+{
+  "title": "Concurrency and Context Tests",
+  "summary": "This module contains integration tests focused on evaluating the system's performance, stability, and resource management under concurrent workloads, as well as its ability to correctly handle and maintain conversational context across various interactions.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "test_multi_model_stress",
+        "label": "Test Multi-Model Stress",
+        "type": "component",
+        "link": null,
+        "title": "Test Multi-Model Stress",
+        "description": "Evaluates the system's ability to manage and schedule multiple models concurrently, especially under VRAM constraints, by simulating thrashing and forced unloading scenarios."
+      },
+      {
+        "id": "test_concurrent_chat",
+        "label": "Test Concurrent Chat",
+        "type": "component",
+        "link": null,
+        "title": "Test Concurrent Chat",
+        "description": "Verifies the system's stability and performance when handling multiple simultaneous chat requests to a single language model."
+      },
+      {
+        "id": "test_parallel_chat_history",
+        "label": "Test Parallel Chat with History",
+        "type": "component",
+        "link": null,
+        "title": "Test Parallel Chat with History",
+        "description": "Assesses the system's capacity to manage and maintain conversational context across multiple parallel chat sessions with a language model."
+      },
+      {
+        "id": "test_context_exhaustion",
+        "label": "Test Context Exhaustion",
+        "type": "component",
+        "link": null,
+        "title": "Test Context Exhaustion",
+        "description": "Examines how the system responds to chat requests that push or exceed the defined context window size, including error handling and response content validation."
+      },
+      {
+        "id": "test_chat_history",
+        "label": "Test Chat with History",
+        "type": "component",
+        "link": null,
+        "title": "Test Chat with History",
+        "description": "Confirms the language model's ability to retain and utilize conversational history over multiple turns within a single chat session."
+      },
+      {
+        "id": "test_long_input_context",
+        "label": "Test Long Input Context",
+        "type": "component",
+        "link": null,
+        "title": "Test Long Input Context",
+        "description": "Tests the system's behavior when processing unusually long input prompts, checking for correct handling, truncation, or context limit errors."
+      },
+      {
+        "id": "test_parallel_generate_history",
+        "label": "Test Parallel Generate with History",
+        "type": "component",
+        "link": null,
+        "title": "Test Parallel Generate with History",
+        "description": "Validates the system's capability to handle concurrent generate requests that build upon previous outputs, ensuring context is correctly passed and utilized in parallel."
+      },
+      {
+        "id": "test_generate_history",
+        "label": "Test Generate with History",
+        "type": "component",
+        "link": null,
+        "title": "Test Generate with History",
+        "description": "Ensures the language model correctly uses the context from prior generations to inform subsequent generate requests within a continuous sequence."
+      },
+      {
+        "id": "test_max_queue",
+        "label": "Test Max Queue Behavior",
+        "type": "component",
+        "link": null,
+        "title": "Test Max Queue Behavior",
+        "description": "Probes the server's request queuing and load management by submitting numerous concurrent embedding requests while a long generation task is active, checking for proper queue handling and error responses."
+      },
+      {
+        "id": "api_handlers_module",
+        "label": "API Handlers",
+        "type": "external",
+        "link": "api_handlers",
+        "title": "API Handlers Module",
+        "description": "Handles incoming API requests for chat, generation, and embeddings, routing them to the appropriate backend services."
+      },
+      {
+        "id": "model_serving_module",
+        "label": "Model Serving & Scheduling",
+        "type": "external",
+        "link": "model_serving_and_scheduling",
+        "title": "Model Serving & Scheduling Module",
+        "description": "Manages the loading, scheduling, and execution of language models, including VRAM allocation and request queuing."
+      }
+    ],
+    "edges": [
+      {
+        "source": "test_multi_model_stress",
+        "target": "api_handlers_module",
+        "label": "uses Generate API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_multi_model_stress",
+        "target": "model_serving_module",
+        "label": "tests model scheduling/VRAM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_concurrent_chat",
+        "target": "api_handlers_module",
+        "label": "uses Chat API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_parallel_chat_history",
+        "target": "api_handlers_module",
+        "label": "uses Chat API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_context_exhaustion",
+        "target": "api_handlers_module",
+        "label": "uses Chat API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_chat_history",
+        "target": "api_handlers_module",
+        "label": "uses Chat API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_long_input_context",
+        "target": "api_handlers_module",
+        "label": "uses Chat API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_parallel_generate_history",
+        "target": "api_handlers_module",
+        "label": "uses Generate API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_generate_history",
+        "target": "api_handlers_module",
+        "label": "uses Generate API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_max_queue",
+        "target": "api_handlers_module",
+        "label": "uses Generate/Embeddings API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_max_queue",
+        "target": "model_serving_module",
+        "label": "tests request queuing",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "concurrency_testing",
+        "label": "Concurrency Testing",
+        "nodes": [
+          "test_multi_model_stress",
+          "test_concurrent_chat",
+          "test_max_queue"
+        ],
+        "title": "Concurrency Testing",
+        "description": "Tests focused on evaluating the system's performance, stability, and resource management under concurrent workloads and high request volumes.",
+        "role": "analytical"
+      },
+      {
+        "id": "context_management_testing",
+        "label": "Context Management Testing",
+        "nodes": [
+          "test_parallel_chat_history",
+          "test_context_exhaustion",
+          "test_chat_history",
+          "test_long_input_context",
+          "test_parallel_generate_history",
+          "test_generate_history"
+        ],
+        "title": "Context Management Testing",
+        "description": "Tests designed to verify the system's ability to correctly handle and maintain conversational or generation context across single and parallel interactions.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

@@ -1,0 +1,293 @@
+{
+  "title": "Text Processing & Embeddings",
+  "summary": "This module provides tools for processing and splitting text from various formats (plain text, HTML, JSON) into manageable chunks, as well as utilities for initializing and caching text embedding models from different providers.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "raw_text_input",
+        "label": "Raw Text Input",
+        "type": "external",
+        "link": null,
+        "title": "Unstructured text data",
+        "description": "Any form of plain text content that needs to be processed or analyzed."
+      },
+      {
+        "id": "html_input",
+        "label": "HTML Content Input",
+        "type": "external",
+        "link": null,
+        "title": "HTML formatted web content",
+        "description": "Web pages or other documents structured with HTML tags, requiring specialized parsing."
+      },
+      {
+        "id": "json_input",
+        "label": "JSON Data Input",
+        "type": "external",
+        "link": null,
+        "title": "Structured JSON data",
+        "description": "Data represented in JSON format, often nested, that needs to be broken down into smaller, manageable parts."
+      },
+      {
+        "id": "token_splitter",
+        "label": "Split by Tokens",
+        "type": "component",
+        "link": null,
+        "title": "Splits text based on token count",
+        "description": "Divides text into chunks using a model's tokenizer (e.g., tiktoken), ensuring chunks adhere to a specified token limit with optional overlap."
+      },
+      {
+        "id": "html_header_splitter",
+        "label": "Split HTML by Headers",
+        "type": "component",
+        "link": null,
+        "title": "Splits HTML content by header tags",
+        "description": "Parses HTML and creates structured documents by splitting content based on specified header tags (e.g., h1, h2), preserving hierarchy and metadata."
+      },
+      {
+        "id": "html_semantic_splitter",
+        "label": "Semantic HTML Splitter",
+        "type": "component",
+        "link": null,
+        "title": "Splits HTML preserving semantic structure",
+        "description": "Divides HTML content into semantically meaningful chunks, handling headers, links, and media, and further splitting large chunks with a recursive text splitter."
+      },
+      {
+        "id": "html_section_splitter",
+        "label": "HTML Section Splitter",
+        "type": "component",
+        "link": null,
+        "title": "Splits HTML into sections by tags/fonts",
+        "description": "Splits HTML documents into sections based on specified header tags and font sizes, using XSLT for transformation and BeautifulSoup for parsing."
+      },
+      {
+        "id": "json_splitter",
+        "label": "Recursive JSON Splitter",
+        "type": "component",
+        "link": null,
+        "title": "Splits JSON data recursively",
+        "description": "Breaks down nested JSON objects into smaller, structured chunks while maintaining their hierarchical relationships, based on configurable size limits."
+      },
+      {
+        "id": "spacy_splitter",
+        "label": "SpaCy Sentence Splitter",
+        "type": "component",
+        "link": null,
+        "title": "Splits text into sentences using SpaCy",
+        "description": "Utilizes the SpaCy library to segment raw text into individual sentences, providing fine-grained control over text chunking."
+      },
+      {
+        "id": "init_embedder_factory",
+        "label": "Embedding Model Factory",
+        "type": "component",
+        "link": null,
+        "title": "Initializes various embedding models",
+        "description": "A factory function to create embedding models from different providers (e.g., OpenAI, Cohere, HuggingFace) based on a model name and optional provider."
+      },
+      {
+        "id": "fireworks_embedder_impl",
+        "label": "Fireworks Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Generates embeddings using Fireworks AI",
+        "description": "An embedding model implementation that interfaces with the Fireworks AI API to generate vector representations of text."
+      },
+      {
+        "id": "cache_embedder_wrapper",
+        "label": "Cache-Backed Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Caches embedding model results",
+        "description": "Wraps an underlying embedding model to cache document and query embeddings, reducing redundant computations and improving performance."
+      },
+      {
+        "id": "text_chunks_output",
+        "label": "Processed Text Chunks",
+        "type": "external",
+        "link": null,
+        "title": "Segmented text for further processing",
+        "description": "Smaller, manageable segments of text or documents, ready for tasks like embedding, summarization, or retrieval."
+      },
+      {
+        "id": "embedding_output",
+        "label": "Text Embeddings",
+        "type": "external",
+        "link": null,
+        "title": "Vector representations of text",
+        "description": "Numerical vector representations of text, used for similarity search, clustering, and other NLP tasks."
+      },
+      {
+        "id": "embedding_providers",
+        "label": "External Embedding Providers",
+        "type": "external",
+        "link": null,
+        "title": "APIs for generating text embeddings",
+        "description": "Third-party services or libraries that provide text embedding capabilities, such as OpenAI, Cohere, or HuggingFace."
+      }
+    ],
+    "edges": [
+      {
+        "source": "raw_text_input",
+        "target": "token_splitter",
+        "label": "Text to split",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "raw_text_input",
+        "target": "spacy_splitter",
+        "label": "Text to split",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_input",
+        "target": "html_header_splitter",
+        "label": "HTML content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_input",
+        "target": "html_semantic_splitter",
+        "label": "HTML content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_input",
+        "target": "html_section_splitter",
+        "label": "HTML content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_input",
+        "target": "json_splitter",
+        "label": "JSON data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "token_splitter",
+        "target": "text_chunks_output",
+        "label": "Outputs chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_header_splitter",
+        "target": "text_chunks_output",
+        "label": "Outputs chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_semantic_splitter",
+        "target": "text_chunks_output",
+        "label": "Outputs chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_section_splitter",
+        "target": "text_chunks_output",
+        "label": "Outputs chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_splitter",
+        "target": "text_chunks_output",
+        "label": "Outputs chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "spacy_splitter",
+        "target": "text_chunks_output",
+        "label": "Outputs chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedding_providers",
+        "target": "init_embedder_factory",
+        "label": "Configures via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_embedder_factory",
+        "target": "embedding_output",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_embedder_impl",
+        "target": "embedding_output",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_embedder_factory",
+        "target": "cache_embedder_wrapper",
+        "label": "Provides underlying embedder",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_embedder_impl",
+        "target": "cache_embedder_wrapper",
+        "label": "Provides underlying embedder",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cache_embedder_wrapper",
+        "target": "embedding_output",
+        "label": "Generates (cached)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_chunks_output",
+        "target": "embedding_output",
+        "label": "Can be embedded",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "text_splitting_group",
+        "label": "Text Splitting",
+        "nodes": [
+          "token_splitter",
+          "html_header_splitter",
+          "html_semantic_splitter",
+          "html_section_splitter",
+          "json_splitter",
+          "spacy_splitter"
+        ],
+        "title": "Tools for segmenting text",
+        "description": "Components designed to break down large text inputs from various formats into smaller, more manageable chunks for further processing.",
+        "role": "analytical"
+      },
+      {
+        "id": "embedding_management_group",
+        "label": "Embedding Management",
+        "nodes": [
+          "init_embedder_factory",
+          "fireworks_embedder_impl",
+          "cache_embedder_wrapper"
+        ],
+        "title": "Tools for generating and caching embeddings",
+        "description": "Components for initializing diverse embedding models and implementing caching strategies to optimize embedding generation.",
+        "role": "generative"
+      }
+    ]
+  }
+}

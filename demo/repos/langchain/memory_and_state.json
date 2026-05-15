@@ -1,0 +1,88 @@
+{
+    "title": "Memory and State Management",
+    "summary": "This module provides various memory implementations for managing conversational history and state in AI applications, including simple buffers, summarization, vector store-backed memory, and entity tracking.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "conversational_memory_node",
+                "label": "Conversational Memory",
+                "type": "module",
+                "link": "conversational_memory",
+                "title": "Manages Chat History",
+                "description": "Provides various implementations for storing and managing conversation history, including simple buffers, sliding windows, summarization, and vector store-backed memory."
+            },
+            {
+                "id": "entity_memory_node",
+                "label": "Entity Memory",
+                "type": "module",
+                "link": "entity_memory",
+                "title": "Tracks Conversational Entities",
+                "description": "Extracts, summarizes, and persists named entities from chat history, allowing the AI to maintain a deeper understanding of specific subjects and individuals over time."
+            },
+            {
+                "id": "model_laboratory_node",
+                "label": "Model Comparison & Evaluation",
+                "type": "module",
+                "link": "model_laboratory",
+                "title": "Compares LLM/Chain Performance",
+                "description": "A utility for experimenting with and comparing different language models or chains, allowing users to observe and evaluate varied outputs for model selection and tuning."
+            }
+        ],
+        "edges": [
+            {
+                "source": "conversational_memory_node",
+                "target": "entity_memory_node",
+                "label": "Provides raw history for",
+                "title": "Feeds raw history",
+                "description": "Conversational memory provides the raw message history that entity memory processes to extract and summarize entities."
+            },
+            {
+                "source": "conversational_memory_node",
+                "target": "model_laboratory_node",
+                "label": "Can be used by models in",
+                "title": "Memory for tested models",
+                "description": "Models or chains being compared in the Model Laboratory can utilize conversational memory to maintain state during their execution."
+            },
+            {
+                "source": "entity_memory_node",
+                "target": "model_laboratory_node",
+                "label": "Can be evaluated by",
+                "title": "Evaluated by laboratory",
+                "description": "The effectiveness of entity memory in tracking and summarizing entities can be assessed and compared using the Model Laboratory."
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_memory_types",
+                "label": "Core Memory Types",
+                "nodes": [
+                    "conversational_memory_node"
+                ],
+                "title": "Fundamental Memory Implementations",
+                "description": "This group includes the primary components for managing the flow and persistence of conversational history within AI applications.",
+                "role": null
+            },
+            {
+                "id": "advanced_memory_features",
+                "label": "Advanced Memory Features",
+                "nodes": [
+                    "entity_memory_node"
+                ],
+                "title": "Intelligent State Management",
+                "description": "Components focused on enhancing memory capabilities through entity extraction and summarization, providing richer context to AI models.",
+                "role": null
+            },
+            {
+                "id": "evaluation_tools",
+                "label": "Evaluation Tools",
+                "nodes": [
+                    "model_laboratory_node"
+                ],
+                "title": "Performance Assessment Utilities",
+                "description": "This component provides tools for comparing and evaluating the performance of different language models or chains, which can include those utilizing memory systems.",
+                "role": null
+            }
+        ]
+    }
+}

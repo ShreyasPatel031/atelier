@@ -1,0 +1,143 @@
+{
+  "title": "Tool Calling Integration Tests",
+  "summary": "This module contains integration tests for the API's tool-calling functionality, covering both basic tool execution and complex, multi-turn agent interactions under stress conditions.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "go_test_runner",
+        "label": "Go Test Runner",
+        "type": "external",
+        "link": null,
+        "title": "Go Testing Framework",
+        "description": "The standard Go testing framework that orchestrates the execution of integration tests."
+      },
+      {
+        "id": "test_stress",
+        "label": "Stress Test Tool Calling",
+        "type": "component",
+        "link": null,
+        "title": "API Tool Calling Stress Test",
+        "description": "Tests API tool-calling under high-complexity scenarios, including large system prompts, multiple tools, multi-turn interactions, and cache behavior."
+      },
+      {
+        "id": "test_basic",
+        "label": "Basic Tool Calling Test",
+        "type": "component",
+        "link": null,
+        "title": "API Tool Calling Basic Test",
+        "description": "Verifies fundamental API tool-calling functionality, ensuring models correctly identify and execute simple tool calls with expected arguments."
+      },
+      {
+        "id": "api_client",
+        "label": "Ollama API Client",
+        "type": "external",
+        "link": null,
+        "title": "Ollama API Client",
+        "description": "The client library used by tests to interact with the Ollama server's API endpoints for chat and generation."
+      },
+      {
+        "id": "ollama_server",
+        "label": "Ollama Server",
+        "type": "external",
+        "link": null,
+        "title": "Ollama Server API",
+        "description": "The core Ollama server responsible for processing API requests, managing models, and executing tool calls."
+      },
+      {
+        "id": "model_loader",
+        "label": "Model Loader/Manager",
+        "type": "external",
+        "link": null,
+        "title": "Model Loading and Management",
+        "description": "Handles pulling, loading, and managing language models, including checking VRAM requirements and GPU loading status."
+      }
+    ],
+    "edges": [
+      {
+        "source": "go_test_runner",
+        "target": "test_stress",
+        "label": "Executes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "go_test_runner",
+        "target": "test_basic",
+        "label": "Executes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_stress",
+        "target": "api_client",
+        "label": "Makes API Calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_basic",
+        "target": "api_client",
+        "label": "Makes API Calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_client",
+        "target": "ollama_server",
+        "label": "Sends Chat/Generate Requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_client",
+        "target": "model_loader",
+        "label": "Requests Model Pull/Load",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_server",
+        "target": "model_loader",
+        "label": "Utilizes for Model Operations",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "test_framework",
+        "label": "Testing Framework",
+        "nodes": [
+          "go_test_runner"
+        ],
+        "title": "Go Testing Framework",
+        "description": "The environment orchestrating the test execution.",
+        "role": "generative"
+      },
+      {
+        "id": "test_components",
+        "label": "Tool Calling Test Components",
+        "nodes": [
+          "test_stress",
+          "test_basic"
+        ],
+        "title": "Tool Calling Test Components",
+        "description": "Core test functions for validating tool calling capabilities.",
+        "role": "analytical"
+      },
+      {
+        "id": "system_under_test",
+        "label": "System Under Test",
+        "nodes": [
+          "api_client",
+          "ollama_server",
+          "model_loader"
+        ],
+        "title": "Ollama System Under Test",
+        "description": "The Ollama server and its model management capabilities being tested.",
+        "role": "surface"
+      }
+    ]
+  }
+}

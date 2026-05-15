@@ -23,7 +23,7 @@ class DiagramNode:
     id: str                          # Unique node ID (lowercase_with_underscores)
     label: str                       # Display label (can have spaces)
     type: NodeType = NodeType.COMPONENT
-    link: Optional[str] = None       # Link to .md file (for MODULE type)
+    link: Optional[str] = None       # Module id to link to (no extension)
     
     def to_dict(self) -> Dict:
         return {
@@ -177,8 +177,8 @@ New module_tree.json structure:
         "diagram": {                          # NEW: Structured diagram
             "direction": "TD",
             "nodes": [
-                {"id": "auth", "label": "Authentication", "type": "module", "link": "auth.md"},
-                {"id": "db", "label": "Database", "type": "module", "link": "db.md"},
+                {"id": "auth", "label": "Authentication", "type": "module", "link": "auth"},
+                {"id": "db", "label": "Database", "type": "module", "link": "db"},
                 {"id": "utils", "label": "Utilities", "type": "component", "link": null}
             ],
             "edges": [
@@ -225,7 +225,7 @@ def create_module_diagram(
             id=child_name,
             label=title,
             type=NodeType.MODULE,
-            link=f"{child_name}.md"
+            link=child_name
         ))
     
     # Add any additional nodes

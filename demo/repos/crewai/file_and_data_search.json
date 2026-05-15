@@ -1,0 +1,305 @@
+{
+  "title": "File and Data Search Tools",
+  "summary": "This module provides a comprehensive suite of tools for performing semantic searches across various file types, data sources, and online content. It includes specialized tools for querying CSV, DOCX, JSON, PDF, TXT, XML files, directories, GitHub repositories, and database tables like MySQL, SingleStore, and Snowflake, as well as web content from websites and YouTube.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "rag_tool_base",
+        "label": "RAG Tool Base",
+        "type": "component",
+        "link": "rag_tools_and_loaders",
+        "title": "Base for RAG-enabled Search Tools",
+        "description": "Provides foundational capabilities for tools that perform semantic search using Retrieval Augmented Generation (RAG) principles, handling data ingestion and query processing."
+      },
+      {
+        "id": "base_tool_base",
+        "label": "Base Tool Interface",
+        "type": "component",
+        "link": "base_tool_framework",
+        "title": "Core Tool Interface",
+        "description": "Defines the fundamental interface and common functionalities for all tools within the CrewAI ecosystem, including name, description, and argument schema."
+      },
+      {
+        "id": "csv_search_tool",
+        "label": "Search CSV Content",
+        "type": "component",
+        "link": null,
+        "title": "CSV Semantic Search Tool",
+        "description": "Enables semantic search within the content of a specified CSV file, allowing agents to extract relevant information based on natural language queries."
+      },
+      {
+        "id": "directory_search_tool",
+        "label": "Search Directory Content",
+        "type": "component",
+        "link": null,
+        "title": "Directory Content Search Tool",
+        "description": "Allows semantic search across all files within a specified directory, providing a unified way to find information across multiple documents."
+      },
+      {
+        "id": "docx_search_tool",
+        "label": "Search DOCX Content",
+        "type": "component",
+        "link": null,
+        "title": "DOCX Semantic Search Tool",
+        "description": "Facilitates semantic search within the content of a specified DOCX document, enabling agents to query and retrieve information from Word files."
+      },
+      {
+        "id": "github_search_tool",
+        "label": "Search GitHub Repo Content",
+        "type": "component",
+        "link": null,
+        "title": "GitHub Repository Search Tool",
+        "description": "Provides semantic search capabilities for content within a GitHub repository, including code, issues, and pull requests, without using the GitHub API directly."
+      },
+      {
+        "id": "json_search_tool",
+        "label": "Search JSON Content",
+        "type": "component",
+        "link": null,
+        "title": "JSON Semantic Search Tool",
+        "description": "Allows semantic search within the content of a specified JSON file, enabling agents to query structured data efficiently."
+      },
+      {
+        "id": "mdx_search_tool",
+        "label": "Search MDX Content",
+        "type": "component",
+        "link": null,
+        "title": "MDX Semantic Search Tool",
+        "description": "Enables semantic search within the content of a specified MDX file, useful for querying documentation or content written in MDX format."
+      },
+      {
+        "id": "mysql_search_tool",
+        "label": "Search MySQL Table Content",
+        "type": "component",
+        "link": null,
+        "title": "MySQL Database Search Tool",
+        "description": "Performs semantic search within the content of a specified MySQL database table, allowing agents to retrieve information from relational databases."
+      },
+      {
+        "id": "pdf_search_tool",
+        "label": "Search PDF Content",
+        "type": "component",
+        "link": null,
+        "title": "PDF Semantic Search Tool",
+        "description": "Facilitates semantic search within the content of a specified PDF document, enabling agents to extract information from PDF files."
+      },
+      {
+        "id": "singlestore_search_tool",
+        "label": "Search SingleStore DB Content",
+        "type": "component",
+        "link": null,
+        "title": "SingleStore Database Search Tool",
+        "description": "Provides a secure interface for executing SELECT and SHOW queries against a SingleStore database, supporting semantic search and efficient connection management."
+      },
+      {
+        "id": "snowflake_search_tool",
+        "label": "Search Snowflake DB Content",
+        "type": "component",
+        "link": null,
+        "title": "Snowflake Data Warehouse Search Tool",
+        "description": "Enables execution of SQL queries and semantic search on Snowflake data warehouses, with features like connection pooling, retries, and caching."
+      },
+      {
+        "id": "txt_search_tool",
+        "label": "Search TXT Content",
+        "type": "component",
+        "link": null,
+        "title": "TXT Semantic Search Tool",
+        "description": "Allows semantic search within the content of a specified plain text file, useful for extracting information from simple text documents."
+      },
+      {
+        "id": "website_search_tool",
+        "label": "Search Website Content",
+        "type": "component",
+        "link": null,
+        "title": "Website Semantic Search Tool",
+        "description": "Enables semantic search within the content of a specified website URL, allowing agents to query and retrieve information directly from web pages."
+      },
+      {
+        "id": "xml_search_tool",
+        "label": "Search XML Content",
+        "type": "component",
+        "link": null,
+        "title": "XML Semantic Search Tool",
+        "description": "Facilitates semantic search within the content of a specified XML file, enabling agents to query structured data in XML format."
+      },
+      {
+        "id": "youtube_channel_search_tool",
+        "label": "Search YouTube Channel Content",
+        "type": "component",
+        "link": null,
+        "title": "YouTube Channel Search Tool",
+        "description": "Provides semantic search capabilities for content across a specified YouTube channel, allowing agents to find relevant information from channel videos."
+      },
+      {
+        "id": "youtube_video_search_tool",
+        "label": "Search YouTube Video Content",
+        "type": "component",
+        "link": null,
+        "title": "YouTube Video Search Tool",
+        "description": "Enables semantic search within the content of a specified YouTube video, allowing agents to extract information from video transcripts or descriptions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "csv_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "directory_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "docx_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mdx_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mysql_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pdf_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "txt_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "website_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "xml_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "youtube_channel_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "youtube_video_search_tool",
+        "target": "rag_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "singlestore_search_tool",
+        "target": "base_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "snowflake_search_tool",
+        "target": "base_tool_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "file_content_search_group",
+        "label": "File Content Search",
+        "nodes": [
+          "csv_search_tool",
+          "docx_search_tool",
+          "json_search_tool",
+          "mdx_search_tool",
+          "pdf_search_tool",
+          "txt_search_tool",
+          "xml_search_tool"
+        ],
+        "title": "Tools for Searching File Content",
+        "description": "A collection of tools designed for semantic search within various document and data file formats.",
+        "role": "data"
+      },
+      {
+        "id": "directory_repo_search_group",
+        "label": "Directory & Repository Search",
+        "nodes": [
+          "directory_search_tool",
+          "github_search_tool"
+        ],
+        "title": "Tools for Searching Directories and Repositories",
+        "description": "Tools enabling semantic search across local file directories and remote GitHub repositories.",
+        "role": "data"
+      },
+      {
+        "id": "database_search_group",
+        "label": "Database Search",
+        "nodes": [
+          "mysql_search_tool",
+          "singlestore_search_tool",
+          "snowflake_search_tool"
+        ],
+        "title": "Tools for Searching Database Content",
+        "description": "Specialized tools for performing semantic queries against various database systems like MySQL, SingleStore, and Snowflake.",
+        "role": "data"
+      },
+      {
+        "id": "web_content_search_group",
+        "label": "Web Content Search",
+        "nodes": [
+          "website_search_tool",
+          "youtube_channel_search_tool",
+          "youtube_video_search_tool"
+        ],
+        "title": "Tools for Searching Web Content",
+        "description": "Tools dedicated to semantic search on online web content, including general websites and specific YouTube channels or videos.",
+        "role": "data"
+      }
+    ]
+  }
+}

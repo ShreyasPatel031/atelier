@@ -1,0 +1,140 @@
+{
+  "title": "Data and Storage Module",
+  "summary": "This module manages persistent application data, user settings, chat history, and handles the storage and caching of AI model artifacts in various formats, including GGUF.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "app_store",
+        "label": "Application Store",
+        "type": "component",
+        "link": null,
+        "title": "Application Store",
+        "description": "Manages persistent application data such as user settings, unique identifiers, chat history, and window configurations."
+      },
+      {
+        "id": "gguf_writer",
+        "label": "GGUF File Writer",
+        "type": "component",
+        "link": null,
+        "title": "GGUF File Writer",
+        "description": "Handles the serialization and writing of AI model weights and metadata into the GGUF (GGML Universal File Format)."
+      },
+      {
+        "id": "blob_cache",
+        "label": "Blob Cache",
+        "type": "component",
+        "link": null,
+        "title": "Blob Cache",
+        "description": "Provides a content-addressable storage mechanism for binary large objects (blobs), managing their storage, retrieval, and associated manifests."
+      },
+      {
+        "id": "registry_client",
+        "label": "Registry Client",
+        "type": "component",
+        "link": null,
+        "title": "Registry Client",
+        "description": "Manages the linking and unlinking of model artifacts within a registry, typically interacting with the blob cache for storage."
+      },
+      {
+        "id": "app_core",
+        "label": "Application Core",
+        "type": "external",
+        "link": "core_application",
+        "title": "Application Core",
+        "description": "The main application logic that interacts with various data storage components to manage state and user interactions."
+      },
+      {
+        "id": "model_mgmt",
+        "label": "Model Management",
+        "type": "external",
+        "link": "model_management",
+        "title": "Model Management",
+        "description": "Components responsible for creating, converting, and managing AI models, including their data storage and lifecycle."
+      },
+      {
+        "id": "file_system",
+        "label": "File System",
+        "type": "external",
+        "link": null,
+        "title": "Operating System File System",
+        "description": "The underlying operating system file system used for persistent storage by various components."
+      }
+    ],
+    "edges": [
+      {
+        "source": "app_core",
+        "target": "app_store",
+        "label": "Manages Settings & Chats",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "app_store",
+        "target": "file_system",
+        "label": "Persists Data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_mgmt",
+        "target": "gguf_writer",
+        "label": "Writes Model Data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gguf_writer",
+        "target": "file_system",
+        "label": "Stores GGUF Files",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_mgmt",
+        "target": "blob_cache",
+        "label": "Caches Model Layers/Manifests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "registry_client",
+        "target": "blob_cache",
+        "label": "Links/Unlinks Artifacts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "blob_cache",
+        "target": "file_system",
+        "label": "Stores Blobs & Manifests",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "app_data_group",
+        "label": "Application Data Storage",
+        "nodes": [
+          "app_store"
+        ],
+        "title": "Application Data Storage",
+        "description": "Manages user-specific application settings, chat history, and other persistent state.",
+        "role": "data"
+      },
+      {
+        "id": "model_cache_group",
+        "label": "Model Data & Cache Management",
+        "nodes": [
+          "gguf_writer",
+          "blob_cache",
+          "registry_client"
+        ],
+        "title": "Model Data & Cache Management",
+        "description": "Handles the storage, caching, and registry management of AI model artifacts and their associated metadata.",
+        "role": "data"
+      }
+    ]
+  }
+}

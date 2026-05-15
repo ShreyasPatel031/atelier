@@ -1,5 +1,5 @@
 /**
- * Walks each demo/repos/<name>/module_tree.json: R2 repair, R4 diagramToElkInput (elkjs),
+ * Walks each demo/repos/<name>/module_tree.json: R4 diagramToElkInput (elkjs),
  * then elk.layout. Exits 1 on any layout failure. Hardens the converter, not fixture JSON.
  */
 'use strict';
@@ -7,7 +7,6 @@
 const fs = require('fs');
 const path = require('path');
 const ELK = require('elkjs');
-const { repairDiagramIR } = require('../pipeline-ir-repair.js');
 const {
     diagramToElkInput,
     validateElkEdgePlacement,
@@ -71,18 +70,8 @@ async function main() {
 
         for (const { path: modulePath, diagram } of items) {
             tested++;
-            const r2 = repairDiagramIR(diagram);
-            if (!r2.ok || !r2.diagram) {
-                failures.push({
-                    repo,
-                    modulePath,
-                    phase: 'repairDiagramIR',
-                    error: r2.reason || 'repair_failed',
-                });
-                continue;
-            }
             for (const target of ['elkjs', 'elklive']) {
-                const r4t = diagramToElkInput(r2.diagram, { target });
+                const r4t = diagramToElkInput(diagram, { target });
                 if (!r4t.ok || !r4t.elkGraph || !r4t.validate.ok) {
                     failures.push({
                         repo,

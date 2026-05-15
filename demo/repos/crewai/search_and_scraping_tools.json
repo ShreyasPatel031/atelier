@@ -1,0 +1,33 @@
+{
+    "title": "Search & Scraping Tools",
+    "summary": "This module provides a comprehensive suite of tools for performing web searches, extracting content from web pages, and querying various structured and unstructured data sources.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "brave_search_tools", "label": "Brave Search Tools", "type": "module", "link": "brave_search_tools", "title": "Brave Search Tools", "description": "Integrates with the Brave Search API to perform web searches and retrieve local points of interest."},
+            {"id": "brightdata_tools", "label": "Bright Data Tools", "type": "module", "link": "brightdata_tools", "title": "Bright Data Tools", "description": "Leverages Bright Data for advanced SERP searches and web content unlocking and scraping."},            
+            {"id": "file_and_data_search", "label": "File & Data Search", "type": "module", "link": "file_and_data_search", "title": "File and Data Search", "description": "Enables semantic search within various file types (CSV, DOCX, JSON, PDF, TXT, XML) and structured data sources like MySQL, SingleStore, and Snowflake."},            
+            {"id": "scraping_frameworks_and_services", "label": "Scraping Services", "type": "module", "link": "scraping_frameworks_and_services", "title": "Scraping Frameworks & Services", "description": "Provides tools for web scraping and crawling using dedicated services like Firecrawl, Jina, Scrapfly, Hyperbrowser, Browserbase and Selenium."},            
+            {"id": "oxylabs_tools", "label": "Oxylabs Tools", "type": "module", "link": "oxylabs_tools", "title": "Oxylabs Tools", "description": "Facilitates advanced scraping from Amazon and Google Search results, as well as general web content, using Oxylabs API."},            
+            {"id": "tavily_tools", "label": "Tavily Tools", "type": "module", "link": "tavily_tools", "title": "Tavily Tools", "description": "Offers tools for web search, content extraction, and advanced research task management using the Tavily API."},            
+            {"id": "other_search_apis", "label": "Other Search APIs", "type": "module", "link": "other_search_apis", "title": "Other Search APIs", "description": "Includes various other specialized search and scraping API integrations like Exa, Serper, and SerpApi."}
+        ],
+        "edges": [
+            {"source": "brave_search_tools", "target": "file_and_data_search", "label": "search results"},
+            {"source": "brightdata_tools", "target": "file_and_data_search", "label": "scraped data"},
+            {"source": "scraping_frameworks_and_services", "target": "file_and_data_search", "label": "extracted content"},
+            {"source": "oxylabs_tools", "target": "file_and_data_search", "label": "scraped product/search data"},
+            {"source": "tavily_tools", "target": "file_and_data_search", "label": "extracted research"},
+            {"source": "other_search_apis", "target": "file_and_data_search", "label": "search results"}
+        ],
+        "groups": [
+            {"id": "brave_api_group", "label": "Brave API", "title": "Brave API Integration", "description": "Tools that interact with the Brave Search API for web search and local information retrieval.", "role": "generative", "nodes": ["brave_search_tools"]},
+            {"id": "brightdata_api_group", "label": "Bright Data API", "title": "Bright Data API Integration", "description": "Tools utilizing Bright Data for SERP searches and advanced web unlocking and scraping capabilities.", "role": "generative", "nodes": ["brightdata_tools"]},
+            {"id": "file_data_sources", "label": "Data Sources", "title": "Data Source Search & Integration", "description": "Tools for searching and interacting with various structured and unstructured data formats and databases.", "role": "data", "nodes": ["file_and_data_search"]},
+            {"id": "web_scraping_group", "label": "Web Scraping & Crawling", "title": "Web Scraping and Crawling Services", "description": "Tools that use specialized services and frameworks for comprehensive web scraping and crawling.", "role": "generative", "nodes": ["scraping_frameworks_and_services"]},
+            {"id": "oxylabs_api_group", "label": "Oxylabs API", "title": "Oxylabs API Integration", "description": "Tools for specialized e-commerce and search scraping via the Oxylabs platform.", "role": "generative", "nodes": ["oxylabs_tools"]},
+            {"id": "tavily_api_group", "label": "Tavily API", "title": "Tavily API Integration", "description": "Tools that interface with the Tavily API for web search, content extraction, and managing research tasks.", "role": "generative", "nodes": ["tavily_tools"]},
+            {"id": "other_apis_group", "label": "Misc. Search APIs", "title": "Miscellaneous Search APIs", "description": "Collection of tools integrating with various other search and scraping APIs.", "role": "generative", "nodes": ["other_search_apis"]}
+        ]
+    }
+}

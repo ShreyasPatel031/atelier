@@ -1,0 +1,134 @@
+{
+    "title": "AI Framework Overview",
+    "summary": "This module provides the foundational components for building, running, and managing intelligent AI agents, including core agent logic, model integrations, tool management, and durable workflow capabilities.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "agent_core_node",
+                "label": "Core Agent Logic",
+                "type": "module",
+                "link": "agent_core",
+                "title": "Agent Core Module",
+                "description": "Defines the foundational architecture for AI agents, managing their execution flow, model interactions, output handling, and configuration."
+            },
+            {
+                "id": "models_embeddings_node",
+                "label": "AI Models & Embeddings",
+                "type": "module",
+                "link": "models_and_embeddings",
+                "title": "Models and Embeddings Module",
+                "description": "Provides interfaces and implementations for various large language models (LLMs) and text embedding services, abstracting provider-specific details."
+            },
+            {
+                "id": "tools_capabilities_node",
+                "label": "Agent Tools & Capabilities",
+                "type": "module",
+                "link": "tools_and_capabilities",
+                "title": "Tools and Capabilities Module",
+                "description": "Manages the discovery, execution, and lifecycle of tools and extensible capabilities that enhance an agent's functionality and interaction with external systems."
+            },
+            {
+                "id": "durable_integrations_node",
+                "label": "Durable Workflow Integrations",
+                "type": "module",
+                "link": "durable_integrations",
+                "title": "Durable Integrations Module",
+                "description": "Offers integrations with workflow orchestration systems (e.g., DBOS, Prefect, Temporal) to ensure AI agents are durable, fault-tolerant, and recoverable."
+            },
+            {
+                "id": "ui_utilities_node",
+                "label": "UI & Utility Components",
+                "type": "module",
+                "link": "ui_and_utilities",
+                "title": "UI and Utility Module",
+                "description": "Contains general-purpose utilities for asynchronous operations, concurrency, data formatting, and adapters for various user interfaces and communication protocols."
+            }
+        ],
+        "edges": [
+            {
+                "source": "agent_core_node",
+                "target": "models_embeddings_node",
+                "label": "Utilizes LLMs & Embeddings",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_core_node",
+                "target": "tools_capabilities_node",
+                "label": "Integrates Tools & Capabilities",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_integrations_node",
+                "target": "agent_core_node",
+                "label": "Orchestrates Agent Runs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_integrations_node",
+                "target": "tools_capabilities_node",
+                "label": "Durable Tool Execution",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_utilities_node",
+                "target": "agent_core_node",
+                "label": "Drives Agent Interactions",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_utilities_node",
+                "target": "tools_capabilities_node",
+                "label": "Exposes UI-driven Tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_utilities_node",
+                "target": "models_embeddings_node",
+                "label": "Direct Model Access (e.g., MCP)",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_ai_components",
+                "label": "Core AI Components",
+                "nodes": [
+                    "agent_core_node",
+                    "models_embeddings_node",
+                    "tools_capabilities_node"
+                ],
+                "title": "Foundational AI Building Blocks",
+                "description": "These modules provide the essential intelligence, model interaction, and functional extensions required for building and operating AI agents.",
+                "role": null
+            },
+            {
+                "id": "external_interfaces",
+                "label": "External Interfaces & Utilities",
+                "nodes": [
+                    "ui_utilities_node"
+                ],
+                "title": "User Interaction & System Utilities",
+                "description": "This group handles user-facing interactions, general system utilities, and integration with external communication protocols like MCP.",
+                "role": null
+            },
+            {
+                "id": "resilience_orchestration",
+                "label": "Resilience & Orchestration",
+                "nodes": [
+                    "durable_integrations_node"
+                ],
+                "title": "Durable Workflow Integration",
+                "description": "Ensures the reliability and recoverability of AI agent operations by integrating with robust workflow orchestration systems.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "title": "Multimodal Model Conversion",
+    "summary": "This module provides utilities for converting various multimodal vision-language models from their original frameworks into the Hugging Face Transformers format.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "conversion_scripts_node",
+                "label": "Conversion Scripts",
+                "type": "module",
+                "link": "conversion_scripts",
+                "title": "Conversion Scripts",
+                "description": "Houses all scripts responsible for converting models."
+            }
+        ],
+        "edges": [],
+        "groups": [
+            {
+                "id": "logical_group_of_conversions",
+                "label": "Logical Group of Conversions",
+                "title": "Logical Group of Conversions",
+                "description": "A conceptual grouping for all model conversion functionalities within this module.",
+                "role": "analytical",
+                "nodes": ["conversion_scripts_node"]
+            }
+        ]
+    }
+}

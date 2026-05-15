@@ -1,0 +1,109 @@
+{
+  "title": "CLI Template Management",
+  "summary": "This module provides functionalities for managing CLI templates, including copying template files to create new projects and defining example crew structures. It helps users quickly set up new CrewAI projects with predefined configurations.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "cli_commands",
+        "label": "CLI Commands",
+        "type": "other_module",
+        "link": "cli_commands",
+        "title": "CLI Commands Module",
+        "description": "The module containing various command-line interface commands, such as 'template add' and 'template list', which interact with template management functionalities."
+      },
+      {
+        "id": "copy_template_files",
+        "label": "Copy Template Files",
+        "type": "component",
+        "link": null,
+        "title": "Copy Template Files",
+        "description": "Copies predefined template files for a new CrewAI project, including configuration, source code, and tools, to a specified directory. It handles file content replacement based on project name and class name."
+      },
+      {
+        "id": "file_system",
+        "label": "Local File System",
+        "type": "external",
+        "link": null,
+        "title": "Local File System",
+        "description": "The storage system where new project files and templates are created and managed."
+      },
+      {
+        "id": "content_crew_definition",
+        "label": "Define Sample Content Crew",
+        "type": "component",
+        "link": null,
+        "title": "Content Crew Definition",
+        "description": "Provides a blueprint for a 'Content Crew' with predefined agents (planner, writer, editor) and tasks (planning, writing, editing). It uses YAML configuration files for agent and task settings."
+      },
+      {
+        "id": "yaml_config_files",
+        "label": "YAML Configuration Files",
+        "type": "external",
+        "link": null,
+        "title": "YAML Configuration Files",
+        "description": "External YAML files used to configure agents and tasks within the crew templates, allowing for flexible and declarative crew definitions."
+      },
+      {
+        "id": "crew_orchestration",
+        "label": "Crew Orchestration",
+        "type": "other_module",
+        "link": "agent_and_crew_orchestration",
+        "title": "Agent & Crew Orchestration",
+        "description": "The core module responsible for managing and executing agents and crews, which would utilize the crew definitions provided by templates."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_commands",
+        "target": "copy_template_files",
+        "label": "Initiates template creation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "copy_template_files",
+        "target": "file_system",
+        "label": "Writes new project files",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "content_crew_definition",
+        "target": "yaml_config_files",
+        "label": "Reads agent/task configurations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "content_crew_definition",
+        "target": "crew_orchestration",
+        "label": "Provides crew blueprint",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "template_creation_group",
+        "label": "Template Creation",
+        "nodes": [
+          "copy_template_files"
+        ],
+        "title": "Template Creation Logic",
+        "description": "Handles the programmatic creation and population of new project structures from predefined templates.",
+        "role": "generative"
+      },
+      {
+        "id": "template_definition_group",
+        "label": "Template Definitions",
+        "nodes": [
+          "content_crew_definition"
+        ],
+        "title": "Example Crew Definitions",
+        "description": "Contains example structures and configurations for different types of AI crews, serving as templates for new projects.",
+        "role": "data"
+      }
+    ]
+  }
+}

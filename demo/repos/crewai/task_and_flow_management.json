@@ -1,0 +1,291 @@
+{
+  "title": "Task and Flow Management",
+  "summary": "This module provides the core framework for defining, orchestrating, and managing complex AI agent workflows (flows). It handles state persistence, human-in-the-loop interactions, event management, and flow visualization.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "flow_orchestrator",
+        "label": "Orchestrate Flow Execution",
+        "type": "component",
+        "link": null,
+        "title": "Flow Orchestration Core",
+        "description": "Manages the entire lifecycle of a flow, including initiation, state transitions, method execution, event handling, and error management. It coordinates the execution of tasks and listeners based on defined conditions."
+      },
+      {
+        "id": "flow_definition",
+        "label": "Define Flow Structure",
+        "type": "component",
+        "link": null,
+        "title": "Flow Definition & Logic",
+        "description": "Provides the metaclass and decorators for defining the structure of a flow, including start methods, listeners, routers, and their triggering conditions."
+      },
+      {
+        "id": "flow_state_persistence",
+        "label": "Persist Flow State",
+        "type": "component",
+        "link": null,
+        "title": "Flow State Persistence",
+        "description": "Defines the abstract interface for persisting and loading flow state, enabling long-running and resumable flows. Includes decorators for automatic state persistence."
+      },
+      {
+        "id": "human_feedback_management",
+        "label": "Manage Human Feedback",
+        "type": "component",
+        "link": null,
+        "title": "Human-in-the-Loop (HITL)",
+        "description": "Handles interactions requiring human input or feedback, including pausing flows, collecting responses, and interpreting feedback using LLMs for routing decisions."
+      },
+      {
+        "id": "flow_analysis_visualization",
+        "label": "Analyze & Visualize Flows",
+        "type": "component",
+        "link": null,
+        "title": "Flow Analysis & Viz",
+        "description": "Provides tools for introspecting the structure of a flow, calculating method dependencies, and generating interactive visual diagrams."
+      },
+      {
+        "id": "specialized_task_types",
+        "label": "Implement Specialized Tasks",
+        "type": "component",
+        "link": null,
+        "title": "Specialized Task Types",
+        "description": "Offers advanced task types like conditional execution and placeholder guardrails for content validation within a flow."
+      },
+      {
+        "id": "state_serialization",
+        "label": "Serialize & Deserialize State",
+        "type": "component",
+        "link": null,
+        "title": "State Serialization",
+        "description": "Handles the serialization and deserialization of flow state and Pydantic models, crucial for persistence and checkpointing."
+      },
+      {
+        "id": "event_bus",
+        "label": "Event Bus",
+        "type": "external",
+        "link": "event_and_state_management",
+        "title": "Event Management",
+        "description": "Central system for emitting and listening to flow events, crucial for tracing, logging, and inter-component communication."
+      },
+      {
+        "id": "llm_providers",
+        "label": "LLM Integrations",
+        "type": "external",
+        "link": "llm_integration",
+        "title": "LLM Access",
+        "description": "Provides interfaces to various Large Language Models for AI-driven tasks within the flow, such as feedback interpretation."
+      },
+      {
+        "id": "memory_manager",
+        "label": "Flow Memory",
+        "type": "external",
+        "link": "utilities_and_extensions",
+        "title": "Memory Management",
+        "description": "Manages the flow's memory, allowing agents to recall and remember information across tasks."
+      },
+      {
+        "id": "cli_commands",
+        "label": "CLI Commands",
+        "type": "external",
+        "link": "cli_commands",
+        "title": "Command Line Interface",
+        "description": "Provides command-line tools for running and plotting flows."
+      },
+      {
+        "id": "agent_orchestration",
+        "label": "Agent & Crew Orchestration",
+        "type": "external",
+        "link": "agent_and_crew_orchestration",
+        "title": "Agent Management",
+        "description": "Manages the execution and coordination of agents and crews within a flow."
+      }
+    ],
+    "edges": [
+      {
+        "source": "flow_orchestrator",
+        "target": "flow_definition",
+        "label": "Uses definitions from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_orchestrator",
+        "target": "flow_state_persistence",
+        "label": "Manages state via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_orchestrator",
+        "target": "human_feedback_management",
+        "label": "Integrates human feedback",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_orchestrator",
+        "target": "event_bus",
+        "label": "Emits/listens to events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_orchestrator",
+        "target": "llm_providers",
+        "label": "Utilizes LLMs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_orchestrator",
+        "target": "memory_manager",
+        "label": "Interacts with memory",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_orchestrator",
+        "target": "specialized_task_types",
+        "label": "Executes tasks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_orchestrator",
+        "target": "state_serialization",
+        "label": "Handles state serialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_definition",
+        "target": "state_serialization",
+        "label": "Uses AST visitors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_state_persistence",
+        "target": "state_serialization",
+        "label": "Relies on serialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "human_feedback_management",
+        "target": "llm_providers",
+        "label": "Uses LLMs for interpretation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_analysis_visualization",
+        "target": "flow_definition",
+        "label": "Analyzes flow definitions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flow_analysis_visualization",
+        "target": "state_serialization",
+        "label": "Extracts method metadata",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_commands",
+        "target": "flow_orchestrator",
+        "label": "Triggers flow execution",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_commands",
+        "target": "flow_analysis_visualization",
+        "label": "Triggers flow plotting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_orchestration",
+        "target": "flow_orchestrator",
+        "label": "Orchestrates agents within",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "flow_core_group",
+        "label": "Flow Core Orchestration",
+        "nodes": [
+          "flow_orchestrator"
+        ],
+        "title": "Flow Core",
+        "description": "Central components responsible for the execution, state management, and lifecycle of AI agent flows.",
+        "role": "surface"
+      },
+      {
+        "id": "flow_definition_group",
+        "label": "Flow Definition & Logic",
+        "nodes": [
+          "flow_definition"
+        ],
+        "title": "Flow Definition",
+        "description": "Components for defining the structure, methods, and conditional logic that govern flow execution.",
+        "role": "generative"
+      },
+      {
+        "id": "state_persistence_group",
+        "label": "State Management & Persistence",
+        "nodes": [
+          "flow_state_persistence"
+        ],
+        "title": "State & Persistence",
+        "description": "Handles the saving, loading, and management of flow state, enabling checkpointing and resumable workflows.",
+        "role": "data"
+      },
+      {
+        "id": "human_interaction_group",
+        "label": "Human-in-the-Loop (HITL)",
+        "nodes": [
+          "human_feedback_management"
+        ],
+        "title": "Human Interaction",
+        "description": "Facilitates human intervention and feedback within automated flows, allowing for guided execution and decision-making.",
+        "role": "surface"
+      },
+      {
+        "id": "analysis_visualization_group",
+        "label": "Flow Analysis & Visualization",
+        "nodes": [
+          "flow_analysis_visualization"
+        ],
+        "title": "Analysis & Viz",
+        "description": "Tools for understanding, debugging, and visualizing the complex structure and execution paths of flows.",
+        "role": "analytical"
+      },
+      {
+        "id": "task_types_group",
+        "label": "Specialized Task Types",
+        "nodes": [
+          "specialized_task_types"
+        ],
+        "title": "Task Types",
+        "description": "Provides specific implementations of tasks that introduce advanced behaviors like conditional execution or content guardrails.",
+        "role": "generative"
+      },
+      {
+        "id": "serialization_group",
+        "label": "State Serialization",
+        "nodes": [
+          "state_serialization"
+        ],
+        "title": "Serialization",
+        "description": "Internal utilities for converting flow state and Pydantic models to and from serializable formats.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,235 @@
+{
+  "title": "Server Infrastructure & UI",
+  "summary": "This module defines the core server operations, including process management, API endpoints for chat and data retrieval, authentication, and integration with the Windows system tray for desktop application control.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "run_server_cmd",
+        "label": "Start Server Application",
+        "type": "component",
+        "link": null,
+        "title": "Run Server Command",
+        "description": "Initializes the server environment, including keypair setup and network listening, then delegates to the core server to begin processing requests."
+      },
+      {
+        "id": "server_lifecycle_manager",
+        "label": "Manage Server Process Lifecycle",
+        "type": "component",
+        "link": null,
+        "title": "Server Process Manager",
+        "description": "Manages the main server process, handling startup, graceful shutdowns, restarts, PID file management, and resolving port conflicts by reaping other server instances."
+      },
+      {
+        "id": "chat_api_handler",
+        "label": "Handle Chat API Requests",
+        "type": "component",
+        "link": null,
+        "title": "Chat API Handler",
+        "description": "Processes real-time chat requests from the UI, managing chat history, interacting with the model for generation and pulling, and executing integrated tools like web search. Streams responses back to the client."
+      },
+      {
+        "id": "get_chat_api_handler",
+        "label": "Retrieve Chat History",
+        "type": "component",
+        "link": null,
+        "title": "Get Chat API Handler",
+        "description": "Retrieves and formats specific chat conversations from the persistent data store, including messages and reconstructed browser state, for display in the user interface."
+      },
+      {
+        "id": "auth_middleware",
+        "label": "Authenticate API Requests",
+        "type": "component",
+        "link": null,
+        "title": "Authentication Middleware",
+        "description": "Enforces authentication policies for incoming API requests, verifying client tokens and content types to ensure secure access to server functionalities."
+      },
+      {
+        "id": "settings_manager",
+        "label": "Manage Application Settings",
+        "type": "component",
+        "link": null,
+        "title": "Settings Manager",
+        "description": "Handles the persistence and retrieval of application settings, such as auto-update preferences, and can trigger actions based on these settings."
+      },
+      {
+        "id": "windows_tray_handler",
+        "label": "Process Windows Tray Events",
+        "type": "component",
+        "link": null,
+        "title": "Windows Tray Event Handler",
+        "description": "Manages interactions with the Windows system tray icon, processing user commands like opening the UI, accessing settings, or initiating updates, and handles inter-process communication."
+      },
+      {
+        "id": "http_client",
+        "label": "External HTTP Client",
+        "type": "external",
+        "link": null,
+        "title": "HTTP Client",
+        "description": "Represents any external client application or browser that communicates with the server via HTTP requests."
+      },
+      {
+        "id": "model_inference",
+        "label": "Model Inference Engine",
+        "type": "external",
+        "link": "model_runtime_and_tools",
+        "title": "Model Inference",
+        "description": "The backend system responsible for executing AI model operations, including chat completions, model pulling, and providing model details."
+      },
+      {
+        "id": "data_store",
+        "label": "Persistent Data Store",
+        "type": "external",
+        "link": "data_and_storage",
+        "title": "Data Store",
+        "description": "A persistent storage mechanism used to save and retrieve application data, such as chat histories, user settings, and model metadata."
+      },
+      {
+        "id": "updater_service",
+        "label": "Application Updater Service",
+        "type": "external",
+        "link": "configuration_and_utilities",
+        "title": "Updater Service",
+        "description": "A dedicated service that manages the application's update process, checking for new versions, downloading updates, and applying them."
+      }
+    ],
+    "edges": [
+      {
+        "source": "run_server_cmd",
+        "target": "server_lifecycle_manager",
+        "label": "Starts and manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "http_client",
+        "target": "auth_middleware",
+        "label": "Sends requests to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "auth_middleware",
+        "target": "chat_api_handler",
+        "label": "Forwards authenticated requests to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "auth_middleware",
+        "target": "get_chat_api_handler",
+        "label": "Forwards authenticated requests to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_api_handler",
+        "target": "model_inference",
+        "label": "Sends chat/pull/show requests to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_api_handler",
+        "target": "data_store",
+        "label": "Reads/writes chat history",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_api_handler",
+        "target": "settings_manager",
+        "label": "Consults for configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_chat_api_handler",
+        "target": "data_store",
+        "label": "Retrieves chat data from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "settings_manager",
+        "target": "data_store",
+        "label": "Persists/loads settings from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "settings_manager",
+        "target": "updater_service",
+        "label": "Triggers update checks via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "windows_tray_handler",
+        "target": "settings_manager",
+        "label": "Opens settings UI",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "windows_tray_handler",
+        "target": "updater_service",
+        "label": "Initiates application update",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "server_lifecycle_manager",
+        "target": "updater_service",
+        "label": "Interacts with for cleanup/reap",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "server_core",
+        "label": "Server Core",
+        "nodes": [
+          "run_server_cmd",
+          "server_lifecycle_manager"
+        ],
+        "title": "Core Server Operations",
+        "description": "Components responsible for starting, managing, and maintaining the server's operational lifecycle.",
+        "role": "generative"
+      },
+      {
+        "id": "api_endpoints",
+        "label": "API Endpoints",
+        "nodes": [
+          "chat_api_handler",
+          "get_chat_api_handler"
+        ],
+        "title": "User Interface API",
+        "description": "Handlers for processing user-facing API requests, primarily for chat interactions and retrieving chat history.",
+        "role": "surface"
+      },
+      {
+        "id": "security_config",
+        "label": "Security & Configuration",
+        "nodes": [
+          "auth_middleware",
+          "settings_manager"
+        ],
+        "title": "Authentication and Settings",
+        "description": "Components managing secure access to the server and handling application-wide configuration settings.",
+        "role": "analytical"
+      },
+      {
+        "id": "desktop_integration",
+        "label": "Desktop Integration",
+        "nodes": [
+          "windows_tray_handler"
+        ],
+        "title": "Windows Tray Interface",
+        "description": "Handles system-level interactions for the desktop application, specifically through the Windows system tray icon.",
+        "role": "surface"
+      }
+    ]
+  }
+}

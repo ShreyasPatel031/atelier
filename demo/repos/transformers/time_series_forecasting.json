@@ -1,0 +1,15 @@
+ proyects/time_series_forecasting.json
+{
+    "title": "Time Series Forecasting",
+    "summary": "Provides various transformer-based models for time series prediction, including Autoformer, Informer, and Time Series Transformer models.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "prediction_models", "label": "Prediction Models", "type": "module", "link": "prediction_models", "title": "Prediction Models", "description": "Contains transformer-based models designed for time series prediction tasks."}
+        ],
+        "edges": [],
+        "groups": [
+            {"id": "core", "label": "Core Logic", "title": "Core Logic", "description": "Main forecasting models that form the analytical core of the module.", "role": "analytical", "nodes": ["prediction_models"]}
+        ]
+    }
+}

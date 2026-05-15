@@ -230,15 +230,55 @@ def _resolve_gemini_api_key(config: Config) -> str:
     return (config.llm_api_key or "").strip()
 
 
+def _use_adc_mode(config: Config) -> bool:
+    """Return True when Vertex AI + ADC should be used instead of a static API key."""
+    if os.getenv("GOOGLE_USE_ADC", "").strip().lower() in ("1", "true", "yes"):
+        return True
+    return bool(getattr(config, "use_vertex_ai", False))
+
+
+def _get_adc_credentials():
+    """
+    Return (credentials, project) from Application Default Credentials.
+    Credentials are automatically refreshed by the google-auth library.
+    """
+    try:
+        import google.auth
+        import google.auth.transport.requests
+        creds, project = google.auth.default(
+            scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+        # Eagerly refresh so token is valid immediately
+        creds.refresh(google.auth.transport.requests.Request())
+        return creds, project
+    except Exception as e:
+        raise RuntimeError(
+            f"Google Application Default Credentials not available: {e}\n"
+            "Run: gcloud auth application-default login"
+        ) from e
+
+
+def _get_adc_bearer_token(config: Config) -> str:
+    """Return a fresh OAuth2 bearer token from ADC for direct REST calls."""
+    creds, _ = _get_adc_credentials()
+    return creds.token
+
+
 def create_main_model(config: Config) -> Model:
     """Create the main LLM model from configuration."""
     
     # Native Gemini support - use CodeWikiGoogleModel (VALIDATED tool config) when available
     if _is_gemini_model(config.main_model) and GEMINI_AVAILABLE:
+        model_cls = CodeWikiGoogleModel if CodeWikiGoogleModel is not None else GoogleModel
+        if _use_adc_mode(config):
+            logger.info(f"[LLM] Gemini via Vertex AI + ADC for {config.main_model}")
+            creds, adc_project = _get_adc_credentials()
+            project = getattr(config, "gcp_project", "") or adc_project or "applied-ai-practice00"
+            provider = GoogleProvider(vertexai=True, credentials=creds, project=project)
+            return model_cls(model_name=config.main_model, provider=provider)
         logger.info(f"[LLM] Using native Gemini support for {config.main_model}")
         gemini_key = _resolve_gemini_api_key(config)
         os.environ["GEMINI_API_KEY"] = gemini_key
-        model_cls = CodeWikiGoogleModel if CodeWikiGoogleModel is not None else GoogleModel
         if model_cls is CodeWikiGoogleModel:
             logger.info(
                 "[LLM] Gemini function calling: ToolConfig mode VALIDATED "
@@ -269,9 +309,15 @@ def create_fallback_model(config: Config) -> Model:
     
     # Native Gemini support
     if _is_gemini_model(config.fallback_model) and GEMINI_AVAILABLE:
+        model_cls = CodeWikiGoogleModel if CodeWikiGoogleModel is not None else GoogleModel
+        if _use_adc_mode(config):
+            logger.info(f"[LLM] Fallback Gemini via Vertex AI + ADC for {config.fallback_model}")
+            creds, adc_project = _get_adc_credentials()
+            project = getattr(config, "gcp_project", "") or adc_project or "applied-ai-practice00"
+            provider = GoogleProvider(vertexai=True, credentials=creds, project=project)
+            return model_cls(model_name=config.fallback_model, provider=provider)
         logger.info(f"[LLM] Using native Gemini support for fallback {config.fallback_model}")
         os.environ["GEMINI_API_KEY"] = _resolve_gemini_api_key(config)
-        model_cls = CodeWikiGoogleModel if CodeWikiGoogleModel is not None else GoogleModel
         return model_cls(
             model_name=config.fallback_model,
             provider='google-gla'
@@ -313,6 +359,8 @@ def _call_gemini_rest(
     model: str,
     temperature: float,
     thinking_budget: int,
+    system_instruction: Optional[str] = None,
+    json_mode: bool = False,
 ) -> str:
     """
     Gemini generateContent via REST so we can set thinkingConfig (thinkingBudget).
@@ -324,19 +372,47 @@ def _call_gemini_rest(
 
     tracker = get_token_tracker()
     prompt_tokens_estimated = count_tokens(prompt)
-    api_key = os.getenv("GEMINI_API_KEY") or config.llm_api_key
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+    if system_instruction:
+        prompt_tokens_estimated += count_tokens(system_instruction)
+
+    gen_config: dict = {"temperature": temperature, "maxOutputTokens": 65536}
+    if thinking_budget and thinking_budget > 0:
+        gen_config["thinkingConfig"] = {"thinkingBudget": thinking_budget}
+    if json_mode:
+        gen_config["responseMimeType"] = "application/json"
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {
-            "temperature": temperature,
-            "maxOutputTokens": 65536,
-            "thinkingConfig": {"thinkingBudget": thinking_budget},
-        },
+        "generationConfig": gen_config,
     }
+    if system_instruction:
+        body["systemInstruction"] = {"parts": [{"text": system_instruction}]}
+
+    if _use_adc_mode(config):
+        # Vertex AI endpoint accepts cloud-platform ADC tokens (generativelanguage.googleapis.com does not).
+        bearer_token = _get_adc_bearer_token(config)
+        project = getattr(config, "gcp_project", "") or "applied-ai-practice00"
+        url = (
+            f"https://us-central1-aiplatform.googleapis.com/v1/projects/{project}"
+            f"/locations/us-central1/publishers/google/models/{model}:generateContent"
+        )
+        # Vertex AI requires role in contents
+        vertex_body = dict(body)
+        vertex_contents = body.get("contents", [])
+        if vertex_contents and "role" not in vertex_contents[0]:
+            vertex_body["contents"] = [{"role": "user", **c} for c in vertex_contents]
+        req_kwargs: dict = {
+            "json": vertex_body,
+            "headers": {"Authorization": f"Bearer {bearer_token}", "Content-Type": "application/json"},
+            "timeout": 600,
+        }
+    else:
+        api_key = os.getenv("GEMINI_API_KEY") or config.llm_api_key
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        req_kwargs = {"json": body, "timeout": 600}
+
     llm_start = time.time()
     try:
-        r = requests.post(url, json=body, timeout=600)
+        r = requests.post(url, **req_kwargs)
         llm_duration = time.time() - llm_start
         data = r.json()
         if r.status_code != 200:
@@ -402,32 +478,81 @@ def _call_gemini_native(
     prompt: str,
     config: Config,
     model: str,
-    temperature: float
+    temperature: float,
+    system_instruction: Optional[str] = None,
 ) -> str:
-    """Call Gemini LLM using native Google Generative AI client."""
+    """Call Gemini LLM using native Google Generative AI client (API-key path) or Vertex AI REST (ADC path)."""
     from codewiki.src.be.utils import count_tokens
-    
+
+    # ADC mode: the google.generativeai client requires an API key; route through Vertex AI REST instead.
+    if _use_adc_mode(config):
+        logger.info(f"[LLM] ADC mode — routing native call through Vertex AI REST for {model}")
+        return _call_gemini_rest(
+            prompt, config, model, temperature, thinking_budget=0, system_instruction=system_instruction
+        )
+
     tracker = get_token_tracker()
     prompt_tokens_estimated = count_tokens(prompt)
-    
-    logger.info(f"[LLM] Using native Gemini API for {model}")
-    
+    if system_instruction:
+        prompt_tokens_estimated += count_tokens(system_instruction)
+
+    logger.info(f"[LLM] Using native Gemini API (API key) for {model}")
+
     # Prefer GEMINI_API_KEY env var, fallback to config
     api_key = os.getenv('GEMINI_API_KEY') or config.llm_api_key
     genai.configure(api_key=api_key)
-    genai_model = genai.GenerativeModel(model)
+    if system_instruction:
+        genai_model = genai.GenerativeModel(model, system_instruction=system_instruction)
+    else:
+        genai_model = genai.GenerativeModel(model)
     
     llm_start = time.time()
+    response = None
     try:
-        response = genai_model.generate_content(
-            prompt,
-            generation_config=genai.GenerationConfig(
-                temperature=temperature,
-                max_output_tokens=65536  # Gemini 2.5 Flash output limit
-            )
-        )
+        for attempt in range(2):
+            llm_start = time.time()
+            try:
+                response = genai_model.generate_content(
+                    prompt,
+                    generation_config=genai.GenerationConfig(
+                        temperature=temperature,
+                        max_output_tokens=65536  # Gemini 2.5 Flash output limit
+                    ),
+                )
+                break
+            except Exception as inner:
+                llm_duration = time.time() - llm_start
+                logger.error(
+                    "[LLM] Gemini API error (attempt %s/2): %s: %s",
+                    attempt + 1,
+                    type(inner).__name__,
+                    inner,
+                )
+                stats = LLMCallStats(
+                    model=model,
+                    prompt_tokens=prompt_tokens_estimated,
+                    completion_tokens=0,
+                    duration_seconds=llm_duration,
+                    success=False,
+                    error=str(inner),
+                )
+                tracker.add_call(stats)
+                is_deadline = type(inner).__name__ == "DeadlineExceeded" or (
+                    "504" in str(inner) and "deadline" in str(inner).lower()
+                )
+                if attempt == 0 and is_deadline:
+                    logger.warning(
+                        "[LLM] Gemini DeadlineExceeded — retrying generate_content once after 10s backoff"
+                    )
+                    time.sleep(10)
+                    continue
+                raise inner
+
+        if response is None:
+            raise RuntimeError("Gemini native: no response after retries")
+
         llm_duration = time.time() - llm_start
-        
+
         # Debug: Log response structure
         logger.info(f"[LLM] Response received in {llm_duration:.1f}s")
         if hasattr(response, 'candidates') and response.candidates:
@@ -461,7 +586,7 @@ def _call_gemini_native(
         tracker.add_call(stats)
         
         return response_text
-        
+
     except Exception as e:
         llm_duration = time.time() - llm_start
         logger.error(f"[LLM] Gemini API error: {type(e).__name__}: {str(e)}")
@@ -471,7 +596,7 @@ def _call_gemini_native(
             completion_tokens=0,
             duration_seconds=llm_duration,
             success=False,
-            error=str(e)
+            error=str(e),
         )
         tracker.add_call(stats)
         raise
@@ -483,17 +608,20 @@ def call_llm(
     model: str = None,
     temperature: float = 0.0,
     thinking_budget: Optional[int] = None,
+    system_prompt: Optional[str] = None,
+    json_mode: bool = False,
 ) -> str:
     """
     Call LLM with the given prompt.
-    
+
     Args:
-        prompt: The prompt to send
+        prompt: User message / task text
         config: Configuration containing LLM settings
         model: Model name (defaults to config.main_model)
         temperature: Temperature setting
         thinking_budget: If set for Gemini, uses REST API with this thinking token budget.
-        
+        system_prompt: Optional system instruction (OpenAI: messages[0]; Gemini: system_instruction)
+
     Returns:
         LLM response text
     """
@@ -506,12 +634,21 @@ def call_llm(
     
     # Use native Gemini if available
     if _is_gemini_model(model) and GENAI_AVAILABLE:
-        if thinking_budget is not None:
-            return _call_gemini_rest(prompt, config, model, temperature, thinking_budget)
-        return _call_gemini_native(prompt, config, model, temperature)
-    
+        if json_mode or thinking_budget is not None:
+            return _call_gemini_rest(
+                prompt, config, model, temperature,
+                thinking_budget if thinking_budget is not None else 0,
+                system_instruction=system_prompt,
+                json_mode=json_mode,
+            )
+        return _call_gemini_native(
+            prompt, config, model, temperature, system_instruction=system_prompt
+        )
+
     # Calculate prompt token count
     prompt_tokens_estimated = count_tokens(prompt)
+    if system_prompt:
+        prompt_tokens_estimated += count_tokens(system_prompt)
     logger.info(f"[LLM] Preparing LLM call: model={model}, prompt_tokens={prompt_tokens_estimated:,}, temperature={temperature}")
     
     client = create_openai_client(config)
@@ -522,9 +659,13 @@ def call_llm(
     llm_start = time.time()
     try:
         logger.info(f"[LLM] Sending request to LLM API...")
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
         response = client.chat.completions.create(
             model=model,
-            messages=[{"role": "user", "content": prompt}],
+            messages=messages,
             temperature=temperature,
             max_tokens=max_tokens
         )

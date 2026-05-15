@@ -1,0 +1,826 @@
+{
+  "title": "OpenAI Function & Tool Integrations",
+  "summary": "This module provides a collection of chains and runnables for integrating OpenAI's function and tool calling capabilities, enabling structured output extraction, API interaction, and citation generation. It supports various schemas including Pydantic models and dictionaries.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "create_structured_output_chain",
+        "label": "Create Structured Output Chain (Legacy)",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "Structured Output Chain (Legacy)",
+        "description": "Constructs a legacy LLMChain that uses OpenAI function calling to extract structured outputs based on a dictionary or Pydantic schema."
+      },
+      {
+        "id": "create_citation_fuzzy_match_chain",
+        "label": "Create Citation Fuzzy Match Chain",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "Citation Fuzzy Match Chain",
+        "description": "Generates an LLMChain for answering questions with citations, ensuring exact word usage from context using OpenAI functions."
+      },
+      {
+        "id": "create_citation_fuzzy_match_runnable",
+        "label": "Create Citation Fuzzy Match Runnable",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "Citation Fuzzy Match Runnable",
+        "description": "Creates a Runnable for answering questions with citations, leveraging models that support `bind_tools` for structured output."
+      },
+      {
+        "id": "create_extraction_chain",
+        "label": "Create Extraction Chain (Dict Schema)",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "Extraction Chain (Dict Schema)",
+        "description": "Builds an LLMChain to extract information from text based on a provided dictionary schema using OpenAI functions."
+      },
+      {
+        "id": "create_extraction_chain_pydantic_functions",
+        "label": "Create Extraction Chain (Pydantic, Functions)",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "Extraction Chain (Pydantic, Functions)",
+        "description": "Constructs an LLMChain for extracting information from text using a Pydantic schema, leveraging OpenAI function calling."
+      },
+      {
+        "id": "get_openapi_chain",
+        "label": "Get OpenAPI Chain (Deprecated)",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "OpenAPI Chain (Deprecated)",
+        "description": "Creates a SequentialChain to query an API defined by an OpenAPI specification, using OpenAI function calling to generate API requests. (Deprecated)"
+      },
+      {
+        "id": "default_call_api",
+        "label": "Default OpenAPI API Caller",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "OpenAPI API Caller",
+        "description": "A utility function to make HTTP requests based on parsed OpenAPI function calls, handling URL formatting and request parameters."
+      },
+      {
+        "id": "create_qa_with_sources_chain",
+        "label": "Create QA with Sources Chain",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "QA with Sources Chain",
+        "description": "Generates an LLMChain for question answering that includes citations, by delegating to a structured QA chain."
+      },
+      {
+        "id": "create_tagging_chain",
+        "label": "Create Tagging Chain (Dict Schema, Deprecated)",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "Tagging Chain (Dict Schema, Deprecated)",
+        "description": "Builds an LLMChain to extract and tag information from text based on a dictionary schema using OpenAI functions. (Deprecated)"
+      },
+      {
+        "id": "create_tagging_chain_pydantic",
+        "label": "Create Tagging Chain (Pydantic, Deprecated)",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "Tagging Chain (Pydantic, Deprecated)",
+        "description": "Constructs an LLMChain for extracting and tagging information from text using a Pydantic schema and OpenAI functions. (Deprecated)"
+      },
+      {
+        "id": "create_extraction_chain_pydantic_tools",
+        "label": "Create Extraction Chain (Pydantic, Tools)",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "Extraction Chain (Pydantic, Tools)",
+        "description": "Creates a Runnable for extracting information from text using Pydantic schemas, leveraging OpenAI's tool-calling capabilities."
+      },
+      {
+        "id": "create_structured_output_runnable",
+        "label": "Create Structured Output Runnable",
+        "type": "component",
+        "link": "openai_function_integrations",
+        "title": "Structured Output Runnable",
+        "description": "Generates a flexible Runnable for extracting structured outputs from LLMs, supporting OpenAI functions, tools, and JSON response formats."
+      },
+      {
+        "id": "BaseLanguageModel",
+        "label": "Base Language Model",
+        "type": "external",
+        "link": "base_components",
+        "title": "Base Language Model",
+        "description": "Abstract base class for all language models."
+      },
+      {
+        "id": "BaseChatModel",
+        "label": "Base Chat Model",
+        "type": "external",
+        "link": "base_components",
+        "title": "Base Chat Model",
+        "description": "Abstract base class for chat models."
+      },
+      {
+        "id": "BasePromptTemplate",
+        "label": "Base Prompt Template",
+        "type": "external",
+        "link": "base_components",
+        "title": "Base Prompt Template",
+        "description": "Abstract base class for all prompt templates."
+      },
+      {
+        "id": "LLMChain",
+        "label": "LLM Chain",
+        "type": "external",
+        "link": "core_chain_components",
+        "title": "LLM Chain",
+        "description": "A chain that invokes a language model and parses its output."
+      },
+      {
+        "id": "Runnable",
+        "label": "Runnable",
+        "type": "external",
+        "link": "base_components",
+        "title": "Runnable",
+        "description": "Interface for components that can be invoked, streamed, or batched."
+      },
+      {
+        "id": "PydanticBaseModel",
+        "label": "Pydantic BaseModel",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic BaseModel",
+        "description": "Base class for data models, providing data validation and parsing."
+      },
+      {
+        "id": "BaseOutputParser",
+        "label": "Base Output Parser",
+        "type": "external",
+        "link": "base_components",
+        "title": "Base Output Parser",
+        "description": "Abstract base class for parsing language model outputs."
+      },
+      {
+        "id": "OpenAPISpec",
+        "label": "OpenAPI Specification",
+        "type": "external",
+        "link": null,
+        "title": "OpenAPI Specification",
+        "description": "Represents an OpenAPI specification for API interaction."
+      },
+      {
+        "id": "requests_lib",
+        "label": "Requests Library",
+        "type": "external",
+        "link": null,
+        "title": "Requests Library",
+        "description": "Python HTTP library for making web requests."
+      },
+      {
+        "id": "SequentialChain",
+        "label": "Sequential Chain",
+        "type": "external",
+        "link": "core_chain_components",
+        "title": "Sequential Chain",
+        "description": "A chain that runs a sequence of other chains."
+      },
+      {
+        "id": "PydanticToolsParser",
+        "label": "Pydantic Tools Parser",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic Tools Parser",
+        "description": "Parses tool outputs into Pydantic models."
+      },
+      {
+        "id": "PydanticAttrOutputFunctionsParser",
+        "label": "Pydantic Attr Output Functions Parser",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic Attr Output Functions Parser",
+        "description": "Parses function call outputs into a specific attribute of a Pydantic model."
+      },
+      {
+        "id": "PydanticOutputFunctionsParser",
+        "label": "Pydantic Output Functions Parser",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic Output Functions Parser",
+        "description": "Parses function call outputs into a Pydantic model."
+      },
+      {
+        "id": "JsonKeyOutputFunctionsParser",
+        "label": "JSON Key Output Functions Parser",
+        "type": "external",
+        "link": null,
+        "title": "JSON Key Output Functions Parser",
+        "description": "Parses function call outputs, extracting a specific key from the JSON."
+      },
+      {
+        "id": "JsonOutputFunctionsParser",
+        "label": "JSON Output Functions Parser",
+        "type": "external",
+        "link": null,
+        "title": "JSON Output Functions Parser",
+        "description": "Parses function call outputs into a JSON object."
+      },
+      {
+        "id": "ChatPromptTemplate",
+        "label": "Chat Prompt Template",
+        "type": "external",
+        "link": "prompts_and_messages",
+        "title": "Chat Prompt Template",
+        "description": "A prompt template specifically designed for chat models."
+      },
+      {
+        "id": "create_qa_with_structure_chain",
+        "label": "Create QA with Structure Chain",
+        "type": "external",
+        "link": null,
+        "title": "Create QA with Structure Chain",
+        "description": "Creates a QA chain that returns structured answers."
+      },
+      {
+        "id": "get_llm_kwargs",
+        "label": "Get LLM Kwargs (Internal)",
+        "type": "external",
+        "link": null,
+        "title": "Internal LLM Kwargs Utility",
+        "description": "Utility to prepare LLM keyword arguments for function calling."
+      },
+      {
+        "id": "_get_extraction_function",
+        "label": "Get Extraction Function (Internal)",
+        "type": "external",
+        "link": null,
+        "title": "Internal Extraction Function Utility",
+        "description": "Internal utility to generate an OpenAI function schema for extraction."
+      },
+      {
+        "id": "_get_tagging_function",
+        "label": "Get Tagging Function (Internal)",
+        "type": "external",
+        "link": null,
+        "title": "Internal Tagging Function Utility",
+        "description": "Internal utility to generate an OpenAI function schema for tagging."
+      },
+      {
+        "id": "create_openai_fn_chain",
+        "label": "Create OpenAI Function Chain (Internal)",
+        "type": "external",
+        "link": null,
+        "title": "Internal OpenAI Function Chain",
+        "description": "Internal utility to create an LLMChain with OpenAI function calling."
+      },
+      {
+        "id": "_create_openai_tools_runnable",
+        "label": "Create OpenAI Tools Runnable (Internal)",
+        "type": "external",
+        "link": null,
+        "title": "Internal OpenAI Tools Runnable",
+        "description": "Internal utility for creating runnables using OpenAI tool calling."
+      },
+      {
+        "id": "_create_openai_functions_structured_output_runnable",
+        "label": "Create OpenAI Functions Structured Output Runnable (Internal)",
+        "type": "external",
+        "link": null,
+        "title": "Internal OpenAI Functions Runnable",
+        "description": "Internal utility for creating runnables using OpenAI function calling for structured output."
+      },
+      {
+        "id": "_create_openai_json_runnable",
+        "label": "Create OpenAI JSON Runnable (Internal)",
+        "type": "external",
+        "link": null,
+        "title": "Internal OpenAI JSON Runnable",
+        "description": "Internal utility for creating runnables using OpenAI JSON response format."
+      },
+      {
+        "id": "convert_pydantic_to_openai_function",
+        "label": "Convert Pydantic to OpenAI Function (Internal)",
+        "type": "external",
+        "link": null,
+        "title": "Internal Pydantic to OpenAI Function Converter",
+        "description": "Converts a Pydantic model into an OpenAI function definition."
+      },
+      {
+        "id": "openapi_spec_to_openai_fn",
+        "label": "OpenAPI Spec to OpenAI Function (Internal)",
+        "type": "external",
+        "link": null,
+        "title": "Internal OpenAPI Function Converter",
+        "description": "Converts an OpenAPI specification into OpenAI function definitions."
+      },
+      {
+        "id": "SimpleRequestChain",
+        "label": "Simple Request Chain (Internal)",
+        "type": "external",
+        "link": null,
+        "title": "Internal Simple Request Chain",
+        "description": "Internal chain for executing API requests."
+      }
+    ],
+    "edges": [
+      {
+        "source": "create_structured_output_chain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_chain",
+        "target": "BasePromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_chain",
+        "target": "PydanticBaseModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_chain",
+        "target": "PydanticAttrOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_chain",
+        "target": "create_openai_fn_chain",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_openai_fn_chain",
+        "target": "LLMChain",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_citation_fuzzy_match_chain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_citation_fuzzy_match_chain",
+        "target": "LLMChain",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_citation_fuzzy_match_chain",
+        "target": "PydanticOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_citation_fuzzy_match_chain",
+        "target": "ChatPromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_citation_fuzzy_match_chain",
+        "target": "get_llm_kwargs",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_citation_fuzzy_match_runnable",
+        "target": "BaseChatModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_citation_fuzzy_match_runnable",
+        "target": "Runnable",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_citation_fuzzy_match_runnable",
+        "target": "ChatPromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain",
+        "target": "LLMChain",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain",
+        "target": "JsonKeyOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain",
+        "target": "ChatPromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain",
+        "target": "get_llm_kwargs",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain",
+        "target": "_get_extraction_function",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_functions",
+        "target": "PydanticBaseModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_functions",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_functions",
+        "target": "LLMChain",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_functions",
+        "target": "PydanticAttrOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_functions",
+        "target": "ChatPromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_functions",
+        "target": "get_llm_kwargs",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_functions",
+        "target": "_get_extraction_function",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_openapi_chain",
+        "target": "OpenAPISpec",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_openapi_chain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_openapi_chain",
+        "target": "SequentialChain",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_openapi_chain",
+        "target": "LLMChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_openapi_chain",
+        "target": "default_call_api",
+        "label": "uses via SimpleRequestChain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_openapi_chain",
+        "target": "ChatPromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_openapi_chain",
+        "target": "JsonOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_openapi_chain",
+        "target": "openapi_spec_to_openai_fn",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_openapi_chain",
+        "target": "SimpleRequestChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "default_call_api",
+        "target": "requests_lib",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_qa_with_sources_chain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_qa_with_sources_chain",
+        "target": "LLMChain",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_qa_with_sources_chain",
+        "target": "create_qa_with_structure_chain",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain",
+        "target": "LLMChain",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain",
+        "target": "JsonOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain",
+        "target": "ChatPromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain",
+        "target": "get_llm_kwargs",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain",
+        "target": "_get_tagging_function",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain_pydantic",
+        "target": "PydanticBaseModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain_pydantic",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain_pydantic",
+        "target": "LLMChain",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain_pydantic",
+        "target": "PydanticOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain_pydantic",
+        "target": "ChatPromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain_pydantic",
+        "target": "get_llm_kwargs",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tagging_chain_pydantic",
+        "target": "_get_tagging_function",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_tools",
+        "target": "PydanticBaseModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_tools",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_tools",
+        "target": "Runnable",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_tools",
+        "target": "ChatPromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_tools",
+        "target": "convert_pydantic_to_openai_function",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_extraction_chain_pydantic_tools",
+        "target": "PydanticToolsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_runnable",
+        "target": "Runnable",
+        "label": "takes as input/returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_runnable",
+        "target": "BasePromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_runnable",
+        "target": "BaseOutputParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_runnable",
+        "target": "PydanticBaseModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_runnable",
+        "target": "_create_openai_tools_runnable",
+        "label": "delegates to (tools mode)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_runnable",
+        "target": "_create_openai_functions_structured_output_runnable",
+        "label": "delegates to (functions mode)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_structured_output_runnable",
+        "target": "_create_openai_json_runnable",
+        "label": "delegates to (json mode)",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "structured_output_chains",
+        "label": "Structured Output Chains",
+        "nodes": [
+          "create_structured_output_chain",
+          "create_structured_output_runnable",
+          "create_extraction_chain",
+          "create_extraction_chain_pydantic_functions",
+          "create_extraction_chain_pydantic_tools",
+          "create_tagging_chain",
+          "create_tagging_chain_pydantic",
+          "create_qa_with_sources_chain"
+        ],
+        "title": "Structured Output Chains",
+        "description": "Components for extracting structured data from language model outputs using various OpenAI capabilities.",
+        "role": "generative"
+      },
+      {
+        "id": "api_integration_chains",
+        "label": "API Integration Chains",
+        "nodes": [
+          "get_openapi_chain",
+          "default_call_api"
+        ],
+        "title": "API Integration Chains",
+        "description": "Components designed for interacting with external APIs based on OpenAPI specifications.",
+        "role": "surface"
+      },
+      {
+        "id": "citation_chains",
+        "label": "Citation Chains",
+        "nodes": [
+          "create_citation_fuzzy_match_chain",
+          "create_citation_fuzzy_match_runnable"
+        ],
+        "title": "Citation Chains",
+        "description": "Components for generating answers that include precise citations from provided context.",
+        "role": "generative"
+      }
+    ]
+  }
+}

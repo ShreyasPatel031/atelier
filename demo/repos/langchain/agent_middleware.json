@@ -1,0 +1,684 @@
+{
+  "title": "Agent Middleware Components",
+  "summary": "This module provides a collection of middleware components designed to enhance agent functionality by managing execution, context, tools, and security. It includes features for resource limiting, error handling, human oversight, data privacy, and specialized tooling for various LLM providers.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "codex_sandbox_policy",
+        "label": "Codex Sandbox Execution",
+        "type": "component",
+        "link": null,
+        "title": "Codex Sandbox Execution Policy",
+        "description": "Executes shell commands within a secure Codex CLI sandbox, applying syscall and filesystem restrictions for enhanced isolation."
+      },
+      {
+        "id": "docker_execution_policy",
+        "label": "Docker Container Execution",
+        "type": "component",
+        "link": null,
+        "title": "Docker Container Execution Policy",
+        "description": "Runs shell commands inside dedicated Docker containers, providing strong isolation, resource limits, and configurable security features."
+      },
+      {
+        "id": "detect_credit_card",
+        "label": "Detect Credit Card Numbers",
+        "type": "component",
+        "link": null,
+        "title": "Credit Card Detection Utility",
+        "description": "Identifies potential credit card numbers in text content using regular expressions and Luhn algorithm validation."
+      },
+      {
+        "id": "context_editing_middleware",
+        "label": "Context Editing & Pruning",
+        "type": "component",
+        "link": null,
+        "title": "Context Editing Middleware",
+        "description": "Manages conversation context size by automatically pruning tool results and messages based on token count thresholds and configurable editing strategies."
+      },
+      {
+        "id": "filesystem_file_search_middleware",
+        "label": "Filesystem File Search Tools",
+        "type": "component",
+        "link": null,
+        "title": "Filesystem File Search Middleware",
+        "description": "Provides `glob_search` and `grep_search` tools for efficient file pattern matching and content searching on the local filesystem."
+      },
+      {
+        "id": "human_in_the_loop_middleware",
+        "label": "Human Approval for Actions",
+        "type": "component",
+        "link": null,
+        "title": "Human-in-the-Loop Middleware",
+        "description": "Introduces human intervention points for agent actions, allowing users to review, approve, edit, or reject tool calls before execution."
+      },
+      {
+        "id": "model_call_limit_middleware",
+        "label": "Model Call Limiting",
+        "type": "component",
+        "link": null,
+        "title": "Model Call Limit Middleware",
+        "description": "Monitors and enforces limits on the number of LLM calls per thread or run, with options to terminate execution or raise errors."
+      },
+      {
+        "id": "model_fallback_middleware",
+        "label": "Model Fallback Strategy",
+        "type": "component",
+        "link": null,
+        "title": "Model Fallback Middleware",
+        "description": "Automatically retries failed model calls with a sequence of alternative language models, enhancing agent resilience to errors."
+      },
+      {
+        "id": "model_retry_middleware",
+        "label": "Model Call Retries",
+        "type": "component",
+        "link": null,
+        "title": "Model Retry Middleware",
+        "description": "Implements automatic retry logic with configurable exponential backoff for failed model calls, improving robustness."
+      },
+      {
+        "id": "pii_middleware",
+        "label": "PII Detection & Handling",
+        "type": "component",
+        "link": null,
+        "title": "PII Middleware",
+        "description": "Detects and handles Personally Identifiable Information (PII) in agent messages, applying strategies like redaction, masking, or blocking."
+      },
+      {
+        "id": "shell_tool_middleware",
+        "label": "Persistent Shell Tool",
+        "type": "component",
+        "link": null,
+        "title": "Shell Tool Middleware",
+        "description": "Registers a persistent shell tool for agents, enabling command execution in isolated environments with configurable security policies and output redaction."
+      },
+      {
+        "id": "summarization_middleware",
+        "label": "Conversation Summarization",
+        "type": "component",
+        "link": null,
+        "title": "Summarization Middleware",
+        "description": "Optimizes conversation history by summarizing older messages when token limits are approached, maintaining context while reducing length."
+      },
+      {
+        "id": "todo_list_middleware",
+        "label": "Task List Management",
+        "type": "component",
+        "link": null,
+        "title": "Todo List Middleware",
+        "description": "Provides agents with a `write_todos` tool to create and manage structured task lists, aiding in complex multi-step operations and planning."
+      },
+      {
+        "id": "write_todos_func",
+        "label": "Write Todo List",
+        "type": "component",
+        "link": null,
+        "title": "Write Todos Function",
+        "description": "A tool function that allows the agent to update its internal state with a structured list of tasks (todos)."
+      },
+      {
+        "id": "awrite_todos_func",
+        "label": "Async Write Todo List",
+        "type": "component",
+        "link": null,
+        "title": "Async Write Todos Function",
+        "description": "Asynchronous wrapper for the `write_todos` tool function, enabling non-blocking updates to the agent's task list."
+      },
+      {
+        "id": "tool_call_limit_middleware",
+        "label": "Tool Call Limiting",
+        "type": "component",
+        "link": null,
+        "title": "Tool Call Limit Middleware",
+        "description": "Enforces limits on the number of tool calls per thread or run, providing control over agent resource usage and preventing excessive tool invocation."
+      },
+      {
+        "id": "llm_tool_emulator",
+        "label": "LLM Tool Emulation",
+        "type": "component",
+        "link": null,
+        "title": "LLM Tool Emulator",
+        "description": "Simulates tool execution using an LLM to generate responses, allowing for testing and development without actual tool invocation."
+      },
+      {
+        "id": "tool_retry_middleware",
+        "label": "Tool Call Retries",
+        "type": "component",
+        "link": null,
+        "title": "Tool Retry Middleware",
+        "description": "Adds automatic retry logic with exponential backoff for failed tool calls, improving the reliability of agent interactions with external systems."
+      },
+      {
+        "id": "llm_tool_selector_middleware",
+        "label": "LLM Tool Selection",
+        "type": "component",
+        "link": null,
+        "title": "LLM Tool Selector Middleware",
+        "description": "Uses an LLM to intelligently select the most relevant tools for a given query, optimizing tool usage and reducing token consumption."
+      },
+      {
+        "id": "async_wrapped_util",
+        "label": "Async Middleware Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Async Middleware Wrapper",
+        "description": "An internal utility function for asynchronously wrapping middleware methods, ensuring proper execution within the agent framework."
+      },
+      {
+        "id": "wrapped_util",
+        "label": "Sync Middleware Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Sync Middleware Wrapper",
+        "description": "An internal utility function for synchronously wrapping middleware methods, ensuring proper execution within the agent framework."
+      },
+      {
+        "id": "state_claude_text_editor_middleware",
+        "label": "Claude State Text Editor",
+        "type": "component",
+        "link": null,
+        "title": "Claude State Text Editor Middleware",
+        "description": "Provides Anthropic's `text_editor` tool, storing file content within the LangGraph state for persistent conversation-specific files."
+      },
+      {
+        "id": "state_claude_memory_middleware",
+        "label": "Claude State Memory Tool",
+        "type": "component",
+        "link": null,
+        "title": "Claude State Memory Middleware",
+        "description": "Implements Anthropic's memory tool, managing memory files within the LangGraph state and enforcing a `/memories` path prefix."
+      },
+      {
+        "id": "filesystem_claude_text_editor_middleware",
+        "label": "Claude Filesystem Text Editor",
+        "type": "component",
+        "link": null,
+        "title": "Claude Filesystem Text Editor Middleware",
+        "description": "Provides Anthropic's `text_editor` tool, storing file content directly on the local filesystem for external persistence."
+      },
+      {
+        "id": "filesystem_claude_memory_middleware",
+        "label": "Claude Filesystem Memory Tool",
+        "type": "component",
+        "link": null,
+        "title": "Claude Filesystem Memory Middleware",
+        "description": "Implements Anthropic's memory tool, managing memory files on the local filesystem and enforcing a `/memories` path prefix."
+      },
+      {
+        "id": "state_file_search_middleware",
+        "label": "Claude State File Search",
+        "type": "component",
+        "link": null,
+        "title": "Claude State File Search Middleware",
+        "description": "Offers `glob_search` and `grep_search` tools to query virtual files stored within the agent's LangGraph state, specifically for Anthropic tools."
+      },
+      {
+        "id": "anthropic_prompt_caching_middleware",
+        "label": "Anthropic Prompt Caching",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Prompt Caching Middleware",
+        "description": "Optimizes API calls to Anthropic models by applying cache control breakpoints to system messages and tool definitions, reducing token usage."
+      },
+      {
+        "id": "openai_moderation_middleware",
+        "label": "OpenAI Content Moderation",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Moderation Middleware",
+        "description": "Integrates OpenAI's moderation endpoint to check agent inputs, outputs, and tool results for policy violations, with configurable handling."
+      },
+      {
+        "id": "BaseChatModel",
+        "label": "Base Chat Model",
+        "type": "external",
+        "link": "llm_providers",
+        "title": "Base Chat Model",
+        "description": "Abstract base class for chat-based language models, providing a common interface for LLM interactions."
+      },
+      {
+        "id": "init_chat_model",
+        "label": "Initialize Chat Model",
+        "type": "external",
+        "link": "llm_providers",
+        "title": "Initialize Chat Model",
+        "description": "Utility function to initialize a chat model instance from a model identifier string or configuration."
+      },
+      {
+        "id": "AIMessage",
+        "label": "AI Message",
+        "type": "external",
+        "link": "prompts_and_messages",
+        "title": "AI Message",
+        "description": "Represents a message generated by an AI model, often containing text content and tool calls."
+      },
+      {
+        "id": "HumanMessage",
+        "label": "Human Message",
+        "type": "external",
+        "link": "prompts_and_messages",
+        "title": "Human Message",
+        "description": "Represents a message originating from a human user, typically containing text input to the agent."
+      },
+      {
+        "id": "ToolMessage",
+        "label": "Tool Message",
+        "type": "external",
+        "link": "prompts_and_messages",
+        "title": "Tool Message",
+        "description": "Represents the output or result of a tool execution, providing feedback to the agent."
+      },
+      {
+        "id": "BaseTool",
+        "label": "Base Tool",
+        "type": "external",
+        "link": "base_components",
+        "title": "Base Tool",
+        "description": "Abstract base class for tools that agents can use, defining their interface and functionality."
+      },
+      {
+        "id": "tool_decorator",
+        "label": "Tool Decorator",
+        "type": "external",
+        "link": "tools_and_retrievers",
+        "title": "Tool Decorator",
+        "description": "A decorator used to convert a Python function into a callable tool for agents."
+      },
+      {
+        "id": "StructuredTool",
+        "label": "Structured Tool",
+        "type": "external",
+        "link": "tools_and_retrievers",
+        "title": "Structured Tool",
+        "description": "A tool that expects structured input, often defined using Pydantic models, for more precise argument parsing."
+      },
+      {
+        "id": "SystemMessage",
+        "label": "System Message",
+        "type": "external",
+        "link": "prompts_and_messages",
+        "title": "System Message",
+        "description": "Represents a system-level instruction or context provided to the AI model, guiding its behavior."
+      },
+      {
+        "id": "ChatAnthropic",
+        "label": "Anthropic Chat Model",
+        "type": "external",
+        "link": "llm_providers",
+        "title": "Anthropic Chat Model",
+        "description": "A specific implementation of a chat model interacting with Anthropic's API."
+      },
+      {
+        "id": "OpenAI_Client",
+        "label": "OpenAI Client",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI Client",
+        "description": "Client for interacting with OpenAI's API services."
+      },
+      {
+        "id": "AsyncOpenAI_Client",
+        "label": "Async OpenAI Client",
+        "type": "external",
+        "link": null,
+        "title": "Async OpenAI Client",
+        "description": "Asynchronous client for interacting with OpenAI's API services."
+      }
+    ],
+    "edges": [
+      {
+        "source": "shell_tool_middleware",
+        "target": "codex_sandbox_policy",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "shell_tool_middleware",
+        "target": "docker_execution_policy",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pii_middleware",
+        "target": "detect_credit_card",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "context_editing_middleware",
+        "target": "AIMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "context_editing_middleware",
+        "target": "HumanMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "context_editing_middleware",
+        "target": "ToolMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "summarization_middleware",
+        "target": "BaseChatModel",
+        "label": "uses for summary",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "summarization_middleware",
+        "target": "HumanMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "summarization_middleware",
+        "target": "AIMessage",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_fallback_middleware",
+        "target": "BaseChatModel",
+        "label": "uses fallback",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_fallback_middleware",
+        "target": "init_chat_model",
+        "label": "initializes models",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_fallback_middleware",
+        "target": "AIMessage",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_retry_middleware",
+        "target": "AIMessage",
+        "label": "returns on failure",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_tool_emulator",
+        "target": "BaseChatModel",
+        "label": "uses for emulation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_tool_emulator",
+        "target": "HumanMessage",
+        "label": "prompts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_tool_emulator",
+        "target": "ToolMessage",
+        "label": "returns emulated",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_tool_selector_middleware",
+        "target": "BaseChatModel",
+        "label": "uses for selection",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_tool_selector_middleware",
+        "target": "HumanMessage",
+        "label": "uses query from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "todo_list_middleware",
+        "target": "StructuredTool",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "todo_list_middleware",
+        "target": "SystemMessage",
+        "label": "injects",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "todo_list_middleware",
+        "target": "ToolMessage",
+        "label": "handles errors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "write_todos_func",
+        "target": "ToolMessage",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "awrite_todos_func",
+        "target": "write_todos_func",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_retry_middleware",
+        "target": "ToolMessage",
+        "label": "returns on failure",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "filesystem_file_search_middleware",
+        "target": "tool_decorator",
+        "label": "provides tools via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "state_claude_text_editor_middleware",
+        "target": "BaseTool",
+        "label": "provides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "state_claude_memory_middleware",
+        "target": "BaseTool",
+        "label": "provides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "filesystem_claude_text_editor_middleware",
+        "target": "BaseTool",
+        "label": "provides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "filesystem_claude_memory_middleware",
+        "target": "BaseTool",
+        "label": "provides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "state_file_search_middleware",
+        "target": "tool_decorator",
+        "label": "provides tools via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_prompt_caching_middleware",
+        "target": "ChatAnthropic",
+        "label": "optimizes for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_moderation_middleware",
+        "target": "OpenAI_Client",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_moderation_middleware",
+        "target": "AsyncOpenAI_Client",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_moderation_middleware",
+        "target": "AIMessage",
+        "label": "moderates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_moderation_middleware",
+        "target": "HumanMessage",
+        "label": "moderates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_moderation_middleware",
+        "target": "ToolMessage",
+        "label": "moderates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "execution_environment_control",
+        "label": "Execution Environment Control",
+        "nodes": [
+          "codex_sandbox_policy",
+          "docker_execution_policy",
+          "shell_tool_middleware"
+        ],
+        "title": "Execution Environment Control",
+        "description": "Middleware components that manage how external commands are executed, providing various levels of isolation and security.",
+        "role": "security"
+      },
+      {
+        "id": "conversation_context_management",
+        "label": "Conversation Context Management",
+        "nodes": [
+          "context_editing_middleware",
+          "summarization_middleware"
+        ],
+        "title": "Conversation Context Management",
+        "description": "Components focused on optimizing and managing the agent's conversational context, including pruning and summarization.",
+        "role": "data"
+      },
+      {
+        "id": "tool_interaction_reliability",
+        "label": "Tool Interaction & Reliability",
+        "nodes": [
+          "llm_tool_emulator",
+          "tool_retry_middleware",
+          "llm_tool_selector_middleware",
+          "human_in_the_loop_middleware"
+        ],
+        "title": "Tool Interaction & Reliability",
+        "description": "Middleware for enhancing how agents interact with tools, including emulation, retries, intelligent selection, and human oversight.",
+        "role": "orchestration"
+      },
+      {
+        "id": "resource_flow_limits",
+        "label": "Resource & Flow Limits",
+        "nodes": [
+          "model_call_limit_middleware",
+          "tool_call_limit_middleware",
+          "model_fallback_middleware",
+          "model_retry_middleware"
+        ],
+        "title": "Resource & Flow Limits",
+        "description": "Components that enforce limits on model and tool calls, manage fallbacks, and control the overall flow of agent execution.",
+        "role": "orchestration"
+      },
+      {
+        "id": "data_privacy_security",
+        "label": "Data Privacy & Security",
+        "nodes": [
+          "pii_middleware",
+          "detect_credit_card",
+          "openai_moderation_middleware"
+        ],
+        "title": "Data Privacy & Security",
+        "description": "Middleware for detecting and handling sensitive information (PII) and moderating content for policy compliance.",
+        "role": "security"
+      },
+      {
+        "id": "task_planning",
+        "label": "Task & Planning",
+        "nodes": [
+          "todo_list_middleware",
+          "write_todos_func",
+          "awrite_todos_func"
+        ],
+        "title": "Task & Planning",
+        "description": "Components that enable agents to manage structured task lists and integrate planning capabilities into their workflow.",
+        "role": "orchestration"
+      },
+      {
+        "id": "anthropic_tooling",
+        "label": "Anthropic Specific Tooling",
+        "nodes": [
+          "state_claude_text_editor_middleware",
+          "state_claude_memory_middleware",
+          "filesystem_claude_text_editor_middleware",
+          "filesystem_claude_memory_middleware",
+          "state_file_search_middleware",
+          "anthropic_prompt_caching_middleware"
+        ],
+        "title": "Anthropic Specific Tooling",
+        "description": "Middleware providing specialized tools and optimizations tailored for Anthropic models, including state-based and filesystem-based file operations and prompt caching.",
+        "role": "generative"
+      },
+      {
+        "id": "internal_utilities",
+        "label": "Internal Utilities",
+        "nodes": [
+          "async_wrapped_util",
+          "wrapped_util"
+        ],
+        "title": "Internal Utilities",
+        "description": "Helper functions for wrapping middleware methods, ensuring consistent synchronous and asynchronous execution patterns.",
+        "role": "surface"
+      }
+    ]
+  }
+}

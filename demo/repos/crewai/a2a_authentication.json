@@ -1,0 +1,387 @@
+{
+  "title": "A2A Authentication Schemes",
+  "summary": "This module provides a comprehensive set of authentication schemes for Agent-to-Agent (A2A) communication, covering both client-side request authentication and server-side token validation. It supports various methods including API keys, bearer tokens, HTTP Basic/Digest, and different OAuth2 flows.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "APIKeyAuth_Client",
+        "label": "Apply API Key Authentication",
+        "type": "component",
+        "link": null,
+        "title": "API Key Authentication (Client)",
+        "description": "Manages API key authentication for outgoing requests, supporting header, query, or cookie locations."
+      },
+      {
+        "id": "BearerTokenAuth_Client",
+        "label": "Apply Bearer Token Authentication",
+        "type": "component",
+        "link": null,
+        "title": "Bearer Token Authentication (Client)",
+        "description": "Handles Bearer token authentication by adding the token to the Authorization header for outgoing requests."
+      },
+      {
+        "id": "HTTPBasicAuth_Client",
+        "label": "Apply HTTP Basic Authentication",
+        "type": "component",
+        "link": null,
+        "title": "HTTP Basic Authentication (Client)",
+        "description": "Implements HTTP Basic authentication, encoding username and password for the Authorization header."
+      },
+      {
+        "id": "HTTPDigestAuth_Client",
+        "label": "Apply HTTP Digest Authentication",
+        "type": "component",
+        "link": null,
+        "title": "HTTP Digest Authentication (Client)",
+        "description": "Provides HTTP Digest authentication, configuring the HTTP client to handle the challenge-response flow."
+      },
+      {
+        "id": "OAuth2ClientCredentials_Client",
+        "label": "Handle OAuth2 Client Credentials",
+        "type": "component",
+        "link": null,
+        "title": "OAuth2 Client Credentials (Client)",
+        "description": "Manages OAuth2 Client Credentials flow, fetching and refreshing access tokens from an OAuth2 provider."
+      },
+      {
+        "id": "OAuth2AuthorizationCode_Client",
+        "label": "Handle OAuth2 Authorization Code",
+        "type": "component",
+        "link": null,
+        "title": "OAuth2 Authorization Code (Client)",
+        "description": "Handles OAuth2 Authorization Code flow, including user interaction for authorization and token refreshing."
+      },
+      {
+        "id": "SimpleTokenAuth_Server",
+        "label": "Validate Simple Bearer Token",
+        "type": "component",
+        "link": null,
+        "title": "Simple Bearer Token Auth (Server)",
+        "description": "Validates incoming requests against a static bearer token, typically configured via environment variables."
+      },
+      {
+        "id": "OIDCAuth_Server",
+        "label": "Validate OIDC JWT",
+        "type": "component",
+        "link": null,
+        "title": "OIDC JWT Validation (Server)",
+        "description": "Authenticates incoming JWTs using OpenID Connect (OIDC) by validating signatures against JWKS endpoints and checking claims."
+      },
+      {
+        "id": "OAuth2ServerAuth_Server",
+        "label": "Validate OAuth2 Token",
+        "type": "component",
+        "link": null,
+        "title": "OAuth2 Token Validation (Server)",
+        "description": "Provides flexible OAuth2 token validation for incoming requests, supporting both JWT validation via JWKS and opaque token introspection."
+      },
+      {
+        "id": "APIKeyServerAuth_Server",
+        "label": "Validate API Key",
+        "type": "component",
+        "link": null,
+        "title": "API Key Authentication (Server)",
+        "description": "Validates incoming API keys found in headers, query parameters, or cookies against a configured expected value."
+      },
+      {
+        "id": "MTLSServerAuth_Server",
+        "label": "Handle mTLS Authentication",
+        "type": "component",
+        "link": null,
+        "title": "mTLS Authentication (Server)",
+        "description": "Acts as a marker for Mutual TLS (mTLS) authentication, indicating that client certificate validation is handled at the transport layer."
+      },
+      {
+        "id": "EnterpriseTokenAuth_Server",
+        "label": "Validate Enterprise Token",
+        "type": "component",
+        "link": null,
+        "title": "Enterprise Token Authentication (Server)",
+        "description": "Authenticates incoming tokens by verifying them against an external enterprise verification service, such as PlusAPI."
+      },
+      {
+        "id": "Retry401",
+        "label": "Retry Request on 401",
+        "type": "component",
+        "link": null,
+        "title": "Retry on 401 Utility",
+        "description": "Utility function that retries an HTTP request if it fails with a 401 Unauthorized status, attempting to refresh authentication credentials."
+      },
+      {
+        "id": "ExternalService",
+        "label": "External Service/API",
+        "type": "external",
+        "link": null,
+        "title": "External Service/API",
+        "description": "Any external API or service that requires authentication for access."
+      },
+      {
+        "id": "OAuth2Provider",
+        "label": "OAuth2 Provider",
+        "type": "external",
+        "link": null,
+        "title": "OAuth2 Provider",
+        "description": "An external service responsible for issuing and managing OAuth2 tokens."
+      },
+      {
+        "id": "JWKSEndpoint",
+        "label": "JWKS Endpoint",
+        "type": "external",
+        "link": null,
+        "title": "JWKS Endpoint",
+        "description": "A public endpoint providing JSON Web Key Sets (JWKS) for verifying JWT signatures."
+      },
+      {
+        "id": "IntrospectionEndpoint",
+        "label": "OAuth2 Introspection Endpoint",
+        "type": "external",
+        "link": null,
+        "title": "OAuth2 Introspection Endpoint",
+        "description": "An OAuth2 endpoint used to determine the active state and metadata of an opaque access token."
+      },
+      {
+        "id": "EnterprisePlusAPI",
+        "label": "Enterprise PlusAPI",
+        "type": "external",
+        "link": null,
+        "title": "Enterprise PlusAPI",
+        "description": "An internal or external enterprise service used for validating specific enterprise-level authentication tokens."
+      },
+      {
+        "id": "UserBrowser",
+        "label": "User/Browser",
+        "type": "external",
+        "link": null,
+        "title": "User/Browser Interaction",
+        "description": "Represents the user agent or browser involved in interactive OAuth2 authorization flows."
+      }
+    ],
+    "edges": [
+      {
+        "source": "APIKeyAuth_Client",
+        "target": "ExternalService",
+        "label": "Applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BearerTokenAuth_Client",
+        "target": "ExternalService",
+        "label": "Applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "HTTPBasicAuth_Client",
+        "target": "ExternalService",
+        "label": "Applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "HTTPDigestAuth_Client",
+        "target": "ExternalService",
+        "label": "Applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OAuth2ClientCredentials_Client",
+        "target": "ExternalService",
+        "label": "Applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OAuth2AuthorizationCode_Client",
+        "target": "ExternalService",
+        "label": "Applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OAuth2ClientCredentials_Client",
+        "target": "OAuth2Provider",
+        "label": "Fetches Token",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OAuth2AuthorizationCode_Client",
+        "target": "OAuth2Provider",
+        "label": "Fetches/Refreshes Token",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OAuth2AuthorizationCode_Client",
+        "target": "UserBrowser",
+        "label": "Requires Authorization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExternalService",
+        "target": "SimpleTokenAuth_Server",
+        "label": "Authenticates Incoming Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExternalService",
+        "target": "OIDCAuth_Server",
+        "label": "Authenticates Incoming Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExternalService",
+        "target": "OAuth2ServerAuth_Server",
+        "label": "Authenticates Incoming Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExternalService",
+        "target": "APIKeyServerAuth_Server",
+        "label": "Authenticates Incoming Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExternalService",
+        "target": "MTLSServerAuth_Server",
+        "label": "Authenticates Incoming Request (TLS)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExternalService",
+        "target": "EnterpriseTokenAuth_Server",
+        "label": "Authenticates Incoming Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OIDCAuth_Server",
+        "target": "JWKSEndpoint",
+        "label": "Retrieves Signing Keys",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OAuth2ServerAuth_Server",
+        "target": "JWKSEndpoint",
+        "label": "Retrieves Signing Keys (JWT)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OAuth2ServerAuth_Server",
+        "target": "IntrospectionEndpoint",
+        "label": "Introspects Opaque Token",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EnterpriseTokenAuth_Server",
+        "target": "EnterprisePlusAPI",
+        "label": "Verifies Token",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Retry401",
+        "target": "ExternalService",
+        "label": "Retries Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Retry401",
+        "target": "APIKeyAuth_Client",
+        "label": "Re-applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Retry401",
+        "target": "BearerTokenAuth_Client",
+        "label": "Re-applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Retry401",
+        "target": "HTTPBasicAuth_Client",
+        "label": "Re-applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Retry401",
+        "target": "HTTPDigestAuth_Client",
+        "label": "Re-applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Retry401",
+        "target": "OAuth2ClientCredentials_Client",
+        "label": "Re-applies Auth",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Retry401",
+        "target": "OAuth2AuthorizationCode_Client",
+        "label": "Re-applies Auth",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "ClientAuth",
+        "label": "Client Authentication Schemes",
+        "nodes": [
+          "APIKeyAuth_Client",
+          "BearerTokenAuth_Client",
+          "HTTPBasicAuth_Client",
+          "HTTPDigestAuth_Client",
+          "OAuth2ClientCredentials_Client",
+          "OAuth2AuthorizationCode_Client"
+        ],
+        "title": "Client Authentication Schemes",
+        "description": "Components responsible for authenticating outgoing requests to external services.",
+        "role": "generative"
+      },
+      {
+        "id": "ServerAuth",
+        "label": "Server Authentication Schemes",
+        "nodes": [
+          "SimpleTokenAuth_Server",
+          "OIDCAuth_Server",
+          "OAuth2ServerAuth_Server",
+          "APIKeyServerAuth_Server",
+          "MTLSServerAuth_Server",
+          "EnterpriseTokenAuth_Server"
+        ],
+        "title": "Server Authentication Schemes",
+        "description": "Components responsible for validating authentication credentials on incoming requests.",
+        "role": "analytical"
+      },
+      {
+        "id": "AuthUtilities",
+        "label": "Authentication Utilities",
+        "nodes": [
+          "Retry401"
+        ],
+        "title": "Authentication Utilities",
+        "description": "Helper functions for managing authentication flows, such as retrying failed requests.",
+        "role": "surface"
+      }
+    ]
+  }
+}

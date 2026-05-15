@@ -1,0 +1,139 @@
+{
+  "title": "CLI Base Components",
+  "summary": "This module provides foundational components for the CrewAI CLI, including base command structures, authentication mechanisms, and utilities for interacting with the CrewAI+ API and managing module imports.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_command",
+        "label": "Initialize Base CLI Command",
+        "type": "component",
+        "link": null,
+        "title": "Base CLI Command",
+        "description": "A foundational class for all CLI commands, responsible for initializing telemetry for tracking and monitoring."
+      },
+      {
+        "id": "auth_command",
+        "label": "Handle CLI Authentication",
+        "type": "component",
+        "link": null,
+        "title": "CLI Authentication Command",
+        "description": "Manages user login for the CLI and extends authentication to the tool repository, providing feedback on success or failure."
+      },
+      {
+        "id": "plus_api_mixin",
+        "label": "Interact with CrewAI+ API",
+        "type": "component",
+        "link": null,
+        "title": "CrewAI+ API Interaction Mixin",
+        "description": "Provides methods for authenticating and interacting with the CrewAI+ API, including robust error handling for API responses."
+      },
+      {
+        "id": "shim_finder",
+        "label": "Map CLI Imports",
+        "type": "component",
+        "link": null,
+        "title": "CLI Import Shim Finder",
+        "description": "A meta path finder that redirects imports from 'crewai.cli' to 'crewai_cli', ensuring compatibility and proper module loading."
+      },
+      {
+        "id": "cli_commands_module",
+        "label": "CLI Commands Module",
+        "type": "other_module",
+        "link": "cli_commands",
+        "title": "CLI Commands",
+        "description": "Contains various specific CLI commands that utilize the base components for authentication and API interaction."
+      },
+      {
+        "id": "telemetry_service",
+        "label": "Telemetry Service",
+        "type": "external",
+        "link": null,
+        "title": "Telemetry Service",
+        "description": "An external service used for tracking and monitoring CLI command execution and API interactions."
+      },
+      {
+        "id": "crewai_plus_api_service",
+        "label": "CrewAI+ API",
+        "type": "external",
+        "link": null,
+        "title": "CrewAI+ API",
+        "description": "The external API for CrewAI+ services, providing advanced functionalities and requiring authentication."
+      },
+      {
+        "id": "tool_repository_service",
+        "label": "Tool Repository",
+        "type": "external",
+        "link": null,
+        "title": "Tool Repository",
+        "description": "An external repository for managing and distributing tools, requiring authentication for access."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_commands_module",
+        "target": "auth_command",
+        "label": "Uses for login",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_commands_module",
+        "target": "base_command",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "auth_command",
+        "target": "tool_repository_service",
+        "label": "Authenticates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "plus_api_mixin",
+        "target": "crewai_plus_api_service",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_command",
+        "target": "telemetry_service",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "plus_api_mixin",
+        "target": "telemetry_service",
+        "label": "Logs errors via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "shim_finder",
+        "target": "cli_commands_module",
+        "label": "Redirects imports to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cli_command_interfaces",
+        "label": "CLI Command Interfaces",
+        "nodes": [
+          "base_command",
+          "auth_command",
+          "plus_api_mixin",
+          "shim_finder"
+        ],
+        "title": "CLI Command Interfaces",
+        "description": "Core components that define the structure and behavior of CLI commands, including authentication and API interaction.",
+        "role": "surface"
+      }
+    ]
+  }
+}

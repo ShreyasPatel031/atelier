@@ -1,0 +1,207 @@
+{
+    "title": "LM and Client Management",
+    "summary": "This module provides the foundational interfaces and utilities for managing Language Models (LMs) and their clients within DSPy. It includes the abstract `BaseLM` class, mechanisms for caching LLM calls, logging LiteLLM interactions, and concrete implementations for various LM providers and embedding services.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "base_lm_interface",
+                "label": "Define Base LM Interface",
+                "type": "component",
+                "link": null,
+                "title": "Base Language Model Interface",
+                "description": "Provides the abstract interface (BaseLM) for all language models in DSPy, defining common methods for text generation, history management, and response processing. All concrete LM implementations inherit from this."
+            },
+            {
+                "id": "lm_call_caching",
+                "label": "Manage LM Call Caching",
+                "type": "component",
+                "link": null,
+                "title": "Language Model Call Caching",
+                "description": "Implements flexible caching mechanisms (disk and memory) for LM calls. It intercepts requests, stores responses, and retrieves cached results to optimize performance and reduce redundant API calls."
+            },
+            {
+                "id": "litellm_api_wrapper",
+                "label": "Wrap LiteLLM API Calls",
+                "type": "component",
+                "link": null,
+                "title": "LiteLLM API Wrapper",
+                "description": "Handles direct synchronous and asynchronous interactions with the LiteLLM library for text completion, chat completion, and embedding generation. It includes retry logic and integrates with the caching system."
+            },
+            {
+                "id": "specific_lm_clients",
+                "label": "Implement Specific LM Clients",
+                "type": "component",
+                "link": null,
+                "title": "Specific LM Provider Clients",
+                "description": "Provides concrete implementations for interacting with various language model platforms, such as Databricks, local SGLang servers, and OpenAI, adhering to the BaseLM interface."
+            },
+            {
+                "id": "finetuning_job_tracker",
+                "label": "Track LM Finetuning Jobs",
+                "type": "component",
+                "link": null,
+                "title": "LM Finetuning Job Tracker",
+                "description": "Manages and monitors the lifecycle of finetuning jobs on specific platforms (e.g., Databricks, OpenAI). It allows for tracking progress, status checks, and potentially cancellation of jobs."
+            },
+            {
+                "id": "dspy_program_user",
+                "label": "DSPy Program",
+                "type": "external",
+                "link": "core_primitives",
+                "title": "DSPy Program/Module",
+                "description": "Represents a DSPy program or module that leverages language models for various tasks, interacting with the LM management system to perform predictions."
+            },
+            {
+                "id": "dspy_configuration",
+                "label": "DSPy Global Configuration",
+                "type": "external",
+                "link": "core_primitives",
+                "title": "DSPy Global Settings",
+                "description": "Manages global configuration settings for DSPy, including caching behavior, LiteLLM logging levels, and other operational parameters that influence LM interactions."
+            },
+            {
+                "id": "external_lm_providers",
+                "label": "External LM Services",
+                "type": "external",
+                "link": null,
+                "title": "External Language Model Providers",
+                "description": "Represents the actual external APIs and services provided by various language model vendors (e.g., OpenAI, Databricks, Hugging Face) that DSPy clients interact with."
+            },
+            {
+                "id": "external_embedding_providers",
+                "label": "External Embedding Services",
+                "type": "external",
+                "link": null,
+                "title": "External Embedding Providers",
+                "description": "Represents external services responsible for generating vector embeddings from text inputs, which are utilized by DSPy's embedding generation functionalities."
+            }
+        ],
+        "edges": [
+            {
+                "source": "dspy_program_user",
+                "target": "base_lm_interface",
+                "label": "Utilizes abstract interface",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "base_lm_interface",
+                "target": "lm_call_caching",
+                "label": "Delegates calls to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_call_caching",
+                "target": "litellm_api_wrapper",
+                "label": "Forwards requests to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "litellm_api_wrapper",
+                "target": "external_lm_providers",
+                "label": "Interacts with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "litellm_api_wrapper",
+                "target": "external_embedding_providers",
+                "label": "Requests embeddings from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_configuration",
+                "target": "lm_call_caching",
+                "label": "Configures caching in",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_configuration",
+                "target": "litellm_api_wrapper",
+                "label": "Influences logging in",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "specific_lm_clients",
+                "target": "base_lm_interface",
+                "label": "Implements",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "specific_lm_clients",
+                "target": "external_lm_providers",
+                "label": "Connects to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "finetuning_job_tracker",
+                "target": "specific_lm_clients",
+                "label": "Monitors jobs from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "finetuning_job_tracker",
+                "target": "external_lm_providers",
+                "label": "Queries job status from",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "lm_abstraction_core",
+                "label": "LM Abstraction Core",
+                "nodes": [
+                    "base_lm_interface"
+                ],
+                "title": "Language Model Abstraction Core",
+                "description": "Defines the fundamental abstract interface for all language models within DSPy, ensuring a consistent way to interact with diverse LLM providers.",
+                "role": null
+            },
+            {
+                "id": "client_operations",
+                "label": "Client Operations",
+                "nodes": [
+                    "lm_call_caching",
+                    "litellm_api_wrapper"
+                ],
+                "title": "LM Client Operations & Caching",
+                "description": "Manages the core operational aspects of interacting with language models, including efficient caching of responses and direct API calls via the LiteLLM wrapper.",
+                "role": null
+            },
+            {
+                "id": "provider_integrations",
+                "label": "Provider Integrations",
+                "nodes": [
+                    "specific_lm_clients",
+                    "finetuning_job_tracker"
+                ],
+                "title": "Specific LM Provider Integrations",
+                "description": "Handles concrete implementations for various external language model providers and provides mechanisms for tracking finetuning jobs on these platforms.",
+                "role": null
+            },
+            {
+                "id": "system_context_and_external",
+                "label": "System Context & External",
+                "nodes": [
+                    "dspy_program_user",
+                    "dspy_configuration",
+                    "external_lm_providers",
+                    "external_embedding_providers"
+                ],
+                "title": "System Context and External Services",
+                "description": "Encompasses the broader DSPy program context, global configurations, and the external language model and embedding services that this module interacts with.",
+                "role": null
+            }
+        ]
+    }
+}

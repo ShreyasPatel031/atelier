@@ -1,0 +1,22 @@
+{
+    "title": "External Integration Drivers",
+    "summary": "This module provides drivers for integrating with various external tools and platforms, handling their launch, configuration, and interaction with the core system.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "claude_desktop_integration", "label": "Claude Desktop Integration", "type": "module", "link": "claude_desktop_integration", "title": "Claude Desktop Integration", "description": "Manages launch and configuration for Claude Desktop, including restore functionality for previous profiles."},
+            {"id": "cline_integration", "label": "Cline Integration", "type": "module", "link": "cline_integration", "title": "Cline Integration", "description": "Handles the configuration and updating of models within the Cline environment."},
+            {"id": "codex_integration", "label": "Codex Integration", "type": "module", "link": "codex_integration", "title": "Codex Integration", "description": "Provides functionalities for launching and ensuring proper configuration of the Codex tool."},
+            {"id": "droid_integration", "label": "Droid Integration", "type": "module", "link": "droid_integration", "title": "Droid Integration", "description": "Manages the editing and preservation of settings, including custom models, for the Droid application."},
+            {"id": "hermes_integration", "label": "Hermes Integration", "type": "module", "link": "hermes_integration", "title": "Hermes Integration", "description": "Facilitates the installation, configuration, and execution of the Hermes tool."},
+            {"id": "kimi_integration", "label": "Kimi Integration", "type": "module", "link": "kimi_integration", "title": "Kimi Integration", "description": "Manages the installation, configuration, and execution of the Kimi tool with specified models."},
+            {"id": "openclaw_integration", "label": "OpenClaw Integration", "type": "module", "link": "openclaw_integration", "title": "OpenClaw Integration", "description": "Handles the onboarding, configuration, and running of OpenClaw, including channel setup and daemon management."},
+            {"id": "pi_integration", "label": "Pi Integration", "type": "module", "link": "pi_integration", "title": "Pi Integration", "description": "Manages the configuration of models and settings for the Pi agent, ensuring proper setup and preservation of user data."},
+            {"id": "vscode_integration", "label": "VSCode Integration", "type": "module", "link": "vscode_integration", "title": "VSCode Integration", "description": "Manages VSCode extension configuration for language models, ensuring model registration and user experience."}
+        ],
+        "edges": [],
+        "groups": [
+            {"id": "external_tool_drivers", "label": "External Tool Drivers", "title": "External Tool Drivers", "description": "Contains components responsible for integrating, configuring, and launching various external AI/developer tools.", "role": "analytical", "nodes": ["claude_desktop_integration", "cline_integration", "codex_integration", "droid_integration", "hermes_integration", "kimi_integration", "openclaw_integration", "pi_integration", "vscode_integration"]}
+        ]
+    }
+}
