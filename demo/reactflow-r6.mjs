@@ -338,6 +338,43 @@ function ElkCustomNode({
         });
     }
 
+    const morphProgress = typeof data.rfMorphProgress === 'number' ? data.rfMorphProgress : null;
+    const morphIsCollapse = !!(data.rfMorphIsCollapse);
+    if (morphIsCollapse && morphProgress != null && morphProgress < 1) {
+        return React.createElement(
+            'div',
+            {
+                'data-atelier-rf-node-kind': 'collapse-morph',
+                style: {
+                    position: 'relative',
+                    width: w,
+                    height: h,
+                    minWidth: w,
+                    maxWidth: w,
+                    minHeight: h,
+                    maxHeight: h,
+                    boxSizing: 'border-box',
+                    overflow: 'visible',
+                    pointerEvents: 'none',
+                },
+            },
+            React.createElement('div', {
+                key: 'group-ghost',
+                style: {
+                    position: 'absolute',
+                    inset: 0,
+                    boxSizing: 'border-box',
+                    border: '1px dashed #64748b',
+                    borderRadius: GROUP_NODE_BORDER_RADIUS,
+                    backgroundColor: 'transparent',
+                    pointerEvents: 'none',
+                },
+            })
+        );
+    }
+
+    const expandingParent = !!(data && data.rfExpandingParent);
+    const hideLeafHandles = expandingParent && morphProgress != null && morphProgress < 1;
     const handleEls = [];
 
     /** Exact ELK connection point → handle center (translate -50/-50 centers on top/left). */
@@ -617,7 +654,7 @@ function ElkCustomNode({
             },
             labelEl
         ),
-        ...handleEls,
+        ...(!hideLeafHandles ? handleEls : []),
         helpPillPortal,
         React.createElement(ElkSideHoverPanel, {
             visible: showHoverPanel,
@@ -765,6 +802,9 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     const topHandles = data.topHandles || [];
     const bottomHandles = data.bottomHandles || [];
 
+    const groupMorphProgress = typeof data.rfMorphProgress === 'number' ? data.rfMorphProgress : null;
+    const hideGroupHandles = groupMorphProgress != null && groupMorphProgress < 1;
+
     const parts = [];
 
     const pointerInsideGroupControls = useCallback(
@@ -806,6 +846,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         };
     }
 
+    if (!hideGroupHandles) {
     leftHandles.forEach((cp, index) => {
         parts.push(
             React.createElement(Handle, {
@@ -881,6 +922,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
             })
         );
     });
+    }
 
     const labelPill = pillLayer
         ? createPortal(
@@ -1670,6 +1712,7 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
      */
     var enteringAnchor = new Map();
     var anchoredExitIds = new Set();
+    var enteringIsCollapse = new Set();
     for (var si = 0; si < targetNodes.length; si++) {
         var sn = targetNodes[si];
         var sid = String(sn.id);
@@ -1686,6 +1729,39 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
                 parentId: String(sn.parentId || ''),
             });
             anchoredExitIds.add(anchorId);
+            if (!sid.endsWith('_sub')) {
+                enteringIsCollapse.add(sid);
+            }
+        }
+    }
+
+    var collapseChildExitIds = new Set();
+    if (enteringIsCollapse.size > 0) {
+        for (var cci = 0; cci < exitingIds.length; cci++) {
+            var ceid = exitingIds[cci];
+            if (anchoredExitIds.has(ceid)) continue;
+            var cGhost = oldById.get(ceid);
+            if (cGhost && cGhost.parentId && anchoredExitIds.has(String(cGhost.parentId))) {
+                collapseChildExitIds.add(ceid);
+            }
+        }
+    }
+
+    var expandingGroupIds = new Set();
+    for (var egi = 0; egi < targetNodes.length; egi++) {
+        var egn = targetNodes[egi];
+        var egid = String(egn.id);
+        if (enteringAnchor.has(egid) && !enteringIsCollapse.has(egid)) {
+            expandingGroupIds.add(egid);
+        }
+    }
+    var expandChildIds = new Set();
+    if (expandingGroupIds.size > 0) {
+        for (var eci = 0; eci < targetNodes.length; eci++) {
+            var ecn = targetNodes[eci];
+            if (ecn.parentId && expandingGroupIds.has(String(ecn.parentId))) {
+                expandChildIds.add(String(ecn.id));
+            }
         }
     }
 
@@ -1772,12 +1848,15 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
                 position: { x: px, y: py },
                 style: ns,
             });
-            if (tweenW != null || tweenH != null) {
+            var isAnchored = !oid && enteringAnchor.has(tid);
+            if (tweenW != null || tweenH != null || isAnchored) {
                 frameNode.width = tweenW != null ? tweenW : tn.width;
                 frameNode.height = tweenH != null ? tweenH : tn.height;
                 frameNode.data = Object.assign({}, tn.data || {}, {
                     width: tweenW != null ? tweenW : (tn.data && tn.data.width),
                     height: tweenH != null ? tweenH : (tn.data && tn.data.height),
+                    rfMorphProgress: easedPos,
+                    rfMorphIsCollapse: enteringIsCollapse.has(tid),
                 });
             }
             /**
@@ -1791,6 +1870,12 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
             if (!oid && enteringAnchor.has(tid) && tPos < 1) {
                 frameNode.extent = undefined;
             }
+            if (expandChildIds.has(tid) && tPos < 1) {
+                frameNode.data = Object.assign({}, frameNode.data || tn.data || {}, {
+                    rfExpandingParent: true,
+                    rfMorphProgress: easedPos,
+                });
+            }
             frameNodes.push(frameNode);
         }
 
@@ -1798,6 +1883,7 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
             var eid = exitingIds[ex];
             if (exitAlpha <= 0) continue;
             if (anchoredExitIds.has(eid)) continue;
+            if (collapseChildExitIds.has(eid)) continue;
             var ghost = oldById.get(eid);
             if (!ghost) continue;
             if (ghost.parentId && !exitingAbsPos.has(String(ghost.parentId))) {
