@@ -418,9 +418,13 @@
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__viewport {
             overflow: visible;
         }
-        /** R6: edges below nodes; hovered node above siblings so side hover panel isn’t covered */
+        /**
+         * R6: edges above group frames (z 4000) but below leaf nodes (z 5000) so cross-group /
+         * cross-compound routes remain visible; hovered leaf still stacks above edges for the
+         * side hover panel.
+         */
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__edges {
-            z-index: 0 !important;
+            z-index: 4500 !important;
         }
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__nodes {
             z-index: 1 !important;
@@ -3312,8 +3316,9 @@
         }
 
         /**
-         * RF expansion: replace leaf nodeId with compound group `${nodeId}_sub` containing prefixed child IR nodes/edges.
-         * Child `groups` are flattened (members merged into the wrapper group) — matches flat ELK compound model.
+         * RF expansion: replace leaf nodeId with compound `${nodeId}_sub` containing prefixed child IR.
+         * Preserves child `groups` (nested ELK compounds) so cross-group edges route visibly.
+         * Parent edges that targeted the collapsed node attach to a portal leaf inside the subgraph.
          */
         function applyExpansionToStructuredIr(diagram, nodeId, childIr) {
             if (!diagram || !childIr || !Array.isArray(childIr.nodes)) return null;
@@ -3339,45 +3344,77 @@
                 if (mi >= 0) g.nodes[mi] = subId;
             }
 
-            for (const e of d.edges) {
-                if (!e) continue;
-                if (String(e.source) === String(nodeId)) e.source = subId;
-                if (String(e.target) === String(nodeId)) e.target = subId;
-            }
-
             const child = JSON.parse(JSON.stringify(childIr));
             const childNodes = Array.isArray(child.nodes) ? child.nodes : [];
             const childEdges = Array.isArray(child.edges) ? child.edges : [];
+            const childGroups = Array.isArray(child.groups) ? child.groups : [];
 
             function pfx(id) {
                 return prefix + String(id);
             }
 
-            const memberIds = [];
-
+            const prefixedNodeIds = [];
             for (const cn of childNodes) {
                 if (!cn || cn.id == null) continue;
-                const cid = String(cn.id);
-                const newId = pfx(cid);
-                memberIds.push(newId);
-                const copy = Object.assign({}, cn, { id: newId });
-                d.nodes.push(copy);
+                const newId = pfx(String(cn.id));
+                prefixedNodeIds.push(newId);
+                d.nodes.push(Object.assign({}, cn, { id: newId }));
             }
+
+            const nestedInChildGroup = new Set();
+            for (const cg of childGroups) {
+                if (!cg || !Array.isArray(cg.nodes)) continue;
+                for (const mid of cg.nodes) nestedInChildGroup.add(pfx(String(mid)));
+            }
+
+            const topLevelChildGroupIds = [];
+            for (const cg of childGroups) {
+                if (!cg || cg.id == null) continue;
+                const newGid = pfx(String(cg.id));
+                const memberIds = (Array.isArray(cg.nodes) ? cg.nodes : []).map((mid) =>
+                    pfx(String(mid))
+                );
+                d.groups.push(
+                    Object.assign({}, cg, {
+                        id: newGid,
+                        nodes: memberIds,
+                    })
+                );
+                topLevelChildGroupIds.push(newGid);
+            }
+
+            const subMembers =
+                topLevelChildGroupIds.length > 0
+                    ? topLevelChildGroupIds
+                    : prefixedNodeIds.filter((nid) => !nestedInChildGroup.has(nid));
 
             d.groups.push({
                 id: subId,
                 label: originalLabel,
-                nodes: memberIds,
+                nodes: subMembers,
             });
+
+            const portalCandidates = [
+                pfx('adapter_base'),
+                pfx(childNodes[0] && childNodes[0].id != null ? String(childNodes[0].id) : ''),
+            ].filter((id) => id && prefixedNodeIds.includes(id));
+            const portalId = portalCandidates[0] || prefixedNodeIds[0] || null;
+
+            for (const e of d.edges) {
+                if (!e || portalId == null) continue;
+                if (String(e.source) === String(nodeId)) e.source = portalId;
+                if (String(e.target) === String(nodeId)) e.target = portalId;
+            }
 
             for (let ei = 0; ei < childEdges.length; ei++) {
                 const e = childEdges[ei];
                 if (!e || e.source == null || e.target == null) continue;
-                const copy = Object.assign({}, e, {
-                    source: pfx(e.source),
-                    target: pfx(e.target),
-                });
-                d.edges.push(copy);
+                d.edges.push(
+                    Object.assign({}, e, {
+                        source: pfx(e.source),
+                        target: pfx(e.target),
+                    })
+                );
             }
 
             return d;
