@@ -1,0 +1,168 @@
+{
+    "title": "Language Model Integration",
+    "summary": "This module centralizes all functionalities for interacting with Language Models (LLMs) in DSPy, providing core client interfaces, caching mechanisms, streaming capabilities, and provider-specific integrations for various LLM services. It abstracts away LLM complexities to offer a unified and efficient interaction layer.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "lm_clients_node",
+                "label": "Manage Core LLM Clients",
+                "type": "module",
+                "link": "language_model_integration.lm_clients",
+                "title": "Core LLM Client Interfaces",
+                "description": "Provides the foundational interfaces for interacting with various Language Models, handling request formatting, response parsing, and basic LM operations."
+            },
+            {
+                "id": "caching_node",
+                "label": "Cache LLM Calls & Embeddings",
+                "type": "module",
+                "link": "language_model_integration.caching_and_embeddings",
+                "title": "Caching & Embedding Services",
+                "description": "Manages caching for expensive LLM calls and embedding computations, ensuring efficient reuse of results and secure disk serialization."
+            },
+            {
+                "id": "streaming_node",
+                "label": "Handle LLM Response Streaming",
+                "type": "module",
+                "link": "language_model_integration.streaming",
+                "title": "LLM Response Streaming",
+                "description": "Enables incremental streaming of LLM outputs, providing real-time feedback and utilities for processing and formatting streamed content."
+            },
+            {
+                "id": "provider_node",
+                "label": "Integrate Provider-Specific Features",
+                "type": "module",
+                "link": "language_model_integration.provider_specific_integrations",
+                "title": "Provider-Specific Integrations",
+                "description": "Offers specialized integrations for different LLM providers, including logging control and management of finetuning jobs for platforms like Databricks and OpenAI."
+            },
+            {
+                "id": "dspy_program_node",
+                "label": "DSPy Program",
+                "type": "external",
+                "link": "core_framework.base_modules",
+                "title": "DSPy Application Logic",
+                "description": "The main DSPy program or module that orchestrates calls to Language Models and utilizes their capabilities."
+            },
+            {
+                "id": "external_llm_apis_node",
+                "label": "External LLM APIs",
+                "type": "external",
+                "link": null,
+                "title": "Third-Party Language Models",
+                "description": "Represents the actual external Language Model services (e.g., OpenAI, Anthropic, local LLMs) that DSPy clients communicate with."
+            },
+            {
+                "id": "external_storage_node",
+                "label": "External Storage/Data",
+                "type": "external",
+                "link": null,
+                "title": "External Data Storage",
+                "description": "External systems for storing cached data, finetuning datasets, or models, accessed by caching and provider modules."
+            }
+        ],
+        "edges": [
+            {
+                "source": "dspy_program_node",
+                "target": "lm_clients_node",
+                "label": "Initiates LM calls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_clients_node",
+                "target": "external_llm_apis_node",
+                "label": "Communicates with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_clients_node",
+                "target": "caching_node",
+                "label": "Leverages for efficiency",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_clients_node",
+                "target": "streaming_node",
+                "label": "Provides raw streams",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "provider_node",
+                "target": "lm_clients_node",
+                "label": "Configures & manages",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "provider_node",
+                "target": "external_llm_apis_node",
+                "label": "Manages finetuning on",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "caching_node",
+                "target": "external_storage_node",
+                "label": "Persists/Retrieves data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "streaming_node",
+                "target": "dspy_program_node",
+                "label": "Delivers processed output",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_lm_abstraction",
+                "label": "Core LLM Abstraction",
+                "nodes": [
+                    "lm_clients_node"
+                ],
+                "title": "Central LLM Interface",
+                "description": "The foundational layer for all Language Model interactions within DSPy, abstracting various LLM APIs.",
+                "role": null
+            },
+            {
+                "id": "lm_enhancements",
+                "label": "LLM Interaction Enhancements",
+                "nodes": [
+                    "caching_node",
+                    "streaming_node"
+                ],
+                "title": "Optimizing LLM Interactions",
+                "description": "Modules that add performance, responsiveness, and data management capabilities to LLM interactions, such as caching and streaming.",
+                "role": null
+            },
+            {
+                "id": "provider_management",
+                "label": "Provider-Specific Management",
+                "nodes": [
+                    "provider_node"
+                ],
+                "title": "Tailored LLM Provider Control",
+                "description": "Handles unique features and management tasks specific to different Language Model providers, including logging and finetuning.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "dspy_program_node",
+                    "external_llm_apis_node",
+                    "external_storage_node"
+                ],
+                "title": "External Systems & Data",
+                "description": "Represents external components like DSPy programs, third-party LLM services, and data storage that interact with this integration layer.",
+                "role": null
+            }
+        ]
+    }
+}

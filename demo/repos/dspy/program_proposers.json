@@ -1,0 +1,154 @@
+{
+  "title": "Program Proposers",
+  "summary": "This module provides tools for analyzing datasets and language model programs, generating observations, and proposing optimized instructions for individual modules within a program. It helps in understanding program structure and improving LM prompts.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "observation_summarizer",
+        "label": "Summarize Dataset Observations",
+        "type": "component",
+        "link": null,
+        "title": "Observation Summarizer",
+        "description": "Takes a series of observations about a dataset and condenses them into a brief 2-3 sentence summary, highlighting the most important details."
+      },
+      {
+        "id": "dataset_descriptor",
+        "label": "Generate Dataset Observations",
+        "type": "component",
+        "link": null,
+        "title": "Dataset Descriptor",
+        "description": "Analyzes sample data points from a dataset to identify trends and patterns, generating observations about topics, content, and syntax, and inferring the dataset's task."
+      },
+      {
+        "id": "dataset_descriptor_with_prior",
+        "label": "Generate Observations with Prior Context",
+        "type": "component",
+        "link": null,
+        "title": "Dataset Descriptor with Prior Observations",
+        "description": "Extends dataset analysis by incorporating existing observations, adding new insights or confirming completeness based on provided examples."
+      },
+      {
+        "id": "describe_program",
+        "label": "Describe Program Task & Flow",
+        "type": "component",
+        "link": null,
+        "title": "Describe Program",
+        "description": "Analyzes pseudocode and an example of a language model program to describe its intended task and how it operates to solve that task."
+      },
+      {
+        "id": "describe_module",
+        "label": "Describe Module's Role",
+        "type": "component",
+        "link": null,
+        "title": "Describe Module",
+        "description": "Focuses on a specific module within a larger language model program, describing its purpose and contribution to the overall program's functionality."
+      },
+      {
+        "id": "generate_instruction",
+        "label": "Generate LM Instruction",
+        "type": "component",
+        "link": null,
+        "title": "Generate Single Module Instruction",
+        "description": "Generates a new, optimized instruction for a Language Model, leveraging dataset descriptions, program details, module descriptions, task demonstrations, and historical instruction performance."
+      },
+      {
+        "id": "create_history_string",
+        "label": "Format Instruction History",
+        "type": "component",
+        "link": null,
+        "title": "Create Instruction Set History String",
+        "description": "Processes trial logs to extract and format a history of instruction sets and their associated scores, useful for informing subsequent instruction generation."
+      }
+    ],
+    "edges": [
+      {
+        "source": "dataset_descriptor",
+        "target": "observation_summarizer",
+        "label": "Provides observations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_descriptor_with_prior",
+        "target": "observation_summarizer",
+        "label": "Provides observations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "describe_program",
+        "target": "describe_module",
+        "label": "Provides program context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "describe_program",
+        "target": "generate_instruction",
+        "label": "Provides program context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "describe_module",
+        "target": "generate_instruction",
+        "label": "Provides module context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_history_string",
+        "target": "generate_instruction",
+        "label": "Provides instruction history",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "dataset_analysis",
+        "label": "Dataset Analysis",
+        "nodes": [
+          "dataset_descriptor",
+          "dataset_descriptor_with_prior",
+          "observation_summarizer"
+        ],
+        "title": "Dataset Analysis and Summarization",
+        "description": "Components for analyzing dataset examples, generating observations, and summarizing key insights to understand data characteristics.",
+        "role": "analytical"
+      },
+      {
+        "id": "program_structure_analysis",
+        "label": "Program Structure Analysis",
+        "nodes": [
+          "describe_program",
+          "describe_module"
+        ],
+        "title": "Program and Module Structure Analysis",
+        "description": "Components dedicated to understanding the structure and function of language model programs and their individual modules from pseudocode and examples.",
+        "role": "analytical"
+      },
+      {
+        "id": "instruction_generation",
+        "label": "Instruction Generation",
+        "nodes": [
+          "generate_instruction"
+        ],
+        "title": "Language Model Instruction Generation",
+        "description": "The core component responsible for proposing new, optimized instructions for Language Models based on various contextual inputs.",
+        "role": "generative"
+      },
+      {
+        "id": "utility_functions",
+        "label": "Utility Functions",
+        "nodes": [
+          "create_history_string"
+        ],
+        "title": "Instruction History Utility",
+        "description": "A utility function for processing and formatting historical instruction sets and their performance scores.",
+        "role": "data"
+      }
+    ]
+  }
+}

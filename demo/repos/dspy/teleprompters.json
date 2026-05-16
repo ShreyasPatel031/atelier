@@ -1,0 +1,894 @@
+{
+  "title": "DSPy Program Optimizers",
+  "summary": "This module provides a collection of advanced teleprompters (optimizers) for DSPy programs. These optimizers employ various strategies, including iterative prompt refinement, few-shot example selection, reinforcement learning, and meta-optimization, to enhance program performance and efficiency.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "avatar_optimizer",
+        "label": "Refine Instructions with Feedback",
+        "type": "component",
+        "link": null,
+        "title": "Avatar Optimizer",
+        "description": "Iteratively refines a program's instructions based on positive and negative examples, using a comparator and a feedback-based instruction generator."
+      },
+      {
+        "id": "comparator_sig",
+        "label": "Compare Program Performance",
+        "type": "component",
+        "link": null,
+        "title": "Comparator Signature",
+        "description": "A DSPy Signature that takes positive and negative examples, along with current instructions and actions, to generate feedback for improving performance."
+      },
+      {
+        "id": "feedback_instruction_sig",
+        "label": "Generate New Instructions from Feedback",
+        "type": "component",
+        "link": null,
+        "title": "Feedback Instruction Signature",
+        "description": "A DSPy Signature that takes previous instructions and feedback to generate new, improved instructions for a program."
+      },
+      {
+        "id": "better_together",
+        "label": "Orchestrate Optimization Strategies",
+        "type": "component",
+        "link": null,
+        "title": "BetterTogether Meta-Optimizer",
+        "description": "A meta-optimizer that combines prompt and weight optimization strategies in configurable sequences, allowing iterative improvement of both prompts and model parameters."
+      },
+      {
+        "id": "patched_forward",
+        "label": "Capture Execution Traces & Handle Errors",
+        "type": "component",
+        "link": null,
+        "title": "Patched Forward",
+        "description": "A patched forward method for DSPy programs that captures execution traces and handles adapter parsing errors by logging failures and assigning a FailedPrediction object."
+      },
+      {
+        "id": "copro_optimizer",
+        "label": "Iterative Prompt Refinement",
+        "type": "component",
+        "link": null,
+        "title": "COPRO Optimizer",
+        "description": "Iteratively refines prompt instructions and prefixes for a DSPy program by generating multiple candidates, evaluating them, and using the best ones to inform subsequent generations."
+      },
+      {
+        "id": "basic_gen_instruction_sig",
+        "label": "Generate Basic Instructions",
+        "type": "component",
+        "link": null,
+        "title": "Basic Instruction Signature",
+        "description": "A DSPy Signature for generating initial or basic instructions and output field prefixes for a language model."
+      },
+      {
+        "id": "gen_instruction_given_attempts_sig",
+        "label": "Refine Instructions from Attempts",
+        "type": "component",
+        "link": null,
+        "title": "Instruction Refinement Signature",
+        "description": "A DSPy Signature that takes a list of previously attempted instructions and their scores to propose new, improved instructions and output field prefixes."
+      },
+      {
+        "id": "gepa_optimizer",
+        "label": "Evolve Prompts with Reflection",
+        "type": "component",
+        "link": null,
+        "title": "GEPA Optimizer",
+        "description": "An evolutionary optimizer that uses reflection to evolve text components of complex systems, guiding prompt evolution with textual feedback from a metric function."
+      },
+      {
+        "id": "gepa_feedback_metric_proto",
+        "label": "Define GEPA Feedback Metric",
+        "type": "component",
+        "link": null,
+        "title": "GEPA Feedback Metric Protocol",
+        "description": "A protocol defining the interface for a metric function used by GEPA, which can provide scores and textual feedback at both program and predictor levels."
+      },
+      {
+        "id": "multimodal_instruction_proposer",
+        "label": "Propose Multimodal Instructions",
+        "type": "component",
+        "link": null,
+        "title": "Multimodal Instruction Proposer",
+        "description": "A GEPA-compatible instruction proposer that handles multimodal inputs by using a single-component proposer for each component needing updates."
+      },
+      {
+        "id": "gen_enhanced_multimodal_instruction_sig",
+        "label": "Enhance Multimodal Instructions",
+        "type": "component",
+        "link": null,
+        "title": "Enhanced Multimodal Instruction Signature",
+        "description": "A DSPy Signature for generating improved multimodal instructions based on feedback, focusing on visual analysis, text integration, and domain-specific knowledge."
+      },
+      {
+        "id": "grpo_optimizer",
+        "label": "Fine-tune LMs with Reinforcement Learning",
+        "type": "component",
+        "link": null,
+        "title": "GRPO Optimizer",
+        "description": "A Reinforcement Learning-based optimizer that fine-tunes language models by collecting trajectories from a student program and teachers, then training the LM with rewards based on a metric."
+      },
+      {
+        "id": "infer_rules_optimizer",
+        "label": "Induce & Apply Natural Language Rules",
+        "type": "component",
+        "link": null,
+        "title": "InferRules Optimizer",
+        "description": "An optimizer that induces natural language rules from examples and incorporates them into a program's instructions to improve performance."
+      },
+      {
+        "id": "custom_rules_induction_sig",
+        "label": "Generate Natural Language Rules",
+        "type": "component",
+        "link": null,
+        "title": "Custom Rules Induction Signature",
+        "description": "A DSPy Signature for generating concise natural language rules from a set of examples."
+      },
+      {
+        "id": "knn_fewshot_optimizer",
+        "label": "Select K-NN Few-Shot Examples",
+        "type": "component",
+        "link": null,
+        "title": "KNNFewShot Optimizer",
+        "description": "An optimizer that dynamically selects k-nearest neighbor examples from a trainset at test time to use as few-shot demonstrations for a student module."
+      },
+      {
+        "id": "mipro_v2_optimizer",
+        "label": "Bayesian Prompt & Few-Shot Optimization",
+        "type": "component",
+        "link": null,
+        "title": "MIPROv2 Optimizer",
+        "description": "A meta-optimizer that combines bootstrapping few-shot examples with instruction proposal and Bayesian optimization (using Optuna) to find optimal prompt parameters for a DSPy program."
+      },
+      {
+        "id": "simba_optimizer",
+        "label": "Self-Improving Stochastic Optimizer",
+        "type": "component",
+        "link": null,
+        "title": "SIMBA Optimizer",
+        "description": "A stochastic introspective optimizer that uses an LLM to analyze its own performance, generate improvement rules, or add successful examples as demonstrations."
+      },
+      {
+        "id": "append_rule_util",
+        "label": "Append Rule to Predictor",
+        "type": "component",
+        "link": null,
+        "title": "Append Rule Utility",
+        "description": "A utility function for SIMBA that generates and appends a new rule to a predictor's instructions based on contrasting good and bad execution trajectories."
+      },
+      {
+        "id": "append_demo_util",
+        "label": "Append Demo to Predictor",
+        "type": "component",
+        "link": null,
+        "title": "Append Demo Utility",
+        "description": "A utility function for SIMBA that appends a successful example from a good execution trajectory as a few-shot demonstration to a predictor."
+      },
+      {
+        "id": "offer_feedback_sig",
+        "label": "Generate Module-Specific Advice",
+        "type": "component",
+        "link": null,
+        "title": "OfferFeedback Signature",
+        "description": "A DSPy Signature used by SIMBA to generate advice for program modules by contrasting good and bad execution trajectories."
+      },
+      {
+        "id": "bootstrap_fewshot_optuna_optimizer",
+        "label": "Optimize Few-Shot Sets with Optuna",
+        "type": "component",
+        "link": null,
+        "title": "BootstrapFewShot with Optuna",
+        "description": "An optimizer that combines BootstrapFewShot for generating candidate few-shot sets with Optuna for Bayesian optimization to select the best set of demonstrations."
+      },
+      {
+        "id": "dspy_module",
+        "label": "DSPy Program Module",
+        "type": "external",
+        "link": "base_modules",
+        "title": "DSPy Module",
+        "description": "The fundamental building block of a DSPy program, representing a callable component that can contain predictors."
+      },
+      {
+        "id": "dspy_signature",
+        "label": "DSPy Signature",
+        "type": "external",
+        "link": "signatures",
+        "title": "DSPy Signature",
+        "description": "Defines the input/output fields and instructions for a language model call within a DSPy predictor."
+      },
+      {
+        "id": "dspy_example",
+        "label": "DSPy Example",
+        "type": "external",
+        "link": "datasets",
+        "title": "DSPy Example",
+        "description": "A data structure representing a single input-output pair used for training or evaluation."
+      },
+      {
+        "id": "dspy_lm",
+        "label": "Language Model Client",
+        "type": "external",
+        "link": "lm_clients",
+        "title": "Language Model",
+        "description": "An interface for interacting with various language models, handling API calls and responses."
+      },
+      {
+        "id": "dspy_evaluate",
+        "label": "Program Evaluator",
+        "type": "external",
+        "link": "evaluation_metrics",
+        "title": "DSPy Evaluate",
+        "description": "A utility for evaluating DSPy programs against a dataset using a specified metric."
+      },
+      {
+        "id": "dspy_embedder",
+        "label": "Text Embedder",
+        "type": "external",
+        "link": "caching_and_embeddings",
+        "title": "DSPy Embedder",
+        "description": "A component for converting text into numerical vector representations (embeddings)."
+      },
+      {
+        "id": "optuna_lib",
+        "label": "Optuna Optimization Library",
+        "type": "external",
+        "link": null,
+        "title": "Optuna",
+        "description": "A hyperparameter optimization framework used for automating search processes."
+      },
+      {
+        "id": "gepa_lib",
+        "label": "GEPA Optimization Library",
+        "type": "external",
+        "link": null,
+        "title": "GEPA Library",
+        "description": "The external GEPA library providing the core evolutionary optimization engine."
+      },
+      {
+        "id": "dspy_teleprompter_base",
+        "label": "Base Teleprompter",
+        "type": "external",
+        "link": "core_framework",
+        "title": "Base Teleprompter",
+        "description": "The abstract base class for all DSPy optimizers, defining the common interface for program compilation."
+      },
+      {
+        "id": "dspy_predictor",
+        "label": "DSPy Predictor",
+        "type": "external",
+        "link": "base_modules",
+        "title": "DSPy Predictor",
+        "description": "A module that wraps a language model call with a specific signature, potentially including few-shot examples."
+      },
+      {
+        "id": "dspy_context",
+        "label": "DSPy Context Manager",
+        "type": "external",
+        "link": "general_utilities",
+        "title": "DSPy Context",
+        "description": "Manages global DSPy settings and state, such as the active language model or trace."
+      },
+      {
+        "id": "dspy_settings",
+        "label": "DSPy Global Settings",
+        "type": "external",
+        "link": "dsp_utilities",
+        "title": "DSPy Settings",
+        "description": "Global configuration settings for DSPy, including default LMs, cache behavior, and error handling."
+      },
+      {
+        "id": "dspy_parallel",
+        "label": "Parallel Execution Utility",
+        "type": "external",
+        "link": "general_utilities",
+        "title": "DSPy Parallel",
+        "description": "Utility for running DSPy program executions in parallel across multiple threads."
+      },
+      {
+        "id": "dspy_typed_predictor",
+        "label": "Typed Predictor",
+        "type": "external",
+        "link": "base_modules",
+        "title": "DSPy Typed Predictor",
+        "description": "A specialized predictor that enforces type-hinted input and output fields."
+      },
+      {
+        "id": "dspy_predict",
+        "label": "Basic Predictor",
+        "type": "external",
+        "link": "prediction_modules",
+        "title": "DSPy Predict",
+        "description": "A basic predictor module that takes a signature and uses an LM to generate an output."
+      },
+      {
+        "id": "dspy_bootstrap_fewshot",
+        "label": "Bootstrap Few-Shot Optimizer",
+        "type": "external",
+        "link": "teleprompters",
+        "title": "BootstrapFewShot",
+        "description": "An optimizer that bootstraps few-shot examples for a program."
+      },
+      {
+        "id": "dspy_bootstrap_finetune",
+        "label": "Bootstrap Finetune Optimizer",
+        "type": "external",
+        "link": "teleprompters",
+        "title": "BootstrapFinetune",
+        "description": "An optimizer that fine-tunes a language model based on bootstrapped examples."
+      },
+      {
+        "id": "dspy_bootstrap_fewshot_random_search",
+        "label": "Bootstrap Few-Shot with Random Search",
+        "type": "external",
+        "link": "teleprompters",
+        "title": "BootstrapFewShotWithRandomSearch",
+        "description": "An optimizer that bootstraps few-shot examples using random search."
+      },
+      {
+        "id": "dspy_grounded_proposer",
+        "label": "Grounded Instruction Proposer",
+        "type": "external",
+        "link": "program_proposers",
+        "title": "GroundedProposer",
+        "description": "A component that proposes instructions based on program code, data summaries, and few-shot examples."
+      },
+      {
+        "id": "dspy_knn",
+        "label": "K-Nearest Neighbors Retriever",
+        "type": "external",
+        "link": "retrieval_modules",
+        "title": "DSPy KNN",
+        "description": "A utility for finding k-nearest neighbors in a dataset based on embeddings."
+      },
+      {
+        "id": "dspy_finetune_teleprompter_base",
+        "label": "Base Finetune Teleprompter",
+        "type": "external",
+        "link": "teleprompters",
+        "title": "Base Finetune Teleprompter",
+        "description": "An abstract base class for teleprompters that involve fine-tuning language models."
+      },
+      {
+        "id": "adapter_parse_error",
+        "label": "Adapter Parsing Error",
+        "type": "external",
+        "link": "data_types_and_adapters",
+        "title": "AdapterParseError",
+        "description": "An error raised when an adapter fails to parse the language model's response."
+      },
+      {
+        "id": "failed_prediction",
+        "label": "Failed Prediction Object",
+        "type": "external",
+        "link": "base_modules",
+        "title": "FailedPrediction",
+        "description": "A special object representing a prediction that failed due to parsing or other issues."
+      }
+    ],
+    "edges": [
+      {
+        "source": "avatar_optimizer",
+        "target": "dspy_teleprompter_base",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "avatar_optimizer",
+        "target": "comparator_sig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "avatar_optimizer",
+        "target": "feedback_instruction_sig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "avatar_optimizer",
+        "target": "dspy_module",
+        "label": "optimizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "comparator_sig",
+        "target": "dspy_signature",
+        "label": "is a",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "feedback_instruction_sig",
+        "target": "dspy_signature",
+        "label": "is a",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "dspy_teleprompter_base",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "dspy_module",
+        "label": "optimizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "dspy_evaluate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "dspy_bootstrap_fewshot_random_search",
+        "label": "can use as default",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "dspy_bootstrap_finetune",
+        "label": "can use as default",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "patched_forward",
+        "target": "dspy_context",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "patched_forward",
+        "target": "adapter_parse_error",
+        "label": "handles",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "patched_forward",
+        "target": "failed_prediction",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "copro_optimizer",
+        "target": "dspy_teleprompter_base",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "copro_optimizer",
+        "target": "dspy_module",
+        "label": "optimizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "copro_optimizer",
+        "target": "dspy_evaluate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "copro_optimizer",
+        "target": "basic_gen_instruction_sig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "copro_optimizer",
+        "target": "gen_instruction_given_attempts_sig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "basic_gen_instruction_sig",
+        "target": "dspy_signature",
+        "label": "is a",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gen_instruction_given_attempts_sig",
+        "target": "dspy_signature",
+        "label": "is a",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gepa_optimizer",
+        "target": "dspy_teleprompter_base",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gepa_optimizer",
+        "target": "dspy_module",
+        "label": "optimizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gepa_optimizer",
+        "target": "gepa_feedback_metric_proto",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gepa_optimizer",
+        "target": "gepa_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gepa_optimizer",
+        "target": "multimodal_instruction_proposer",
+        "label": "can use",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gepa_feedback_metric_proto",
+        "target": "dspy_example",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gepa_feedback_metric_proto",
+        "target": "dspy_predictor",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multimodal_instruction_proposer",
+        "target": "gen_enhanced_multimodal_instruction_sig",
+        "label": "uses internally",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gen_enhanced_multimodal_instruction_sig",
+        "target": "dspy_signature",
+        "label": "is a",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grpo_optimizer",
+        "target": "dspy_finetune_teleprompter_base",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grpo_optimizer",
+        "target": "dspy_module",
+        "label": "fine-tunes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grpo_optimizer",
+        "target": "dspy_evaluate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grpo_optimizer",
+        "target": "dspy_parallel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "infer_rules_optimizer",
+        "target": "dspy_bootstrap_fewshot",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "infer_rules_optimizer",
+        "target": "dspy_module",
+        "label": "optimizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "infer_rules_optimizer",
+        "target": "custom_rules_induction_sig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "infer_rules_optimizer",
+        "target": "dspy_evaluate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "custom_rules_induction_sig",
+        "target": "dspy_signature",
+        "label": "is a",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "knn_fewshot_optimizer",
+        "target": "dspy_teleprompter_base",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "knn_fewshot_optimizer",
+        "target": "dspy_module",
+        "label": "optimizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "knn_fewshot_optimizer",
+        "target": "dspy_knn",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "knn_fewshot_optimizer",
+        "target": "dspy_embedder",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "knn_fewshot_optimizer",
+        "target": "dspy_bootstrap_fewshot",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mipro_v2_optimizer",
+        "target": "dspy_teleprompter_base",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mipro_v2_optimizer",
+        "target": "dspy_module",
+        "label": "optimizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mipro_v2_optimizer",
+        "target": "dspy_evaluate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mipro_v2_optimizer",
+        "target": "dspy_grounded_proposer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mipro_v2_optimizer",
+        "target": "optuna_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "simba_optimizer",
+        "target": "dspy_teleprompter_base",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "simba_optimizer",
+        "target": "dspy_module",
+        "label": "optimizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "simba_optimizer",
+        "target": "dspy_parallel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "simba_optimizer",
+        "target": "append_rule_util",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "simba_optimizer",
+        "target": "append_demo_util",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "append_rule_util",
+        "target": "offer_feedback_sig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "offer_feedback_sig",
+        "target": "dspy_signature",
+        "label": "is a",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bootstrap_fewshot_optuna_optimizer",
+        "target": "dspy_teleprompter_base",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bootstrap_fewshot_optuna_optimizer",
+        "target": "dspy_module",
+        "label": "optimizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bootstrap_fewshot_optuna_optimizer",
+        "target": "dspy_bootstrap_fewshot",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bootstrap_fewshot_optuna_optimizer",
+        "target": "optuna_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bootstrap_fewshot_optuna_optimizer",
+        "target": "dspy_evaluate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "generative_prompt_optimizers_core",
+        "label": "Core Prompt Optimizers",
+        "nodes": [
+          "copro_optimizer",
+          "gepa_optimizer",
+          "avatar_optimizer",
+          "mipro_v2_optimizer"
+        ],
+        "title": "Core Prompt Optimizers",
+        "description": "Optimizers focused on refining program instructions and prompts through iterative or evolutionary methods.",
+        "role": "generative"
+      },
+      {
+        "id": "rule_fewshot_induction",
+        "label": "Rule & Few-Shot Induction",
+        "nodes": [
+          "infer_rules_optimizer",
+          "knn_fewshot_optimizer",
+          "bootstrap_fewshot_optuna_optimizer"
+        ],
+        "title": "Rule & Few-Shot Induction",
+        "description": "Optimizers that derive natural language rules or dynamically select few-shot examples to improve program performance.",
+        "role": "generative"
+      },
+      {
+        "id": "self_improving_rl_optimizers",
+        "label": "Self-Improving & RL Optimizers",
+        "nodes": [
+          "simba_optimizer",
+          "grpo_optimizer"
+        ],
+        "title": "Self-Improving & RL Optimizers",
+        "description": "Optimizers that leverage self-reflection or reinforcement learning to continuously improve program behavior and underlying language models.",
+        "role": "generative"
+      },
+      {
+        "id": "meta_optimization_orchestration",
+        "label": "Meta-Optimization Orchestration",
+        "nodes": [
+          "better_together"
+        ],
+        "title": "Meta-Optimization Orchestration",
+        "description": "An optimizer that orchestrates and combines multiple optimization strategies (e.g., prompt and weight optimization) in a configurable sequence.",
+        "role": "generative"
+      },
+      {
+        "id": "instruction_feedback_signatures",
+        "label": "Instruction & Feedback Signatures",
+        "nodes": [
+          "basic_gen_instruction_sig",
+          "gen_instruction_given_attempts_sig",
+          "gen_enhanced_multimodal_instruction_sig",
+          "custom_rules_induction_sig",
+          "offer_feedback_sig"
+        ],
+        "title": "Instruction & Feedback Signatures",
+        "description": "DSPy Signatures used for generating, refining, or enhancing instructions and providing structured feedback for optimization processes.",
+        "role": "generative"
+      },
+      {
+        "id": "feedback_analysis_utilities",
+        "label": "Feedback Analysis Utilities",
+        "nodes": [
+          "comparator_sig",
+          "gepa_feedback_metric_proto",
+          "feedback_instruction_sig"
+        ],
+        "title": "Feedback Analysis Utilities",
+        "description": "Components and protocols for analyzing program performance, defining feedback mechanisms, and generating instructions based on comparative analysis.",
+        "role": "analytical"
+      },
+      {
+        "id": "instruction_proposal_utilities",
+        "label": "Instruction Proposal Utilities",
+        "nodes": [
+          "multimodal_instruction_proposer",
+          "append_rule_util",
+          "append_demo_util"
+        ],
+        "title": "Instruction Proposal Utilities",
+        "description": "Utility functions for proposing and appending new instructions, rules, or demonstrations to predictors based on execution trajectories.",
+        "role": "generative"
+      },
+      {
+        "id": "execution_trace_error_handling",
+        "label": "Execution Trace & Error Handling",
+        "nodes": [
+          "patched_forward"
+        ],
+        "title": "Execution Trace & Error Handling",
+        "description": "A utility for capturing detailed execution traces of DSPy programs and gracefully handling parsing errors during runtime.",
+        "role": "data"
+      }
+    ]
+  }
+}

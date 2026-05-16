@@ -1,32 +1,87 @@
 {
-    "core_primitives": {
-        "path": "dspy/primitives, dspy/signatures, dspy/utils, dspy/streaming",
+    "core_framework": {
+        "path": "dspy/primitives",
         "components": [],
         "children": {
-            "base_modules_and_signatures": {
-                "path": "dspy/primitives, dspy/signatures",
+            "base_modules": {
+                "path": "dspy/primitives",
                 "components": [
                     "dspy.primitives.base_module.BaseModule",
-                    "dspy.primitives.module.Module",
+                    "dspy.primitives.module.Module"
+                ]
+            },
+            "signatures": {
+                "path": "dspy/signatures",
+                "components": [
                     "dspy.signatures.field.new_to_old_field",
                     "dspy.signatures.field.OldInputField",
                     "dspy.signatures.field.OldOutputField",
                     "dspy.signatures.signature.SignatureMeta"
                 ]
             },
-            "utilities": {
-                "path": "dspy/utils",
+            "data_types_and_adapters": {
+                "path": "dspy/adapters/types",
                 "components": [
-                    "dspy.utils.__init__.download",
-                    "dspy.utils.annotation.decorator",
-                    "dspy.utils.asyncify.wrapped_program",
-                    "dspy.utils.asyncify.async_program",
-                    "dspy.utils.asyncify.get_limiter",
-                    "dspy.utils.callback.async_wrapper",
-                    "dspy.utils.callback.sync_wrapper",
+                    "dspy.adapters.baml_adapter.BAMLAdapter",
+                    "dspy.adapters.base.Adapter",
+                    "dspy.adapters.two_step_adapter.TwoStepAdapter",
+                    "dspy.adapters.types.audio.Audio",
+                    "dspy.adapters.types.base_type.Type",
+                    "dspy.adapters.types.citation.from_dict_list",
+                    "dspy.adapters.types.citation.format",
+                    "dspy.adapters.types.citation.validate_input",
+                    "dspy.adapters.types.code.Code",
+                    "dspy.adapters.types.document.Document",
+                    "dspy.adapters.types.file.File",
+                    "dspy.adapters.types.image.Image",
+                    "dspy.adapters.types.image._get_file_extension",
+                    "dspy.adapters.types.image.is_image",
+                    "dspy.adapters.types.tool.Tool",
+                    "dspy.adapters.types.tool.validate_input"
+                ]
+            },
+            "tool_execution": {
+                "path": "dspy/primitives",
+                "components": [
+                    "dspy.primitives.repl_types.REPLVariable",
+                    "dspy.primitives.runner.makeToolWrapper",
+                    "dspy.primitives.runner.toolCallBridge",
+                    "dspy.primitives.sandbox_serializable.SandboxSerializable"
+                ]
+            }
+        }
+    },
+    "language_model_integration": {
+        "path": "dspy/clients",
+        "components": [],
+        "children": {
+            "lm_clients": {
+                "path": "dspy/clients",
+                "components": [
+                    "dspy.clients.base_lm.BaseLM",
+                    "dspy.clients.lm.litellm_completion",
+                    "dspy.clients.lm.alitellm_completion",
+                    "dspy.clients.lm.litellm_responses_completion",
+                    "dspy.clients.lm.alitellm_responses_completion",
+                    "dspy.clients.lm.async_stream_completion",
+                    "dspy.clients.lm.litellm_text_completion",
+                    "dspy.clients.lm.alitellm_text_completion",
+                    "dspy.clients.lm_local.LocalProvider",
+                    "dspy.clients.lm_local.tokenize_function",
                     "dspy.utils.dummies.DummyLM",
-                    "dspy.utils.dummies.inner",
-                    "dspy.utils.syncify.SyncWrapper"
+                    "dspy.utils.dummies.inner"
+                ]
+            },
+            "caching_and_embeddings": {
+                "path": "dspy/clients",
+                "components": [
+                    "dspy.clients.__init__.configure_cache",
+                    "dspy.clients.__init__._get_dspy_cache",
+                    "dspy.clients.cache.sync_wrapper",
+                    "dspy.clients.cache.async_wrapper",
+                    "dspy.clients.disk_serialization._RestrictedDisk",
+                    "dspy.clients.embedding._cached_compute_embeddings",
+                    "dspy.clients.embedding._cached_acompute_embeddings"
                 ]
             },
             "streaming": {
@@ -39,94 +94,23 @@
                     "dspy.streaming.streaming_listener.StreamListener"
                 ]
             },
-            "repl_and_serialization": {
-                "path": "dspy/primitives",
-                "components": [
-                    "dspy.primitives.repl_types.REPLVariable",
-                    "dspy.primitives.sandbox_serializable.SandboxSerializable"
-                ]
-            }
-        }
-    },
-    "lm_and_client_management": {
-        "path": "dspy/clients",
-        "components": [],
-        "children": {
-            "base_lm_and_core_clients": {
+            "provider_specific_integrations": {
                 "path": "dspy/clients",
                 "components": [
-                    "dspy.clients.__init__.configure_cache",
-                    "dspy.clients.__init__._get_dspy_cache",
                     "dspy.clients.__init__.enable_litellm_logging",
                     "dspy.clients.__init__.disable_litellm_logging",
-                    "dspy.clients.base_lm.BaseLM",
-                    "dspy.clients.cache.sync_wrapper",
-                    "dspy.clients.cache.async_wrapper",
-                    "dspy.clients.disk_serialization._RestrictedDisk"
-                ]
-            },
-            "lm_completion_and_embedding": {
-                "path": "dspy/clients",
-                "components": [
-                    "dspy.clients.embedding._cached_compute_embeddings",
-                    "dspy.clients.embedding._cached_acompute_embeddings",
-                    "dspy.clients.lm.litellm_completion",
-                    "dspy.clients.lm.alitellm_completion",
-                    "dspy.clients.lm.litellm_responses_completion",
-                    "dspy.clients.lm.alitellm_responses_completion",
-                    "dspy.clients.lm.async_stream_completion",
-                    "dspy.clients.lm.litellm_text_completion",
-                    "dspy.clients.lm.alitellm_text_completion"
-                ]
-            },
-            "specific_lm_providers": {
-                "path": "dspy/clients",
-                "components": [
                     "dspy.clients.databricks.DatabricksProvider",
                     "dspy.clients.databricks.TrainingJobDatabricks",
-                    "dspy.clients.lm_local.LocalProvider",
-                    "dspy.clients.lm_local.tokenize_function",
                     "dspy.clients.openai.TrainingJobOpenAI"
                 ]
             }
         }
     },
-    "program_development_and_optimization": {
-        "path": "dspy/predict, dspy/propose, dspy/teleprompt",
+    "program_optimization_and_evaluation": {
+        "path": "dspy/teleprompt",
         "components": [],
         "children": {
-            "predictors_and_program_flow": {
-                "path": "dspy/predict",
-                "components": [
-                    "dspy.predict.aggregation.majority",
-                    "dspy.predict.aggregation.default_normalize",
-                    "dspy.predict.avatar.avatar.Avatar",
-                    "dspy.predict.avatar.signatures.Actor",
-                    "dspy.predict.best_of_n.BestOfN",
-                    "dspy.predict.code_act.CodeAct",
-                    "dspy.predict.multi_chain_comparison.MultiChainComparison",
-                    "dspy.predict.program_of_thought.ProgramOfThought",
-                    "dspy.predict.react.ReAct",
-                    "dspy.predict.refine.Refine",
-                    "dspy.predict.refine.WrapperAdapter",
-                    "dspy.predict.refine.inspect_modules",
-                    "dspy.predict.refine.OfferFeedback",
-                    "dspy.predict.rlm.RLM"
-                ]
-            },
-            "program_proposal_and_description": {
-                "path": "dspy/propose",
-                "components": [
-                    "dspy.propose.dataset_summary_generator.ObservationSummarizer",
-                    "dspy.propose.dataset_summary_generator.DatasetDescriptor",
-                    "dspy.propose.dataset_summary_generator.DatasetDescriptorWithPriorObservations",
-                    "dspy.propose.grounded_proposer.DescribeProgram",
-                    "dspy.propose.grounded_proposer.DescribeModule",
-                    "dspy.propose.grounded_proposer.GenerateSingleModuleInstruction",
-                    "dspy.propose.utils.create_instruction_set_history_string"
-                ]
-            },
-            "teleprompters_and_optimizers": {
+            "teleprompters": {
                 "path": "dspy/teleprompt",
                 "components": [
                     "dspy.teleprompt.avatar_optimizer.AvatarOptimizer",
@@ -150,28 +134,7 @@
                     "dspy.teleprompt.simba_utils.append_a_rule",
                     "dspy.teleprompt.simba_utils.append_a_demo_",
                     "dspy.teleprompt.simba_utils.OfferFeedback",
-                    "dspy.teleprompt.teleprompt_optuna.BootstrapFewShotWithOptuna",
-                    "dspy.teleprompt.utils.get_task_model_history_for_full_example",
-                    "dspy.teleprompt.utils.log_token_usage",
-                    "dspy.teleprompt.utils.calculate_last_n_proposed_quality"
-                ]
-            }
-        }
-    },
-    "data_and_evaluation": {
-        "path": "dspy/datasets, dspy/evaluate",
-        "components": [],
-        "children": {
-            "datasets": {
-                "path": "dspy/datasets",
-                "components": [
-                    "dspy.datasets.alfworld.alfworld.AlfWorld",
-                    "dspy.datasets.alfworld.alfworld.env_worker",
-                    "dspy.datasets.dataloader.DataLoader",
-                    "dspy.datasets.dataset.Dataset",
-                    "dspy.datasets.gsm8k.GSM8K",
-                    "dspy.datasets.gsm8k.gsm8k_metric",
-                    "dspy.datasets.math.MATH"
+                    "dspy.teleprompt.teleprompt_optuna.BootstrapFewShotWithOptuna"
                 ]
             },
             "evaluation_metrics": {
@@ -189,56 +152,114 @@
                     "dspy.evaluate.metrics.HotPotF1",
                     "dspy.evaluate.metrics.answer_passage_match"
                 ]
+            },
+            "program_proposers": {
+                "path": "dspy/propose",
+                "components": [
+                    "dspy.propose.dataset_summary_generator.ObservationSummarizer",
+                    "dspy.propose.dataset_summary_generator.DatasetDescriptor",
+                    "dspy.propose.dataset_summary_generator.DatasetDescriptorWithPriorObservations",
+                    "dspy.propose.grounded_proposer.DescribeProgram",
+                    "dspy.propose.grounded_proposer.DescribeModule",
+                    "dspy.propose.grounded_proposer.GenerateSingleModuleInstruction",
+                    "dspy.propose.utils.create_instruction_set_history_string"
+                ]
+            },
+            "optimization_utilities": {
+                "path": "dspy/teleprompt",
+                "components": [
+                    "dspy.teleprompt.utils.get_task_model_history_for_full_example",
+                    "dspy.teleprompt.utils.log_token_usage",
+                    "dspy.teleprompt.utils.calculate_last_n_proposed_quality"
+                ]
             }
         }
     },
-    "adapters_and_retrievers": {
-        "path": "dspy/adapters, dspy/dsp, dspy/retrievers",
+    "prediction_and_retrieval_strategies": {
+        "path": "dspy/predict",
         "components": [],
         "children": {
-            "data_type_adapters": {
-                "path": "dspy/adapters/types",
+            "prediction_modules": {
+                "path": "dspy/predict",
                 "components": [
-                    "dspy.adapters.types.audio.Audio",
-                    "dspy.adapters.types.base_type.Type",
-                    "dspy.adapters.types.citation.from_dict_list",
-                    "dspy.adapters.types.citation.format",
-                    "dspy.adapters.types.citation.validate_input",
-                    "dspy.adapters.types.code.Code",
-                    "dspy.adapters.types.document.Document",
-                    "dspy.adapters.types.file.File",
-                    "dspy.adapters.types.image.Image",
-                    "dspy.adapters.types.image._get_file_extension",
-                    "dspy.adapters.types.image.is_image",
-                    "dspy.adapters.types.tool.Tool",
-                    "dspy.adapters.types.tool.validate_input"
+                    "dspy.predict.aggregation.majority",
+                    "dspy.predict.aggregation.default_normalize",
+                    "dspy.predict.avatar.avatar.Avatar",
+                    "dspy.predict.avatar.signatures.Actor",
+                    "dspy.predict.best_of_n.BestOfN",
+                    "dspy.predict.code_act.CodeAct",
+                    "dspy.predict.multi_chain_comparison.MultiChainComparison",
+                    "dspy.predict.program_of_thought.ProgramOfThought",
+                    "dspy.predict.react.ReAct",
+                    "dspy.predict.refine.Refine",
+                    "dspy.predict.refine.WrapperAdapter",
+                    "dspy.predict.refine.inspect_modules",
+                    "dspy.predict.refine.OfferFeedback",
+                    "dspy.predict.rlm.RLM"
                 ]
             },
-            "system_adapters": {
-                "path": "dspy/adapters",
-                "components": [
-                    "dspy.adapters.baml_adapter.BAMLAdapter",
-                    "dspy.adapters.base.Adapter",
-                    "dspy.adapters.two_step_adapter.TwoStepAdapter"
-                ]
-            },
-            "retrievers": {
-                "path": "dspy/retrievers, dspy/dsp",
+            "retrieval_modules": {
+                "path": "dspy/retrievers",
                 "components": [
                     "dspy.dsp.colbertv2.ColBERTv2RetrieverLocal",
                     "dspy.dsp.colbertv2.colbertv2_get_request_v2_wrapped",
                     "dspy.dsp.colbertv2.colbertv2_post_request_v2_wrapped",
                     "dspy.dsp.colbertv2.ColBERTv2RerankerLocal",
                     "dspy.dsp.colbertv2.ColBERTv2",
-                    "dspy.dsp.utils.dpr.SimpleTokenizer",
-                    "dspy.dsp.utils.dpr.locate_answers",
-                    "dspy.dsp.utils.settings.Settings",
-                    "dspy.dsp.utils.utils.load_batch_backgrounds",
                     "dspy.retrievers.databricks_rm.DatabricksRM",
                     "dspy.retrievers.embeddings.EmbeddingsWithScores",
                     "dspy.retrievers.retrieve.Retrieve",
                     "dspy.retrievers.retrieve.single_query_passage",
                     "dspy.retrievers.weaviate_rm.WeaviateRM"
+                ]
+            },
+            "dsp_utilities": {
+                "path": "dspy/dsp/utils",
+                "components": [
+                    "dspy.dsp.utils.dpr.SimpleTokenizer",
+                    "dspy.dsp.utils.dpr.locate_answers",
+                    "dspy.dsp.utils.settings.Settings",
+                    "dspy.dsp.utils.utils.load_batch_backgrounds"
+                ]
+            }
+        }
+    },
+    "data_and_utilities": {
+        "path": "dspy/datasets",
+        "components": [],
+        "children": {
+            "datasets": {
+                "path": "dspy/datasets",
+                "components": [
+                    "dspy.datasets.alfworld.alfworld.AlfWorld",
+                    "dspy.datasets.alfworld.alfworld.env_worker",
+                    "dspy.datasets.dataloader.DataLoader",
+                    "dspy.datasets.dataset.Dataset",
+                    "dspy.datasets.gsm8k.GSM8K",
+                    "dspy.datasets.gsm8k.gsm8k_metric",
+                    "dspy.datasets.math.MATH"
+                ]
+            },
+            "general_utilities": {
+                "path": "dspy/utils",
+                "components": [
+                    "dspy.utils.__init__.download",
+                    "dspy.utils.annotation.decorator",
+                    "dspy.utils.asyncify.wrapped_program",
+                    "dspy.utils.asyncify.async_program",
+                    "dspy.utils.asyncify.get_limiter",
+                    "dspy.utils.callback.async_wrapper",
+                    "dspy.utils.callback.sync_wrapper",
+                    "dspy.utils.syncify.SyncWrapper"
+                ]
+            },
+            "documentation_tools": {
+                "path": "docs",
+                "components": [
+                    "docs.docs.js.copy-as-markdown.createButton",
+                    "docs.docs.tutorials.dataframe_rlm.cohort_analysis.generate_cohort_data.main",
+                    "docs.scripts.generate_api_docs.generate_md_docs",
+                    "docs.scripts.generate_api_summary.main"
                 ]
             }
         }

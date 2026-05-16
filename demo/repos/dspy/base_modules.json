@@ -1,0 +1,241 @@
+{
+  "title": "DSPy Base Modules",
+  "summary": "This module defines the foundational building blocks for all DSPy programs: `BaseModule` provides core functionalities like parameter management and persistence, while `Module` extends it to enable program execution, LM interaction, and batch processing.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_module_class",
+        "label": "Base Module Foundation",
+        "type": "component",
+        "link": null,
+        "title": "dspy.primitives.base_module.BaseModule",
+        "description": "Provides core functionalities for DSPy modules, including parameter management, deep copying, state saving/loading, and sub-module discovery."
+      },
+      {
+        "id": "module_class",
+        "label": "DSPy Program Module",
+        "type": "component",
+        "link": null,
+        "title": "dspy.primitives.module.Module",
+        "description": "The primary base class for all DSPy programs, extending BaseModule with execution logic, LM interaction, callback handling, and parallel processing capabilities."
+      },
+      {
+        "id": "parameter_obj",
+        "label": "Configurable Parameter",
+        "type": "component",
+        "link": "other_module",
+        "title": "dspy.predict.parameter.Parameter",
+        "description": "Represents a tunable or configurable element within a DSPy module, managed by BaseModule for state and optimization."
+      },
+      {
+        "id": "predict_module",
+        "label": "LM Prediction Component",
+        "type": "component",
+        "link": "other_module",
+        "title": "dspy.predict.predict.Predict",
+        "description": "A specialized module responsible for making calls to language models based on a defined signature, often composed within a DSPy Module."
+      },
+      {
+        "id": "lm_client",
+        "label": "Language Model Client",
+        "type": "external",
+        "link": "other_module",
+        "title": "dspy.clients.base_lm.BaseLM",
+        "description": "External service responsible for interacting with various language models, used by prediction components."
+      },
+      {
+        "id": "serialization_libs",
+        "label": "Serialization Utilities",
+        "type": "external",
+        "link": null,
+        "title": "cloudpickle, orjson",
+        "description": "External libraries (like cloudpickle and orjson) used by BaseModule for saving and loading module states or entire programs."
+      },
+      {
+        "id": "parallel_executor",
+        "label": "Parallel Processing Engine",
+        "type": "component",
+        "link": "other_module",
+        "title": "dspy.primitives.parallel.Parallel",
+        "description": "Handles concurrent execution of multiple module calls for efficiency, utilized by the Module's batch method."
+      },
+      {
+        "id": "dspy_settings",
+        "label": "DSPy Global Settings",
+        "type": "component",
+        "link": "other_module",
+        "title": "dspy.dsp.utils.settings",
+        "description": "Manages global configurations, context, and usage tracking for DSPy programs, interacting with Module execution."
+      },
+      {
+        "id": "callback_handlers",
+        "label": "Event Callback System",
+        "type": "component",
+        "link": null,
+        "title": "dspy.utils.callback",
+        "description": "Provides hooks for monitoring and instrumenting module execution, integrated into the Module's call process."
+      },
+      {
+        "id": "prediction_output",
+        "label": "Module Prediction Output",
+        "type": "component",
+        "link": "other_module",
+        "title": "dspy.Prediction",
+        "description": "Standardized data structure representing the output of a DSPy module's execution, often including LM usage information."
+      },
+      {
+        "id": "example_input",
+        "label": "Batch Example Data",
+        "type": "component",
+        "link": "other_module",
+        "title": "dspy.Example",
+        "description": "Input data format used for training or batch processing of modules, processed by the Module's batch method."
+      }
+    ],
+    "edges": [
+      {
+        "source": "module_class",
+        "target": "base_module_class",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_module_class",
+        "target": "parameter_obj",
+        "label": "Manages parameters",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_module_class",
+        "target": "serialization_libs",
+        "label": "Handles persistence",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_module_class",
+        "target": "predict_module",
+        "label": "Loads state for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "module_class",
+        "target": "predict_module",
+        "label": "Composes predictors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "module_class",
+        "target": "dspy_settings",
+        "label": "Uses global settings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "module_class",
+        "target": "callback_handlers",
+        "label": "Integrates callbacks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "module_class",
+        "target": "parallel_executor",
+        "label": "Enables batch processing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "module_class",
+        "target": "example_input",
+        "label": "Processes input data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "module_class",
+        "target": "prediction_output",
+        "label": "Generates output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "predict_module",
+        "target": "lm_client",
+        "label": "Interacts with LM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prediction_output",
+        "target": "dspy_settings",
+        "label": "Reports usage to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_abstractions",
+        "label": "Core Module Abstractions",
+        "nodes": [
+          "base_module_class",
+          "module_class"
+        ],
+        "title": "Core Module Abstractions",
+        "description": "Fundamental classes defining the structure and behavior of DSPy programs.",
+        "role": "generative"
+      },
+      {
+        "id": "module_components",
+        "label": "Internal Module Components",
+        "nodes": [
+          "parameter_obj",
+          "predict_module"
+        ],
+        "title": "Internal Module Components",
+        "description": "Building blocks and specialized sub-modules used within DSPy programs.",
+        "role": "surface"
+      },
+      {
+        "id": "runtime_management",
+        "label": "Runtime Management",
+        "nodes": [
+          "dspy_settings",
+          "callback_handlers",
+          "parallel_executor"
+        ],
+        "title": "Runtime Management",
+        "description": "Utilities and systems that support the execution and monitoring of DSPy modules.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_flow",
+        "label": "Data Flow",
+        "nodes": [
+          "example_input",
+          "prediction_output"
+        ],
+        "title": "Data Flow",
+        "description": "Key data structures for inputs and outputs of DSPy modules.",
+        "role": "data"
+      },
+      {
+        "id": "external_services",
+        "label": "External Services",
+        "nodes": [
+          "lm_client",
+          "serialization_libs"
+        ],
+        "title": "External Services",
+        "description": "Integrations with external systems like language models and serialization tools.",
+        "role": "external"
+      }
+    ]
+  }
+}

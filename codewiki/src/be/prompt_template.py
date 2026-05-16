@@ -247,6 +247,7 @@ TOOLTIP FIELDS (MANDATORY): Every `nodes[]` object MUST include non-empty `title
 <DIAGRAM_DESIGN_RULES>
 1. GROUPING: Organize nodes into groups by functional role. Max 5 nodes per group.
    Every group's `"nodes"` must be a non-empty list of ids that exist verbatim in your `nodes[]` array. Omit any group you cannot populate.
+   Do **not** leave more than 3-4 nodes ungrouped at the top level — if you have more, assign them to groups. If a group would exceed 4-5 nodes, split into additional sibling groups instead of one large group.
 2. NODE LABELS: Describe what happens, NOT class/file names. Good: "Parse source files". Bad: "DependencyParser".
    Put that phrase in every `nodes[].label` — never CamelCase or slug-as-label.
 3. CONNECTIONS: Every edge MUST have a label describing what flows between the nodes.
@@ -315,10 +316,11 @@ TOOLTIP FIELDS: Every node and group MUST have non-empty `title` and `descriptio
 </JSON_FORMAT>
 
 <DIAGRAM_DESIGN_RULES>
-1. NODE LABELS: Describe what happens, NOT class/file names.
-2. CONNECTIONS: Every edge MUST have a label describing what flows.
-3. CROSS-MODULE LINKS: Include dependencies on other modules as external nodes with links.
-4. TOOLTIPS: Follow `<HOVER_COPY_GUIDELINES>` for length and tone.
+1. GROUPING: Organize nodes into `groups` by functional role. Do **not** leave more than 3-4 nodes ungrouped at the top level — if you have more, assign them to groups. Each group should have at most 4-5 nodes; if a cluster would exceed that, split into sibling groups instead of one large group.
+2. NODE LABELS: Describe what happens, NOT class/file names.
+3. CONNECTIONS: Every edge MUST have a label describing what flows.
+4. CROSS-MODULE LINKS: Include dependencies on other modules as external nodes with links.
+5. TOOLTIPS: Follow `<HOVER_COPY_GUIDELINES>` for length and tone.
 </DIAGRAM_DESIGN_RULES>
 
 <NAMING_RULES>
@@ -355,6 +357,7 @@ Diagram rules:
 - Node labels: describe what happens, NOT class names. Good: "Parse Incoming Data". Bad: "DataParser".
 - No id may appear as both a node id and a group id.
 - Omit groups you cannot populate with at least one valid node.
+- GROUPING: Do not leave more than 3-4 nodes ungrouped. If you have more, assign them to groups by role. Max 4-5 nodes per group; split into sibling groups if needed.
 """.strip()
 
 LEAF_JSON_USER_PROMPT = """Analyze the {module_name} module and return a JSON object with "title", "summary", and "diagram".

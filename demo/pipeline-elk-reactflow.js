@@ -407,7 +407,7 @@
                         type: 'elkOrthogonal',
                         sourceHandle: sourceHandle,
                         targetHandle: targetHandle,
-                        zIndex: 0,
+                        zIndex: 4500,
                         style: { stroke: '#64748b', strokeWidth: 1.25 },
                         data: {
                             routePoints: routePoints,

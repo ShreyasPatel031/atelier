@@ -1,0 +1,175 @@
+{
+    "title": "Prediction & Retrieval Strategies",
+    "summary": "This module encompasses advanced strategies for generating predictions, including agentic behaviors, iterative refinement, and code execution. It also provides diverse retrieval mechanisms for fetching relevant information and essential utilities for text processing and configuration management.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "prediction_modules_node",
+                "label": "Prediction Modules",
+                "type": "module",
+                "link": "prediction_and_retrieval_strategies.prediction_modules",
+                "title": "Advanced Prediction Strategies",
+                "description": "Provides diverse strategies for generating predictions, including agentic behaviors, iterative refinement, code execution, and aggregation of multiple outputs."
+            },
+            {
+                "id": "retrieval_modules_node",
+                "label": "Retrieval Modules",
+                "type": "module",
+                "link": "prediction_and_retrieval_strategies.retrieval_modules",
+                "title": "Information Retrieval Mechanisms",
+                "description": "Offers various mechanisms for fetching relevant information from external sources, such as vector databases and specialized search services, to augment LLM responses."
+            },
+            {
+                "id": "dsp_utilities_node",
+                "label": "DSP Utilities",
+                "type": "module",
+                "link": "prediction_and_retrieval_strategies.dsp_utilities",
+                "title": "Core DSPy Utilities",
+                "description": "Contains essential helper functions for text processing (tokenization, answer location), robust configuration management, and efficient loading of background data for various tasks."
+            },
+            {
+                "id": "dspy_program",
+                "label": "DSPy Program",
+                "type": "external",
+                "link": "core_framework.base_modules",
+                "title": "User-Defined DSPy Program",
+                "description": "The main DSPy application logic that orchestrates prediction and retrieval operations to solve complex tasks."
+            },
+            {
+                "id": "language_model",
+                "label": "Language Model (LLM)",
+                "type": "external",
+                "link": "language_model_integration.lm_clients",
+                "title": "External LLM Service",
+                "description": "The underlying large language model that prediction modules interact with to generate responses and perform reasoning."
+            },
+            {
+                "id": "vector_database",
+                "label": "Vector Database / Index",
+                "type": "external",
+                "link": null,
+                "title": "External Knowledge Source",
+                "description": "External systems (e.g., ColBERTv2 index, Databricks Vector Search, Weaviate) that store and provide relevant passages for retrieval."
+            },
+            {
+                "id": "external_tools",
+                "label": "External Tools / APIs",
+                "type": "external",
+                "link": "core_framework.tool_execution",
+                "title": "External Functionality",
+                "description": "Various external services or APIs that agentic prediction modules can invoke to perform actions or gather information."
+            },
+            {
+                "id": "datasets",
+                "label": "Datasets",
+                "type": "external",
+                "link": "data_and_utilities.datasets",
+                "title": "Input/Context Data",
+                "description": "Collections of examples or background information used as input or context for DSPy programs, often processed by utilities."
+            }
+        ],
+        "edges": [
+            {
+                "source": "dspy_program",
+                "target": "prediction_modules_node",
+                "label": "Uses prediction strategies",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_program",
+                "target": "retrieval_modules_node",
+                "label": "Uses retrieval mechanisms",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_program",
+                "target": "dsp_utilities_node",
+                "label": "Leverages utilities",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prediction_modules_node",
+                "target": "language_model",
+                "label": "Interacts with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prediction_modules_node",
+                "target": "external_tools",
+                "label": "Invokes",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrieval_modules_node",
+                "target": "vector_database",
+                "label": "Queries",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrieval_modules_node",
+                "target": "dsp_utilities_node",
+                "label": "Uses text processing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dsp_utilities_node",
+                "target": "datasets",
+                "label": "Processes data from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prediction_modules_node",
+                "target": "retrieval_modules_node",
+                "label": "Integrates retrieval (e.g., RAG)",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_strategies",
+                "label": "Core Strategies",
+                "nodes": [
+                    "prediction_modules_node",
+                    "retrieval_modules_node"
+                ],
+                "title": "Prediction & Retrieval Core",
+                "description": "The central components providing advanced prediction capabilities and mechanisms for fetching relevant information.",
+                "role": null
+            },
+            {
+                "id": "supporting_utilities",
+                "label": "Supporting Utilities",
+                "nodes": [
+                    "dsp_utilities_node"
+                ],
+                "title": "Essential Helper Functions",
+                "description": "Provides foundational utilities for text processing, configuration management, and data preparation that support prediction and retrieval tasks.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "dspy_program",
+                    "language_model",
+                    "vector_database",
+                    "external_tools",
+                    "datasets"
+                ],
+                "title": "External Systems & Data",
+                "description": "Represents the DSPy program itself and external systems like LLMs, vector databases, tools, and datasets that interact with this module.",
+                "role": null
+            }
+        ]
+    }
+}

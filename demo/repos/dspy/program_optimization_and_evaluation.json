@@ -1,0 +1,189 @@
+{
+    "title": "Program Optimization and Evaluation",
+    "summary": "This module provides advanced teleprompters (optimizers) for DSPy programs, along with tools for evaluating their performance and proposing optimized instructions. It encompasses strategies for iterative prompt refinement, few-shot example selection, reinforcement learning, and meta-optimization, ensuring robust and efficient program development.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "teleprompters_module",
+                "label": "Program Optimizers (Teleprompters)",
+                "type": "module",
+                "link": "program_optimization_and_evaluation.teleprompters",
+                "title": "DSPy Program Optimizers",
+                "description": "A collection of advanced optimizers that employ various strategies like iterative prompt refinement, few-shot example selection, reinforcement learning, and meta-optimization to enhance DSPy program performance."
+            },
+            {
+                "id": "evaluation_metrics_module",
+                "label": "Evaluation Metrics",
+                "type": "module",
+                "link": "program_optimization_and_evaluation.evaluation_metrics",
+                "title": "DSPy Evaluation Metrics",
+                "description": "Provides a suite of metrics for evaluating DSPy programs, including traditional exact-match/F1 scores and advanced LLM-based metrics for semantic F1, completeness, and groundedness."
+            },
+            {
+                "id": "program_proposers_module",
+                "label": "Program Instruction Proposers",
+                "type": "module",
+                "link": "program_optimization_and_evaluation.program_proposers",
+                "title": "DSPy Program Proposers",
+                "description": "Tools for analyzing datasets and language model programs, generating observations, and proposing optimized instructions for individual modules within a program."
+            },
+            {
+                "id": "optimization_utilities_module",
+                "label": "Optimization Utility Functions",
+                "type": "module",
+                "link": "program_optimization_and_evaluation.optimization_utilities",
+                "title": "DSPy Optimization Utilities",
+                "description": "Helper functions for monitoring and evaluating program optimization trials, including inspecting model execution history, logging token usage, and calculating program quality over time."
+            },
+            {
+                "id": "dspy_program",
+                "label": "DSPy Program",
+                "type": "external",
+                "link": "core_framework.base_modules",
+                "title": "DSPy Program Module",
+                "description": "The core DSPy program (a dspy.Module instance) that is being optimized or evaluated."
+            },
+            {
+                "id": "datasets",
+                "label": "Datasets (Train/Dev)",
+                "type": "external",
+                "link": "data_and_utilities.datasets",
+                "title": "DSPy Datasets",
+                "description": "Collections of examples used for training, development, and evaluation of DSPy programs."
+            },
+            {
+                "id": "language_model",
+                "label": "Language Model (LLM)",
+                "type": "external",
+                "link": "language_model_integration.lm_clients",
+                "title": "External Language Model",
+                "description": "The underlying large language model that DSPy programs interact with, used by optimizers and evaluators."
+            }
+        ],
+        "edges": [
+            {
+                "source": "teleprompters_module",
+                "target": "dspy_program",
+                "label": "Optimizes",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "teleprompters_module",
+                "target": "evaluation_metrics_module",
+                "label": "Uses for scoring",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "teleprompters_module",
+                "target": "datasets",
+                "label": "Trains/Evaluates on",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "teleprompters_module",
+                "target": "program_proposers_module",
+                "label": "Leverages for instruction generation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "teleprompters_module",
+                "target": "optimization_utilities_module",
+                "label": "Utilizes for monitoring",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_metrics_module",
+                "target": "dspy_program",
+                "label": "Evaluates output of",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_metrics_module",
+                "target": "language_model",
+                "label": "Uses for LLM-based metrics",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "program_proposers_module",
+                "target": "datasets",
+                "label": "Analyzes",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "program_proposers_module",
+                "target": "dspy_program",
+                "label": "Analyzes structure of",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "optimization_utilities_module",
+                "target": "dspy_program",
+                "label": "Inspects execution of",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "optimization_utilities_module",
+                "target": "datasets",
+                "label": "Evaluates on",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "optimization_strategies",
+                "label": "Optimization Strategies",
+                "nodes": [
+                    "teleprompters_module"
+                ],
+                "title": "DSPy Program Optimization",
+                "description": "This group encompasses various teleprompters and optimizers designed to automatically improve the performance of DSPy programs through techniques like prompt engineering, few-shot learning, and reinforcement learning.",
+                "role": null
+            },
+            {
+                "id": "evaluation_and_analysis",
+                "label": "Evaluation & Analysis",
+                "nodes": [
+                    "evaluation_metrics_module",
+                    "optimization_utilities_module"
+                ],
+                "title": "Program Evaluation and Monitoring",
+                "description": "Components for assessing the quality of DSPy programs using diverse metrics and utilities for monitoring optimization trials, tracking performance, and debugging.",
+                "role": null
+            },
+            {
+                "id": "instruction_generation",
+                "label": "Instruction Generation",
+                "nodes": [
+                    "program_proposers_module"
+                ],
+                "title": "Automated Instruction Proposal",
+                "description": "Tools that analyze program structure and datasets to automatically propose and refine instructions for language models, aiding in the optimization process.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "dspy_program",
+                    "datasets",
+                    "language_model"
+                ],
+                "title": "Core DSPy & External Systems",
+                "description": "Represents the core DSPy program being worked on, the datasets used for training and evaluation, and the underlying language models that power the operations within this module.",
+                "role": null
+            }
+        ]
+    }
+}

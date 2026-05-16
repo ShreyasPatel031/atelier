@@ -1,0 +1,175 @@
+{
+    "title": "DSPy Core Framework",
+    "summary": "This module establishes the foundational architecture for building and optimizing Language Model programs in DSPy. It defines core program structures, manages interactions with LMs and external tools, and provides mechanisms for structured data handling and task definition.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "program_structure",
+                "label": "DSPy Program Structure",
+                "type": "module",
+                "link": "base_modules",
+                "title": "Core Program Building Blocks",
+                "description": "Defines the fundamental classes for DSPy programs, including module hierarchy, parameter management, and the core execution logic for LM interactions."
+            },
+            {
+                "id": "task_definition",
+                "label": "LM Task Definition (Signatures)",
+                "type": "module",
+                "link": "signatures",
+                "title": "Language Model Task Specification",
+                "description": "Provides the mechanism to formally define the inputs, outputs, and instructions for any Language Model task, guiding the LM's behavior within DSPy programs."
+            },
+            {
+                "id": "data_io_adapters",
+                "label": "Data I/O & LM Adapters",
+                "type": "module",
+                "link": "data_types_and_adapters",
+                "title": "Structured Data & LM Interaction",
+                "description": "Manages how DSPy programs interact with Language Models, handling prompt construction, response parsing, and integrating native LM features like function calling."
+            },
+            {
+                "id": "custom_types",
+                "label": "Custom Data Types",
+                "type": "module",
+                "link": "data_types_and_adapters",
+                "title": "Extensible Data Structures",
+                "description": "Enables the definition and handling of diverse structured and multimodal data types (e.g., Audio, Image, Tool) for seamless integration into LM inputs and outputs."
+            },
+            {
+                "id": "tool_integration",
+                "label": "External Tool Integration",
+                "type": "module",
+                "link": "tool_execution",
+                "title": "LLM Tooling & Sandboxing",
+                "description": "Provides primitives for integrating and executing external tools and functions within a sandboxed environment, enabling LLMs to interact with dynamic data and services."
+            },
+            {
+                "id": "language_model",
+                "label": "Language Model (LLM)",
+                "type": "external",
+                "link": "language_model_integration.lm_clients",
+                "title": "External Language Model",
+                "description": "The underlying large language model that DSPy programs interact with to perform tasks, abstracted by DSPy's LM clients for consistent access."
+            },
+            {
+                "id": "external_services",
+                "label": "External Services & APIs",
+                "type": "external",
+                "link": null,
+                "title": "External Systems & APIs",
+                "description": "Represents various external systems, databases, or APIs that DSPy programs might interact with via tools or custom data types for enhanced functionality."
+            }
+        ],
+        "edges": [
+            {
+                "source": "program_structure",
+                "target": "task_definition",
+                "label": "Uses to define tasks",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "program_structure",
+                "target": "data_io_adapters",
+                "label": "Executes via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "program_structure",
+                "target": "tool_integration",
+                "label": "Orchestrates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "task_definition",
+                "target": "custom_types",
+                "label": "Defines fields with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_io_adapters",
+                "target": "language_model",
+                "label": "Communicates with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_io_adapters",
+                "target": "custom_types",
+                "label": "Processes",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "custom_types",
+                "target": "external_services",
+                "label": "Accesses/Represents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tool_integration",
+                "target": "external_services",
+                "label": "Invokes",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "language_model",
+                "target": "data_io_adapters",
+                "label": "Returns responses to",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_abstractions",
+                "label": "Core Abstractions",
+                "nodes": [
+                    "program_structure",
+                    "task_definition"
+                ],
+                "title": "Fundamental DSPy Building Blocks",
+                "description": "Defines the essential components for structuring DSPy programs and specifying Language Model tasks, forming the backbone of any DSPy application.",
+                "role": null
+            },
+            {
+                "id": "lm_interaction_layer",
+                "label": "LM Interaction & Data Layer",
+                "nodes": [
+                    "data_io_adapters",
+                    "custom_types"
+                ],
+                "title": "Managing LM Communication & Data",
+                "description": "Handles the interface with Language Models, including prompt formatting, response parsing, and robust support for diverse structured and multimodal data types.",
+                "role": null
+            },
+            {
+                "id": "external_integration",
+                "label": "External Integration",
+                "nodes": [
+                    "tool_integration"
+                ],
+                "title": "Connecting to External Capabilities",
+                "description": "Enables DSPy programs to leverage external tools and services, extending their capabilities beyond the Language Model itself through sandboxed execution.",
+                "role": null
+            },
+            {
+                "id": "external_systems",
+                "label": "External Systems",
+                "nodes": [
+                    "language_model",
+                    "external_services"
+                ],
+                "title": "Dependencies Outside DSPy",
+                "description": "Represents the external Language Models and other services that the DSPy framework interacts with to perform its functions and extend its reach.",
+                "role": null
+            }
+        ]
+    }
+}

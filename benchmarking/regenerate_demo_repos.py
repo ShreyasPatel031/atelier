@@ -130,15 +130,19 @@ def clone_repo(name: str, url: str) -> Path:
 
 
 def _find_codewiki_exe() -> str:
-    """Locate the codewiki executable, preferring pipx / PATH over bare sys.executable."""
+    """Locate the codewiki executable, preferring this repo's venv over global PATH."""
     import shutil
     # 1. Explicit override via env var
     if exe := os.environ.get("CODEWIKI_EXE"):
         return exe
-    # 2. `codewiki` on PATH (installed via pipx or pip install --user)
+    # 2. This repository's .venv (editable install — matches the code you are editing)
+    venv_codewiki = REPO_ROOT / ".venv" / "bin" / "codewiki"
+    if venv_codewiki.is_file():
+        return str(venv_codewiki)
+    # 3. `codewiki` on PATH (installed via pipx or pip install --user)
     if found := shutil.which("codewiki"):
         return found
-    # 3. python -m codewiki using the current interpreter as a last resort
+    # 4. python -m codewiki using the current interpreter as a last resort
     return f"{sys.executable} -m codewiki"
 
 

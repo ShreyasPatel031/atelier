@@ -1,0 +1,161 @@
+{
+    "title": "Data & Utility Management",
+    "summary": "This module provides comprehensive tools for managing datasets, including loading, processing, and specialized task datasets. It also offers general-purpose utilities for file operations, asynchronous execution, callback handling, and documentation generation.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "datasets_module",
+                "label": "Manage DSPy Datasets",
+                "type": "module",
+                "link": "data_and_utilities.datasets",
+                "title": "DSPy Dataset Management",
+                "description": "Handles loading, processing, and managing various datasets for DSPy programs, including specialized task datasets and utilities for data splitting and sampling."
+            },
+            {
+                "id": "general_utilities_module",
+                "label": "Provide General Utilities",
+                "type": "module",
+                "link": "data_and_utilities.general_utilities",
+                "title": "General DSPy Utilities",
+                "description": "Offers a collection of general-purpose utilities for file downloading, asynchronous program execution, callback management, and adapting async modules for synchronous use."
+            },
+            {
+                "id": "documentation_tools_module",
+                "label": "Generate Documentation",
+                "type": "module",
+                "link": "data_and_utilities.documentation_tools",
+                "title": "Documentation Generation Tools",
+                "description": "Provides tools for generating and enhancing documentation, including API reference creation, MkDocs navigation updates, client-side Markdown copy features, and synthetic data generation for tutorials."
+            },
+            {
+                "id": "dspy_program",
+                "label": "DSPy Program",
+                "type": "external",
+                "link": "core_framework.base_modules",
+                "title": "User DSPy Program",
+                "description": "The main DSPy application logic that utilizes datasets and general utilities for its operations."
+            },
+            {
+                "id": "external_data_sources",
+                "label": "External Data Sources",
+                "type": "external",
+                "link": null,
+                "title": "Data Repositories",
+                "description": "Represents various external origins like HuggingFace, local files, or databases from which datasets are loaded."
+            },
+            {
+                "id": "external_web_services",
+                "label": "External Web Services",
+                "type": "external",
+                "link": null,
+                "title": "Web Resources",
+                "description": "External web endpoints or services used for downloading files or other general utility functions."
+            },
+            {
+                "id": "documentation_platform",
+                "label": "Documentation Platform",
+                "type": "external",
+                "link": null,
+                "title": "MkDocs & Browser",
+                "description": "The static site generator (MkDocs) and user's web browser where documentation is rendered and interacted with."
+            }
+        ],
+        "edges": [
+            {
+                "source": "dspy_program",
+                "target": "datasets_module",
+                "label": "Consumes data from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_program",
+                "target": "general_utilities_module",
+                "label": "Leverages utilities from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "datasets_module",
+                "target": "external_data_sources",
+                "label": "Loads data from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "general_utilities_module",
+                "target": "external_web_services",
+                "label": "Interacts with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "documentation_tools_module",
+                "target": "documentation_platform",
+                "label": "Publishes to / Enhances",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "datasets_module",
+                "target": "general_utilities_module",
+                "label": "May use for file ops",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "documentation_tools_module",
+                "target": "dspy_program",
+                "label": "Generates docs for",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "data_management",
+                "label": "Data Management",
+                "nodes": [
+                    "datasets_module"
+                ],
+                "title": "DSPy Data Management",
+                "description": "This group focuses on tools for loading, processing, and managing various datasets, including specialized task datasets and utilities for data splitting and sampling.",
+                "role": "data"
+            },
+            {
+                "id": "core_utilities",
+                "label": "Core Utilities",
+                "nodes": [
+                    "general_utilities_module"
+                ],
+                "title": "General DSPy Utilities",
+                "description": "A collection of general-purpose utilities for file operations, asynchronous execution, and callback handling, supporting various aspects of DSPy programs.",
+                "role": "utility"
+            },
+            {
+                "id": "documentation_support",
+                "label": "Documentation Support",
+                "nodes": [
+                    "documentation_tools_module"
+                ],
+                "title": "Documentation Generation & Enhancement",
+                "description": "Tools dedicated to generating and enhancing documentation, including API reference creation, MkDocs navigation updates, and client-side features for improved user experience.",
+                "role": "analytical"
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "dspy_program",
+                    "external_data_sources",
+                    "external_web_services",
+                    "documentation_platform"
+                ],
+                "title": "External Systems & Consumers",
+                "description": "Represents external systems and consumers that interact with the data and utility modules, such as DSPy programs, data repositories, web services, and documentation platforms.",
+                "role": "external"
+            }
+        ]
+    }
+}
