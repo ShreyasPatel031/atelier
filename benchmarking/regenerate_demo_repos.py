@@ -134,7 +134,10 @@ def _find_codewiki_exe() -> str:
     import shutil
     # 1. Explicit override via env var
     if exe := os.environ.get("CODEWIKI_EXE"):
-        return exe
+        p = Path(exe)
+        if not p.is_absolute():
+            p = (REPO_ROOT / p).resolve()
+        return str(p)
     # 2. `codewiki` on PATH (installed via pipx or pip install --user)
     if found := shutil.which("codewiki"):
         return found
