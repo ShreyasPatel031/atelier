@@ -1,0 +1,95 @@
+{
+    "title": "Core Framework Components",
+    "summary": "This module defines the fundamental building blocks of DSPy, encompassing the base classes for program modules, signature definitions for LM interactions, flexible data types and adapters, and robust tool execution capabilities. It provides the essential primitives for constructing and managing complex language model programs.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "base_modules_node",
+                "label": "Core DSPy Modules",
+                "type": "module",
+                "link": "base_modules",
+                "title": "DSPy Base Modules",
+                "description": "Provides foundational classes (BaseModule, Module) for all DSPy programs, managing parameters, persistence, execution logic, and LM interaction. These are the building blocks for complex LM pipelines."
+            },
+            {
+                "id": "signatures_node",
+                "label": "Define LM Task Structure",
+                "type": "module",
+                "link": "signatures",
+                "title": "DSPy Signature Definition",
+                "description": "Defines the structure and behavior of DSPy Signatures, including dynamic creation, field validation, and instruction generation for LM tasks. It guides LM behavior."
+            },
+            {
+                "id": "data_types_adapters_node",
+                "label": "Handle Data & LM Interactions",
+                "type": "module",
+                "link": "data_types_and_adapters",
+                "title": "Data Types and Adapters",
+                "description": "Offers a flexible framework for custom data types and adapters, enabling seamless interaction with LMs and handling diverse structured/unstructured data formats. It bridges data to LMs."
+            },
+            {
+                "id": "tool_execution_node",
+                "label": "Execute External Tools",
+                "type": "module",
+                "link": "tool_execution",
+                "title": "Tool Execution & Sandboxing",
+                "description": "Provides primitives for integrating and executing external tools within a sandboxed environment. This enables LLMs to interact with dynamic data and functions securely."
+            }
+        ],
+        "edges": [
+            {
+                "source": "base_modules_node",
+                "target": "signatures_node",
+                "label": "Uses for LM Calls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "base_modules_node",
+                "target": "data_types_adapters_node",
+                "label": "Integrates Custom Data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_types_adapters_node",
+                "target": "tool_execution_node",
+                "label": "Defines Callable Tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tool_execution_node",
+                "target": "base_modules_node",
+                "label": "Enables Agentic Behavior",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_abstractions_group",
+                "label": "Core Abstractions",
+                "nodes": [
+                    "base_modules_node",
+                    "signatures_node"
+                ],
+                "title": "Core DSPy Abstractions",
+                "description": "The foundational programming model elements of DSPy, defining how programs are structured and how language model tasks are specified. These form the backbone of any DSPy application.",
+                "role": null
+            },
+            {
+                "id": "interaction_execution_group",
+                "label": "Data & External Interaction",
+                "nodes": [
+                    "data_types_adapters_node",
+                    "tool_execution_node"
+                ],
+                "title": "Data & External Interaction",
+                "description": "Components that manage diverse data types, adapt interactions with language models, and enable the secure execution of external tools. They facilitate real-world integration.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,95 @@
+{
+    "title": "Program Optimization & Evaluation",
+    "summary": "This module provides comprehensive tools for optimizing and evaluating DSPy programs. It includes various teleprompters for automated prompt engineering and few-shot example selection, alongside a suite of metrics for robust program performance assessment.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "teleprompters_node",
+                "label": "Optimize DSPy Programs",
+                "type": "module",
+                "link": "teleprompters",
+                "title": "DSPy Program Optimizers",
+                "description": "Contains various teleprompters (optimizers) for automated prompt engineering, few-shot example selection, and fine-tuning strategies to improve DSPy program performance."
+            },
+            {
+                "id": "evaluation_metrics_node",
+                "label": "Evaluate Program Performance",
+                "type": "module",
+                "link": "evaluation_metrics",
+                "title": "DSPy Evaluation Metrics",
+                "description": "Provides a suite of metrics for evaluating DSPy programs, including traditional exact-match scores and advanced LLM-based metrics for semantic F1, completeness, and groundedness."
+            },
+            {
+                "id": "program_proposers_node",
+                "label": "Propose Program Instructions",
+                "type": "module",
+                "link": "program_proposers",
+                "title": "DSPy Program Proposers",
+                "description": "Offers tools for analyzing datasets and programs, generating observations, and proposing optimized instructions for individual modules to enhance prompt quality."
+            },
+            {
+                "id": "optimization_utilities_node",
+                "label": "Provide Optimization Utilities",
+                "type": "module",
+                "link": "optimization_utilities",
+                "title": "DSPy Optimization Utilities",
+                "description": "Contains helper functions for monitoring and evaluating program optimization trials, including execution history inspection, token usage logging, and quality calculation."
+            }
+        ],
+        "edges": [
+            {
+                "source": "teleprompters_node",
+                "target": "evaluation_metrics_node",
+                "label": "Uses for scoring",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "program_proposers_node",
+                "target": "teleprompters_node",
+                "label": "Informs optimization",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "optimization_utilities_node",
+                "target": "teleprompters_node",
+                "label": "Supports optimization process",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "optimization_utilities_node",
+                "target": "evaluation_metrics_node",
+                "label": "Aids in analysis",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "optimization_strategies_group",
+                "label": "Optimization Strategies",
+                "nodes": [
+                    "teleprompters_node",
+                    "program_proposers_node"
+                ],
+                "title": "Core Optimization Strategies",
+                "description": "Modules dedicated to developing and applying various strategies for improving DSPy program performance, from prompt engineering to instruction generation.",
+                "role": null
+            },
+            {
+                "id": "evaluation_support_group",
+                "label": "Evaluation & Support",
+                "nodes": [
+                    "evaluation_metrics_node",
+                    "optimization_utilities_node"
+                ],
+                "title": "Evaluation & Utility Support",
+                "description": "Components providing the necessary metrics and utility functions to measure, monitor, and analyze the effectiveness of DSPy program optimizations.",
+                "role": null
+            }
+        ]
+    }
+}

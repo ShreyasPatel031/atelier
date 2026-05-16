@@ -1,0 +1,300 @@
+{
+  "title": "Prediction Strategies & Modules",
+  "summary": "This module provides a collection of advanced prediction strategies and modules for DSPy programs, including agentic frameworks like ReAct and CodeAct, iterative refinement techniques, and aggregation utilities. It enables complex reasoning, tool use, and programmatic problem-solving within language model applications.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "majority_agg",
+        "label": "Aggregate Majority Prediction",
+        "type": "component",
+        "link": null,
+        "title": "Majority Aggregation",
+        "description": "Determines the most common completion for a specified field across multiple predictions, ignoring normalized values that are None. Prioritizes earlier completions in case of ties."
+      },
+      {
+        "id": "default_normalize_func",
+        "label": "Normalize Text",
+        "type": "component",
+        "link": null,
+        "title": "Default Normalization",
+        "description": "Provides a default text normalization function, typically used to clean string outputs before aggregation or comparison."
+      },
+      {
+        "id": "avatar_agent",
+        "label": "Execute Tool-Using Agent",
+        "type": "component",
+        "link": null,
+        "title": "Avatar Agent",
+        "description": "An agent that iteratively uses a set of tools, including a 'Finish' tool, to accomplish a goal defined by a signature. It reasons and acts based on the current state and tool outputs."
+      },
+      {
+        "id": "actor_signature",
+        "label": "Define Agent Actions",
+        "type": "component",
+        "link": null,
+        "title": "Actor Signature",
+        "description": "A DSPy Signature that defines the structure for an agent's actions, including the goal, available tools, and the format for outputting actions."
+      },
+      {
+        "id": "best_of_n_strategy",
+        "label": "Select Best Prediction (N Attempts)",
+        "type": "component",
+        "link": null,
+        "title": "Best-of-N Strategy",
+        "description": "Runs a given DSPy module multiple times (N) with different rollouts, evaluating each attempt with a reward function, and returns the best prediction or the first one exceeding a threshold."
+      },
+      {
+        "id": "code_act_agent",
+        "label": "Execute Code with Tools",
+        "type": "component",
+        "link": null,
+        "title": "CodeAct Agent",
+        "description": "An agent that combines ReAct and ProgramOfThought paradigms, generating and executing Python code within an interpreter, utilizing provided tools to solve problems."
+      },
+      {
+        "id": "multi_chain_comparison",
+        "label": "Compare Multiple Reasoning Chains",
+        "type": "component",
+        "link": null,
+        "title": "Multi-Chain Comparison",
+        "description": "Compares and synthesizes insights from multiple reasoning attempts (chains of thought) to produce a refined rationale and final answer, often used for improving robustness."
+      },
+      {
+        "id": "program_of_thought",
+        "label": "Execute Python Programs",
+        "type": "component",
+        "link": null,
+        "title": "Program of Thought",
+        "description": "A module that generates and executes Python code within a sandboxed interpreter to solve problems, iteratively refining the code based on execution results or errors."
+      },
+      {
+        "id": "react_agent",
+        "label": "Reason and Act with Tools",
+        "type": "component",
+        "link": null,
+        "title": "ReAct Agent",
+        "description": "An agent that interleaves natural language reasoning with tool usage. It decides whether to call a tool for more information or to finish the task based on its internal thought process."
+      },
+      {
+        "id": "refine_strategy",
+        "label": "Refine Module Output",
+        "type": "component",
+        "link": null,
+        "title": "Refine Strategy",
+        "description": "Iteratively refines the output of a DSPy module by running it multiple times, evaluating with a reward function, and generating feedback to improve subsequent attempts if a threshold is not met."
+      },
+      {
+        "id": "wrapper_adapter",
+        "label": "Adapt Module with Hints",
+        "type": "component",
+        "link": null,
+        "title": "Refine Wrapper Adapter",
+        "description": "An internal adapter used by the Refine module to inject hints (feedback) into the module's input signature during subsequent refinement attempts."
+      },
+      {
+        "id": "inspect_modules_util",
+        "label": "Inspect Program Modules",
+        "type": "component",
+        "link": null,
+        "title": "Module Inspector",
+        "description": "Utility function to extract and format detailed information about the sub-modules within a DSPy program, including their input/output fields and instructions."
+      },
+      {
+        "id": "offer_feedback_signature",
+        "label": "Define Feedback Generation",
+        "type": "component",
+        "link": null,
+        "title": "Offer Feedback Signature",
+        "description": "A DSPy Signature used by the Refine module to guide an LLM in generating concrete advice for improving specific sub-modules based on their performance and trajectory."
+      },
+      {
+        "id": "rlm_module",
+        "label": "Recursive Language Model (REPL)",
+        "type": "component",
+        "link": null,
+        "title": "RLM Module",
+        "description": "A module that enables an LLM to programmatically explore contexts and solve problems by writing and executing Python code within a sandboxed REPL, including calling sub-LLMs and user-defined tools."
+      },
+      {
+        "id": "code_interpreter_external",
+        "label": "Code Interpreter",
+        "type": "external",
+        "link": null,
+        "title": "External Code Interpreter",
+        "description": "An external component responsible for executing Python code in a sandboxed environment, used by modules like ProgramOfThought, CodeAct, and RLM."
+      },
+      {
+        "id": "dspy_module_base",
+        "label": "DSPy Base Module",
+        "type": "external",
+        "link": "base_modules",
+        "title": "DSPy Base Module",
+        "description": "The fundamental building block for all DSPy programs, representing a callable component that can be composed and optimized."
+      }
+    ],
+    "edges": [
+      {
+        "source": "avatar_agent",
+        "target": "actor_signature",
+        "label": "uses signature",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "best_of_n_strategy",
+        "target": "dspy_module_base",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_agent",
+        "target": "react_agent",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_agent",
+        "target": "program_of_thought",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_agent",
+        "target": "code_interpreter_external",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_of_thought",
+        "target": "code_interpreter_external",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react_agent",
+        "target": "dspy_module_base",
+        "label": "is a",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_strategy",
+        "target": "dspy_module_base",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_strategy",
+        "target": "wrapper_adapter",
+        "label": "uses internally",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_strategy",
+        "target": "inspect_modules_util",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_strategy",
+        "target": "offer_feedback_signature",
+        "label": "uses signature",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm_module",
+        "target": "code_interpreter_external",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "majority_agg",
+        "target": "default_normalize_func",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "agentic_prediction_modules",
+        "label": "Agentic Prediction Modules",
+        "nodes": [
+          "avatar_agent",
+          "code_act_agent",
+          "react_agent",
+          "rlm_module"
+        ],
+        "title": "Agentic Prediction Modules",
+        "description": "Modules that implement agentic behavior, interleaving reasoning, tool use, and iterative actions to solve complex tasks.",
+        "role": "generative"
+      },
+      {
+        "id": "reasoning_programmatic_modules",
+        "label": "Reasoning & Programmatic Modules",
+        "nodes": [
+          "multi_chain_comparison",
+          "program_of_thought"
+        ],
+        "title": "Reasoning & Programmatic Modules",
+        "description": "Modules focused on structured reasoning, code generation, and execution to derive solutions.",
+        "role": "generative"
+      },
+      {
+        "id": "prediction_optimization_modules",
+        "label": "Prediction Optimization Modules",
+        "nodes": [
+          "best_of_n_strategy",
+          "refine_strategy"
+        ],
+        "title": "Prediction Optimization Modules",
+        "description": "Modules designed to improve the quality of predictions through multiple attempts, selection, and refinement based on feedback.",
+        "role": "analytical"
+      },
+      {
+        "id": "prediction_aggregation_utilities",
+        "label": "Prediction Aggregation Utilities",
+        "nodes": [
+          "majority_agg",
+          "default_normalize_func"
+        ],
+        "title": "Prediction Aggregation Utilities",
+        "description": "Utility functions for combining and normalizing multiple prediction outputs.",
+        "role": "data"
+      },
+      {
+        "id": "refinement_support_components",
+        "label": "Refinement Support Components",
+        "nodes": [
+          "wrapper_adapter",
+          "inspect_modules_util",
+          "offer_feedback_signature"
+        ],
+        "title": "Refinement Support Components",
+        "description": "Internal components and signatures that facilitate the refinement process within modules like Refine.",
+        "role": "surface"
+      },
+      {
+        "id": "agent_signature_definitions",
+        "label": "Agent Signature Definitions",
+        "nodes": [
+          "actor_signature"
+        ],
+        "title": "Agent Signature Definitions",
+        "description": "Signatures that define the input and output structure for agentic prediction modules.",
+        "role": "surface"
+      }
+    ]
+  }
+}

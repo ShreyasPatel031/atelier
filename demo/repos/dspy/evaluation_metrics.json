@@ -1,16 +1,16 @@
 {
   "title": "Evaluation Metrics Module",
-  "summary": "This module provides a collection of metrics for evaluating language model responses, including both LLM-based auto-evaluation techniques for semantic understanding and traditional string/token-based comparison methods.",
+  "summary": "This module provides a suite of metrics for evaluating DSPy programs, including both traditional exact-match/F1 scores and advanced LLM-based metrics for semantic F1, completeness, and groundedness.",
   "diagram": {
     "direction": "TD",
     "nodes": [
       {
         "id": "SemanticF1",
-        "label": "Calculate Semantic F1 Score",
+        "label": "Calculate Semantic F1",
         "type": "component",
         "link": null,
-        "title": "Semantic F1 Score",
-        "description": "Computes the semantic F1 score between a prediction and ground truth using LLM-based precision and recall. It can operate in a standard or decompositional mode."
+        "title": "Semantic F1 Metric",
+        "description": "Computes semantic F1 between prediction and ground truth using LLM-based precision/recall. Optionally uses a decompositional approach and applies a threshold."
       },
       {
         "id": "CompleteAndGrounded",
@@ -18,55 +18,55 @@
         "type": "component",
         "link": null,
         "title": "Completeness & Groundedness Metric",
-        "description": "Combines individual scores for answer completeness and groundedness into a single metric, leveraging LLM-based modules for each assessment."
+        "description": "Combines answer completeness and groundedness into a single score. Leverages separate LLM-based modules for each aspect with a configurable threshold."
       },
       {
         "id": "SemanticRecallPrecision",
-        "label": "Define Semantic Recall & Precision",
+        "label": "LLM Signature: Semantic Recall/Precision",
         "type": "component",
         "link": null,
         "title": "Semantic Recall/Precision Signature",
-        "description": "A DSPy Signature that defines the inputs and outputs for an LLM to compute semantic recall and precision between a system response and ground truth."
+        "description": "DSPy Signature for an LLM to compare system response to ground truth, computing recall and precision based on key ideas."
       },
       {
         "id": "DecompositionalSemanticRecallPrecision",
-        "label": "Define Decompositional Semantic Recall & Precision",
+        "label": "LLM Signature: Decompositional Semantic Recall/Precision",
         "type": "component",
         "link": null,
         "title": "Decompositional Semantic Recall/Precision Signature",
-        "description": "A DSPy Signature for LLM-based semantic recall and precision that involves enumerating key ideas from both ground truth and system response before discussing their overlap."
+        "description": "DSPy Signature for an LLM to compute recall and precision by enumerating key ideas, discussing overlap, and reporting scores."
       },
       {
         "id": "AnswerCompleteness",
-        "label": "Define Answer Completeness",
+        "label": "LLM Signature: Answer Completeness",
         "type": "component",
         "link": null,
         "title": "Answer Completeness Signature",
-        "description": "A DSPy Signature for an LLM to estimate the completeness of a system's response against a ground truth, by identifying and comparing key ideas."
+        "description": "DSPy Signature for an LLM to estimate completeness of a system's response against ground truth, based on key idea enumeration and overlap."
       },
       {
         "id": "AnswerGroundedness",
-        "label": "Define Answer Groundedness",
+        "label": "LLM Signature: Answer Groundedness",
         "type": "component",
         "link": null,
         "title": "Answer Groundedness Signature",
-        "description": "A DSPy Signature for an LLM to estimate the groundedness of a system's response by evaluating how well its claims are supported by retrieved context."
+        "description": "DSPy Signature for an LLM to estimate groundedness of a system's response against retrieved context, analyzing claims and their support."
       },
       {
         "id": "answer_exact_match",
         "label": "Check Exact Answer Match",
         "type": "component",
         "link": null,
-        "title": "Exact Match Metric",
-        "description": "Evaluates if a predicted answer exactly matches or achieves a minimum F1-score threshold against a ground truth answer or a list of possible answers."
+        "title": "Exact Match Evaluation",
+        "description": "Evaluates if a prediction's answer exactly matches or meets an F1-threshold against a ground truth answer (string or list)."
       },
       {
         "id": "passage_has_answers",
         "label": "Check Passage for Answers",
         "type": "component",
         "link": null,
-        "title": "Passage Contains Answers Metric",
-        "description": "Determines if a given text passage contains any of the specified reference answers, after applying text normalization."
+        "title": "Passage Answer Check",
+        "description": "Determines if a given passage contains any of the provided answer strings after normalization."
       },
       {
         "id": "precision_score",
@@ -74,50 +74,79 @@
         "type": "component",
         "link": null,
         "title": "Token Precision Score",
-        "description": "Computes the token-level precision of a predicted answer against a ground truth answer, after text normalization."
+        "description": "Computes the token-level precision of a predicted string against a ground truth string after normalization. Ratio of overlapping tokens to prediction tokens."
       },
       {
         "id": "HotPotF1",
-        "label": "Calculate HotPotQA F1 Score",
+        "label": "Calculate HotPotQA F1",
         "type": "component",
         "link": null,
         "title": "HotPotQA F1 Metric",
-        "description": "Calculates the maximum HotPotQA-style F1 score between a prediction and a list of reference answers, with specific handling for 'yes', 'no', and 'noanswer' cases."
+        "description": "Calculates the maximum HotPotQA-style F1 score between a prediction and reference answers, handling 'yes/no/noanswer' cases."
       },
       {
         "id": "answer_passage_match",
         "label": "Check Answer-Passage Match",
         "type": "component",
         "link": null,
-        "title": "Answer-Passage Match Metric",
-        "description": "Verifies if any passage within a provided context contains the reference answer(s), after text normalization."
+        "title": "Answer-Passage Match Evaluation",
+        "description": "Checks if any passage within a prediction's context contains the ground truth answer(s), using normalized text for comparison."
+      },
+      {
+        "id": "ChainOfThought",
+        "label": "Chain of Thought Module",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Chain of Thought",
+        "description": "A DSPy module that applies a Chain of Thought prompting strategy to a given signature, enabling multi-step reasoning."
       }
     ],
     "edges": [
       {
         "source": "SemanticF1",
+        "target": "ChainOfThought",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChainOfThought",
         "target": "SemanticRecallPrecision",
-        "label": "uses",
+        "label": "wraps (default)",
         "title": null,
         "description": null
       },
       {
-        "source": "SemanticF1",
+        "source": "ChainOfThought",
         "target": "DecompositionalSemanticRecallPrecision",
-        "label": "uses (optional)",
+        "label": "wraps (if decompositional)",
         "title": null,
         "description": null
       },
       {
         "source": "CompleteAndGrounded",
-        "target": "AnswerCompleteness",
+        "target": "ChainOfThought",
         "label": "uses",
         "title": null,
         "description": null
       },
       {
-        "source": "CompleteAndGrounded",
+        "source": "ChainOfThought",
+        "target": "AnswerCompleteness",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChainOfThought",
         "target": "AnswerGroundedness",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "answer_passage_match",
+        "target": "passage_has_answers",
         "label": "uses",
         "title": null,
         "description": null
@@ -125,33 +154,52 @@
     ],
     "groups": [
       {
-        "id": "llm_auto_eval",
-        "label": "LLM-based Auto-Evaluation",
+        "id": "llm_evaluation_modules",
+        "label": "LLM-based Evaluation Modules",
         "nodes": [
           "SemanticF1",
-          "CompleteAndGrounded",
+          "CompleteAndGrounded"
+        ],
+        "title": "LLM-based Evaluation Modules",
+        "description": "DSPy Modules that orchestrate LLM-powered evaluation metrics.",
+        "role": "generative"
+      },
+      {
+        "id": "llm_evaluation_signatures",
+        "label": "LLM Evaluation Signatures",
+        "nodes": [
           "SemanticRecallPrecision",
           "DecompositionalSemanticRecallPrecision",
           "AnswerCompleteness",
           "AnswerGroundedness"
         ],
-        "title": "LLM-based Auto-Evaluation Metrics",
-        "description": "Metrics that leverage Language Models (LLMs) to perform nuanced evaluations of responses, such as semantic similarity, completeness, and groundedness.",
+        "title": "LLM Evaluation Signatures",
+        "description": "DSPy Signatures defining the prompts for LLM-based evaluation tasks.",
         "role": "generative"
       },
       {
         "id": "traditional_metrics",
-        "label": "Traditional Metrics",
+        "label": "Traditional Evaluation Metrics",
         "nodes": [
           "answer_exact_match",
-          "passage_has_answers",
           "precision_score",
           "HotPotF1",
+          "passage_has_answers",
           "answer_passage_match"
         ],
-        "title": "Traditional String/Token Metrics",
-        "description": "Rule-based or string/token matching metrics for evaluating responses, focusing on exact matches, F1 scores, and passage containment.",
+        "title": "Traditional Evaluation Metrics",
+        "description": "Functions for calculating common, non-LLM-based evaluation scores.",
         "role": "analytical"
+      },
+      {
+        "id": "external_dspy_components",
+        "label": "External DSPy Components",
+        "nodes": [
+          "ChainOfThought"
+        ],
+        "title": "External DSPy Components",
+        "description": "Core DSPy components utilized by this module for its functionality.",
+        "role": "surface"
       }
     ]
   }

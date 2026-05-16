@@ -1,0 +1,254 @@
+{
+  "title": "General Utility Functions",
+  "summary": "This module provides a collection of general-purpose utilities for file downloading, asynchronous program execution, callback management for both synchronous and asynchronous operations, and adapting asynchronous modules for synchronous use.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "download_file_node",
+        "label": "Download Files from URL",
+        "type": "component",
+        "link": null,
+        "title": "dspy.utils.download",
+        "description": "Downloads a file from a given URL, checking for existing files and their sizes to avoid redundant downloads."
+      },
+      {
+        "id": "experimental_decorator_node",
+        "label": "Mark Function as Experimental",
+        "type": "component",
+        "link": null,
+        "title": "dspy.utils.annotation.decorator",
+        "description": "A decorator used to mark functions or methods as experimental, indicating they might change in future versions."
+      },
+      {
+        "id": "async_program_node",
+        "label": "Execute Program Asynchronously",
+        "type": "component",
+        "link": null,
+        "title": "dspy.utils.asyncify.async_program",
+        "description": "Executes a given program asynchronously in a separate thread, managing thread-local overrides and concurrency."
+      },
+      {
+        "id": "wrapped_program_node",
+        "label": "Manage Thread-Local Overrides",
+        "type": "component",
+        "link": null,
+        "title": "dspy.utils.asyncify.wrapped_program",
+        "description": "An internal helper function that wraps a program's execution to correctly handle and restore thread-local settings and overrides."
+      },
+      {
+        "id": "limiter_node",
+        "label": "Manage Concurrency Limits",
+        "type": "component",
+        "link": null,
+        "title": "dspy.utils.asyncify.get_limiter",
+        "description": "Provides a concurrency limiter (CapacityLimiter) to control the maximum number of concurrent asynchronous operations."
+      },
+      {
+        "id": "async_callback_node",
+        "label": "Handle Async Callbacks",
+        "type": "component",
+        "link": null,
+        "title": "dspy.utils.callback.async_wrapper",
+        "description": "A wrapper for asynchronous functions that triggers start and end callbacks, managing call IDs and exception handling."
+      },
+      {
+        "id": "sync_callback_node",
+        "label": "Handle Sync Callbacks",
+        "type": "component",
+        "link": null,
+        "title": "dspy.utils.callback.sync_wrapper",
+        "description": "A wrapper for synchronous functions that triggers start and end callbacks, managing call IDs and exception handling."
+      },
+      {
+        "id": "sync_wrapper_node",
+        "label": "Synchronize Async Modules",
+        "type": "component",
+        "link": null,
+        "title": "dspy.utils.syncify.SyncWrapper",
+        "description": "A class that wraps an asynchronous DSPy Module's 'aforward' method, allowing it to be called synchronously."
+      },
+      {
+        "id": "external_url_node",
+        "label": "External URL",
+        "type": "external",
+        "link": null,
+        "title": "External Resource",
+        "description": "Represents an external web address from which files are downloaded."
+      },
+      {
+        "id": "requests_lib_node",
+        "label": "Requests Library",
+        "type": "external",
+        "link": null,
+        "title": "Python Requests Library",
+        "description": "The external Python library used for making HTTP requests to download files."
+      },
+      {
+        "id": "anyio_lib_node",
+        "label": "AnyIO Library",
+        "type": "external",
+        "link": null,
+        "title": "AnyIO Concurrency Library",
+        "description": "An external library used for running asynchronous code in a separate thread, providing cross-backend concurrency primitives."
+      },
+      {
+        "id": "thread_local_settings_node",
+        "label": "Thread-Local Settings",
+        "type": "external",
+        "link": "dspy.dsp.utils.settings",
+        "title": "DSPy Thread-Local Overrides",
+        "description": "Manages thread-specific settings and overrides for DSPy programs, ensuring isolation between concurrent executions."
+      },
+      {
+        "id": "dspy_module_base_node",
+        "label": "DSPy Base Module",
+        "type": "external",
+        "link": "dspy.primitives.module.Module",
+        "title": "DSPy Module Base Class",
+        "description": "The foundational class for all DSPy modules, providing core functionality and structure."
+      },
+      {
+        "id": "callback_logic_node",
+        "label": "Callback Execution Logic",
+        "type": "component",
+        "link": null,
+        "title": "Internal Callback Handlers",
+        "description": "Internal functions responsible for executing registered start and end callbacks for operations."
+      }
+    ],
+    "edges": [
+      {
+        "source": "download_file_node",
+        "target": "external_url_node",
+        "label": "Fetches from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "download_file_node",
+        "target": "requests_lib_node",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_program_node",
+        "target": "wrapped_program_node",
+        "label": "Executes via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_program_node",
+        "target": "limiter_node",
+        "label": "Applies limits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_program_node",
+        "target": "anyio_lib_node",
+        "label": "Uses for thread execution",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapped_program_node",
+        "target": "thread_local_settings_node",
+        "label": "Manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_callback_node",
+        "target": "callback_logic_node",
+        "label": "Delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_callback_node",
+        "target": "callback_logic_node",
+        "label": "Delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_wrapper_node",
+        "target": "dspy_module_base_node",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_wrapper_node",
+        "target": "anyio_lib_node",
+        "label": "Uses for async-to-sync",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "file_management_group",
+        "label": "File Management",
+        "nodes": [
+          "download_file_node",
+          "external_url_node",
+          "requests_lib_node"
+        ],
+        "title": "File Download Utilities",
+        "description": "Components related to downloading files from external sources.",
+        "role": "data"
+      },
+      {
+        "id": "async_execution_group",
+        "label": "Asynchronous Execution",
+        "nodes": [
+          "async_program_node",
+          "wrapped_program_node",
+          "limiter_node",
+          "anyio_lib_node",
+          "thread_local_settings_node"
+        ],
+        "title": "Asynchronous Program Execution",
+        "description": "Utilities for running programs asynchronously, managing concurrency and thread-local contexts.",
+        "role": "generative"
+      },
+      {
+        "id": "callback_system_group",
+        "label": "Callback System",
+        "nodes": [
+          "async_callback_node",
+          "sync_callback_node",
+          "callback_logic_node"
+        ],
+        "title": "Function Callback Handling",
+        "description": "Wrappers for functions to integrate pre- and post-execution callbacks for both synchronous and asynchronous operations.",
+        "role": "surface"
+      },
+      {
+        "id": "module_adapters_group",
+        "label": "Module Adapters",
+        "nodes": [
+          "sync_wrapper_node",
+          "dspy_module_base_node"
+        ],
+        "title": "Module Synchronization Adapters",
+        "description": "Provides mechanisms to adapt asynchronous DSPy modules for synchronous execution.",
+        "role": "surface"
+      },
+      {
+        "id": "dev_utilities_group",
+        "label": "Development Utilities",
+        "nodes": [
+          "experimental_decorator_node"
+        ],
+        "title": "Development Annotation Tools",
+        "description": "Tools for annotating code, such as marking functions as experimental.",
+        "role": "surface"
+      }
+    ]
+  }
+}

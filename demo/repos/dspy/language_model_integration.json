@@ -1,0 +1,106 @@
+{
+    "title": "Language Model Integration",
+    "summary": "This module provides the core infrastructure for integrating and managing various Language Models (LMs) within DSPy. It includes client interfaces for different LM providers, caching mechanisms for efficient interaction, streaming capabilities for real-time output, and provider-specific integrations for advanced features like finetuning.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "lm_clients_node",
+                "label": "Manage LLM Clients",
+                "type": "module",
+                "link": "lm_clients",
+                "title": "LLM Client Interfaces",
+                "description": "Provides the foundational interfaces for interacting with various Language Models, including base classes, LiteLLM wrappers, and local LM management."
+            },
+            {
+                "id": "caching_node",
+                "label": "Optimize with Caching & Embeddings",
+                "type": "module",
+                "link": "caching_and_embeddings",
+                "title": "Caching & Embedding Services",
+                "description": "Implements caching mechanisms for expensive LM calls and embedding computations, ensuring efficient reuse of results and secure disk serialization."
+            },
+            {
+                "id": "streaming_node",
+                "label": "Enable LLM Output Streaming",
+                "type": "module",
+                "link": "streaming",
+                "title": "Real-time Output Streaming",
+                "description": "Facilitates incremental streaming of DSPy program outputs, allowing for real-time feedback and custom processing of streamed content from LMs."
+            },
+            {
+                "id": "provider_specific_node",
+                "label": "Integrate Provider-Specific Features",
+                "type": "module",
+                "link": "provider_specific_integrations",
+                "title": "Provider-Specific Integrations",
+                "description": "Offers specialized integrations for particular LM providers, including logging control for LiteLLM and management of finetuning jobs for platforms like Databricks and OpenAI."
+            }
+        ],
+        "edges": [
+            {
+                "source": "lm_clients_node",
+                "target": "caching_node",
+                "label": "Utilizes for caching",
+                "title": "LM Clients Use Caching",
+                "description": "Language Model clients leverage the caching module to store and retrieve responses, reducing redundant API calls and improving performance."
+            },
+            {
+                "source": "lm_clients_node",
+                "target": "streaming_node",
+                "label": "Provides raw streams to",
+                "title": "LM Clients Feed Streaming",
+                "description": "The core LM clients generate raw, incremental output streams that are then processed and managed by the streaming module."
+            },
+            {
+                "source": "provider_specific_node",
+                "target": "lm_clients_node",
+                "label": "Configures/Enhances",
+                "title": "Provider Integrations Affect Clients",
+                "description": "Provider-specific modules configure or extend the behavior of general LM clients, for example, by enabling detailed logging or managing finetuning processes."
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_lm_interaction",
+                "label": "Core LM Interaction",
+                "nodes": [
+                    "lm_clients_node"
+                ],
+                "title": "Core Language Model Interaction",
+                "description": "The central component responsible for abstracting and managing direct communication with various Language Models.",
+                "role": "surface"
+            },
+            {
+                "id": "performance_optimization",
+                "label": "Performance & Data Optimization",
+                "nodes": [
+                    "caching_node"
+                ],
+                "title": "Performance & Data Optimization",
+                "description": "Modules focused on enhancing efficiency through caching and providing embedding services for data processing.",
+                "role": "analytical"
+            },
+            {
+                "id": "realtime_output",
+                "label": "Real-time Output Handling",
+                "nodes": [
+                    "streaming_node"
+                ],
+                "title": "Real-time Output Handling",
+                "description": "Manages the incremental delivery and processing of Language Model outputs for real-time user experiences.",
+                "role": "generative"
+            },
+            {
+                "id": "vendor_specific_features",
+                "label": "Vendor-Specific Features",
+                "nodes": [
+                    "provider_specific_node"
+                ],
+                "title": "Vendor-Specific Features",
+                "description": "Provides specialized functionalities and integrations tailored to specific Language Model providers and platforms.",
+                "role": "utility"
+            }
+        ]
+    }
+}

@@ -1,35 +1,35 @@
 {
-  "docs_dir": "/Users/shreyaspatel/atelier/.tmp/demo_regen/dspy/docs",
-  "timestamp": "2026-05-15T20:51:58.955330",
+  "docs_dir": "/Users/shreyaspatel/.cursor/worktrees/atelier/7y0n/.tmp/demo_regen/dspy/docs",
+  "timestamp": "2026-05-17T01:43:59.843717",
   "summary": {
-    "total_modules": 20,
+    "total_modules": 23,
     "missing_files": 0,
     "failure_rate_pct": 0.0,
     "success_rate_pct": 100.0,
-    "total_issues": 30,
+    "total_issues": 36,
     "errors": 0,
-    "warnings": 30,
+    "warnings": 36,
     "files_created": 0,
-    "metadata_added": 30,
+    "metadata_added": 36,
     "diagrams_added": 0
   },
   "metrics": {
     "presync_audit": {
-      "modules_total": 20,
-      "missing_md": 20,
-      "missing_title": 15,
-      "missing_description": 15,
+      "modules_total": 23,
+      "missing_md": 23,
+      "missing_title": 18,
+      "missing_description": 18,
       "leaf_missing_diagram": 0,
       "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
       "diagram_edges_unknown_endpoint": 0,
-      "children_missing_from_diagram_nodes": 15,
-      "parent_diagram_gaps_to_inject": 15,
+      "children_missing_from_diagram_nodes": 18,
+      "parent_diagram_gaps_to_inject": 18,
       "mermaid_fence_blocks_total": 0,
       "placeholder_md_files": 0
     },
     "diagram_ir_audit": {
-      "module_diagrams_total": 20,
+      "module_diagrams_total": 23,
       "overview_has_diagram_json": true,
       "overview_mermaid_parse_ok": true,
       "overview_r1_reason": null,
@@ -39,15 +39,15 @@
     "mermaid_validation": {
       "blocks_checked": 0,
       "blocks_invalid": 0,
-      "validation_ms": 0.0346,
+      "validation_ms": 0.054,
       "error_type_histogram": {},
       "stage46_fixes_applied": 0,
       "postfix_blocks_invalid": 0,
       "postfix_error_type_histogram": {}
     },
     "postsync_audit": {
-      "modules_total": 20,
-      "missing_md": 20,
+      "modules_total": 23,
+      "missing_md": 23,
       "missing_title": 0,
       "missing_description": 0,
       "leaf_missing_diagram": 0,
@@ -61,23 +61,23 @@
     },
     "delta_presync_minus_postsync": {
       "modules_total": 0.0,
-      "parent_diagram_gaps_to_inject": 15.0,
-      "children_missing_from_diagram_nodes": 15.0,
-      "missing_title": 15.0,
-      "mermaid_fence_blocks_total": 0.0,
+      "missing_title": 18.0,
+      "placeholder_md_files": 0.0,
+      "parent_missing_diagram_with_children": 0.0,
+      "diagram_nodes_with_empty_label": 0.0,
+      "children_missing_from_diagram_nodes": 18.0,
+      "parent_diagram_gaps_to_inject": 18.0,
+      "missing_description": 18.0,
       "leaf_missing_diagram": 0.0,
       "missing_md": 0.0,
-      "diagram_nodes_with_empty_label": 0.0,
-      "parent_missing_diagram_with_children": 0.0,
-      "placeholder_md_files": 0.0,
-      "missing_description": 15.0,
-      "diagram_edges_unknown_endpoint": 0.0
+      "diagram_edges_unknown_endpoint": 0.0,
+      "mermaid_fence_blocks_total": 0.0
     },
     "fixes_applied_counts": {
-      "metadata_field_updates": 30,
+      "metadata_field_updates": 36,
       "placeholder_md_files_created": 0,
       "leaf_diagrams_added": 0,
-      "parent_diagram_child_nodes_injected": 15,
+      "parent_diagram_child_nodes_injected": 18,
       "overview_md_created": 0,
       "mermaid_stage46_fixes": 0
     },
@@ -85,32 +85,32 @@
       "1_stage3_defects_before_stage45": {
         "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
         "presync_audit": {
-          "modules_total": 20,
-          "missing_md": 20,
-          "missing_title": 15,
-          "missing_description": 15,
+          "modules_total": 23,
+          "missing_md": 23,
+          "missing_title": 18,
+          "missing_description": 18,
           "leaf_missing_diagram": 0,
           "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
           "diagram_edges_unknown_endpoint": 0,
-          "children_missing_from_diagram_nodes": 15,
-          "parent_diagram_gaps_to_inject": 15,
+          "children_missing_from_diagram_nodes": 18,
+          "parent_diagram_gaps_to_inject": 18,
           "mermaid_fence_blocks_total": 0,
           "placeholder_md_files": 0
         }
       },
       "1b_stage45_fixes_applied_counters": {
-        "metadata_field_updates": 30,
+        "metadata_field_updates": 36,
         "placeholder_md_files_created": 0,
         "leaf_diagrams_added": 0,
-        "parent_diagram_child_nodes_injected": 15,
+        "parent_diagram_child_nodes_injected": 18,
         "overview_md_created": 0,
         "mermaid_stage46_fixes": 0
       },
       "1c_residual_after_stage45": {
         "postsync_audit": {
-          "modules_total": 20,
-          "missing_md": 20,
+          "modules_total": 23,
+          "missing_md": 23,
           "missing_title": 0,
           "missing_description": 0,
           "leaf_missing_diagram": 0,
@@ -127,30 +127,30 @@
         "note": "Positive number = fewer problems after sync for that metric",
         "delta": {
           "modules_total": 0.0,
-          "parent_diagram_gaps_to_inject": 15.0,
-          "children_missing_from_diagram_nodes": 15.0,
-          "missing_title": 15.0,
-          "mermaid_fence_blocks_total": 0.0,
+          "missing_title": 18.0,
+          "placeholder_md_files": 0.0,
+          "parent_missing_diagram_with_children": 0.0,
+          "diagram_nodes_with_empty_label": 0.0,
+          "children_missing_from_diagram_nodes": 18.0,
+          "parent_diagram_gaps_to_inject": 18.0,
+          "missing_description": 18.0,
           "leaf_missing_diagram": 0.0,
           "missing_md": 0.0,
-          "diagram_nodes_with_empty_label": 0.0,
-          "parent_missing_diagram_with_children": 0.0,
-          "placeholder_md_files": 0.0,
-          "missing_description": 15.0,
-          "diagram_edges_unknown_endpoint": 0.0
+          "diagram_edges_unknown_endpoint": 0.0,
+          "mermaid_fence_blocks_total": 0.0
         }
       },
       "1e_issues_logged_this_run_by_type": {
         "all": {
-          "missing_title": 15,
-          "missing_description": 15
+          "missing_title": 18,
+          "missing_description": 18
         }
       },
       "2_mermaid": {
         "blocks_checked": 0,
         "blocks_invalid_before_stage46": 0,
         "blocks_invalid_after_stage46": 0,
-        "validation_ms": 0.0346,
+        "validation_ms": 0.054,
         "error_type_histogram": {},
         "error_type_histogram_after_stage46": {},
         "stage46_fixes_applied": 0,
@@ -158,7 +158,7 @@
       },
       "3_diagram_ir": {
         "audit": {
-          "module_diagrams_total": 20,
+          "module_diagrams_total": 23,
           "overview_has_diagram_json": true,
           "overview_mermaid_parse_ok": true,
           "overview_r1_reason": null,
@@ -170,80 +170,14 @@
     }
   },
   "issues_by_type": {
-    "missing_title": 15,
-    "missing_description": 15
+    "missing_title": 18,
+    "missing_description": 18
   },
   "issues": [
     {
       "issue_type": "missing_title",
-      "module_name": "base_modules_and_signatures",
-      "module_path": "core_primitives/base_modules_and_signatures",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "base_modules_and_signatures",
-      "module_path": "core_primitives/base_modules_and_signatures",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "utilities",
-      "module_path": "core_primitives/utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "utilities",
-      "module_path": "core_primitives/utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "streaming",
-      "module_path": "core_primitives/streaming",
-      "severity": "warning",
-      "details": {
-        "component_count": 5,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "streaming",
-      "module_path": "core_primitives/streaming",
-      "severity": "warning",
-      "details": {
-        "component_count": 5,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "repl_and_serialization",
-      "module_path": "core_primitives/repl_and_serialization",
+      "module_name": "base_modules",
+      "module_path": "core_framework/base_modules",
       "severity": "warning",
       "details": {
         "component_count": 2,
@@ -253,8 +187,8 @@
     },
     {
       "issue_type": "missing_description",
-      "module_name": "repl_and_serialization",
-      "module_path": "core_primitives/repl_and_serialization",
+      "module_name": "base_modules",
+      "module_path": "core_framework/base_modules",
       "severity": "warning",
       "details": {
         "component_count": 2,
@@ -264,52 +198,118 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "base_lm_and_core_clients",
-      "module_path": "lm_and_client_management/base_lm_and_core_clients",
+      "module_name": "signatures",
+      "module_path": "core_framework/signatures",
       "severity": "warning",
       "details": {
-        "component_count": 8,
+        "component_count": 4,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "base_lm_and_core_clients",
-      "module_path": "lm_and_client_management/base_lm_and_core_clients",
+      "module_name": "signatures",
+      "module_path": "core_framework/signatures",
       "severity": "warning",
       "details": {
-        "component_count": 8,
+        "component_count": 4,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_title",
-      "module_name": "lm_completion_and_embedding",
-      "module_path": "lm_and_client_management/lm_completion_and_embedding",
+      "module_name": "data_types_and_adapters",
+      "module_path": "core_framework/data_types_and_adapters",
       "severity": "warning",
       "details": {
-        "component_count": 9,
+        "component_count": 16,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "lm_completion_and_embedding",
-      "module_path": "lm_and_client_management/lm_completion_and_embedding",
+      "module_name": "data_types_and_adapters",
+      "module_path": "core_framework/data_types_and_adapters",
       "severity": "warning",
       "details": {
-        "component_count": 9,
+        "component_count": 16,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_title",
-      "module_name": "specific_lm_providers",
-      "module_path": "lm_and_client_management/specific_lm_providers",
+      "module_name": "tool_execution",
+      "module_path": "core_framework/tool_execution",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "tool_execution",
+      "module_path": "core_framework/tool_execution",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "lm_clients",
+      "module_path": "language_model_integration/lm_clients",
+      "severity": "warning",
+      "details": {
+        "component_count": 12,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "lm_clients",
+      "module_path": "language_model_integration/lm_clients",
+      "severity": "warning",
+      "details": {
+        "component_count": 12,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "caching_and_embeddings",
+      "module_path": "language_model_integration/caching_and_embeddings",
+      "severity": "warning",
+      "details": {
+        "component_count": 7,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "caching_and_embeddings",
+      "module_path": "language_model_integration/caching_and_embeddings",
+      "severity": "warning",
+      "details": {
+        "component_count": 7,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "streaming",
+      "module_path": "language_model_integration/streaming",
       "severity": "warning",
       "details": {
         "component_count": 5,
@@ -319,8 +319,8 @@
     },
     {
       "issue_type": "missing_description",
-      "module_name": "specific_lm_providers",
-      "module_path": "lm_and_client_management/specific_lm_providers",
+      "module_name": "streaming",
+      "module_path": "language_model_integration/streaming",
       "severity": "warning",
       "details": {
         "component_count": 5,
@@ -330,88 +330,44 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "predictors_and_program_flow",
-      "module_path": "program_development_and_optimization/predictors_and_program_flow",
+      "module_name": "provider_specific_integrations",
+      "module_path": "language_model_integration/provider_specific_integrations",
       "severity": "warning",
       "details": {
-        "component_count": 14,
+        "component_count": 5,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "predictors_and_program_flow",
-      "module_path": "program_development_and_optimization/predictors_and_program_flow",
+      "module_name": "provider_specific_integrations",
+      "module_path": "language_model_integration/provider_specific_integrations",
       "severity": "warning",
       "details": {
-        "component_count": 14,
+        "component_count": 5,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_title",
-      "module_name": "program_proposal_and_description",
-      "module_path": "program_development_and_optimization/program_proposal_and_description",
+      "module_name": "teleprompters",
+      "module_path": "program_optimization_and_evaluation/teleprompters",
       "severity": "warning",
       "details": {
-        "component_count": 7,
+        "component_count": 22,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "program_proposal_and_description",
-      "module_path": "program_development_and_optimization/program_proposal_and_description",
+      "module_name": "teleprompters",
+      "module_path": "program_optimization_and_evaluation/teleprompters",
       "severity": "warning",
       "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "teleprompters_and_optimizers",
-      "module_path": "program_development_and_optimization/teleprompters_and_optimizers",
-      "severity": "warning",
-      "details": {
-        "component_count": 25,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "teleprompters_and_optimizers",
-      "module_path": "program_development_and_optimization/teleprompters_and_optimizers",
-      "severity": "warning",
-      "details": {
-        "component_count": 25,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "datasets",
-      "module_path": "data_and_evaluation/datasets",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "datasets",
-      "module_path": "data_and_evaluation/datasets",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
+        "component_count": 22,
         "has_children": false
       },
       "auto_fixed": true
@@ -419,7 +375,7 @@
     {
       "issue_type": "missing_title",
       "module_name": "evaluation_metrics",
-      "module_path": "data_and_evaluation/evaluation_metrics",
+      "module_path": "program_optimization_and_evaluation/evaluation_metrics",
       "severity": "warning",
       "details": {
         "component_count": 11,
@@ -430,7 +386,7 @@
     {
       "issue_type": "missing_description",
       "module_name": "evaluation_metrics",
-      "module_path": "data_and_evaluation/evaluation_metrics",
+      "module_path": "program_optimization_and_evaluation/evaluation_metrics",
       "severity": "warning",
       "details": {
         "component_count": 11,
@@ -440,30 +396,30 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "data_type_adapters",
-      "module_path": "adapters_and_retrievers/data_type_adapters",
+      "module_name": "program_proposers",
+      "module_path": "program_optimization_and_evaluation/program_proposers",
       "severity": "warning",
       "details": {
-        "component_count": 13,
+        "component_count": 7,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "data_type_adapters",
-      "module_path": "adapters_and_retrievers/data_type_adapters",
+      "module_name": "program_proposers",
+      "module_path": "program_optimization_and_evaluation/program_proposers",
       "severity": "warning",
       "details": {
-        "component_count": 13,
+        "component_count": 7,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_title",
-      "module_name": "system_adapters",
-      "module_path": "adapters_and_retrievers/system_adapters",
+      "module_name": "optimization_utilities",
+      "module_path": "program_optimization_and_evaluation/optimization_utilities",
       "severity": "warning",
       "details": {
         "component_count": 3,
@@ -473,8 +429,8 @@
     },
     {
       "issue_type": "missing_description",
-      "module_name": "system_adapters",
-      "module_path": "adapters_and_retrievers/system_adapters",
+      "module_name": "optimization_utilities",
+      "module_path": "program_optimization_and_evaluation/optimization_utilities",
       "severity": "warning",
       "details": {
         "component_count": 3,
@@ -484,8 +440,8 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "retrievers",
-      "module_path": "adapters_and_retrievers/retrievers",
+      "module_name": "prediction_modules",
+      "module_path": "prediction_and_retrieval_strategies/prediction_modules",
       "severity": "warning",
       "details": {
         "component_count": 14,
@@ -495,11 +451,121 @@
     },
     {
       "issue_type": "missing_description",
-      "module_name": "retrievers",
-      "module_path": "adapters_and_retrievers/retrievers",
+      "module_name": "prediction_modules",
+      "module_path": "prediction_and_retrieval_strategies/prediction_modules",
       "severity": "warning",
       "details": {
         "component_count": 14,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "retrieval_modules",
+      "module_path": "prediction_and_retrieval_strategies/retrieval_modules",
+      "severity": "warning",
+      "details": {
+        "component_count": 10,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "retrieval_modules",
+      "module_path": "prediction_and_retrieval_strategies/retrieval_modules",
+      "severity": "warning",
+      "details": {
+        "component_count": 10,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "dsp_utilities",
+      "module_path": "prediction_and_retrieval_strategies/dsp_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "dsp_utilities",
+      "module_path": "prediction_and_retrieval_strategies/dsp_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "datasets",
+      "module_path": "data_and_utilities/datasets",
+      "severity": "warning",
+      "details": {
+        "component_count": 7,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "datasets",
+      "module_path": "data_and_utilities/datasets",
+      "severity": "warning",
+      "details": {
+        "component_count": 7,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "general_utilities",
+      "module_path": "data_and_utilities/general_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 8,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "general_utilities",
+      "module_path": "data_and_utilities/general_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 8,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "documentation_tools",
+      "module_path": "data_and_utilities/documentation_tools",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "documentation_tools",
+      "module_path": "data_and_utilities/documentation_tools",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
         "has_children": false
       },
       "auto_fixed": true
@@ -507,36 +573,42 @@
   ],
   "files_created": [],
   "metadata_added": [
-    "base_modules_and_signatures:title",
-    "base_modules_and_signatures:description",
-    "utilities:title",
-    "utilities:description",
+    "base_modules:title",
+    "base_modules:description",
+    "signatures:title",
+    "signatures:description",
+    "data_types_and_adapters:title",
+    "data_types_and_adapters:description",
+    "tool_execution:title",
+    "tool_execution:description",
+    "lm_clients:title",
+    "lm_clients:description",
+    "caching_and_embeddings:title",
+    "caching_and_embeddings:description",
     "streaming:title",
     "streaming:description",
-    "repl_and_serialization:title",
-    "repl_and_serialization:description",
-    "base_lm_and_core_clients:title",
-    "base_lm_and_core_clients:description",
-    "lm_completion_and_embedding:title",
-    "lm_completion_and_embedding:description",
-    "specific_lm_providers:title",
-    "specific_lm_providers:description",
-    "predictors_and_program_flow:title",
-    "predictors_and_program_flow:description",
-    "program_proposal_and_description:title",
-    "program_proposal_and_description:description",
-    "teleprompters_and_optimizers:title",
-    "teleprompters_and_optimizers:description",
-    "datasets:title",
-    "datasets:description",
+    "provider_specific_integrations:title",
+    "provider_specific_integrations:description",
+    "teleprompters:title",
+    "teleprompters:description",
     "evaluation_metrics:title",
     "evaluation_metrics:description",
-    "data_type_adapters:title",
-    "data_type_adapters:description",
-    "system_adapters:title",
-    "system_adapters:description",
-    "retrievers:title",
-    "retrievers:description"
+    "program_proposers:title",
+    "program_proposers:description",
+    "optimization_utilities:title",
+    "optimization_utilities:description",
+    "prediction_modules:title",
+    "prediction_modules:description",
+    "retrieval_modules:title",
+    "retrieval_modules:description",
+    "dsp_utilities:title",
+    "dsp_utilities:description",
+    "datasets:title",
+    "datasets:description",
+    "general_utilities:title",
+    "general_utilities:description",
+    "documentation_tools:title",
+    "documentation_tools:description"
   ],
   "diagrams_added": []
 }

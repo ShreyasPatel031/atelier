@@ -1,0 +1,454 @@
+{
+  "title": "Data Types and Adapters",
+  "summary": "This module provides a flexible framework for defining custom data types and adapters, enabling DSPy to seamlessly interact with Language Models and handle diverse structured and unstructured data formats.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "adapter_base",
+        "label": "Manage LM Interactions",
+        "type": "component",
+        "link": null,
+        "title": "Base Adapter Interface",
+        "description": "Defines the foundational contract for DSPy to communicate with Language Models, handling prompt construction, response parsing, and integration of native LM features like function calling and citations. It ensures consistent interaction across different LMs."
+      },
+      {
+        "id": "baml_adapter",
+        "label": "Optimize Pydantic Schema",
+        "type": "component",
+        "link": null,
+        "title": "BAML Schema Adapter",
+        "description": "Enhances the rendering of complex Pydantic models into a compact, human-readable schema for LMs. This improves token efficiency and comprehension for smaller models, incorporating Pydantic field descriptions as comments for context."
+      },
+      {
+        "id": "two_step_adapter",
+        "label": "Extract Structured Data (Two-Step)",
+        "type": "component",
+        "link": null,
+        "title": "Two-Step Extraction Adapter",
+        "description": "Implements a two-stage process: a primary LM generates a natural language response, and a secondary, smaller LM extracts structured data from that response. This is ideal for reasoning models that struggle with direct structured output."
+      },
+      {
+        "id": "type_base",
+        "label": "Define Custom Data Structures",
+        "type": "component",
+        "link": null,
+        "title": "Base Custom Type System",
+        "description": "Provides the abstract base for all DSPy custom data types, enabling structured data to be seamlessly integrated into signatures. It supports serialization, nested type extraction, and adaptation to native LM features."
+      },
+      {
+        "id": "audio_type",
+        "label": "Handle Audio Content",
+        "type": "component",
+        "link": null,
+        "title": "Audio Data Type",
+        "description": "Represents audio data within DSPy, facilitating its inclusion in multimodal LM inputs. It supports various audio formats and handles encoding from URLs, local files, or raw arrays into base64 for LM consumption."
+      },
+      {
+        "id": "code_type",
+        "label": "Manage Code Snippets",
+        "type": "component",
+        "link": null,
+        "title": "Code Data Type",
+        "description": "Encapsulates programming code for tasks like code generation or analysis. It allows specifying the language and ensures proper formatting for LM processing, including markdown block representation for outputs."
+      },
+      {
+        "id": "document_type",
+        "label": "Represent Citable Documents",
+        "type": "component",
+        "link": null,
+        "title": "Document Data Type",
+        "description": "Models documents for use in citation-enabled LM interactions. It includes the document's text content, optional title, media type, and context, allowing LMs to reference source material accurately."
+      },
+      {
+        "id": "file_type",
+        "label": "Integrate File Data",
+        "type": "component",
+        "link": null,
+        "title": "File Content Type",
+        "description": "Manages file content for LM inputs, supporting data URIs, file IDs, or direct paths. It provides utilities to load files from local storage or web resources, encoding them appropriately for transmission to LMs."
+      },
+      {
+        "id": "image_type",
+        "label": "Process Image Content",
+        "type": "component",
+        "link": null,
+        "title": "Image Data Type",
+        "description": "Represents image data for multimodal LM inputs. It supports various sources like URLs, local files, raw bytes, or PIL images, converting them into base64 data URIs for efficient LM processing."
+      },
+      {
+        "id": "tool_type",
+        "label": "Define Callable Tools",
+        "type": "component",
+        "link": null,
+        "title": "Function Tool Type",
+        "description": "Wraps Python functions to be used as callable tools by LLMs. It automatically infers function names, descriptions, and argument schemas, enabling robust function calling capabilities within DSPy programs."
+      },
+      {
+        "id": "citations_type",
+        "label": "Structure LM Citations",
+        "type": "component",
+        "link": null,
+        "title": "Citations Data Type",
+        "description": "Manages structured citation information, including cited text, document indices, and character ranges. It provides methods to convert from dictionary lists and format for LM outputs, ensuring accurate source attribution."
+      },
+      {
+        "id": "tool_calls_type",
+        "label": "Represent Tool Invocations",
+        "type": "component",
+        "link": null,
+        "title": "Tool Calls Data Type",
+        "description": "Encapsulates a list of tool invocations, each with a tool name and its arguments. This type is crucial for parsing and representing structured function calls returned by Language Models."
+      },
+      {
+        "id": "lm_client",
+        "label": "Interact with LMs",
+        "type": "external",
+        "link": null,
+        "title": "Language Model Client",
+        "description": "An external component that provides the programmatic interface for sending requests to and receiving responses from various Language Models, abstracting away specific API details."
+      },
+      {
+        "id": "dspy_signature",
+        "label": "Define LM Task Structure",
+        "type": "external",
+        "link": "signatures",
+        "title": "DSPy Signature Definition",
+        "description": "An external DSPy component that formally specifies the input and output fields, along with instructions, for a particular Language Model task, guiding the LM's behavior."
+      },
+      {
+        "id": "pydantic_lib",
+        "label": "Validate Data Schemas",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic Library",
+        "description": "An external Python library widely used for data validation, parsing, and serialization, especially for defining data schemas with type hints."
+      },
+      {
+        "id": "chat_adapter_ext",
+        "label": "Extract Structured Chat",
+        "type": "external",
+        "link": null,
+        "title": "Chat Adapter (External)",
+        "description": "An external DSPy adapter, often used for general chat-based interactions, which the TwoStepAdapter leverages specifically for structured data extraction from raw LM responses."
+      },
+      {
+        "id": "user_input",
+        "label": "Provide Program Inputs",
+        "type": "external",
+        "link": null,
+        "title": "User Input Data",
+        "description": "The raw data or queries supplied by an end-user or another system, which serves as the initial input to a DSPy program."
+      },
+      {
+        "id": "llm_api",
+        "label": "Communicate with LLM",
+        "type": "external",
+        "link": null,
+        "title": "LLM API Endpoint",
+        "description": "The actual external API endpoint of a Large Language Model, responsible for receiving formatted requests and returning raw or processed text responses."
+      },
+      {
+        "id": "file_storage",
+        "label": "Store Files Locally/Remotely",
+        "type": "external",
+        "link": null,
+        "title": "File Storage System",
+        "description": "A system (local disk, cloud storage) used for persisting and retrieving files and other media content, accessed by DSPy's file-related data types."
+      },
+      {
+        "id": "web_service",
+        "label": "Fetch Web Resources",
+        "type": "external",
+        "link": null,
+        "title": "Web Service/URL",
+        "description": "Any external web-based service or URL that provides data (e.g., images, audio, documents) which DSPy's custom types can fetch and process."
+      },
+      {
+        "id": "tool_executor",
+        "label": "Execute External Functions",
+        "type": "external",
+        "link": "tool_execution",
+        "title": "Tool Execution Environment",
+        "description": "The runtime environment or mechanism responsible for invoking and managing the execution of external functions or APIs defined as DSPy Tools."
+      }
+    ],
+    "edges": [
+      {
+        "source": "baml_adapter",
+        "target": "adapter_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "two_step_adapter",
+        "target": "adapter_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_type",
+        "target": "type_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_type",
+        "target": "type_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_type",
+        "target": "type_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_type",
+        "target": "type_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_type",
+        "target": "type_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_type",
+        "target": "type_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "citations_type",
+        "target": "type_base",
+        "label": "Extends (Implied)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_calls_type",
+        "target": "type_base",
+        "label": "Extends (Implied)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "adapter_base",
+        "target": "lm_client",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "adapter_base",
+        "target": "dspy_signature",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "adapter_base",
+        "target": "type_base",
+        "label": "Handles custom types",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "baml_adapter",
+        "target": "pydantic_lib",
+        "label": "Leverages for schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "two_step_adapter",
+        "target": "lm_client",
+        "label": "Uses extraction LM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "two_step_adapter",
+        "target": "chat_adapter_ext",
+        "label": "Delegates extraction to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_type",
+        "target": "tool_executor",
+        "label": "Enables execution in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_type",
+        "target": "file_storage",
+        "label": "Accesses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_type",
+        "target": "web_service",
+        "label": "Fetches from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_type",
+        "target": "file_storage",
+        "label": "Accesses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "image_type",
+        "target": "web_service",
+        "label": "Fetches from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_type",
+        "target": "file_storage",
+        "label": "Accesses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "audio_type",
+        "target": "web_service",
+        "label": "Fetches from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_input",
+        "target": "adapter_base",
+        "label": "Provided to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "adapter_base",
+        "target": "llm_api",
+        "label": "Formats for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_api",
+        "target": "adapter_base",
+        "label": "Returns response to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_signature",
+        "target": "type_base",
+        "label": "Uses custom types",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "adapter_core",
+        "label": "Adapter Core",
+        "nodes": [
+          "adapter_base"
+        ],
+        "title": "Core Adapter Functionality",
+        "description": "The foundational component for managing interactions between DSPy programs and Language Models.",
+        "role": "surface"
+      },
+      {
+        "id": "specialized_adapters",
+        "label": "Specialized Adapters",
+        "nodes": [
+          "baml_adapter",
+          "two_step_adapter"
+        ],
+        "title": "Specific LM Interaction Strategies",
+        "description": "Implementations of the base adapter that provide tailored strategies for interacting with LMs, such as optimizing schema rendering or employing multi-stage processing.",
+        "role": "surface"
+      },
+      {
+        "id": "type_system_base",
+        "label": "Custom Type Base",
+        "nodes": [
+          "type_base"
+        ],
+        "title": "Foundation for Custom Data Types",
+        "description": "The abstract base class that all DSPy custom data types extend, providing common functionality for structured data handling within the framework.",
+        "role": "data"
+      },
+      {
+        "id": "media_file_types",
+        "label": "Media & File Types",
+        "nodes": [
+          "audio_type",
+          "image_type",
+          "file_type"
+        ],
+        "title": "Handling Diverse Media and Files",
+        "description": "Custom data types designed to represent and process various forms of media (audio, images) and general file content for multimodal and file-aware LM interactions.",
+        "role": "data"
+      },
+      {
+        "id": "structured_content_types",
+        "label": "Structured Content Types",
+        "nodes": [
+          "code_type",
+          "document_type",
+          "citations_type",
+          "tool_calls_type"
+        ],
+        "title": "Representing Structured Information",
+        "description": "Custom data types for encapsulating structured information such as code snippets, citable documents, and parsed citations or tool calls from LM responses.",
+        "role": "data"
+      },
+      {
+        "id": "tooling_types",
+        "label": "Tooling Types",
+        "nodes": [
+          "tool_type"
+        ],
+        "title": "Enabling Function Calling",
+        "description": "A specialized custom type that wraps Python functions, making them callable tools for Language Models to interact with external systems or perform specific operations.",
+        "role": "generative"
+      },
+      {
+        "id": "external_deps",
+        "label": "External Dependencies",
+        "nodes": [
+          "lm_client",
+          "dspy_signature",
+          "pydantic_lib",
+          "chat_adapter_ext",
+          "user_input",
+          "llm_api",
+          "file_storage",
+          "web_service",
+          "tool_executor"
+        ],
+        "title": "External Systems and Libraries",
+        "description": "Components and systems outside this module that are integrated with or utilized by the data types and adapters, including Language Models, DSPy's core signature definitions, and data validation libraries.",
+        "role": "data"
+      }
+    ]
+  }
+}
