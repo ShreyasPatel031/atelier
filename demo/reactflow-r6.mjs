@@ -33,6 +33,9 @@ const baseHandleStyle = {
 
 /** Gap between node edge and hover panel (visual); bridge handlers avoid hover flicker across the gap. */
 const NODE_HOVER_SIDE_GAP_PX = 10;
+/** Side snippet: fixed width in diagram (flow) px; height follows content up to maxHeight. */
+const RF_HOVER_DETAIL_PANEL_WIDTH = 280;
+const RF_HOVER_DETAIL_PANEL_MAX_HEIGHT = 440;
 
 const LEAF_NODE_BORDER_RADIUS = 6;
 /** Matches pipeline-elk-reactflow group node style.borderRadius */
@@ -42,10 +45,12 @@ const GROUP_NODE_TINT = '241, 245, 249';
 /** Pill: same hue as group fill (see pipeline `rgba(241,245,249,0.4)`), fully opaque for legibility. */
 const GROUP_LABEL_PILL_BG = 'rgba(' + GROUP_NODE_TINT + ', 1)';
 const GROUP_LABEL_PILL_BORDER = '1px solid rgba(100, 116, 139, 0.42)';
-/** Group title pill; side hover panel uses HOVER_PANEL_Z_INDEX (above this). */
+/** Group title pill (portaled to .atelier-rf-pill-layer at RF_PILL_LAYER_Z_INDEX). */
 const GROUP_LABEL_Z_INDEX = 20000;
-/** Above group title pill and local stacking context inside the node wrapper. */
-const HOVER_PANEL_Z_INDEX = 2147481000;
+/** Viewport overlay layer — group labels, help pills, hover snippets (see AtelierViewportApiBootstrap). */
+const RF_PILL_LAYER_Z_INDEX = 50000;
+/** Hover snippet z-index inside the pill layer (above GROUP_LABEL_Z_INDEX + help pills). */
+const RF_HOVER_ABOVE_PILL_Z_INDEX = 60000;
 
 const RF_SEMANTIC_NODE_STYLES = {
     stakeholder_surface: {
@@ -186,21 +191,30 @@ function rfTriggerBriefExplanation(nodeId, label, kind) {
 }
 
 /**
- * Fixed width = 3× node width; height grows with content, caps at 2× node height then scrolls.
+ * Fixed width; height follows content (variable) up to maxHeight then scrolls.
  */
 function ElkSideHoverPanel({
     visible,
-    nodeWidth,
-    nodeHeight,
     borderRadius,
     text,
     panelRef,
     onPanelMouseLeave,
+    maxHeightPx,
+    flowLeft,
+    flowTop,
+    portalLayer,
 }) {
     if (!visible) return null;
-    const panelW = nodeWidth * 3;
-    const maxH = nodeHeight * 2;
-    return React.createElement(
+    const panelW = RF_HOVER_DETAIL_PANEL_WIDTH;
+    const maxH =
+        maxHeightPx != null && Number.isFinite(Number(maxHeightPx))
+            ? Number(maxHeightPx)
+            : RF_HOVER_DETAIL_PANEL_MAX_HEIGHT;
+    const usePortal =
+        portalLayer &&
+        typeof flowLeft === 'number' &&
+        typeof flowTop === 'number';
+    const panelEl = React.createElement(
         'div',
         {
             ref: panelRef,
@@ -208,9 +222,10 @@ function ElkSideHoverPanel({
             onMouseLeave: onPanelMouseLeave,
             style: {
                 position: 'absolute',
-                left: 'calc(100% + ' + NODE_HOVER_SIDE_GAP_PX + 'px)',
-                top: 0,
+                left: usePortal ? flowLeft : 'calc(100% + ' + NODE_HOVER_SIDE_GAP_PX + 'px)',
+                top: usePortal ? flowTop : 0,
                 width: panelW,
+                height: 'auto',
                 maxHeight: maxH,
                 overflowY: 'auto',
                 boxSizing: 'border-box',
@@ -225,18 +240,52 @@ function ElkSideHoverPanel({
                 border: '1px solid #475569',
                 borderRadius: borderRadius,
                 boxShadow: '0 4px 14px rgba(15,23,42,0.14)',
-                zIndex: HOVER_PANEL_Z_INDEX,
+                zIndex: usePortal ? RF_HOVER_ABOVE_PILL_Z_INDEX : RF_PILL_LAYER_Z_INDEX,
                 pointerEvents: 'auto',
                 textAlign: 'left',
             },
         },
         text || ''
     );
+    if (usePortal) {
+        return createPortal(panelEl, portalLayer);
+    }
+    return panelEl;
 }
 
 function containsNode(ancestor, node) {
     if (!ancestor || !node) return false;
     return ancestor === node || ancestor.contains(node);
+}
+
+/**
+ * True if the pointer stack includes a non-group React Flow node other than selfId.
+ * Clears expanded-group hover when moving onto a leaf, even if the group hover panel
+ * overlaps the leaf in paint order (elementsFromPoint would hit the panel first).
+ */
+function rfPointerOverForeignLeafNode(clientX, clientY, selfId) {
+    if (typeof document === 'undefined' || typeof document.elementsFromPoint !== 'function') return false;
+    const sid = String(selfId || '');
+    try {
+        const stack = document.elementsFromPoint(clientX, clientY);
+        if (!stack || !stack.length) return false;
+        const seen = new WeakSet();
+        for (let i = 0; i < stack.length; i++) {
+            const el = stack[i];
+            if (!el || typeof el.closest !== 'function') continue;
+            const wrap = el.closest('.react-flow__node[data-id]');
+            if (!wrap || seen.has(wrap)) continue;
+            seen.add(wrap);
+            const nid = wrap.getAttribute('data-id');
+            if (!nid || nid === sid) continue;
+            if (!wrap.classList.contains('react-flow__node-group')) {
+                return true;
+            }
+        }
+        return false;
+    } catch (_) {
+        return false;
+    }
 }
 
 /**
@@ -658,12 +707,14 @@ function ElkCustomNode({
         helpPillPortal,
         React.createElement(ElkSideHoverPanel, {
             visible: showHoverPanel,
-            nodeWidth: w,
-            nodeHeight: h,
+            maxHeightPx: Math.max(160, Math.min(RF_HOVER_DETAIL_PANEL_MAX_HEIGHT, h * 2)),
             borderRadius: LEAF_NODE_BORDER_RADIUS,
             text: detail,
             panelRef: panelRef,
             onPanelMouseLeave: onPanelLeave,
+            flowLeft: nodeX + w + NODE_HOVER_SIDE_GAP_PX,
+            flowTop: nodeY,
+            portalLayer: pillLayer,
         })
     );
 }
@@ -702,6 +753,7 @@ function usePillLayer() {
     }, [layer]);
     return layer;
 }
+
 
 /** Compound: handles on frame (GroupNode-style). RF sizes the wrapper via node.width / node.height. */
 function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, positionAbsoluteY }) {
@@ -782,6 +834,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         whiteSpace: 'nowrap',
         pointerEvents: 'none',
         fontSize: fontPx / z,
+        zIndex: GROUP_LABEL_Z_INDEX,
         ...(inside
             ? {
                   /** Inset from group top-left by 6 screen px (constant across zoom). */
@@ -809,6 +862,9 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
 
     const pointerInsideGroupControls = useCallback(
         function (clientX, clientY) {
+            if (rfPointerOverForeignLeafNode(clientX, clientY, id)) {
+                return false;
+            }
             return (
                 rfClientPointInElement(rootRef, clientX, clientY) ||
                 rfClientPointInElement(panelRef, clientX, clientY) ||
@@ -816,7 +872,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                 rfClientPointInElement(helpBridgeRef, clientX, clientY)
             );
         },
-        []
+        [id]
     );
 
     useEffect(() => {
@@ -924,21 +980,22 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     });
     }
 
-    const labelPill = pillLayer
-        ? createPortal(
-              React.createElement(
-                  'div',
-                  {
-                      key: 'hdr-' + id,
-                      'data-testid': 'atelier-rf-group-label',
-                      'data-group-id': id,
-                      style: hdrStyle,
-                  },
-                  label
-              ),
-              pillLayer
-          )
-        : null;
+    const labelPill =
+        pillLayer && !showHoverPanel
+            ? createPortal(
+                  React.createElement(
+                      'div',
+                      {
+                          key: 'hdr-' + id,
+                          'data-testid': 'atelier-rf-group-label',
+                          'data-group-id': id,
+                          style: hdrStyle,
+                      },
+                      label
+                  ),
+                  pillLayer
+              )
+            : null;
 
     const onRootLeave = function (e) {
         if (typeof e.clientX === 'number' && pointerInsideGroupControls(e.clientX, e.clientY)) return;
@@ -1138,12 +1195,14 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         ),
         React.createElement(ElkSideHoverPanel, {
             visible: showHoverPanel,
-            nodeWidth: gw,
-            nodeHeight: gh,
+            maxHeightPx: Math.max(200, Math.min(RF_HOVER_DETAIL_PANEL_MAX_HEIGHT, gh * 2)),
             borderRadius: GROUP_NODE_BORDER_RADIUS,
             text: detail,
             panelRef: panelRef,
             onPanelMouseLeave: onPanelLeave,
+            flowLeft: nodeX + gw + NODE_HOVER_SIDE_GAP_PX,
+            flowTop: nodeY,
+            portalLayer: pillLayer,
         })
     );
 }
@@ -1236,7 +1295,9 @@ function AtelierViewportApiBootstrap() {
                      */
                     layer.style.cssText =
                         'position:absolute;left:0;top:0;width:0;height:0;' +
-                        'pointer-events:none;z-index:50000;';
+                        'pointer-events:none;z-index:' +
+                        RF_PILL_LAYER_Z_INDEX +
+                        ';';
                     viewport.appendChild(layer);
                 }
                 window.__atelierR6PillLayer = layer;
