@@ -5,11 +5,6 @@
     "description": "Multi-agent crews, tasks, and tools for LLM workflows."
   },
   {
-    "id": "crewai-src",
-    "label": "CrewAI (generated)",
-    "description": "Full CrewAI lib docs \u2013 DIAGRAM_JSON sample for ELK / React Flow viewer."
-  },
-  {
     "id": "dspy",
     "label": "DSPy",
     "description": "Framework for programming not prompting LLM pipelines."

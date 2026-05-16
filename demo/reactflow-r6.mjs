@@ -190,8 +190,19 @@ function rfTriggerBriefExplanation(nodeId, label, kind) {
     fn({ nodeId: String(nodeId || ''), label: label || '', kind });
 }
 
+/** Max panel height in flow units (constant on-screen size via zoom). */
+function rfHoverPanelMaxHeightFlow(zoom) {
+    const z = zoom > 0 ? zoom : 1;
+    let maxScreen = RF_HOVER_DETAIL_PANEL_MAX_HEIGHT;
+    if (typeof window !== 'undefined' && window.innerHeight > 0) {
+        maxScreen = Math.min(maxScreen, Math.max(200, window.innerHeight - 96));
+    }
+    return maxScreen / z;
+}
+
 /**
- * Fixed width; height follows content (variable) up to maxHeight then scrolls.
+ * Fixed screen width; height fits content up to viewport cap, then scrolls.
+ * Dimensions scale with 1/zoom so the panel stays readable when zoomed out.
  */
 function ElkSideHoverPanel({
     visible,
@@ -199,17 +210,40 @@ function ElkSideHoverPanel({
     text,
     panelRef,
     onPanelMouseLeave,
-    maxHeightPx,
     flowLeft,
     flowTop,
     portalLayer,
+    zoom = 1,
 }) {
+    const z = zoom > 0 ? zoom : 1;
+    const panelW = RF_HOVER_DETAIL_PANEL_WIDTH / z;
+    const pad = 8 / z;
+    const fontSize = 11 / z;
+    const maxH = rfHoverPanelMaxHeightFlow(z);
+    const [layout, setLayout] = useState({ height: null, scroll: false });
+
+    useLayoutEffect(
+        function () {
+            if (!visible) {
+                setLayout({ height: null, scroll: false });
+                return;
+            }
+            const el = panelRef && panelRef.current;
+            if (!el) return;
+            el.style.height = 'auto';
+            el.style.maxHeight = 'none';
+            el.style.overflowY = 'visible';
+            const natural = el.scrollHeight;
+            if (natural <= maxH) {
+                setLayout({ height: natural, scroll: false });
+            } else {
+                setLayout({ height: maxH, scroll: true });
+            }
+        },
+        [visible, text, maxH, z, panelRef]
+    );
+
     if (!visible) return null;
-    const panelW = RF_HOVER_DETAIL_PANEL_WIDTH;
-    const maxH =
-        maxHeightPx != null && Number.isFinite(Number(maxHeightPx))
-            ? Number(maxHeightPx)
-            : RF_HOVER_DETAIL_PANEL_MAX_HEIGHT;
     const usePortal =
         portalLayer &&
         typeof flowLeft === 'number' &&
@@ -222,15 +256,16 @@ function ElkSideHoverPanel({
             onMouseLeave: onPanelMouseLeave,
             style: {
                 position: 'absolute',
-                left: usePortal ? flowLeft : 'calc(100% + ' + NODE_HOVER_SIDE_GAP_PX + 'px)',
+                left: usePortal ? flowLeft : 'calc(100% + ' + NODE_HOVER_SIDE_GAP_PX / z + 'px)',
                 top: usePortal ? flowTop : 0,
                 width: panelW,
-                height: 'auto',
-                maxHeight: maxH,
-                overflowY: 'auto',
+                height: layout.height != null ? layout.height : 'auto',
+                maxHeight: layout.scroll ? maxH : undefined,
+                overflowY: layout.scroll ? 'auto' : 'visible',
+                overflowX: 'hidden',
                 boxSizing: 'border-box',
-                padding: '8px',
-                fontSize: 11,
+                padding: pad + 'px',
+                fontSize: fontSize,
                 lineHeight: 1.35,
                 color: '#0f172a',
                 whiteSpace: 'pre-wrap',
@@ -238,7 +273,7 @@ function ElkSideHoverPanel({
                 overflowWrap: 'break-word',
                 background: '#fff',
                 border: '1px solid #475569',
-                borderRadius: borderRadius,
+                borderRadius: borderRadius / z,
                 boxShadow: '0 4px 14px rgba(15,23,42,0.14)',
                 zIndex: usePortal ? RF_HOVER_ABOVE_PILL_Z_INDEX : RF_PILL_LAYER_Z_INDEX,
                 pointerEvents: 'auto',
@@ -255,6 +290,7 @@ function ElkSideHoverPanel({
 
 function containsNode(ancestor, node) {
     if (!ancestor || !node) return false;
+    if (typeof Node !== 'undefined' && !(node instanceof Node)) return false;
     return ancestor === node || ancestor.contains(node);
 }
 
@@ -707,14 +743,14 @@ function ElkCustomNode({
         helpPillPortal,
         React.createElement(ElkSideHoverPanel, {
             visible: showHoverPanel,
-            maxHeightPx: Math.max(160, Math.min(RF_HOVER_DETAIL_PANEL_MAX_HEIGHT, h * 2)),
             borderRadius: LEAF_NODE_BORDER_RADIUS,
             text: detail,
             panelRef: panelRef,
             onPanelMouseLeave: onPanelLeave,
-            flowLeft: nodeX + w + NODE_HOVER_SIDE_GAP_PX,
+            flowLeft: nodeX + w + NODE_HOVER_SIDE_GAP_PX / z,
             flowTop: nodeY,
             portalLayer: pillLayer,
+            zoom: z,
         })
     );
 }
@@ -1195,14 +1231,14 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         ),
         React.createElement(ElkSideHoverPanel, {
             visible: showHoverPanel,
-            maxHeightPx: Math.max(200, Math.min(RF_HOVER_DETAIL_PANEL_MAX_HEIGHT, gh * 2)),
             borderRadius: GROUP_NODE_BORDER_RADIUS,
             text: detail,
             panelRef: panelRef,
             onPanelMouseLeave: onPanelLeave,
-            flowLeft: nodeX + gw + NODE_HOVER_SIDE_GAP_PX,
+            flowLeft: nodeX + gw + NODE_HOVER_SIDE_GAP_PX / z,
             flowTop: nodeY,
             portalLayer: pillLayer,
+            zoom: z,
         })
     );
 }
@@ -1294,7 +1330,7 @@ function AtelierViewportApiBootstrap() {
                      * z-index beats .react-flow__nodes (which we set to 1 in index.html).
                      */
                     layer.style.cssText =
-                        'position:absolute;left:0;top:0;width:0;height:0;' +
+                        'position:absolute;left:0;top:0;width:0;height:0;overflow:visible;' +
                         'pointer-events:none;z-index:' +
                         RF_PILL_LAYER_Z_INDEX +
                         ';';
