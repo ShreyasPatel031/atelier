@@ -614,7 +614,7 @@ function ElkCustomNode({
     const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
 
     /** Hide “?” when the side hover snippet panel has text (avoid stacking two aids). */
-    const showHelpPill = hovered && pillLayer && detail.length === 0 && rfChatEnabled();
+    const showHelpPill = hovered && pillLayer && rfChatEnabled();
     const helpPillPortal =
         showHelpPill &&
         createPortal(
@@ -1055,7 +1055,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
 
     const showCollapsePill = hovered && pillLayer && !!(data && data.rfExpandedSubgraph);
-    const showHelpPill = hovered && pillLayer && detail.length === 0 && rfChatEnabled();
+    const showHelpPill = hovered && pillLayer && rfChatEnabled();
     const showControlPills = showCollapsePill || showHelpPill;
     const controlGapFlow = 4 / z;
     const controlPillStyle = {

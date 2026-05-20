@@ -27,6 +27,8 @@ _ALLOWED_ORIGINS = frozenset(
         "https://www.atelier-inc.net",
         "http://localhost:8080",
         "http://127.0.0.1:8080",
+        "http://localhost:9891",
+        "http://127.0.0.1:9891",
     }
 )
 
@@ -51,9 +53,53 @@ def _json_response(handler: BaseHTTPRequestHandler, status: int, body: dict) -> 
     handler.wfile.write(raw)
 
 
+def _gemini_ready() -> bool:
+    """True when GEMINI_API_KEY is set or Vertex/ADC (gcloud application-default) is available."""
+    if (os.getenv("GEMINI_API_KEY") or "").strip():
+        return True
+    try:
+        from codewiki.src.config import Config, LLM_API_KEY, LLM_BASE_URL, MAIN_MODEL, CLUSTER_MODEL, MAX_DEPTH, OUTPUT_BASE_DIR, DEPENDENCY_GRAPHS_DIR, DOCS_DIR
+        from codewiki.src.be.llm_services import _get_adc_credentials, _use_adc_mode
+
+        cfg = Config(
+            repo_path=".",
+            output_dir=OUTPUT_BASE_DIR,
+            dependency_graph_dir=os.path.join(OUTPUT_BASE_DIR, DEPENDENCY_GRAPHS_DIR),
+            docs_dir=os.path.join(OUTPUT_BASE_DIR, DOCS_DIR, "demo-docs"),
+            max_depth=MAX_DEPTH,
+            llm_base_url=LLM_BASE_URL,
+            llm_api_key=LLM_API_KEY,
+            main_model=os.getenv("MAIN_MODEL", MAIN_MODEL),
+            cluster_model=os.getenv("CLUSTER_MODEL", CLUSTER_MODEL),
+            use_vertex_ai=os.getenv("GOOGLE_USE_ADC", "").strip().lower() in ("1", "true", "yes")
+            or os.getenv("USE_VERTEX_AI", "").strip().lower() in ("1", "true", "yes"),
+            gcp_project=os.getenv("GCP_PROJECT", "") or os.getenv("GOOGLE_CLOUD_PROJECT", ""),
+        )
+        if _use_adc_mode(cfg):
+            _get_adc_credentials()
+            return True
+    except Exception:
+        pass
+    try:
+        import subprocess
+
+        proc = subprocess.run(
+            ["gcloud", "auth", "application-default", "print-access-token"],
+            capture_output=True,
+            text=True,
+            timeout=8,
+        )
+        return proc.returncode == 0 and bool((proc.stdout or "").strip())
+    except Exception:
+        return False
+
+
 def _run_chat(payload: dict) -> dict:
-    if not os.getenv("GEMINI_API_KEY"):
-        return {"error": "GEMINI_API_KEY is not configured", "status": 503}
+    if not _gemini_ready():
+        return {
+            "error": "Gemini not configured (set GEMINI_API_KEY or run: gcloud auth application-default login)",
+            "status": 503,
+        }
 
     job_id = payload.get("job_id") or ""
     message = (payload.get("message") or "").strip()
@@ -120,7 +166,7 @@ class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         p = self.path.split("?", 1)[0].rstrip("/")
         if p.endswith("/api/health") or p == "/api" or p.endswith("/health"):
-            gem = bool(os.getenv("GEMINI_API_KEY"))
+            gem = _gemini_ready()
             dp = _docs_path("react")
             _json_response(
                 self,

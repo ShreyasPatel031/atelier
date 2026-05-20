@@ -13,7 +13,7 @@ docker/
 docs/
 output/
 scripts/
-assets/
+/assets/
 codewiki.egg-info/
 
 # Tooling / CI / IDE
@@ -40,3 +40,7 @@ demo/repos/**/temp/
 venv/
 .env*
 *.env
+
+api/
+requirements.txt
+codewiki/

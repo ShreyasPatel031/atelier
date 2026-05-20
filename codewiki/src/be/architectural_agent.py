@@ -82,46 +82,40 @@ class ArchitecturalAgentRunner:
         import os
         
         self.docs_path = Path(docs_path)
-        
-        # Get Gemini API key from environment (optional if using gcloud auth)
-        self.gemini_api_key = os.getenv('GEMINI_API_KEY')
-        self.main_model = main_model or os.getenv('MAIN_MODEL', 'gemini-2.5-flash')
-        
-        # Load artifacts
+
+        from codewiki.src.config import (
+            CLUSTER_MODEL,
+            Config,
+            DEPENDENCY_GRAPHS_DIR,
+            LLM_API_KEY,
+            LLM_BASE_URL,
+            MAIN_MODEL,
+            MAX_DEPTH,
+            OUTPUT_BASE_DIR,
+        )
+        from codewiki.src.be.llm_services import create_main_model
+
+        self.gemini_api_key = os.getenv("GEMINI_API_KEY")
+        self.main_model = main_model or os.getenv("MAIN_MODEL", MAIN_MODEL)
+
         self.module_tree = self._load_module_tree()
         self.metadata = self._load_metadata()
-        
-        # Create Gemini model using pydantic-ai
-        # If GEMINI_API_KEY is set, use it; otherwise rely on gcloud application-default credentials
-        from pydantic_ai.models.google import GoogleModel
-        
-        if self.gemini_api_key:
-            # Set environment variable for GoogleModel
-            os.environ['GEMINI_API_KEY'] = self.gemini_api_key
-            self.model = GoogleModel(
-                model_name=self.main_model,
-                provider='google-gla'
-            )
-        else:
-            # Use gcloud application-default credentials
-            # GoogleModel should automatically use ADC if no API key is provided
-            try:
-                # Verify gcloud auth is available
-                import subprocess
-                result = subprocess.run(['gcloud', 'auth', 'application-default', 'print-access-token'], 
-                                      capture_output=True, text=True, timeout=5)
-                if result.returncode != 0:
-                    raise ValueError("GEMINI_API_KEY not set and gcloud application-default credentials not available. "
-                                   "Run: gcloud auth application-default login")
-            except (FileNotFoundError, subprocess.TimeoutExpired):
-                raise ValueError("GEMINI_API_KEY not set and gcloud not available. "
-                               "Either set GEMINI_API_KEY or install/configure gcloud")
-            
-            # GoogleModel with google-gla provider should use ADC automatically
-            self.model = GoogleModel(
-                model_name=self.main_model,
-                provider='google-gla'
-            )
+
+        llm_config = Config(
+            repo_path=str(self.docs_path),
+            output_dir=OUTPUT_BASE_DIR,
+            dependency_graph_dir=os.path.join(OUTPUT_BASE_DIR, DEPENDENCY_GRAPHS_DIR),
+            docs_dir=str(self.docs_path),
+            max_depth=MAX_DEPTH,
+            llm_base_url=llm_base_url or LLM_BASE_URL,
+            llm_api_key=llm_api_key or LLM_API_KEY,
+            main_model=self.main_model,
+            cluster_model=os.getenv("CLUSTER_MODEL", CLUSTER_MODEL),
+            use_vertex_ai=os.getenv("GOOGLE_USE_ADC", "").strip().lower() in ("1", "true", "yes")
+            or os.getenv("USE_VERTEX_AI", "").strip().lower() in ("1", "true", "yes"),
+            gcp_project=os.getenv("GCP_PROJECT", "") or os.getenv("GOOGLE_CLOUD_PROJECT", ""),
+        )
+        self.model = create_main_model(llm_config)
         
     def _load_module_tree(self) -> Dict[str, Any]:
         """Load module tree from docs."""
