@@ -2,11 +2,12 @@
   "version": 2,
   "buildCommand": "node demo/scripts/generate-repos-index.js",
   "outputDirectory": "demo",
+  "installCommand": "pip install -r api/requirements.txt",
   "functions": {
-    "api/**/*.py": {
+    "api/chat.py": {
       "maxDuration": 60,
-      "memory": 1024,
-      "includeFiles": "demo/repos/**,codewiki/src/**"
+      "includeFiles": "demo/repos/**,codewiki/src/**",
+      "excludeFiles": "demo/repos/**/temp/**"
     }
   },
   "routes": [

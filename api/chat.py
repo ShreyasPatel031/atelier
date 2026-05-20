@@ -177,14 +177,14 @@ class handler(BaseHTTPRequestHandler):
         p = self.path.split("?", 1)[0].rstrip("/")
         if p.endswith("/api/health") or p == "/api" or p.endswith("/health"):
             gem = _gemini_ready()
-            dp = _docs_path("react")
+            persona = _docs_path("persona-selection-model")
             _json_response(
                 self,
                 200,
                 {
                     "ok": True,
                     "gemini_configured": gem,
-                    "demo_repos_react": dp is not None,
+                    "demo_persona_bundle": persona is not None,
                     "repo_root": str(_ROOT),
                 },
             )

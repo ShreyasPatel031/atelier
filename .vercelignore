@@ -12,7 +12,7 @@ tests/
 docker/
 docs/
 output/
-scripts/
+/scripts/
 /assets/
 codewiki.egg-info/
 
