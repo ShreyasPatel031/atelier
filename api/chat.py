@@ -66,10 +66,12 @@ def _cors_allow_origin(origin: str) -> str:
 
 
 def _gemini_ready() -> bool:
+    if os.getenv("VERCEL"):
+        from api.gcp_auth import vertex_ready
+
+        return vertex_ready()
     if (os.getenv("GEMINI_API_KEY") or "").strip():
         return True
-    if os.getenv("VERCEL"):
-        return False
     try:
         from codewiki.src.config import (
             CLUSTER_MODEL,
@@ -160,14 +162,29 @@ def _format_diagram_block(payload: dict) -> str:
 
 
 def _run_chat_vercel(payload: dict, docs: Path) -> dict:
-    api_key = (os.getenv("GEMINI_API_KEY") or "").strip()
-    if not api_key:
+    from api.gcp_auth import get_vertex_access_token, vertex_ready
+
+    if not vertex_ready():
         return {
-            "error": "Gemini not configured. Set GEMINI_API_KEY in Vercel project Environment Variables.",
+            "error": (
+                "Vertex ADC not configured. Set GOOGLE_ADC_JSON (your gcloud application-default "
+                "credentials JSON) and GOOGLE_USE_ADC=1, plus GOOGLE_CLOUD_PROJECT. "
+                "Optional: GOOGLE_IMPERSONATE_SERVICE_ACCOUNT for SA impersonation."
+            ),
+            "status": 503,
+        }
+
+    try:
+        access_token, project_id = get_vertex_access_token()
+    except Exception as e:
+        return {
+            "error": f"ADC token refresh failed: {e}",
+            "trace": traceback.format_exc(),
             "status": 503,
         }
 
     model = os.getenv("MAIN_MODEL", "gemini-2.5-flash")
+    location = (os.getenv("VERTEX_LOCATION") or os.getenv("GOOGLE_CLOUD_LOCATION") or "us-central1").strip()
     message = (payload.get("message") or "").strip()
 
     try:
@@ -197,8 +214,9 @@ def _run_chat_vercel(payload: dict, docs: Path) -> dict:
     user = _format_diagram_block(payload) + message
 
     url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{model}:generateContent?key={api_key}"
+        f"https://{location}-aiplatform.googleapis.com/v1/projects/"
+        f"{project_id}/locations/{location}/publishers/google/models/"
+        f"{model}:generateContent"
     )
     body = {
         "systemInstruction": {"parts": [{"text": system}]},
@@ -208,7 +226,10 @@ def _run_chat_vercel(payload: dict, docs: Path) -> dict:
     req = urllib.request.Request(
         url,
         data=json.dumps(body).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}",
+        },
         method="POST",
     )
     try:
@@ -216,9 +237,9 @@ def _run_chat_vercel(payload: dict, docs: Path) -> dict:
             data = json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         err_body = e.read().decode("utf-8", errors="replace")[:800]
-        return {"error": f"Gemini HTTP {e.code}: {err_body}", "status": 502}
+        return {"error": f"Vertex HTTP {e.code}: {err_body}", "status": 502}
     except Exception as e:
-        return {"error": f"Gemini request failed: {e}", "status": 502}
+        return {"error": f"Vertex request failed: {e}", "status": 502}
 
     text = ""
     for cand in data.get("candidates") or []:
@@ -270,7 +291,7 @@ def _run_chat_codewiki(payload: dict, docs: Path) -> dict:
 def _run_chat(payload: dict) -> dict:
     if not _gemini_ready():
         return {
-            "error": "Gemini not configured. Set GEMINI_API_KEY in Vercel project Environment Variables.",
+            "error": "Gemini/Vertex not configured.",
             "status": 503,
         }
 
@@ -310,6 +331,14 @@ class handler(BaseHTTPRequestHandler):
         if p.endswith("/api/health") or p == "/api" or p.endswith("/health"):
             gem = _gemini_ready()
             persona = _docs_path("persona-selection-model")
+            vtx_adc = None
+            if os.getenv("VERCEL"):
+                try:
+                    from api.gcp_auth import vertex_ready as _vertex_ready
+
+                    vtx_adc = _vertex_ready()
+                except Exception:
+                    vtx_adc = False
             _json_response(
                 self,
                 200,
@@ -319,6 +348,7 @@ class handler(BaseHTTPRequestHandler):
                     "demo_persona_bundle": persona is not None,
                     "repo_root": str(_ROOT),
                     "vercel_lightweight_chat": bool(os.getenv("VERCEL")),
+                    "vertex_adc": vtx_adc,
                 },
             )
             return

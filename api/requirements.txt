@@ -1,1 +1,4 @@
-# Vercel chat uses stdlib urllib + GEMINI_API_KEY (see api/chat.py _run_chat_vercel).
+# Vertex + user ADC on Vercel (refresh OAuth / optional SA impersonation).
+google-auth>=2.40.0
+google-auth-oauthlib>=1.2.0
+requests>=2.31.0
