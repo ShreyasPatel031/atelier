@@ -46,5 +46,5 @@ codewiki/cli/
 codewiki/mcp/
 codewiki/run_web_app.py
 
-# Root requirements.txt is for local dev; Vercel uses api/requirements.txt
-requirements.txt
+# Full local dev lockfile (Vercel uses pyproject.toml + api/requirements.txt)
+/requirements.txt
