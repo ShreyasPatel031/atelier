@@ -43,7 +43,7 @@ def _docs_path(job_id: str) -> Optional[Path]:
 def _json_response(handler: BaseHTTPRequestHandler, status: int, body: dict) -> None:
     raw = json.dumps(body).encode("utf-8")
     origin = handler.headers.get("Origin", "")
-    allow = origin if origin in _ALLOWED_ORIGINS else "https://atelier-inc.net"
+    allow = _cors_allow_origin(origin)
     handler.send_response(status)
     handler.send_header("Content-Type", "application/json; charset=utf-8")
     handler.send_header("Content-Length", str(len(raw)))
@@ -53,10 +53,20 @@ def _json_response(handler: BaseHTTPRequestHandler, status: int, body: dict) -> 
     handler.wfile.write(raw)
 
 
+def _cors_allow_origin(origin: str) -> str:
+    if origin in _ALLOWED_ORIGINS:
+        return origin
+    if origin.startswith("https://") and origin.endswith(".vercel.app"):
+        return origin
+    return "https://app.atelier-inc.net"
+
+
 def _gemini_ready() -> bool:
-    """True when GEMINI_API_KEY is set or Vertex/ADC (gcloud application-default) is available."""
+    """True when GEMINI_API_KEY is set or Vertex/ADC (local only; Vercel uses GEMINI_API_KEY)."""
     if (os.getenv("GEMINI_API_KEY") or "").strip():
         return True
+    if os.getenv("VERCEL"):
+        return False
     try:
         from codewiki.src.config import Config, LLM_API_KEY, LLM_BASE_URL, MAIN_MODEL, CLUSTER_MODEL, MAX_DEPTH, OUTPUT_BASE_DIR, DEPENDENCY_GRAPHS_DIR, DOCS_DIR
         from codewiki.src.be.llm_services import _get_adc_credentials, _use_adc_mode
@@ -97,7 +107,7 @@ def _gemini_ready() -> bool:
 def _run_chat(payload: dict) -> dict:
     if not _gemini_ready():
         return {
-            "error": "Gemini not configured (set GEMINI_API_KEY or run: gcloud auth application-default login)",
+            "error": "Gemini not configured. Set GEMINI_API_KEY in Vercel project Environment Variables.",
             "status": 503,
         }
 
@@ -155,7 +165,7 @@ class handler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self):
         origin = self.headers.get("Origin", "")
-        allow = origin if origin in _ALLOWED_ORIGINS else "https://atelier-inc.net"
+        allow = _cors_allow_origin(origin)
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", allow)
         self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")

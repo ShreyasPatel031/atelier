@@ -6,7 +6,8 @@
     "demo": "python3 -m http.server 9891 --directory demo",
     "build:viewer": "node demo/scripts/generate-repos-index.js && node demo/scripts/generate-architecture-svgs.js",
     "preview:architecture": "node demo/scripts/generate-architecture-svgs.js --repo persona-selection-model --png",
-    "deploy:viewer": "node -e \"const fs=require('fs');fs.appendFileSync('.vercelignore','\\napi/\\nrequirements.txt\\ncodewiki/\\n');fs.copyFileSync('vercel.json','.vercel.deploy-backup.json');fs.copyFileSync('vercel.static.json','vercel.json');\" && vercel --prod --yes && node -e \"const fs=require('fs');fs.copyFileSync('.vercel.deploy-backup.json','vercel.json');fs.rmSync('.vercel.deploy-backup.json');let ig=fs.readFileSync('.vercelignore','utf8').replace(/\\napi\\/\\nrequirements.txt\\ncodewiki\\/\\n$/,'');fs.writeFileSync('.vercelignore',ig);\"",
+    "deploy:prod": "vercel --prod --yes",
+    "deploy:viewer": "node -e \"const fs=require('fs');fs.copyFileSync('vercel.json','.vercel.deploy-backup.json');fs.copyFileSync('vercel.static.json','vercel.json');\" && vercel --prod --yes && node -e \"const fs=require('fs');fs.copyFileSync('.vercel.deploy-backup.json','vercel.json');fs.rmSync('.vercel.deploy-backup.json');\"",
     "test:elk-diagrams": "node demo/scripts/validate-elk-all-diagrams.js",
     "test:e2e": "playwright test",
     "test:e2e:edge": "playwright test demo/playwright/edge-hover.spec.ts"

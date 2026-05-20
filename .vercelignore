@@ -41,6 +41,10 @@ venv/
 .env*
 *.env
 
-api/
+# Codewiki areas not needed by api/chat.py
+codewiki/cli/
+codewiki/mcp/
+codewiki/run_web_app.py
+
+# Root requirements.txt is for local dev; Vercel uses api/requirements.txt
 requirements.txt
-codewiki/

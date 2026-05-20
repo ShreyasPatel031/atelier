@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "buildCommand": null,
+  "buildCommand": "node demo/scripts/generate-repos-index.js",
   "outputDirectory": "demo",
   "functions": {
     "api/**/*.py": {
       "maxDuration": 60,
-      "includeFiles": "demo/repos/**"
+      "memory": 1024,
+      "includeFiles": "demo/repos/**,codewiki/src/**"
     }
   },
   "routes": [
