@@ -1,0 +1,254 @@
+{
+    "title": "AI Persona Steering System",
+    "summary": "This repository implements an AI persona steering system for large language models. It provides tools for developing, evaluating, and applying distinct personas to influence model behavior in conversational and interactive applications. Users can interact with persona-steered chat interfaces, explore dynamic D&D playground scenarios, and analyze the internal workings of persona activations. The system aims to enable fine-grained control over AI responses through persona-driven steering vectors.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "user_end",
+                "label": "End-User / Client App",
+                "type": "external",
+                "semanticRole": "actor",
+                "link": null,
+                "title": "End-User / Client Application",
+                "description": "An external user or application interacting with the persona-steered AI services via API endpoints, such as chat interfaces or interactive playgrounds."
+            },
+            {
+                "id": "user_dev",
+                "label": "Developer / Researcher",
+                "type": "external",
+                "semanticRole": "actor",
+                "link": null,
+                "title": "Developer / Researcher",
+                "description": "A user focused on creating, testing, and validating new AI personas and steering vectors, using experimental tools and analysis features."
+            },
+            {
+                "id": "user_admin",
+                "label": "Admin / DevOps",
+                "type": "external",
+                "semanticRole": "actor",
+                "link": null,
+                "title": "Administrator / DevOps Engineer",
+                "description": "A user responsible for managing the application's lifecycle, monitoring health, and orchestrating system resources, ensuring stable and efficient operation."
+            },
+            {
+                "id": "llm_backend",
+                "label": "Language Model Backend",
+                "type": "external",
+                "semanticRole": "external_dependency",
+                "link": null,
+                "title": "Underlying LLM Service",
+                "description": "The core large language model (e.g., Gemma) responsible for text generation, activation extraction, and steered responses across all system functionalities."
+            },
+            {
+                "id": "external_eval",
+                "label": "External Evaluation Services",
+                "type": "external",
+                "semanticRole": "external_dependency",
+                "link": null,
+                "title": "AI Evaluation & Judging Services",
+                "description": "External AI services (e.g., Vertex AI) used for generating artifacts, judging model responses, and evaluating coherence during persona development and validation."
+            },
+            {
+                "id": "persona_data_store",
+                "label": "Persona Data Storage",
+                "type": "external",
+                "semanticRole": "data_store",
+                "link": null,
+                "title": "Persona Data & Artifacts",
+                "description": "Centralized storage for persona vectors, trait bundles, calibration data, and other structured information defining personas and their properties."
+            },
+            {
+                "id": "user_facing_api",
+                "label": "User-Facing API Services",
+                "type": "module",
+                "semanticRole": "component",
+                "link": "user_facing_api",
+                "title": "User-Facing API Services",
+                "description": "Provides public API endpoints for chat interfaces, interactive D&D playground sessions, and UI metadata retrieval, enabling external interaction with the system."
+            },
+            {
+                "id": "persona_development_and_evaluation",
+                "label": "Persona Development & Evaluation",
+                "type": "module",
+                "semanticRole": "component",
+                "link": "persona_development_and_evaluation",
+                "title": "Persona Development & Evaluation Tools",
+                "description": "A comprehensive suite of tools for developing, evaluating, and demonstrating persona steering vectors for large language models, covering the entire lifecycle."
+            },
+            {
+                "id": "core_persona_logic",
+                "label": "Core Persona Logic",
+                "type": "module",
+                "semanticRole": "component",
+                "link": "core_persona_logic",
+                "title": "Core Persona Logic & Mechanisms",
+                "description": "Encapsulates the fundamental logic for persona activations, dynamic gating mechanisms, and vector composition, driving intelligent AI behavior in applications."
+            },
+            {
+                "id": "system_infrastructure",
+                "label": "System Infrastructure",
+                "type": "module",
+                "semanticRole": "component",
+                "link": "system_infrastructure",
+                "title": "System Infrastructure & Utilities",
+                "description": "Provides foundational services for application lifecycle, data schemas, testing, and GPU resource management, ensuring system stability and efficient operation."
+            }
+        ],
+        "edges": [
+            {
+                "source": "user_end",
+                "target": "user_facing_api",
+                "label": "Interacts with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_dev",
+                "target": "persona_development_and_evaluation",
+                "label": "Initiates experiments & analysis",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_admin",
+                "target": "system_infrastructure",
+                "label": "Manages & monitors",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_facing_api",
+                "target": "core_persona_logic",
+                "label": "Consumes persona services",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_facing_api",
+                "target": "llm_backend",
+                "label": "Generates text via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_facing_api",
+                "target": "persona_data_store",
+                "label": "Retrieves UI metadata",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "persona_development_and_evaluation",
+                "target": "core_persona_logic",
+                "label": "Utilizes vector composition & activations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "persona_development_and_evaluation",
+                "target": "llm_backend",
+                "label": "Uses for generation & activations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "persona_development_and_evaluation",
+                "target": "persona_data_store",
+                "label": "Manages persona artifacts",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "persona_development_and_evaluation",
+                "target": "external_eval",
+                "label": "Leverages for judging & validation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "system_infrastructure",
+                "target": "llm_backend",
+                "label": "Manages LLM lifecycle",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "system_infrastructure",
+                "target": "persona_data_store",
+                "label": "Configures data access",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "system_infrastructure",
+                "target": "user_facing_api",
+                "label": "Supports API operations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "system_infrastructure",
+                "target": "persona_development_and_evaluation",
+                "label": "Provides foundational services",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "system_infrastructure",
+                "target": "core_persona_logic",
+                "label": "Manages underlying resources for",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "user_api_gateway",
+                "label": "User Interfaces & API Gateway",
+                "nodes": [
+                    "user_end",
+                    "user_facing_api"
+                ],
+                "title": "User Interfaces & API Gateway",
+                "description": "This group provides the public-facing API endpoints for external users and client applications to interact with the persona steering system, offering chat, interactive playground, and metadata services.",
+                "role": "domain_group"
+            },
+            {
+                "id": "persona_dev_eval_group",
+                "label": "Persona Development & Evaluation",
+                "nodes": [
+                    "user_dev",
+                    "persona_development_and_evaluation"
+                ],
+                "title": "Persona Development & Evaluation",
+                "description": "This group encompasses the comprehensive suite of tools and workflows for researchers and developers to create, evaluate, and refine AI personas and their steering vectors, including experimentation, data generation, and analysis.",
+                "role": "domain_group"
+            },
+            {
+                "id": "core_ai_logic_data",
+                "label": "Core AI Logic, Models & Data",
+                "nodes": [
+                    "core_persona_logic",
+                    "llm_backend",
+                    "persona_data_store",
+                    "external_eval"
+                ],
+                "title": "Core AI Logic, Models & Data",
+                "description": "This group contains the fundamental AI logic for persona activations, dynamic gating, and vector composition, along with the underlying language model, external evaluation services, and persistent storage for persona-related data and configurations.",
+                "role": "domain_group"
+            },
+            {
+                "id": "system_ops_infra",
+                "label": "System Operations & Infrastructure",
+                "nodes": [
+                    "user_admin",
+                    "system_infrastructure"
+                ],
+                "title": "System Operations & Infrastructure",
+                "description": "This group manages the foundational aspects of the system, including application lifecycle, health monitoring, data schemas, testing utilities, and GPU resource orchestration, ensuring robust and efficient operation.",
+                "role": "domain_group"
+            }
+        ]
+    }
+}

@@ -1,0 +1,197 @@
+{
+  "title": "Data Generation & Rollouts",
+  "summary": "This module generates conversational data through automated model rollouts and self-chat experiments. It explores persona vector influence and gate discovery by simulating multi-turn interactions.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "run_extraction_rollouts",
+        "label": "Generate Extraction Rollouts",
+        "type": "component",
+        "link": null,
+        "title": "Generate Extraction Rollouts",
+        "description": "Initiates the generation of model responses (rollouts) for data extraction, bypassing any judging mechanism. It serves as a wrapper for a specific step in an evaluation pipeline."
+      },
+      {
+        "id": "run_step_c",
+        "label": "Execute Evaluation Step C",
+        "type": "component",
+        "link": "experiment_runners",
+        "title": "Execute Evaluation Step C",
+        "description": "Performs a specific step within a broader evaluation pipeline, which includes generating model rollouts. This component is part of the `experiment_runners` module."
+      },
+      {
+        "id": "gemma_model_api",
+        "label": "Gemma LLM",
+        "type": "external",
+        "link": null,
+        "title": "Gemma Large Language Model",
+        "description": "The external Gemma Large Language Model service, providing text generation capabilities for both rollouts and self-chat experiments."
+      },
+      {
+        "id": "gate_self_chat_main",
+        "label": "Orchestrate Self-Chat Experiment",
+        "type": "component",
+        "link": null,
+        "title": "Orchestrate Self-Chat Experiment",
+        "description": "Drives an experiment where a language model engages in multiple self-chat sessions. It configures persona vectors and gate mechanisms to observe their influence on conversational dynamics."
+      },
+      {
+        "id": "load_model_tokenizer",
+        "label": "Load LLM & Tokenizer",
+        "type": "component",
+        "link": "persona_activations",
+        "title": "Load LLM & Tokenizer",
+        "description": "Initializes and loads the specified language model and its tokenizer, making them ready for text generation tasks. This component is from the `persona_activations` module."
+      },
+      {
+        "id": "persona_config_grid",
+        "label": "Persona Configuration",
+        "type": "data",
+        "link": null,
+        "title": "Persona Configuration & Grid",
+        "description": "Input data defining persona traits, vector configurations, and experimental grid parameters used to guide the self-chat sessions."
+      },
+      {
+        "id": "self_chat_session_runner",
+        "label": "Run Single Self-Chat Session",
+        "type": "component",
+        "link": null,
+        "title": "Run Single Self-Chat Session",
+        "description": "Executes one complete multi-turn self-chat conversation. It applies loaded persona vectors and gate states to influence the model's responses throughout the session."
+      },
+      {
+        "id": "output_json_transcript",
+        "label": "Store JSON Transcript",
+        "type": "data",
+        "link": null,
+        "title": "JSON Conversation Transcript",
+        "description": "Outputs a comprehensive JSON file containing the full transcript of all self-chat sessions, including messages, gate states, and session metadata."
+      },
+      {
+        "id": "stdout_display",
+        "label": "Display Session Summary",
+        "type": "data",
+        "link": null,
+        "title": "Standard Output Display",
+        "description": "Prints a human-readable summary of each self-chat session to the standard output, detailing turns, gate activations, and messages."
+      },
+      {
+        "id": "output_rollout_path",
+        "label": "Rollout Output File",
+        "type": "data",
+        "link": null,
+        "title": "Rollout Output File",
+        "description": "The designated file path where the generated data from the extraction rollouts is saved."
+      }
+    ],
+    "edges": [
+      {
+        "source": "run_extraction_rollouts",
+        "target": "run_step_c",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_step_c",
+        "target": "gemma_model_api",
+        "label": "generates text via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_extraction_rollouts",
+        "target": "output_rollout_path",
+        "label": "returns path to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_self_chat_main",
+        "target": "persona_config_grid",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_self_chat_main",
+        "target": "load_model_tokenizer",
+        "label": "initializes with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_model_tokenizer",
+        "target": "gemma_model_api",
+        "label": "loads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_self_chat_main",
+        "target": "self_chat_session_runner",
+        "label": "orchestrates multiple",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "self_chat_session_runner",
+        "target": "gemma_model_api",
+        "label": "generates responses via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_self_chat_main",
+        "target": "output_json_transcript",
+        "label": "writes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_self_chat_main",
+        "target": "stdout_display",
+        "label": "prints summary to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "self_chat_experiment_driver",
+        "label": "Self-Chat Experiment Driver",
+        "nodes": [
+          "gate_self_chat_main"
+        ],
+        "title": "Self-Chat Experiment Driver",
+        "description": "The primary entry point for configuring and running the self-chat gate discovery experiment.",
+        "role": "surface"
+      },
+      {
+        "id": "data_generation_engines",
+        "label": "Data Generation Engines",
+        "nodes": [
+          "run_extraction_rollouts",
+          "self_chat_session_runner"
+        ],
+        "title": "Data Generation Engines",
+        "description": "Components responsible for actively generating new textual data or conversational interactions.",
+        "role": "generative"
+      },
+      {
+        "id": "data_io",
+        "label": "Data Inputs/Outputs",
+        "nodes": [
+          "persona_config_grid",
+          "output_json_transcript",
+          "stdout_display",
+          "output_rollout_path"
+        ],
+        "title": "Data Inputs and Outputs",
+        "description": "Represents the configuration data consumed and the generated data produced by the module.",
+        "role": "data"
+      }
+    ]
+  }
+}

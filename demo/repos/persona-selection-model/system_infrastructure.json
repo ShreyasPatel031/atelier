@@ -1,0 +1,205 @@
+{
+    "title": "System Infrastructure",
+    "summary": "This module provides foundational components for application lifecycle, data schemas, testing, and GPU resource management, ensuring system stability and efficient operation.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "app_lifecycle_mod",
+                "label": "Application Lifecycle",
+                "type": "module",
+                "link": "application_lifecycle",
+                "title": "Application Lifecycle Management",
+                "description": "Manages application startup, graceful shutdown, and provides health check endpoints. It orchestrates the loading of core AI models and their dependencies, ensuring operational readiness."
+            },
+            {
+                "id": "data_schemas_mod",
+                "label": "Data Schemas",
+                "type": "module",
+                "link": "data_schemas",
+                "title": "Data Schemas & Validation",
+                "description": "Defines Pydantic data models for structuring and validating persona-related data, such as trait artifacts and experimental configurations. This ensures data consistency and integrity across modules."
+            },
+            {
+                "id": "testing_utilities_mod",
+                "label": "Testing Utilities",
+                "type": "module",
+                "link": "testing_utilities",
+                "title": "Dynamic Gating Test Utility",
+                "description": "Provides API endpoints for performing and streaming results of dynamic gating tests. This utility is crucial for evaluating the behavior and effectiveness of persona-based gating mechanisms."
+            },
+            {
+                "id": "resource_management_mod",
+                "label": "Resource Management",
+                "type": "module",
+                "link": "resource_management",
+                "title": "GPU Resource Management",
+                "description": "Offers command-line utilities for probing and orchestrating GPU resources. It helps in monitoring hardware status and ensuring efficient utilization for AI model operations."
+            },
+            {
+                "id": "llm_pipeline",
+                "label": "Language Model Pipeline",
+                "type": "external",
+                "link": null,
+                "title": "Hugging Face Model Pipeline",
+                "description": "The core text generation pipeline, loaded using the Hugging Face transformers library. It is essential for all AI functionalities, providing the underlying generative capabilities."
+            },
+            {
+                "id": "persona_dev_eval_mod",
+                "label": "Persona Dev & Eval Module",
+                "type": "other_module",
+                "link": "persona_development_and_evaluation",
+                "title": "Persona Development & Evaluation",
+                "description": "Module containing tools for developing, evaluating, and demonstrating persona steering vectors. This includes SAE analysis, experiment runners, and steering demonstrations."
+            },
+            {
+                "id": "core_persona_logic_mod",
+                "label": "Core Persona Logic Module",
+                "type": "other_module",
+                "link": "core_persona_logic",
+                "title": "Core Persona Logic",
+                "description": "Encapsulates the fundamental logic for persona activations, dynamic gating mechanisms, and vector composition. It drives the intelligent behavior of persona-steered interactions."
+            },
+            {
+                "id": "app_config_state",
+                "label": "Application Configuration",
+                "type": "external",
+                "link": null,
+                "title": "Application Configuration & State",
+                "description": "Manages environment variables (e.g., HF_TOKEN) and in-memory states for persona steering and DND playground configurations. These settings influence global application behavior."
+            },
+            {
+                "id": "system_io_resources",
+                "label": "System I/O & Resources",
+                "type": "external",
+                "link": null,
+                "title": "System Inputs, Outputs & Hardware",
+                "description": "Represents external interactions like command-line arguments, test requests/responses, logging, and direct interfaces with underlying GPU hardware resources."
+            }
+        ],
+        "edges": [
+            {
+                "source": "app_config_state",
+                "target": "app_lifecycle_mod",
+                "label": "Provides Config & State",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "app_lifecycle_mod",
+                "target": "llm_pipeline",
+                "label": "Loads & Manages",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "app_lifecycle_mod",
+                "target": "persona_dev_eval_mod",
+                "label": "Integrates SAE Analysis",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "llm_pipeline",
+                "target": "app_lifecycle_mod",
+                "label": "Reports Health Status",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "persona_dev_eval_mod",
+                "target": "app_lifecycle_mod",
+                "label": "Reports Health Status",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "app_config_state",
+                "target": "app_lifecycle_mod",
+                "label": "Reports Health Status",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_schemas_mod",
+                "target": "persona_dev_eval_mod",
+                "label": "Defines Data Structures",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_schemas_mod",
+                "target": "core_persona_logic_mod",
+                "label": "Defines Data Structures",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "system_io_resources",
+                "target": "testing_utilities_mod",
+                "label": "Sends Test Requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "testing_utilities_mod",
+                "target": "system_io_resources",
+                "label": "Streams Test Results",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "system_io_resources",
+                "target": "resource_management_mod",
+                "label": "Provides CLI Input",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "resource_management_mod",
+                "target": "system_io_resources",
+                "label": "Interacts with Hardware & Logs",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_infra_services",
+                "label": "Core Infrastructure Services",
+                "nodes": [
+                    "app_lifecycle_mod",
+                    "data_schemas_mod",
+                    "testing_utilities_mod",
+                    "resource_management_mod"
+                ],
+                "title": "Core Infrastructure Services",
+                "description": "These modules provide foundational services for application lifecycle management, data validation, testing, and hardware resource orchestration, ensuring system stability and functionality.",
+                "role": null
+            },
+            {
+                "id": "ai_core_components",
+                "label": "AI Core Components",
+                "nodes": [
+                    "llm_pipeline",
+                    "persona_dev_eval_mod",
+                    "core_persona_logic_mod"
+                ],
+                "title": "Core AI Components & Logic",
+                "description": "Represents the central AI model, along with modules for persona development, evaluation, and core persona logic, which are critical for the system's intelligent behavior.",
+                "role": null
+            },
+            {
+                "id": "system_interfaces_data",
+                "label": "System Interfaces & Data",
+                "nodes": [
+                    "app_config_state",
+                    "system_io_resources"
+                ],
+                "title": "System Interfaces & Data",
+                "description": "Encompasses application-wide configurations, environment variables, in-memory states, and various system input/output mechanisms, including hardware interactions and logging.",
+                "role": null
+            }
+        ]
+    }
+}

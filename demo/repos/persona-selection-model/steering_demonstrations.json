@@ -1,0 +1,266 @@
+{
+  "title": "Persona Steering Demonstrations",
+  "summary": "This module provides tools for demonstrating and evaluating persona steering. It includes functions to generate text with steering, analyze the effect of steering on hidden states, and run grid-based experiments to explore different steering parameters and combinations of personas.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "grid_nine_main",
+        "label": "Run Steering Grid Experiment",
+        "type": "component",
+        "link": null,
+        "title": "Orchestrates Grid Experiments",
+        "description": "Parses arguments, loads steering vectors and calibration data, and orchestrates the generation of a 3x3 or 2x2 grid of steered model replies. Optionally scores replies using external judges and outputs results."
+      },
+      {
+        "id": "steering_demo_generate_once",
+        "label": "Generate Single Steered Reply",
+        "type": "component",
+        "link": null,
+        "title": "Generates Text with Steering",
+        "description": "Generates a single text reply from the language model, applying a specified steering vector at a given alpha and layer. Manages the registration and removal of steering hooks."
+      },
+      {
+        "id": "steering_demo_along_persona_vector",
+        "label": "Analyze Persona Vector Alignment",
+        "type": "component",
+        "link": null,
+        "title": "Measures Steering Effect",
+        "description": "Calculates the dot product of the model's hidden states (mean-pooled assistant states) with a persona vector and a steering vector at a specific layer and across all layers. Used to quantify how well a reply aligns with a persona."
+      },
+      {
+        "id": "grid_nine_run_generate",
+        "label": "Execute Grid Generation",
+        "type": "component",
+        "link": null,
+        "title": "Performs Steered Generation for Grid",
+        "description": "Manages the registration of multiple steering hooks (e.g., for combined sycophancy and chaos vectors) and executes the language model's text generation for a grid cell. Ensures hooks are properly removed."
+      },
+      {
+        "id": "grid_nine_register",
+        "label": "Register Steering Hook",
+        "type": "component",
+        "link": null,
+        "title": "Sets Up Steering Hook",
+        "description": "A helper function that registers a forward hook on a specific model layer to inject a steering vector with a given alpha. Used by grid generation functions to apply steering."
+      },
+      {
+        "id": "model_inference",
+        "label": "Language Model Inference",
+        "type": "external",
+        "link": null,
+        "title": "Generates Text from LLM",
+        "description": "The underlying language model performing text generation based on input prompts and applied steering vectors."
+      },
+      {
+        "id": "persona_vectors",
+        "label": "Persona Steering Vectors",
+        "type": "external",
+        "link": null,
+        "title": "Pre-trained Steering Vectors",
+        "description": "Files containing pre-trained persona steering vectors (e.g., sycophancy, chaos) used to influence the language model's behavior."
+      },
+      {
+        "id": "calibration_data",
+        "label": "Steering Calibration Data",
+        "type": "external",
+        "link": null,
+        "title": "Alpha Calibration Values",
+        "description": "JSON files containing recommended alpha values for steering, often derived from coherence alpha sweeps, used to set steering intensity."
+      },
+      {
+        "id": "trait_bundles",
+        "label": "Persona Trait Bundles",
+        "type": "external",
+        "link": null,
+        "title": "Evaluation Trait Definitions",
+        "description": "Bundles defining persona traits, used by external judges to score generated replies for alignment with specific personas."
+      },
+      {
+        "id": "evaluation_judges",
+        "label": "External Evaluation Judges",
+        "type": "external",
+        "link": null,
+        "title": "Scores Generated Replies",
+        "description": "External services or models (e.g., Vertex AI) that evaluate generated text for specific traits like sycophancy, chaos, or coherence."
+      },
+      {
+        "id": "user_input",
+        "label": "User Input / CLI Arguments",
+        "type": "external",
+        "link": null,
+        "title": "Experiment Configuration",
+        "description": "Command-line arguments and user-provided questions that configure the grid experiment, steering parameters, and output options."
+      },
+      {
+        "id": "output_reports",
+        "label": "Experiment Reports",
+        "type": "external",
+        "link": null,
+        "title": "JSON/CSV Results",
+        "description": "Structured output files (JSON, CSV) containing the generated replies, steering parameters, and evaluation scores from the grid experiments."
+      },
+      {
+        "id": "coherence_alpha_sweep",
+        "label": "Coherence Alpha Sweep Module",
+        "type": "other_module",
+        "link": "experiment_runners",
+        "title": "Optimizes Steering Alphas",
+        "description": "A related module responsible for running experiments to find optimal alpha values for steering vectors based on coherence metrics."
+      }
+    ],
+    "edges": [
+      {
+        "source": "user_input",
+        "target": "grid_nine_main",
+        "label": "Configures Experiment",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "persona_vectors",
+        "target": "grid_nine_main",
+        "label": "Loads Vectors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "calibration_data",
+        "target": "grid_nine_main",
+        "label": "Loads Alpha Scales",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "coherence_alpha_sweep",
+        "target": "calibration_data",
+        "label": "Generates Calibration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_main",
+        "target": "grid_nine_run_generate",
+        "label": "Orchestrates Grid Generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_run_generate",
+        "target": "grid_nine_register",
+        "label": "Registers Hooks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_register",
+        "target": "model_inference",
+        "label": "Applies Steering (via hook)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_run_generate",
+        "target": "model_inference",
+        "label": "Requests Generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "steering_demo_generate_once",
+        "target": "model_inference",
+        "label": "Requests Generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_inference",
+        "target": "steering_demo_along_persona_vector",
+        "label": "Provides Hidden States",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "persona_vectors",
+        "target": "steering_demo_along_persona_vector",
+        "label": "Provides Persona Vectors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_main",
+        "target": "trait_bundles",
+        "label": "Loads Trait Definitions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_main",
+        "target": "evaluation_judges",
+        "label": "Sends Replies for Scoring",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluation_judges",
+        "target": "grid_nine_main",
+        "label": "Returns Scores",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grid_nine_main",
+        "target": "output_reports",
+        "label": "Writes Results",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_components",
+        "label": "Surface Components",
+        "nodes": [
+          "grid_nine_main"
+        ],
+        "title": "User-Facing Interfaces",
+        "description": "Components that serve as direct entry points for users or other modules, typically handling command-line arguments or high-level orchestration.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_components",
+        "label": "Generative Components",
+        "nodes": [
+          "steering_demo_generate_once",
+          "grid_nine_run_generate",
+          "grid_nine_register"
+        ],
+        "title": "Text Generation with Steering",
+        "description": "Components responsible for generating text from the language model, specifically incorporating steering vectors to influence the output.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_components",
+        "label": "Analytical Components",
+        "nodes": [
+          "steering_demo_along_persona_vector"
+        ],
+        "title": "Steering Effect Analysis",
+        "description": "Components focused on analyzing the impact of steering by examining model internals, such as hidden states and their alignment with persona vectors.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_sources",
+        "label": "Data Sources",
+        "nodes": [
+          "persona_vectors",
+          "calibration_data",
+          "trait_bundles"
+        ],
+        "title": "External Data Dependencies",
+        "description": "External data assets and configurations required for the module's operation, including pre-trained vectors and calibration settings.",
+        "role": "data"
+      }
+    ]
+  }
+}

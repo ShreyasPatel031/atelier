@@ -5,6 +5,11 @@
     "description": "Multi-agent crews, tasks, and tools for LLM workflows."
   },
   {
+    "id": "crewai-src",
+    "label": "Crewai Src",
+    "description": ""
+  },
+  {
     "id": "dspy",
     "label": "DSPy",
     "description": "Framework for programming not prompting LLM pipelines."
@@ -18,6 +23,11 @@
     "id": "ollama",
     "label": "Ollama",
     "description": "Run and bundle local LLMs with a simple API and CLI."
+  },
+  {
+    "id": "persona-selection-model",
+    "label": "Persona Selection",
+    "description": "Gemma chat MVP with persona vectors, SAE tooling, and FastAPI UI."
   },
   {
     "id": "pydantic-ai",

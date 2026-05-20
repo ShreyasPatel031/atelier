@@ -1,0 +1,64 @@
+{
+  "repo_name": "persona-selection-model",
+  "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/persona-selection-model",
+  "repo_size_mb": 435265.41015625,
+  "total_files": 0,
+  "total_code_files": 29,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 1.395880937576294,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 16.010160207748413,
+      "tokens_used": 2404,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 579.7524240016937,
+      "tokens_used": 300162,
+      "files_created": 24,
+      "files_created_list": [
+        "chat_interfaces.json",
+        "system_infrastructure.json",
+        "dnd_playground_logic.json",
+        "api_metadata.json",
+        "data_generation_and_rollouts.json",
+        "first_module_tree.json",
+        "metadata.json",
+        "vector_composition_tools.json",
+        "persona_development_and_evaluation.json",
+        "testing_utilities.json",
+        "gating_mechanisms.json",
+        "module_tree.json",
+        "application_lifecycle.json",
+        "overview.json",
+        "user_facing_api.json",
+        "experiment_runners.json",
+        "sae_analysis.json",
+        "core_persona_logic.json",
+        "resource_management.json",
+        "playground_interfaces.json",
+        "sync_issues.json",
+        "persona_activations.json",
+        "steering_demonstrations.json",
+        "data_schemas.json"
+      ]
+    }
+  },
+  "time_to_first_overview": 597.1696710586548,
+  "first_overview_file": "/Users/shreyaspatel/atelier/.tmp/demo_regen/persona-selection-model/docs/overview.json",
+  "total_duration": 597.1697242259979,
+  "total_tokens": 302566,
+  "estimated_cost_usd": 0.0622,
+  "total_llm_calls": 21,
+  "total_files_created": 24,
+  "start_time": 1779167504.046099,
+  "end_time": 1779168101.2158232
+}

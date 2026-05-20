@@ -1,0 +1,223 @@
+{
+  "title": "SAE Analysis Tools",
+  "summary": "This module provides API endpoints for analyzing Sparse Autoencoders (SAEs), allowing comparison of SAE activations between different system prompts and generating snapshots of SAE activations for specific messages.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "phase2_sae_compare",
+        "label": "Compare SAE Activations",
+        "type": "component",
+        "link": null,
+        "title": "SAE Comparison Endpoint",
+        "description": "API endpoint to compare Sparse Autoencoder (SAE) activations between two different system prompts for a given message."
+      },
+      {
+        "id": "phase2_sae_snapshot",
+        "label": "Snapshot SAE Activations",
+        "type": "component",
+        "link": null,
+        "title": "SAE Snapshot Endpoint",
+        "description": "API endpoint to generate a snapshot of Sparse Autoencoder (SAE) activations for a specific system prompt and message."
+      },
+      {
+        "id": "SaeCompareRequest",
+        "label": "Comparison Request Data",
+        "type": "component",
+        "link": null,
+        "title": "SAE Compare Request Schema",
+        "description": "Input data model for the SAE comparison endpoint, including message, system prompts A and B, and top-k parameter."
+      },
+      {
+        "id": "SaeSnapshotRequest",
+        "label": "Snapshot Request Data",
+        "type": "component",
+        "link": null,
+        "title": "SAE Snapshot Request Schema",
+        "description": "Input data model for the SAE snapshot endpoint, including system prompt, message, and top-k parameter."
+      },
+      {
+        "id": "_pipe",
+        "label": "Loaded Model Pipeline",
+        "type": "external",
+        "link": null,
+        "title": "Language Model Pipeline",
+        "description": "Represents the underlying language model pipeline (_pipe) that processes messages and generates activations for SAE analysis."
+      },
+      {
+        "id": "sae_loaded_check",
+        "label": "Check SAE Status",
+        "type": "component",
+        "link": null,
+        "title": "SAE Loading Status Check",
+        "description": "Verifies if the Sparse Autoencoder (SAE) model has been successfully loaded and is ready for use."
+      },
+      {
+        "id": "compute_compare",
+        "label": "Perform SAE Comparison",
+        "type": "component",
+        "link": null,
+        "title": "SAE Comparison Logic",
+        "description": "Core logic to compute and compare SAE activations based on the provided messages and system prompts."
+      },
+      {
+        "id": "compute_snapshot",
+        "label": "Generate SAE Snapshot",
+        "type": "component",
+        "link": null,
+        "title": "SAE Snapshot Generation Logic",
+        "description": "Core logic to generate a detailed snapshot of SAE activations for a given input."
+      },
+      {
+        "id": "HTTPException",
+        "label": "Handle API Errors",
+        "type": "component",
+        "link": null,
+        "title": "API Error Handling",
+        "description": "Standard FastAPI exception handling for reporting errors such as model not loaded or internal processing failures."
+      }
+    ],
+    "edges": [
+      {
+        "source": "SaeCompareRequest",
+        "target": "phase2_sae_compare",
+        "label": "Provides input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SaeSnapshotRequest",
+        "target": "phase2_sae_snapshot",
+        "label": "Provides input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "phase2_sae_compare",
+        "target": "sae_loaded_check",
+        "label": "Checks SAE status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "phase2_sae_compare",
+        "target": "_pipe",
+        "label": "Uses model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "phase2_sae_compare",
+        "target": "compute_compare",
+        "label": "Invokes core logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "phase2_sae_snapshot",
+        "target": "sae_loaded_check",
+        "label": "Checks SAE status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "phase2_sae_snapshot",
+        "target": "_pipe",
+        "label": "Uses model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "phase2_sae_snapshot",
+        "target": "compute_snapshot",
+        "label": "Invokes core logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_loaded_check",
+        "target": "HTTPException",
+        "label": "Raises error if not loaded",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_pipe",
+        "target": "HTTPException",
+        "label": "Raises error if not loaded",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "compute_compare",
+        "target": "HTTPException",
+        "label": "Reports processing errors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "compute_snapshot",
+        "target": "HTTPException",
+        "label": "Reports processing errors",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "api_endpoints",
+        "label": "API Endpoints",
+        "nodes": [
+          "phase2_sae_compare",
+          "phase2_sae_snapshot"
+        ],
+        "title": "User-Facing API Endpoints",
+        "description": "These components expose the SAE analysis functionalities as HTTP API endpoints.",
+        "role": "surface"
+      },
+      {
+        "id": "data_models",
+        "label": "Data Models",
+        "nodes": [
+          "SaeCompareRequest",
+          "SaeSnapshotRequest"
+        ],
+        "title": "Request Data Schemas",
+        "description": "Pydantic models defining the structure of input data for the SAE analysis API endpoints.",
+        "role": "data"
+      },
+      {
+        "id": "core_sae_logic",
+        "label": "Core SAE Logic",
+        "nodes": [
+          "sae_loaded_check",
+          "compute_compare",
+          "compute_snapshot"
+        ],
+        "title": "SAE Processing Functions",
+        "description": "Internal functions responsible for performing the actual Sparse Autoencoder computations and comparisons.",
+        "role": "analytical"
+      },
+      {
+        "id": "system_dependencies",
+        "label": "System Dependencies",
+        "nodes": [
+          "_pipe"
+        ],
+        "title": "External System Components",
+        "description": "Critical external or shared system components required for the operation of the SAE analysis module.",
+        "role": "data"
+      },
+      {
+        "id": "error_handling",
+        "label": "Error Handling",
+        "nodes": [
+          "HTTPException"
+        ],
+        "title": "API Error Management",
+        "description": "Mechanisms for catching and reporting errors to the API consumer, ensuring robust service operation.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

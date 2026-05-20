@@ -1,0 +1,144 @@
+{
+    "user_facing_api": {
+        "path": "",
+        "components": [],
+        "children": {
+            "chat_interfaces": {
+                "path": "app/main.py",
+                "components": [
+                    "app.main.gate_chat_stream",
+                    "app.main.gate_chat",
+                    "app.main.chat_persona_steer",
+                    "app.main.chat_persona_steer_stream",
+                    "app.main.chat",
+                    "app.main.chat_stream"
+                ]
+            },
+            "playground_interfaces": {
+                "path": "app/main.py",
+                "components": [
+                    "app.main.dnd_playground_stream"
+                ]
+            },
+            "api_metadata": {
+                "path": "app/main.py",
+                "components": [
+                    "app.main.gate_chat_meta",
+                    "app.main.dnd_playground_meta"
+                ]
+            }
+        }
+    },
+    "persona_development_and_evaluation": {
+        "path": "",
+        "components": [],
+        "children": {
+            "experiment_runners": {
+                "path": "app/persona/run.py, app/persona/coherence_alpha_sweep.py, scripts/bench_persona_steer_alphas.py",
+                "components": [
+                    "app.persona.coherence_alpha_sweep.main",
+                    "app.persona.run.cmd_validate",
+                    "app.persona.run.cmd_sanity_eval_projection",
+                    "app.persona.run.cmd_step_c",
+                    "app.persona.run.cmd_step_d",
+                    "app.persona.run.cmd_steering_ramp",
+                    "app.persona.run.cmd_steering_ab",
+                    "app.persona.run.cmd_step_b",
+                    "app.persona.run.cmd_eval_answers",
+                    "app.persona.run.main",
+                    "scripts.bench_persona_steer_alphas.main"
+                ]
+            },
+            "steering_demonstrations": {
+                "path": "app/persona/steering_demo.py, app/persona/grid_nine.py",
+                "components": [
+                    "app.persona.steering_demo.along_persona_vector",
+                    "app.persona.steering_demo.generate_once",
+                    "app.persona.grid_nine.main",
+                    "app.persona.grid_nine._register",
+                    "app.persona.grid_nine.run_generate"
+                ]
+            },
+            "sae_analysis": {
+                "path": "app/main.py",
+                "components": [
+                    "app.main.phase2_sae_compare",
+                    "app.main.phase2_sae_snapshot"
+                ]
+            },
+            "data_generation_and_rollouts": {
+                "path": "app/persona/rollouts.py, app/persona/gate_self_chat.py",
+                "components": [
+                    "app.persona.rollouts.run_extraction_rollouts",
+                    "app.persona.gate_self_chat.main"
+                ]
+            }
+        }
+    },
+    "core_persona_logic": {
+        "path": "",
+        "components": [],
+        "children": {
+            "persona_activations": {
+                "path": "app/persona/activations.py",
+                "components": [
+                    "app.persona.activations.run_arm"
+                ]
+            },
+            "gating_mechanisms": {
+                "path": "app/persona/gate_planner.py",
+                "components": [
+                    "app.persona.gate_planner.run_gate_agent_turn_stream"
+                ]
+            },
+            "vector_composition_tools": {
+                "path": "app/persona/vector_compose.py",
+                "components": [
+                    "app.persona.vector_compose.cmd_calibrate",
+                    "app.persona.vector_compose.cmd_dnd_grid",
+                    "app.persona.vector_compose.cmd_alpha_grid",
+                    "app.persona.vector_compose.cmd_cosine",
+                    "app.persona.vector_compose.cmd_ortho_save"
+                ]
+            },
+            "dnd_playground_logic": {
+                "path": "app/persona/dnd_playground.py",
+                "components": [
+                    "app.persona.dnd_playground.corner_alphas",
+                    "app.persona.dnd_playground.best"
+                ]
+            }
+        }
+    },
+    "system_infrastructure": {
+        "path": "",
+        "components": [],
+        "children": {
+            "application_lifecycle": {
+                "path": "app/main.py",
+                "components": [
+                    "app.main.lifespan",
+                    "app.main.health"
+                ]
+            },
+            "data_schemas": {
+                "path": "app/persona/schemas.py",
+                "components": [
+                    "app.persona.schemas.PersonaTraitArtifact"
+                ]
+            },
+            "testing_utilities": {
+                "path": "app/main.py",
+                "components": [
+                    "app.main.gate_chat_test_rotating"
+                ]
+            },
+            "resource_management": {
+                "path": "app/persona/gpu_orchestrate.py",
+                "components": [
+                    "app.persona.gpu_orchestrate.cmd_gpu_probe"
+                ]
+            }
+        }
+    }
+}

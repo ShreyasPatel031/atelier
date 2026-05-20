@@ -1,0 +1,88 @@
+{
+  "title": "Persona Trait Data Schemas",
+  "summary": "This module defines Pydantic data models, primarily `PersonaTraitArtifact`, to structure and validate persona-related data like contrast prompts, evaluation questions, and judge rubrics for consistent use across persona development and experimentation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "persona_trait_artifact_schema",
+        "label": "Define Persona Trait Artifact Schema",
+        "type": "component",
+        "link": null,
+        "title": "Persona Trait Artifact Schema",
+        "description": "Pydantic model defining the structure for a single persona trait bundle, including contrast prompts, evaluation questions, and judge rubrics. It ensures data consistency and validation for persona-related configurations."
+      },
+      {
+        "id": "experiment_runners",
+        "label": "Run Persona Experiments",
+        "type": "external",
+        "link": "experiment_runners",
+        "title": "Experiment Runners",
+        "description": "Modules responsible for executing various persona-related experiments, such as coherence sweeps, validation, and steering evaluations. These components consume `PersonaTraitArtifact`s to define experimental conditions and parameters."
+      },
+      {
+        "id": "steering_demonstrations",
+        "label": "Generate Steering Demos",
+        "type": "external",
+        "link": "steering_demonstrations",
+        "title": "Steering Demonstrations",
+        "description": "Components that generate and visualize steering demonstrations, potentially using `PersonaTraitArtifact`s to define the traits being demonstrated and the scenarios for observation."
+      },
+      {
+        "id": "persona_activations",
+        "label": "Activate Persona Vectors",
+        "type": "external",
+        "link": "persona_activations",
+        "title": "Persona Activations",
+        "description": "Logic for activating and applying persona vectors within the system. This process relies on the structured data defined by `PersonaTraitArtifact`s to correctly interpret and apply persona characteristics."
+      }
+    ],
+    "edges": [
+      {
+        "source": "persona_trait_artifact_schema",
+        "target": "experiment_runners",
+        "label": "Used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "persona_trait_artifact_schema",
+        "target": "steering_demonstrations",
+        "label": "Used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "persona_trait_artifact_schema",
+        "target": "persona_activations",
+        "label": "Used by",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "data_definitions",
+        "label": "Data Definitions",
+        "nodes": [
+          "persona_trait_artifact_schema"
+        ],
+        "title": "Data Definitions",
+        "description": "Contains Pydantic models and other structures that define the shape and validation rules for data used across the system, ensuring consistency and integrity.",
+        "role": "data"
+      },
+      {
+        "id": "persona_consumers",
+        "label": "Persona Logic & Evaluation",
+        "nodes": [
+          "experiment_runners",
+          "steering_demonstrations",
+          "persona_activations"
+        ],
+        "title": "Persona Logic & Evaluation",
+        "description": "Modules that consume and process persona-related data structures for various tasks like experimentation, demonstration, and activation, driving core persona functionalities.",
+        "role": "generative"
+      }
+    ]
+  }
+}

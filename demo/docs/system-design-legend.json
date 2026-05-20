@@ -1,0 +1,16 @@
+{
+    "palette": "system_design",
+    "purpose": "Minimal architectural-role colors for system design diagrams. Nesting shows containment; labels carry implementation detail.",
+    "roles": {
+        "actor": { "label": "Actor / Client", "fill": "#FFFFFF", "border": "#9AA0A6" },
+        "domain_group": { "label": "Domain / Subsystem Group", "fill": "#E3F2FD", "border": "#64B5F6" },
+        "component": { "label": "Component", "fill": "#FFFFFF", "border": "#5F6368" },
+        "data_store": {
+            "label": "Data Store / Data Channel",
+            "fill": "#FFF8E1",
+            "border": "#F9AB00",
+            "nodeMode": "border"
+        },
+        "external_dependency": { "label": "External Dependency", "fill": "#FFEBEE", "border": "#E57373" }
+    }
+}

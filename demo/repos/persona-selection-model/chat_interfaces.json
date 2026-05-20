@@ -1,0 +1,278 @@
+{
+  "title": "Chat Interface Endpoints",
+  "summary": "This module provides various API endpoints for interacting with chat models, including basic chat, persona-steered chat, and gated chat. It offers both synchronous and streaming options for real-time interaction.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "user_request",
+        "label": "User API Request",
+        "type": "external",
+        "link": null,
+        "title": "User API Request",
+        "description": "Represents an incoming request from a user or client application to one of the chat API endpoints."
+      },
+      {
+        "id": "lm_model",
+        "label": "Language Model",
+        "type": "external",
+        "link": null,
+        "title": "Underlying Language Model",
+        "description": "The core large language model responsible for generating text responses based on input prompts and various steering parameters."
+      },
+      {
+        "id": "persona_vectors",
+        "label": "Persona Steering Vectors",
+        "type": "external",
+        "link": "persona_activations",
+        "title": "Persona Steering Vectors",
+        "description": "Pre-computed vectors used to steer the language model's output towards specific persona traits or styles, influencing the generated text."
+      },
+      {
+        "id": "gating_logic",
+        "label": "Gating Mechanism Logic",
+        "type": "external",
+        "link": "gating_mechanisms",
+        "title": "Gating Mechanism Logic",
+        "description": "Logic responsible for evaluating and applying gates during chat interactions, potentially controlling model behavior or access to certain functionalities."
+      },
+      {
+        "id": "dnd_bundle",
+        "label": "DND Playground Configuration",
+        "type": "external",
+        "link": "dnd_playground_logic",
+        "title": "DND Playground Configuration",
+        "description": "Configuration and data bundle from the DND playground, used to define specific interaction rules, traits, and parameters for gated chat scenarios."
+      },
+      {
+        "id": "gate_chat_stream_node",
+        "label": "Stream Gated Chat",
+        "type": "component",
+        "link": "app.main.gate_chat_stream",
+        "title": "Stream Gated Chat Response",
+        "description": "Provides a streaming API endpoint for gated chat interactions, returning Server-Sent Events (SSE) for tokens, banners, and trace information in real-time."
+      },
+      {
+        "id": "gate_chat_node",
+        "label": "Process Gated Chat",
+        "type": "component",
+        "link": "app.main.gate_chat",
+        "title": "Process Gated Chat Request",
+        "description": "Handles synchronous gated chat requests, applying gating logic and persona steering based on DND playground configurations to generate a single, complete response."
+      },
+      {
+        "id": "chat_persona_steer_node",
+        "label": "Generate Persona-Steered Chat",
+        "type": "component",
+        "link": "app.main.chat_persona_steer",
+        "title": "Generate Persona-Steered Chat",
+        "description": "Generates a chat response steered by a specific persona vector and alpha value, allowing for controlled influence on the model's output based on user-defined traits."
+      },
+      {
+        "id": "chat_persona_steer_stream_node",
+        "label": "Stream Persona-Steered Chat",
+        "type": "component",
+        "link": "app.main.chat_persona_steer_stream",
+        "title": "Stream Persona-Steered Chat",
+        "description": "Provides a streaming API endpoint for persona-steered chat, delivering real-time token generation influenced by persona vectors for dynamic interaction."
+      },
+      {
+        "id": "chat_node",
+        "label": "Generate Basic Chat",
+        "type": "component",
+        "link": "app.main.chat",
+        "title": "Generate Basic Chat Response",
+        "description": "Handles synchronous basic chat requests, generating a response from the language model without advanced steering or gating mechanisms applied."
+      },
+      {
+        "id": "chat_stream_node",
+        "label": "Stream Basic Chat",
+        "type": "component",
+        "link": "app.main.chat_stream",
+        "title": "Stream Basic Chat Response",
+        "description": "Provides a streaming API endpoint for basic chat, delivering real-time token generation from the language model for continuous output."
+      }
+    ],
+    "edges": [
+      {
+        "source": "user_request",
+        "target": "gate_chat_stream_node",
+        "label": "Initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_request",
+        "target": "gate_chat_node",
+        "label": "Initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_request",
+        "target": "chat_persona_steer_node",
+        "label": "Initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_request",
+        "target": "chat_persona_steer_stream_node",
+        "label": "Initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_request",
+        "target": "chat_node",
+        "label": "Initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_request",
+        "target": "chat_stream_node",
+        "label": "Initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_stream_node",
+        "target": "lm_model",
+        "label": "Streams from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_stream_node",
+        "target": "gating_logic",
+        "label": "Applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_stream_node",
+        "target": "dnd_bundle",
+        "label": "Uses config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_node",
+        "target": "lm_model",
+        "label": "Generates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_node",
+        "target": "gating_logic",
+        "label": "Applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_node",
+        "target": "dnd_bundle",
+        "label": "Uses config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_persona_steer_node",
+        "target": "lm_model",
+        "label": "Steers & Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_persona_steer_node",
+        "target": "persona_vectors",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_persona_steer_stream_node",
+        "target": "lm_model",
+        "label": "Steers & Streams",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_persona_steer_stream_node",
+        "target": "persona_vectors",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_node",
+        "target": "lm_model",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_stream_node",
+        "target": "lm_model",
+        "label": "Streams",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_endpoints",
+        "label": "API Endpoints",
+        "nodes": [
+          "gate_chat_stream_node",
+          "gate_chat_node",
+          "chat_persona_steer_node",
+          "chat_persona_steer_stream_node",
+          "chat_node",
+          "chat_stream_node"
+        ],
+        "title": "User-Facing API Endpoints",
+        "description": "These components expose the primary chat functionalities as HTTP API endpoints for external consumption.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_functions",
+        "label": "Text Generation",
+        "nodes": [
+          "gate_chat_stream_node",
+          "gate_chat_node",
+          "chat_persona_steer_node",
+          "chat_persona_steer_stream_node",
+          "chat_node",
+          "chat_stream_node"
+        ],
+        "title": "Text Generation Functions",
+        "description": "Components responsible for orchestrating the generation of chat responses, potentially with steering or gating applied.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_components",
+        "label": "Analytical Logic",
+        "nodes": [
+          "gating_logic"
+        ],
+        "title": "Analytical Logic Components",
+        "description": "External components that perform analysis or decision-making, such as applying gating rules to chat interactions.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_sources",
+        "label": "Data Sources",
+        "nodes": [
+          "persona_vectors",
+          "dnd_bundle"
+        ],
+        "title": "External Data Sources",
+        "description": "External data repositories or configurations that influence the behavior of the chat interfaces.",
+        "role": "data"
+      }
+    ]
+  }
+}

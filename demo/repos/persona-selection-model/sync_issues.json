@@ -1,0 +1,542 @@
+{
+  "docs_dir": "/Users/shreyaspatel/atelier/.tmp/demo_regen/persona-selection-model/docs",
+  "timestamp": "2026-05-19T10:51:40.605168",
+  "summary": {
+    "total_modules": 19,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "total_issues": 30,
+    "errors": 0,
+    "warnings": 30,
+    "files_created": 0,
+    "metadata_added": 30,
+    "diagrams_added": 0
+  },
+  "metrics": {
+    "presync_audit": {
+      "modules_total": 19,
+      "missing_md": 19,
+      "missing_title": 15,
+      "missing_description": 15,
+      "leaf_missing_diagram": 0,
+      "parent_missing_diagram_with_children": 0,
+      "diagram_nodes_with_empty_label": 0,
+      "diagram_edges_unknown_endpoint": 0,
+      "children_missing_from_diagram_nodes": 15,
+      "parent_diagram_gaps_to_inject": 15,
+      "mermaid_fence_blocks_total": 0,
+      "placeholder_md_files": 0
+    },
+    "diagram_ir_audit": {
+      "module_diagrams_total": 19,
+      "overview_has_diagram_json": true,
+      "overview_mermaid_parse_ok": true,
+      "overview_r1_reason": null,
+      "by_code": {},
+      "samples_by_code": {}
+    },
+    "mermaid_validation": {
+      "blocks_checked": 0,
+      "blocks_invalid": 0,
+      "validation_ms": 0.0499,
+      "error_type_histogram": {},
+      "stage46_fixes_applied": 0,
+      "postfix_blocks_invalid": 0,
+      "postfix_error_type_histogram": {}
+    },
+    "postsync_audit": {
+      "modules_total": 19,
+      "missing_md": 19,
+      "missing_title": 0,
+      "missing_description": 0,
+      "leaf_missing_diagram": 0,
+      "parent_missing_diagram_with_children": 0,
+      "diagram_nodes_with_empty_label": 0,
+      "diagram_edges_unknown_endpoint": 0,
+      "children_missing_from_diagram_nodes": 0,
+      "parent_diagram_gaps_to_inject": 0,
+      "mermaid_fence_blocks_total": 0,
+      "placeholder_md_files": 0
+    },
+    "delta_presync_minus_postsync": {
+      "missing_description": 15.0,
+      "leaf_missing_diagram": 0.0,
+      "parent_diagram_gaps_to_inject": 15.0,
+      "missing_md": 0.0,
+      "mermaid_fence_blocks_total": 0.0,
+      "parent_missing_diagram_with_children": 0.0,
+      "modules_total": 0.0,
+      "placeholder_md_files": 0.0,
+      "diagram_edges_unknown_endpoint": 0.0,
+      "missing_title": 15.0,
+      "children_missing_from_diagram_nodes": 15.0,
+      "diagram_nodes_with_empty_label": 0.0
+    },
+    "fixes_applied_counts": {
+      "metadata_field_updates": 30,
+      "placeholder_md_files_created": 0,
+      "leaf_diagrams_added": 0,
+      "parent_diagram_child_nodes_injected": 15,
+      "overview_md_created": 0,
+      "mermaid_stage46_fixes": 0
+    },
+    "measurement_summary": {
+      "1_stage3_defects_before_stage45": {
+        "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
+        "presync_audit": {
+          "modules_total": 19,
+          "missing_md": 19,
+          "missing_title": 15,
+          "missing_description": 15,
+          "leaf_missing_diagram": 0,
+          "parent_missing_diagram_with_children": 0,
+          "diagram_nodes_with_empty_label": 0,
+          "diagram_edges_unknown_endpoint": 0,
+          "children_missing_from_diagram_nodes": 15,
+          "parent_diagram_gaps_to_inject": 15,
+          "mermaid_fence_blocks_total": 0,
+          "placeholder_md_files": 0
+        }
+      },
+      "1b_stage45_fixes_applied_counters": {
+        "metadata_field_updates": 30,
+        "placeholder_md_files_created": 0,
+        "leaf_diagrams_added": 0,
+        "parent_diagram_child_nodes_injected": 15,
+        "overview_md_created": 0,
+        "mermaid_stage46_fixes": 0
+      },
+      "1c_residual_after_stage45": {
+        "postsync_audit": {
+          "modules_total": 19,
+          "missing_md": 19,
+          "missing_title": 0,
+          "missing_description": 0,
+          "leaf_missing_diagram": 0,
+          "parent_missing_diagram_with_children": 0,
+          "diagram_nodes_with_empty_label": 0,
+          "diagram_edges_unknown_endpoint": 0,
+          "children_missing_from_diagram_nodes": 0,
+          "parent_diagram_gaps_to_inject": 0,
+          "mermaid_fence_blocks_total": 0,
+          "placeholder_md_files": 0
+        }
+      },
+      "1d_reduction_delta_presync_minus_postsync": {
+        "note": "Positive number = fewer problems after sync for that metric",
+        "delta": {
+          "missing_description": 15.0,
+          "leaf_missing_diagram": 0.0,
+          "parent_diagram_gaps_to_inject": 15.0,
+          "missing_md": 0.0,
+          "mermaid_fence_blocks_total": 0.0,
+          "parent_missing_diagram_with_children": 0.0,
+          "modules_total": 0.0,
+          "placeholder_md_files": 0.0,
+          "diagram_edges_unknown_endpoint": 0.0,
+          "missing_title": 15.0,
+          "children_missing_from_diagram_nodes": 15.0,
+          "diagram_nodes_with_empty_label": 0.0
+        }
+      },
+      "1e_issues_logged_this_run_by_type": {
+        "all": {
+          "missing_title": 15,
+          "missing_description": 15
+        }
+      },
+      "2_mermaid": {
+        "blocks_checked": 0,
+        "blocks_invalid_before_stage46": 0,
+        "blocks_invalid_after_stage46": 0,
+        "validation_ms": 0.0499,
+        "error_type_histogram": {},
+        "error_type_histogram_after_stage46": {},
+        "stage46_fixes_applied": 0,
+        "validator": "mermaid_validator (Mermaid.js 11.9 via Node, same as viewer)"
+      },
+      "3_diagram_ir": {
+        "audit": {
+          "module_diagrams_total": 19,
+          "overview_has_diagram_json": true,
+          "overview_mermaid_parse_ok": true,
+          "overview_r1_reason": null,
+          "by_code": {},
+          "samples_by_code": {}
+        },
+        "by_code": {}
+      }
+    }
+  },
+  "issues_by_type": {
+    "missing_title": 15,
+    "missing_description": 15
+  },
+  "issues": [
+    {
+      "issue_type": "missing_title",
+      "module_name": "chat_interfaces",
+      "module_path": "user_facing_api/chat_interfaces",
+      "severity": "warning",
+      "details": {
+        "component_count": 6,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "chat_interfaces",
+      "module_path": "user_facing_api/chat_interfaces",
+      "severity": "warning",
+      "details": {
+        "component_count": 6,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "playground_interfaces",
+      "module_path": "user_facing_api/playground_interfaces",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "playground_interfaces",
+      "module_path": "user_facing_api/playground_interfaces",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "api_metadata",
+      "module_path": "user_facing_api/api_metadata",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "api_metadata",
+      "module_path": "user_facing_api/api_metadata",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "experiment_runners",
+      "module_path": "persona_development_and_evaluation/experiment_runners",
+      "severity": "warning",
+      "details": {
+        "component_count": 11,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "experiment_runners",
+      "module_path": "persona_development_and_evaluation/experiment_runners",
+      "severity": "warning",
+      "details": {
+        "component_count": 11,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "steering_demonstrations",
+      "module_path": "persona_development_and_evaluation/steering_demonstrations",
+      "severity": "warning",
+      "details": {
+        "component_count": 5,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "steering_demonstrations",
+      "module_path": "persona_development_and_evaluation/steering_demonstrations",
+      "severity": "warning",
+      "details": {
+        "component_count": 5,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "sae_analysis",
+      "module_path": "persona_development_and_evaluation/sae_analysis",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "sae_analysis",
+      "module_path": "persona_development_and_evaluation/sae_analysis",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "data_generation_and_rollouts",
+      "module_path": "persona_development_and_evaluation/data_generation_and_rollouts",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "data_generation_and_rollouts",
+      "module_path": "persona_development_and_evaluation/data_generation_and_rollouts",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "persona_activations",
+      "module_path": "core_persona_logic/persona_activations",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "persona_activations",
+      "module_path": "core_persona_logic/persona_activations",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "gating_mechanisms",
+      "module_path": "core_persona_logic/gating_mechanisms",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "gating_mechanisms",
+      "module_path": "core_persona_logic/gating_mechanisms",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "vector_composition_tools",
+      "module_path": "core_persona_logic/vector_composition_tools",
+      "severity": "warning",
+      "details": {
+        "component_count": 5,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "vector_composition_tools",
+      "module_path": "core_persona_logic/vector_composition_tools",
+      "severity": "warning",
+      "details": {
+        "component_count": 5,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "dnd_playground_logic",
+      "module_path": "core_persona_logic/dnd_playground_logic",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "dnd_playground_logic",
+      "module_path": "core_persona_logic/dnd_playground_logic",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "application_lifecycle",
+      "module_path": "system_infrastructure/application_lifecycle",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "application_lifecycle",
+      "module_path": "system_infrastructure/application_lifecycle",
+      "severity": "warning",
+      "details": {
+        "component_count": 2,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "data_schemas",
+      "module_path": "system_infrastructure/data_schemas",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "data_schemas",
+      "module_path": "system_infrastructure/data_schemas",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "testing_utilities",
+      "module_path": "system_infrastructure/testing_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "testing_utilities",
+      "module_path": "system_infrastructure/testing_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "resource_management",
+      "module_path": "system_infrastructure/resource_management",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "resource_management",
+      "module_path": "system_infrastructure/resource_management",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    }
+  ],
+  "files_created": [],
+  "metadata_added": [
+    "chat_interfaces:title",
+    "chat_interfaces:description",
+    "playground_interfaces:title",
+    "playground_interfaces:description",
+    "api_metadata:title",
+    "api_metadata:description",
+    "experiment_runners:title",
+    "experiment_runners:description",
+    "steering_demonstrations:title",
+    "steering_demonstrations:description",
+    "sae_analysis:title",
+    "sae_analysis:description",
+    "data_generation_and_rollouts:title",
+    "data_generation_and_rollouts:description",
+    "persona_activations:title",
+    "persona_activations:description",
+    "gating_mechanisms:title",
+    "gating_mechanisms:description",
+    "vector_composition_tools:title",
+    "vector_composition_tools:description",
+    "dnd_playground_logic:title",
+    "dnd_playground_logic:description",
+    "application_lifecycle:title",
+    "application_lifecycle:description",
+    "data_schemas:title",
+    "data_schemas:description",
+    "testing_utilities:title",
+    "testing_utilities:description",
+    "resource_management:title",
+    "resource_management:description"
+  ],
+  "diagrams_added": []
+}

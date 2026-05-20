@@ -1,0 +1,621 @@
+{
+  "title": "Persona Experiment Runners",
+  "summary": "This module provides command-line tools for the entire persona development and evaluation pipeline, from artifact generation and data collection to vector extraction, steering demonstrations, and final validation. It orchestrates various steps to create, analyze, and test persona steering vectors.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "cli_entry",
+        "label": "Persona Pipeline CLI",
+        "type": "component",
+        "link": null,
+        "title": "Main CLI Entry Point",
+        "description": "The primary command-line interface for orchestrating persona development and evaluation tasks, providing access to various pipeline steps and tools."
+      },
+      {
+        "id": "generate_artifact",
+        "label": "Generate Trait Artifact",
+        "type": "component",
+        "link": null,
+        "title": "Generate Persona Trait Artifact",
+        "description": "Creates a persona trait bundle, including contrast prompts, evaluation questions, and judge rubrics, often leveraging Vertex AI for generation."
+      },
+      {
+        "id": "generate_eval_answers",
+        "label": "Generate Eval Answers",
+        "type": "component",
+        "link": null,
+        "title": "Generate Evaluation Answers",
+        "description": "Prompts the Gemma model with positive and negative system prompts to generate baseline answers for evaluation questions, saving them for later analysis."
+      },
+      {
+        "id": "generate_judge_rollouts",
+        "label": "Generate & Judge Rollouts",
+        "type": "component",
+        "link": null,
+        "title": "Generate and Judge Rollouts",
+        "description": "Performs extraction rollouts using Gemma to generate diverse responses, then judges these responses with Vertex AI to filter for high-quality examples."
+      },
+      {
+        "id": "extract_persona_vectors",
+        "label": "Extract Persona Vectors",
+        "type": "component",
+        "link": null,
+        "title": "Extract Persona Vectors",
+        "description": "Processes filtered rollouts to extract mean hidden states from the Gemma model and computes the persona vector (mean_pos - mean_neg) for each layer."
+      },
+      {
+        "id": "sanity_check_projection",
+        "label": "Sanity Check Vector Projection",
+        "type": "component",
+        "link": null,
+        "title": "Sanity Check Vector Projection",
+        "description": "Evaluates how well positive and negative activations project onto the extracted persona vectors, assessing their separation and overall vector quality."
+      },
+      {
+        "id": "demonstrate_steering_ramp",
+        "label": "Demonstrate Steering Ramp",
+        "type": "component",
+        "link": null,
+        "title": "Demonstrate Steering Ramp",
+        "description": "Shows the effect of persona steering by generating responses with incrementally increasing alpha values applied to a persona vector, illustrating its impact."
+      },
+      {
+        "id": "ab_test_steering",
+        "label": "A/B Test Steering",
+        "type": "component",
+        "link": null,
+        "title": "A/B Test Persona Steering",
+        "description": "Compares text generation with and without persona steering for specific alpha values, providing a direct A/B comparison of the steering's influence on responses."
+      },
+      {
+        "id": "validate_pipeline",
+        "label": "Validate Persona Pipeline",
+        "type": "component",
+        "link": null,
+        "title": "Validate Persona Pipeline",
+        "description": "Runs automated quality gates to assess data sufficiency, vector separation, layer selection, and steering effectiveness, producing a comprehensive validation report."
+      },
+      {
+        "id": "sweep_alpha_coherence",
+        "label": "Sweep Alpha for Coherence",
+        "type": "component",
+        "link": null,
+        "title": "Sweep Alpha vs Coherence",
+        "description": "Performs an alpha sweep for specific traits (e.g., sycophancy, chaos) to find optimal alpha scales that maintain model coherence while applying steering."
+      },
+      {
+        "id": "benchmark_steering",
+        "label": "Benchmark Steering Latency",
+        "type": "component",
+        "link": null,
+        "title": "Benchmark Steering Latency",
+        "description": "Measures the latency and performance of sequential persona steering requests to a FastAPI endpoint for various alpha values, aiding in system optimization."
+      },
+      {
+        "id": "trait_bundle",
+        "label": "Trait Bundle",
+        "type": "data",
+        "link": null,
+        "title": "Persona Trait Bundle",
+        "description": "JSON artifact defining a persona, including contrast prompts, evaluation questions, and judging rubrics, serving as the foundational input for the pipeline."
+      },
+      {
+        "id": "eval_answers",
+        "label": "Eval Answers",
+        "type": "data",
+        "link": null,
+        "title": "Evaluation Answers JSON",
+        "description": "JSON file containing model responses to evaluation questions under positive and negative system prompts, used for subsequent analysis and vector extraction."
+      },
+      {
+        "id": "rollouts_data",
+        "label": "Rollouts Data",
+        "type": "data",
+        "link": null,
+        "title": "Filtered Rollouts JSONL",
+        "description": "JSONL file containing filtered extraction rollouts, which are high-quality model responses used as input for persona vector extraction in later steps."
+      },
+      {
+        "id": "persona_vectors",
+        "label": "Persona Vectors",
+        "type": "data",
+        "link": null,
+        "title": "Persona Vectors (.pt)",
+        "description": "PyTorch tensor file containing the extracted persona vectors (mean_pos - mean_neg) for different model layers, representing the learned persona direction."
+      },
+      {
+        "id": "sanity_eval_report",
+        "label": "Sanity Eval Report",
+        "type": "data",
+        "link": null,
+        "title": "Sanity Evaluation Report JSON",
+        "description": "JSON report detailing the projection of activations onto persona vectors, indicating their separation and providing a sanity check on vector quality."
+      },
+      {
+        "id": "steering_ramp_output",
+        "label": "Steering Ramp Output",
+        "type": "data",
+        "link": null,
+        "title": "Steering Ramp Output JSON",
+        "description": "JSON output from the steering ramp demonstration, showing model replies at different alpha values to visualize the gradual effect of persona steering."
+      },
+      {
+        "id": "steering_ab_output",
+        "label": "Steering A/B Output",
+        "type": "data",
+        "link": null,
+        "title": "Steering A/B Output JSON",
+        "description": "JSON output from the A/B steering comparison, showing model replies with and without steering to directly assess the impact of the persona vector."
+      },
+      {
+        "id": "validation_report",
+        "label": "Validation Report",
+        "type": "data",
+        "link": null,
+        "title": "Validation Report JSON",
+        "description": "Comprehensive JSON report summarizing the quality and effectiveness of the developed persona and its steering vectors, including pass/fail verdicts."
+      },
+      {
+        "id": "coherence_sweep_report",
+        "label": "Coherence Sweep Report",
+        "type": "data",
+        "link": null,
+        "title": "Coherence Sweep Report JSON",
+        "description": "JSON report from the alpha sweep, recommending optimal alpha scales based on coherence metrics to ensure effective and stable persona steering."
+      },
+      {
+        "id": "run_manifest",
+        "label": "Run Manifest",
+        "type": "data",
+        "link": null,
+        "title": "Run Manifest JSON",
+        "description": "Metadata file tracking the outputs and key parameters of a persona development run, providing an overview and traceability for the entire pipeline."
+      },
+      {
+        "id": "gemma_llm",
+        "label": "Gemma LLM",
+        "type": "external",
+        "link": null,
+        "title": "Gemma Language Model",
+        "description": "The large language model (e.g., Gemma) used for generating text, performing rollouts, and extracting internal activations for persona vector creation."
+      },
+      {
+        "id": "vertex_ai_service",
+        "label": "Vertex AI Services",
+        "type": "external",
+        "link": null,
+        "title": "Vertex AI Platform Services",
+        "description": "Google Cloud's Vertex AI platform, utilized for LLM calls (e.g., artifact generation) and acting as a judge for evaluating model responses and coherence."
+      },
+      {
+        "id": "fastapi_steering_api",
+        "label": "FastAPI Steering API",
+        "type": "external",
+        "link": "other_module",
+        "title": "FastAPI Persona Steering API",
+        "description": "An external API endpoint, typically a FastAPI service, that provides persona steering functionality, used for real-time interaction or performance benchmarking."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_entry",
+        "target": "generate_artifact",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entry",
+        "target": "generate_eval_answers",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entry",
+        "target": "generate_judge_rollouts",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entry",
+        "target": "extract_persona_vectors",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entry",
+        "target": "sanity_check_projection",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entry",
+        "target": "demonstrate_steering_ramp",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entry",
+        "target": "ab_test_steering",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cli_entry",
+        "target": "validate_pipeline",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_artifact",
+        "target": "vertex_ai_service",
+        "label": "Uses LLM via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_artifact",
+        "target": "trait_bundle",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_artifact",
+        "target": "run_manifest",
+        "label": "Updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_eval_answers",
+        "target": "trait_bundle",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_eval_answers",
+        "target": "gemma_llm",
+        "label": "Queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_eval_answers",
+        "target": "eval_answers",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_judge_rollouts",
+        "target": "trait_bundle",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_judge_rollouts",
+        "target": "gemma_llm",
+        "label": "Generates Rollouts via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_judge_rollouts",
+        "target": "vertex_ai_service",
+        "label": "Judges Rollouts via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_judge_rollouts",
+        "target": "rollouts_data",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_judge_rollouts",
+        "target": "run_manifest",
+        "label": "Updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extract_persona_vectors",
+        "target": "rollouts_data",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extract_persona_vectors",
+        "target": "gemma_llm",
+        "label": "Extracts Activations from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extract_persona_vectors",
+        "target": "persona_vectors",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extract_persona_vectors",
+        "target": "run_manifest",
+        "label": "Updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sanity_check_projection",
+        "target": "trait_bundle",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sanity_check_projection",
+        "target": "persona_vectors",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sanity_check_projection",
+        "target": "eval_answers",
+        "label": "Reads (or generates)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sanity_check_projection",
+        "target": "generate_eval_answers",
+        "label": "Optionally invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sanity_check_projection",
+        "target": "sanity_eval_report",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sanity_check_projection",
+        "target": "run_manifest",
+        "label": "Updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "demonstrate_steering_ramp",
+        "target": "trait_bundle",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "demonstrate_steering_ramp",
+        "target": "persona_vectors",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "demonstrate_steering_ramp",
+        "target": "gemma_llm",
+        "label": "Steers Generation via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "demonstrate_steering_ramp",
+        "target": "steering_ramp_output",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ab_test_steering",
+        "target": "trait_bundle",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ab_test_steering",
+        "target": "persona_vectors",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ab_test_steering",
+        "target": "gemma_llm",
+        "label": "Steers Generation via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ab_test_steering",
+        "target": "steering_ab_output",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_pipeline",
+        "target": "trait_bundle",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_pipeline",
+        "target": "persona_vectors",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_pipeline",
+        "target": "rollouts_data",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_pipeline",
+        "target": "sanity_eval_report",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_pipeline",
+        "target": "gemma_llm",
+        "label": "Evaluates Steering via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_pipeline",
+        "target": "vertex_ai_service",
+        "label": "Judges Coherence via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_pipeline",
+        "target": "validation_report",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sweep_alpha_coherence",
+        "target": "trait_bundle",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sweep_alpha_coherence",
+        "target": "persona_vectors",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sweep_alpha_coherence",
+        "target": "gemma_llm",
+        "label": "Evaluates Steering via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sweep_alpha_coherence",
+        "target": "vertex_ai_service",
+        "label": "Judges Coherence via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sweep_alpha_coherence",
+        "target": "coherence_sweep_report",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "benchmark_steering",
+        "target": "fastapi_steering_api",
+        "label": "Queries",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_group",
+        "label": "Surface",
+        "nodes": [
+          "cli_entry"
+        ],
+        "title": "User-Facing Entry Points",
+        "description": "Components that serve as the primary interface for users to interact with the persona development and evaluation system.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_group",
+        "label": "Generative Steps",
+        "nodes": [
+          "generate_artifact",
+          "generate_eval_answers",
+          "generate_judge_rollouts"
+        ],
+        "title": "Persona Data Generation",
+        "description": "Components responsible for generating the core data and artifacts required for persona development, including trait definitions and model responses.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_group",
+        "label": "Analytical & Evaluation",
+        "nodes": [
+          "extract_persona_vectors",
+          "sanity_check_projection",
+          "validate_pipeline",
+          "sweep_alpha_coherence"
+        ],
+        "title": "Persona Analysis and Validation",
+        "description": "Components focused on analyzing generated data, extracting persona vectors, performing sanity checks, and validating the overall effectiveness of the persona pipeline.",
+        "role": "analytical"
+      },
+      {
+        "id": "demonstration_group",
+        "label": "Demonstration & Benchmarking",
+        "nodes": [
+          "demonstrate_steering_ramp",
+          "ab_test_steering",
+          "benchmark_steering"
+        ],
+        "title": "Persona Steering Demonstration",
+        "description": "Components used to demonstrate the effects of persona steering and to benchmark the performance of the steering mechanism.",
+        "role": "generative"
+      },
+      {
+        "id": "data_group",
+        "label": "Data Artifacts",
+        "nodes": [
+          "trait_bundle",
+          "eval_answers",
+          "rollouts_data",
+          "persona_vectors",
+          "sanity_eval_report",
+          "steering_ramp_output",
+          "steering_ab_output",
+          "validation_report",
+          "coherence_sweep_report",
+          "run_manifest"
+        ],
+        "title": "Persona Pipeline Data",
+        "description": "Key data artifacts and intermediate files produced and consumed throughout the persona development and evaluation pipeline.",
+        "role": "data"
+      }
+    ]
+  }
+}

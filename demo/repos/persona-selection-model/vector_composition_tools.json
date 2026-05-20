@@ -1,0 +1,581 @@
+{
+  "title": "Vector Composition Tools",
+  "summary": "This module provides command-line tools for composing and analyzing steering vectors, including calibrating trait scales, generating grids of steered responses, and performing vector orthogonalization and similarity calculations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "calibrate_cmd",
+        "label": "Calibrate Trait Vectors",
+        "type": "component",
+        "link": null,
+        "title": "Calibrate Trait Vectors",
+        "description": "Sweeps alpha values for individual traits to find optimal steering scales based on coherence, outputting recommended scales."
+      },
+      {
+        "id": "dnd_grid_cmd",
+        "label": "Generate DND Trait Grid",
+        "type": "component",
+        "link": null,
+        "title": "Generate DND Trait Grid",
+        "description": "Creates a 2D grid of model responses by steering with two DND-style trait vectors, then evaluates them for trait scores and coherence."
+      },
+      {
+        "id": "alpha_grid_cmd",
+        "label": "Generate Alpha Steering Grid",
+        "type": "component",
+        "link": null,
+        "title": "Generate Alpha Steering Grid",
+        "description": "Generates a grid of model responses by steering with two arbitrary vectors (e.g., sycophancy, chaos) and evaluates the results."
+      },
+      {
+        "id": "cosine_cmd",
+        "label": "Calculate Vector Cosine Similarity",
+        "type": "component",
+        "link": null,
+        "title": "Calculate Vector Cosine Similarity",
+        "description": "Computes and reports the cosine similarity and norms between two sets of steering vectors across different model layers."
+      },
+      {
+        "id": "ortho_save_cmd",
+        "label": "Orthogonalize & Save Vectors",
+        "type": "component",
+        "link": null,
+        "title": "Orthogonalize & Save Vectors",
+        "description": "Orthogonalizes one set of steering vectors against another to remove shared variance and saves the resulting vectors."
+      },
+      {
+        "id": "load_model_tokenizer",
+        "label": "Load Language Model & Tokenizer",
+        "type": "component",
+        "link": "persona_activations",
+        "title": "Load Language Model & Tokenizer",
+        "description": "Loads a pre-trained language model and its corresponding tokenizer for steering operations."
+      },
+      {
+        "id": "run_alpha_sweep",
+        "label": "Run Coherence Alpha Sweep",
+        "type": "component",
+        "link": "experiment_runners",
+        "title": "Run Coherence Alpha Sweep",
+        "description": "Executes an alpha sweep to determine the optimal steering strength for a given trait based on response coherence."
+      },
+      {
+        "id": "generate_steered_responses",
+        "label": "Generate Steered Responses",
+        "type": "component",
+        "link": "steering_demonstrations",
+        "title": "Generate Steered Responses",
+        "description": "Produces model responses by applying steering vectors along one or two axes with specified alpha values."
+      },
+      {
+        "id": "score_dual_trait",
+        "label": "Score Dual Trait Responses",
+        "type": "component",
+        "link": null,
+        "title": "Score Dual Trait Responses",
+        "description": "Evaluates generated responses against two specific traits and coherence using an external judge service."
+      },
+      {
+        "id": "build_steering_dirs",
+        "label": "Build Steering Directions",
+        "type": "component",
+        "link": "steering_demonstrations",
+        "title": "Build Steering Directions",
+        "description": "Constructs steering directions from raw vectors, optionally orthogonalizing one against the other."
+      },
+      {
+        "id": "score_four_dual_traits",
+        "label": "Score Four Dual Trait Responses",
+        "type": "component",
+        "link": "steering_demonstrations",
+        "title": "Score Four Dual Trait Responses",
+        "description": "Evaluates generated responses for four dual traits (e.g., sycophancy, chaos) and coherence using an external judge."
+      },
+      {
+        "id": "compute_cosine_norms",
+        "label": "Compute Layer Cosine & Norms",
+        "type": "component",
+        "link": null,
+        "title": "Compute Layer Cosine & Norms",
+        "description": "Calculates cosine similarity and L2 norms between two sets of steering vectors for each model layer."
+      },
+      {
+        "id": "orthogonalize_vectors",
+        "label": "Orthogonalize Vectors",
+        "type": "component",
+        "link": null,
+        "title": "Orthogonalize Vectors",
+        "description": "Projects one set of steering vectors to be orthogonal to another set, removing linear dependencies."
+      },
+      {
+        "id": "apply_paragraph_cap",
+        "label": "Apply Paragraph Cap",
+        "type": "component",
+        "link": null,
+        "title": "Apply Paragraph Cap",
+        "description": "Modifies the system prompt to include instructions for limiting paragraph length in model responses."
+      },
+      {
+        "id": "identify_model_layers",
+        "label": "Identify Model Layers",
+        "type": "component",
+        "link": "steering_demonstrations",
+        "title": "Identify Model Layers",
+        "description": "Determines the available layers within the loaded language model for targeted steering."
+      },
+      {
+        "id": "build_positive_direction",
+        "label": "Build Positive Steering Direction",
+        "type": "component",
+        "link": null,
+        "title": "Build Positive Steering Direction",
+        "description": "Constructs a positive steering direction from a given vector for a specific model layer."
+      },
+      {
+        "id": "norm_budget_scale",
+        "label": "Apply Norm Budget Scaling",
+        "type": "component",
+        "link": null,
+        "title": "Apply Norm Budget Scaling",
+        "description": "Adjusts alpha values for steering vectors to maintain a consistent norm budget when applied to the same layer."
+      },
+      {
+        "id": "trait_config_json",
+        "label": "Trait Configuration JSON",
+        "type": "external",
+        "link": null,
+        "title": "Trait Configuration JSON",
+        "description": "JSON file defining various persona traits, their associated vector bundles, and model layers."
+      },
+      {
+        "id": "calibration_json",
+        "label": "Calibration Data JSON",
+        "type": "external",
+        "link": null,
+        "title": "Calibration Data JSON",
+        "description": "JSON file containing calibration results, including recommended alpha scales for different traits."
+      },
+      {
+        "id": "syc_vectors",
+        "label": "Sycophancy Steering Vectors",
+        "type": "external",
+        "link": null,
+        "title": "Sycophancy Steering Vectors",
+        "description": "PyTorch tensor file containing steering vectors related to sycophancy, typically per model layer."
+      },
+      {
+        "id": "chaos_vectors",
+        "label": "Chaos Steering Vectors",
+        "type": "external",
+        "link": null,
+        "title": "Chaos Steering Vectors",
+        "description": "PyTorch tensor file containing steering vectors related to 'chaos' or other secondary traits, per model layer."
+      },
+      {
+        "id": "output_report_json",
+        "label": "Output Report JSON",
+        "type": "external",
+        "link": null,
+        "title": "Output Report JSON",
+        "description": "JSON file containing detailed results of grid searches, calibrations, or vector analyses."
+      },
+      {
+        "id": "orthogonalized_vectors_file",
+        "label": "Orthogonalized Vectors File",
+        "type": "external",
+        "link": null,
+        "title": "Orthogonalized Vectors File",
+        "description": "PyTorch tensor file storing steering vectors that have been orthogonalized against another set of vectors."
+      },
+      {
+        "id": "language_model",
+        "label": "Language Model",
+        "type": "external",
+        "link": null,
+        "title": "Language Model",
+        "description": "The large language model (LLM) being steered and evaluated."
+      },
+      {
+        "id": "tokenizer",
+        "label": "Tokenizer",
+        "type": "external",
+        "link": null,
+        "title": "Tokenizer",
+        "description": "The tokenizer associated with the language model, used for encoding and decoding text."
+      },
+      {
+        "id": "evaluation_service",
+        "label": "Evaluation Service",
+        "type": "external",
+        "link": null,
+        "title": "Evaluation Service",
+        "description": "An external service or component responsible for judging and scoring model responses based on predefined criteria."
+      }
+    ],
+    "edges": [
+      {
+        "source": "calibrate_cmd",
+        "target": "load_model_tokenizer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "calibrate_cmd",
+        "target": "trait_config_json",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "calibrate_cmd",
+        "target": "run_alpha_sweep",
+        "label": "initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_alpha_sweep",
+        "target": "language_model",
+        "label": "steers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_alpha_sweep",
+        "target": "tokenizer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_alpha_sweep",
+        "target": "evaluation_service",
+        "label": "sends for scoring",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "calibrate_cmd",
+        "target": "output_report_json",
+        "label": "writes results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "load_model_tokenizer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "trait_config_json",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "calibration_json",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "identify_model_layers",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "syc_vectors",
+        "label": "reads (Trait A)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "chaos_vectors",
+        "label": "reads (Trait B)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "build_positive_direction",
+        "label": "builds direction",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "apply_paragraph_cap",
+        "label": "applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "generate_steered_responses",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_steered_responses",
+        "target": "language_model",
+        "label": "steers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_steered_responses",
+        "target": "tokenizer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "score_dual_trait",
+        "label": "evaluates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "score_dual_trait",
+        "target": "evaluation_service",
+        "label": "sends for scoring",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_grid_cmd",
+        "target": "output_report_json",
+        "label": "writes results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alpha_grid_cmd",
+        "target": "load_model_tokenizer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alpha_grid_cmd",
+        "target": "syc_vectors",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alpha_grid_cmd",
+        "target": "chaos_vectors",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alpha_grid_cmd",
+        "target": "identify_model_layers",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alpha_grid_cmd",
+        "target": "build_steering_dirs",
+        "label": "builds directions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alpha_grid_cmd",
+        "target": "apply_paragraph_cap",
+        "label": "applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alpha_grid_cmd",
+        "target": "norm_budget_scale",
+        "label": "applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alpha_grid_cmd",
+        "target": "generate_steered_responses",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alpha_grid_cmd",
+        "target": "score_four_dual_traits",
+        "label": "evaluates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "score_four_dual_traits",
+        "target": "evaluation_service",
+        "label": "sends for scoring",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alpha_grid_cmd",
+        "target": "output_report_json",
+        "label": "writes results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cosine_cmd",
+        "target": "syc_vectors",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cosine_cmd",
+        "target": "chaos_vectors",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cosine_cmd",
+        "target": "compute_cosine_norms",
+        "label": "computes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cosine_cmd",
+        "target": "output_report_json",
+        "label": "writes (optional)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ortho_save_cmd",
+        "target": "syc_vectors",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ortho_save_cmd",
+        "target": "chaos_vectors",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ortho_save_cmd",
+        "target": "orthogonalize_vectors",
+        "label": "orthogonalizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ortho_save_cmd",
+        "target": "orthogonalized_vectors_file",
+        "label": "saves",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_commands",
+        "label": "Surface Commands",
+        "nodes": [
+          "calibrate_cmd",
+          "dnd_grid_cmd",
+          "alpha_grid_cmd",
+          "cosine_cmd",
+          "ortho_save_cmd"
+        ],
+        "title": "Module Entry Points",
+        "description": "The primary command-line interface functions for interacting with the vector composition tools.",
+        "role": "surface"
+      },
+      {
+        "id": "core_vector_ops",
+        "label": "Core Vector Operations",
+        "nodes": [
+          "build_positive_direction",
+          "build_steering_dirs",
+          "orthogonalize_vectors",
+          "compute_cosine_norms",
+          "norm_budget_scale"
+        ],
+        "title": "Core Vector Operations",
+        "description": "Internal functions responsible for manipulating, combining, and analyzing steering vectors.",
+        "role": "generative"
+      },
+      {
+        "id": "model_interaction",
+        "label": "Model Interaction & Generation",
+        "nodes": [
+          "load_model_tokenizer",
+          "identify_model_layers",
+          "generate_steered_responses",
+          "apply_paragraph_cap"
+        ],
+        "title": "Model Interaction & Generation",
+        "description": "Components that load the language model, identify its layers, and generate steered responses.",
+        "role": "generative"
+      },
+      {
+        "id": "evaluation_analysis",
+        "label": "Evaluation & Analysis",
+        "nodes": [
+          "run_alpha_sweep",
+          "score_dual_trait",
+          "score_four_dual_traits"
+        ],
+        "title": "Evaluation & Analysis",
+        "description": "Components responsible for evaluating generated responses and performing analytical sweeps.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_assets",
+        "label": "Data Assets",
+        "nodes": [
+          "trait_config_json",
+          "calibration_json",
+          "syc_vectors",
+          "chaos_vectors",
+          "output_report_json",
+          "orthogonalized_vectors_file"
+        ],
+        "title": "Data Assets",
+        "description": "Configuration files, steering vector files, and output reports used or generated by the module.",
+        "role": "data"
+      },
+      {
+        "id": "external_systems",
+        "label": "External Systems",
+        "nodes": [
+          "language_model",
+          "tokenizer",
+          "evaluation_service"
+        ],
+        "title": "External Systems",
+        "description": "External components that the module interacts with, such as the language model itself or an evaluation service.",
+        "role": "external"
+      }
+    ]
+  }
+}
