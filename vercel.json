@@ -5,7 +5,7 @@
   "functions": {
     "api/chat.py": {
       "maxDuration": 60,
-      "includeFiles": "demo/repos/**,codewiki/src/**",
+      "includeFiles": "demo/repos/**",
       "excludeFiles": "demo/repos/**/temp/**,demo/repos/transformers/**,demo/repos/crewai-src/**,demo/repos/**/architecture.png,demo/repos/**/architecture-legend.png,demo/repos/**/architecture.svg,demo/repos/**/architecture-legend.svg,demo/repos/**/sync_issues.json"
     }
   },

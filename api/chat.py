@@ -2,8 +2,8 @@
 Vercel serverless: all /api/* routes land here (see vercel.json).
 Implements POST /api/arch-agent/chat (same JSON as FastAPI version).
 
-FastAPI's ASGI entry fails on this project's Vercel Python bundle (FUNCTION_INVOCATION_FAILED);
-BaseHTTPRequestHandler works reliably.
+On Vercel, uses a lightweight Gemini REST path (stdlib only). Locally, uses
+ArchitecturalAgentRunner when codewiki is available.
 """
 
 from __future__ import annotations
@@ -12,6 +12,8 @@ import json
 import os
 import sys
 import traceback
+import urllib.error
+import urllib.request
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -31,6 +33,8 @@ _ALLOWED_ORIGINS = frozenset(
         "http://127.0.0.1:9891",
     }
 )
+
+_MAX_TREE_CHARS = 14_000
 
 
 def _docs_path(job_id: str) -> Optional[Path]:
@@ -62,13 +66,22 @@ def _cors_allow_origin(origin: str) -> str:
 
 
 def _gemini_ready() -> bool:
-    """True when GEMINI_API_KEY is set or Vertex/ADC (local only; Vercel uses GEMINI_API_KEY)."""
     if (os.getenv("GEMINI_API_KEY") or "").strip():
         return True
     if os.getenv("VERCEL"):
         return False
     try:
-        from codewiki.src.config import Config, LLM_API_KEY, LLM_BASE_URL, MAIN_MODEL, CLUSTER_MODEL, MAX_DEPTH, OUTPUT_BASE_DIR, DEPENDENCY_GRAPHS_DIR, DOCS_DIR
+        from codewiki.src.config import (
+            CLUSTER_MODEL,
+            Config,
+            DEPENDENCY_GRAPHS_DIR,
+            DOCS_DIR,
+            LLM_API_KEY,
+            LLM_BASE_URL,
+            MAIN_MODEL,
+            MAX_DEPTH,
+            OUTPUT_BASE_DIR,
+        )
         from codewiki.src.be.llm_services import _get_adc_credentials, _use_adc_mode
 
         cfg = Config(
@@ -104,25 +117,120 @@ def _gemini_ready() -> bool:
         return False
 
 
-def _run_chat(payload: dict) -> dict:
-    if not _gemini_ready():
+def _compact_module_tree(node: Any, lines: List[str], depth: int = 0) -> None:
+    if depth > 8 or len("\n".join(lines)) > _MAX_TREE_CHARS:
+        return
+    if isinstance(node, dict):
+        nid = node.get("id") or node.get("name") or ""
+        label = node.get("label") or node.get("title") or nid
+        desc = (node.get("description") or "")[:200]
+        if nid or label:
+            lines.append(f"{'  ' * depth}- {label} ({nid})" + (f": {desc}" if desc else ""))
+        for key in ("children", "modules", "submodules"):
+            ch = node.get(key)
+            if isinstance(ch, list):
+                for c in ch:
+                    _compact_module_tree(c, lines, depth + 1)
+            elif isinstance(ch, dict):
+                for c in ch.values():
+                    _compact_module_tree(c, lines, depth + 1)
+    elif isinstance(node, list):
+        for item in node:
+            _compact_module_tree(item, lines, depth)
+
+
+def _format_diagram_block(payload: dict) -> str:
+    parts: List[str] = []
+    dss = payload.get("diagram_selections")
+    if isinstance(dss, list) and dss:
+        for ds in dss:
+            if isinstance(ds, dict):
+                parts.append(
+                    f"  - {ds.get('kind', 'node')}: {ds.get('label') or ds.get('logical_id')}"
+                )
+    else:
+        ds = payload.get("diagram_selection")
+        if isinstance(ds, dict):
+            parts.append(
+                f"  - {ds.get('kind', 'node')}: {ds.get('label') or ds.get('logical_id')}"
+            )
+    if not parts:
+        return ""
+    return "VIEWER DIAGRAM SELECTION:\n" + "\n".join(parts) + "\n\n"
+
+
+def _run_chat_vercel(payload: dict, docs: Path) -> dict:
+    api_key = (os.getenv("GEMINI_API_KEY") or "").strip()
+    if not api_key:
         return {
             "error": "Gemini not configured. Set GEMINI_API_KEY in Vercel project Environment Variables.",
             "status": 503,
         }
 
-    job_id = payload.get("job_id") or ""
+    model = os.getenv("MAIN_MODEL", "gemini-2.5-flash")
     message = (payload.get("message") or "").strip()
-    if not job_id or not message:
-        return {"error": "job_id and message are required", "status": 400}
 
-    docs = _docs_path(job_id)
-    if docs is None:
-        return {
-            "error": f"No docs for job_id={job_id}",
-            "status": 404,
-        }
+    try:
+        tree_raw = json.loads((docs / "module_tree.json").read_text(encoding="utf-8"))
+    except Exception as e:
+        return {"error": f"module_tree.json: {e}", "status": 500}
 
+    lines: List[str] = []
+    root = tree_raw.get("module_tree") if isinstance(tree_raw, dict) else tree_raw
+    _compact_module_tree(root if root is not None else tree_raw, lines)
+    tree_text = "\n".join(lines)[:_MAX_TREE_CHARS]
+
+    overview_md = docs / "overview.md"
+    overview_snip = ""
+    if overview_md.is_file():
+        overview_snip = overview_md.read_text(encoding="utf-8", errors="replace")[:4000]
+
+    system = (
+        "You are an architectural navigation assistant for a software repository diagram.\n"
+        "Keep answers under 3–4 sentences. Be direct. Reference module names when relevant.\n"
+        "MODULE TREE (compact):\n"
+        f"{tree_text}\n"
+    )
+    if overview_snip:
+        system += f"\nOVERVIEW EXCERPT:\n{overview_snip}\n"
+
+    user = _format_diagram_block(payload) + message
+
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{model}:generateContent?key={api_key}"
+    )
+    body = {
+        "systemInstruction": {"parts": [{"text": system}]},
+        "contents": [{"role": "user", "parts": [{"text": user}]}],
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 512},
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(body).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=55) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace")[:800]
+        return {"error": f"Gemini HTTP {e.code}: {err_body}", "status": 502}
+    except Exception as e:
+        return {"error": f"Gemini request failed: {e}", "status": 502}
+
+    text = ""
+    for cand in data.get("candidates") or []:
+        content = cand.get("content") or {}
+        for part in content.get("parts") or []:
+            if part.get("text"):
+                text += part["text"]
+    text = text.strip() or "No response."
+    return {"response": text, "history": None, "status": 200}
+
+
+def _run_chat_codewiki(payload: dict, docs: Path) -> dict:
     from codewiki.src.be.architectural_agent import ArchitecturalAgentRunner
 
     try:
@@ -144,7 +252,7 @@ def _run_chat(payload: dict) -> dict:
 
     try:
         text, history = runner.chat(
-            message=message,
+            message=(payload.get("message") or "").strip(),
             opened_modules=opened,
             message_history=payload.get("history"),
             diagram_selection=ds if isinstance(ds, dict) else None,
@@ -157,6 +265,30 @@ def _run_chat(payload: dict) -> dict:
             "trace": traceback.format_exc(),
             "status": 500,
         }
+
+
+def _run_chat(payload: dict) -> dict:
+    if not _gemini_ready():
+        return {
+            "error": "Gemini not configured. Set GEMINI_API_KEY in Vercel project Environment Variables.",
+            "status": 503,
+        }
+
+    job_id = payload.get("job_id") or ""
+    message = (payload.get("message") or "").strip()
+    if not job_id or not message:
+        return {"error": "job_id and message are required", "status": 400}
+
+    docs = _docs_path(job_id)
+    if docs is None:
+        return {
+            "error": f"No docs for job_id={job_id}",
+            "status": 404,
+        }
+
+    if os.getenv("VERCEL"):
+        return _run_chat_vercel(payload, docs)
+    return _run_chat_codewiki(payload, docs)
 
 
 class handler(BaseHTTPRequestHandler):
@@ -186,6 +318,7 @@ class handler(BaseHTTPRequestHandler):
                     "gemini_configured": gem,
                     "demo_persona_bundle": persona is not None,
                     "repo_root": str(_ROOT),
+                    "vercel_lightweight_chat": bool(os.getenv("VERCEL")),
                 },
             )
             return
@@ -211,7 +344,6 @@ class handler(BaseHTTPRequestHandler):
         result = _run_chat(payload)
         st = int(result.pop("status", 500))
         if st == 200:
-            # Match ArchAgentChatResponse shape for the viewer
             _json_response(
                 self,
                 200,
