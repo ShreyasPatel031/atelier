@@ -1,0 +1,451 @@
+{
+  "title": "Embeddings and Utilities",
+  "summary": "This module provides core functionalities for generating text embeddings, managing concurrency, and handling agent response streams, alongside various general-purpose utilities.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "embedder",
+        "label": "Embedder",
+        "type": "component",
+        "link": null,
+        "title": "Embedder Interface",
+        "description": "High-level interface for generating text embeddings from various models, handling settings and instrumentation."
+      },
+      {
+        "id": "embedding_model_base",
+        "label": "Embedding Model Base",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Embedding Model",
+        "description": "Abstract base class defining the common interface for all embedding models, including methods for embedding and token counting."
+      },
+      {
+        "id": "wrapper_embedding_model",
+        "label": "Wrapper Embedding Model",
+        "type": "component",
+        "link": null,
+        "title": "Model Wrapper",
+        "description": "Allows wrapping other embedding models to modify or extend their behavior, such as for caching or logging."
+      },
+      {
+        "id": "test_embedding_model",
+        "label": "Test Embedding Model",
+        "type": "component",
+        "link": null,
+        "title": "Mock Embedding Model",
+        "description": "A mock embedding model used for testing purposes, returning deterministic embeddings and tracking settings."
+      },
+      {
+        "id": "bedrock_cohere_handler",
+        "label": "Cohere Bedrock Handler",
+        "type": "component",
+        "link": null,
+        "title": "Cohere Bedrock Integration",
+        "description": "Prepares requests and parses responses specifically for Cohere embedding models hosted on AWS Bedrock."
+      },
+      {
+        "id": "bedrock_nova_handler",
+        "label": "Amazon Nova Bedrock Handler",
+        "type": "component",
+        "link": null,
+        "title": "Amazon Nova Bedrock Integration",
+        "description": "Prepares requests and parses responses for Amazon Nova embedding models on AWS Bedrock."
+      },
+      {
+        "id": "bedrock_titan_handler",
+        "label": "Amazon Titan Bedrock Handler",
+        "type": "component",
+        "link": null,
+        "title": "Amazon Titan Bedrock Integration",
+        "description": "Prepares requests and parses responses for Amazon Titan embedding models on AWS Bedrock."
+      },
+      {
+        "id": "concurrency_limiter",
+        "label": "Concurrency Limiter",
+        "type": "component",
+        "link": null,
+        "title": "Concurrency Management",
+        "description": "Manages and limits the number of concurrent operations, tracking waiting tasks for observability."
+      },
+      {
+        "id": "agent_stream",
+        "label": "Agent Stream",
+        "type": "component",
+        "link": null,
+        "title": "Agent Response Stream",
+        "description": "Manages streaming responses from an AI agent, including output validation, usage tracking, and cancellation."
+      },
+      {
+        "id": "run_in_executor",
+        "label": "Run in Executor",
+        "type": "component",
+        "link": null,
+        "title": "Async Executor Utility",
+        "description": "Utility to execute synchronous functions in a thread pool executor asynchronously, handling context propagation."
+      },
+      {
+        "id": "get_event_loop",
+        "label": "Get Event Loop",
+        "type": "component",
+        "link": null,
+        "title": "Asyncio Event Loop Access",
+        "description": "Utility to retrieve the current asyncio event loop or create a new one if none is running."
+      },
+      {
+        "id": "get_union_args",
+        "label": "Get Union Arguments",
+        "type": "component",
+        "link": null,
+        "title": "Type Hint Utility",
+        "description": "Utility to extract arguments from a Python `Union` type hint, unwrapping annotated types."
+      },
+      {
+        "id": "format_as_xml",
+        "label": "Format as XML",
+        "type": "component",
+        "link": null,
+        "title": "XML Serialization",
+        "description": "Utility to serialize various Python objects into a human-readable XML string format, useful for LLM prompts."
+      },
+      {
+        "id": "deprecated_decorator",
+        "label": "Deprecated Decorator",
+        "type": "component",
+        "link": null,
+        "title": "Deprecation Marker",
+        "description": "A decorator used to mark callable properties as deprecated, providing a warning message upon access."
+      },
+      {
+        "id": "map_usage_cohere",
+        "label": "Map Cohere Usage",
+        "type": "component",
+        "link": null,
+        "title": "Cohere Usage Mapper",
+        "description": "Maps Cohere embedding response metadata to a standardized `RequestUsage` format for tracking."
+      },
+      {
+        "id": "map_usage_google",
+        "label": "Map Google Usage",
+        "type": "component",
+        "link": null,
+        "title": "Google Usage Mapper",
+        "description": "Maps Google embedding response metadata to a standardized `RequestUsage` format, noting token count availability."
+      },
+      {
+        "id": "map_usage_openai",
+        "label": "Map OpenAI Usage",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Usage Mapper",
+        "description": "Maps OpenAI embedding response metadata to a standardized `RequestUsage` format, handling missing usage data."
+      },
+      {
+        "id": "map_usage_voyageai",
+        "label": "Map VoyageAI Usage",
+        "type": "component",
+        "link": null,
+        "title": "VoyageAI Usage Mapper",
+        "description": "Maps VoyageAI embedding response metadata to a standardized `RequestUsage` format."
+      },
+      {
+        "id": "request_usage",
+        "label": "Request Usage",
+        "type": "data",
+        "link": null,
+        "title": "Resource Usage Data",
+        "description": "Data structure for tracking token and other resource consumption from model requests across different providers."
+      },
+      {
+        "id": "embedding_result",
+        "label": "Embedding Result",
+        "type": "data",
+        "link": null,
+        "title": "Embedding Output Data",
+        "description": "Data structure containing generated embeddings, input texts, input type, and associated usage metadata."
+      },
+      {
+        "id": "model_response",
+        "label": "Model Response",
+        "type": "data",
+        "link": null,
+        "title": "Model Output Snapshot",
+        "description": "Represents a snapshot of a model's streaming response, including content parts, tool calls, and current state."
+      },
+      {
+        "id": "embedding_settings",
+        "label": "Embedding Settings",
+        "type": "data",
+        "link": null,
+        "title": "Embedding Configuration",
+        "description": "Configuration settings for embedding models, such as output dimensions, truncation modes, or input types."
+      },
+      {
+        "id": "usage_alias",
+        "label": "Usage (Deprecated)",
+        "type": "data",
+        "link": null,
+        "title": "Deprecated Usage Alias",
+        "description": "A deprecated alias for `RunUsage`, used for tracking resource consumption within a run."
+      },
+      {
+        "id": "anyio_capacity_limiter",
+        "label": "Anyio Capacity Limiter",
+        "type": "external",
+        "link": null,
+        "title": "Anyio Concurrency",
+        "description": "An external library component used by ConcurrencyLimiter for managing concurrent task execution capacity."
+      },
+      {
+        "id": "opentelemetry_tracer",
+        "label": "OpenTelemetry Tracer",
+        "type": "external",
+        "link": null,
+        "title": "OpenTelemetry Tracing",
+        "description": "An external component for distributed tracing and observability, used by ConcurrencyLimiter for span creation."
+      }
+    ],
+    "edges": [
+      {
+        "source": "embedder",
+        "target": "embedding_model_base",
+        "label": "Manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedder",
+        "target": "embedding_result",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedder",
+        "target": "embedding_settings",
+        "label": "Applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedder",
+        "target": "get_event_loop",
+        "label": "Uses for sync calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedding_model_base",
+        "target": "embedding_settings",
+        "label": "Configured by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedding_model_base",
+        "target": "embedding_result",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapper_embedding_model",
+        "target": "embedding_model_base",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_embedding_model",
+        "target": "embedding_model_base",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_cohere_handler",
+        "target": "embedding_settings",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_nova_handler",
+        "target": "embedding_settings",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_titan_handler",
+        "target": "embedding_settings",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "map_usage_cohere",
+        "target": "request_usage",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "map_usage_google",
+        "target": "request_usage",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "map_usage_openai",
+        "target": "request_usage",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "map_usage_voyageai",
+        "target": "request_usage",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_embedding_model",
+        "target": "request_usage",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_stream",
+        "target": "model_response",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_stream",
+        "target": "request_usage",
+        "label": "Tracks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_stream",
+        "target": "get_event_loop",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "concurrency_limiter",
+        "target": "anyio_capacity_limiter",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "concurrency_limiter",
+        "target": "opentelemetry_tracer",
+        "label": "Reports to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_in_executor",
+        "target": "get_event_loop",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "usage_alias",
+        "target": "request_usage",
+        "label": "Alias for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "embedding_core",
+        "label": "Embedding Core",
+        "nodes": [
+          "embedder",
+          "embedding_model_base",
+          "wrapper_embedding_model",
+          "test_embedding_model"
+        ],
+        "title": "Core Embedding Components",
+        "description": "Central components for managing and interacting with embedding models.",
+        "role": "surface"
+      },
+      {
+        "id": "embedding_providers",
+        "label": "Embedding Provider Handlers",
+        "nodes": [
+          "bedrock_cohere_handler",
+          "bedrock_nova_handler",
+          "bedrock_titan_handler"
+        ],
+        "title": "Provider-Specific Embedding Logic",
+        "description": "Components responsible for integrating with specific embedding model providers like AWS Bedrock.",
+        "role": "generative"
+      },
+      {
+        "id": "usage_mapping",
+        "label": "Usage Mapping",
+        "nodes": [
+          "map_usage_cohere",
+          "map_usage_google",
+          "map_usage_openai",
+          "map_usage_voyageai"
+        ],
+        "title": "Model Usage Translation",
+        "description": "Functions that translate provider-specific usage metrics into a common `RequestUsage` format.",
+        "role": "analytical"
+      },
+      {
+        "id": "concurrency_streaming",
+        "label": "Concurrency & Streaming",
+        "nodes": [
+          "concurrency_limiter",
+          "agent_stream"
+        ],
+        "title": "Concurrency and Stream Management",
+        "description": "Components for controlling concurrent operations and managing asynchronous agent response streams.",
+        "role": "surface"
+      },
+      {
+        "id": "general_utils",
+        "label": "General Utilities",
+        "nodes": [
+          "run_in_executor",
+          "get_event_loop",
+          "get_union_args",
+          "format_as_xml",
+          "deprecated_decorator"
+        ],
+        "title": "Common Utility Functions",
+        "description": "A collection of general-purpose utility functions for asynchronous operations, type introspection, and data formatting.",
+        "role": "surface"
+      },
+      {
+        "id": "data_structures",
+        "label": "Data Structures",
+        "nodes": [
+          "request_usage",
+          "embedding_result",
+          "model_response",
+          "embedding_settings",
+          "usage_alias"
+        ],
+        "title": "Module Data Structures",
+        "description": "Key data structures used across the module for representing embeddings, model responses, and usage information.",
+        "role": "data"
+      }
+    ]
+  }
+}

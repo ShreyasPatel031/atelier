@@ -1,0 +1,299 @@
+{
+    "title": "CLI & Developer Tools",
+    "summary": "This module provides command-line interfaces for users to interact with CrewAI functionalities and developer tools to streamline the development and release process of CrewAI projects.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "cli_auth_api",
+                "label": "Handle CLI Authentication & API",
+                "type": "module",
+                "link": "cli_core",
+                "title": "CLI Auth & API Interaction",
+                "description": "Manages user authentication, secure communication with the CrewAI+ API, and telemetry initialization for CLI commands."
+            },
+            {
+                "id": "cli_main_entry",
+                "label": "Main CLI Entry Point",
+                "type": "module",
+                "link": "cli_commands",
+                "title": "CrewAI CLI Access",
+                "description": "The primary command-line interface for users to access all CrewAI functionalities, dispatching to various sub-commands."
+            },
+            {
+                "id": "cli_crew_flow_management",
+                "label": "Manage Crews & Flows",
+                "type": "module",
+                "link": "cli_commands",
+                "title": "Crew & Flow Operations",
+                "description": "Provides commands for executing, training, testing, and interacting with CrewAI agents and flows, including chat and flow plotting."
+            },
+            {
+                "id": "cli_deployment_management",
+                "label": "Manage Deployments",
+                "type": "module",
+                "link": "cli_commands",
+                "title": "Deployment Lifecycle Management",
+                "description": "Offers commands for creating, pushing, listing, monitoring, validating, and removing CrewAI project deployments on the platform."
+            },
+            {
+                "id": "cli_tool_config_management",
+                "label": "Manage Tools & Configuration",
+                "type": "module",
+                "link": "cli_commands",
+                "title": "Tool & CLI Settings Management",
+                "description": "Includes commands for creating, installing, publishing tools, configuring CLI settings, managing organizations, and handling user authentication/logout."
+            },
+            {
+                "id": "cli_checkpoint_tracing",
+                "label": "Manage Checkpoints & Tracing",
+                "type": "module",
+                "link": "cli_commands",
+                "title": "Checkpoint & Tracing Control",
+                "description": "Commands for resuming, diffing, listing, and pruning execution checkpoints, as well as enabling, disabling, and checking tracing status."
+            },
+            {
+                "id": "project_scaffolding",
+                "label": "Scaffold New Projects",
+                "type": "module",
+                "link": "project_creation",
+                "title": "New Project Creation",
+                "description": "Facilitates the creation of new CrewAI projects by copying template files and setting up initial project structures from predefined templates."
+            },
+            {
+                "id": "dev_version_release",
+                "label": "Automate Versioning & Releases",
+                "type": "module",
+                "link": "dev_utilities",
+                "title": "Automated Versioning & Release",
+                "description": "Provides tools for automatically bumping package versions, creating Git tags, generating release notes, and managing GitHub releases."
+            },
+            {
+                "id": "dev_docs_automation",
+                "label": "Automate Documentation",
+                "type": "module",
+                "link": "dev_utilities",
+                "title": "AI-Powered Docs Generation",
+                "description": "Generates and translates documentation based on code changes, leveraging AI to create and update content for releases and localization."
+            },
+            {
+                "id": "core_framework_interaction",
+                "label": "Interact with CrewAI Core",
+                "type": "external",
+                "link": "core_framework",
+                "title": "CrewAI Core Framework",
+                "description": "The underlying CrewAI framework providing agents, tasks, and flow execution logic that CLI commands operate on."
+            },
+            {
+                "id": "crewai_plus_platform",
+                "label": "Connect to CrewAI+ Platform",
+                "type": "external",
+                "link": null,
+                "title": "CrewAI+ Platform Services",
+                "description": "The cloud platform providing backend services for deployments, tool repositories, telemetry, and advanced CrewAI features."
+            },
+            {
+                "id": "git_scm",
+                "label": "Utilize Git SCM",
+                "type": "external",
+                "link": null,
+                "title": "Git Source Control Management",
+                "description": "The external Git version control system used by developer tools for managing code, branches, tags, and pull requests."
+            },
+            {
+                "id": "llm_services",
+                "label": "Access LLM Services",
+                "type": "external",
+                "link": null,
+                "title": "External LLM Providers",
+                "description": "External Large Language Model services used by developer tools for tasks like generating release notes and documentation content."
+            }
+        ],
+        "edges": [
+            {
+                "source": "cli_main_entry",
+                "target": "cli_auth_api",
+                "label": "Uses for authentication",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_auth_api",
+                "target": "crewai_plus_platform",
+                "label": "Communicates with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_main_entry",
+                "target": "cli_crew_flow_management",
+                "label": "Dispatches to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_main_entry",
+                "target": "cli_deployment_management",
+                "label": "Dispatches to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_main_entry",
+                "target": "cli_tool_config_management",
+                "label": "Dispatches to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_main_entry",
+                "target": "cli_checkpoint_tracing",
+                "label": "Dispatches to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_crew_flow_management",
+                "target": "core_framework_interaction",
+                "label": "Operates on",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_deployment_management",
+                "target": "crewai_plus_platform",
+                "label": "Manages resources on",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_tool_config_management",
+                "target": "crewai_plus_platform",
+                "label": "Publishes/Configures via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_checkpoint_tracing",
+                "target": "core_framework_interaction",
+                "label": "Monitors/Controls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_checkpoint_tracing",
+                "target": "crewai_plus_platform",
+                "label": "Sends traces to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "project_scaffolding",
+                "target": "cli_main_entry",
+                "label": "Initiated by CLI",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "project_scaffolding",
+                "target": "core_framework_interaction",
+                "label": "Generates structure for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dev_version_release",
+                "target": "git_scm",
+                "label": "Updates/Tags",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dev_version_release",
+                "target": "crewai_plus_platform",
+                "label": "Publishes releases to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dev_version_release",
+                "target": "dev_docs_automation",
+                "label": "Triggers docs update",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dev_docs_automation",
+                "target": "git_scm",
+                "label": "Reads code changes from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dev_docs_automation",
+                "target": "llm_services",
+                "label": "Uses for content generation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dev_docs_automation",
+                "target": "git_scm",
+                "label": "Commits generated docs to",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "cli_foundation_group",
+                "label": "CLI Foundation",
+                "nodes": [
+                    "cli_auth_api",
+                    "cli_main_entry"
+                ],
+                "title": "Core CLI Infrastructure",
+                "description": "The foundational components that handle user authentication, API communication, and serve as the main entry point for all command-line interactions.",
+                "role": null
+            },
+            {
+                "id": "cli_operations_group",
+                "label": "CLI Operations",
+                "nodes": [
+                    "cli_crew_flow_management",
+                    "cli_deployment_management",
+                    "cli_tool_config_management",
+                    "cli_checkpoint_tracing"
+                ],
+                "title": "Comprehensive CLI Commands",
+                "description": "A suite of command-line tools for managing CrewAI projects, including crew execution, flow orchestration, deployment, tool management, configuration, and tracing.",
+                "role": null
+            },
+            {
+                "id": "dev_tools_group",
+                "label": "Developer Tools",
+                "nodes": [
+                    "project_scaffolding",
+                    "dev_version_release",
+                    "dev_docs_automation"
+                ],
+                "title": "Project & Release Automation",
+                "description": "Utilities designed to streamline the development workflow, from project creation and version management to automated documentation generation and Git operations.",
+                "role": null
+            },
+            {
+                "id": "external_integrations_group",
+                "label": "External Integrations",
+                "nodes": [
+                    "core_framework_interaction",
+                    "crewai_plus_platform",
+                    "git_scm",
+                    "llm_services"
+                ],
+                "title": "External Systems & Core Modules",
+                "description": "Represents the external systems and core CrewAI modules that the CLI and developer tools interact with to perform their functions.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,143 @@
+{
+  "title": "YouTube Integration Tools",
+  "summary": "This module provides specialized tools for AI agents to perform semantic searches within YouTube content. It includes tools for searching specific YouTube channels and individual YouTube videos.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "agent_llm",
+        "label": "Agent/LLM",
+        "type": "external",
+        "link": null,
+        "title": "AI Agent or LLM",
+        "description": "Represents an AI agent or Large Language Model that initiates search queries and utilizes the YouTube content search tools."
+      },
+      {
+        "id": "youtube_channel_tool",
+        "label": "Search YouTube Channel Content",
+        "type": "component",
+        "link": null,
+        "title": "YoutubeChannelSearchTool",
+        "description": "A tool designed to perform semantic searches within the aggregated content (e.g., transcripts) of a specified YouTube channel, retrieving relevant information for the agent."
+      },
+      {
+        "id": "youtube_video_tool",
+        "label": "Search YouTube Video Content",
+        "type": "component",
+        "link": null,
+        "title": "YoutubeVideoSearchTool",
+        "description": "A tool that enables semantic searching within the content (e.g., transcript) of a specific YouTube video identified by its URL, providing precise information."
+      },
+      {
+        "id": "rag_tool_base",
+        "label": "Base RAG Tool",
+        "type": "component",
+        "link": "agent_tools_and_rag",
+        "title": "RagTool Base Class",
+        "description": "The foundational Retrieval Augmented Generation (RAG) tool providing core capabilities for semantic search, data loading, and retrieval mechanisms that these YouTube tools extend."
+      },
+      {
+        "id": "youtube_api",
+        "label": "YouTube Data API",
+        "type": "external",
+        "link": null,
+        "title": "YouTube External Service",
+        "description": "The external service responsible for providing access to YouTube channel information, video metadata, and potentially transcripts or other content for analysis."
+      }
+    ],
+    "edges": [
+      {
+        "source": "agent_llm",
+        "target": "youtube_channel_tool",
+        "label": "Invokes search",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_llm",
+        "target": "youtube_video_tool",
+        "label": "Invokes search",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "youtube_channel_tool",
+        "target": "rag_tool_base",
+        "label": "Extends RAG functionality",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "youtube_video_tool",
+        "target": "rag_tool_base",
+        "label": "Extends RAG functionality",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "youtube_channel_tool",
+        "target": "youtube_api",
+        "label": "Fetches channel data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "youtube_video_tool",
+        "target": "youtube_api",
+        "label": "Fetches video data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rag_tool_base",
+        "target": "youtube_api",
+        "label": "Processes retrieved data",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "youtube_search_tools",
+        "label": "YouTube Content Search Tools",
+        "nodes": [
+          "youtube_channel_tool",
+          "youtube_video_tool"
+        ],
+        "title": "Specific YouTube Search Tools",
+        "description": "Contains the specialized tools for agents to interact with YouTube content, enabling targeted semantic searches.",
+        "role": "generative"
+      },
+      {
+        "id": "rag_framework",
+        "label": "Core RAG Framework",
+        "nodes": [
+          "rag_tool_base"
+        ],
+        "title": "Retrieval Augmented Generation",
+        "description": "Encapsulates the base RAG capabilities that provide the underlying semantic search and data retrieval mechanisms for the YouTube tools.",
+        "role": "generative"
+      },
+      {
+        "id": "external_data_sources",
+        "label": "External Data Sources",
+        "nodes": [
+          "youtube_api"
+        ],
+        "title": "External APIs and Services",
+        "description": "Represents external services that provide the raw data for the tools to process and search, specifically the YouTube Data API.",
+        "role": "data"
+      },
+      {
+        "id": "agent_interface",
+        "label": "Agent Interface",
+        "nodes": [
+          "agent_llm"
+        ],
+        "title": "Agent/LLM Interaction Point",
+        "description": "Defines the entry point for AI agents or LLMs to utilize the functionality provided by this module.",
+        "role": "surface"
+      }
+    ]
+  }
+}

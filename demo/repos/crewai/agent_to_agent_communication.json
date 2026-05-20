@@ -1,0 +1,166 @@
+{
+    "title": "Agent-to-Agent Communication",
+    "summary": "This module enables secure and structured delegation of tasks and information exchange between different AI agents. It provides authentication, update mechanisms, and utilities to facilitate collaborative workflows and extend agent capabilities.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "core_delegation",
+                "label": "Core Delegation Logic",
+                "type": "module",
+                "link": "a2a_core_logic",
+                "title": "A2A Core Delegation",
+                "description": "Manages the primary logic for agents to delegate tasks and initiate workflows with other agents, handling both synchronous and asynchronous calls."
+            },
+            {
+                "id": "auth_security",
+                "label": "Authentication & Security",
+                "type": "module",
+                "link": "a2a_authentication",
+                "title": "A2A Authentication",
+                "description": "Provides various client and server-side authentication schemes (API keys, OAuth2, tokens) to secure Agent-to-Agent communication channels."
+            },
+            {
+                "id": "updates_extensions",
+                "label": "Update Mechanisms & Extensions",
+                "type": "module",
+                "link": "a2a_updates_and_extensions",
+                "title": "A2A Updates & Extensions",
+                "description": "Handles different methods for receiving updates (polling, streaming, push notifications) and integrates A2UI for declarative user interface generation."
+            },
+            {
+                "id": "config_utilities",
+                "label": "Configuration & Utilities",
+                "type": "module",
+                "link": "a2a_utilities",
+                "title": "A2A Configuration & Utilities",
+                "description": "Offers essential functions for agent card management, gRPC interception, task cancellation monitoring, and general A2A configuration settings."
+            },
+            {
+                "id": "initiating_agent",
+                "label": "Initiating CrewAI Agent",
+                "type": "external",
+                "link": "core_framework.agents_and_execution",
+                "title": "CrewAI Agent",
+                "description": "A CrewAI agent that initiates delegation requests to other agents or services via the A2A module."
+            },
+            {
+                "id": "receiving_agent",
+                "label": "Receiving Remote Agent",
+                "type": "external",
+                "link": null,
+                "title": "Remote Agent/Service",
+                "description": "An external agent or service that receives and processes delegated tasks or requests from a CrewAI agent."
+            },
+            {
+                "id": "event_bus",
+                "label": "CrewAI Event Bus",
+                "type": "external",
+                "link": "core_framework.events_and_state",
+                "title": "CrewAI Event Bus",
+                "description": "The central messaging system within CrewAI for emitting and handling various events, including those related to A2A communication."
+            }
+        ],
+        "edges": [
+            {
+                "source": "initiating_agent",
+                "target": "core_delegation",
+                "label": "Delegates Tasks/Kickoffs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_delegation",
+                "target": "auth_security",
+                "label": "Secures Communication",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_delegation",
+                "target": "config_utilities",
+                "label": "Uses Config & Utils",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_delegation",
+                "target": "updates_extensions",
+                "label": "Manages Update Handling",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "auth_security",
+                "target": "receiving_agent",
+                "label": "Authenticates Requests To",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "updates_extensions",
+                "target": "receiving_agent",
+                "label": "Receives Updates From",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "config_utilities",
+                "target": "receiving_agent",
+                "label": "Fetches Agent Cards From",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_delegation",
+                "target": "event_bus",
+                "label": "Emits A2A Events",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "updates_extensions",
+                "target": "event_bus",
+                "label": "Emits Update Events",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "a2a_core",
+                "label": "Core A2A Functionality",
+                "nodes": [
+                    "core_delegation"
+                ],
+                "title": "Core Agent-to-Agent Logic",
+                "description": "Encapsulates the central mechanisms for agents to delegate tasks and orchestrate workflows with other agents.",
+                "role": null
+            },
+            {
+                "id": "a2a_support",
+                "label": "A2A Supporting Services",
+                "nodes": [
+                    "auth_security",
+                    "updates_extensions",
+                    "config_utilities"
+                ],
+                "title": "A2A Infrastructure Services",
+                "description": "Provides essential services like secure communication, update management, extensions, and configuration utilities for robust A2A operations.",
+                "role": null
+            },
+            {
+                "id": "external_interactions",
+                "label": "External Interactions",
+                "nodes": [
+                    "initiating_agent",
+                    "receiving_agent",
+                    "event_bus"
+                ],
+                "title": "External System Interfaces",
+                "description": "Represents the external entities and internal CrewAI systems that interact with the Agent-to-Agent communication module.",
+                "role": null
+            }
+        ]
+    }
+}

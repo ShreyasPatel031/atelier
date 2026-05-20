@@ -1,90 +1,83 @@
 {
     "title": "Data Processing Module",
-    "summary": "This module provides comprehensive tools for preparing diverse raw data inputs, including images, text, and audio, into formats suitable for machine learning models. It encompasses tokenization, feature extraction, normalization, and model-specific preprocessing steps.",
+    "summary": "This module handles the preprocessing of various data types (images, text, audio) to prepare them for consumption by machine learning models. It includes specialized processors and tokenizers for different modalities and tasks.",
     "diagram": {
         "direction": "LR",
         "nodes": [
             {
-                "id": "raw_input_data",
-                "label": "Raw Input Data",
+                "id": "raw_data_input",
+                "label": "Raw Data Input",
                 "type": "external",
                 "link": null,
-                "title": "Raw Input Data",
-                "description": "Unprocessed data (images, text, audio) provided by users or external sources, serving as the initial input for the processing pipeline."
+                "title": "Unprocessed Input Data",
+                "description": "Represents the initial, unprocessed data provided by users or datasets, encompassing various modalities like images, text, and audio."
             },
             {
-                "id": "image_preprocessing",
-                "label": "Image Preprocessing",
+                "id": "image_processing_module",
+                "label": "Image Processing",
                 "type": "module",
                 "link": "image_processing",
-                "title": "Image Preprocessing Submodule",
-                "description": "Handles resizing, normalization, format conversion, and other transformations for raw image data, preparing it for various vision and multimodal models."
+                "title": "Image Preprocessing Sub-module",
+                "description": "Handles the transformation and preparation of raw image data, applying operations like resizing, normalization, and format conversion for computer vision models."
             },
             {
-                "id": "text_audio_preprocessing",
-                "label": "Text & Audio Preprocessing",
+                "id": "text_audio_processing_module",
+                "label": "Text & Audio Processing",
                 "type": "module",
                 "link": "text_audio_processing",
-                "title": "Text & Audio Preprocessing Submodule",
-                "description": "Manages tokenization, number normalization, and multimodal data preparation for text and audio inputs, including OCR and speech-to-text functionalities."
+                "title": "Text and Audio Preprocessing Sub-module",
+                "description": "Manages the tokenization of text, multimodal data preparation, and normalization of numerical text, crucial for language and speech models."
             },
             {
                 "id": "model_ready_features",
                 "label": "Model-Ready Features",
                 "type": "external",
                 "link": null,
-                "title": "Model-Ready Features",
-                "description": "Processed and formatted data (e.g., token IDs, image tensors, audio features) ready to be consumed by various machine learning models for inference or training."
+                "title": "Prepared Model Inputs",
+                "description": "The output of the data processing pipeline, consisting of transformed and encoded features formatted for direct consumption by machine learning models."
             },
             {
-                "id": "external_models",
-                "label": "Machine Learning Models",
+                "id": "model_architectures_module",
+                "label": "Model Architectures",
                 "type": "external",
                 "link": "model_architectures",
-                "title": "Machine Learning Models",
-                "description": "Various Transformer models that utilize the preprocessed data for tasks like generation, classification, object detection, or speech recognition."
+                "title": "Model Architectures Module",
+                "description": "The collection of various machine learning model definitions that consume the prepared data for inference or training."
             }
         ],
         "edges": [
             {
-                "source": "raw_input_data",
-                "target": "image_preprocessing",
-                "label": "Raw images",
+                "source": "raw_data_input",
+                "target": "image_processing_module",
+                "label": "Provides image data",
                 "title": null,
                 "description": null
             },
             {
-                "source": "raw_input_data",
-                "target": "text_audio_preprocessing",
-                "label": "Raw text/audio",
+                "source": "raw_data_input",
+                "target": "text_audio_processing_module",
+                "label": "Provides text/audio data",
                 "title": null,
                 "description": null
             },
             {
-                "source": "image_preprocessing",
-                "target": "text_audio_preprocessing",
-                "label": "Processed image components (for multimodal)",
-                "title": null,
-                "description": "Image preprocessing outputs, such as image tensors or visual prompts, are used by multimodal processors within the text and audio module."
-            },
-            {
-                "source": "image_preprocessing",
+                "source": "image_processing_module",
                 "target": "model_ready_features",
-                "label": "Image features",
+                "label": "Outputs processed image features",
                 "title": null,
                 "description": null
             },
             {
-                "source": "text_audio_preprocessing",
+                "source": "text_audio_processing_module",
                 "target": "model_ready_features",
-                "label": "Text/audio features",
+                "label": "Outputs processed text/audio features",
                 "title": null,
                 "description": null
             },
             {
                 "source": "model_ready_features",
-                "target": "external_models",
-                "label": "Input to models",
+                "target": "model_architectures_module",
+                "label": "Consumed by models",
                 "title": null,
                 "description": null
             }
@@ -94,32 +87,32 @@
                 "id": "input_sources",
                 "label": "Input Sources",
                 "nodes": [
-                    "raw_input_data"
+                    "raw_data_input"
                 ],
-                "title": "Raw Data Inputs",
-                "description": "Represents the initial, unprocessed data streams that enter the data processing pipeline.",
+                "title": "Raw Data Input Sources",
+                "description": "Represents the initial, untransformed data streams entering the processing pipeline.",
                 "role": null
             },
             {
-                "id": "core_processors",
-                "label": "Core Processors",
+                "id": "processing_core",
+                "label": "Processing Core",
                 "nodes": [
-                    "image_preprocessing",
-                    "text_audio_preprocessing"
+                    "image_processing_module",
+                    "text_audio_processing_module"
                 ],
-                "title": "Core Data Processing Submodules",
-                "description": "The main submodules responsible for transforming raw data into a model-consumable format, handling different modalities.",
+                "title": "Core Data Processing Logic",
+                "description": "Contains the specialized sub-modules responsible for transforming raw data into model-compatible formats across different modalities.",
                 "role": null
             },
             {
-                "id": "output_destination",
-                "label": "Output & Consumers",
+                "id": "model_integration",
+                "label": "Model Integration",
                 "nodes": [
                     "model_ready_features",
-                    "external_models"
+                    "model_architectures_module"
                 ],
-                "title": "Processed Data Output and Consumers",
-                "description": "Represents the final, prepared data output from the module and the machine learning models that consume this data.",
+                "title": "Model Input & Consumption",
+                "description": "Represents the final, prepared data ready for machine learning models and the models themselves that utilize this data.",
                 "role": null
             }
         ]

@@ -1,0 +1,145 @@
+{
+  "title": "Contextual AI Integration Tools",
+  "summary": "This module provides specialized tools for interacting with the Contextual AI platform. It enables the creation of RAG agents with document ingestion, parsing of various document types, and querying of existing Contextual AI agents.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "create_agent_tool",
+        "label": "Create Contextual AI Agent",
+        "type": "component",
+        "link": null,
+        "title": "ContextualAICreateAgentTool",
+        "description": "Creates a new Contextual AI RAG agent, ingesting specified documents into a datastore for retrieval-augmented generation."
+      },
+      {
+        "id": "parse_tool",
+        "label": "Parse Documents with Contextual AI",
+        "type": "component",
+        "link": null,
+        "title": "ContextualAIParseTool",
+        "description": "Utilizes Contextual AI's advanced parser to process documents, extracting structured information and converting them into various output formats."
+      },
+      {
+        "id": "query_tool",
+        "label": "Query Contextual AI Agent",
+        "type": "component",
+        "link": null,
+        "title": "ContextualAIQueryTool",
+        "description": "Allows querying of an existing Contextual AI RAG agent, retrieving relevant information based on the agent's configured knowledge base."
+      },
+      {
+        "id": "contextual_client_lib",
+        "label": "Contextual AI Python Client",
+        "type": "component",
+        "link": null,
+        "title": "Contextual AI Client Library",
+        "description": "The official Python client library for programmatic interaction with the Contextual AI platform's services."
+      },
+      {
+        "id": "file_system",
+        "label": "Local File Storage",
+        "type": "external",
+        "link": null,
+        "title": "Local File System",
+        "description": "Represents the local file system where documents are stored before being uploaded or parsed by the tools."
+      },
+      {
+        "id": "contextual_ai_platform",
+        "label": "Contextual AI Cloud Platform",
+        "type": "external",
+        "link": null,
+        "title": "Contextual AI Service",
+        "description": "The external cloud-based AI service that hosts RAG agents, datastores, and document parsing capabilities."
+      }
+    ],
+    "edges": [
+      {
+        "source": "create_agent_tool",
+        "target": "file_system",
+        "label": "Reads document paths",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_agent_tool",
+        "target": "contextual_client_lib",
+        "label": "Uses client to create/ingest",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "parse_tool",
+        "target": "file_system",
+        "label": "Reads document for parsing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "parse_tool",
+        "target": "contextual_ai_platform",
+        "label": "Sends document for parsing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "query_tool",
+        "target": "contextual_client_lib",
+        "label": "Uses client to query agent",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "contextual_client_lib",
+        "target": "contextual_ai_platform",
+        "label": "Communicates with API",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "agent_operations",
+        "label": "Agent Operations",
+        "nodes": [
+          "create_agent_tool",
+          "query_tool"
+        ],
+        "title": "Contextual AI Agent Management",
+        "description": "Tools focused on the lifecycle and interaction with Contextual AI RAG agents.",
+        "role": "surface"
+      },
+      {
+        "id": "document_processing",
+        "label": "Document Processing",
+        "nodes": [
+          "parse_tool"
+        ],
+        "title": "Contextual AI Document Parsing",
+        "description": "Tool dedicated to leveraging Contextual AI's capabilities for document analysis and parsing.",
+        "role": "surface"
+      },
+      {
+        "id": "integration_layer",
+        "label": "Integration Layer",
+        "nodes": [
+          "contextual_client_lib"
+        ],
+        "title": "Contextual AI Client Integration",
+        "description": "The core library facilitating communication between the tools and the Contextual AI platform.",
+        "role": "generative"
+      },
+      {
+        "id": "external_dependencies",
+        "label": "External Systems",
+        "nodes": [
+          "file_system",
+          "contextual_ai_platform"
+        ],
+        "title": "External Data and AI Services",
+        "description": "External systems that the Contextual AI tools interact with for data input and AI processing.",
+        "role": "external"
+      }
+    ]
+  }
+}

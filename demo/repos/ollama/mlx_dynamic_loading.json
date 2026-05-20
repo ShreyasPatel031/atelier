@@ -1,0 +1,68 @@
+{
+  "title": "MLX Dynamic Loading",
+  "summary": "This module handles the dynamic loading and initialization of the MLX library at runtime, providing a mechanism to load the library from a specified path and report any loading errors.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "mlx_init_path",
+        "label": "Initialize MLX Library",
+        "type": "component",
+        "link": null,
+        "title": "Initialize MLX Library",
+        "description": "Attempts to dynamically load the MLX library from a given path, ensuring it's only initialized once and capturing any loading errors."
+      },
+      {
+        "id": "os_dynamic_loader",
+        "label": "OS Dynamic Loader",
+        "type": "external",
+        "link": null,
+        "title": "Operating System Dynamic Library Loader",
+        "description": "The underlying operating system mechanism (e.g., dlopen, LoadLibrary) responsible for loading shared libraries at runtime."
+      },
+      {
+        "id": "mlx_lib_file",
+        "label": "MLX Library File",
+        "type": "external",
+        "link": null,
+        "title": "MLX Shared Library",
+        "description": "The compiled MLX shared library file (e.g., .so, .dylib, .dll) that contains the core MLX functionalities to be loaded."
+      }
+    ],
+    "edges": [
+      {
+        "source": "mlx_init_path",
+        "target": "os_dynamic_loader",
+        "label": "Requests Library Load",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "os_dynamic_loader",
+        "target": "mlx_init_path",
+        "label": "Returns Load Result",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mlx_init_path",
+        "target": "mlx_lib_file",
+        "label": "Accesses Library",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "mlx_dynamic_loading_group",
+        "label": "MLX Dynamic Loading",
+        "nodes": [
+          "mlx_init_path"
+        ],
+        "title": "MLX Dynamic Loading Module",
+        "description": "Manages the dynamic loading and initialization of the core MLX library at runtime.",
+        "role": "surface"
+      }
+    ]
+  }
+}

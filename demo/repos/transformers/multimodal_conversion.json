@@ -1,0 +1,112 @@
+{
+    "title": "Multimodal Model Conversion",
+    "summary": "This module handles the conversion of various multimodal models from their original formats to Hugging Face Transformers. It supports vision-language, object detection, document AI, and keypoint matching models.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "original_models_source", "label": "Original Models", "type": "external", "title": "Original Models", "description": "Represents the diverse array of multimodal models from various sources and frameworks that are candidates for conversion."},
+            {"id": "huggingface_models_target", "label": "Hugging Face Models", "type": "external", "title": "Hugging Face Models", "description": "The target format for all converted models, making them compatible with the Hugging Face ecosystem and tools."},
+
+            {"id": "general_vlm_conversions", "label": "General VLMs", "type": "module", "link": "general_vlm_conversions", "title": "General VLM Conversions", "description": "Converts foundational vision-language models such as ALIGN, BLIP, GIT, and GroupViT into the Hugging Face format."},
+            {"id": "instructed_vlm_conversions", "label": "Instructed VLMs", "type": "module", "link": "instructed_vlm_conversions", "title": "Instructed VLM Conversions", "description": "Handles the conversion of instruction-tuned vision-language models like InstructBLIP and Kosmos-2 for Hugging Face compatibility."},
+            {"id": "llm_integrated_vlm_conversions", "label": "LLM-Integrated VLMs", "type": "module", "link": "llm_integrated_vlm_conversions", "title": "LLM-Integrated VLM Conversions", "description": "Converts models that integrate large language models, including LLaVA, InternVL, Janus, OVIS-2, Phi-4 Multimodal, and Pixtral."},
+            {"id": "vilt_visualbert_xclip_conversions", "label": "ViLT, VisualBERT, X-CLIP", "type": "module", "link": "vilt_visualbert_xclip_conversions", "title": "ViLT & Related Conversions", "description": "Converts specific multimodal models including ViLT, VisualBERT, and X-CLIP to the Hugging Face standard."},
+
+            {"id": "sam_conversions", "label": "SAM Models", "type": "module", "link": "sam_conversions", "title": "SAM Model Conversions", "description": "Manages the conversion of Segment Anything Model (SAM) and its direct variants to the Hugging Face format."},
+            {"id": "advanced_sam_conversions", "label": "Advanced SAM & Segmentation", "type": "module", "link": "advanced_sam_conversions", "title": "Advanced SAM & Segmentation Conversions", "description": "Converts advanced SAM variants and other segmentation models like CHMv2 and EdgeTAM into the Hugging Face ecosystem."},
+            {"id": "object_detection_conversions", "label": "Object Detection", "type": "module", "link": "object_detection_conversions", "title": "Object Detection Conversions", "description": "Facilitates the conversion of various object detection models, including MM-Grounding-Dino, OWL-ViT, OWL-ViT v2, and OMDet-Turbo."},
+
+            {"id": "keypoint_matching_conversions", "label": "Keypoint Matching", "type": "module", "link": "keypoint_matching_conversions", "title": "Keypoint Matching Conversions", "description": "Converts models specialized in keypoint matching such as EfficientLoFTR, LightGlue, and SuperGlue."},
+            {"id": "document_ai_conversions", "label": "Document AI", "type": "module", "link": "document_ai_conversions", "title": "Document AI Conversions", "description": "Converts multimodal models tailored for document understanding tasks, including Donut, Nougat, Pix2Struct, and UDOP."},
+            {"id": "depth_estimation_conversions", "label": "Depth Estimation", "type": "module", "link": "depth_estimation_conversions", "title": "Depth Estimation Conversions", "description": "Handles the conversion of DepthPro, a model dedicated to depth estimation, into the Hugging Face format."},
+
+            {"id": "model_architectures_external", "label": "Model Architectures", "type": "external", "title": "Model Architectures Module", "description": "Provides core model building blocks and configurations utilized by conversion scripts."},
+            {"id": "model_utilities_external", "label": "Model Utilities", "type": "external", "title": "Model Utilities Module", "description": "Offers utility functions and helper methods for model operations and data handling."},
+            {"id": "data_processing_external", "label": "Data Processing", "type": "external", "title": "Data Processing Module", "description": "Responsible for preprocessing and postprocessing data for various model types, ensuring compatibility."},
+            {"id": "pipelines_and_generation_external", "label": "Pipelines & Generation", "type": "external", "title": "Pipelines & Generation Module", "description": "Provides high-level interfaces for common tasks and sequence generation capabilities."},
+            {"id": "quantization_and_integrations_external", "label": "Quantization & Integrations", "type": "external", "title": "Quantization & Integrations Module", "description": "Manages model optimization techniques like quantization and integrations with external systems or tools."},
+
+            {"id": "parent_model_conversion", "label": "Parent: model_conversion", "type": "external", "title": "Parent: model_conversion", "description": "The parent module responsible for general model conversion utilities and orchestration."},
+            {"id": "sibling_image_conversion", "label": "Sibling: image_conversion", "type": "external", "title": "Sibling: image_conversion", "description": "Handles conversions specifically for image models."},
+            {"id": "sibling_other_model_conversion", "label": "Sibling: other_model_conversion", "type": "external", "title": "Sibling: other_model_conversion", "description": "Manages conversions for other miscellaneous model types."},
+            {"id": "sibling_text_conversion", "label": "Sibling: text_conversion", "type": "external", "title": "Sibling: text_conversion", "description": "Deals with conversions related to text-based models."},
+            {"id": "sibling_audio_conversion", "label": "Sibling: audio_conversion", "type": "external", "title": "Sibling: audio_conversion", "description": "Focuses on conversions for audio models."},
+            {"id": "sibling_gemma_family_conversion", "label": "Sibling: gemma_family_conversion", "type": "external", "title": "Sibling: gemma_family_conversion", "description": "Handles conversions for the Gemma family of models."},
+            {"id": "sibling_detr_family_conversion", "label": "Sibling: detr_family_conversion", "type": "external", "title": "Sibling: detr_family_conversion", "description": "Manages conversions for the DETR family of models."}
+
+        ],
+        "edges": [
+            {"source": "original_models_source", "target": "general_vlm_conversions", "label": "raw checkpoints"},
+            {"source": "original_models_source", "target": "instructed_vlm_conversions", "label": "raw checkpoints"},
+            {"source": "original_models_source", "target": "llm_integrated_vlm_conversions", "label": "raw checkpoints"},
+            {"source": "original_models_source", "target": "vilt_visualbert_xclip_conversions", "label": "raw checkpoints"},
+            {"source": "original_models_source", "target": "sam_conversions", "label": "raw checkpoints"},
+            {"source": "original_models_source", "target": "advanced_sam_conversions", "label": "raw checkpoints"},
+            {"source": "original_models_source", "target": "object_detection_conversions", "label": "raw checkpoints"},
+            {"source": "original_models_source", "target": "keypoint_matching_conversions", "label": "raw checkpoints"},
+            {"source": "original_models_source", "target": "document_ai_conversions", "label": "raw checkpoints"},
+            {"source": "original_models_source", "target": "depth_estimation_conversions", "label": "raw checkpoints"},
+
+            {"source": "general_vlm_conversions", "target": "huggingface_models_target", "label": "HF models"},
+            {"source": "instructed_vlm_conversions", "target": "huggingface_models_target", "label": "HF models"},
+            {"source": "llm_integrated_vlm_conversions", "target": "huggingface_models_target", "label": "HF models"},
+            {"source": "vilt_visualbert_xclip_conversions", "target": "huggingface_models_target", "label": "HF models"},
+            {"source": "sam_conversions", "target": "huggingface_models_target", "label": "HF models"},
+            {"source": "advanced_sam_conversions", "target": "huggingface_models_target", "label": "HF models"},
+            {"source": "object_detection_conversions", "target": "huggingface_models_target", "label": "HF models"},
+            {"source": "keypoint_matching_conversions", "target": "huggingface_models_target", "label": "HF models"},
+            {"source": "document_ai_conversions", "target": "huggingface_models_target", "label": "HF models"},
+            {"source": "depth_estimation_conversions", "target": "huggingface_models_target", "label": "HF models"},
+
+            {"source": "general_vlm_conversions", "target": "model_architectures_external", "label": "uses configs"},
+            {"source": "instructed_vlm_conversions", "target": "model_architectures_external", "label": "uses configs"},
+            {"source": "llm_integrated_vlm_conversions", "target": "model_architectures_external", "label": "uses configs"},
+            {"source": "vilt_visualbert_xclip_conversions", "target": "model_architectures_external", "label": "uses configs"},
+            {"source": "sam_conversions", "target": "model_architectures_external", "label": "uses configs"},
+            {"source": "advanced_sam_conversions", "target": "model_architectures_external", "label": "uses configs"},
+            {"source": "object_detection_conversions", "target": "model_architectures_external", "label": "uses configs"},
+            {"source": "keypoint_matching_conversions", "target": "model_architectures_external", "label": "uses configs"},
+            {"source": "document_ai_conversions", "target": "model_architectures_external", "label": "uses configs"},
+            {"source": "depth_estimation_conversions", "target": "model_architectures_external", "label": "uses configs"},
+
+            {"source": "general_vlm_conversions", "target": "model_utilities_external", "label": "uses helpers"},
+            {"source": "instructed_vlm_conversions", "target": "model_utilities_external", "label": "uses helpers"},
+            {"source": "llm_integrated_vlm_conversions", "target": "model_utilities_external", "label": "uses helpers"},
+            {"source": "vilt_visualbert_xclip_conversions", "target": "model_utilities_external", "label": "uses helpers"},
+            {"source": "sam_conversions", "target": "model_utilities_external", "label": "uses helpers"},
+            {"source": "advanced_sam_conversions", "target": "model_utilities_external", "label": "uses helpers"},
+            {"source": "object_detection_conversions", "target": "model_utilities_external", "label": "uses helpers"},
+            {"source": "keypoint_matching_conversions", "target": "model_utilities_external", "label": "uses helpers"},
+            {"source": "document_ai_conversions", "target": "model_utilities_external", "label": "uses helpers"},
+            {"source": "depth_estimation_conversions", "target": "model_utilities_external", "label": "uses helpers"},
+
+            {"source": "general_vlm_conversions", "target": "data_processing_external", "label": "uses processors"},
+            {"source": "instructed_vlm_conversions", "target": "data_processing_external", "label": "uses processors"},
+            {"source": "llm_integrated_vlm_conversions", "target": "data_processing_external", "label": "uses processors"},
+            {"source": "vilt_visualbert_xclip_conversions", "target": "data_processing_external", "label": "uses processors"},
+            {"source": "sam_conversions", "target": "data_processing_external", "label": "uses processors"},
+            {"source": "advanced_sam_conversions", "target": "data_processing_external", "label": "uses processors"},
+            {"source": "object_detection_conversions", "target": "data_processing_external", "label": "uses processors"},
+            {"source": "keypoint_matching_conversions", "target": "data_processing_external", "label": "uses processors"},
+            {"source": "document_ai_conversions", "target": "data_processing_external", "label": "uses processors"},
+            {"source": "depth_estimation_conversions", "target": "data_processing_external", "label": "uses processors"},
+
+            {"source": "parent_model_conversion", "target": "general_vlm_conversions", "label": "orchestrates"},
+            {"source": "parent_model_conversion", "target": "instructed_vlm_conversions", "label": "orchestrates"},
+            {"source": "parent_model_conversion", "target": "llm_integrated_vlm_conversions", "label": "orchestrates"},
+            {"source": "parent_model_conversion", "target": "vilt_visualbert_xclip_conversions", "label": "orchestrates"},
+            {"source": "parent_model_conversion", "target": "sam_conversions", "label": "orchestrates"},
+            {"source": "parent_model_conversion", "target": "advanced_sam_conversions", "label": "orchestrates"},
+            {"source": "parent_model_conversion", "target": "object_detection_conversions", "label": "orchestrates"},
+            {"source": "parent_model_conversion", "target": "keypoint_matching_conversions", "label": "orchestrates"},
+            {"source": "parent_model_conversion", "target": "document_ai_conversions", "label": "orchestrates"},
+            {"source": "parent_model_conversion", "target": "depth_estimation_conversions", "label": "orchestrates"}
+
+        ],
+        "groups": [
+            {"id": "vision_language_models_group", "label": "Vision-Language Models", "title": "Vision-Language Models", "description": "Group of sub-modules handling the conversion of various vision-language models, from general purpose to LLM-integrated systems.", "role": "analytical", "nodes": ["general_vlm_conversions", "instructed_vlm_conversions", "llm_integrated_vlm_conversions", "vilt_visualbert_xclip_conversions"]},
+            {"id": "segmentation_detection_group", "label": "Segmentation & Detection", "title": "Segmentation and Object Detection", "description": "Group of sub-modules dedicated to converting models for image segmentation, object detection, and related tasks like SAM and Grounding-Dino.", "role": "analytical", "nodes": ["sam_conversions", "advanced_sam_conversions", "object_detection_conversions"]},
+            {"id": "specialized_vision_group", "label": "Specialized Vision", "title": "Specialized Vision Conversions", "description": "Group of sub-modules for converting models focused on specific vision tasks such as keypoint matching, depth estimation, and document AI.", "role": "analytical", "nodes": ["keypoint_matching_conversions", "document_ai_conversions", "depth_estimation_conversions"]}
+        ]
+    }
+}

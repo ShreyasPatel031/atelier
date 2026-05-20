@@ -1,19 +1,57 @@
 {
   "repos": [
     {
+      "repo": "crewai",
+      "generation": {},
+      "validation": {
+        "validation_passed": true,
+        "errors": 0,
+        "warnings": 3
+      }
+    },
+    {
       "repo": "dspy",
-      "generation": {
-        "exit_code": 0,
-        "duration_seconds": 568.8,
-        "stdout_lines": 1019,
-        "stderr_lines": 33,
-        "docs_exist": true,
-        "md_files": 0
-      },
+      "generation": {},
       "validation": {
         "validation_passed": true,
         "errors": 0,
         "warnings": 5
+      }
+    },
+    {
+      "repo": "langchain",
+      "generation": {},
+      "validation": {
+        "validation_passed": true,
+        "errors": 0,
+        "warnings": 4
+      }
+    },
+    {
+      "repo": "ollama",
+      "generation": {},
+      "validation": {
+        "validation_passed": true,
+        "errors": 0,
+        "warnings": 3
+      }
+    },
+    {
+      "repo": "pydantic-ai",
+      "generation": {},
+      "validation": {
+        "validation_passed": true,
+        "errors": 0,
+        "warnings": 2
+      }
+    },
+    {
+      "repo": "transformers",
+      "generation": {},
+      "validation": {
+        "validation_passed": true,
+        "errors": 0,
+        "warnings": 1
       }
     }
   ]

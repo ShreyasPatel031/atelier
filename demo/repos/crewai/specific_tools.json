@@ -1,0 +1,175 @@
+{
+    "title": "Specific Agent Tools",
+    "summary": "This module provides a comprehensive collection of specialized tools for agents, including functionalities for web scraping, diverse data querying, file and document management, AWS Bedrock services, AI-powered vision and OCR, Contextual AI integrations, Patronus evaluation, and various platform-specific automation and integrations.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "web_scraping_and_search",
+                "label": "Web Scraping & Search",
+                "type": "module",
+                "link": "web_scraping_and_search",
+                "title": "Web Scraping and Search Tools",
+                "description": "Tools for extracting and searching information from the web using various services like Brave, Firecrawl, Jina, Oxylabs, Scrapegraph, Serper, Serply, and Tavily."
+            },
+            {
+                "id": "web_automation",
+                "label": "Web Automation",
+                "type": "module",
+                "link": "web_automation",
+                "title": "Web Automation Tools",
+                "description": "Tools designed for automating browser interactions, including loading web pages, executing scripts, and handling complex web workflows using services like Browserbase, Hyperbrowser, MultiOn, Selenium, Spider, and Stagehand."
+            },
+            {
+                "id": "database_query",
+                "label": "Database Query",
+                "type": "module",
+                "link": "database_query",
+                "title": "Database Query and Search Tools",
+                "description": "Tools for querying and performing semantic searches across various database types, including MongoDB, MySQL, SingleStore, Snowflake, Couchbase, Qdrant, Databricks, and general SQL with natural language capabilities (NL2SQL), and AI-Mind for data insights."
+            },
+            {
+                "id": "file_content_tools",
+                "label": "File & Content Tools",
+                "type": "module",
+                "link": "file_content_tools",
+                "title": "File and Content Management Tools",
+                "description": "Tools for reading, searching, and managing various file formats and directory contents, such as CSV, DOCX, JSON, MDX, PDF, TXT, and XML files, as well as file compression and directory listing."
+            },
+            {
+                "id": "aws_bedrock_tools",
+                "label": "AWS Bedrock Tools",
+                "type": "module",
+                "link": "aws_bedrock_tools",
+                "title": "AWS Bedrock Integration Tools",
+                "description": "Tools specifically designed to interact with AWS Bedrock services, including invoking agents, code interpreters, and knowledge base retrievers, along with browser toolkits."
+            },
+            {
+                "id": "ai_vision_and_ocr",
+                "label": "AI Vision & OCR",
+                "type": "module",
+                "link": "ai_vision_and_ocr",
+                "title": "AI Vision and OCR Tools",
+                "description": "Tools leveraging AI for image analysis, including optical character recognition (OCR) for text extraction and general vision capabilities for describing image content."
+            },
+            {
+                "id": "contextual_ai_tools",
+                "label": "Contextual AI Tools",
+                "type": "module",
+                "link": "contextual_ai_tools",
+                "title": "Contextual AI Integration Tools",
+                "description": "Tools for integrating with Contextual AI, enabling the creation of RAG agents, parsing documents, and querying these agents for contextual information."
+            },
+            {
+                "id": "patronus_evaluation_tools",
+                "label": "Patronus Evaluation",
+                "type": "module",
+                "link": "patronus_evaluation_tools",
+                "title": "Patronus Evaluation Tools",
+                "description": "Tools for evaluating model inputs and outputs using the Patronus AI platform, offering both general and predefined criteria-based evaluation functionalities."
+            },
+            {
+                "id": "crewai_platform_tools",
+                "label": "CrewAI Platform Tools",
+                "type": "module",
+                "link": "crewai_platform_tools",
+                "title": "CrewAI Platform Tools",
+                "description": "Tools for integrating with the CrewAI Platform, including generating CrewAI automations and executing platform-defined actions."
+            },
+            {
+                "id": "zapier_integration",
+                "label": "Zapier Integration",
+                "type": "module",
+                "link": "zapier_integration",
+                "title": "Zapier Integration Tool",
+                "description": "Provides a factory function to generate tools for interacting with various Zapier actions, enabling extensive automation workflows."
+            },
+            {
+                "id": "github_integration",
+                "label": "GitHub Integration",
+                "type": "module",
+                "link": "github_integration",
+                "title": "GitHub Search Tool",
+                "description": "A specialized tool for semantic searching within GitHub repositories, including code, issues, and pull requests."
+            },
+            {
+                "id": "youtube_integration",
+                "label": "YouTube Integration",
+                "type": "module",
+                "link": "youtube_integration",
+                "title": "YouTube Search Tools",
+                "description": "Tools dedicated to semantic searching within YouTube content, covering both individual video content and entire channel uploads."
+            },
+            {
+                "id": "composio_integration",
+                "label": "Composio Integration",
+                "type": "module",
+                "link": "composio_integration",
+                "title": "Composio Integration Tool",
+                "description": "A wrapper for Composio tools, enabling agents to leverage a wide range of third-party integrations and actions."
+            }
+        ],
+        "edges": [
+            {"source": "web_scraping_and_search", "target": "data_query_and_storage", "label": "search results/scraped data"},
+            {"source": "web_automation", "target": "data_query_and_storage", "label": "extracted web data"},
+            {"source": "file_content_tools", "target": "data_query_and_storage", "label": "file content"},
+            {"source": "aws_bedrock_tools", "target": "ai_service_integrations", "label": "bedrock agent output"},
+            {"source": "ai_vision_and_ocr", "target": "ai_service_integrations", "label": "processed image data"},
+            {"source": "contextual_ai_tools", "target": "patronus_evaluation_tools", "label": "agent query results"},
+            {"source": "crewai_platform_tools", "target": "zapier_integration", "label": "automation triggers"},
+            {"source": "github_integration", "target": "file_content_tools", "label": "repo content"},
+            {"source": "youtube_integration", "target": "file_content_tools", "label": "video/channel data"}
+        ],
+        "groups": [
+            {
+                "id": "web_interaction_group",
+                "label": "Web Interaction",
+                "title": "Web Interaction Tools",
+                "description": "Modules that facilitate interaction with web content, including scraping, searching, and browser automation.",
+                "role": "surface", 
+                "nodes": [
+                    "web_scraping_and_search",
+                    "web_automation"
+                ]
+            },
+            {
+                "id": "data_processing_group",
+                "label": "Data & Document Processing",
+                "title": "Data and Document Processing",
+                "description": "Modules focused on querying diverse data sources and managing various file and document types.",
+                "role": "analytical", 
+                "nodes": [
+                    "database_query",
+                    "file_content_tools"
+                ]
+            },
+            {
+                "id": "ai_cloud_services_group",
+                "label": "AI & Cloud Services",
+                "title": "AI and Cloud Service Tools",
+                "description": "Modules integrating with specialized AI models and cloud-specific services, such as AWS Bedrock and Contextual AI.",
+                "role": "generative", 
+                "nodes": [
+                    "aws_bedrock_tools",
+                    "ai_vision_and_ocr",
+                    "contextual_ai_tools",
+                    "patronus_evaluation_tools"
+                ]
+            },
+            {
+                "id": "platform_integrations_group",
+                "label": "Platform Integrations",
+                "title": "Platform and External Integrations",
+                "description": "Modules that provide integration with various external platforms and services, enhancing automation and connectivity.",
+                "role": "surface", 
+                "nodes": [
+                    "crewai_platform_tools",
+                    "zapier_integration",
+                    "github_integration",
+                    "youtube_integration",
+                    "composio_integration"
+                ]
+            }
+        ]
+    }
+}

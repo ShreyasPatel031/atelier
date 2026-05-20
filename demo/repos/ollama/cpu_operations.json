@@ -1,0 +1,30 @@
+{
+    "title": "CPU Operations Module",
+    "summary": "This module provides the core CPU-optimized operations for GGML, including quantization, vector and matrix computations, and compute graph management.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "backend_init", "label": "Initialize CPU Backend", "type": "module", "link": "backend_initialization", "title": "Initialize CPU Backend", "description": "Handles the initialization of the CPU backend and retrieves device-specific properties."},
+            {"id": "data_quant_repack", "label": "Quantize & Repack Data", "type": "module", "link": "quantization_and_repacking", "title": "Quantize and Repack Data", "description": "Manages the quantization of floating-point data into lower precision formats and reorganizes data for optimized CPU access patterns."},
+            {"id": "vector_ops", "label": "Perform Vector Operations", "type": "module", "link": "vector_dot_products", "title": "Perform Vector Operations", "description": "Implements highly optimized vector dot product operations for various quantized data types across different CPU architectures."},
+            {"id": "matrix_mult_kernels", "label": "Optimized Matrix Kernels", "type": "module", "link": "matrix_multiplication_kernels", "title": "Optimized Matrix Kernels", "description": "Provides specialized matrix multiplication kernels, finely tuned for performance on CPU architectures using quantized data."},
+            {"id": "graph_mgmt", "label": "Manage Compute Graphs", "type": "module", "link": "graph_and_compute_management", "title": "Manage Compute Graphs", "description": "Orchestrates the execution of computation graphs and manages threading for parallel CPU processing."},
+            {"id": "utils_data_access", "label": "Data Access & Utilities", "type": "module", "link": "data_access_and_utilities", "title": "Data Access and Utilities", "description": "Offers functions for direct tensor data manipulation, NUMA awareness, and general-purpose computational utilities."}
+        ],
+        "edges": [
+            {"source": "backend_init", "target": "graph_mgmt", "label": "provides context"},
+            {"source": "data_quant_repack", "target": "vector_ops", "label": "quantized data"},
+            {"source": "data_quant_repack", "target": "matrix_mult_kernels", "label": "quantized data"},
+            {"source": "vector_ops", "target": "graph_mgmt", "label": "part of computations"},
+            {"source": "matrix_mult_kernels", "target": "graph_mgmt", "label": "part of computations"},
+            {"source": "graph_mgmt", "target": "utils_data_access", "label": "uses utilities"},
+            {"source": "utils_data_access", "target": "data_quant_repack", "label": "influences data prep"}
+        ],
+        "groups": [
+            {"id": "initialization", "label": "Initialization", "title": "Backend Setup", "description": "Establishes and configures the CPU backend for subsequent operations and resource allocation.", "role": "surface", "nodes": ["backend_init"]},
+            {"id": "data_transformation", "label": "Data Transformation", "title": "Data Optimization", "description": "Processes and transforms raw data into efficient quantized formats suitable for high-performance computations.", "role": "generative", "nodes": ["data_quant_repack"]},
+            {"id": "core_algorithms", "label": "Core Algorithms", "title": "Core CPU Algorithms", "description": "Contains the fundamental numerical algorithms for vector and matrix computations optimized for CPU execution.", "role": "analytical", "nodes": ["vector_ops", "matrix_mult_kernels"]},
+            {"id": "control_and_utilities", "label": "Control & Utilities", "title": "Execution Control & Helpers", "description": "Provides the mechanisms for managing the flow of computation, thread execution, and essential data handling utilities.", "role": "analytical", "nodes": ["graph_mgmt", "utils_data_access"]}
+        ]
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "title": "Prediction Models",
+    "summary": "This module encompasses various models designed for predictive tasks, including time series forecasting and protein structure prediction.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "time_series_prediction",
+                "label": "Time Series Prediction",
+                "type": "module",
+                "link": "time_series_prediction",
+                "title": "Time Series Prediction Models",
+                "description": "Contains models specialized in forecasting future values based on historical time-dependent data."
+            },
+            {
+                "id": "protein_folding_prediction",
+                "label": "Protein Folding Prediction",
+                "type": "module",
+                "link": "protein_folding_prediction",
+                "title": "Protein Folding Prediction Models",
+                "description": "Includes models dedicated to predicting the intricate three-dimensional structures of proteins."
+            }
+        ],
+        "edges": [],
+        "groups": [
+            {
+                "id": "analytical_models",
+                "label": "Analytical Models",
+                "title": "Core Analytical Models",
+                "description": "A collection of models focused on various analytical and predictive tasks, from time series to bioinformatics.",
+                "role": "analytical",
+                "nodes": ["time_series_prediction", "protein_folding_prediction"]
+            }
+        ]
+    }
+}

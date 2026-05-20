@@ -1,0 +1,187 @@
+{
+  "title": "Common Tools and Extensions",
+  "summary": "This module provides a collection of common tools and extensions for AI agents. It includes integrations with external search services (Exa.ai, Tavily), wrappers for frameworks (LangChain, ACI.dev), and native agent capabilities like code execution, memory, and RAG-based file search.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "ExaToolset",
+        "label": "Exa Search Toolset",
+        "type": "component",
+        "link": null,
+        "title": "Exa Search Toolset",
+        "description": "Provides a collection of Exa search tools (search, find_similar, get_contents, answer) with a shared client for efficient web search and content retrieval, optimizing API usage."
+      },
+      {
+        "id": "TavilySearchTool",
+        "label": "Tavily Search Tool",
+        "type": "component",
+        "link": null,
+        "title": "Tavily Search Tool Creator",
+        "description": "Creates a configurable Tavily search tool for web search, allowing parameters like max results, search depth, and domain filtering to be set or exposed to the LLM for dynamic queries."
+      },
+      {
+        "id": "ACIToolset",
+        "label": "ACI.dev Toolset",
+        "type": "component",
+        "link": null,
+        "title": "ACI.dev Integration Toolset",
+        "description": "Wraps ACI.dev functions into a toolset, enabling agents to interact with ACI.dev services and leverage their functionalities within the AI framework."
+      },
+      {
+        "id": "LangChainToolset",
+        "label": "LangChain Toolset",
+        "type": "component",
+        "link": null,
+        "title": "LangChain Integration Toolset",
+        "description": "Adapts LangChain tools into a compatible toolset, allowing agents to seamlessly leverage existing LangChain functionalities and integrations within the Pydantic AI ecosystem."
+      },
+      {
+        "id": "UrlContextTool",
+        "label": "URL Context Tool (Legacy)",
+        "type": "component",
+        "link": null,
+        "title": "URL Context Tool (Legacy)",
+        "description": "A deprecated alias for WebFetchTool, maintained for backward compatibility to deserialize old payloads. It provides functionality to fetch and process content from specified URLs."
+      },
+      {
+        "id": "CodeExecutionTool",
+        "label": "Code Execution Tool",
+        "type": "component",
+        "link": null,
+        "title": "Agent Code Execution",
+        "description": "Enables AI agents to execute code dynamically, supporting various LLM providers such as Anthropic, OpenAI, Google, Bedrock, and xAI for enhanced problem-solving capabilities."
+      },
+      {
+        "id": "MemoryTool",
+        "label": "Memory Tool",
+        "type": "component",
+        "link": null,
+        "title": "Agent Memory Management",
+        "description": "Provides AI agents with the capability to manage and utilize conversational or contextual memory, enhancing their ability to maintain state and recall information, currently supported by Anthropic."
+      },
+      {
+        "id": "FileSearchTool",
+        "label": "File Search Tool",
+        "type": "component",
+        "link": null,
+        "title": "RAG File Search",
+        "description": "Offers a fully managed Retrieval-Augmented Generation (RAG) system for agents to search through uploaded files using vector search, supporting OpenAI, Google, and xAI for context injection."
+      },
+      {
+        "id": "ExaAIService",
+        "label": "Exa.ai Service",
+        "type": "external",
+        "link": null,
+        "title": "Exa.ai Web Search",
+        "description": "External web search and content retrieval service providing advanced search capabilities, content extraction, and answer generation from the web."
+      },
+      {
+        "id": "TavilyAIService",
+        "label": "Tavily.com Service",
+        "type": "external",
+        "link": null,
+        "title": "Tavily.com Web Search",
+        "description": "External web search API service offering focused and configurable web searches with options for search depth, topic, and domain filtering."
+      },
+      {
+        "id": "ACIDevPlatform",
+        "label": "ACI.dev Platform",
+        "type": "external",
+        "link": null,
+        "title": "ACI.dev External Platform",
+        "description": "External platform offering various AI functions and services, integrated to extend the capabilities of agents within the Pydantic AI framework."
+      },
+      {
+        "id": "LangChainFramework",
+        "label": "LangChain Framework",
+        "type": "external",
+        "link": null,
+        "title": "LangChain AI Framework",
+        "description": "Popular external framework for developing applications powered by large language models, whose tools can be wrapped and used by Pydantic AI agents."
+      },
+      {
+        "id": "WebFetchToolModule",
+        "label": "WebFetchTool (Capabilities)",
+        "type": "other_module",
+        "link": "capabilities_and_tools",
+        "title": "WebFetchTool from Capabilities",
+        "description": "The core WebFetchTool component residing in the capabilities_and_tools module, providing fundamental web content fetching functionality, aliased by UrlContextTool."
+      }
+    ],
+    "edges": [
+      {
+        "source": "ExaToolset",
+        "target": "ExaAIService",
+        "label": "Uses API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TavilySearchTool",
+        "target": "TavilyAIService",
+        "label": "Uses API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ACIToolset",
+        "target": "ACIDevPlatform",
+        "label": "Integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LangChainToolset",
+        "target": "LangChainFramework",
+        "label": "Wraps tools from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UrlContextTool",
+        "target": "WebFetchToolModule",
+        "label": "Alias for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "web_data_tools",
+        "label": "Web & Data Tools",
+        "nodes": [
+          "ExaToolset",
+          "TavilySearchTool",
+          "UrlContextTool",
+          "FileSearchTool"
+        ],
+        "title": "Web & Data Tools",
+        "description": "Tools for searching the web, fetching content from URLs, and performing RAG-based file searches.",
+        "role": "data"
+      },
+      {
+        "id": "external_integrations",
+        "label": "External Integrations",
+        "nodes": [
+          "ACIToolset",
+          "LangChainToolset"
+        ],
+        "title": "External Framework Integrations",
+        "description": "Toolsets designed to integrate with and wrap functionalities from external AI frameworks and platforms.",
+        "role": "surface"
+      },
+      {
+        "id": "native_agent_capabilities",
+        "label": "Native Agent Capabilities",
+        "nodes": [
+          "CodeExecutionTool",
+          "MemoryTool"
+        ],
+        "title": "Core Agent Capabilities",
+        "description": "Fundamental tools that provide agents with native abilities like code execution and memory management.",
+        "role": "generative"
+      }
+    ]
+  }
+}

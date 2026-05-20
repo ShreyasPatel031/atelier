@@ -1,0 +1,52 @@
+{
+    "title": "Text Classification & QA Models",
+    "summary": "This module provides specialized model implementations for sequence classification, token classification, and question answering tasks.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "seq_classification",
+                "label": "Sequence Classification Models",
+                "type": "module",
+                "link": "sequence_classification_models",
+                "title": "Sequence Classification Models",
+                "description": "Models designed for classifying sequences of text into predefined categories."
+            },
+            {
+                "id": "token_classification",
+                "label": "Token Classification Models",
+                "type": "module",
+                "link": "token_classification_models",
+                "title": "Token Classification Models",
+                "description": "Models for assigning labels to individual tokens within a sequence, useful for tasks like Named Entity Recognition."
+            },
+            {
+                "id": "qa_models",
+                "label": "Question Answering Models",
+                "type": "module",
+                "link": "question_answering_models",
+                "title": "Question Answering Models",
+                "description": "Models capable of extracting answers to questions from given text passages."
+            }
+        ],
+        "edges": [],
+        "groups": [
+            {
+                "id": "classification_tasks",
+                "label": "Classification Tasks",
+                "title": "Classification Tasks",
+                "description": "Groups models performing various types of text classification.",
+                "role": "analytical",
+                "nodes": ["seq_classification", "token_classification"]
+            },
+            {
+                "id": "qa_task",
+                "label": "Question Answering Task",
+                "title": "Question Answering Task",
+                "description": "Contains models specialized in answering questions based on provided context.",
+                "role": "analytical",
+                "nodes": ["qa_models"]
+            }
+        ]
+    }
+}

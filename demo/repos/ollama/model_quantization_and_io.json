@@ -1,0 +1,126 @@
+{
+  "title": "LLM Model Quantization & I/O",
+  "summary": "This module provides functionalities for quantizing large language models to optimize their size and performance, alongside utilities for handling GGUF file metadata and managing the Key-Value (KV) cache during model inference. It also includes core memory mapping implementations for efficient file access.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "quantize_model",
+        "label": "Quantize LLM Model",
+        "type": "component",
+        "link": null,
+        "title": "Model Quantization",
+        "description": "Performs quantization on an input LLM model file, converting it to a more memory-efficient format (e.g., GGUF) and saving the output."
+      },
+      {
+        "id": "convert_gguf_kv_to_string",
+        "label": "Convert GGUF KV to String",
+        "type": "component",
+        "link": null,
+        "title": "GGUF Key-Value String Conversion",
+        "description": "Converts a GGUF key-value pair, including arrays and strings, into a human-readable string representation for metadata handling."
+      },
+      {
+        "id": "add_kv_position",
+        "label": "Add KV Cache Position",
+        "type": "component",
+        "link": null,
+        "title": "KV Cache Position Addition",
+        "description": "Adjusts the position of a sequence within the KV cache by adding a delta, handling negative positions by removing the sequence."
+      },
+      {
+        "id": "divide_kv_position",
+        "label": "Divide KV Cache Position",
+        "type": "component",
+        "link": null,
+        "title": "KV Cache Position Division",
+        "description": "Divides the position of a sequence in the KV cache by a given divisor, updating the shift accordingly."
+      },
+      {
+        "id": "keep_kv_sequence",
+        "label": "Keep KV Cache Sequence",
+        "type": "component",
+        "link": null,
+        "title": "KV Cache Sequence Retention",
+        "description": "Manages the retention of a specific sequence within the KV cache, resetting or updating its position and associated metadata."
+      },
+      {
+        "id": "remove_kv_entry",
+        "label": "Remove KV Cache Entry",
+        "type": "component",
+        "link": null,
+        "title": "KV Cache Entry Removal",
+        "description": "Removes a specific entry from the KV cache, resetting its position, sequence associations, and shift values."
+      },
+      {
+        "id": "memory_map_impl",
+        "label": "Memory Map Implementation",
+        "type": "component",
+        "link": null,
+        "title": "Memory Mapping Details",
+        "description": "Represents the underlying implementation details for memory-mapped file operations, crucial for efficient model loading and access."
+      }
+    ],
+    "edges": [
+      {
+        "source": "memory_map_impl",
+        "target": "quantize_model",
+        "label": "Reads/Writes Model Files",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "quantize_model",
+        "target": "convert_gguf_kv_to_string",
+        "label": "Generates GGUF Metadata",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "quantization_group",
+        "label": "Model Quantization",
+        "nodes": [
+          "quantize_model"
+        ],
+        "title": "Model Quantization Process",
+        "description": "Handles the conversion of large language models into more compact, quantized formats for reduced memory footprint and faster inference.",
+        "role": "generative"
+      },
+      {
+        "id": "gguf_io_group",
+        "label": "GGUF I/O & Metadata",
+        "nodes": [
+          "convert_gguf_kv_to_string"
+        ],
+        "title": "GGUF Input/Output and Metadata Handling",
+        "description": "Manages the reading and writing of GGUF file format metadata, including conversion of key-value pairs to string representations.",
+        "role": "data"
+      },
+      {
+        "id": "kv_cache_group",
+        "label": "KV Cache Management",
+        "nodes": [
+          "add_kv_position",
+          "divide_kv_position",
+          "keep_kv_sequence",
+          "remove_kv_entry"
+        ],
+        "title": "Key-Value Cache Management",
+        "description": "Provides utilities for manipulating the Key-Value cache, including adding, dividing, keeping, and removing sequence positions to optimize memory usage during inference.",
+        "role": "data"
+      },
+      {
+        "id": "memory_mapping_group",
+        "label": "Memory Mapping",
+        "nodes": [
+          "memory_map_impl"
+        ],
+        "title": "Memory Mapping Utilities",
+        "description": "Encapsulates the core implementation details for memory-mapped file operations, enabling efficient direct access to model data from disk.",
+        "role": "data"
+      }
+    ]
+  }
+}

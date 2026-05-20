@@ -1,0 +1,24 @@
+ 
+{
+    "title": "Image Model Conversion",
+    "summary": "Facilitates the conversion of various image-related models from their original frameworks to the Hugging Face Transformers format.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "vision_model_converters", "label": "Vision Model Converters", "type": "module", "link": "vision_model_converters", "title": "Vision Model Converters", "description": "Converts general vision models like BEiT, ConvNext, DINOv2, EfficientNet, MobileNet, MobileViT, Swin, and ViT from external formats to Hugging Face Transformers models."},
+            {"id": "depth_segmentation_converters", "label": "Depth and Segmentation Converters", "type": "module", "link": "depth_segmentation_converters", "title": "Depth and Segmentation Converters", "description": "Handles the conversion of models specialized in depth estimation and semantic/instance segmentation tasks, such as DPT, GLPN, SegGPT, UperNet, VitMatte, and ZoeDepth."},
+            {"id": "video_model_converters", "label": "Video Model Converters", "type": "module", "link": "video_model_converters", "title": "Video Model Converters", "description": "Converts models designed for video understanding and processing, specifically VideoMAE, into the Hugging Face Transformers format."},
+            {"id": "image_restoration_converters", "label": "Image Restoration Converters", "type": "module", "link": "image_restoration_converters", "title": "Image Restoration Converters", "description": "Focuses on converting models for image restoration tasks, such as super-resolution, exemplified by Swin2SR."},
+            {"id": "pose_estimation_converters", "label": "Pose Estimation Converters", "type": "module", "link": "pose_estimation_converters", "title": "Pose Estimation Converters", "description": "Converts models for human pose estimation, including VitPose."}
+        ],
+        "edges": [
+            {"source": "vision_model_converters", "target": "depth_segmentation_converters", "label": "converted vision features"},
+            {"source": "vision_model_converters", "target": "video_model_converters", "label": "converted core models"},
+            {"source": "vision_model_converters", "target": "image_restoration_converters", "label": "converted core models"},
+            {"source": "vision_model_converters", "target": "pose_estimation_converters", "label": "converted core models"}
+        ],
+        "groups": [
+            {"id": "image_conversion_core", "label": "Image Conversion Core", "title": "Image Conversion Core Logic", "description": "Central modules responsible for converting various image-related models from external formats to Hugging Face Transformers.", "role": "analytical", "nodes": ["vision_model_converters", "depth_segmentation_converters", "video_model_converters", "image_restoration_converters", "pose_estimation_converters"]}
+        ]
+    }
+}

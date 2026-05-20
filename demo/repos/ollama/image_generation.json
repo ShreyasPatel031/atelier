@@ -1,0 +1,166 @@
+{
+    "title": "Image Generation Module",
+    "summary": "This module orchestrates the process of generating images from various inputs, leveraging machine learning models and frameworks like MLX. It handles model loading, generation execution, and output processing.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "user_input",
+                "label": "User Request",
+                "type": "external",
+                "link": null,
+                "title": "Image Generation Request",
+                "description": "Input from the user, typically a text prompt and generation parameters, initiating the image creation process."
+            },
+            {
+                "id": "mlx_dynamic_loading_mod",
+                "label": "MLX Dynamic Loading",
+                "type": "module",
+                "link": "mlx_dynamic_loading",
+                "title": "MLX Library Loader",
+                "description": "Handles the dynamic loading and initialization of the MLX machine learning library, ensuring it's available for use by the generation components."
+            },
+            {
+                "id": "model_loading",
+                "label": "Load Image Model",
+                "type": "component",
+                "link": null,
+                "title": "Image Model Loader",
+                "description": "Responsible for loading the specific image generation model (e.g., Stable Diffusion weights) into memory, often utilizing MLX capabilities for efficient data handling."
+            },
+            {
+                "id": "generation_engine",
+                "label": "Execute Image Generation",
+                "type": "component",
+                "link": null,
+                "title": "Image Generation Core",
+                "description": "The central component that takes the processed input and the loaded model to perform the actual image synthesis using MLX operations and algorithms."
+            },
+            {
+                "id": "output_handler",
+                "label": "Output Generated Image",
+                "type": "component",
+                "link": null,
+                "title": "Generated Image Output",
+                "description": "Processes and delivers the final generated image, potentially applying post-processing, format conversion, or saving it to a specified location."
+            },
+            {
+                "id": "mlx_framework_ext",
+                "label": "MLX Framework",
+                "type": "external",
+                "link": null,
+                "title": "MLX Machine Learning Framework",
+                "description": "The underlying machine learning framework (e.g., Apple MLX) that provides tensor computation, model execution, and GPU acceleration for image generation tasks."
+            },
+            {
+                "id": "llm_runtime_ext",
+                "label": "LLM Runtime Core",
+                "type": "external",
+                "link": "llm_runtime_core",
+                "title": "LLM Runtime Core",
+                "description": "The core runtime for Large Language Models, which might provide text embeddings, semantic understanding, or other multimodal features as input to the image generation process."
+            }
+        ],
+        "edges": [
+            {
+                "source": "user_input",
+                "target": "model_loading",
+                "label": "Provides model selection/config",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_input",
+                "target": "generation_engine",
+                "label": "Provides generation parameters",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mlx_dynamic_loading_mod",
+                "target": "model_loading",
+                "label": "Enables MLX-based loading",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mlx_dynamic_loading_mod",
+                "target": "generation_engine",
+                "label": "Provides MLX runtime access",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_loading",
+                "target": "generation_engine",
+                "label": "Supplies loaded model",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "generation_engine",
+                "target": "output_handler",
+                "label": "Sends raw image data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "generation_engine",
+                "target": "mlx_framework_ext",
+                "label": "Executes ML operations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_loading",
+                "target": "mlx_framework_ext",
+                "label": "Uses MLX for model data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "llm_runtime_ext",
+                "target": "generation_engine",
+                "label": "Provides text embeddings/prompts",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "input_and_setup",
+                "label": "Input & Setup",
+                "nodes": [
+                    "user_input",
+                    "mlx_dynamic_loading_mod",
+                    "model_loading"
+                ],
+                "title": "Image Generation Input & Setup",
+                "description": "This group handles receiving user requests, dynamically loading necessary machine learning libraries, and preparing the image generation model for use.",
+                "role": null
+            },
+            {
+                "id": "core_generation_process",
+                "label": "Core Generation Process",
+                "nodes": [
+                    "generation_engine",
+                    "output_handler"
+                ],
+                "title": "Core Image Generation & Output",
+                "description": "This group encompasses the central logic for executing the image generation process and managing the delivery of the final generated image.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "mlx_framework_ext",
+                    "llm_runtime_ext"
+                ],
+                "title": "External ML & LLM Dependencies",
+                "description": "This group represents the external machine learning frameworks and language model runtimes that provide core computational and semantic capabilities to the image generation module.",
+                "role": null
+            }
+        ]
+    }
+}

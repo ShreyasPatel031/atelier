@@ -73,12 +73,14 @@ app = FastAPI(
     lifespan=_lifespan,
 )
 
-# CORS: static demo on 8080; web app on 8000/8001
+# CORS: static demo on 8080 / npm run demo (9891); web app on 8000/8001
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:8080",
         "http://127.0.0.1:8080",
+        "http://localhost:9891",
+        "http://127.0.0.1:9891",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
         "http://localhost:8001",

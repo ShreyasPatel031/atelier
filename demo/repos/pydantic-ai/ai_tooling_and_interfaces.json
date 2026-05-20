@@ -1,0 +1,129 @@
+{
+    "title": "AI Tooling & Interfaces",
+    "summary": "This module provides a comprehensive suite of tools, integrations, and interfaces for AI agents, enabling interaction with external services, durable execution, user interfaces, and direct model access.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "common_tools",
+                "label": "Common Tools & Extensions",
+                "type": "module",
+                "link": "common_tools_and_extensions",
+                "title": "Common Tools & Extensions",
+                "description": "Provides a collection of pre-built tools and integrations with external services (e.g., search, LangChain) and native agent capabilities (e.g., code execution, memory)."
+            },
+            {
+                "id": "durable_exec",
+                "label": "Durable Execution Integrations",
+                "type": "module",
+                "link": "durable_execution_integrations",
+                "title": "Durable Execution Integrations",
+                "description": "Integrates AI agents and toolsets with durable execution frameworks like DBOS, Prefect, and Temporal, ensuring reliable and fault-tolerant operations."
+            },
+            {
+                "id": "mcp",
+                "label": "Multi-Component Platform (MCP)",
+                "type": "module",
+                "link": "multi_component_platform",
+                "title": "Multi-Component Platform (MCP)",
+                "description": "Implements the Model Context Protocol (MCP) for serving AI models, loading toolsets from configurations, and defining structured resources for AI interactions."
+            },
+            {
+                "id": "user_interfaces",
+                "label": "User Interface Integrations",
+                "type": "module",
+                "link": "user_interfaces",
+                "title": "User Interface Integrations",
+                "description": "Provides adapters and endpoints for connecting AI agents with various user interfaces, handling request/response transformations and streaming events (e.g., AG-UI, Vercel AI SDK)."
+            },
+            {
+                "id": "direct_model_access",
+                "label": "Direct Model Access",
+                "type": "module",
+                "link": "direct_model_access",
+                "title": "Direct Model Access",
+                "description": "Offers synchronous functions for direct, non-streamed and streamed requests to AI models, abstracting away asynchronous complexities for simpler interaction."
+            },
+            {
+                "id": "ai_core_framework",
+                "label": "AI Core Framework",
+                "type": "external",
+                "link": "ai_core_framework",
+                "title": "AI Core Framework",
+                "description": "The foundational components for building and operating AI agents, including core agent definitions, model providers, and extensible capabilities."
+            }
+        ],
+        "edges": [
+            {
+                "source": "common_tools",
+                "target": "ai_core_framework",
+                "label": "Extends agent capabilities",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_exec",
+                "target": "ai_core_framework",
+                "label": "Enhances agent reliability",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mcp",
+                "target": "ai_core_framework",
+                "label": "Provides model/tool services",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_interfaces",
+                "target": "ai_core_framework",
+                "label": "Interacts with agents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "direct_model_access",
+                "target": "ai_core_framework",
+                "label": "Accesses core models",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "external_integrations",
+                "label": "External Integrations",
+                "nodes": [
+                    "common_tools",
+                    "mcp"
+                ],
+                "title": "External Integrations",
+                "description": "Modules for integrating with external services, frameworks, and the Model Context Protocol to extend agent functionality.",
+                "role": null
+            },
+            {
+                "id": "execution_ui_layers",
+                "label": "Execution & UI Layers",
+                "nodes": [
+                    "durable_exec",
+                    "user_interfaces",
+                    "direct_model_access"
+                ],
+                "title": "Execution & UI Layers",
+                "description": "Components enabling reliable, durable execution of agents, providing user interface connectivity, and offering direct access to AI models.",
+                "role": null
+            },
+            {
+                "id": "core_ai_foundation",
+                "label": "Core AI Foundation",
+                "nodes": [
+                    "ai_core_framework"
+                ],
+                "title": "Core AI Foundation",
+                "description": "The underlying framework providing agent orchestration, model providers, and core capabilities that these modules build upon.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,304 @@
+{
+  "title": "API Lifecycle Management",
+  "summary": "This module provides decorators and utilities for managing the lifecycle of API components, including emitting warnings for beta features and deprecated functionalities. It helps maintain API stability and informs users about changes.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "beta_sync_wrapper",
+        "label": "Wrap Sync Beta Function",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Beta Feature Wrapper",
+        "description": "Decorates synchronous functions to issue a one-time warning when a beta feature is called directly by external code."
+      },
+      {
+        "id": "beta_async_wrapper",
+        "label": "Wrap Async Beta Function",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Beta Feature Wrapper",
+        "description": "Decorates asynchronous functions to issue a one-time warning when a beta feature is called directly by external code."
+      },
+      {
+        "id": "beta_instance_check",
+        "label": "Check Beta Class Instance",
+        "type": "component",
+        "link": null,
+        "title": "Beta Class Direct Instantiation Check",
+        "description": "Checks if a beta class is being directly instantiated by external code and issues a warning if so."
+      },
+      {
+        "id": "beta_prop_get",
+        "label": "Beta Property Getter",
+        "type": "component",
+        "link": null,
+        "title": "Beta Property Access (Get)",
+        "description": "Handles property 'get' operations for beta features, emitting a warning if accessed on an instance."
+      },
+      {
+        "id": "beta_prop_set",
+        "label": "Beta Property Setter",
+        "type": "component",
+        "link": null,
+        "title": "Beta Property Access (Set)",
+        "description": "Handles property 'set' operations for beta features, emitting a warning if modified on an instance."
+      },
+      {
+        "id": "beta_prop_del",
+        "label": "Beta Property Deleter",
+        "type": "component",
+        "link": null,
+        "title": "Beta Property Access (Delete)",
+        "description": "Handles property 'delete' operations for beta features, emitting a warning if deleted from an instance."
+      },
+      {
+        "id": "deprec_sync_wrapper",
+        "label": "Wrap Sync Deprecated Function",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Deprecated Feature Wrapper",
+        "description": "Decorates synchronous functions to issue a one-time warning when a deprecated feature is called directly by external code."
+      },
+      {
+        "id": "deprec_async_wrapper",
+        "label": "Wrap Async Deprecated Function",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Deprecated Feature Wrapper",
+        "description": "Decorates asynchronous functions to issue a one-time warning when a deprecated feature is called directly by external code."
+      },
+      {
+        "id": "deprec_instance_check",
+        "label": "Check Deprecated Class Instance",
+        "type": "component",
+        "link": null,
+        "title": "Deprecated Class Direct Instantiation Check",
+        "description": "Checks if a deprecated class is being directly instantiated by external code and issues a warning if so."
+      },
+      {
+        "id": "is_internal_caller",
+        "label": "Is Internal Caller?",
+        "type": "external",
+        "link": null,
+        "title": "Determine Caller Origin",
+        "description": "Utility function to determine if the current code execution originates from within the library or from an external user."
+      },
+      {
+        "id": "issue_warning",
+        "label": "Issue Warning",
+        "type": "external",
+        "link": null,
+        "title": "Emit API Warning Message",
+        "description": "Function responsible for generating and displaying a warning message to the user, indicating beta status or deprecation."
+      },
+      {
+        "id": "execute_original",
+        "label": "Execute Original Logic",
+        "type": "external",
+        "link": null,
+        "title": "Run Wrapped Function/Method",
+        "description": "Represents the execution of the original function, method, or property operation after checks and warnings have been handled."
+      }
+    ],
+    "edges": [
+      {
+        "source": "beta_sync_wrapper",
+        "target": "is_internal_caller",
+        "label": "checks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_sync_wrapper",
+        "target": "issue_warning",
+        "label": "emits if external",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_sync_wrapper",
+        "target": "execute_original",
+        "label": "then calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_async_wrapper",
+        "target": "is_internal_caller",
+        "label": "checks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_async_wrapper",
+        "target": "issue_warning",
+        "label": "emits if external",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_async_wrapper",
+        "target": "execute_original",
+        "label": "then calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_instance_check",
+        "target": "is_internal_caller",
+        "label": "checks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_instance_check",
+        "target": "issue_warning",
+        "label": "emits if external",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_instance_check",
+        "target": "execute_original",
+        "label": "then calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_prop_get",
+        "target": "issue_warning",
+        "label": "emits if instance",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_prop_get",
+        "target": "execute_original",
+        "label": "then calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_prop_set",
+        "target": "issue_warning",
+        "label": "emits if instance",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_prop_set",
+        "target": "execute_original",
+        "label": "then calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_prop_del",
+        "target": "issue_warning",
+        "label": "emits if instance",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_prop_del",
+        "target": "execute_original",
+        "label": "then calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprec_sync_wrapper",
+        "target": "is_internal_caller",
+        "label": "checks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprec_sync_wrapper",
+        "target": "issue_warning",
+        "label": "emits if external",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprec_sync_wrapper",
+        "target": "execute_original",
+        "label": "then calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprec_async_wrapper",
+        "target": "is_internal_caller",
+        "label": "checks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprec_async_wrapper",
+        "target": "issue_warning",
+        "label": "emits if external",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprec_async_wrapper",
+        "target": "execute_original",
+        "label": "then calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprec_instance_check",
+        "target": "is_internal_caller",
+        "label": "checks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprec_instance_check",
+        "target": "issue_warning",
+        "label": "emits if external",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprec_instance_check",
+        "target": "execute_original",
+        "label": "then calls",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "beta_api_management",
+        "label": "Beta API Management",
+        "nodes": [
+          "beta_sync_wrapper",
+          "beta_async_wrapper",
+          "beta_instance_check",
+          "beta_prop_get",
+          "beta_prop_set",
+          "beta_prop_del"
+        ],
+        "title": "Manage Beta API Features",
+        "description": "Provides decorators and utilities to manage the lifecycle of API components marked as beta, ensuring users are warned upon direct usage while allowing internal development without constant warnings. This includes handling functions, async functions, class instantiations, and property access.",
+        "role": "surface"
+      },
+      {
+        "id": "deprecation_api_management",
+        "label": "Deprecation API Management",
+        "nodes": [
+          "deprec_sync_wrapper",
+          "deprec_async_wrapper",
+          "deprec_instance_check"
+        ],
+        "title": "Manage Deprecated API Components",
+        "description": "Offers decorators and utilities to manage the deprecation of API components, providing warnings to users when deprecated functions, async functions, or classes are directly accessed, facilitating smooth transitions to newer alternatives.",
+        "role": "surface"
+      }
+    ]
+  }
+}

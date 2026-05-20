@@ -1,0 +1,172 @@
+{
+  "title": "Evaluation Core Module",
+  "summary": "This module provides the foundational components for defining, generating, and executing evaluation datasets. It includes data models for datasets, utilities for asynchronous task execution, and logic for AI-driven dataset generation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "dataset_model",
+        "label": "Evaluation Dataset Schema",
+        "type": "component",
+        "link": null,
+        "title": "Dataset Definition",
+        "description": "Defines the Pydantic model for evaluation datasets, including test cases, input/output types, and references to evaluators and report evaluators."
+      },
+      {
+        "id": "generate_data",
+        "label": "Generate Evaluation Data",
+        "type": "component",
+        "link": null,
+        "title": "Dataset Generation Logic",
+        "description": "Leverages an LLM agent to create synthetic test cases, inputs, outputs, and metadata, structured according to a specified Dataset schema. Can save the generated dataset to a file."
+      },
+      {
+        "id": "execute_eval_task",
+        "label": "Execute Single Evaluation Task",
+        "type": "component",
+        "link": null,
+        "title": "Task Execution Runner",
+        "description": "Manages the execution of a single evaluation task, capturing its output, duration, and observability traces. Ensures proper context management for nested task runs."
+      },
+      {
+        "id": "async_loop_helper",
+        "label": "Async Event Loop Utility",
+        "type": "component",
+        "link": null,
+        "title": "Event Loop Provider",
+        "description": "Provides or creates an asyncio event loop, ensuring that asynchronous operations within the evaluation framework have a running event loop to execute on."
+      },
+      {
+        "id": "llm_agent_comp",
+        "label": "AI Agent",
+        "type": "external",
+        "link": "agents_and_orchestration",
+        "title": "AI Agent for Generation",
+        "description": "An AI agent component responsible for orchestrating calls to language models to fulfill complex tasks, such as generating structured data based on prompts and schemas."
+      },
+      {
+        "id": "llm_model_comp",
+        "label": "Language Model",
+        "type": "external",
+        "link": "model_providers_and_wrappers",
+        "title": "Underlying LLM",
+        "description": "The actual large language model (e.g., GPT, Gemini) that provides text generation capabilities, used by the AI agent to produce dataset content."
+      },
+      {
+        "id": "evaluator_defs",
+        "label": "Evaluator Definitions",
+        "type": "external",
+        "link": "evaluator_implementations",
+        "title": "Evaluator Schemas",
+        "description": "Schemas and types for various evaluators and report evaluators, which are used to define how the generated dataset will be assessed."
+      },
+      {
+        "id": "observability_platform",
+        "label": "Observability & Tracing",
+        "type": "external",
+        "link": "online_evaluation_and_reporting",
+        "title": "Tracing System",
+        "description": "An external system (e.g., Logfire, OpenTelemetry) used to capture and monitor the execution flow, performance metrics, and contextual information of evaluation tasks."
+      },
+      {
+        "id": "file_system_storage",
+        "label": "File System Storage",
+        "type": "external",
+        "link": null,
+        "title": "Dataset Persistence",
+        "description": "The local or remote file system used for saving and loading generated evaluation datasets, ensuring data persistence across sessions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "generate_data",
+        "target": "llm_agent_comp",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_agent_comp",
+        "target": "llm_model_comp",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_data",
+        "target": "dataset_model",
+        "label": "Generates instances of",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_data",
+        "target": "evaluator_defs",
+        "label": "Incorporates schemas from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_data",
+        "target": "file_system_storage",
+        "label": "Saves dataset to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_eval_task",
+        "target": "observability_platform",
+        "label": "Reports traces to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_eval_task",
+        "target": "async_loop_helper",
+        "label": "Relies on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_model",
+        "target": "evaluator_defs",
+        "label": "Includes references to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "data_definition_group",
+        "label": "Data Definition",
+        "nodes": [
+          "dataset_model"
+        ],
+        "title": "Evaluation Data Structures",
+        "description": "Components responsible for defining the schema and structure of evaluation datasets.",
+        "role": "data"
+      },
+      {
+        "id": "dataset_generation_group",
+        "label": "Dataset Generation",
+        "nodes": [
+          "generate_data"
+        ],
+        "title": "Automated Dataset Creation",
+        "description": "Logic and processes for programmatically generating evaluation datasets, often leveraging AI models.",
+        "role": "generative"
+      },
+      {
+        "id": "task_execution_group",
+        "label": "Task Execution & Utilities",
+        "nodes": [
+          "execute_eval_task",
+          "async_loop_helper"
+        ],
+        "title": "Core Execution Logic",
+        "description": "Components handling the execution of individual evaluation tasks and providing necessary asynchronous utilities.",
+        "role": "surface"
+      }
+    ]
+  }
+}

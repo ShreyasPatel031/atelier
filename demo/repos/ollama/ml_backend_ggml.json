@@ -1,0 +1,377 @@
+{
+    "title": "GGML Machine Learning Backend",
+    "summary": "This module is the core GGML implementation, providing efficient machine learning operations by managing hardware backends, tensor computation, model quantization, and GGUF file persistence.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "backend_discovery",
+                "label": "Discover Backends",
+                "type": "component",
+                "link": null,
+                "title": "Discover Available Backends",
+                "description": "Identifies and registers various GGML hardware backends (CPU, GPU) available on the system."
+            },
+            {
+                "id": "backend_init",
+                "label": "Initialize Best Backend",
+                "type": "component",
+                "link": null,
+                "title": "Initialize Best Backend",
+                "description": "Selects and initializes the most performant available hardware backend for computation, prioritizing GPUs."
+            },
+            {
+                "id": "graph_scheduler",
+                "label": "Schedule Graph Execution",
+                "type": "component",
+                "link": null,
+                "title": "Orchestrate Graph Execution",
+                "description": "Manages the execution of computation graphs across selected hardware backends, handling task distribution and synchronization."
+            },
+            {
+                "id": "graph_allocator",
+                "label": "Manage Graph Memory",
+                "type": "component",
+                "link": null,
+                "title": "Manage Graph Memory Allocation",
+                "description": "Creates and manages memory allocators specifically for computation graphs, reserving and allocating tensor memory efficiently."
+            },
+            {
+                "id": "data_transfer",
+                "label": "Transfer Tensor Data",
+                "type": "component",
+                "link": null,
+                "title": "Cross-Backend Data Transfer",
+                "description": "Facilitates asynchronous and synchronous copying of tensor data between different hardware backends (e.g., CPU to GPU)."
+            },
+            {
+                "id": "cpu_ops",
+                "label": "Execute CPU Operations",
+                "type": "component",
+                "link": null,
+                "title": "CPU-Optimized Tensor Operations",
+                "description": "Performs core tensor computations (e.g., matrix multiplications, vector dot products) highly optimized for CPU architectures."
+            },
+            {
+                "id": "gpu_ops",
+                "label": "Execute GPU Operations",
+                "type": "component",
+                "link": null,
+                "title": "GPU-Accelerated Tensor Operations",
+                "description": "Leverages GPU backends (Metal, Vulkan, BLAS) to accelerate tensor computations, offloading intensive tasks from the CPU."
+            },
+            {
+                "id": "graph_optimizer",
+                "label": "Optimize Computation Graphs",
+                "type": "component",
+                "link": null,
+                "title": "Graph Optimization & Fusion",
+                "description": "Analyzes and transforms computation graphs to improve execution efficiency on target hardware, including node fusion and reordering."
+            },
+            {
+                "id": "backward_pass",
+                "label": "Build Backward Pass",
+                "type": "component",
+                "link": null,
+                "title": "Construct Backward Graph",
+                "description": "Generates the computational graph required for backpropagation, enabling gradient calculation for model training."
+            },
+            {
+                "id": "tensor_quantization",
+                "label": "Quantize Tensor Data",
+                "type": "component",
+                "link": null,
+                "title": "Tensor Data Quantization",
+                "description": "Converts floating-point tensor data into various lower-precision integer formats to reduce memory footprint and improve inference speed."
+            },
+            {
+                "id": "gguf_io",
+                "label": "Manage GGUF Files",
+                "type": "component",
+                "link": null,
+                "title": "GGUF Model File Management",
+                "description": "Handles the reading, writing, and manipulation of GGUF (GGML Universal Format) files for persistent storage of models and metadata."
+            },
+            {
+                "id": "buffer_management",
+                "label": "Allocate & Manage Buffers",
+                "type": "component",
+                "link": null,
+                "title": "Memory Buffer Allocation",
+                "description": "Manages the allocation, deallocation, and usage of memory buffers for tensors and GGML contexts across different backends."
+            },
+            {
+                "id": "type_conversion",
+                "label": "Convert Data Types",
+                "type": "component",
+                "link": null,
+                "title": "Floating-Point Type Conversion",
+                "description": "Provides utilities for converting between different floating-point data types, such as FP32 to FP16, for compatibility and efficiency."
+            },
+            {
+                "id": "system_info",
+                "label": "Query System Resources",
+                "type": "component",
+                "link": null,
+                "title": "System Resource Information",
+                "description": "Retrieves system-level information, including available device memory and CPU properties, to inform backend operations."
+            },
+            {
+                "id": "debug_tools",
+                "label": "Provide Debugging Tools",
+                "type": "component",
+                "link": null,
+                "title": "Graph Debugging & Verification",
+                "description": "Offers utilities for visualizing computation graphs (DOT format) and comparing results across different backends for verification."
+            },
+            {
+                "id": "model_fitting",
+                "label": "Orchestrate Model Fitting",
+                "type": "component",
+                "link": null,
+                "title": "Model Training & Optimization",
+                "description": "Manages the overall process of fitting models to data, including iterative optimization steps and progress reporting."
+            },
+            {
+                "id": "llm_runtime_core",
+                "label": "LLM Runtime Core",
+                "type": "external",
+                "link": "llm_runtime_core",
+                "title": "Higher-Level LLM Runtime",
+                "description": "The main LLM runtime that utilizes the GGML backend for model inference, training, and data processing."
+            },
+            {
+                "id": "operating_system",
+                "label": "Operating System",
+                "type": "external",
+                "link": null,
+                "title": "Underlying OS Services",
+                "description": "Provides fundamental services like file I/O, memory management, and system information to the GGML backend."
+            }
+        ],
+        "edges": [
+            {
+                "source": "llm_runtime_core",
+                "target": "backend_discovery",
+                "label": "requests backend",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "backend_discovery",
+                "target": "backend_init",
+                "label": "informs selection",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "backend_init",
+                "target": "graph_allocator",
+                "label": "configures memory",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "backend_init",
+                "target": "graph_scheduler",
+                "label": "provides execution context",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "graph_scheduler",
+                "target": "cpu_ops",
+                "label": "dispatches CPU tasks",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "graph_scheduler",
+                "target": "gpu_ops",
+                "label": "dispatches GPU tasks",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cpu_ops",
+                "target": "tensor_quantization",
+                "label": "uses quantized data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "gpu_ops",
+                "target": "tensor_quantization",
+                "label": "uses quantized data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "graph_optimizer",
+                "target": "cpu_ops",
+                "label": "optimizes operations for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "graph_optimizer",
+                "target": "gpu_ops",
+                "label": "optimizes operations for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "backward_pass",
+                "target": "graph_optimizer",
+                "label": "generates graphs for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tensor_quantization",
+                "target": "gguf_io",
+                "label": "prepares data for saving",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "gguf_io",
+                "target": "buffer_management",
+                "label": "uses buffers for file ops",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_transfer",
+                "target": "buffer_management",
+                "label": "moves data between buffers",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "type_conversion",
+                "target": "tensor_quantization",
+                "label": "pre-processes data for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "system_info",
+                "target": "backend_init",
+                "label": "informs backend selection",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "debug_tools",
+                "target": "graph_scheduler",
+                "label": "monitors execution of",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_fitting",
+                "target": "backend_init",
+                "label": "initializes backend for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_fitting",
+                "target": "backward_pass",
+                "label": "uses for gradients",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_fitting",
+                "target": "graph_scheduler",
+                "label": "executes training steps via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "operating_system",
+                "target": "system_info",
+                "label": "provides resource data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "operating_system",
+                "target": "gguf_io",
+                "label": "handles file I/O",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "llm_runtime_core",
+                "target": "tensor_quantization",
+                "label": "requests data quantization",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "llm_runtime_core",
+                "target": "gguf_io",
+                "label": "loads/saves models",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "backend_orchestration_group",
+                "label": "Backend Orchestration",
+                "nodes": [
+                    "backend_discovery",
+                    "backend_init",
+                    "graph_scheduler",
+                    "graph_allocator",
+                    "data_transfer"
+                ],
+                "title": "Hardware Backend Management",
+                "description": "Manages the discovery, initialization, and scheduling of computation graphs across various hardware backends (CPU, GPU), ensuring efficient resource utilization.",
+                "role": "generative"
+            },
+            {
+                "id": "tensor_computation_group",
+                "label": "Tensor Computation",
+                "nodes": [
+                    "cpu_ops",
+                    "gpu_ops",
+                    "graph_optimizer",
+                    "backward_pass"
+                ],
+                "title": "Core Tensor Operations & Optimization",
+                "description": "Executes fundamental tensor operations, leveraging both CPU and GPU acceleration, and optimizes computation graphs for improved performance and gradient calculation.",
+                "role": "analytical"
+            },
+            {
+                "id": "data_model_lifecycle_group",
+                "label": "Data & Model Lifecycle",
+                "nodes": [
+                    "tensor_quantization",
+                    "gguf_io",
+                    "buffer_management",
+                    "type_conversion"
+                ],
+                "title": "Data Handling & Model Persistence",
+                "description": "Manages the lifecycle of model data, including quantization for efficiency, handling GGUF file format for storage, and allocating/managing memory buffers.",
+                "role": "data"
+            },
+            {
+                "id": "system_diagnostics_group",
+                "label": "System & Diagnostics",
+                "nodes": [
+                    "system_info",
+                    "debug_tools",
+                    "model_fitting"
+                ],
+                "title": "System Integration & Debugging",
+                "description": "Provides utilities for querying system resources, debugging computation graphs, and orchestrating the overall model training and fitting process.",
+                "role": "analytical"
+            }
+        ]
+    }
+}

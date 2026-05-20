@@ -1,0 +1,76 @@
+ {
+    "title": "Model Core Abstractions",
+    "summary": "This module defines the foundational abstract classes and utilities for interacting with large language models, providing a consistent interface for different providers and enabling advanced functionalities like streaming and concurrency control.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "base_models",
+                "label": "Base Model Interfaces",
+                "type": "module",
+                "link": "base_models",
+                "title": "Base Model Interfaces",
+                "description": "Defines the core abstract classes for interacting with LLMs, including Model and StreamedResponse, establishing a common interface for all model implementations."
+            },
+            {
+                "id": "model_wrappers",
+                "label": "Model Wrapper Classes",
+                "type": "module",
+                "link": "model_wrappers",
+                "title": "Model Wrapper Classes",
+                "description": "Provides abstract classes for wrapping existing model implementations, allowing for the extension or modification of model behavior without altering the original model."
+            },
+            {
+                "id": "model_utilities",
+                "label": "Model Utilities",
+                "type": "module",
+                "link": "model_utilities",
+                "title": "Model Utilities",
+                "description": "Contains utility functions for managing model interactions, such as concurrency limiting and HTTP client caching."
+            },
+            {
+                "id": "provider_abstractions",
+                "label": "Provider Abstractions",
+                "type": "external",
+                "link": "provider_abstractions",
+                "title": "Provider Abstractions",
+                "description": "Defines abstract interfaces for different model providers, allowing for standardized interaction regardless of the underlying service."
+            }
+        ],
+        "edges": [
+            {
+                "source": "base_models",
+                "target": "provider_abstractions",
+                "label": "uses provider interfaces"
+            },
+            {
+                "source": "model_wrappers",
+                "target": "base_models",
+                "label": "wraps base models"
+            },
+            {
+                "source": "model_utilities",
+                "target": "base_models",
+                "label": "applies to base models"
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_interfaces",
+                "label": "Core Interfaces",
+                "title": "Core Model Interfaces",
+                "description": "Fundamental abstract definitions that all model implementations and extensions adhere to.",
+                "role": "analytical",
+                "nodes": ["base_models"]
+            },
+            {
+                "id": "model_extension_and_control",
+                "label": "Model Extension & Control",
+                "title": "Model Extension and Control",
+                "description": "Components that extend or control the behavior of core model abstractions, such as wrappers and concurrency limiters.",
+                "role": "generative",
+                "nodes": ["model_wrappers", "model_utilities"]
+            }
+        ]
+    }
+}

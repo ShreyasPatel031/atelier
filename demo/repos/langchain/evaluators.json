@@ -1,0 +1,175 @@
+{
+  "title": "LLM Output Evaluators",
+  "summary": "This module provides various evaluators for assessing LLM outputs, including checks for JSON validity, JSON equality, and JSON schema compliance. It also defines base interfaces for different types of evaluators, such as string, pairwise string, and agent trajectory evaluators.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "load_evaluators_func",
+        "label": "Load Evaluators",
+        "type": "component",
+        "link": null,
+        "title": "Load Evaluator Instances",
+        "description": "Dynamically loads and configures evaluator instances based on specified types, optionally using a language model and custom configurations."
+      },
+      {
+        "id": "json_validity_evaluator",
+        "label": "Validate JSON String",
+        "type": "component",
+        "link": null,
+        "title": "JSON Validity Checker",
+        "description": "Evaluates if a given prediction string is a syntactically valid JSON object, returning a score and reasoning for invalid cases."
+      },
+      {
+        "id": "json_equality_evaluator",
+        "label": "Compare JSON Objects",
+        "type": "component",
+        "link": null,
+        "title": "JSON Equality Checker",
+        "description": "Compares a predicted JSON string against a reference JSON string for equality, optionally using a custom comparison operator."
+      },
+      {
+        "id": "json_schema_evaluator",
+        "label": "Validate against JSON Schema",
+        "type": "component",
+        "link": null,
+        "title": "JSON Schema Validator",
+        "description": "Validates a JSON prediction against a provided JSON schema, indicating whether the prediction conforms to the schema."
+      },
+      {
+        "id": "string_evaluator_interface",
+        "label": "Base String Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Abstract String Evaluation",
+        "description": "Abstract base class defining the interface for evaluators that assess single string predictions, with methods for synchronous and asynchronous evaluation."
+      },
+      {
+        "id": "pairwise_string_evaluator_interface",
+        "label": "Base Pairwise Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Pairwise String Evaluation",
+        "description": "Abstract base class for evaluators that compare two string predictions, providing methods for evaluating pairs synchronously and asynchronously."
+      },
+      {
+        "id": "agent_trajectory_evaluator_interface",
+        "label": "Base Agent Trajectory Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Agent Trajectory Evaluation",
+        "description": "Abstract base class for evaluators designed to assess the performance and steps of an agent's execution trajectory."
+      },
+      {
+        "id": "llm_model",
+        "label": "Language Model",
+        "type": "external",
+        "link": "llm_interfaces",
+        "title": "External Language Model",
+        "description": "An external Language Model (LLM) used by some evaluators for generating or assessing responses."
+      },
+      {
+        "id": "json_schema_def",
+        "label": "JSON Schema Definition",
+        "type": "external",
+        "link": null,
+        "title": "External JSON Schema",
+        "description": "A JSON schema definition used as a reference for validating JSON structures."
+      }
+    ],
+    "edges": [
+      {
+        "source": "load_evaluators_func",
+        "target": "json_validity_evaluator",
+        "label": "Instantiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_evaluators_func",
+        "target": "json_equality_evaluator",
+        "label": "Instantiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_evaluators_func",
+        "target": "json_schema_evaluator",
+        "label": "Instantiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_evaluators_func",
+        "target": "llm_model",
+        "label": "Configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_validity_evaluator",
+        "target": "string_evaluator_interface",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_equality_evaluator",
+        "target": "string_evaluator_interface",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_schema_evaluator",
+        "target": "string_evaluator_interface",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_schema_evaluator",
+        "target": "json_schema_def",
+        "label": "Validates against",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "abstract_evaluator_interfaces",
+        "label": "Abstract Evaluator Interfaces",
+        "nodes": [
+          "string_evaluator_interface",
+          "pairwise_string_evaluator_interface",
+          "agent_trajectory_evaluator_interface"
+        ],
+        "title": "Abstract Evaluator Interfaces",
+        "description": "Defines the base contracts for different types of evaluators.",
+        "role": "surface"
+      },
+      {
+        "id": "evaluator_factories",
+        "label": "Evaluator Factories",
+        "nodes": [
+          "load_evaluators_func"
+        ],
+        "title": "Evaluator Factories",
+        "description": "Components responsible for creating and configuring evaluator instances.",
+        "role": "generative"
+      },
+      {
+        "id": "json_parsing_evaluators",
+        "label": "JSON Parsing Evaluators",
+        "nodes": [
+          "json_validity_evaluator",
+          "json_equality_evaluator",
+          "json_schema_evaluator"
+        ],
+        "title": "JSON Parsing Evaluators",
+        "description": "Specialized evaluators for validating and comparing JSON structures.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

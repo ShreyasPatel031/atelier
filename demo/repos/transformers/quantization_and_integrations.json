@@ -1,116 +1,189 @@
 {
-    "title": "Quantization and Integrations",
-    "summary": "This module provides tools for optimizing model performance and integrating with external systems. It includes various quantization techniques to reduce model size and accelerate inference, as well as utilities for connecting with external libraries and services for experiment tracking, hyperparameter tuning, and efficient model serving via CLI.",
+    "title": "Quantization & Integrations",
+    "summary": "This module provides tools for model quantization to optimize size and speed, alongside integrations with external libraries for hyperparameter search, experiment logging, and efficient fine-tuning.",
     "diagram": {
-        "direction": "LR",
+        "direction": "TD",
         "nodes": [
             {
-                "id": "quantization_submodule",
+                "id": "quant_mod",
                 "label": "Model Quantization",
                 "type": "module",
                 "link": "quantization",
                 "title": "Model Quantization Techniques",
-                "description": "Provides various techniques (e.g., 4-bit, 8-bit, FP8) to reduce model size and accelerate inference, supporting both pre-quantized models and on-the-fly quantization."
+                "description": "Provides various methods to reduce model size and improve inference speed through techniques like 4-bit, 8-bit, and FP8 quantization."
             },
             {
-                "id": "integrations_submodule",
+                "id": "integrations_mod",
                 "label": "External Integrations",
                 "type": "module",
                 "link": "external_integrations",
-                "title": "External Tools Integration",
-                "description": "Connects Hugging Face models and workflows with external platforms for experiment tracking (Wandb, DVCLive), hyperparameter search, and parameter-efficient fine-tuning (PEFT)."
+                "title": "External Tool Integrations",
+                "description": "Connects Hugging Face models and training processes with external platforms for experiment tracking, hyperparameter optimization, and parameter-efficient fine-tuning."
             },
             {
-                "id": "cli_tools_submodule",
-                "label": "CLI Serving Tools",
+                "id": "cli_mod",
+                "label": "CLI Model Serving",
                 "type": "module",
                 "link": "cli_tools",
-                "title": "Command-Line Serving Tools",
-                "description": "Offers command-line interfaces for serving Transformer models via an API, including features like continuous batching, dynamic model management, and integration with quantization."
+                "title": "Command-Line Model Serving",
+                "description": "Offers a command-line interface for deploying and serving Hugging Face models via an asynchronous web server, supporting optimizations like continuous batching and quantization."
             },
             {
-                "id": "model_architectures_ext",
-                "label": "Model Architectures",
+                "id": "hf_model_in",
+                "label": "Hugging Face Model",
                 "type": "external",
-                "link": "model_architectures",
-                "title": "Core Model Definitions",
-                "description": "The foundational module containing definitions of various deep learning models that are optimized and served by this module."
+                "link": null,
+                "title": "Base Transformer Model",
+                "description": "A pre-trained or custom transformer model that can be optimized, adapted, or served by the module's functionalities."
             },
             {
-                "id": "pipelines_generation_ext",
-                "label": "Pipelines & Generation",
+                "id": "training_env",
+                "label": "Training Environment",
                 "type": "external",
-                "link": "pipelines_and_generation",
-                "title": "Generation Logic & Task Pipelines",
-                "description": "Provides core text generation algorithms and high-level task-specific pipelines, which can be integrated with external tools or served via CLI."
+                "link": null,
+                "title": "Model Training Environment",
+                "description": "The environment where models are trained or fine-tuned, leveraging integrations for logging and hyperparameter search."
+            },
+            {
+                "id": "inference_req",
+                "label": "Inference Request",
+                "type": "external",
+                "link": null,
+                "title": "Incoming Inference Request",
+                "description": "An external request to perform inference on a deployed model, typically via an API endpoint."
+            },
+            {
+                "id": "optimized_model_out",
+                "label": "Optimized Model",
+                "type": "external",
+                "link": null,
+                "title": "Quantized/Adapted Model",
+                "description": "A Hugging Face model that has been optimized for size, speed, or adapted for specific tasks through quantization or PEFT."
+            },
+            {
+                "id": "external_logs",
+                "label": "External Logs & Metrics",
+                "type": "external",
+                "link": null,
+                "title": "Experiment Logs & Metrics",
+                "description": "Metrics, parameters, and other experiment data sent to external tracking platforms like Wandb or DVCLive."
+            },
+            {
+                "id": "api_response",
+                "label": "API Inference Response",
+                "type": "external",
+                "link": null,
+                "title": "Served Inference Response",
+                "description": "The result returned by the model serving API in response to an inference request, e.g., generated text or predictions."
             }
         ],
         "edges": [
             {
-                "source": "model_architectures_ext",
-                "target": "quantization_submodule",
-                "label": "Is optimized by",
+                "source": "hf_model_in",
+                "target": "quant_mod",
+                "label": "is optimized by",
                 "title": null,
                 "description": null
             },
             {
-                "source": "quantization_submodule",
-                "target": "cli_tools_submodule",
-                "label": "Provides optimized models for",
+                "source": "quant_mod",
+                "target": "optimized_model_out",
+                "label": "produces optimized model",
                 "title": null,
                 "description": null
             },
             {
-                "source": "model_architectures_ext",
-                "target": "integrations_submodule",
-                "label": "Integrates with",
+                "source": "hf_model_in",
+                "target": "integrations_mod",
+                "label": "is adapted/tracked by",
                 "title": null,
                 "description": null
             },
             {
-                "source": "integrations_submodule",
-                "target": "pipelines_generation_ext",
-                "label": "Enhances workflows in",
+                "source": "training_env",
+                "target": "integrations_mod",
+                "label": "uses for experiment tracking",
                 "title": null,
                 "description": null
             },
             {
-                "source": "cli_tools_submodule",
-                "target": "model_architectures_ext",
-                "label": "Serves",
+                "source": "integrations_mod",
+                "target": "external_logs",
+                "label": "sends metrics & logs to",
                 "title": null,
                 "description": null
             },
             {
-                "source": "cli_tools_submodule",
-                "target": "pipelines_generation_ext",
-                "label": "Leverages generation from",
+                "source": "optimized_model_out",
+                "target": "cli_mod",
+                "label": "is deployed for serving",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "inference_req",
+                "target": "cli_mod",
+                "label": "sends inference requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_mod",
+                "target": "api_response",
+                "label": "returns API responses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_mod",
+                "target": "quant_mod",
+                "label": "applies quantization via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_mod",
+                "target": "integrations_mod",
+                "label": "loads PEFT adapters via",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "internal_components",
-                "label": "Core Sub-Modules",
+                "id": "optimization_adaptation",
+                "label": "Model Optimization & Adaptation",
                 "nodes": [
-                    "quantization_submodule",
-                    "integrations_submodule",
-                    "cli_tools_submodule"
+                    "quant_mod",
+                    "integrations_mod"
                 ],
-                "title": "Internal Sub-Modules",
-                "description": "The primary components within the `quantization_and_integrations` module, focusing on model optimization, external tool connectivity, and serving.",
+                "title": "Model Optimization & Adaptation",
+                "description": "Components for reducing model footprint and improving inference speed through quantization, and for integrating with external tools for efficient fine-tuning and experiment tracking.",
                 "role": null
             },
             {
-                "id": "external_dependencies",
-                "label": "External Dependencies",
+                "id": "deployment_serving",
+                "label": "Model Deployment & Serving",
                 "nodes": [
-                    "model_architectures_ext",
-                    "pipelines_generation_ext"
+                    "cli_mod"
                 ],
-                "title": "Dependent Modules",
-                "description": "Other key modules within the Transformers library that interact with and are leveraged by the components in this module.",
+                "title": "Model Deployment & Serving",
+                "description": "Provides the command-line interface for deploying and serving models, handling incoming requests, and delivering responses efficiently.",
+                "role": null
+            },
+            {
+                "id": "external_interactions",
+                "label": "External Interactions & Data Flow",
+                "nodes": [
+                    "hf_model_in",
+                    "training_env",
+                    "inference_req",
+                    "optimized_model_out",
+                    "external_logs",
+                    "api_response"
+                ],
+                "title": "External Interactions & Data Flow",
+                "description": "Represents the models, training processes, and various inputs/outputs that interact with the module's functionalities, showing the overall data flow.",
                 "role": null
             }
         ]

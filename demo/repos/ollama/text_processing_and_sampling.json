@@ -1,0 +1,585 @@
+{
+  "title": "Text Processing & Sampling",
+  "summary": "This module handles the core logic for text tokenization, detokenization, grammar enforcement, and various token sampling strategies within the LLM runtime. It ensures generated text adheres to rules and exhibits desired properties like diversity or coherence.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "detokenize_text",
+        "label": "Detokenize Text",
+        "type": "component",
+        "link": null,
+        "title": "common_detokenize",
+        "description": "Converts a sequence of numerical tokens back into a human-readable string using the vocabulary."
+      },
+      {
+        "id": "sample_accept_draft_tokens",
+        "label": "Sample & Accept Draft Tokens",
+        "type": "component",
+        "link": null,
+        "title": "common_sampler_sample_and_accept_n",
+        "description": "Samples and accepts a specified number of tokens from a draft sequence, often used in speculative decoding."
+      },
+      {
+        "id": "map_sampler_types",
+        "label": "Map Sampler Types",
+        "type": "component",
+        "link": null,
+        "title": "common_sampler_types_from_chars",
+        "description": "Converts character representations of sampling strategies (e.g., 'k' for Top-K) into their corresponding internal sampler types."
+      },
+      {
+        "id": "apply_grammar_rules",
+        "label": "Apply Grammar Rules",
+        "type": "component",
+        "link": null,
+        "title": "llama_grammar_apply_impl",
+        "description": "Filters token candidates based on active grammar rules, ensuring generated text conforms to a specified structure."
+      },
+      {
+        "id": "accept_string_into_grammar",
+        "label": "Accept String into Grammar",
+        "type": "component",
+        "link": null,
+        "title": "llama_grammar_accept_str",
+        "description": "Processes a string piece, updating the grammar state to reflect the accepted characters."
+      },
+      {
+        "id": "accept_token_into_grammar",
+        "label": "Accept Token into Grammar",
+        "type": "component",
+        "link": null,
+        "title": "llama_grammar_accept_token",
+        "description": "Processes a token and its string representation, updating the grammar state based on the accepted token."
+      },
+      {
+        "id": "parse_grammar_char",
+        "label": "Parse Grammar Character",
+        "type": "component",
+        "link": null,
+        "title": "parse_char",
+        "description": "Parses a single character or escape sequence from a grammar definition string."
+      },
+      {
+        "id": "print_grammar_rule",
+        "label": "Print Grammar Rule",
+        "type": "component",
+        "link": null,
+        "title": "print_rule",
+        "description": "Formats and prints a grammar rule to a file, useful for debugging or visualization."
+      },
+      {
+        "id": "implement_grammar_acceptance",
+        "label": "Implement Grammar Acceptance",
+        "type": "component",
+        "link": null,
+        "title": "llama_grammar_accept_impl",
+        "description": "Core logic for accepting tokens into the grammar, including handling trigger patterns and end-of-grammar conditions."
+      },
+      {
+        "id": "apply_mirostat_sampling",
+        "label": "Apply Mirostat Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_mirostat_apply",
+        "description": "Adjusts token probabilities using the Mirostat algorithm to control perplexity and diversity."
+      },
+      {
+        "id": "apply_extended_temperature_sampling",
+        "label": "Apply Extended Temperature Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_temp_ext_apply",
+        "description": "Dynamically adjusts temperature based on the entropy of token probabilities to control generation randomness."
+      },
+      {
+        "id": "apply_mirostat_v2_sampling",
+        "label": "Apply Mirostat V2 Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_mirostat_v2_apply",
+        "description": "Applies the Mirostat V2 algorithm for dynamic token probability adjustment, focusing on surprise and learning rate."
+      },
+      {
+        "id": "apply_top_k_sampling",
+        "label": "Apply Top-K Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_top_k_apply",
+        "description": "Selects the next token from the K most probable tokens, discarding less likely options."
+      },
+      {
+        "id": "apply_top_p_sampling",
+        "label": "Apply Top-P Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_top_p_apply",
+        "description": "Selects the next token from the smallest set of most probable tokens whose cumulative probability exceeds P."
+      },
+      {
+        "id": "apply_typical_p_sampling",
+        "label": "Apply Typical P Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_typical_apply",
+        "description": "Filters tokens based on their 'typicality' relative to the distribution's entropy, promoting more coherent text."
+      },
+      {
+        "id": "apply_xtc_sampling",
+        "label": "Apply XTC Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sample_xtc_apply",
+        "description": "Implements eXtreme Truncation Control sampling, potentially truncating the candidate list based on probability thresholds."
+      },
+      {
+        "id": "apply_top_n_sigma_sampling",
+        "label": "Apply Top-N Sigma Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_top_n_sigma_apply",
+        "description": "Filters tokens based on their logit distance from the mean, using a multiple of the standard deviation."
+      },
+      {
+        "id": "apply_infill_sampling",
+        "label": "Apply Infill Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_infill_apply",
+        "description": "Adjusts token probabilities specifically for infill scenarios, handling end-of-grammar tokens and token merging."
+      },
+      {
+        "id": "perform_token_sampling",
+        "label": "Perform Token Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_sample",
+        "description": "Orchestrates the overall token sampling process, applying various configured sampling strategies to logits."
+      },
+      {
+        "id": "apply_min_p_apply",
+        "label": "Apply Min-P Sampling",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_min_p_apply",
+        "description": "Filters tokens, keeping only those whose probability is at least a minimum fraction (P) of the most probable token."
+      },
+      {
+        "id": "reset_sampler_chain",
+        "label": "Reset Sampler Chain",
+        "type": "component",
+        "link": null,
+        "title": "llama_sampler_chain_reset",
+        "description": "Resets the state of all samplers within a sampling chain, preparing for a new generation sequence."
+      },
+      {
+        "id": "initialize_ugm_tokenizer",
+        "label": "Initialize UGM Tokenizer",
+        "type": "component",
+        "link": null,
+        "title": "llm_tokenizer_ugm",
+        "description": "Sets up a tokenizer specifically for Unigram Model (UGM) vocabularies, including prefix replacements and score tracking."
+      },
+      {
+        "id": "initialize_bpe_tokenizer",
+        "label": "Initialize BPE Tokenizer",
+        "type": "component",
+        "link": null,
+        "title": "llm_tokenizer_bpe",
+        "description": "Configures a Byte Pair Encoding (BPE) tokenizer with predefined regex patterns for various model types."
+      },
+      {
+        "id": "initialize_rwkv_tokenizer",
+        "label": "Initialize RWKV Tokenizer",
+        "type": "component",
+        "link": null,
+        "title": "llm_tokenizer_rwkv",
+        "description": "Initializes a tokenizer for RWKV models, building a trie for efficient token matching from the vocabulary."
+      },
+      {
+        "id": "get_vocabulary_size",
+        "label": "Get Vocabulary Size",
+        "type": "component",
+        "link": null,
+        "title": "llama_n_vocab",
+        "description": "Returns the total number of tokens available in the loaded vocabulary."
+      },
+      {
+        "id": "get_token_score",
+        "label": "Get Token Score",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_get_score",
+        "description": "Retrieves the score associated with a specific token from the vocabulary."
+      },
+      {
+        "id": "get_token_attributes",
+        "label": "Get Token Attributes",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_get_attr",
+        "description": "Fetches special attributes (e.g., normal, control, user-defined) for a given token."
+      },
+      {
+        "id": "check_end_of_grammar_token",
+        "label": "Check End-Of-Grammar Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_is_eog",
+        "description": "Determines if a given token is designated as an End-Of-Grammar token."
+      },
+      {
+        "id": "check_control_token",
+        "label": "Check Control Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_is_control",
+        "description": "Determines if a given token is a control token, used for special model instructions."
+      },
+      {
+        "id": "get_bos_token",
+        "label": "Get BOS Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_bos",
+        "description": "Returns the Beginning-Of-Sentence token ID for the vocabulary."
+      },
+      {
+        "id": "get_eos_token",
+        "label": "Get EOS Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_eos",
+        "description": "Returns the End-Of-Sentence token ID for the vocabulary."
+      },
+      {
+        "id": "get_eot_token",
+        "label": "Get EOT Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_eot",
+        "description": "Returns the End-Of-Text token ID for the vocabulary."
+      },
+      {
+        "id": "get_cls_token",
+        "label": "Get CLS Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_cls",
+        "description": "Returns the Classification token ID for the vocabulary."
+      },
+      {
+        "id": "get_sep_token",
+        "label": "Get SEP Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_sep",
+        "description": "Returns the Separator token ID for the vocabulary."
+      },
+      {
+        "id": "get_newline_token",
+        "label": "Get Newline Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_nl",
+        "description": "Returns the Newline token ID for the vocabulary."
+      },
+      {
+        "id": "get_padding_token",
+        "label": "Get Padding Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_pad",
+        "description": "Returns the Padding token ID for the vocabulary."
+      },
+      {
+        "id": "check_add_bos_token",
+        "label": "Check Add BOS Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_add_bos_token",
+        "description": "Indicates whether a Beginning-Of-Sentence token should be automatically added."
+      },
+      {
+        "id": "check_add_eos_token",
+        "label": "Check Add EOS Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_add_eos_token",
+        "description": "Indicates whether an End-Of-Sentence token should be automatically added."
+      },
+      {
+        "id": "get_fim_prefix_token",
+        "label": "Get FIM Prefix Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_fim_pre",
+        "description": "Returns the Fill-in-the-Middle (FIM) prefix token ID."
+      },
+      {
+        "id": "get_fim_suffix_token",
+        "label": "Get FIM Suffix Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_fim_suf",
+        "description": "Returns the Fill-in-the-Middle (FIM) suffix token ID."
+      },
+      {
+        "id": "get_fim_middle_token",
+        "label": "Get FIM Middle Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_fim_mid",
+        "description": "Returns the Fill-in-the-Middle (FIM) middle token ID."
+      },
+      {
+        "id": "get_fim_padding_token",
+        "label": "Get FIM Padding Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_fim_pad",
+        "description": "Returns the Fill-in-the-Middle (FIM) padding token ID."
+      },
+      {
+        "id": "get_fim_replacement_token",
+        "label": "Get FIM Replacement Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_fim_rep",
+        "description": "Returns the Fill-in-the-Middle (FIM) replacement token ID."
+      },
+      {
+        "id": "get_fim_separator_token",
+        "label": "Get FIM Separator Token",
+        "type": "component",
+        "link": null,
+        "title": "llama_token_fim_sep",
+        "description": "Returns the Fill-in-the-Middle (FIM) separator token ID."
+      },
+      {
+        "id": "split_text_by_regex",
+        "label": "Split Text by Regex",
+        "type": "component",
+        "link": null,
+        "title": "unicode_regex_split",
+        "description": "Splits a given text string into segments using Unicode-aware regular expressions, handling various character categories."
+      },
+      {
+        "id": "get_unicode_codepoint_flags",
+        "label": "Get Unicode Codepoint Flags",
+        "type": "component",
+        "link": null,
+        "title": "unicode_cpt_flags_from_utf8",
+        "description": "Extracts and returns flags (e.g., letter, number, punctuation) for a Unicode codepoint from its UTF-8 representation."
+      },
+      {
+        "id": "convert_utf8_to_byte",
+        "label": "Convert UTF-8 to Byte",
+        "type": "component",
+        "link": null,
+        "title": "unicode_utf8_to_byte",
+        "description": "Converts a UTF-8 string representation of a single byte into its numerical byte value."
+      }
+    ],
+    "edges": [
+      {
+        "source": "perform_token_sampling",
+        "target": "sampling_strategies_group",
+        "label": "Applies strategies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "perform_token_sampling",
+        "target": "vocab_metadata_group",
+        "label": "Accesses vocab info",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sample_accept_draft_tokens",
+        "target": "perform_token_sampling",
+        "label": "Delegates sampling",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "map_sampler_types",
+        "target": "core_sampling_group",
+        "label": "Configures samplers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "core_sampling_group",
+        "target": "reset_sampler_chain",
+        "label": "Manages reset",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grammar_group",
+        "target": "vocab_metadata_group",
+        "label": "Consults token properties",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grammar_group",
+        "target": "detokenization_group",
+        "label": "Processes token pieces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grammar_group",
+        "target": "unicode_group",
+        "label": "Handles UTF-8 decoding",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tokenizer_init_group",
+        "target": "vocab_metadata_group",
+        "label": "Initializes with vocab",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tokenizer_init_group",
+        "target": "unicode_group",
+        "label": "Uses text splitting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "detokenization_group",
+        "target": "vocab_metadata_group",
+        "label": "Uses vocab for conversion",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "detokenization_group",
+        "label": "Text Detokenization",
+        "nodes": [
+          "detokenize_text"
+        ],
+        "title": "Text Detokenization",
+        "description": "Converts numerical token sequences back into human-readable text.",
+        "role": "generative"
+      },
+      {
+        "id": "grammar_group",
+        "label": "Grammar Enforcement",
+        "nodes": [
+          "apply_grammar_rules",
+          "accept_string_into_grammar",
+          "accept_token_into_grammar",
+          "parse_grammar_char",
+          "print_grammar_rule",
+          "implement_grammar_acceptance"
+        ],
+        "title": "Grammar Enforcement",
+        "description": "Manages and applies grammar constraints to token generation, ensuring structured output.",
+        "role": "analytical"
+      },
+      {
+        "id": "sampling_strategies_group",
+        "label": "Token Sampling Strategies",
+        "nodes": [
+          "apply_mirostat_sampling",
+          "apply_extended_temperature_sampling",
+          "apply_mirostat_v2_sampling",
+          "apply_top_k_sampling",
+          "apply_top_p_sampling",
+          "apply_typical_p_sampling",
+          "apply_xtc_sampling",
+          "apply_top_n_sigma_sampling",
+          "apply_infill_sampling",
+          "apply_min_p_apply"
+        ],
+        "title": "Token Sampling Strategies",
+        "description": "Implements various algorithms for selecting the next token based on probabilities and specific criteria.",
+        "role": "generative"
+      },
+      {
+        "id": "core_sampling_group",
+        "label": "Core Sampling Control",
+        "nodes": [
+          "perform_token_sampling",
+          "sample_accept_draft_tokens",
+          "map_sampler_types",
+          "reset_sampler_chain"
+        ],
+        "title": "Core Sampling Control",
+        "description": "Orchestrates the overall token sampling process and manages sampler configurations.",
+        "role": "generative"
+      },
+      {
+        "id": "tokenizer_init_group",
+        "label": "Tokenizer Initialization",
+        "nodes": [
+          "initialize_ugm_tokenizer",
+          "initialize_bpe_tokenizer",
+          "initialize_rwkv_tokenizer"
+        ],
+        "title": "Tokenizer Initialization",
+        "description": "Sets up different types of tokenizers based on the model's vocabulary structure.",
+        "role": "surface"
+      },
+      {
+        "id": "vocab_metadata_group",
+        "label": "Vocabulary Metadata Access",
+        "nodes": [
+          "get_vocabulary_size",
+          "get_token_score",
+          "get_token_attributes",
+          "check_end_of_grammar_token",
+          "check_control_token",
+          "check_add_bos_token",
+          "check_add_eos_token"
+        ],
+        "title": "Vocabulary Metadata Access",
+        "description": "Provides functions to query general information and properties of tokens within the vocabulary.",
+        "role": "data"
+      },
+      {
+        "id": "special_token_ids_group",
+        "label": "Special Token Identifiers",
+        "nodes": [
+          "get_bos_token",
+          "get_eos_token",
+          "get_eot_token",
+          "get_cls_token",
+          "get_sep_token",
+          "get_newline_token",
+          "get_padding_token",
+          "get_fim_prefix_token",
+          "get_fim_suffix_token",
+          "get_fim_middle_token",
+          "get_fim_padding_token",
+          "get_fim_replacement_token",
+          "get_fim_separator_token"
+        ],
+        "title": "Special Token Identifiers",
+        "description": "Retrieves specific token IDs for special purposes like beginning/end of sentence, padding, or fill-in-the-middle.",
+        "role": "data"
+      },
+      {
+        "id": "unicode_group",
+        "label": "Unicode Text Utilities",
+        "nodes": [
+          "split_text_by_regex",
+          "get_unicode_codepoint_flags",
+          "convert_utf8_to_byte"
+        ],
+        "title": "Unicode Text Utilities",
+        "description": "Provides low-level utilities for handling Unicode characters and regex-based text splitting.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

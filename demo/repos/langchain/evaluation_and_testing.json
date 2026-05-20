@@ -1,0 +1,127 @@
+{
+    "title": "LLM Evaluation and Testing",
+    "summary": "This module provides core functionalities for evaluating the performance of language models and agents, including various evaluation chains, evaluators, configuration runners, and tracing tools. It supports comprehensive assessment of LLM applications.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "eval_chains",
+                "label": "Evaluation Chains",
+                "type": "module",
+                "link": "eval_chains",
+                "title": "Evaluation Chains Module",
+                "description": "Provides various chains for evaluating the performance of language models and agents, including specialized chains for agent trajectories, QA, string comparisons, and criteria-based assessments."
+            },
+            {
+                "id": "evaluators",
+                "label": "LLM Output Evaluators",
+                "type": "module",
+                "link": "evaluators",
+                "title": "LLM Output Evaluators",
+                "description": "Provides various evaluators for assessing LLM outputs, including checks for JSON validity, JSON equality, and JSON schema compliance. It also defines base interfaces for different types of evaluators."
+            },
+            {
+                "id": "evaluation_config_and_runners",
+                "label": "Evaluation Config & Runners",
+                "type": "module",
+                "link": "evaluation_config_and_runners",
+                "title": "Evaluation Configuration and Runners",
+                "description": "Provides configurations for various evaluation types and functions to run LLMs or chains against datasets, logging results to LangSmith. Supports synchronous and asynchronous evaluation workflows."
+            },
+            {
+                "id": "tracing_and_monitoring",
+                "label": "Tracing & Monitoring",
+                "type": "module",
+                "link": "tracing_and_monitoring",
+                "title": "Tracing and Monitoring",
+                "description": "Provides core functionalities for tracing execution runs, managing their lifecycle, and integrating with logging and streaming mechanisms. Enables detailed observation and analysis of component interactions."
+            },
+            {
+                "id": "model_laboratory",
+                "label": "Model Comparison & Testing",
+                "type": "module",
+                "link": "model_laboratory",
+                "title": "Model Comparison & Testing Utilities",
+                "description": "Offers a `ModelLaboratory` for comparing language model chains and LLMs, complemented by utilities for object serialization, dynamic module imports, and base classes for comprehensive testing."
+            }
+        ],
+        "edges": [
+            {
+                "source": "eval_chains",
+                "target": "evaluators",
+                "label": "Uses evaluators from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_config_and_runners",
+                "target": "eval_chains",
+                "label": "Configures & runs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_config_and_runners",
+                "target": "evaluators",
+                "label": "Configures & uses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tracing_and_monitoring",
+                "target": "evaluation_config_and_runners",
+                "label": "Provides run data to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_laboratory",
+                "target": "eval_chains",
+                "label": "Can leverage",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_laboratory",
+                "target": "evaluators",
+                "label": "Can leverage",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "evaluation_core",
+                "label": "Evaluation Core",
+                "nodes": [
+                    "eval_chains",
+                    "evaluators"
+                ],
+                "title": "Core Evaluation Mechanisms",
+                "description": "Defines the fundamental chains and individual evaluators used to assess the performance and quality of LLM outputs and agent behaviors.",
+                "role": null
+            },
+            {
+                "id": "evaluation_orchestration",
+                "label": "Evaluation Orchestration",
+                "nodes": [
+                    "evaluation_config_and_runners"
+                ],
+                "title": "Evaluation Orchestration & Execution",
+                "description": "Manages the configuration and execution of evaluation runs against datasets, integrating with LangSmith for logging and reporting.",
+                "role": null
+            },
+            {
+                "id": "observability_and_testing",
+                "label": "Observability & Testing Utilities",
+                "nodes": [
+                    "tracing_and_monitoring",
+                    "model_laboratory"
+                ],
+                "title": "Observability and Testing Utilities",
+                "description": "Provides tools for monitoring execution traces, analyzing component interactions, and comparing different model implementations for development and debugging.",
+                "role": null
+            }
+        ]
+    }
+}

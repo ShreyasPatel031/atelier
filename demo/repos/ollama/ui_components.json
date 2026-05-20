@@ -1,0 +1,154 @@
+{
+  "title": "UI Core Components",
+  "summary": "This module provides fundamental UI components for the application, including various status displays, layout structures, and reusable elements for user interaction and feedback.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "DisplayLogin",
+        "label": "User Login Display",
+        "type": "component",
+        "link": null,
+        "title": "User Login Interface",
+        "description": "Presents a user interface for cloud model authentication, handling sign-in actions and managing authentication state based on user interaction and system focus events."
+      },
+      {
+        "id": "DisplayStale",
+        "label": "Stale Model Notification",
+        "type": "component",
+        "link": null,
+        "title": "Model Update Prompt",
+        "description": "Notifies the user when a newer version of a model is available and provides an action to update the model, integrating with message sending and streaming status."
+      },
+      {
+        "id": "DisplayUpgrade",
+        "label": "Upgrade Prompt Display",
+        "type": "component",
+        "link": null,
+        "title": "Feature Upgrade Notification",
+        "description": "Shows messages related to feature upgrades or usage limits, offering an action button to direct users to an upgrade link."
+      },
+      {
+        "id": "Downloading",
+        "label": "Download Progress Indicator",
+        "type": "component",
+        "link": null,
+        "title": "File Download Progress",
+        "description": "Displays the progress of a file download, showing completed bytes, total bytes, and a percentage, along with a visual progress bar."
+      },
+      {
+        "id": "ImageThumbnail",
+        "label": "Image Thumbnail Renderer",
+        "type": "component",
+        "link": null,
+        "title": "Image Preview Component",
+        "description": "Generates and displays a thumbnail for an image file, converting raw image data (Uint8Array, Array, base64 string) into a Blob URL for rendering, with error handling."
+      },
+      {
+        "id": "SidebarLayout",
+        "label": "Application Sidebar Layout",
+        "type": "component",
+        "link": null,
+        "title": "Main Application Layout",
+        "description": "Provides the main layout structure for the application, including a collapsible sidebar and the main content area, adapting to operating system specifics."
+      },
+      {
+        "id": "Display",
+        "label": "Generic Message Display",
+        "type": "component",
+        "link": null,
+        "title": "Reusable Message & Action Display",
+        "description": "A versatile UI component for displaying messages, status updates, or errors, optionally including a customizable action button for user interaction (e.g., sign-in, upgrade)."
+      },
+      {
+        "id": "UseUserHook",
+        "label": "User Authentication Hook",
+        "type": "external",
+        "link": "ui_logic_and_hooks",
+        "title": "User Auth Hook",
+        "description": "A custom React hook (`useUser`) providing user authentication status, functions to initiate sign-in, and refresh user data."
+      },
+      {
+        "id": "UseChatHooks",
+        "label": "Chat Interaction Hooks",
+        "type": "external",
+        "link": "ui_logic_and_hooks",
+        "title": "Chat Messaging Hooks",
+        "description": "Custom React hooks (`useSendMessage`, `useIsStreaming`) for sending chat messages and monitoring the streaming status of responses."
+      }
+    ],
+    "edges": [
+      {
+        "source": "DisplayLogin",
+        "target": "Display",
+        "label": "Renders UI via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DisplayStale",
+        "target": "Display",
+        "label": "Renders UI via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DisplayUpgrade",
+        "target": "Display",
+        "label": "Renders UI via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DisplayLogin",
+        "target": "UseUserHook",
+        "label": "Utilizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DisplayStale",
+        "target": "UseChatHooks",
+        "label": "Utilizes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "StatusAndAlerts",
+        "label": "Status & Alerts",
+        "nodes": [
+          "DisplayLogin",
+          "DisplayStale",
+          "DisplayUpgrade",
+          "Downloading"
+        ],
+        "title": "User Status and Alert Displays",
+        "description": "Components responsible for informing the user about various states, such as login requirements, model updates, upgrade prompts, and download progress.",
+        "role": "surface"
+      },
+      {
+        "id": "LayoutManagement",
+        "label": "Layout Management",
+        "nodes": [
+          "SidebarLayout"
+        ],
+        "title": "Application Layout Structure",
+        "description": "Manages the overall structural arrangement of the user interface, including sidebars and main content areas.",
+        "role": "surface"
+      },
+      {
+        "id": "MediaAndGenericDisplays",
+        "label": "Media & Generic Displays",
+        "nodes": [
+          "ImageThumbnail",
+          "Display"
+        ],
+        "title": "Media and Reusable Display Components",
+        "description": "Components for rendering specific media types like image thumbnails and a generic, reusable component for displaying messages and actions.",
+        "role": "surface"
+      }
+    ]
+  }
+}

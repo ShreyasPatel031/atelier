@@ -1,0 +1,28 @@
+{
+    "title": "Text Masked Language Models",
+    "summary": "This module implements various masked language models for text and multi-modal tasks, enabling predictions on masked tokens.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "mlm_implementations",
+                "label": "Masked Language Model Implementations",
+                "type": "module",
+                "link": "mlm_implementations",
+                "title": "MLM Implementations",
+                "description": "Houses the core implementations of masked language models, processing text and multi-modal inputs to predict masked tokens."
+            }
+        ],
+        "edges": [],
+        "groups": [
+            {
+                "id": "model_implementations",
+                "label": "Model Implementations",
+                "title": "Model Implementations",
+                "description": "Groups different masked language model architectures and their respective forward pass logic.",
+                "role": "generative",
+                "nodes": ["mlm_implementations"]
+            }
+        ]
+    }
+}

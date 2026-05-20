@@ -1,0 +1,97 @@
+{
+  "title": "Tracing and Monitoring",
+  "summary": "This module provides core functionalities for tracing execution runs, managing their lifecycle, and integrating with logging and streaming mechanisms. It enables detailed observation and analysis of component interactions within an application.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "collect_runs_node",
+        "label": "Collect Run Traces",
+        "type": "component",
+        "link": null,
+        "title": "Collect Run Traces Context",
+        "description": "Provides a context manager to gather and manage execution traces during runtime, allowing detailed inspection of the execution flow and run activities."
+      },
+      {
+        "id": "tracer_core_node",
+        "label": "Manage Core Tracing Logic",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Tracer Core",
+        "description": "Abstract base class defining the fundamental structure and methods for all tracers. It handles run creation, updates, and error logging for various component types like LLMs, Chains, Tools, and Retrievers."
+      },
+      {
+        "id": "consume_astream_node",
+        "label": "Process Asynchronous Stream Logs",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Stream Consumer",
+        "description": "Asynchronously consumes streamed output from a runnable, generates JSON patches for incremental updates, and sends them as `RunLogPatch` events for real-time monitoring and logging."
+      },
+      {
+        "id": "logging_handler_node",
+        "label": "Log Run Events",
+        "type": "component",
+        "link": null,
+        "title": "Logging Callback Handler",
+        "description": "A concrete callback handler that processes various events (e.g., text output) from execution runs and directs them to a specified Python logger, including contextual breadcrumbs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "collect_runs_node",
+        "target": "tracer_core_node",
+        "label": "Manages context for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tracer_core_node",
+        "target": "logging_handler_node",
+        "label": "Provides base for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "consume_astream_node",
+        "target": "tracer_core_node",
+        "label": "Generates events for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "tracing_context",
+        "label": "Tracing Context Management",
+        "nodes": [
+          "collect_runs_node"
+        ],
+        "title": "Tracing Context Management",
+        "description": "Components responsible for setting up and managing the context in which execution runs are traced.",
+        "role": "surface"
+      },
+      {
+        "id": "core_tracing",
+        "label": "Core Tracing Abstraction",
+        "nodes": [
+          "tracer_core_node"
+        ],
+        "title": "Core Tracing Abstraction",
+        "description": "The foundational abstract class that defines the common interface and logic for all tracing implementations.",
+        "role": "generative"
+      },
+      {
+        "id": "event_processing",
+        "label": "Event Processing & Logging",
+        "nodes": [
+          "consume_astream_node",
+          "logging_handler_node"
+        ],
+        "title": "Event Processing & Logging",
+        "description": "Components that process and react to tracing events, including handling streaming data and integrating with standard logging systems.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

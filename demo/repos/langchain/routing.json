@@ -1,0 +1,374 @@
+{
+  "title": "Dynamic Routing Chains",
+  "summary": "This module provides various chain implementations for dynamically routing user inputs or queries to different sub-chains or prompts. It supports routing based on embedding similarity or decisions made by a Language Model.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "EmbeddingRouterChain",
+        "label": "Route via Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "EmbeddingRouterChain",
+        "description": "Routes incoming queries to a destination chain by finding the most similar embedding in a vector store, useful for semantic routing."
+      },
+      {
+        "id": "LLMRouterChain",
+        "label": "Route via LLM Decision",
+        "type": "component",
+        "link": null,
+        "title": "LLMRouterChain",
+        "description": "Uses an LLM to decide which destination chain or prompt to route the input to, based on the LLM's understanding of the query. This class is deprecated in favor of more flexible Runnable implementations."
+      },
+      {
+        "id": "MultiPromptChain",
+        "label": "Route to Multiple Prompts",
+        "type": "component",
+        "link": null,
+        "title": "MultiPromptChain",
+        "description": "Routes an input to one of several predefined prompts, each associated with a specific sub-chain, using an LLM router to make the selection. This class is deprecated."
+      },
+      {
+        "id": "MultiRetrievalQAChain",
+        "label": "Route to Multiple Retrieval QA Chains",
+        "type": "component",
+        "link": null,
+        "title": "MultiRetrievalQAChain",
+        "description": "Routes an input query to one of multiple retrieval-augmented question answering (QA) chains, each potentially using a different retriever or prompt, based on an LLM router's decision."
+      },
+      {
+        "id": "RouterChain",
+        "label": "Define Routing Chain Interface",
+        "type": "external",
+        "link": "agents_and_chains.chains",
+        "title": "RouterChain",
+        "description": "Abstract base class for chains that perform routing logic, directing inputs to different downstream components."
+      },
+      {
+        "id": "MultiRouteChain",
+        "label": "Define Multi-Route Chain Interface",
+        "type": "external",
+        "link": "agents_and_chains.chains",
+        "title": "MultiRouteChain",
+        "description": "Abstract base class for chains that manage routing between multiple distinct sub-chains or destinations."
+      },
+      {
+        "id": "VectorStore",
+        "label": "Store & Search Embeddings",
+        "type": "external",
+        "link": "data_and_retrieval.vector_stores",
+        "title": "VectorStore",
+        "description": "A database optimized for storing and querying high-dimensional vector embeddings, enabling similarity searches."
+      },
+      {
+        "id": "Embeddings",
+        "label": "Generate Text Embeddings",
+        "type": "external",
+        "link": "language_models_and_prompts.embeddings",
+        "title": "Embeddings",
+        "description": "A component responsible for converting text into numerical vector representations (embeddings) for semantic analysis."
+      },
+      {
+        "id": "LLMChain",
+        "label": "Execute LLM with Prompt",
+        "type": "external",
+        "link": "agents_and_chains.chains.base_chains",
+        "title": "LLMChain",
+        "description": "A chain that takes a prompt template, formats it with input variables, and passes the result to a language model."
+      },
+      {
+        "id": "BaseLanguageModel",
+        "label": "Interact with Language Models",
+        "type": "external",
+        "link": "language_models_and_prompts.llm_interfaces",
+        "title": "BaseLanguageModel",
+        "description": "An abstract interface for interacting with various language models, providing a consistent API for different LLM providers."
+      },
+      {
+        "id": "BasePromptTemplate",
+        "label": "Define Prompt Structure",
+        "type": "external",
+        "link": "language_models_and_prompts.prompt_templates",
+        "title": "BasePromptTemplate",
+        "description": "An abstract base class for prompt templates, defining the structure and variables for generating prompts."
+      },
+      {
+        "id": "PromptTemplate",
+        "label": "Format Prompts",
+        "type": "external",
+        "link": "language_models_and_prompts.prompt_templates",
+        "title": "PromptTemplate",
+        "description": "A concrete implementation of a prompt template that formats a string with input variables."
+      },
+      {
+        "id": "RouterOutputParser",
+        "label": "Parse Router Output",
+        "type": "external",
+        "link": "agents_and_chains.tools_and_output_parsers",
+        "title": "RouterOutputParser",
+        "description": "Parses the output from a language model to extract routing decisions, typically identifying a destination and relevant inputs."
+      },
+      {
+        "id": "Chain",
+        "label": "Define Chain Interface",
+        "type": "external",
+        "link": "agents_and_chains.chains.base_chains",
+        "title": "Chain",
+        "description": "The fundamental abstract base class for all chains, defining the basic interface for processing inputs and producing outputs."
+      },
+      {
+        "id": "BaseRetrievalQA",
+        "label": "Define Retrieval QA Interface",
+        "type": "external",
+        "link": "agents_and_chains.chains",
+        "title": "BaseRetrievalQA",
+        "description": "An abstract base class for retrieval-augmented question answering chains, combining retrieval with LLM generation."
+      },
+      {
+        "id": "BaseRetriever",
+        "label": "Retrieve Documents",
+        "type": "external",
+        "link": "data_and_retrieval.retrievers",
+        "title": "BaseRetriever",
+        "description": "An abstract interface for retrieving relevant documents or information based on a query."
+      },
+      {
+        "id": "RetrievalQA",
+        "label": "Perform Retrieval-Augmented QA",
+        "type": "external",
+        "link": "agents_and_chains.chains.conversational_qa",
+        "title": "RetrievalQA",
+        "description": "A chain that performs question answering by first retrieving relevant documents and then using an LLM to generate an answer based on those documents."
+      },
+      {
+        "id": "ConversationChain",
+        "label": "Manage Conversational Flow",
+        "type": "external",
+        "link": "agents_and_chains.chains.conversational_qa",
+        "title": "ConversationChain",
+        "description": "A chain designed to manage and maintain conversational context and flow, often used for chatbots."
+      }
+    ],
+    "edges": [
+      {
+        "source": "EmbeddingRouterChain",
+        "target": "RouterChain",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EmbeddingRouterChain",
+        "target": "VectorStore",
+        "label": "uses for similarity search",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EmbeddingRouterChain",
+        "target": "Embeddings",
+        "label": "uses for vector store creation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMRouterChain",
+        "target": "RouterChain",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMRouterChain",
+        "target": "LLMChain",
+        "label": "uses for routing decision",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMRouterChain",
+        "target": "BaseLanguageModel",
+        "label": "creates LLMChain with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMRouterChain",
+        "target": "BasePromptTemplate",
+        "label": "creates LLMChain with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiPromptChain",
+        "target": "MultiRouteChain",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiPromptChain",
+        "target": "LLMRouterChain",
+        "label": "uses as router",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiPromptChain",
+        "target": "BaseLanguageModel",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiPromptChain",
+        "target": "PromptTemplate",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiPromptChain",
+        "target": "RouterOutputParser",
+        "label": "uses for router prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiPromptChain",
+        "target": "Chain",
+        "label": "uses as default chain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "MultiRouteChain",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "LLMRouterChain",
+        "label": "uses as router",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "BaseRetrievalQA",
+        "label": "routes to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "BaseLanguageModel",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "BaseRetriever",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "PromptTemplate",
+        "label": "uses for sub-chains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "RouterOutputParser",
+        "label": "uses for router prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "RetrievalQA",
+        "label": "creates sub-chains with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "ConversationChain",
+        "label": "uses as default chain",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "routing_logic",
+        "label": "Routing Logic",
+        "nodes": [
+          "EmbeddingRouterChain",
+          "LLMRouterChain"
+        ],
+        "title": "Core Routing Mechanisms",
+        "description": "Components responsible for the fundamental decision-making process of routing inputs.",
+        "role": "generative"
+      },
+      {
+        "id": "multi_chain_orchestration",
+        "label": "Multi-Chain Orchestration",
+        "nodes": [
+          "MultiPromptChain",
+          "MultiRetrievalQAChain"
+        ],
+        "title": "Orchestrating Multiple Chains",
+        "description": "Components that manage and route inputs across various specialized sub-chains or prompts.",
+        "role": "surface"
+      },
+      {
+        "id": "llm_prompting_foundations",
+        "label": "LLM & Prompting Foundations",
+        "nodes": [
+          "BaseLanguageModel",
+          "BasePromptTemplate",
+          "PromptTemplate",
+          "LLMChain",
+          "RouterOutputParser"
+        ],
+        "title": "Language Model and Prompting Tools",
+        "description": "Essential components for interacting with Language Models and structuring prompts for effective communication.",
+        "role": "generative"
+      },
+      {
+        "id": "data_retrieval_foundations",
+        "label": "Data & Retrieval Foundations",
+        "nodes": [
+          "VectorStore",
+          "Embeddings",
+          "BaseRetriever",
+          "RetrievalQA"
+        ],
+        "title": "Data Storage and Retrieval Components",
+        "description": "Components for managing data, generating embeddings, and retrieving relevant information for processing.",
+        "role": "data"
+      },
+      {
+        "id": "base_chain_abstractions",
+        "label": "Base Chain Abstractions",
+        "nodes": [
+          "RouterChain",
+          "MultiRouteChain",
+          "Chain",
+          "BaseRetrievalQA",
+          "ConversationChain"
+        ],
+        "title": "Fundamental Chain Building Blocks",
+        "description": "Abstract and concrete base classes that define the core structure and behavior of various types of chains.",
+        "role": "surface"
+      }
+    ]
+  }
+}

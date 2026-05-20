@@ -1,73 +1,48 @@
 {
-    "title": "Chains Module Overview",
-    "summary": "Provides a framework for linking LLM calls and other components into structured sequences, enabling complex workflows for various AI applications.",
+    "title": "LLM Chains",
+    "summary": "The chains module provides building blocks for creating complex sequences of operations, combining LLMs with other components for various tasks.",
     "diagram": {
-        "direction": "LR",
+        "direction": "TD",
         "nodes": [
-            {"id": "core_chain_components", "label": "Core Chains", "type": "module", "link": "core_chain_components", "title": "Core Chain Components", "description": "Defines the foundational Chain abstraction for creating structured sequences of operations."},
-            {"id": "conversational_retrieval", "label": "Conversational Retrieval", "type": "module", "link": "conversational_retrieval", "title": "Conversational Retrieval Chains", "description": "Handles document retrieval and context management within conversational flows."},
-            {"id": "web_automation_chains", "label": "Web Automation", "type": "module", "link": "web_automation_chains", "title": "Web Automation Chains", "description": "Enables LLMs to interact with and automate web browsing tasks."},
-            {"id": "openai_function_integrations", "label": "OpenAI Function Integrations", "type": "module", "link": "openai_function_integrations", "title": "OpenAI Function/Tool Integrations", "description": "Facilitates structured output extraction, function calling, and API integration using OpenAI models."},
-            {"id": "chain_loading_utilities", "label": "Chain Loading Utilities", "type": "module", "link": "chain_loading_utilities", "title": "Chain Loading Utilities", "description": "Provides functions to load and configure various chain types from predefined configurations."},
-            {"id": "qa_generation_chains", "label": "QA Generation", "type": "module", "link": "qa_generation_chains", "title": "QA Generation Chains", "description": "Focuses on generating questions and answers, often from provided text."},
-            {"id": "routing_chains", "label": "Routing Chains", "type": "module", "link": "routing_chains", "title": "Routing Chains", "description": "Directs inputs to appropriate sub-chains or tools based on embedding or LLM-based decisions."},
-            {"id": "query_construction", "label": "Query Construction", "type": "module", "link": "query_construction", "title": "Query Construction and Parsing", "description": "Handles the creation and parsing of structured queries for information retrieval."},
-            {"id": "specialized_chains", "label": "Specialized Chains", "type": "module", "link": "specialized_chains", "title": "Specialized Chains", "description": "Implements unique chain types for specific advanced use cases like constitutional AI or FLARE."},
-            {"id": "map_reduce_chains", "label": "Map-Reduce Chains", "type": "module", "link": "map_reduce_chains", "title": "Map-Reduce Chains", "description": "Applies map-reduce pattern for processing large documents or complex data."},
-            {"id": "moderation_chains", "label": "Moderation Chains", "type": "module", "link": "moderation_chains", "title": "Moderation Chains", "description": "Provides functionality for content moderation using external services."}
+            {"id": "base_chains", "label": "Base Chain Class", "type": "module", "link": "base_chains", "title": "Base Chain Class", "description": "The fundamental abstract base class for constructing sequences of operations."}, 
+            {"id": "loading_and_factory", "label": "Chain Loading and Factory", "type": "module", "link": "loading_and_factory", "title": "Chain Loading and Factory", "description": "Manages the instantiation and loading of various chain configurations from predefined templates or dynamic specifications."}, 
+            {"id": "conversational_qa", "label": "Conversational QA Chains", "type": "module", "link": "conversational_qa", "title": "Conversational QA Chains", "description": "Facilitates question-answering in a conversational context, often involving retrieval from document stores."}, 
+            {"id": "structured_output_and_tools", "label": "Structured Output & Tool Calling", "type": "module", "link": "structured_output_and_tools", "title": "Structured Output & Tool Calling", "description": "Enables LLMs to produce structured data and interact with external tools or functions."}, 
+            {"id": "routing", "label": "Routing Chains", "type": "module", "link": "routing", "title": "Routing Chains", "description": "Intelligently directs queries and tasks to appropriate sub-chains or processing paths."}, 
+            {"id": "document_processing", "label": "Document Processing Chains", "type": "module", "link": "document_processing", "title": "Document Processing Chains", "description": "Applies transformations and aggregations on documents, such as summarization using map-reduce."}, 
+            {"id": "web_automation", "label": "Web Automation Chains", "type": "module", "link": "web_automation", "title": "Web Automation Chains", "description": "Provides capabilities for LLMs to interact with and automate tasks on the web."}, 
+            {"id": "content_moderation", "label": "Content Moderation Chains", "type": "module", "link": "content_moderation", "title": "Content Moderation Chains", "description": "Filters and moderates generated content based on predefined policies or external services."}, 
+            {"id": "response_refinement", "label": "Response Refinement", "type": "module", "link": "response_refinement", "title": "Response Refinement", "description": "Enhances or validates LLM-generated responses, incorporating principles or self-correction."}, 
+            {"id": "prompt_engineering_utils", "label": "Prompt Engineering Utilities", "type": "module", "link": "prompt_engineering_utils", "title": "Prompt Engineering Utilities", "description": "Tools and helper functions for generating examples and constructing complex prompts."}, 
+            {"id": "qa_generation", "label": "QA Generation Chains", "type": "module", "link": "qa_generation", "title": "QA Generation Chains", "description": "Specialized chains for automatically generating question-answer pairs from text."}
         ],
         "edges": [
-            {"source": "core_chain_components", "target": "conversational_retrieval", "label": "extends"},
-            {"source": "core_chain_components", "target": "web_automation_chains", "label": "extends"},
-            {"source": "core_chain_components", "target": "qa_generation_chains", "label": "extends"},
-            {"source": "core_chain_components", "target": "routing_chains", "label": "extends"},
-            {"source": "core_chain_components", "target": "specialized_chains", "label": "extends"},
-            {"source": "core_chain_components", "target": "map_reduce_chains", "label": "extends"},
-            {"source": "core_chain_components", "target": "moderation_chains", "label": "extends"},
-
-            {"source": "chain_loading_utilities", "target": "conversational_retrieval", "label": "loads/configures"},
-            {"source": "chain_loading_utilities", "target": "qa_generation_chains", "label": "loads/configures"},
-            {"source": "chain_loading_utilities", "target": "map_reduce_chains", "label": "loads/configures"},
-            {"source": "chain_loading_utilities", "target": "specialized_chains", "label": "loads/configures"},
-
-            {"source": "openai_function_integrations", "target": "qa_generation_chains", "label": "provides structured output for"},
-
-            {"source": "query_construction", "target": "routing_chains", "label": "informs"},
-            {"source": "conversational_retrieval", "target": "qa_generation_chains", "label": "uses"}
+            {"source": "base_chains", "target": "loading_and_factory", "label": "instantiates"}, 
+            {"source": "loading_and_factory", "target": "conversational_qa", "label": "creates instances"}, 
+            {"source": "loading_and_factory", "target": "structured_output_and_tools", "label": "creates instances"}, 
+            {"source": "loading_and_factory", "target": "document_processing", "label": "creates instances"}, 
+            {"source": "loading_and_factory", "target": "response_refinement", "label": "creates instances"}, 
+            {"source": "base_chains", "target": "conversational_qa", "label": "extends"}, 
+            {"source": "base_chains", "target": "structured_output_and_tools", "label": "extends"}, 
+            {"source": "base_chains", "target": "routing", "label": "extends"}, 
+            {"source": "base_chains", "target": "document_processing", "label": "extends"}, 
+            {"source": "base_chains", "target": "web_automation", "label": "extends"}, 
+            {"source": "base_chains", "target": "content_moderation", "label": "extends"}, 
+            {"source": "base_chains", "target": "response_refinement", "label": "extends"}, 
+            {"source": "base_chains", "target": "qa_generation", "label": "extends"}, 
+            {"source": "structured_output_and_tools", "target": "prompt_engineering_utils", "label": "uses"}, 
+            {"source": "routing", "target": "conversational_qa", "label": "routes to"}, 
+            {"source": "routing", "target": "structured_output_and_tools", "label": "routes to"}, 
+            {"source": "routing", "target": "document_processing", "label": "routes to"}, 
+            {"source": "conversational_qa", "target": "prompt_engineering_utils", "label": "uses"}, 
+            {"source": "qa_generation", "target": "prompt_engineering_utils", "label": "uses"}, 
+            {"source": "response_refinement", "target": "prompt_engineering_utils", "label": "uses"}
         ],
         "groups": [
-            {
-                "id": "core_framework",
-                "label": "Core Framework",
-                "title": "Core Framework",
-                "description": "Fundamental abstractions and loading mechanisms for building chains.",
-                "role": "analytical",
-                "nodes": ["core_chain_components", "chain_loading_utilities"]
-            },
-            {
-                "id": "interaction_patterns",
-                "label": "Interaction Patterns",
-                "title": "Common Interaction Patterns",
-                "description": "Chains designed for common LLM interaction patterns like conversational AI, QA, and content generation.",
-                "role": "generative",
-                "nodes": ["conversational_retrieval", "qa_generation_chains", "map_reduce_chains", "routing_chains", "query_construction"]
-            },
-            {
-                "id": "integrations",
-                "label": "External Integrations",
-                "title": "External Tool & API Integrations",
-                "description": "Chains that integrate with external services and specialized APIs, such as OpenAI functions or web browsers.",
-                "role": "surface",
-                "nodes": ["openai_function_integrations", "web_automation_chains", "moderation_chains"]
-            },
-            {
-                "id": "advanced_techniques",
-                "label": "Advanced Techniques",
-                "title": "Advanced AI Techniques",
-                "description": "Specialized chains implementing more advanced or experimental AI patterns.",
-                "role": "analytical",
-                "nodes": ["specialized_chains"]
-            }
+            {"id": "core_infrastructure", "label": "Core Infrastructure", "title": "Core Infrastructure", "description": "Foundational components for defining and managing chains.", "role": "analytical", "nodes": ["base_chains", "loading_and_factory"]},
+            {"id": "interaction_patterns", "label": "Interaction Patterns", "title": "Interaction Patterns", "description": "Common patterns for LLM interaction and document processing.", "role": "generative", "nodes": ["conversational_qa", "structured_output_and_tools", "routing", "document_processing"]},
+            {"id": "specialized_tasks", "label": "Specialized Tasks", "title": "Specialized Tasks", "description": "Chains designed for specific applications like web automation or moderation.", "role": "generative", "nodes": ["web_automation", "content_moderation", "response_refinement", "qa_generation"]},
+            {"id": "helpers", "label": "Helper Utilities", "title": "Helper Utilities", "description": "Utility functions supporting prompt creation and query construction.", "role": "analytical", "nodes": ["prompt_engineering_utils"]}
         ]
     }
 }

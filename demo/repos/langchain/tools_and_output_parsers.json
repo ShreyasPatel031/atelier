@@ -1,0 +1,471 @@
+{
+  "title": "Tools and Output Parsers",
+  "summary": "This module provides foundational classes and utilities for defining and interacting with tools, alongside a comprehensive suite of output parsers to structure language model responses into various formats.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "BaseOutputParser",
+        "label": "Base Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Base Output Parser",
+        "description": "Provides the foundational interface for parsing LLM string outputs into structured formats, supporting both synchronous and asynchronous operations."
+      },
+      {
+        "id": "BaseGenerationOutputParser",
+        "label": "Base Generation Parser",
+        "type": "component",
+        "link": null,
+        "title": "Base Generation Parser",
+        "description": "Extends the base output parser to specifically handle and parse language model generation objects, including chat messages."
+      },
+      {
+        "id": "CommaSeparatedListOutputParser",
+        "label": "Comma-Separated List Parser",
+        "type": "component",
+        "link": null,
+        "title": "Comma-Separated List Parser",
+        "description": "Parses LLM output strings into a list of values separated by commas, handling various comma-separated formats."
+      },
+      {
+        "id": "NumberedListOutputParser",
+        "label": "Numbered List Parser",
+        "type": "component",
+        "link": null,
+        "title": "Numbered List Parser",
+        "description": "Extracts items from LLM output formatted as a numbered list, using regular expressions to identify each entry."
+      },
+      {
+        "id": "MarkdownListOutputParser",
+        "label": "Markdown List Parser",
+        "type": "component",
+        "link": null,
+        "title": "Markdown List Parser",
+        "description": "Parses LLM output formatted as a Markdown list, extracting items prefixed with hyphens or asterisks."
+      },
+      {
+        "id": "BaseTransformOutputParser",
+        "label": "Base Transform Parser",
+        "type": "component",
+        "link": null,
+        "title": "Base Transform Parser",
+        "description": "A base class for output parsers that can process streaming input, transforming chunks of text or messages into structured outputs."
+      },
+      {
+        "id": "BaseCumulativeTransformOutputParser",
+        "label": "Cumulative Transform Parser",
+        "type": "component",
+        "link": null,
+        "title": "Cumulative Transform Parser",
+        "description": "Extends the base transform parser to handle streaming input cumulatively, optionally yielding diffs between successive parsed outputs."
+      },
+      {
+        "id": "XMLOutputParser",
+        "label": "XML Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "XML Output Parser",
+        "description": "Parses LLM output formatted as XML, converting it into a dictionary representation and supporting secure XML parsing options."
+      },
+      {
+        "id": "DatetimeOutputParser",
+        "label": "Datetime Parser",
+        "type": "component",
+        "link": null,
+        "title": "Datetime Parser",
+        "description": "Parses LLM output strings into Python datetime objects, supporting custom format specifications."
+      },
+      {
+        "id": "EnumOutputParser",
+        "label": "Enum Parser",
+        "type": "component",
+        "link": null,
+        "title": "Enum Parser",
+        "description": "Parses LLM output into a specific enumeration member, validating the output against predefined enum values."
+      },
+      {
+        "id": "OutputFixingParser",
+        "label": "Output Fixing Parser",
+        "type": "component",
+        "link": null,
+        "title": "Output Fixing Parser",
+        "description": "Wraps another output parser to automatically attempt to fix parsing errors by re-prompting an LLM with error details."
+      },
+      {
+        "id": "PandasDataFrameOutputParser",
+        "label": "Pandas DataFrame Parser",
+        "type": "component",
+        "link": null,
+        "title": "Pandas DataFrame Parser",
+        "description": "Parses LLM output into a structured format that can be used to query or manipulate a Pandas DataFrame."
+      },
+      {
+        "id": "RetryOutputParser",
+        "label": "Retry Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Retry Output Parser",
+        "description": "Wraps another parser and retries on errors, using the original prompt for context in the retry mechanism."
+      },
+      {
+        "id": "StructuredOutputParser",
+        "label": "Structured Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Structured Output Parser",
+        "description": "Parses LLM output into a structured dictionary based on a list of defined response schemas, typically expecting JSON markdown."
+      },
+      {
+        "id": "YamlOutputParser",
+        "label": "YAML Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "YAML Output Parser",
+        "description": "Parses LLM output formatted as YAML into a Pydantic model, handling YAML code blocks and validation."
+      },
+      {
+        "id": "ToolsOutputParser",
+        "label": "Anthropic Tools Parser",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Tools Parser",
+        "description": "Specifically designed to parse tool call outputs from Anthropic language models, converting them into structured tool call objects."
+      },
+      {
+        "id": "BaseTool",
+        "label": "Base Tool",
+        "type": "component",
+        "link": null,
+        "title": "Base Tool",
+        "description": "The abstract base class for all LangChain tools, defining the core interface for tools that agents can use to perform actions."
+      },
+      {
+        "id": "_get_filtered_args",
+        "label": "Filter Tool Arguments",
+        "type": "component",
+        "link": null,
+        "title": "Filter Tool Arguments",
+        "description": "Utility function to filter out specific arguments from a tool's input schema, such as injected runtime parameters."
+      },
+      {
+        "id": "_get_schema_from_runnable_and_arg_types",
+        "label": "Infer Tool Schema",
+        "type": "component",
+        "link": null,
+        "title": "Infer Tool Schema",
+        "description": "Infers the input argument schema for a tool from a runnable or explicit type hints, facilitating tool definition."
+      },
+      {
+        "id": "afunc",
+        "label": "Retriever Tool Async Function",
+        "type": "component",
+        "link": null,
+        "title": "Retriever Tool Async Function",
+        "description": "An asynchronous function used within retriever tools to fetch and format documents based on a query."
+      },
+      {
+        "id": "__getattr__",
+        "label": "Legacy Tool Importer",
+        "type": "component",
+        "link": null,
+        "title": "Legacy Tool Importer",
+        "description": "A deprecated mechanism for importing tools from the `langchain` package, now recommending `langchain-community`."
+      },
+      {
+        "id": "ExaSearchResults",
+        "label": "Exa Search Tool",
+        "type": "external",
+        "link": "other_module",
+        "title": "Exa Search Tool",
+        "description": "Integrates with the Exa API to perform web searches and retrieve results, returning them in a structured JSON format."
+      },
+      {
+        "id": "ExaFindSimilarResults",
+        "label": "Exa Find Similar Tool",
+        "type": "external",
+        "link": "other_module",
+        "title": "Exa Find Similar Tool",
+        "description": "Utilizes the Exa API to find web pages similar to a given URL, returning structured results."
+      },
+      {
+        "id": "decorator",
+        "label": "Custom Tool Decorator",
+        "type": "component",
+        "link": null,
+        "title": "Custom Tool Decorator",
+        "description": "A decorator for creating custom OpenAI-compatible tools, handling schema inference and function wrapping."
+      }
+    ],
+    "edges": [
+      {
+        "source": "BaseGenerationOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CommaSeparatedListOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "NumberedListOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MarkdownListOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseTransformOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseCumulativeTransformOutputParser",
+        "target": "BaseTransformOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "XMLOutputParser",
+        "target": "BaseTransformOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatetimeOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EnumOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OutputFixingParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OutputFixingParser",
+        "target": "BaseOutputParser",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PandasDataFrameOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RetryOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RetryOutputParser",
+        "target": "BaseOutputParser",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "YamlOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolsOutputParser",
+        "target": "BaseGenerationOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaSearchResults",
+        "target": "BaseTool",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaFindSimilarResults",
+        "target": "BaseTool",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_get_schema_from_runnable_and_arg_types",
+        "target": "BaseTool",
+        "label": "infers schema for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_get_filtered_args",
+        "target": "BaseTool",
+        "label": "filters inputs for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "afunc",
+        "target": "BaseTool",
+        "label": "used in retriever tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decorator",
+        "target": "BaseTool",
+        "label": "creates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_output_parsing",
+        "label": "Core Output Parsing",
+        "nodes": [
+          "BaseOutputParser",
+          "BaseGenerationOutputParser"
+        ],
+        "title": "Core Output Parsing",
+        "description": "Fundamental interfaces for parsing language model outputs.",
+        "role": "analytical"
+      },
+      {
+        "id": "list_parsers",
+        "label": "List Format Parsers",
+        "nodes": [
+          "CommaSeparatedListOutputParser",
+          "NumberedListOutputParser",
+          "MarkdownListOutputParser"
+        ],
+        "title": "List Format Parsers",
+        "description": "Specialized parsers for extracting data from various list formats.",
+        "role": "analytical"
+      },
+      {
+        "id": "structured_data_parsers",
+        "label": "Structured Data Parsers",
+        "nodes": [
+          "XMLOutputParser",
+          "DatetimeOutputParser",
+          "EnumOutputParser",
+          "PandasDataFrameOutputParser",
+          "StructuredOutputParser",
+          "YamlOutputParser"
+        ],
+        "title": "Structured Data Parsers",
+        "description": "Parsers for converting LLM output into structured data types like XML, YAML, Datetime, Enums, and Pandas DataFrames.",
+        "role": "analytical"
+      },
+      {
+        "id": "streaming_parsers",
+        "label": "Streaming Output Parsers",
+        "nodes": [
+          "BaseTransformOutputParser",
+          "BaseCumulativeTransformOutputParser"
+        ],
+        "title": "Streaming Output Parsers",
+        "description": "Base classes for handling and transforming streaming language model outputs.",
+        "role": "analytical"
+      },
+      {
+        "id": "robustness_parsers",
+        "label": "Robustness Parsers",
+        "nodes": [
+          "OutputFixingParser",
+          "RetryOutputParser"
+        ],
+        "title": "Robustness Parsers",
+        "description": "Parsers designed to improve reliability by fixing or retrying parsing operations upon encountering errors.",
+        "role": "analytical"
+      },
+      {
+        "id": "tool_specific_parsers",
+        "label": "Tool-Specific Parsers",
+        "nodes": [
+          "ToolsOutputParser"
+        ],
+        "title": "Tool-Specific Parsers",
+        "description": "Parsers tailored for specific tool outputs, such as those from Anthropic models.",
+        "role": "analytical"
+      },
+      {
+        "id": "core_tooling",
+        "label": "Core Tooling",
+        "nodes": [
+          "BaseTool",
+          "_get_filtered_args",
+          "_get_schema_from_runnable_and_arg_types",
+          "afunc",
+          "decorator"
+        ],
+        "title": "Core Tooling",
+        "description": "Foundational components and utilities for defining, managing, and interacting with tools within the LangChain ecosystem.",
+        "role": "generative"
+      },
+      {
+        "id": "external_service_tools",
+        "label": "External Service Tools",
+        "nodes": [
+          "ExaSearchResults",
+          "ExaFindSimilarResults"
+        ],
+        "title": "External Service Tools",
+        "description": "Tools that integrate with and leverage external services like Exa for web search capabilities.",
+        "role": "surface"
+      },
+      {
+        "id": "legacy_components",
+        "label": "Legacy Components",
+        "nodes": [
+          "__getattr__"
+        ],
+        "title": "Legacy Components",
+        "description": "Components maintained for backward compatibility, with recommendations for updated usage.",
+        "role": "data"
+      }
+    ]
+  }
+}

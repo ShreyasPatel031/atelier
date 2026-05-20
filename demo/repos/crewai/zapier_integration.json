@@ -1,0 +1,118 @@
+{
+  "title": "Zapier Integration Tools",
+  "summary": "This module provides a factory function to generate a list of Zapier action tools, allowing agents to interact with Zapier's extensive automation capabilities. It supports filtering tools by name and requires a Zapier API key for authentication.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "crewai_agent",
+        "label": "CrewAI Agent",
+        "type": "external",
+        "link": null,
+        "title": "CrewAI Agent",
+        "description": "A CrewAI agent that utilizes the generated Zapier tools to perform various automation tasks and interact with external services."
+      },
+      {
+        "id": "zapier_action_tools_factory",
+        "label": "Generate Zapier Tools",
+        "type": "component",
+        "link": null,
+        "title": "Zapier Action Tools Factory",
+        "description": "A factory function (ZapierActionTools) that initializes and returns a list of Zapier action tools. It can filter tools based on a provided list of action names and handles API key retrieval."
+      },
+      {
+        "id": "zapier_actions_adapter",
+        "label": "Adapt Zapier Actions",
+        "type": "component",
+        "link": null,
+        "title": "Zapier Actions Adapter",
+        "description": "An internal adapter (ZapierActionsAdapter) responsible for communicating with the Zapier API to fetch available actions and convert them into usable tool objects."
+      },
+      {
+        "id": "zapier_api",
+        "label": "Zapier API",
+        "type": "external",
+        "link": null,
+        "title": "External Zapier Service",
+        "description": "The external Zapier platform API, providing a wide range of automation actions that can be integrated as tools."
+      }
+    ],
+    "edges": [
+      {
+        "source": "crewai_agent",
+        "target": "zapier_action_tools_factory",
+        "label": "Requests Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "zapier_action_tools_factory",
+        "target": "zapier_actions_adapter",
+        "label": "Uses Adapter to Fetch",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "zapier_actions_adapter",
+        "target": "zapier_api",
+        "label": "Calls API for Actions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "zapier_api",
+        "target": "zapier_actions_adapter",
+        "label": "Returns Available Actions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "zapier_actions_adapter",
+        "target": "zapier_action_tools_factory",
+        "label": "Provides Raw Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "zapier_action_tools_factory",
+        "target": "crewai_agent",
+        "label": "Returns Filtered Tools",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "agent_interaction",
+        "label": "Agent Interaction",
+        "nodes": [
+          "crewai_agent"
+        ],
+        "title": "Agent Interaction with Tools",
+        "description": "Describes how a CrewAI agent requests and utilizes the Zapier tools to perform tasks.",
+        "role": "surface"
+      },
+      {
+        "id": "tool_provisioning",
+        "label": "Tool Provisioning",
+        "nodes": [
+          "zapier_action_tools_factory",
+          "zapier_actions_adapter"
+        ],
+        "title": "Zapier Tool Provisioning",
+        "description": "Handles the creation, adaptation, and filtering of Zapier action tools for use within the CrewAI framework.",
+        "role": "generative"
+      },
+      {
+        "id": "external_integration",
+        "label": "External Integration",
+        "nodes": [
+          "zapier_api"
+        ],
+        "title": "External Zapier Integration",
+        "description": "Represents the interaction with the external Zapier API to retrieve and execute automation actions.",
+        "role": "data"
+      }
+    ]
+  }
+}

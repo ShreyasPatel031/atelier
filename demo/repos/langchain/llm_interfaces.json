@@ -1,0 +1,440 @@
+{
+  "title": "Language Model Interfaces",
+  "summary": "This module defines the core interfaces for interacting with various language models (LLMs) and chat models. It includes abstract base classes for model implementation, utility functions, and fake models for testing purposes.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "node_runnable_serializable",
+        "label": "RunnableSerializable Base",
+        "type": "external",
+        "link": null,
+        "title": "Runnable Serializable Base",
+        "description": "Base class for serializable runnables, providing core execution and serialization capabilities."
+      },
+      {
+        "id": "node_base_lang_model",
+        "label": "Base Language Model",
+        "type": "component",
+        "link": null,
+        "title": "Base Language Model Interface",
+        "description": "Abstract base class for all language model wrappers, defining common methods for generation, caching, and token counting."
+      },
+      {
+        "id": "node_llm",
+        "label": "LLM (Text Completion)",
+        "type": "component",
+        "link": null,
+        "title": "Base LLM for Text Completion",
+        "description": "Abstract base class for implementing custom Large Language Models (LLMs) focused on text completion, requiring `_call` and `_identifying_params`."
+      },
+      {
+        "id": "node_base_chat_model",
+        "label": "Base Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "Base Chat Model Interface",
+        "description": "Abstract base class for chat models, handling message-based interactions."
+      },
+      {
+        "id": "node_simple_chat_model",
+        "label": "Simple Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "Simplified Chat Model Base",
+        "description": "A simplified abstract base class for chat models, primarily for backward compatibility, requiring implementation of a `_call` method."
+      },
+      {
+        "id": "node_fake_list_chat_model",
+        "label": "Fake List Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "Fake Chat Model (List Responses)",
+        "description": "A fake chat model for testing that cycles through a predefined list of string responses, supporting streaming and batching."
+      },
+      {
+        "id": "node_fake_chat_model",
+        "label": "Fake Chat Model (Static)",
+        "type": "component",
+        "link": null,
+        "title": "Simple Fake Chat Model",
+        "description": "A basic fake chat model for testing that always returns a static 'fake response'."
+      },
+      {
+        "id": "node_fake_messages_list_chat_model",
+        "label": "Fake Message List Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "Fake Chat Model (Message List)",
+        "description": "A fake chat model for testing that cycles through a predefined list of `BaseMessage` objects as responses."
+      },
+      {
+        "id": "node_parrot_fake_chat_model",
+        "label": "Parrot Fake Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "Parrot Fake Chat Model",
+        "description": "A generic fake chat model for testing that echoes the last input message as its response."
+      },
+      {
+        "id": "node_init_chat_model",
+        "label": "Initialize Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "Initialize Chat Model Factory",
+        "description": "Factory function to create and configure chat models from various providers, supporting fixed or runtime-configurable parameters."
+      },
+      {
+        "id": "node_before_sleep",
+        "label": "LLM Retry Sleep Handler",
+        "type": "component",
+        "link": null,
+        "title": "LLM Retry Sleep Handler",
+        "description": "Internal utility function used within LLM retry logic to handle asynchronous callbacks during sleep periods."
+      },
+      {
+        "id": "node_configurable_model",
+        "label": "Configurable Model Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Configurable Model Wrapper",
+        "description": "Internal wrapper for models whose parameters can be configured at runtime by `init_chat_model`."
+      },
+      {
+        "id": "node_prompt_value",
+        "label": "Prompt Value",
+        "type": "external",
+        "link": null,
+        "title": "Prompt Value Object",
+        "description": "Represents a prompt that can be converted to different language model formats (string or messages)."
+      },
+      {
+        "id": "node_llm_result",
+        "label": "LLM Result",
+        "type": "external",
+        "link": null,
+        "title": "LLM Generation Result",
+        "description": "Container for language model generation results, including candidate generations and model-specific output."
+      },
+      {
+        "id": "node_base_message",
+        "label": "Base Message",
+        "type": "external",
+        "link": null,
+        "title": "Base Chat Message",
+        "description": "Abstract base class for chat messages (e.g., HumanMessage, AIMessage, SystemMessage)."
+      },
+      {
+        "id": "node_chat_result",
+        "label": "Chat Result",
+        "type": "external",
+        "link": null,
+        "title": "Chat Generation Result",
+        "description": "Container for chat model generation results, including chat generations."
+      },
+      {
+        "id": "node_chat_generation",
+        "label": "Chat Generation",
+        "type": "external",
+        "link": null,
+        "title": "Single Chat Generation",
+        "description": "Represents a single generation from a chat model, containing the generated message."
+      },
+      {
+        "id": "node_ai_message",
+        "label": "AI Message",
+        "type": "external",
+        "link": null,
+        "title": "AI Assistant Message",
+        "description": "Represents a message from an AI assistant."
+      },
+      {
+        "id": "node_ai_message_chunk",
+        "label": "AI Message Chunk",
+        "type": "external",
+        "link": null,
+        "title": "Streaming AI Message Chunk",
+        "description": "A chunk of an AI message, used for streaming responses."
+      },
+      {
+        "id": "node_callback_manager_llm",
+        "label": "LLM Callback Manager",
+        "type": "external",
+        "link": null,
+        "title": "LLM Run Callback Manager",
+        "description": "Manages synchronous callbacks for LLM runs."
+      },
+      {
+        "id": "node_async_callback_manager_llm",
+        "label": "Async LLM Callback Manager",
+        "type": "external",
+        "link": null,
+        "title": "Async LLM Run Callback Manager",
+        "description": "Manages asynchronous callbacks for LLM runs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "node_base_lang_model",
+        "target": "node_runnable_serializable",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_llm",
+        "target": "node_base_lang_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_base_chat_model",
+        "target": "node_base_lang_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_simple_chat_model",
+        "target": "node_base_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_fake_list_chat_model",
+        "target": "node_simple_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_fake_chat_model",
+        "target": "node_simple_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_fake_messages_list_chat_model",
+        "target": "node_base_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_parrot_fake_chat_model",
+        "target": "node_base_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_base_lang_model",
+        "target": "node_prompt_value",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_base_lang_model",
+        "target": "node_llm_result",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_base_lang_model",
+        "target": "node_base_message",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_llm",
+        "target": "node_callback_manager_llm",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_llm",
+        "target": "node_async_callback_manager_llm",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_simple_chat_model",
+        "target": "node_base_message",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_simple_chat_model",
+        "target": "node_chat_result",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_simple_chat_model",
+        "target": "node_ai_message",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_simple_chat_model",
+        "target": "node_chat_generation",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_simple_chat_model",
+        "target": "node_callback_manager_llm",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_simple_chat_model",
+        "target": "node_async_callback_manager_llm",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_fake_list_chat_model",
+        "target": "node_ai_message_chunk",
+        "label": "yields",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_fake_list_chat_model",
+        "target": "node_chat_generation",
+        "label": "yields",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_fake_messages_list_chat_model",
+        "target": "node_chat_generation",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_parrot_fake_chat_model",
+        "target": "node_chat_result",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_parrot_fake_chat_model",
+        "target": "node_chat_generation",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_init_chat_model",
+        "target": "node_base_chat_model",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_init_chat_model",
+        "target": "node_configurable_model",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_before_sleep",
+        "target": "node_callback_manager_llm",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_before_sleep",
+        "target": "node_async_callback_manager_llm",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "group_core_interfaces",
+        "label": "Core Model Interfaces",
+        "nodes": [
+          "node_base_lang_model",
+          "node_llm",
+          "node_base_chat_model",
+          "node_simple_chat_model"
+        ],
+        "title": "Core Model Interfaces",
+        "description": "Abstract and base classes defining the fundamental interfaces for language models and chat models.",
+        "role": "surface"
+      },
+      {
+        "id": "group_fake_models",
+        "label": "Fake Model Implementations",
+        "nodes": [
+          "node_fake_list_chat_model",
+          "node_fake_chat_model",
+          "node_fake_messages_list_chat_model",
+          "node_parrot_fake_chat_model"
+        ],
+        "title": "Fake Model Implementations",
+        "description": "Implementations of chat models designed for testing purposes, providing predictable or simulated responses.",
+        "role": "generative"
+      },
+      {
+        "id": "group_config_utils",
+        "label": "Model Configuration & Utilities",
+        "nodes": [
+          "node_init_chat_model",
+          "node_configurable_model",
+          "node_before_sleep"
+        ],
+        "title": "Model Configuration & Utilities",
+        "description": "Functions and wrappers for initializing and configuring language models, including retry mechanisms.",
+        "role": "analytical"
+      },
+      {
+        "id": "group_prompt_output_data",
+        "label": "Prompt & LLM Output Data",
+        "nodes": [
+          "node_prompt_value",
+          "node_llm_result",
+          "node_base_message"
+        ],
+        "title": "Prompt & LLM Output Data",
+        "description": "Data structures representing input prompts and the general output results from language models.",
+        "role": "data"
+      },
+      {
+        "id": "group_chat_output_data",
+        "label": "Chat Output Data",
+        "nodes": [
+          "node_chat_result",
+          "node_chat_generation",
+          "node_ai_message",
+          "node_ai_message_chunk"
+        ],
+        "title": "Chat Output Data",
+        "description": "Specific data structures for representing chat model responses, including generations and message chunks.",
+        "role": "data"
+      }
+    ]
+  }
+}

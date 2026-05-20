@@ -1,0 +1,378 @@
+{
+  "title": "A2A Updates and Extensions",
+  "summary": "This module manages various update mechanisms for Agent-to-Agent (A2A) communication, including polling, streaming, and push notifications. It also provides extensions for A2UI (Agent-to-User Interface) to enable declarative UI generation and interaction.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "PollingHandlerKwargs",
+        "label": "Polling Configuration",
+        "type": "component",
+        "link": null,
+        "title": "PollingHandlerKwargs",
+        "description": "Defines configuration parameters for the polling-based update handler, such as intervals, timeouts, and history length."
+      },
+      {
+        "id": "StreamingHandlerKwargs",
+        "label": "Streaming Configuration",
+        "type": "component",
+        "link": null,
+        "title": "StreamingHandlerKwargs",
+        "description": "Specifies configuration parameters for the streaming-based update handler."
+      },
+      {
+        "id": "PushNotificationHandlerKwargs",
+        "label": "Push Notification Configuration",
+        "type": "component",
+        "link": null,
+        "title": "PushNotificationHandlerKwargs",
+        "description": "Contains configuration settings for the push notification (webhook) update handler, including result store and polling parameters."
+      },
+      {
+        "id": "PollingHandler",
+        "label": "Handle Polling Updates",
+        "type": "component",
+        "link": null,
+        "title": "PollingHandler",
+        "description": "Executes Agent-to-Agent delegation using a polling mechanism to retrieve task updates and results from the server."
+      },
+      {
+        "id": "StreamingHandler",
+        "label": "Handle Streaming Updates",
+        "type": "component",
+        "link": null,
+        "title": "StreamingHandler",
+        "description": "Manages Agent-to-Agent delegation using Server-Sent Events (SSE) streaming for real-time updates, including interruption recovery."
+      },
+      {
+        "id": "PushNotificationHandler",
+        "label": "Handle Push Notification Updates",
+        "type": "component",
+        "link": null,
+        "title": "PushNotificationHandler",
+        "description": "Processes Agent-to-Agent delegation using webhook-based push notifications to receive task updates."
+      },
+      {
+        "id": "A2UIClientExtension",
+        "label": "A2UI Client Extension",
+        "type": "component",
+        "link": null,
+        "title": "A2UIClientExtension",
+        "description": "Provides client-side support for A2UI, augmenting prompts, tracking UI state, and validating A2UI messages in agent responses."
+      },
+      {
+        "id": "A2UIServerExtension",
+        "label": "A2UI Server Extension",
+        "type": "component",
+        "link": null,
+        "title": "A2UIServerExtension",
+        "description": "Enables server-side A2UI declarative UI generation by negotiating catalog preferences and wrapping A2UI messages in A2A DataParts."
+      },
+      {
+        "id": "_build_data_part",
+        "label": "Build v0.8 A2UI DataPart",
+        "type": "component",
+        "link": null,
+        "title": "_build_data_part",
+        "description": "Validates a v0.8 A2UI message and converts it into a DataPart dictionary for A2A communication."
+      },
+      {
+        "id": "_build_data_part_v09",
+        "label": "Build v0.9 A2UI DataPart",
+        "type": "component",
+        "link": null,
+        "title": "_build_data_part_v09",
+        "description": "Validates a v0.9 A2UI message and converts it into a DataPart dictionary for A2A communication."
+      },
+      {
+        "id": "validate_a2ui_event",
+        "label": "Validate v0.8 A2UI Event",
+        "type": "component",
+        "link": null,
+        "title": "validate_a2ui_event",
+        "description": "Parses and validates a raw JSON-decoded A2UI client-to-server event against the v0.8 schema."
+      },
+      {
+        "id": "validate_a2ui_event_v09",
+        "label": "Validate v0.9 A2UI Event",
+        "type": "component",
+        "link": null,
+        "title": "validate_a2ui_event_v09",
+        "description": "Parses and validates a raw JSON-decoded A2UI v0.9 client-to-server event against its specific schema."
+      },
+      {
+        "id": "validate_catalog_components_v09",
+        "label": "Validate v0.9 A2UI Components",
+        "type": "component",
+        "link": null,
+        "title": "validate_catalog_components_v09",
+        "description": "Validates component properties within an A2UI v0.9 updateComponents message against the basic catalog."
+      },
+      {
+        "id": "get_extensions_from_config",
+        "label": "Extract Extension URIs",
+        "type": "component",
+        "link": null,
+        "title": "get_extensions_from_config",
+        "description": "Extracts and deduplicates extension URIs from A2A client configuration objects."
+      },
+      {
+        "id": "A2A Client",
+        "label": "A2A Client",
+        "type": "external",
+        "link": null,
+        "title": "A2A Client",
+        "description": "The client component responsible for initiating and managing Agent-to-Agent communication."
+      },
+      {
+        "id": "A2A Server",
+        "label": "A2A Server",
+        "type": "external",
+        "link": null,
+        "title": "A2A Server",
+        "description": "The server component that receives and processes Agent-to-Agent communication requests."
+      },
+      {
+        "id": "CrewAI Agent",
+        "label": "CrewAI Agent",
+        "type": "external",
+        "link": null,
+        "title": "CrewAI Agent",
+        "description": "An intelligent agent within the CrewAI framework that interacts with A2A extensions."
+      },
+      {
+        "id": "User Interface",
+        "label": "External User Interface",
+        "type": "external",
+        "link": null,
+        "title": "User Interface",
+        "description": "An external user interface that interacts with A2UI extensions for declarative UI generation."
+      },
+      {
+        "id": "Event Bus",
+        "label": "CrewAI Event Bus",
+        "type": "external",
+        "link": null,
+        "title": "CrewAI Event Bus",
+        "description": "A central messaging system for emitting and handling events within the CrewAI framework."
+      }
+    ],
+    "edges": [
+      {
+        "source": "A2A Client",
+        "target": "PollingHandler",
+        "label": "Initiates Polling",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2A Client",
+        "target": "StreamingHandler",
+        "label": "Initiates Streaming",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2A Client",
+        "target": "PushNotificationHandler",
+        "label": "Initiates Push Notifications",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PollingHandlerKwargs",
+        "target": "PollingHandler",
+        "label": "Configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StreamingHandlerKwargs",
+        "target": "StreamingHandler",
+        "label": "Configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PushNotificationHandlerKwargs",
+        "target": "PushNotificationHandler",
+        "label": "Configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PollingHandler",
+        "target": "Event Bus",
+        "label": "Emits Events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StreamingHandler",
+        "target": "Event Bus",
+        "label": "Emits Events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PushNotificationHandler",
+        "target": "Event Bus",
+        "label": "Emits Events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2UIClientExtension",
+        "target": "CrewAI Agent",
+        "label": "Augments Prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CrewAI Agent",
+        "target": "A2UIClientExtension",
+        "label": "Processes Response",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2UIClientExtension",
+        "target": "User Interface",
+        "label": "Generates UI Data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2UIServerExtension",
+        "target": "A2A Server",
+        "label": "Registers Extension",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2A Server",
+        "target": "A2UIServerExtension",
+        "label": "Handles A2UI Requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2UIServerExtension",
+        "target": "_build_data_part",
+        "label": "Uses v0.8 Builder",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2UIServerExtension",
+        "target": "_build_data_part_v09",
+        "label": "Uses v0.9 Builder",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_build_data_part",
+        "target": "validate_a2ui_event",
+        "label": "Validates Message",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_build_data_part_v09",
+        "target": "validate_a2ui_event_v09",
+        "label": "Validates Message",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2UIClientExtension",
+        "target": "validate_a2ui_event",
+        "label": "Validates Incoming Event",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2UIClientExtension",
+        "target": "validate_a2ui_event_v09",
+        "label": "Validates Incoming v0.9 Event",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "A2UIClientExtension",
+        "target": "validate_catalog_components_v09",
+        "label": "Validates Components",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_extensions_from_config",
+        "target": "A2A Client",
+        "label": "Provides Extension URIs",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "update_mechanism_handlers",
+        "label": "Update Mechanism Handlers",
+        "nodes": [
+          "PollingHandler",
+          "StreamingHandler",
+          "PushNotificationHandler"
+        ],
+        "title": "A2A Update Handlers",
+        "description": "Components responsible for managing different Agent-to-Agent communication update strategies.",
+        "role": "generative"
+      },
+      {
+        "id": "update_configuration",
+        "label": "Update Configuration",
+        "nodes": [
+          "PollingHandlerKwargs",
+          "StreamingHandlerKwargs",
+          "PushNotificationHandlerKwargs"
+        ],
+        "title": "A2A Update Configurations",
+        "description": "Data structures defining the parameters for various A2A update handlers.",
+        "role": "data"
+      },
+      {
+        "id": "a2ui_client_side_logic",
+        "label": "A2UI Client-Side Logic",
+        "nodes": [
+          "A2UIClientExtension",
+          "validate_a2ui_event",
+          "validate_a2ui_event_v09",
+          "validate_catalog_components_v09"
+        ],
+        "title": "A2UI Client-Side Processing",
+        "description": "Components handling the client-side aspects of A2UI, including prompt augmentation and message validation.",
+        "role": "surface"
+      },
+      {
+        "id": "a2ui_server_side_logic",
+        "label": "A2UI Server-Side Logic",
+        "nodes": [
+          "A2UIServerExtension",
+          "_build_data_part",
+          "_build_data_part_v09"
+        ],
+        "title": "A2UI Server-Side Processing",
+        "description": "Components managing the server-side integration of A2UI, including message wrapping and data part construction.",
+        "role": "surface"
+      },
+      {
+        "id": "extension_management",
+        "label": "Extension Management",
+        "nodes": [
+          "get_extensions_from_config"
+        ],
+        "title": "A2A Extension Management",
+        "description": "Utility for extracting and managing A2A extension configurations.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

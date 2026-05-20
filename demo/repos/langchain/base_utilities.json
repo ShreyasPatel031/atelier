@@ -1,0 +1,156 @@
+{
+  "title": "Core Utility Functions",
+  "summary": "This module provides fundamental utility classes and functions for caching, object serialization, system information, iterable manipulation, HTML parsing, Pydantic model enhancements, and version consistency checks.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "in_memory_cache",
+        "label": "In-Memory Cache",
+        "type": "component",
+        "link": null,
+        "title": "In-Memory Cache",
+        "description": "A cache implementation that stores key-value pairs in memory, supporting both synchronous and asynchronous lookup, update, and clear operations. It can be configured with a maximum size to manage memory usage."
+      },
+      {
+        "id": "serializable_base",
+        "label": "Serializable Base Class",
+        "type": "component",
+        "link": null,
+        "title": "Serializable Base Class",
+        "description": "Provides a base class for objects that can be serialized to JSON. It defines methods for determining serializability, getting a unique namespace, handling secrets, and including additional attributes for serialization."
+      },
+      {
+        "id": "print_sys_info",
+        "label": "Print System Information",
+        "type": "component",
+        "link": null,
+        "title": "Print System Information",
+        "description": "Gathers and prints detailed system and package information, including OS, Python version, and versions of LangChain-related packages, useful for debugging and environment analysis."
+      },
+      {
+        "id": "async_tee_iterator",
+        "label": "Asynchronous Tee Iterator",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Tee Iterator",
+        "description": "Splits a single asynchronous iterable into multiple independent asynchronous iterators, allowing each child iterator to consume items at its own pace while buffering shared items."
+      },
+      {
+        "id": "extract_sub_links",
+        "label": "Extract HTML Sub-Links",
+        "type": "component",
+        "link": null,
+        "title": "Extract HTML Sub-Links",
+        "description": "Parses an HTML string to extract all links, converts them to absolute paths, and can filter them based on a base URL, regex patterns, and exclusion prefixes."
+      },
+      {
+        "id": "sync_tee_iterator",
+        "label": "Synchronous Tee Iterator",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Tee Iterator",
+        "description": "Splits a single synchronous iterable into multiple independent synchronous iterators, allowing each child iterator to consume items at its own pace while buffering shared items."
+      },
+      {
+        "id": "pydantic_wrapper",
+        "label": "Pydantic Model Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Pydantic Model Wrapper",
+        "description": "A utility that modifies Pydantic model initialization logic, handling default values, aliases, and population by field name before the model is validated."
+      },
+      {
+        "id": "get_pydantic_version",
+        "label": "Get Pydantic Major Version",
+        "type": "component",
+        "link": null,
+        "title": "Get Pydantic Major Version",
+        "description": "A deprecated utility function to retrieve the major version number of the Pydantic library. It is recommended to use `PYDANTIC_VERSION.major` directly."
+      },
+      {
+        "id": "arg_validation_wrapper",
+        "label": "Argument Validation Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Argument Validation Wrapper",
+        "description": "A utility that ensures exactly one argument within specified groups is provided and not `None`, raising a `ValueError` if validation fails."
+      },
+      {
+        "id": "core_version_check",
+        "label": "Core Library Version Check",
+        "type": "component",
+        "link": null,
+        "title": "Core Library Version Check",
+        "description": "A script that validates version consistency between `pyproject.toml` and `langchain_core/version.py` for the core library."
+      },
+      {
+        "id": "langchain_v1_version_check",
+        "label": "Langchain V1 Version Check",
+        "type": "component",
+        "link": null,
+        "title": "Langchain V1 Version Check",
+        "description": "A script that validates version consistency between `pyproject.toml` and `langchain/__init__.py` for the `langchain_v1` library."
+      }
+    ],
+    "edges": [],
+    "groups": [
+      {
+        "id": "data_management_group",
+        "label": "Data Management",
+        "nodes": [
+          "in_memory_cache",
+          "serializable_base"
+        ],
+        "title": "Data Management",
+        "description": "Handles in-memory caching and provides a base for serializing objects to JSON, including secret management.",
+        "role": "data"
+      },
+      {
+        "id": "system_utilities_group",
+        "label": "System & Versioning",
+        "nodes": [
+          "print_sys_info",
+          "core_version_check",
+          "langchain_v1_version_check"
+        ],
+        "title": "System & Versioning",
+        "description": "Provides tools for inspecting the system environment, listing installed packages, and ensuring version consistency across different parts of the library.",
+        "role": "analytical"
+      },
+      {
+        "id": "iteration_utilities_group",
+        "label": "Iteration & Streaming",
+        "nodes": [
+          "async_tee_iterator",
+          "sync_tee_iterator"
+        ],
+        "title": "Iteration & Streaming",
+        "description": "Offers utilities for splitting iterables into multiple independent iterators, supporting both synchronous and asynchronous data streams.",
+        "role": "data"
+      },
+      {
+        "id": "pydantic_validation_group",
+        "label": "Pydantic & Validation",
+        "nodes": [
+          "pydantic_wrapper",
+          "get_pydantic_version",
+          "arg_validation_wrapper"
+        ],
+        "title": "Pydantic & Validation",
+        "description": "Contains utilities for enhancing Pydantic model behavior, such as handling initialization logic and validating argument groups.",
+        "role": "surface"
+      },
+      {
+        "id": "web_html_group",
+        "label": "Web & HTML Processing",
+        "nodes": [
+          "extract_sub_links"
+        ],
+        "title": "Web & HTML Processing",
+        "description": "Includes functions for parsing HTML content to extract and process links, with options for filtering and path conversion.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,473 @@
+{
+  "title": "Flow Orchestration and Task Management",
+  "summary": "This module defines the core Flow class for orchestrating multi-step AI agent workflows, managing state, handling human feedback, and providing persistence and visualization capabilities. It also includes specialized task types like conditional execution and hallucination guardrails.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "Flow",
+        "label": "Flow",
+        "type": "component",
+        "link": null,
+        "title": "Core Flow Definition",
+        "description": "The central class for defining and managing multi-step AI agent workflows, handling execution, state, and interactions."
+      },
+      {
+        "id": "FlowMeta",
+        "label": "Flow Metaclass",
+        "type": "component",
+        "link": null,
+        "title": "Flow Metaclass",
+        "description": "Metaclass responsible for introspecting Flow classes, registering start methods, listeners, and routers during class creation."
+      },
+      {
+        "id": "KickoffExecution",
+        "label": "Kickoff Flow Execution",
+        "type": "component",
+        "link": null,
+        "title": "Initiate Flow Execution",
+        "description": "Starts the workflow, handling initial state setup, event emission, and execution of designated start methods, supporting both synchronous and asynchronous modes."
+      },
+      {
+        "id": "ResumeFlow",
+        "label": "Resume Paused Flow",
+        "type": "component",
+        "link": null,
+        "title": "Continue Flow After Pause",
+        "description": "Resumes a flow that was paused for human feedback, processing the feedback and triggering subsequent steps."
+      },
+      {
+        "id": "RestorePending",
+        "label": "Restore From Pending",
+        "type": "component",
+        "link": null,
+        "title": "Load Paused Flow State",
+        "description": "Reconstructs a Flow instance from a persisted state that was paused awaiting human feedback."
+      },
+      {
+        "id": "ExecuteMethod",
+        "label": "Execute Flow Method",
+        "type": "component",
+        "link": null,
+        "title": "Run Individual Flow Method",
+        "description": "Handles the execution of individual methods within a flow, including event emission, context management, and error handling."
+      },
+      {
+        "id": "ManageListeners",
+        "label": "Manage Listeners",
+        "type": "component",
+        "link": null,
+        "title": "Orchestrate Method Triggers",
+        "description": "Manages the execution of methods (listeners and routers) triggered by the completion of other flow methods, supporting parallel and conditional execution."
+      },
+      {
+        "id": "EvaluateConditions",
+        "label": "Evaluate Conditions",
+        "type": "component",
+        "link": null,
+        "title": "Determine Flow Path",
+        "description": "Evaluates complex AND/OR conditions to determine which methods should be triggered next in the workflow, supporting nested logic."
+      },
+      {
+        "id": "InitializeState",
+        "label": "Initialize Flow State",
+        "type": "component",
+        "link": null,
+        "title": "Setup Flow Data State",
+        "description": "Creates and initializes the flow's internal state, including unique identifiers and default values, and updates it with inputs."
+      },
+      {
+        "id": "PersistState",
+        "label": "Persist Flow State",
+        "type": "component",
+        "link": null,
+        "title": "Save Flow Progress",
+        "description": "Provides an abstract interface for saving and loading the flow's state to a persistence backend, ensuring durability and resumability."
+      },
+      {
+        "id": "RequestInput",
+        "label": "Request User Input",
+        "type": "component",
+        "link": null,
+        "title": "Prompt for Human Input",
+        "description": "Allows the flow to request and receive input from a human user, blocking execution until input is provided or a timeout occurs."
+      },
+      {
+        "id": "ProcessFeedback",
+        "label": "Process Human Feedback",
+        "type": "component",
+        "link": null,
+        "title": "Handle Human Review & Decisions",
+        "description": "Manages the process of requesting, receiving, and interpreting human feedback, potentially collapsing free-form text into predefined outcomes using an LLM."
+      },
+      {
+        "id": "GeneratePlot",
+        "label": "Generate Flow Plot",
+        "type": "component",
+        "link": null,
+        "title": "Visualize Flow Structure",
+        "description": "Creates an interactive HTML visualization of the flow's structure, showing methods, connections, and dependencies."
+      },
+      {
+        "id": "InteractiveDiagram",
+        "label": "Interactive Diagram UI",
+        "type": "component",
+        "link": null,
+        "title": "Flow Visualization Interface",
+        "description": "Provides the interactive user interface components for exploring and highlighting nodes and edges within the generated flow diagram."
+      },
+      {
+        "id": "ConditionalTask",
+        "label": "Conditional Task",
+        "type": "component",
+        "link": null,
+        "title": "Dynamically Executed Task",
+        "description": "A specialized task type that executes only if a specified condition, based on previous task output, evaluates to true."
+      },
+      {
+        "id": "HallucinationGuardrail",
+        "label": "Hallucination Guardrail",
+        "type": "component",
+        "link": null,
+        "title": "Task Output Validation",
+        "description": "A placeholder task component designed to validate outputs against hallucination criteria, ensuring factual accuracy (premium feature)."
+      },
+      {
+        "id": "ReplayEvents",
+        "label": "Replay Recorded Events",
+        "type": "component",
+        "link": null,
+        "title": "Re-dispatch Past Events",
+        "description": "Dispatches previously recorded method execution events, typically during flow resumption from a checkpoint, to re-establish state and context."
+      },
+      {
+        "id": "ReloadState",
+        "label": "Reload Flow State",
+        "type": "component",
+        "link": null,
+        "title": "Update Flow from Execution Data",
+        "description": "Restores the flow's execution ID, completed methods, and state from a provided execution data dictionary, enabling resumption."
+      },
+      {
+        "id": "FlowAnalysisUtils",
+        "label": "Flow Analysis Utilities",
+        "type": "component",
+        "link": null,
+        "title": "Graph & Code Analysis Tools",
+        "description": "Collection of utility functions for analyzing flow structure, method signatures, and code to extract information for visualization and internal logic."
+      },
+      {
+        "id": "FlowDecorators",
+        "label": "Flow Decorators",
+        "type": "component",
+        "link": null,
+        "title": "Define Flow Behavior",
+        "description": "Decorators used to mark methods as start points, listeners, or routers, defining the control flow and triggering conditions within a Flow."
+      },
+      {
+        "id": "TaskDeserialization",
+        "label": "Task Model Deserialization",
+        "type": "component",
+        "link": null,
+        "title": "Reconstruct Task Models",
+        "description": "Utility for rehydrating Pydantic model class references from serialized checkpoint data, used in task and flow restoration."
+      }
+    ],
+    "edges": [
+      {
+        "source": "FlowMeta",
+        "target": "Flow",
+        "label": "defines structure",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Flow",
+        "target": "KickoffExecution",
+        "label": "initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Flow",
+        "target": "ResumeFlow",
+        "label": "resumes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Flow",
+        "target": "InitializeState",
+        "label": "manages state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Flow",
+        "target": "PersistState",
+        "label": "uses persistence",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Flow",
+        "target": "RequestInput",
+        "label": "requests input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Flow",
+        "target": "ProcessFeedback",
+        "label": "handles feedback",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Flow",
+        "target": "GeneratePlot",
+        "label": "visualizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Flow",
+        "target": "ReplayEvents",
+        "label": "uses for restore",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Flow",
+        "target": "ReloadState",
+        "label": "updates from data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Flow",
+        "target": "FlowDecorators",
+        "label": "applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "KickoffExecution",
+        "target": "ExecuteMethod",
+        "label": "runs methods",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "KickoffExecution",
+        "target": "ReplayEvents",
+        "label": "on resume",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ResumeFlow",
+        "target": "RestorePending",
+        "label": "loads state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ResumeFlow",
+        "target": "ExecuteMethod",
+        "label": "runs methods",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RestorePending",
+        "target": "InitializeState",
+        "label": "updates state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExecuteMethod",
+        "target": "ManageListeners",
+        "label": "triggers listeners",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExecuteMethod",
+        "target": "InitializeState",
+        "label": "updates state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ManageListeners",
+        "target": "EvaluateConditions",
+        "label": "uses conditions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ManageListeners",
+        "target": "ExecuteMethod",
+        "label": "executes triggered",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EvaluateConditions",
+        "target": "FlowDecorators",
+        "label": "interprets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InitializeState",
+        "target": "PersistState",
+        "label": "saves/loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PersistState",
+        "target": "RestorePending",
+        "label": "provides data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RequestInput",
+        "target": "ProcessFeedback",
+        "label": "can lead to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ProcessFeedback",
+        "target": "ExecuteMethod",
+        "label": "triggers next",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GeneratePlot",
+        "target": "FlowAnalysisUtils",
+        "label": "uses for structure",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GeneratePlot",
+        "target": "InteractiveDiagram",
+        "label": "renders UI",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FlowAnalysisUtils",
+        "target": "FlowMeta",
+        "label": "informs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FlowAnalysisUtils",
+        "target": "FlowDecorators",
+        "label": "analyzes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConditionalTask",
+        "target": "TaskDeserialization",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "HallucinationGuardrail",
+        "target": "TaskDeserialization",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "FlowOrchestration",
+        "label": "Flow Orchestration",
+        "nodes": [
+          "Flow",
+          "FlowMeta",
+          "KickoffExecution",
+          "ResumeFlow",
+          "ExecuteMethod",
+          "ManageListeners",
+          "ReplayEvents",
+          "ReloadState",
+          "FlowDecorators"
+        ],
+        "title": "Core Flow Execution & Control",
+        "description": "Manages the lifecycle of a Flow, from initiation and method execution to listener management and event replay.",
+        "role": "generative"
+      },
+      {
+        "id": "StatePersistence",
+        "label": "State & Persistence",
+        "nodes": [
+          "InitializeState",
+          "PersistState",
+          "RestorePending"
+        ],
+        "title": "Flow State Management & Storage",
+        "description": "Handles the initialization, updating, and durable storage of the flow's internal state, including mechanisms for resuming from checkpoints.",
+        "role": "data"
+      },
+      {
+        "id": "FlowControlLogic",
+        "label": "Flow Control Logic",
+        "nodes": [
+          "EvaluateConditions"
+        ],
+        "title": "Conditional Flow Routing",
+        "description": "Provides mechanisms for defining and evaluating complex conditions (AND/OR) that dictate the branching and triggering of methods within a flow.",
+        "role": "analytical"
+      },
+      {
+        "id": "HumanInteraction",
+        "label": "Human Interaction & Feedback",
+        "nodes": [
+          "RequestInput",
+          "ProcessFeedback"
+        ],
+        "title": "Human-in-the-Loop Processes",
+        "description": "Facilitates interaction with human users, allowing flows to request input and process feedback to guide execution or validate outputs.",
+        "role": "surface"
+      },
+      {
+        "id": "FlowVisualization",
+        "label": "Flow Visualization",
+        "nodes": [
+          "GeneratePlot",
+          "InteractiveDiagram",
+          "FlowAnalysisUtils"
+        ],
+        "title": "Interactive Flow Diagrams",
+        "description": "Generates interactive visual representations of flow structures, enabling users to understand and explore complex workflows.",
+        "role": "analytical"
+      },
+      {
+        "id": "SpecializedTasks",
+        "label": "Specialized Tasks",
+        "nodes": [
+          "ConditionalTask",
+          "HallucinationGuardrail",
+          "TaskDeserialization"
+        ],
+        "title": "Advanced Task Definitions",
+        "description": "Defines specific types of tasks that extend basic functionality, such as conditional execution and guardrails for output validation.",
+        "role": "generative"
+      }
+    ]
+  }
+}

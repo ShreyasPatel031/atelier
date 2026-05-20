@@ -69,59 +69,45 @@ COMPLETE MODULE TREE (all modules in repository):
 class ArchitecturalAgentRunner:
     """Runner for the architectural exploration agent."""
     
-    def __init__(self, docs_path: str, llm_base_url: str = None, llm_api_key: str = None, main_model: str = None):
+    def __init__(
+        self,
+        docs_path: str,
+        llm_base_url: str = None,
+        llm_api_key: str = None,
+        main_model: str = None,
+        llm_config=None,
+    ):
         """
         Initialize the architectural agent.
         
         Args:
             docs_path: Path to the generated documentation folder
-            llm_base_url: LLM API base URL (defaults to env var)
-            llm_api_key: LLM API key (defaults to env var)
-            main_model: Main model name (defaults to env var)
+            llm_base_url: LLM API base URL (optional override)
+            llm_api_key: LLM API key (optional override)
+            main_model: Main model name (optional override)
+            llm_config: Pre-built ``Config`` (optional; else ``resolve_llm_config_for_services``)
         """
-        import os
-        
+        from codewiki.src.be.llm_services import create_main_model, resolve_llm_config_for_services
+
         self.docs_path = Path(docs_path)
-        
-        # Get Gemini API key from environment (optional if using gcloud auth)
-        self.gemini_api_key = os.getenv('GEMINI_API_KEY')
-        self.main_model = main_model or os.getenv('MAIN_MODEL', 'gemini-2.5-flash')
-        
+
+        overrides = {}
+        if llm_base_url is not None:
+            overrides["llm_base_url"] = llm_base_url
+        if llm_api_key is not None:
+            overrides["llm_api_key"] = llm_api_key
+        if main_model is not None:
+            overrides["main_model"] = main_model
+
+        self.llm_config = llm_config or resolve_llm_config_for_services(**overrides)
+        self.main_model = self.llm_config.main_model
+
+        # Same Vertex ADC / API-key path as ``codewiki generate`` (llm_services.create_main_model)
+        self.model = create_main_model(self.llm_config)
+
         # Load artifacts
         self.module_tree = self._load_module_tree()
         self.metadata = self._load_metadata()
-        
-        # Create Gemini model using pydantic-ai
-        # If GEMINI_API_KEY is set, use it; otherwise rely on gcloud application-default credentials
-        from pydantic_ai.models.google import GoogleModel
-        
-        if self.gemini_api_key:
-            # Set environment variable for GoogleModel
-            os.environ['GEMINI_API_KEY'] = self.gemini_api_key
-            self.model = GoogleModel(
-                model_name=self.main_model,
-                provider='google-gla'
-            )
-        else:
-            # Use gcloud application-default credentials
-            # GoogleModel should automatically use ADC if no API key is provided
-            try:
-                # Verify gcloud auth is available
-                import subprocess
-                result = subprocess.run(['gcloud', 'auth', 'application-default', 'print-access-token'], 
-                                      capture_output=True, text=True, timeout=5)
-                if result.returncode != 0:
-                    raise ValueError("GEMINI_API_KEY not set and gcloud application-default credentials not available. "
-                                   "Run: gcloud auth application-default login")
-            except (FileNotFoundError, subprocess.TimeoutExpired):
-                raise ValueError("GEMINI_API_KEY not set and gcloud not available. "
-                               "Either set GEMINI_API_KEY or install/configure gcloud")
-            
-            # GoogleModel with google-gla provider should use ADC automatically
-            self.model = GoogleModel(
-                model_name=self.main_model,
-                provider='google-gla'
-            )
         
     def _load_module_tree(self) -> Dict[str, Any]:
         """Load module tree from docs."""

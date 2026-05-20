@@ -1,0 +1,56 @@
+{
+    "title": "Graph Execution Engine",
+    "summary": "This module provides a robust framework for defining, executing, and managing complex computational graphs. It includes core components for graph construction, stateful execution, and mechanisms for persisting graph state to ensure reliability and recoverability.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "graph_core_logic",
+                "label": "Core Graph Logic",
+                "type": "module",
+                "link": "graph_core",
+                "title": "Graph Definition & Execution",
+                "description": "Defines the fundamental components for building, executing, and managing directed acyclic graphs (DAGs), including nodes, graph definition, runtime execution, and path construction."
+            },
+            {
+                "id": "state_persistence",
+                "label": "Graph State Persistence",
+                "type": "module",
+                "link": "persistence_mechanisms",
+                "title": "Graph State Management",
+                "description": "Provides abstract and concrete mechanisms for persisting the state of graph runs, enabling tracking of execution progress and recovery across sessions."
+            }
+        ],
+        "edges": [
+            {
+                "source": "graph_core_logic",
+                "target": "state_persistence",
+                "label": "Manages state via",
+                "title": "State Management",
+                "description": "The core graph execution logic relies on the persistence mechanisms to save and load the graph's state during its run."
+            }
+        ],
+        "groups": [
+            {
+                "id": "graph_framework",
+                "label": "Graph Framework",
+                "nodes": [
+                    "graph_core_logic"
+                ],
+                "title": "Core Graph Framework",
+                "description": "The foundational components for defining and executing computational graphs.",
+                "role": null
+            },
+            {
+                "id": "state_management",
+                "label": "State Management",
+                "nodes": [
+                    "state_persistence"
+                ],
+                "title": "Graph State Management",
+                "description": "Mechanisms for ensuring the durability and recoverability of graph execution state.",
+                "role": null
+            }
+        ]
+    }
+}

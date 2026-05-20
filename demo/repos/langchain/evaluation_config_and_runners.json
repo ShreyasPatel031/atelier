@@ -1,0 +1,389 @@
+{
+  "title": "Evaluation Configuration and Runners",
+  "summary": "This module provides configurations for various evaluation types and functions to run LLMs or chains against datasets, logging results to LangSmith. It supports both synchronous and asynchronous evaluation workflows with customizable evaluators.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "RunOnDataset",
+        "label": "Execute Synchronous Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Dataset Evaluation",
+        "description": "Orchestrates the synchronous execution of an LLM or chain across a dataset, applying evaluators and logging results to LangSmith."
+      },
+      {
+        "id": "ARunOnDataset",
+        "label": "Execute Asynchronous Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Dataset Evaluation",
+        "description": "Orchestrates the asynchronous execution of an LLM or chain across a dataset, applying evaluators and logging results to LangSmith."
+      },
+      {
+        "id": "DatasetRunContainer",
+        "label": "Manage Evaluation Run State",
+        "type": "component",
+        "link": null,
+        "title": "Evaluation Run State Manager",
+        "description": "Stores and manages the state, configurations, and results for a dataset evaluation run, including callbacks and metrics collection."
+      },
+      {
+        "id": "ARunLLMOrChain",
+        "label": "Execute LLM/Chain for Example",
+        "type": "component",
+        "link": null,
+        "title": "LLM/Chain Example Executor",
+        "description": "Executes a language model or chain for a single dataset example, handling inputs, callbacks, and potential errors during evaluation."
+      },
+      {
+        "id": "LabeledScoreStringConfig",
+        "label": "Configure Labeled Score Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "Labeled Score Config",
+        "description": "Defines settings for evaluators that score strings based on predefined labels."
+      },
+      {
+        "id": "LabeledCriteriaConfig",
+        "label": "Configure Labeled Criteria Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "Labeled Criteria Config",
+        "description": "Defines settings for evaluators that use an LLM to judge outputs against specific criteria, often with reference answers."
+      },
+      {
+        "id": "EmbeddingDistanceConfig",
+        "label": "Configure Embedding Distance Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "Embedding Distance Config",
+        "description": "Defines settings for evaluators that measure similarity between texts using embedding distances and specified metrics."
+      },
+      {
+        "id": "StringDistanceConfig",
+        "label": "Configure String Distance Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "String Distance Config",
+        "description": "Defines settings for evaluators that compare strings using various distance metrics like Levenshtein or Jaro-Winkler."
+      },
+      {
+        "id": "QAConfig",
+        "label": "Configure QA Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "QA Evaluation Config",
+        "description": "Defines settings for evaluators that assess question-answering performance using an LLM and a prompt template."
+      },
+      {
+        "id": "ContextQAConfig",
+        "label": "Configure Context QA Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "Context QA Evaluation Config",
+        "description": "Defines settings for evaluators that assess context-based question-answering performance using an LLM and a prompt template."
+      },
+      {
+        "id": "CoTQAConfig",
+        "label": "Configure CoT QA Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "CoT QA Evaluation Config",
+        "description": "Defines settings for evaluators that assess Chain-of-Thought QA performance using an LLM and a prompt template."
+      },
+      {
+        "id": "JsonValidityConfig",
+        "label": "Configure JSON Validity Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "JSON Validity Config",
+        "description": "Defines settings for evaluators that check if an output string represents valid JSON."
+      },
+      {
+        "id": "ExactMatchConfig",
+        "label": "Configure Exact Match Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "Exact Match Config",
+        "description": "Defines settings for evaluators that check for exact string matches, with options for ignoring case, punctuation, or numbers."
+      },
+      {
+        "id": "RegexMatchConfig",
+        "label": "Configure Regex Match Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "Regex Match Config",
+        "description": "Defines settings for evaluators that check if an output string matches a given regular expression."
+      },
+      {
+        "id": "LangSmithClient",
+        "label": "LangSmith Client",
+        "type": "external",
+        "link": null,
+        "title": "LangSmith Platform Interface",
+        "description": "An external client used to interact with the LangSmith platform for logging traces, feedback, and managing datasets."
+      },
+      {
+        "id": "LLMOrChainFactory",
+        "label": "LLM or Chain Constructor",
+        "type": "external",
+        "link": "language_models_and_prompts",
+        "title": "Model/Chain Provider",
+        "description": "A callable that constructs an instance of a Language Model (LLM) or a Chain for execution during evaluation."
+      },
+      {
+        "id": "EvaluationConfig",
+        "label": "Evaluation Configuration (RunEvalConfig)",
+        "type": "external",
+        "link": "eval_chains",
+        "title": "Overall Evaluation Settings",
+        "description": "An external configuration object that specifies which evaluators to run and their specific parameters for a dataset evaluation."
+      },
+      {
+        "id": "DatasetExample",
+        "label": "Dataset Example",
+        "type": "external",
+        "link": null,
+        "title": "Single Dataset Entry",
+        "description": "A single input-output pair from a dataset, representing a test case for the LLM or chain."
+      },
+      {
+        "id": "RunnableConfig",
+        "label": "Runnable Configuration",
+        "type": "external",
+        "link": "agents_and_chains",
+        "title": "Execution Configuration",
+        "description": "A configuration object for a runnable, including settings for callbacks, tags, and concurrency during execution."
+      },
+      {
+        "id": "BaseLanguageModel",
+        "label": "Base Language Model",
+        "type": "external",
+        "link": "llm_interfaces",
+        "title": "Core LLM Interface",
+        "description": "The abstract base class for all language models, providing a standardized interface for LLM interactions."
+      },
+      {
+        "id": "BasePromptTemplate",
+        "label": "Base Prompt Template",
+        "type": "external",
+        "link": "prompt_templates",
+        "title": "Core Prompt Template Interface",
+        "description": "The abstract base class for prompt templates, used to format inputs for language models."
+      },
+      {
+        "id": "Embeddings",
+        "label": "Embeddings Model",
+        "type": "external",
+        "link": "embeddings",
+        "title": "Text Embedding Generator",
+        "description": "An interface for models that generate vector representations (embeddings) of text, used for similarity calculations."
+      }
+    ],
+    "edges": [
+      {
+        "source": "RunOnDataset",
+        "target": "DatasetRunContainer",
+        "label": "Prepares & Finalizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ARunOnDataset",
+        "target": "DatasetRunContainer",
+        "label": "Prepares & Finalizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunOnDataset",
+        "target": "ARunLLMOrChain",
+        "label": "Invokes for each example",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ARunOnDataset",
+        "target": "ARunLLMOrChain",
+        "label": "Invokes for each example",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatasetRunContainer",
+        "target": "LangSmithClient",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatasetRunContainer",
+        "target": "LLMOrChainFactory",
+        "label": "Uses to configure",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatasetRunContainer",
+        "target": "EvaluationConfig",
+        "label": "Processes settings from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatasetRunContainer",
+        "target": "DatasetExample",
+        "label": "Manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatasetRunContainer",
+        "target": "RunnableConfig",
+        "label": "Generates & Manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ARunLLMOrChain",
+        "target": "LLMOrChainFactory",
+        "label": "Executes model/chain from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ARunLLMOrChain",
+        "target": "BaseLanguageModel",
+        "label": "Directly executes LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledCriteriaConfig",
+        "target": "BaseLanguageModel",
+        "label": "Requires LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAConfig",
+        "target": "BaseLanguageModel",
+        "label": "Requires LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAConfig",
+        "target": "BasePromptTemplate",
+        "label": "Requires Prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ContextQAConfig",
+        "target": "BaseLanguageModel",
+        "label": "Requires LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ContextQAConfig",
+        "target": "BasePromptTemplate",
+        "label": "Requires Prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CoTQAConfig",
+        "target": "BaseLanguageModel",
+        "label": "Requires LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CoTQAConfig",
+        "target": "BasePromptTemplate",
+        "label": "Requires Prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EmbeddingDistanceConfig",
+        "target": "Embeddings",
+        "label": "Requires Embeddings",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "EvaluationOrchestration",
+        "label": "Evaluation Orchestration",
+        "nodes": [
+          "RunOnDataset",
+          "ARunOnDataset",
+          "DatasetRunContainer"
+        ],
+        "title": "Evaluation Orchestration",
+        "description": "Manages the overall evaluation process, including dataset iteration, callback handling, and result aggregation.",
+        "role": "generative"
+      },
+      {
+        "id": "CoreExecutionLogic",
+        "label": "Core Execution Logic",
+        "nodes": [
+          "ARunLLMOrChain"
+        ],
+        "title": "Core Execution Logic",
+        "description": "Handles the actual execution of the LLM or chain against individual examples, capturing outputs and errors.",
+        "role": "generative"
+      },
+      {
+        "id": "LLMBasedEvaluationConfigs",
+        "label": "LLM-Based Evaluation Configs",
+        "nodes": [
+          "LabeledCriteriaConfig",
+          "QAConfig",
+          "ContextQAConfig",
+          "CoTQAConfig"
+        ],
+        "title": "LLM-Based Evaluation Configurations",
+        "description": "Defines configurations for evaluation types that rely on a Language Model (LLM) for scoring or analysis.",
+        "role": "surface"
+      },
+      {
+        "id": "StringEmbeddingEvaluationConfigs",
+        "label": "String/Embedding Evaluation Configs",
+        "nodes": [
+          "LabeledScoreStringConfig",
+          "EmbeddingDistanceConfig",
+          "StringDistanceConfig",
+          "JsonValidityConfig",
+          "ExactMatchConfig",
+          "RegexMatchConfig"
+        ],
+        "title": "String and Embedding Evaluation Configurations",
+        "description": "Specifies parameters for evaluation types based on string comparisons, embedding distances, or JSON structure validation.",
+        "role": "surface"
+      },
+      {
+        "id": "ExternalInterfaces",
+        "label": "External Interfaces",
+        "nodes": [
+          "LangSmithClient",
+          "LLMOrChainFactory",
+          "EvaluationConfig",
+          "DatasetExample",
+          "RunnableConfig",
+          "BaseLanguageModel",
+          "BasePromptTemplate",
+          "Embeddings"
+        ],
+        "title": "External System Interfaces",
+        "description": "Represents external systems, data structures, and models that interact with the evaluation runners.",
+        "role": "data"
+      }
+    ]
+  }
+}

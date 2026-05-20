@@ -1,0 +1,260 @@
+{
+  "title": "Text Splitting Strategies",
+  "summary": "This module provides diverse text splitting strategies, including token-based, HTML-aware, and JSON-aware methods, to break down large texts into smaller, manageable chunks while preserving semantic structure or specific formatting.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "token_splitter",
+        "label": "Tokenize Text",
+        "type": "component",
+        "link": null,
+        "title": "TokenTextSplitter",
+        "description": "Splits text into tokens using a specified model tokenizer (e.g., GPT-2), allowing control over special tokens and chunk sizes."
+      },
+      {
+        "id": "html_header_splitter",
+        "label": "Split HTML by Headers",
+        "type": "component",
+        "link": null,
+        "title": "HTMLHeaderTextSplitter",
+        "description": "Divides HTML content into structured documents based on specified header tags (h1, h2, etc.), preserving hierarchical metadata."
+      },
+      {
+        "id": "html_semantic_splitter",
+        "label": "Semantically Split HTML",
+        "type": "component",
+        "link": null,
+        "title": "HTMLSemanticPreservingSplitter",
+        "description": "Splits HTML content into chunks while preserving semantic structure, converting links/media to Markdown, and optionally performing further recursive splitting."
+      },
+      {
+        "id": "html_section_splitter",
+        "label": "Split HTML by Sections",
+        "type": "component",
+        "link": null,
+        "title": "HTMLSectionSplitter",
+        "description": "Splits HTML files into sections based on specified tags and font sizes, using XSLT for transformation and BeautifulSoup for parsing."
+      },
+      {
+        "id": "json_splitter",
+        "label": "Recursively Split JSON",
+        "type": "component",
+        "link": null,
+        "title": "RecursiveJsonSplitter",
+        "description": "Breaks down JSON data into smaller, structured chunks, maintaining the original hierarchy and allowing conversion of lists to dictionaries."
+      },
+      {
+        "id": "spacy_splitter",
+        "label": "Split Text with spaCy",
+        "type": "component",
+        "link": null,
+        "title": "SpacyTextSplitter",
+        "description": "Splits text into sentences or other linguistic units using spaCy's natural language processing pipelines for robust segmentation."
+      },
+      {
+        "id": "tiktoken_lib",
+        "label": "tiktoken library",
+        "type": "external",
+        "link": null,
+        "title": "tiktoken",
+        "description": "External library for fast BPE tokenization, used by TokenTextSplitter for encoding and decoding text."
+      },
+      {
+        "id": "beautiful_soup_lib",
+        "label": "BeautifulSoup library",
+        "type": "external",
+        "link": null,
+        "title": "BeautifulSoup",
+        "description": "External library for parsing HTML and XML documents, essential for extracting data from HTML content."
+      },
+      {
+        "id": "lxml_lib",
+        "label": "lxml library",
+        "type": "external",
+        "link": null,
+        "title": "lxml",
+        "description": "External high-performance XML and HTML processing library, used for XSLT transformations in HTMLSectionSplitter."
+      },
+      {
+        "id": "nltk_lib",
+        "label": "NLTK library",
+        "type": "external",
+        "link": null,
+        "title": "NLTK",
+        "description": "External Natural Language Toolkit, used by HTMLSemanticPreservingSplitter for optional stopword removal."
+      },
+      {
+        "id": "spacy_lib",
+        "label": "spaCy library",
+        "type": "external",
+        "link": null,
+        "title": "spaCy",
+        "description": "External industrial-strength natural language processing library, providing advanced text segmentation capabilities."
+      },
+      {
+        "id": "recursive_char_splitter",
+        "label": "Recursive Character Splitter",
+        "type": "component",
+        "link": "langchain_text_splitters.character",
+        "title": "RecursiveCharacterTextSplitter",
+        "description": "A general-purpose text splitter that recursively splits text by a list of characters, used for fine-grained chunking by other splitters."
+      },
+      {
+        "id": "document_output",
+        "label": "Document Object",
+        "type": "component",
+        "link": "langchain_core.documents.base",
+        "title": "Document",
+        "description": "Standard data structure representing a piece of text content along with associated metadata, used as output by splitters."
+      }
+    ],
+    "edges": [
+      {
+        "source": "token_splitter",
+        "target": "tiktoken_lib",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_header_splitter",
+        "target": "beautiful_soup_lib",
+        "label": "Parses HTML with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_semantic_splitter",
+        "target": "beautiful_soup_lib",
+        "label": "Parses HTML with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_semantic_splitter",
+        "target": "nltk_lib",
+        "label": "Uses for stopword removal",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_semantic_splitter",
+        "target": "recursive_char_splitter",
+        "label": "Further splits with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_section_splitter",
+        "target": "beautiful_soup_lib",
+        "label": "Parses HTML with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_section_splitter",
+        "target": "lxml_lib",
+        "label": "Transforms HTML with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_section_splitter",
+        "target": "recursive_char_splitter",
+        "label": "Further splits with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "spacy_splitter",
+        "target": "spacy_lib",
+        "label": "Uses NLP pipeline from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "token_splitter",
+        "target": "document_output",
+        "label": "Generates chunks for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_header_splitter",
+        "target": "document_output",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_semantic_splitter",
+        "target": "document_output",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "html_section_splitter",
+        "target": "document_output",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_splitter",
+        "target": "document_output",
+        "label": "Generates chunks for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "spacy_splitter",
+        "target": "document_output",
+        "label": "Generates chunks for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "html_splitters_group",
+        "label": "HTML Content Splitters",
+        "nodes": [
+          "html_header_splitter",
+          "html_semantic_splitter",
+          "html_section_splitter"
+        ],
+        "title": "HTML Content Splitters",
+        "description": "Components designed to parse and split HTML documents based on their structural and semantic properties.",
+        "role": "surface"
+      },
+      {
+        "id": "specialized_splitters_group",
+        "label": "Specialized Text/Data Splitters",
+        "nodes": [
+          "token_splitter",
+          "json_splitter",
+          "spacy_splitter"
+        ],
+        "title": "Specialized Text/Data Splitters",
+        "description": "Components for splitting specific data formats like tokens or JSON, or using advanced NLP techniques.",
+        "role": "generative"
+      },
+      {
+        "id": "external_dependencies_group",
+        "label": "External Libraries",
+        "nodes": [
+          "tiktoken_lib",
+          "beautiful_soup_lib",
+          "lxml_lib",
+          "nltk_lib",
+          "spacy_lib"
+        ],
+        "title": "External Libraries",
+        "description": "Third-party libraries that provide core functionalities for parsing, tokenization, and NLP.",
+        "role": "data"
+      }
+    ]
+  }
+}

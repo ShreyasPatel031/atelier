@@ -1,0 +1,86 @@
+{
+  "title": "GGML CPU Backend Initialization",
+  "summary": "This module handles the initialization of the GGML CPU backend and provides functions to retrieve its device properties, including memory and capabilities. It sets up the CPU for efficient machine learning operations.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "init_cpu_backend",
+        "label": "Initialize CPU Backend",
+        "type": "component",
+        "link": null,
+        "title": "Initialize CPU Backend",
+        "description": "Sets up the CPU as a compute device for GGML operations, returning a handle to the initialized backend."
+      },
+      {
+        "id": "get_cpu_props",
+        "label": "Retrieve CPU Device Properties",
+        "type": "component",
+        "link": null,
+        "title": "Get CPU Device Properties",
+        "description": "Queries and returns detailed information about the CPU backend, such as its name, type, available memory, and supported capabilities."
+      },
+      {
+        "id": "ggml_core_framework",
+        "label": "GGML Core Framework",
+        "type": "external",
+        "link": null,
+        "title": "GGML Core Framework",
+        "description": "The central framework responsible for managing various hardware backends and orchestrating machine learning computations."
+      },
+      {
+        "id": "system_hardware_os",
+        "label": "System Hardware & OS",
+        "type": "external",
+        "link": null,
+        "title": "System Hardware & OS",
+        "description": "The underlying operating system and physical hardware components that provide raw information about CPU resources and capabilities."
+      }
+    ],
+    "edges": [
+      {
+        "source": "init_cpu_backend",
+        "target": "ggml_core_framework",
+        "label": "Registers Backend",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_cpu_props",
+        "target": "ggml_core_framework",
+        "label": "Queries Backend State",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "system_hardware_os",
+        "target": "get_cpu_props",
+        "label": "Provides Hardware Info",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "grp_backend_setup",
+        "label": "Backend Setup",
+        "nodes": [
+          "init_cpu_backend"
+        ],
+        "title": "GGML Backend Setup",
+        "description": "Components responsible for the initial configuration and registration of the CPU as a GGML compute backend.",
+        "role": "generative"
+      },
+      {
+        "id": "grp_device_info",
+        "label": "Device Information",
+        "nodes": [
+          "get_cpu_props"
+        ],
+        "title": "CPU Device Information Retrieval",
+        "description": "Components dedicated to gathering and exposing properties and capabilities of the initialized CPU backend device.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

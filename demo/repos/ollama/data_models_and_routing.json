@@ -1,0 +1,208 @@
+{
+  "title": "Data Models and Routing",
+  "summary": "This module defines core data structures for API responses, manages application routing, handles session state, and provides utilities for file processing and global interface extensions.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "models_response",
+        "label": "Model Data Structure",
+        "type": "component",
+        "link": null,
+        "title": "Model API Response Structure",
+        "description": "Defines the structure for API responses containing a list of models, including a utility for converting nested data."
+      },
+      {
+        "id": "settings_response",
+        "label": "Settings Data Structure",
+        "type": "component",
+        "link": null,
+        "title": "Settings API Response Structure",
+        "description": "Defines the structure for API responses containing application settings, including a utility for converting nested data."
+      },
+      {
+        "id": "health_response",
+        "label": "Health Status Data Structure",
+        "type": "component",
+        "link": null,
+        "title": "Health API Response Structure",
+        "description": "Defines the structure for API responses indicating the application's health status (healthy/unhealthy)."
+      },
+      {
+        "id": "model_upstream_response",
+        "label": "Model Upstream Status",
+        "type": "component",
+        "link": null,
+        "title": "Model Upstream Status Response",
+        "description": "Defines the structure for API responses indicating if a model is stale or has an associated error."
+      },
+      {
+        "id": "file_route_types",
+        "label": "Route Type Definitions",
+        "type": "component",
+        "link": null,
+        "title": "File-based Route Type Definitions",
+        "description": "Provides TypeScript interface definitions for file-based routing, mapping full paths and IDs to route components."
+      },
+      {
+        "id": "root_component",
+        "label": "Application Root Component",
+        "type": "component",
+        "link": null,
+        "title": "Main Application Root Component",
+        "description": "The top-level React component that renders the main application layout and initiates global data fetches like settings and cloud status."
+      },
+      {
+        "id": "get_session_state",
+        "label": "Session State Management",
+        "type": "component",
+        "link": null,
+        "title": "Browser Session State Accessor",
+        "description": "Provides a utility function to access and manage browser session storage, with a fallback in case sessionStorage is unavailable."
+      },
+      {
+        "id": "window_interface",
+        "label": "Global Window Interface",
+        "type": "component",
+        "link": null,
+        "title": "Extended Global Window Interface",
+        "description": "Extends the global Window object with custom properties for webview interactions, drag functionality, and menu operations."
+      },
+      {
+        "id": "process_files",
+        "label": "File Validation & Processing",
+        "type": "component",
+        "link": null,
+        "title": "File Validation and Byte Processing",
+        "description": "Asynchronously validates a list of files against specified options and reads valid files into Uint8Array format, reporting any errors."
+      },
+      {
+        "id": "api_client",
+        "label": "API Client",
+        "type": "external",
+        "link": "api_client",
+        "title": "API Client Module",
+        "description": "Handles communication with the backend API, including fetching settings and cloud status."
+      },
+      {
+        "id": "user_interface",
+        "label": "User Interface",
+        "type": "external",
+        "link": "user_interface",
+        "title": "User Interface Module",
+        "description": "The main module for the application's graphical user interface."
+      },
+      {
+        "id": "webview_host_integration",
+        "label": "Webview Host Integration",
+        "type": "external",
+        "link": "webview_host_integration",
+        "title": "Webview Host Integration Module",
+        "description": "Manages the integration and communication between the webview and the native host application."
+      }
+    ],
+    "edges": [
+      {
+        "source": "root_component",
+        "target": "api_client",
+        "label": "fetches settings/status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_route_types",
+        "target": "root_component",
+        "label": "defines routes for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_route_types",
+        "target": "get_session_state",
+        "label": "defines chat route context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "window_interface",
+        "target": "webview_host_integration",
+        "label": "exposes webview API to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "process_files",
+        "target": "user_interface",
+        "label": "used by UI for uploads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_client",
+        "target": "models_response",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_client",
+        "target": "settings_response",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_client",
+        "target": "health_response",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_client",
+        "target": "model_upstream_response",
+        "label": "returns",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "data_structures_group",
+        "label": "API Data Structures",
+        "nodes": [
+          "models_response",
+          "settings_response",
+          "health_response",
+          "model_upstream_response"
+        ],
+        "title": "API Response Data Structures",
+        "description": "Defines the TypeScript interfaces and classes for various API responses, ensuring type safety and data consistency.",
+        "role": "data"
+      },
+      {
+        "id": "routing_navigation_group",
+        "label": "Routing & Navigation",
+        "nodes": [
+          "file_route_types",
+          "root_component",
+          "get_session_state"
+        ],
+        "title": "Application Routing and Session Management",
+        "description": "Components responsible for defining application routes, rendering the main layout, and managing user session state.",
+        "role": "surface"
+      },
+      {
+        "id": "core_utilities_interfaces_group",
+        "label": "Core Utilities & Interfaces",
+        "nodes": [
+          "window_interface",
+          "process_files"
+        ],
+        "title": "Global Utilities and Interface Extensions",
+        "description": "Provides utility functions for file handling and extends the global browser interface for application-specific functionalities.",
+        "role": "generative"
+      }
+    ]
+  }
+}

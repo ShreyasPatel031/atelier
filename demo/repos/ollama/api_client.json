@@ -1,0 +1,192 @@
+{
+  "title": "API Client Module",
+  "summary": "This module provides a set of asynchronous functions for the UI to interact with the application's backend API, handling various operations such as model management, user data, settings, and cloud integration.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "pullModel",
+        "label": "Pull Model",
+        "type": "component",
+        "link": null,
+        "title": "Initiate Model Download",
+        "description": "Requests the backend to download a specified model, providing real-time progress updates to the UI."
+      },
+      {
+        "id": "getInferenceCompute",
+        "label": "Get Inference Compute Info",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Inference Compute Details",
+        "description": "Fetches information about the available inference compute resources from the backend for display."
+      },
+      {
+        "id": "getChats",
+        "label": "Fetch User Chats",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve All User Chat Sessions",
+        "description": "Retrieves a list of all chat sessions associated with the current user from the backend."
+      },
+      {
+        "id": "updateCloudSetting",
+        "label": "Update Cloud Setting",
+        "type": "component",
+        "link": null,
+        "title": "Modify Cloud Integration Status",
+        "description": "Sends a request to the backend to enable or disable cloud integration and returns the updated status."
+      },
+      {
+        "id": "getModelRecommendations",
+        "label": "Get Model Recommendations",
+        "type": "component",
+        "link": null,
+        "title": "Fetch Recommended Models",
+        "description": "Retrieves a list of recommended models from the backend's experimental API for user selection."
+      },
+      {
+        "id": "getCloudStatus",
+        "label": "Get Cloud Status",
+        "type": "component",
+        "link": null,
+        "title": "Check Cloud Integration Status",
+        "description": "Fetches the current status of cloud integration from the backend to inform the UI."
+      },
+      {
+        "id": "getSettings",
+        "label": "Fetch Application Settings",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve User Settings",
+        "description": "Retrieves the current application settings for the user from the backend."
+      },
+      {
+        "id": "updateSettings",
+        "label": "Update Application Settings",
+        "type": "component",
+        "link": null,
+        "title": "Save User Settings",
+        "description": "Sends updated application settings to the backend for persistence."
+      },
+      {
+        "id": "disconnectUser",
+        "label": "Disconnect User Session",
+        "type": "component",
+        "link": null,
+        "title": "Log Out User",
+        "description": "Initiates a request to the backend to sign out the current user session, ending their active session."
+      },
+      {
+        "id": "backend_api",
+        "label": "Backend API",
+        "type": "external",
+        "link": null,
+        "title": "Application Backend API",
+        "description": "The external API endpoint that the UI client communicates with for various operations and data exchange."
+      }
+    ],
+    "edges": [
+      {
+        "source": "pullModel",
+        "target": "backend_api",
+        "label": "requests model pull",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "getInferenceCompute",
+        "target": "backend_api",
+        "label": "fetches compute info",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "getChats",
+        "target": "backend_api",
+        "label": "fetches chat list",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "updateCloudSetting",
+        "target": "backend_api",
+        "label": "updates cloud setting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "getModelRecommendations",
+        "target": "backend_api",
+        "label": "fetches recommendations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "getCloudStatus",
+        "target": "backend_api",
+        "label": "fetches cloud status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "getSettings",
+        "target": "backend_api",
+        "label": "fetches settings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "updateSettings",
+        "target": "backend_api",
+        "label": "updates settings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "disconnectUser",
+        "target": "backend_api",
+        "label": "requests sign out",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "model_management",
+        "label": "Model Management",
+        "nodes": [
+          "pullModel",
+          "getModelRecommendations",
+          "getInferenceCompute"
+        ],
+        "title": "Model Interaction & Information",
+        "description": "Handles operations related to downloading, recommending, and querying inference capabilities of models.",
+        "role": "generative"
+      },
+      {
+        "id": "user_data_state",
+        "label": "User Data & State",
+        "nodes": [
+          "getChats",
+          "getSettings",
+          "updateSettings",
+          "disconnectUser"
+        ],
+        "title": "User-Specific Data and Session Control",
+        "description": "Manages fetching and updating user chats, application settings, and user session disconnection.",
+        "role": "data"
+      },
+      {
+        "id": "cloud_integration",
+        "label": "Cloud Integration",
+        "nodes": [
+          "updateCloudSetting",
+          "getCloudStatus"
+        ],
+        "title": "Cloud Service Status and Configuration",
+        "description": "Provides functions to retrieve and modify the application's cloud integration settings and status.",
+        "role": "data"
+      }
+    ]
+  }
+}

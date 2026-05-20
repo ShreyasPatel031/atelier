@@ -1,0 +1,46 @@
+{
+  "title": "System Utilities Module",
+  "summary": "This module provides utility functions for querying system-level information, specifically focusing on device memory statistics on Windows platforms. It acts as an interface to retrieve hardware-related data.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "get_device_memory",
+        "label": "Query Device Memory",
+        "type": "component",
+        "link": null,
+        "title": "Query Device Memory (Windows)",
+        "description": "Retrieves available and total memory for a specified GPU device using DXGI and PDH APIs on Windows. Currently returns a placeholder value, indicating potential future implementation or platform-specific limitations."
+      },
+      {
+        "id": "windows_os_apis",
+        "label": "Windows System APIs",
+        "type": "external",
+        "link": null,
+        "title": "Windows OS APIs (DXGI, PDH)",
+        "description": "Represents the underlying Windows operating system APIs, such as DXGI (DirectX Graphics Infrastructure) and PDH (Performance Data Helper), used to query hardware and performance information."
+      }
+    ],
+    "edges": [
+      {
+        "source": "get_device_memory",
+        "target": "windows_os_apis",
+        "label": "Queries",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "system_info_retrieval",
+        "label": "System Information Retrieval",
+        "nodes": [
+          "get_device_memory"
+        ],
+        "title": "System Information Retrieval",
+        "description": "Encapsulates functions responsible for gathering system-level hardware and performance data, particularly for device memory.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

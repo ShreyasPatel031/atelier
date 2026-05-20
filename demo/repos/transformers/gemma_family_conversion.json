@@ -1,0 +1,29 @@
+ proyects/gemma_family_conversion.json
+{
+    "title": "Gemma Family Converters",
+    "summary": "This module provides utilities to convert various Gemma family model weights from their original formats to Hugging Face Transformers format, ensuring compatibility and ease of use.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "gemma_model_converters",
+                "label": "Convert Gemma Models",
+                "type": "module",
+                "link": "gemma_model_converters",
+                "title": "Gemma Model Converters",
+                "description": "Handles the conversion of various Gemma family model weights and tokenizers to the Hugging Face Transformers format."
+            }
+        ],
+        "edges": [],
+        "groups": [
+            {
+                "id": "conversion_utilities",
+                "label": "Conversion Utilities",
+                "title": "Conversion Utilities",
+                "description": "Centralized utilities for model and tokenizer conversions across the Gemma family.",
+                "role": "analytical",
+                "nodes": ["gemma_model_converters"]
+            }
+        ]
+    }
+}

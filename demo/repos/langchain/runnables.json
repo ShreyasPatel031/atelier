@@ -1,240 +1,288 @@
 {
-  "title": "Specialized Runnable Implementations",
-  "summary": "This module provides advanced `Runnable` implementations for dynamic configuration, managing chat history, passing data through pipelines, loading components from the LangChain Hub, and routing based on OpenAI function calls.",
+  "title": "Runnable Core & Utilities",
+  "summary": "This module defines the foundational `Runnable` interface for composable units of work, enabling serialization, dynamic configuration, and specialized functionalities like chat history management and external component loading.",
   "diagram": {
     "direction": "TD",
     "nodes": [
       {
-        "id": "dynamic_runnable",
-        "label": "Dynamically Configure Runnable",
+        "id": "Runnable",
+        "label": "Define Core Runnable Interface",
         "type": "component",
         "link": null,
-        "title": "DynamicRunnable",
-        "description": "Allows a `Runnable` to be dynamically configured at runtime, delegating execution to an underlying runnable based on the provided configuration."
+        "title": "Core Runnable Interface",
+        "description": "The foundational abstract base class for all executable units of work, providing methods for invocation, batching, streaming, and composition, along with schema introspection and lifecycle management."
       },
       {
-        "id": "message_history_runnable",
-        "label": "Manage Chat History",
+        "id": "RunnableSerializable",
+        "label": "Enable Runnable Serialization & Dynamic Config",
         "type": "component",
         "link": null,
-        "title": "RunnableWithMessageHistory",
-        "description": "Wraps a `Runnable` to automatically manage and persist chat message history, using a configurable session history factory."
+        "title": "Serializable & Configurable Runnable",
+        "description": "Extends the core Runnable to support JSON serialization and dynamic configuration of fields and alternatives at runtime, enhancing flexibility and reusability."
       },
       {
-        "id": "passthrough_runnable",
-        "label": "Pass Through & Assign Data",
+        "id": "RunnableBindingBase",
+        "label": "Base for Binding Arguments & Config",
         "type": "component",
         "link": null,
-        "title": "RunnablePassthrough",
-        "description": "Acts as an identity function for `Runnable`s, passing inputs through directly or allowing additional keys to be assigned to the output dictionary."
+        "title": "Runnable Binding Base",
+        "description": "A foundational class for runnables that wrap and delegate to another runnable, allowing for the binding of specific arguments or configuration without altering the wrapped runnable's core logic."
       },
       {
-        "id": "hub_runnable",
-        "label": "Load Runnable from Hub",
+        "id": "RunnableEachBase",
+        "label": "Base for Processing List Elements",
         "type": "component",
         "link": null,
-        "title": "HubRunnable",
-        "description": "Retrieves and instantiates a `Runnable` from the LangChain Hub, allowing for versioned and shared runnable components."
+        "title": "Runnable for List Processing",
+        "description": "A foundational class for runnables that apply a wrapped runnable to each item in an input list, efficiently handling batching and streaming for individual elements."
       },
       {
-        "id": "openai_functions_router",
-        "label": "Route to OpenAI Function Calls",
+        "id": "DynamicRunnable",
+        "label": "Manage Dynamic Runnable Selection",
         "type": "component",
         "link": null,
-        "title": "OpenAIFunctionsRouter",
-        "description": "Routes incoming messages to specific `Runnable`s or callables based on the output of OpenAI function calling, enabling dynamic tool selection."
+        "title": "Dynamically Configurable Runnable",
+        "description": "A serializable runnable that acts as a proxy, dynamically selecting and delegating to an underlying runnable based on runtime configuration, enabling configurable fields and alternatives."
       },
       {
-        "id": "stop_iteration_wrapper",
-        "label": "Handle Async Exceptions",
+        "id": "RunnableWithMessageHistory",
+        "label": "Manage Conversational History",
         "type": "component",
         "link": null,
-        "title": "wrapper (config.py)",
-        "description": "Catches and converts `StopIteration` exceptions to `RuntimeError` to prevent issues in asynchronous operations within runnables."
+        "title": "Conversational History Manager",
+        "description": "A specialized runnable that wraps another runnable to manage chat message history, loading existing conversations, injecting them into the runnable's input, and updating history with the runnable's output."
       },
       {
-        "id": "runnable_base",
-        "label": "Base Runnable Interface",
-        "type": "external",
-        "link": "base_components",
-        "title": "Runnable",
-        "description": "The fundamental interface for all runnable components in LangChain, defining methods for invocation, streaming, and batch processing."
-      },
-      {
-        "id": "runnable_serializable",
-        "label": "Serializable Runnable",
-        "type": "external",
-        "link": "base_components",
-        "title": "RunnableSerializable",
-        "description": "A base class for runnables that can be serialized and deserialized, enabling persistence and sharing of runnable configurations."
-      },
-      {
-        "id": "runnable_binding_base",
-        "label": "Runnable with Bound Config",
-        "type": "external",
-        "link": "base_components",
-        "title": "RunnableBindingBase",
-        "description": "A base class for runnables that bind to a specific configuration or another runnable, often used for wrapping or modifying behavior."
-      },
-      {
-        "id": "chat_message_history",
-        "label": "Chat Message History Store",
-        "type": "external",
-        "link": "caching_and_history",
-        "title": "BaseChatMessageHistory",
-        "description": "Abstract base class for storing and retrieving chat messages, providing an interface for conversational memory."
-      },
-      {
-        "id": "prompt_messages",
-        "label": "Prompt Messages (Human/AI)",
-        "type": "external",
-        "link": "prompts_and_messages",
-        "title": "BaseMessage, HumanMessage, AIMessage",
-        "description": "Core message types used in conversational AI, representing different roles in a dialogue (e.g., human input, AI response)."
-      },
-      {
-        "id": "langchain_hub",
-        "label": "LangChain Hub",
-        "type": "external",
+        "id": "RunnablePassthrough",
+        "label": "Pass Input & Assign Additional Data",
+        "type": "component",
         "link": null,
+        "title": "Input Passthrough & Assignment",
+        "description": "A utility runnable that passes its input through unchanged, with the option to assign additional keys to the output (if input is a dictionary) or execute a side-effect function."
+      },
+      {
+        "id": "HubRunnable",
+        "label": "Load Components from LangChain Hub",
+        "type": "component",
+        "link": null,
+        "title": "LangChain Hub Component Loader",
+        "description": "Enables loading and integrating runnables published on the LangChain Hub, facilitating easy sharing, discovery, and reuse of pre-built components."
+      },
+      {
+        "id": "OpenAIFunctionsRouter",
+        "label": "Route Based on OpenAI Tool Calls",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Function Call Router",
+        "description": "A specialized runnable that parses OpenAI function/tool call outputs and dispatches messages to different sub-runnables based on the identified function name, enabling dynamic routing in agents."
+      },
+      {
+        "id": "ConfigWrapper",
+        "label": "Wrap Async StopIteration",
+        "type": "component",
+        "link": null,
+        "title": "Async Exception Handler",
+        "description": "An internal utility that wraps asynchronous function calls to convert `StopIteration` exceptions into `RuntimeError`s, preventing issues in `asyncio.Future` handling."
+      },
+      {
+        "id": "BaseChatMessageHistory",
+        "label": "Chat Message History Interface",
+        "type": "external",
+        "link": "callbacks_and_history",
+        "title": "Chat History Interface",
+        "description": "Defines the interface for storing and retrieving chat messages, used by runnables that manage conversational state."
+      },
+      {
+        "id": "LangChainHub",
+        "label": "LangChain Hub Repository",
+        "type": "external",
+        "link": "langchain_classic.hub",
         "title": "LangChain Hub",
-        "description": "An external repository for sharing and discovering LangChain components, including prompts and runnables."
+        "description": "An external repository for sharing and discovering LangChain components, including runnables."
       },
       {
-        "id": "openai_functions",
-        "label": "OpenAI Function Definitions",
+        "id": "JsonOutputFunctionsParser",
+        "label": "Parse JSON Function Calls",
+        "type": "external",
+        "link": "tools_and_output_parsers",
+        "title": "JSON Function Parser",
+        "description": "An output parser that extracts structured JSON function call information from language model outputs."
+      },
+      {
+        "id": "RouterRunnable",
+        "label": "Route to Sub-Runnables",
         "type": "external",
         "link": null,
-        "title": "OpenAIFunction",
-        "description": "Structured definitions of functions that can be called by OpenAI models, enabling tool use and structured output."
-      },
-      {
-        "id": "json_parser",
-        "label": "JSON Output Parser",
-        "type": "external",
-        "link": "output_parsing",
-        "title": "JsonOutputFunctionsParser",
-        "description": "Parses JSON output from language models, specifically designed to extract function call information."
+        "title": "Runnable Router",
+        "description": "A runnable that dispatches input to one of several sub-runnables based on a routing key."
       }
     ],
     "edges": [
       {
-        "source": "dynamic_runnable",
-        "target": "runnable_serializable",
-        "label": "Extends",
+        "source": "RunnableSerializable",
+        "target": "Runnable",
+        "label": "extends",
         "title": null,
         "description": null
       },
       {
-        "source": "dynamic_runnable",
-        "target": "runnable_base",
-        "label": "Delegates to",
+        "source": "RunnableBindingBase",
+        "target": "RunnableSerializable",
+        "label": "extends",
         "title": null,
         "description": null
       },
       {
-        "source": "message_history_runnable",
-        "target": "runnable_binding_base",
-        "label": "Extends",
+        "source": "RunnableEachBase",
+        "target": "RunnableSerializable",
+        "label": "extends",
         "title": null,
         "description": null
       },
       {
-        "source": "message_history_runnable",
-        "target": "chat_message_history",
-        "label": "Manages",
+        "source": "DynamicRunnable",
+        "target": "RunnableSerializable",
+        "label": "extends",
         "title": null,
         "description": null
       },
       {
-        "source": "message_history_runnable",
-        "target": "runnable_base",
-        "label": "Wraps",
+        "source": "RunnableWithMessageHistory",
+        "target": "RunnableBindingBase",
+        "label": "extends",
         "title": null,
         "description": null
       },
       {
-        "source": "message_history_runnable",
-        "target": "prompt_messages",
-        "label": "Processes",
+        "source": "HubRunnable",
+        "target": "RunnableBindingBase",
+        "label": "extends",
         "title": null,
         "description": null
       },
       {
-        "source": "passthrough_runnable",
-        "target": "runnable_serializable",
-        "label": "Extends",
+        "source": "OpenAIFunctionsRouter",
+        "target": "RunnableBindingBase",
+        "label": "extends",
         "title": null,
         "description": null
       },
       {
-        "source": "hub_runnable",
-        "target": "runnable_binding_base",
-        "label": "Extends",
+        "source": "RunnablePassthrough",
+        "target": "RunnableSerializable",
+        "label": "extends",
         "title": null,
         "description": null
       },
       {
-        "source": "hub_runnable",
-        "target": "langchain_hub",
-        "label": "Pulls from",
+        "source": "Runnable",
+        "target": "ConfigWrapper",
+        "label": "uses",
         "title": null,
         "description": null
       },
       {
-        "source": "openai_functions_router",
-        "target": "runnable_binding_base",
-        "label": "Extends",
+        "source": "RunnableBindingBase",
+        "target": "Runnable",
+        "label": "wraps",
         "title": null,
         "description": null
       },
       {
-        "source": "openai_functions_router",
-        "target": "openai_functions",
-        "label": "Uses",
+        "source": "RunnableEachBase",
+        "target": "Runnable",
+        "label": "wraps",
         "title": null,
         "description": null
       },
       {
-        "source": "openai_functions_router",
-        "target": "json_parser",
-        "label": "Parses output with",
+        "source": "DynamicRunnable",
+        "target": "Runnable",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunnableWithMessageHistory",
+        "target": "RunnablePassthrough",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunnableWithMessageHistory",
+        "target": "BaseChatMessageHistory",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "HubRunnable",
+        "target": "LangChainHub",
+        "label": "loads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIFunctionsRouter",
+        "target": "JsonOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIFunctionsRouter",
+        "target": "RouterRunnable",
+        "label": "uses",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "surface_components",
-        "label": "Surface Components",
+        "id": "CoreAbstractions",
+        "label": "Core Abstractions",
         "nodes": [
-          "message_history_runnable",
-          "passthrough_runnable",
-          "hub_runnable",
-          "openai_functions_router"
+          "Runnable",
+          "RunnableSerializable"
         ],
-        "title": "User-Facing Runnable Implementations",
-        "description": "These runnables provide direct functionality for common use cases like chat history, data manipulation, and external component loading.",
+        "title": "Foundational Runnable Interfaces",
+        "description": "These components define the fundamental building blocks and extensible interfaces for all runnable units of work in the LangChain ecosystem.",
         "role": "surface"
       },
       {
-        "id": "core_runnable_logic",
-        "label": "Core Runnable Logic",
+        "id": "BindingAndConfiguration",
+        "label": "Binding & Configuration",
         "nodes": [
-          "dynamic_runnable"
+          "RunnableBindingBase",
+          "DynamicRunnable",
+          "RunnableEachBase"
         ],
-        "title": "Foundational Runnable Orchestration",
-        "description": "Components that enable dynamic behavior and configuration within the runnable ecosystem.",
+        "title": "Runnable Modification & Dynamic Setup",
+        "description": "Components in this group provide mechanisms for modifying, configuring, and dynamically adapting the behavior of other runnables at runtime.",
+        "role": "analytical"
+      },
+      {
+        "id": "SpecializedRunnables",
+        "label": "Specialized Runnables",
+        "nodes": [
+          "RunnableWithMessageHistory",
+          "RunnablePassthrough",
+          "HubRunnable",
+          "OpenAIFunctionsRouter"
+        ],
+        "title": "Concrete Runnable Implementations",
+        "description": "This group contains concrete runnable implementations designed for specific tasks, such as managing conversational history, data flow utilities, and integration with external services.",
         "role": "generative"
       },
       {
-        "id": "utilities",
-        "label": "Utilities",
+        "id": "InternalUtilities",
+        "label": "Internal Utilities",
         "nodes": [
-          "stop_iteration_wrapper"
+          "ConfigWrapper"
         ],
-        "title": "Internal Helper Functions",
-        "description": "Small, focused components that provide supporting functionality for other runnables, often related to error handling or configuration.",
+        "title": "Module Internal Helpers",
+        "description": "Helper functions and utilities that support the core functionality of the runnables module, often dealing with low-level concerns like exception handling.",
         "role": "data"
       }
     ]

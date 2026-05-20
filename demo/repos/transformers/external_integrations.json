@@ -1,122 +1,114 @@
 {
   "title": "External Integrations Module",
-  "summary": "This module provides core components for integrating Hugging Face models and training workflows with external tools and libraries, including hyperparameter search platforms, experiment tracking systems, and parameter-efficient fine-tuning (PEFT) methods.",
+  "summary": "This module provides interfaces and callbacks for integrating Hugging Face models and training processes with various external tools and libraries. It supports hyperparameter search with Weights & Biases, experiment logging with DVCLive, and Parameter-Efficient Fine-Tuning (PEFT) adapter management.",
   "diagram": {
     "direction": "LR",
     "nodes": [
       {
-        "id": "node_wandb_backend",
-        "label": "Wandb Backend",
+        "id": "wandb_backend",
+        "label": "Wandb Hyperparameter Backend",
         "type": "component",
         "link": null,
-        "title": "Wandb Backend Integration",
-        "description": "Provides an interface for integrating with the Weights & Biases platform, enabling hyperparameter search, experiment tracking, and logging of training runs. It allows users to leverage Wandb's optimization capabilities directly within the training workflow."
+        "title": "Wandb Hyperparameter Search",
+        "description": "Provides an interface for integrating with Weights & Biases (Wandb) to perform hyperparameter optimization. It enables running search trials and defining parameter spaces for model training."
       },
       {
-        "id": "node_dvclive_callback",
-        "label": "DVCLive Callback",
+        "id": "dvclive_callback",
+        "label": "DVCLive Logging Callback",
         "type": "component",
         "link": null,
         "title": "DVCLive Experiment Logging",
-        "description": "A callback mechanism for the Hugging Face Trainer that facilitates logging of training metrics, parameters, and model checkpoints to DVCLive. It ensures experiment reproducibility and versioning by integrating with DVC's data and model management features."
+        "description": "A callback for the Trainer that sends training metrics, parameters, and optionally model checkpoints to DVCLive for experiment tracking, visualization, and data versioning."
       },
       {
-        "id": "node_peft_mixin",
-        "label": "PEFT Adapter Mixin",
+        "id": "peft_adapter_mixin",
+        "label": "PEFT Adapter Management",
         "type": "component",
         "link": null,
-        "title": "PEFT Adapter Management",
-        "description": "Enables dynamic loading, management, and application of Parameter-Efficient Fine-Tuning (PEFT) adapters to models. This mixin supports various PEFT methods like LoRA, allowing for efficient model customization and deployment without modifying the base model's full weights."
+        "title": "Parameter-Efficient Fine-Tuning",
+        "description": "Enables loading, adding, activating, deactivating, and deleting Parameter-Efficient Fine-Tuning (PEFT) adapters, such as LoRA, into a base model for efficient model customization."
       },
       {
-        "id": "node_wandb_service",
-        "label": "Wandb Service",
+        "id": "external_wandb",
+        "label": "Weights & Biases (Wandb)",
         "type": "external",
         "link": null,
-        "title": "Weights & Biases Platform",
-        "description": "An external machine learning platform used for experiment tracking, visualization, and hyperparameter optimization. It provides tools to monitor training, compare runs, and manage datasets and models effectively."
+        "title": "Wandb Platform",
+        "description": "An external platform used for experiment tracking, visualization, and hyperparameter optimization in machine learning projects."
       },
       {
-        "id": "node_dvclive_service",
-        "label": "DVCLive Service",
+        "id": "external_dvclive",
+        "label": "DVCLive",
         "type": "external",
         "link": null,
         "title": "DVCLive Experiment Tracking",
-        "description": "An open-source library for experiment tracking and versioning, integrated with DVC. It helps in logging metrics, parameters, and artifacts, ensuring reproducibility and traceability of machine learning experiments."
+        "description": "An external open-source library for experiment tracking, metric logging, and data versioning, often used in conjunction with DVC."
       },
       {
-        "id": "node_peft_library",
+        "id": "external_peft_lib",
         "label": "PEFT Library",
         "type": "external",
         "link": null,
-        "title": "Parameter-Efficient Fine-Tuning Library",
-        "description": "An external library providing methods for efficiently adapting large pre-trained models to new tasks with minimal trainable parameters. It includes techniques like LoRA, IA\u00b3, and others, significantly reducing computational and memory costs during fine-tuning."
+        "title": "PEFT Library for Adapters",
+        "description": "An external Python library that provides implementations for various Parameter-Efficient Fine-Tuning (PEFT) methods, allowing efficient adaptation of large pre-trained models."
       },
       {
-        "id": "node_accelerate_library",
-        "label": "Accelerate Library",
-        "type": "external",
-        "link": null,
-        "title": "Accelerate Distributed Training",
-        "description": "An external library from Hugging Face designed to simplify distributed training and mixed-precision training across various hardware setups. It handles device placement and model dispatch, optimizing performance for large models."
-      },
-      {
-        "id": "node_trainer",
+        "id": "hf_trainer",
         "label": "Hugging Face Trainer",
         "type": "component",
-        "link": "pipelines_and_generation",
-        "title": "Hugging Face Trainer",
-        "description": "The core training loop utility in Hugging Face Transformers, responsible for orchestrating model training, evaluation, and prediction. It provides a high-level API for common ML tasks and integrates with callbacks for extended functionality."
+        "link": null,
+        "title": "Model Training Orchestrator",
+        "description": "The core component responsible for orchestrating the training and evaluation loops of Hugging Face models, managing callbacks, and applying training arguments."
       },
       {
-        "id": "node_modeling_utils",
-        "label": "Modeling Utilities",
+        "id": "hf_model",
+        "label": "Hugging Face Model",
         "type": "component",
-        "link": "model_architectures.model_utilities",
-        "title": "Model Loading and Conversion Utilities",
-        "description": "Internal utilities responsible for loading model weights, handling checkpoint files, and managing state dictionary conversions. These functions are crucial for ensuring compatibility and correct initialization of models and their components."
+        "link": null,
+        "title": "Base Transformer Model",
+        "description": "A pre-trained or custom transformer model that can be fine-tuned or adapted using various techniques, including PEFT adapters."
       }
     ],
     "edges": [
       {
-        "source": "node_wandb_backend",
-        "target": "node_wandb_service",
-        "label": "Performs hyperparameter search",
+        "source": "wandb_backend",
+        "target": "external_wandb",
+        "label": "Integrates with",
         "title": null,
         "description": null
       },
       {
-        "source": "node_dvclive_callback",
-        "target": "node_dvclive_service",
-        "label": "Logs experiment data",
+        "source": "dvclive_callback",
+        "target": "external_dvclive",
+        "label": "Sends logs to",
         "title": null,
         "description": null
       },
       {
-        "source": "node_dvclive_callback",
-        "target": "node_trainer",
-        "label": "Monitors training progress",
+        "source": "peft_adapter_mixin",
+        "target": "external_peft_lib",
+        "label": "Utilizes",
         "title": null,
         "description": null
       },
       {
-        "source": "node_peft_mixin",
-        "target": "node_peft_library",
-        "label": "Utilizes PEFT methods",
+        "source": "hf_trainer",
+        "target": "wandb_backend",
+        "label": "Uses for HP search",
         "title": null,
         "description": null
       },
       {
-        "source": "node_peft_mixin",
-        "target": "node_modeling_utils",
-        "label": "Loads adapter weights",
+        "source": "hf_trainer",
+        "target": "dvclive_callback",
+        "label": "Registers callback",
         "title": null,
         "description": null
       },
       {
-        "source": "node_peft_mixin",
-        "target": "node_accelerate_library",
-        "label": "Dispatches models for PEFT",
+        "source": "peft_adapter_mixin",
+        "target": "hf_model",
+        "label": "Applies adapters to",
         "title": null,
         "description": null
       }
@@ -124,39 +116,38 @@
     "groups": [
       {
         "id": "grp_integrations",
-        "label": "Integration Components",
+        "label": "Module Components",
         "nodes": [
-          "node_wandb_backend",
-          "node_dvclive_callback",
-          "node_peft_mixin"
+          "wandb_backend",
+          "dvclive_callback",
+          "peft_adapter_mixin"
         ],
-        "title": "Core Integration Components",
-        "description": "These are the primary components within the external_integrations module that facilitate interaction with external systems and libraries.",
+        "title": "External Integrations Components",
+        "description": "Core components within this module that facilitate integration with external tools and libraries.",
         "role": "surface"
       },
       {
-        "id": "grp_external",
+        "id": "grp_external_systems",
         "label": "External Systems",
         "nodes": [
-          "node_wandb_service",
-          "node_dvclive_service",
-          "node_peft_library",
-          "node_accelerate_library"
+          "external_wandb",
+          "external_dvclive",
+          "external_peft_lib"
         ],
-        "title": "Third-Party Services and Libraries",
-        "description": "Represents external services and libraries that the integration components interact with to provide extended functionality.",
+        "title": "Integrated External Systems",
+        "description": "External platforms and libraries that are integrated with or utilized by the components in this module.",
         "role": "external"
       },
       {
-        "id": "grp_internal_deps",
-        "label": "Internal Dependencies",
+        "id": "grp_hf_core",
+        "label": "Hugging Face Core",
         "nodes": [
-          "node_trainer",
-          "node_modeling_utils"
+          "hf_trainer",
+          "hf_model"
         ],
-        "title": "Dependencies within Transformers Library",
-        "description": "Other modules or components within the Hugging Face Transformers library that the external_integrations module relies on for its functionality.",
-        "role": "data"
+        "title": "Hugging Face Core Components",
+        "description": "Fundamental Hugging Face components that interact with the external integration features.",
+        "role": "component"
       }
     ]
   }

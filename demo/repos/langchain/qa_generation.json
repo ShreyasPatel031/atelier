@@ -1,0 +1,191 @@
+{
+  "title": "QA Generation Chain",
+  "summary": "This module provides a chain for generating question-answer pairs from input text documents. It processes text by splitting it into chunks, using an LLM to generate Q&A for each chunk, and then aggregating the results. Note: This class is deprecated in favor of a Runnable-based approach.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "input_text",
+        "label": "Input Document Text",
+        "type": "external",
+        "link": null,
+        "title": "Input Document",
+        "description": "The raw text document provided to the chain, which will be processed to generate question-answer pairs."
+      },
+      {
+        "id": "text_splitter",
+        "label": "Split Document into Chunks",
+        "type": "component",
+        "link": "text_splitters",
+        "title": "Text Splitter",
+        "description": "Breaks down the large input document into smaller, manageable text segments or chunks, suitable for individual processing by the language model."
+      },
+      {
+        "id": "qa_gen_chain",
+        "label": "Orchestrate QA Generation",
+        "type": "component",
+        "link": null,
+        "title": "QAGenerationChain",
+        "description": "The main chain component that coordinates the text splitting, invokes the LLM chain for each chunk, and collects the generated question-answer pairs."
+      },
+      {
+        "id": "llm_chain",
+        "label": "Generate QA for Chunk",
+        "type": "component",
+        "link": "chains",
+        "title": "LLMChain",
+        "description": "A sub-chain responsible for taking a single text chunk and, using a language model and prompt, generating question-answer pairs from its content."
+      },
+      {
+        "id": "language_model",
+        "label": "Large Language Model (LLM)",
+        "type": "external",
+        "link": "llm_interfaces",
+        "title": "Language Model",
+        "description": "The AI model that performs the core natural language understanding and generation, producing raw text responses based on the prompt and context."
+      },
+      {
+        "id": "prompt_template",
+        "label": "QA Generation Prompt",
+        "type": "external",
+        "link": "prompt_templates",
+        "title": "Prompt Template",
+        "description": "A predefined template that structures the input to the LLM, guiding it to generate question-answer pairs in a specific format."
+      },
+      {
+        "id": "json_parser",
+        "label": "Parse LLM Output (JSON)",
+        "type": "component",
+        "link": null,
+        "title": "JSON Parser",
+        "description": "Interprets the raw text output from the language model, extracting structured JSON data containing the generated question-answer pairs."
+      },
+      {
+        "id": "generated_qa",
+        "label": "Output QA Pairs",
+        "type": "external",
+        "link": null,
+        "title": "Generated QA",
+        "description": "The final collection of structured question-answer pairs, aggregated from all processed text chunks."
+      }
+    ],
+    "edges": [
+      {
+        "source": "input_text",
+        "target": "qa_gen_chain",
+        "label": "Provides document",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qa_gen_chain",
+        "target": "text_splitter",
+        "label": "Sends text for splitting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_splitter",
+        "target": "qa_gen_chain",
+        "label": "Returns text chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qa_gen_chain",
+        "target": "llm_chain",
+        "label": "Invokes for each chunk",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_chain",
+        "target": "language_model",
+        "label": "Queries LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prompt_template",
+        "target": "llm_chain",
+        "label": "Applies prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "language_model",
+        "target": "llm_chain",
+        "label": "Returns raw generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_chain",
+        "target": "json_parser",
+        "label": "Sends raw output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_parser",
+        "target": "qa_gen_chain",
+        "label": "Returns parsed QA",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qa_gen_chain",
+        "target": "generated_qa",
+        "label": "Outputs final QA",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "main_chain",
+        "label": "QA Generation Chain",
+        "nodes": [
+          "qa_gen_chain"
+        ],
+        "title": "Core QA Generation Logic",
+        "description": "The primary component responsible for orchestrating the entire process of generating question-answer pairs from a given document.",
+        "role": "surface"
+      },
+      {
+        "id": "data_flow",
+        "label": "Data Input/Output",
+        "nodes": [
+          "input_text",
+          "generated_qa"
+        ],
+        "title": "Data Handling",
+        "description": "Represents the entry point for raw data and the final output of processed question-answer pairs.",
+        "role": "data"
+      },
+      {
+        "id": "text_processing",
+        "label": "Text Preparation & Parsing",
+        "nodes": [
+          "text_splitter",
+          "json_parser"
+        ],
+        "title": "Document Processing",
+        "description": "Components involved in preparing the input text for the LLM and structuring its raw output.",
+        "role": "analytical"
+      },
+      {
+        "id": "llm_interaction",
+        "label": "LLM Interaction",
+        "nodes": [
+          "llm_chain",
+          "language_model",
+          "prompt_template"
+        ],
+        "title": "Generative Core",
+        "description": "The components directly involved in leveraging the Large Language Model for generating responses.",
+        "role": "generative"
+      }
+    ]
+  }
+}

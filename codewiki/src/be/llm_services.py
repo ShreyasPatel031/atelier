@@ -84,7 +84,15 @@ try:
 except ImportError:
     GENAI_AVAILABLE = False
 
-from codewiki.src.config import Config
+from codewiki.src.config import (
+    CLUSTER_MODEL,
+    Config,
+    FALLBACK_MODEL_1,
+    LLM_API_KEY,
+    LLM_BASE_URL,
+    MAIN_MODEL,
+    OUTPUT_BASE_DIR,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -262,6 +270,56 @@ def _get_adc_bearer_token(config: Config) -> str:
     """Return a fresh OAuth2 bearer token from ADC for direct REST calls."""
     creds, _ = _get_adc_credentials()
     return creds.token
+
+
+def resolve_llm_config_for_services(
+    *,
+    llm_base_url: Optional[str] = None,
+    llm_api_key: Optional[str] = None,
+    main_model: Optional[str] = None,
+) -> Config:
+    """
+    LLM Config for in-process services (web arch-agent, etc.).
+
+    Uses the same sources as the CLI / background worker:
+    ``~/.codewiki/config.json`` (including ``use_vertex_ai`` + ``gcp_project``),
+    then environment variables.
+    """
+    from codewiki.cli.config_manager import ConfigManager
+
+    mgr = ConfigManager()
+    if mgr.load():
+        cfg_obj = mgr.get_config()
+        api_key = (llm_api_key if llm_api_key is not None else (mgr.get_api_key() or "")).strip()
+        return Config.from_cli(
+            repo_path=".",
+            output_dir=OUTPUT_BASE_DIR,
+            llm_base_url=llm_base_url or cfg_obj.base_url or LLM_BASE_URL,
+            llm_api_key=api_key,
+            main_model=main_model or cfg_obj.main_model or MAIN_MODEL,
+            cluster_model=cfg_obj.cluster_model or CLUSTER_MODEL,
+            fallback_model=FALLBACK_MODEL_1,
+            use_vertex_ai=cfg_obj.use_vertex_ai,
+            gcp_project=cfg_obj.gcp_project,
+        )
+
+    use_vertex = os.getenv("GOOGLE_USE_ADC", "").strip().lower() in ("1", "true", "yes")
+    api_key = (
+        (llm_api_key or "").strip()
+        or (os.getenv("GEMINI_API_KEY") or "").strip()
+        or (os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or "").strip()
+    )
+    return Config.from_cli(
+        repo_path=".",
+        output_dir=OUTPUT_BASE_DIR,
+        llm_base_url=llm_base_url or LLM_BASE_URL,
+        llm_api_key=api_key or LLM_API_KEY,
+        main_model=main_model or MAIN_MODEL,
+        cluster_model=CLUSTER_MODEL,
+        fallback_model=FALLBACK_MODEL_1,
+        use_vertex_ai=use_vertex,
+        gcp_project=os.getenv("GCP_PROJECT", os.getenv("GOOGLE_CLOUD_PROJECT", "")),
+    )
 
 
 def create_main_model(config: Config) -> Model:

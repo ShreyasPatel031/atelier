@@ -324,6 +324,136 @@ function rfPointerOverForeignLeafNode(clientX, clientY, selfId) {
     }
 }
 
+/** Any custom (leaf) RF node under the pointer — suppress group hover when over a leaf. */
+function rfPointerOverAnyLeafAtPoint(clientX, clientY) {
+    if (typeof document === 'undefined' || typeof document.elementsFromPoint !== 'function') return false;
+    try {
+        const stack = document.elementsFromPoint(clientX, clientY);
+        if (!stack || !stack.length) return false;
+        const seen = new WeakSet();
+        for (let i = 0; i < stack.length; i++) {
+            const el = stack[i];
+            if (!el || typeof el.closest !== 'function') continue;
+            const wrap = el.closest('.react-flow__node[data-id]');
+            if (!wrap || seen.has(wrap)) continue;
+            seen.add(wrap);
+            if (!wrap.classList.contains('react-flow__node-group')) {
+                return true;
+            }
+        }
+        return false;
+    } catch (_) {
+        return false;
+    }
+}
+
+/** Collect every RF group id under the pointer (paint order + portaled pills/bridges). */
+function rfCollectGroupIdsAtPoint(clientX, clientY) {
+    const ids = [];
+    const seen = new Set();
+    if (typeof document === 'undefined' || typeof document.elementsFromPoint !== 'function') return ids;
+    try {
+        const stack = document.elementsFromPoint(clientX, clientY);
+        for (let i = 0; i < stack.length; i++) {
+            const el = stack[i];
+            if (!el || typeof el.closest !== 'function') continue;
+            const ctl = el.closest(
+                '[data-group-id].atelier-rf-help-hover-bridge,[data-group-id].atelier-rf-control-column,[data-testid="atelier-rf-group-help"],[data-testid="atelier-rf-group-collapse"]'
+            );
+            if (ctl) {
+                const cid = ctl.getAttribute('data-group-id');
+                if (cid && !seen.has(cid)) {
+                    seen.add(cid);
+                    ids.push(cid);
+                }
+            }
+            const wrap = el.closest('.react-flow__node-group[data-id]');
+            if (wrap) {
+                const nid = wrap.getAttribute('data-id');
+                if (nid && !seen.has(nid)) {
+                    seen.add(nid);
+                    ids.push(nid);
+                }
+            }
+        }
+    } catch (_) {
+        /* ignore */
+    }
+    return ids;
+}
+
+function rfGroupDepthInRfTree(groupId, parentById) {
+    let d = 0;
+    let cur = groupId != null ? String(groupId) : '';
+    const guard = new Set();
+    while (cur && parentById && parentById[cur] && !guard.has(cur)) {
+        guard.add(cur);
+        d += 1;
+        cur = String(parentById[cur]);
+    }
+    return d;
+}
+
+/**
+ * Deepest (innermost) RF group under the pointer. Parent groups can stack above
+ * children in paint order; picking the first hit wrongly hovers every ancestor.
+ */
+function rfDeepestGroupIdAtPoint(clientX, clientY) {
+    const ids = rfCollectGroupIdsAtPoint(clientX, clientY);
+    if (!ids.length) return null;
+    const parentById =
+        typeof window !== 'undefined' && window.atelierRfLastNodeParentById
+            ? window.atelierRfLastNodeParentById
+            : {};
+    let best = ids[0];
+    let bestD = rfGroupDepthInRfTree(best, parentById);
+    for (let i = 1; i < ids.length; i++) {
+        const gid = ids[i];
+        const dep = rfGroupDepthInRfTree(gid, parentById);
+        if (dep > bestD) {
+            bestD = dep;
+            best = gid;
+        }
+    }
+    return best;
+}
+
+function rfNotifyGroupHoverChange() {
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('atelier-rf-group-hover-sync'));
+    }
+}
+
+function rfSetActiveGroupHoverId(groupId) {
+    if (typeof window === 'undefined') return;
+    const next = groupId != null ? String(groupId) : null;
+    if (window.__atelierRfActiveGroupHoverId === next) return;
+    window.__atelierRfActiveGroupHoverId = next;
+    rfNotifyGroupHoverChange();
+}
+
+function rfEnsureGlobalGroupHover() {
+    if (typeof window === 'undefined' || window.__atelierRfGlobalGroupHoverInstalled) return;
+    window.__atelierRfGlobalGroupHoverInstalled = true;
+    function updateFromPointer(e) {
+        const cx = e && typeof e.clientX === 'number' ? e.clientX : null;
+        const cy = e && typeof e.clientY === 'number' ? e.clientY : null;
+        if (cx == null || cy == null) {
+            rfSetActiveGroupHoverId(null);
+            return;
+        }
+        if (rfPointerOverAnyLeafAtPoint(cx, cy)) {
+            rfSetActiveGroupHoverId(null);
+            return;
+        }
+        rfSetActiveGroupHoverId(rfDeepestGroupIdAtPoint(cx, cy));
+    }
+    document.addEventListener('pointermove', updateFromPointer, true);
+    window.addEventListener('blur', function () {
+        rfSetActiveGroupHoverId(null);
+    });
+}
+
 /**
  * Portaled “?” sits outside the node DOM; moving across the gap fires mouseleave on the root with
  * relatedTarget not yet on the button. A transparent bridge keeps hover until the pointer hits the pill or leaves both.
@@ -793,11 +923,30 @@ function usePillLayer() {
 
 /** Compound: handles on frame (GroupNode-style). RF sizes the wrapper via node.width / node.height. */
 function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, positionAbsoluteY }) {
+    rfEnsureGlobalGroupHover();
     const [hovered, setHovered] = useState(false);
     const rootRef = useRef(null);
     const panelRef = useRef(null);
     const helpBridgeRef = useRef(null);
     const helpPillRef = useRef(null);
+
+    useEffect(
+        function () {
+            function sync() {
+                const active =
+                    typeof window !== 'undefined' && window.__atelierRfActiveGroupHoverId != null
+                        ? String(window.__atelierRfActiveGroupHoverId)
+                        : '';
+                setHovered(active === String(id));
+            }
+            sync();
+            window.addEventListener('atelier-rf-group-hover-sync', sync);
+            return function () {
+                window.removeEventListener('atelier-rf-group-hover-sync', sync);
+            };
+        },
+        [id]
+    );
 
     const gw = rw ?? data.width ?? 160;
     const gh = rh ?? data.height ?? 120;
@@ -901,31 +1050,21 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
             if (rfPointerOverForeignLeafNode(clientX, clientY, id)) {
                 return false;
             }
-            return (
-                rfClientPointInElement(rootRef, clientX, clientY) ||
+            if (
                 rfClientPointInElement(panelRef, clientX, clientY) ||
                 rfClientPointInElement(helpPillRef, clientX, clientY) ||
                 rfClientPointInElement(helpBridgeRef, clientX, clientY)
-            );
+            ) {
+                return true;
+            }
+            const deepestGroupId = rfDeepestGroupIdAtPoint(clientX, clientY);
+            if (deepestGroupId != null && String(deepestGroupId) !== String(id)) {
+                return false;
+            }
+            return rfClientPointInElement(rootRef, clientX, clientY);
         },
         [id]
     );
-
-    useEffect(() => {
-        if (!(data && data.rfExpandedSubgraph)) return;
-        function onPointerMove(e) {
-            setHovered(pointerInsideGroupControls(e.clientX, e.clientY));
-        }
-        function onWindowBlur() {
-            setHovered(false);
-        }
-        document.addEventListener('pointermove', onPointerMove, true);
-        window.addEventListener('blur', onWindowBlur);
-        return () => {
-            document.removeEventListener('pointermove', onPointerMove, true);
-            window.removeEventListener('blur', onWindowBlur);
-        };
-    }, [data, pointerInsideGroupControls]);
 
     /** Exact ELK connection point → handle center (translate -50/-50 centers on top/left). */
     function gHandleStyle(cp) {
@@ -1039,7 +1178,9 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         if (containsNode(panelRef.current, rel)) return;
         if (containsNode(helpPillRef.current, rel)) return;
         if (containsNode(helpBridgeRef.current, rel)) return;
-        setHovered(false);
+        if (String(window.__atelierRfActiveGroupHoverId || '') === String(id)) {
+            rfSetActiveGroupHoverId(null);
+        }
     };
     const onPanelLeave = function (e) {
         if (typeof e.clientX === 'number' && pointerInsideGroupControls(e.clientX, e.clientY)) return;
@@ -1047,7 +1188,9 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         if (containsNode(rootRef.current, rel)) return;
         if (containsNode(helpPillRef.current, rel)) return;
         if (containsNode(helpBridgeRef.current, rel)) return;
-        setHovered(false);
+        if (String(window.__atelierRfActiveGroupHoverId || '') === String(id)) {
+            rfSetActiveGroupHoverId(null);
+        }
     };
 
     const helpBridgeOverlap = 4 / z;
@@ -1091,10 +1234,19 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                       onPointerDown: rfHelpPillStopPropagation,
                       onMouseDown: rfHelpPillStopPropagation,
                       onMouseEnter: function () {
-                          setHovered(true);
+                          rfSetActiveGroupHoverId(id);
                       },
                       onMouseLeave: function (e) {
-                          rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                          rfHelpHoverLeaveOutside(
+                              function (v) {
+                                  if (!v) rfSetActiveGroupHoverId(null);
+                              },
+                              rootRef,
+                              panelRef,
+                              helpPillRef,
+                              helpBridgeRef,
+                              e
+                          );
                       },
                   }),
                   React.createElement(
@@ -1117,10 +1269,19 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                           onPointerDown: rfHelpPillStopPropagation,
                           onMouseDown: rfHelpPillStopPropagation,
                           onMouseEnter: function () {
-                              setHovered(true);
+                              rfSetActiveGroupHoverId(id);
                           },
                           onMouseLeave: function (e) {
-                              rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                              rfHelpHoverLeaveOutside(
+                                  function (v) {
+                                      if (!v) rfSetActiveGroupHoverId(null);
+                                  },
+                                  rootRef,
+                                  panelRef,
+                                  helpPillRef,
+                                  helpBridgeRef,
+                                  e
+                              );
                           },
                       },
                       showCollapsePill
@@ -1179,8 +1340,10 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         'div',
         {
             ref: rootRef,
-            onMouseEnter: function () {
-                setHovered(true);
+            onMouseEnter: function (e) {
+                if (pointerInsideGroupControls(e.clientX, e.clientY)) {
+                    rfSetActiveGroupHoverId(id);
+                }
             },
             onMouseLeave: onRootLeave,
             style: {
@@ -1369,6 +1532,18 @@ function rfCubicInOut(t) {
 
 var RF_LAYOUT_ANIM_MS = 350;
 var RF_LAYOUT_EXIT_MS = 200;
+
+/** Ensure edges are fully visible after layout tween (avoids stuck style.opacity from fade-in). */
+function rfFinalizeLayoutEdges(edges) {
+    if (!Array.isArray(edges)) return [];
+    return edges.map(function (e) {
+        var es = Object.assign({}, e && e.style ? e.style : {});
+        es.opacity = 1;
+        return Object.assign({}, e, { style: es });
+    });
+}
+
+var rfLayoutAnimPendingFinal = null;
 
 function rfSemanticLegendEnabled(diagram) {
     if (!diagram || typeof diagram !== 'object') return false;
@@ -1661,6 +1836,18 @@ window.atelierRfStopLayoutAnimation = function () {
         } catch (_) {}
         rfLayoutAnimTimer = null;
     }
+    var pending = rfLayoutAnimPendingFinal;
+    rfLayoutAnimPendingFinal = null;
+    if (!pending) return;
+    var setNodes = window.__atelierR6SetNodes;
+    var setEdges = window.__atelierR6SetEdges;
+    if (typeof setNodes !== 'function' || typeof setEdges !== 'function') return;
+    setNodes(clampElkCustomNodeDimensions(pending.targetNodes));
+    setEdges(rfFinalizeLayoutEdges(pending.targetEdges));
+    if (pending.parentDbg) window.atelierRfLastNodeParentById = pending.parentDbg;
+    if (pending.epoch != null) {
+        rfAssignRfSnapshot(pending.epoch, pending.targetNodes, pending.targetEdges);
+    }
 };
 
 /**
@@ -1864,13 +2051,28 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
 
     var duration = RF_LAYOUT_ANIM_MS;
     var exitMs = RF_LAYOUT_EXIT_MS;
+    /** Collapse: show new edge routes immediately so cross-group links stay visible. */
+    var isCollapseTransition = enteringIsCollapse.size > 0;
+
+    rfLayoutAnimPendingFinal = {
+        targetNodes: targetNodes,
+        targetEdges: targetEdges,
+        parentDbg: parentDbg,
+        epoch: epoch,
+    };
 
     rfLayoutAnimTimer = timer(function (elapsed) {
         function staleAnim() {
             return epoch != null && epoch !== window.__atelierRfLayoutEpoch;
         }
         if (staleAnim()) {
-            window.atelierRfStopLayoutAnimation();
+            rfLayoutAnimPendingFinal = null;
+            if (rfLayoutAnimTimer) {
+                try {
+                    rfLayoutAnimTimer.stop();
+                } catch (_) {}
+                rfLayoutAnimTimer = null;
+            }
             return;
         }
 
@@ -1999,7 +2201,9 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
 
         setNodes(clampElkCustomNodeDimensions(frameNodes));
 
-        var edgeOp = rfCubicInOut(Math.min(1, elapsed / duration));
+        var edgeOp = isCollapseTransition
+            ? 1
+            : rfCubicInOut(Math.min(1, elapsed / duration));
         var edgeFrame = targetEdges.map(function (e) {
             var es = Object.assign({}, e.style || {}, { opacity: edgeOp });
             return Object.assign({}, e, { style: es });
@@ -2007,9 +2211,10 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
         setEdges(edgeFrame);
 
         if (tPos >= 1) {
+            rfLayoutAnimPendingFinal = null;
             window.atelierRfStopLayoutAnimation();
             setNodes(clampElkCustomNodeDimensions(targetNodes));
-            setEdges(targetEdges);
+            setEdges(rfFinalizeLayoutEdges(targetEdges));
             if (parentDbg) window.atelierRfLastNodeParentById = parentDbg;
             rfAssignRfSnapshot(epoch, targetNodes, targetEdges);
             queueMicrotask(function () {

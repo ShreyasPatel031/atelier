@@ -1,0 +1,184 @@
+{
+    "title": "User Interface Module",
+    "summary": "This module constitutes the entire web-based graphical user interface of the application, providing interactive components, managing application state, handling data flow, and integrating with backend services and the native host environment.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "ui_components",
+                "label": "Core UI Components",
+                "type": "module",
+                "link": "ui_components",
+                "title": "Reusable UI Elements",
+                "description": "Provides fundamental and reusable React components for rendering the application's user interface, including layouts, displays, and interactive elements."
+            },
+            {
+                "id": "ui_logic_hooks",
+                "label": "UI Logic & State Hooks",
+                "type": "module",
+                "link": "ui_logic_and_hooks",
+                "title": "Application Logic & State Management",
+                "description": "Encapsulates complex UI logic, state management, and interactions through custom React hooks and context providers, managing chat, model, and streaming states."
+            },
+            {
+                "id": "api_client",
+                "label": "Backend API Client",
+                "type": "module",
+                "link": "api_client",
+                "title": "Backend API Communication",
+                "description": "Handles all asynchronous communication with the application's backend API for data fetching, mutations, and service interactions."
+            },
+            {
+                "id": "data_routing",
+                "label": "Data Models & Routing",
+                "type": "module",
+                "link": "data_models_and_routing",
+                "title": "Data Structures & Navigation",
+                "description": "Defines core data structures for API responses, manages application routing, handles session state, and provides utilities for file processing and global interface extensions."
+            },
+            {
+                "id": "backend_api",
+                "label": "Application Backend API",
+                "type": "external",
+                "link": null,
+                "title": "External Backend Service",
+                "description": "The primary backend service that the user interface communicates with to perform operations, fetch data, and manage user sessions."
+            },
+            {
+                "id": "react_framework",
+                "label": "React Framework & State",
+                "type": "external",
+                "link": null,
+                "title": "React Core & Data Management",
+                "description": "The foundational React library for building user interfaces, including core hooks and a data fetching/caching library for efficient state management."
+            },
+            {
+                "id": "browser_apis",
+                "label": "Browser APIs",
+                "type": "external",
+                "link": null,
+                "title": "Web Browser Functionalities",
+                "description": "Standard web browser APIs providing access to DOM manipulation, local storage, timers, and other client-side functionalities."
+            },
+            {
+                "id": "webview_host",
+                "label": "Webview Host Integration",
+                "type": "external",
+                "link": "webview_host_integration",
+                "title": "Native Host Communication",
+                "description": "The module responsible for integrating the web-based UI with the native desktop application host, enabling communication and native feature access."
+            }
+        ],
+        "edges": [
+            {
+                "source": "ui_components",
+                "target": "ui_logic_hooks",
+                "label": "Uses logic & state from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_logic_hooks",
+                "target": "api_client",
+                "label": "Invokes API calls via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "api_client",
+                "target": "backend_api",
+                "label": "Communicates with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_logic_hooks",
+                "target": "react_framework",
+                "label": "Leverages core features of",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_logic_hooks",
+                "target": "browser_apis",
+                "label": "Utilizes browser features",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_routing",
+                "target": "api_client",
+                "label": "Defines API data structures for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_routing",
+                "target": "ui_components",
+                "label": "Provides routing context to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_routing",
+                "target": "webview_host",
+                "label": "Extends global interface for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_components",
+                "target": "data_routing",
+                "label": "Renders based on routes from",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "presentation_layer",
+                "label": "Presentation Layer",
+                "nodes": [
+                    "ui_components"
+                ],
+                "title": "Visual & Interactive UI",
+                "description": "This group encompasses all the visual and interactive elements that users directly engage with, forming the application's graphical interface.",
+                "role": null
+            },
+            {
+                "id": "logic_state_management",
+                "label": "Logic & State Management",
+                "nodes": [
+                    "ui_logic_hooks",
+                    "react_framework",
+                    "browser_apis"
+                ],
+                "title": "Core UI Logic & Data Flow",
+                "description": "Manages the application's dynamic behavior, data flow, and state changes, leveraging React's capabilities and browser features.",
+                "role": null
+            },
+            {
+                "id": "data_api_integration",
+                "label": "Data & API Integration",
+                "nodes": [
+                    "api_client",
+                    "data_routing",
+                    "backend_api"
+                ],
+                "title": "Backend Communication & Data Handling",
+                "description": "Handles all communication with the backend services, defines data structures, and manages application-wide routing and data flow.",
+                "role": null
+            },
+            {
+                "id": "platform_integration",
+                "label": "Platform Integration",
+                "nodes": [
+                    "webview_host"
+                ],
+                "title": "Native Environment Bridge",
+                "description": "Facilitates seamless interaction between the web-based user interface and the underlying native desktop application environment.",
+                "role": null
+            }
+        ]
+    }
+}

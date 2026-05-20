@@ -1,0 +1,203 @@
+{
+  "title": "AWS Bedrock Tools Integration",
+  "summary": "This module provides a collection of tools for CrewAI agents to interact with various AWS Bedrock services, including invoking agents, retrieving information from knowledge bases, and utilizing browser and code interpreter functionalities.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "crewai_agent",
+        "label": "CrewAI Agent",
+        "type": "external",
+        "link": null,
+        "title": "CrewAI Agent",
+        "description": "An intelligent agent within the CrewAI framework that leverages specialized tools to perform tasks."
+      },
+      {
+        "id": "invoke_agent_tool",
+        "label": "Invoke Bedrock Agent",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Agent Invoker",
+        "description": "Allows CrewAI agents to invoke a pre-configured AWS Bedrock Agent, sending a query and receiving a completion for complex tasks."
+      },
+      {
+        "id": "kb_retriever_tool",
+        "label": "Retrieve from Bedrock Knowledge Base",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock KB Retriever",
+        "description": "Enables querying an Amazon Bedrock Knowledge Base to retrieve relevant documents and information based on a user query for RAG."
+      },
+      {
+        "id": "browser_toolkit_creator",
+        "label": "Create Bedrock Browser Tools",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Browser Toolkit Factory",
+        "description": "Generates a toolkit providing browser automation functionalities, integrated with AWS Bedrock services for web interaction."
+      },
+      {
+        "id": "code_interpreter_toolkit_creator",
+        "label": "Create Bedrock Code Interpreter Tools",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Code Interpreter Toolkit Factory",
+        "description": "Generates a toolkit offering code execution and interpretation capabilities, powered by AWS Bedrock's code interpreter."
+      },
+      {
+        "id": "bedrock_agent_service",
+        "label": "AWS Bedrock Agent Service",
+        "type": "external",
+        "link": null,
+        "title": "Bedrock Agent Service",
+        "description": "The managed AWS service responsible for hosting and executing Bedrock Agents, processing complex tasks and workflows."
+      },
+      {
+        "id": "bedrock_kb_service",
+        "label": "AWS Bedrock Knowledge Base Service",
+        "type": "external",
+        "link": null,
+        "title": "Bedrock Knowledge Base",
+        "description": "The AWS service for managing, storing, and querying enterprise knowledge bases for Retrieval Augmented Generation (RAG) applications."
+      },
+      {
+        "id": "bedrock_browser_service",
+        "label": "AWS Bedrock Browser Service",
+        "type": "external",
+        "link": null,
+        "title": "Bedrock Browser Service",
+        "description": "The underlying AWS Bedrock capability that provides browser automation and web interaction functionalities for agents."
+      },
+      {
+        "id": "bedrock_code_interpreter_service",
+        "label": "AWS Bedrock Code Interpreter Service",
+        "type": "external",
+        "link": null,
+        "title": "Bedrock Code Interpreter",
+        "description": "The underlying AWS Bedrock capability that provides a secure environment for code execution and interpretation for agents."
+      },
+      {
+        "id": "boto3_sdk",
+        "label": "Boto3 AWS SDK",
+        "type": "external",
+        "link": null,
+        "title": "Boto3 AWS SDK",
+        "description": "The official Python SDK for Amazon Web Services, used by these tools to programmatically interact with Bedrock services."
+      }
+    ],
+    "edges": [
+      {
+        "source": "crewai_agent",
+        "target": "invoke_agent_tool",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crewai_agent",
+        "target": "kb_retriever_tool",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crewai_agent",
+        "target": "browser_toolkit_creator",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crewai_agent",
+        "target": "code_interpreter_toolkit_creator",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "invoke_agent_tool",
+        "target": "bedrock_agent_service",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kb_retriever_tool",
+        "target": "bedrock_kb_service",
+        "label": "Queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "browser_toolkit_creator",
+        "target": "bedrock_browser_service",
+        "label": "Integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_interpreter_toolkit_creator",
+        "target": "bedrock_code_interpreter_service",
+        "label": "Integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "invoke_agent_tool",
+        "target": "boto3_sdk",
+        "label": "Depends on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kb_retriever_tool",
+        "target": "boto3_sdk",
+        "label": "Depends on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "browser_toolkit_creator",
+        "target": "boto3_sdk",
+        "label": "Depends on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_interpreter_toolkit_creator",
+        "target": "boto3_sdk",
+        "label": "Depends on",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "bedrock_tools_group",
+        "label": "Bedrock Tools",
+        "nodes": [
+          "invoke_agent_tool",
+          "kb_retriever_tool",
+          "browser_toolkit_creator",
+          "code_interpreter_toolkit_creator"
+        ],
+        "title": "Core Bedrock Tools",
+        "description": "The primary tools provided by this module for interacting with AWS Bedrock services from CrewAI agents.",
+        "role": "surface"
+      },
+      {
+        "id": "aws_bedrock_services_group",
+        "label": "AWS Bedrock Services",
+        "nodes": [
+          "bedrock_agent_service",
+          "bedrock_kb_service",
+          "bedrock_browser_service",
+          "bedrock_code_interpreter_service"
+        ],
+        "title": "External AWS Bedrock Services",
+        "description": "The specific AWS Bedrock services that these tools integrate with to provide AI capabilities.",
+        "role": "external"
+      }
+    ]
+  }
+}

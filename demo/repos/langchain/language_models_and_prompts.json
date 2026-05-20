@@ -1,0 +1,136 @@
+{
+    "title": "Language Models & Prompts",
+    "summary": "This module provides core interfaces for interacting with various language models (LLMs) and chat models, along with functionalities for managing prompts, handling messages, generating embeddings, and integrating with third-party LLM providers.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "llm_interfaces",
+                "label": "LLM Interfaces",
+                "type": "module",
+                "link": "llm_interfaces",
+                "title": "Language Model Interfaces",
+                "description": "Defines the core interfaces for interacting with various language models (LLMs) and chat models, including abstract base classes and fake models for testing."
+            },
+            {
+                "id": "message_handling",
+                "label": "Message Handling",
+                "type": "module",
+                "link": "message_handling",
+                "title": "LLM Message Handling & Translation",
+                "description": "Provides core functionalities for handling and translating messages between various LLM provider formats and LangChain's internal content block representation."
+            },
+            {
+                "id": "prompt_templates",
+                "label": "Prompt Templates",
+                "type": "module",
+                "link": "prompt_templates",
+                "title": "Prompt Template Management",
+                "description": "Offers a comprehensive set of classes and utilities for creating, managing, and formatting various types of prompt templates, including chat message and few-shot templates."
+            },
+            {
+                "id": "embeddings",
+                "label": "Embeddings",
+                "type": "module",
+                "link": "embeddings",
+                "title": "Embedding Module Overview",
+                "description": "Provides functionalities for generating text embeddings, including a factory for initializing various provider-specific embedding models and a caching mechanism."
+            },
+            {
+                "id": "partner_llms",
+                "label": "Partner LLM Integrations",
+                "type": "module",
+                "link": "partner_llms",
+                "title": "Partner LLM Integrations",
+                "description": "Provides integrations for various third-party Large Language Models (LLMs) and chat models, handling API communication, message conversion, and streaming."
+            }
+        ],
+        "edges": [
+            {
+                "source": "llm_interfaces",
+                "target": "message_handling",
+                "label": "Uses message structures",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "llm_interfaces",
+                "target": "prompt_templates",
+                "label": "Processes prompts from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prompt_templates",
+                "target": "llm_interfaces",
+                "label": "Formats input for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "embeddings",
+                "target": "llm_interfaces",
+                "label": "Used by some LLMs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "partner_llms",
+                "target": "llm_interfaces",
+                "label": "Implements interfaces from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "message_handling",
+                "target": "partner_llms",
+                "label": "Translates messages for",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_interfaces",
+                "label": "Core Interfaces",
+                "nodes": [
+                    "llm_interfaces"
+                ],
+                "title": "Core Language Model Interfaces",
+                "description": "Defines the abstract and concrete interfaces for interacting with various types of language models, providing a unified API for different providers.",
+                "role": null
+            },
+            {
+                "id": "message_handling",
+                "label": "Message Handling",
+                "nodes": [
+                    "message_handling"
+                ],
+                "title": "LLM Message Processing",
+                "description": "Manages the conversion and manipulation of messages between different LLM provider formats and LangChain's internal representations.",
+                "role": null
+            },
+            {
+                "id": "prompt_templates",
+                "label": "Prompt Templates",
+                "nodes": [
+                    "prompt_templates"
+                ],
+                "title": "Prompt Construction & Management",
+                "description": "Provides tools for creating, managing, and formatting prompts, including support for chat messages, few-shot examples, and structured outputs.",
+                "role": null
+            },
+            {
+                "id": "embeddings_and_partner_llms",
+                "label": "Embeddings & Partner LLMs",
+                "nodes": [
+                    "embeddings",
+                    "partner_llms"
+                ],
+                "title": "Embeddings and Third-Party LLM Integrations",
+                "description": "Handles the generation of text embeddings and integrates with a wide array of external language model providers, facilitating diverse model usage.",
+                "role": null
+            }
+        ]
+    }
+}

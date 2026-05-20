@@ -1,10 +1,18 @@
 {
-    "cli_and_dev_tools": {
+    "cli_and_developer_tools": {
         "path": "lib/cli, lib/devtools",
         "components": [],
         "children": {
+            "cli_core": {
+                "path": "lib/cli/src/crewai_cli/authentication, lib/cli/src/crewai_cli/command",
+                "components": [
+                    "lib.cli.src.crewai_cli.authentication.main.AuthenticationCommand",
+                    "lib.cli.src.crewai_cli.command.PlusAPIMixin",
+                    "lib.cli.src.crewai_cli.command.BaseCommand"
+                ]
+            },
             "cli_commands": {
-                "path": "lib/cli/src/crewai_cli/cli.py",
+                "path": "lib/cli/src/crewai_cli/cli",
                 "components": [
                     "lib.cli.src.crewai_cli.cli.checkpoint_resume",
                     "lib.cli.src.crewai_cli.cli.checkpoint_diff",
@@ -47,24 +55,15 @@
                     "lib.cli.src.crewai_cli.cli.crewai"
                 ]
             },
-            "cli_base_components": {
-                "path": "lib/cli/src/crewai_cli/authentication, lib/cli/src/crewai_cli/command.py, lib/crewai/src/crewai/cli",
-                "components": [
-                    "lib.cli.src.crewai_cli.authentication.main.AuthenticationCommand",
-                    "lib.cli.src.crewai_cli.command.PlusAPIMixin",
-                    "lib.cli.src.crewai_cli.command.BaseCommand",
-                    "lib.crewai.src.crewai.cli.__init__._ShimFinder"
-                ]
-            },
-            "cli_template_management": {
-                "path": "lib/cli/src/crewai_cli/create_crew.py, lib/cli/src/crewai_cli/templates",
+            "project_creation": {
+                "path": "lib/cli/src/crewai_cli/create_crew, lib/cli/src/crewai_cli/templates",
                 "components": [
                     "lib.cli.src.crewai_cli.create_crew.copy_template_files",
                     "lib.cli.src.crewai_cli.templates.flow.crews.content_crew.content_crew.ContentCrew"
                 ]
             },
-            "developer_utilities": {
-                "path": "lib/devtools",
+            "dev_utilities": {
+                "path": "lib/devtools/src/crewai_devtools",
                 "components": [
                     "lib.devtools.src.crewai_devtools.cli.tag",
                     "lib.devtools.src.crewai_devtools.cli.bump",
@@ -77,8 +76,8 @@
         "path": "lib/crewai/src/crewai",
         "components": [],
         "children": {
-            "agent_and_crew_orchestration": {
-                "path": "lib/crewai/src/crewai/agent, lib/crewai/src/crewai/agents, lib/crewai/src/crewai/lite_agent.py",
+            "agents_and_execution": {
+                "path": "lib/crewai/src/crewai/agent, lib/crewai/src/crewai/agents, lib/crewai/src/crewai/core, lib/crewai/src/crewai/lite_agent, lib/crewai/src/crewai/mcp, lib/crewai/src/crewai/tools/agent_tools, lib/crewai/src/crewai/tools/base_tool",
                 "components": [
                     "lib.crewai.src.crewai.agent.internal.meta.AgentMeta",
                     "lib.crewai.src.crewai.agent.utils.handle_reasoning",
@@ -87,11 +86,21 @@
                     "lib.crewai.src.crewai.agents.agent_adapters.openai_agents.openai_adapter.OpenAIAgentAdapter",
                     "lib.crewai.src.crewai.agents.crew_agent_executor.CrewAgentExecutor",
                     "lib.crewai.src.crewai.agents.tools_handler.ToolsHandler",
-                    "lib.crewai.src.crewai.lite_agent.LiteAgent"
+                    "lib.crewai.src.crewai.core.providers.human_input.AsyncExecutorContext",
+                    "lib.crewai.src.crewai.lite_agent.LiteAgent",
+                    "lib.crewai.src.crewai.mcp.filters.create_static_tool_filter",
+                    "lib.crewai.src.crewai.tools.agent_tools.base_agent_tools.BaseAgentTool",
+                    "lib.crewai.src.crewai.tools.base_tool.to_langchain",
+                    "lib.crewai.src.crewai.tools.base_tool._default_args_schema",
+                    "lib.crewai.src.crewai.tools.base_tool._make_tool",
+                    "lib.crewai.src.crewai.tools.base_tool.arun",
+                    "lib.crewai.src.crewai.tools.base_tool._validate_tool",
+                    "lib.crewai.src.crewai.tools.base_tool.from_langchain",
+                    "lib.crewai.src.crewai.tools.base_tool.decorator"
                 ]
             },
-            "task_and_flow_management": {
-                "path": "lib/crewai/src/crewai/flow, lib/crewai/src/crewai/task.py, lib/crewai/src/crewai/tasks",
+            "tasks_and_flow": {
+                "path": "lib/crewai/src/crewai/flow, lib/crewai/src/crewai/task, lib/crewai/src/crewai/tasks",
                 "components": [
                     "lib.crewai.src.crewai.flow.flow.resume",
                     "lib.crewai.src.crewai.flow.flow.from_pending",
@@ -122,6 +131,10 @@
                     "lib.crewai.src.crewai.flow.utils.ReturnVisitor",
                     "lib.crewai.src.crewai.flow.utils.VariableAssignmentVisitor",
                     "lib.crewai.src.crewai.flow.utils.StateAttributeVisitor",
+                    "lib.crewai.src.crewai.flow.visualization.assets.interactive.NetworkManager",
+                    "lib.crewai.src.crewai.flow.visualization.assets.interactive.DrawerManager",
+                    "lib.crewai.src.crewai.flow.visualization.assets.interactive.NodeRenderer",
+                    "lib.crewai.src.crewai.flow.visualization.assets.interactive.TriggeredByHighlighter",
                     "lib.crewai.src.crewai.flow.visualization.schema.extract_method_signature",
                     "lib.crewai.src.crewai.task._deserialize_model_class",
                     "lib.crewai.src.crewai.tasks.conditional_task.ConditionalTask",
@@ -139,8 +152,8 @@
                     "lib.crewai.src.crewai.llms.providers.openai_compatible.completion.OpenAICompatibleCompletion"
                 ]
             },
-            "event_and_state_management": {
-                "path": "lib/crewai/src/crewai/events, lib/crewai/src/crewai/state, conftest.py",
+            "events_and_state": {
+                "path": "conftest, lib/crewai/src/crewai/events, lib/crewai/src/crewai/memory, lib/crewai/src/crewai/state",
                 "components": [
                     "conftest.reset_event_state",
                     "lib.crewai.src.crewai.events.base_events.BaseEvent",
@@ -157,17 +170,22 @@
                     "lib.crewai.src.crewai.events.types.a2a_events.A2AContextIdleEvent",
                     "lib.crewai.src.crewai.events.types.a2a_events.A2AContextCompletedEvent",
                     "lib.crewai.src.crewai.events.types.a2a_events.A2AContextPrunedEvent",
+                    "lib.crewai.src.crewai.memory.analyze.analyze_for_save",
+                    "lib.crewai.src.crewai.memory.analyze.analyze_for_consolidation",
                     "lib.crewai.src.crewai.state.checkpoint_config._coerce_checkpoint",
                     "lib.crewai.src.crewai.state.checkpoint_listener._on_any_event",
                     "lib.crewai.src.crewai.state.event_record.EventRecord",
                     "lib.crewai.src.crewai.state.event_record._resolve_event"
                 ]
             },
-            "utilities_and_extensions": {
-                "path": "lib/crewai/src/crewai/hooks, lib/crewai/src/crewai/memory, lib/crewai/src/crewai/project, lib/crewai/src/crewai/skills, lib/crewai/src/crewai/telemetry, lib/crewai/src/crewai/types, lib/crewai/src/crewai/utilities, lib/crewai-core/src/crewai_core/printer.py, lib/crewai/src/crewai/core/providers/human_input.py",
+            "utilities_and_config": {
+                "path": "lib/crewai-core/src/crewai_core, lib/crewai/src/crewai/cli, lib/crewai/src/crewai/experimental, lib/crewai/src/crewai/hooks, lib/crewai/src/crewai/knowledge, lib/crewai/src/crewai/project, lib/crewai/src/crewai/security, lib/crewai/src/crewai/skills, lib/crewai/src/crewai/telemetry, lib/crewai/src/crewai/types, lib/crewai/src/crewai/utilities",
                 "components": [
                     "lib.crewai-core.src.crewai_core.printer.Printer",
-                    "lib.crewai.src.crewai.core.providers.human_input.AsyncExecutorContext",
+                    "lib.crewai.src.crewai.cli.__init__._ShimFinder",
+                    "lib.crewai.src.crewai.experimental.evaluation.base_evaluator.BaseEvaluator",
+                    "lib.crewai.src.crewai.experimental.evaluation.testing.run_experiment",
+                    "lib.crewai.src.crewai.experimental.evaluation.testing.assert_experiment_successfully",
                     "lib.crewai.src.crewai.hooks.__init__.clear_all_global_hooks",
                     "lib.crewai.src.crewai.hooks.decorators.decorator_factory",
                     "lib.crewai.src.crewai.hooks.decorators.before_llm_call",
@@ -178,8 +196,9 @@
                     "lib.crewai.src.crewai.hooks.wrappers.AfterLLMCallHookMethod",
                     "lib.crewai.src.crewai.hooks.wrappers.BeforeToolCallHookMethod",
                     "lib.crewai.src.crewai.hooks.wrappers.AfterToolCallHookMethod",
-                    "lib.crewai.src.crewai.memory.analyze.analyze_for_save",
-                    "lib.crewai.src.crewai.memory.analyze.analyze_for_consolidation",
+                    "lib.crewai.src.crewai.knowledge.source.base_file_knowledge_source.BaseFileKnowledgeSource",
+                    "lib.crewai.src.crewai.knowledge.source.crew_docling_source.CrewDoclingSource",
+                    "lib.crewai.src.crewai.knowledge.source.excel_knowledge_source.ExcelKnowledgeSource",
                     "lib.crewai.src.crewai.project.annotations.task",
                     "lib.crewai.src.crewai.project.annotations.wrapper",
                     "lib.crewai.src.crewai.project.annotations.agent",
@@ -193,6 +212,7 @@
                     "lib.crewai.src.crewai.project.crew_base._CrewBaseType",
                     "lib.crewai.src.crewai.project.utils.wrapper",
                     "lib.crewai.src.crewai.project.wrappers.DecoratedMethod",
+                    "lib.crewai.src.crewai.security.security_config.SecurityConfig",
                     "lib.crewai.src.crewai.skills.loader.load_resources",
                     "lib.crewai.src.crewai.telemetry.telemetry.Telemetry",
                     "lib.crewai.src.crewai.types.callback.string_to_callable",
@@ -212,26 +232,12 @@
             }
         }
     },
-    "agent_tools_and_integrations": {
-        "path": "lib/crewai-tools/src/crewai_tools, lib/crewai/src/crewai/tools",
+    "agent_tools_and_rag": {
+        "path": "lib/crewai-tools, lib/crewai-files, lib/crewai/src/crewai/rag",
         "components": [],
         "children": {
-            "base_tool_framework": {
-                "path": "lib/crewai-tools/src/crewai_tools/generate_tool_specs.py, lib/crewai/src/crewai/tools",
-                "components": [
-                    "lib.crewai-tools.src.crewai_tools.generate_tool_specs.ToolSpecExtractor",
-                    "lib.crewai.src.crewai.tools.agent_tools.base_agent_tools.BaseAgentTool",
-                    "lib.crewai.src.crewai.tools.base_tool.to_langchain",
-                    "lib.crewai.src.crewai.tools.base_tool._default_args_schema",
-                    "lib.crewai.src.crewai.tools.base_tool._make_tool",
-                    "lib.crewai.src.crewai.tools.base_tool.arun",
-                    "lib.crewai.src.crewai.tools.base_tool._validate_tool",
-                    "lib.crewai.src.crewai.tools.base_tool.from_langchain",
-                    "lib.crewai.src.crewai.tools.base_tool.decorator"
-                ]
-            },
-            "rag_tools_and_loaders": {
-                "path": "lib/crewai-tools/src/crewai_tools/rag",
+            "rag_loaders_and_chunkers": {
+                "path": "lib/crewai-tools/src/crewai_tools/rag/loaders, lib/crewai-tools/src/crewai_tools/rag/chunkers, lib/crewai-tools/src/crewai_tools/rag/base_loader",
                 "components": [
                     "lib.crewai-tools.src.crewai_tools.rag.base_loader.BaseLoader",
                     "lib.crewai-tools.src.crewai_tools.rag.chunkers.base_chunker.BaseChunker",
@@ -250,115 +256,35 @@
                     "lib.crewai-tools.src.crewai_tools.rag.loaders.webpage_loader.WebPageLoader",
                     "lib.crewai-tools.src.crewai_tools.rag.loaders.xml_loader.XMLLoader",
                     "lib.crewai-tools.src.crewai_tools.rag.loaders.youtube_channel_loader.YoutubeChannelLoader",
-                    "lib.crewai-tools.src.crewai_tools.rag.loaders.youtube_video_loader.YoutubeVideoLoader",
-                    "lib.crewai-tools.src.crewai_tools.tools.rag.rag_tool._ensure_adapter",
-                    "lib.crewai-tools.src.crewai_tools.tools.rag.rag_tool._check_url",
-                    "lib.crewai-tools.src.crewai_tools.tools.rag.rag_tool._check_path"
+                    "lib.crewai-tools.src.crewai_tools.rag.loaders.youtube_video_loader.YoutubeVideoLoader"
                 ]
             },
-            "search_and_scraping_tools": {
-                "path": "lib/crewai-tools/src/crewai_tools/tools/*search_tool*, lib/crewai-tools/src/crewai_tools/tools/*scrape_tool*, lib/crewai-tools/src/crewai_tools/tools/browserbase_load_tool, lib/crewai-tools/src/crewai_tools/tools/hyperbrowser_load_tool",
+            "rag_vector_stores": {
+                "path": "lib/crewai/src/crewai/rag",
                 "components": [
-                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.base.BraveSearchToolBase",
-                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.brave_local_pois_tool.BraveLocalPOIsTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.brave_search_tool.BraveSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.LLMContextHeaders",
-                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.LocalPOIsHeaders",
-                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.LocalPOIsDescriptionHeaders",
-                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.VideoSearchHeaders",
-                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.ImageSearchHeaders",
-                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.NewsSearchHeaders",
-                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.WebSearchHeaders",
-                    "lib.crewai-tools.src.crewai_tools.tools.brightdata_tool.brightdata_serp.BrightDataSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.brightdata_tool.brightdata_unlocker.BrightDataWebUnlockerTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.browserbase_load_tool.browserbase_load_tool.BrowserbaseLoadTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.csv_search_tool.csv_search_tool.CSVSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.directory_search_tool.directory_search_tool.DirectorySearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.docx_search_tool.docx_search_tool.DOCXSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.exa_tools.exa_search_tool.EXASearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.firecrawl_crawl_website_tool.firecrawl_crawl_website_tool.FirecrawlCrawlWebsiteTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.firecrawl_scrape_website_tool.firecrawl_scrape_website_tool.FirecrawlScrapeWebsiteTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.firecrawl_search_tool.firecrawl_search_tool.FirecrawlSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.github_search_tool.github_search_tool.GithubSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.hyperbrowser_load_tool.hyperbrowser_load_tool.HyperbrowserLoadTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.jina_scrape_website_tool.jina_scrape_website_tool.JinaScrapeWebsiteTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.json_search_tool.json_search_tool.JSONSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.linkup.linkup_search_tool.LinkupSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.mdx_search_tool.mdx_search_tool.MDXSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.mysql_search_tool.mysql_search_tool.MySQLSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.oxylabs_amazon_product_scraper_tool.oxylabs_amazon_product_scraper_tool.OxylabsAmazonProductScraperTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.oxylabs_amazon_search_scraper_tool.oxylabs_amazon_search_scraper_tool.OxylabsAmazonSearchScraperTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.oxylabs_google_search_scraper_tool.oxylabs_google_search_scraper_tool.OxylabsGoogleSearchScraperTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.oxylabs_universal_scraper_tool.oxylabs_universal_scraper_tool.OxylabsUniversalScraperTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.pdf_search_tool.pdf_search_tool.PDFSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.scrape_element_from_website.scrape_element_from_website.ScrapeElementFromWebsiteTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.scrape_website_tool.scrape_website_tool.ScrapeWebsiteTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.scrapegraph_scrape_tool.scrapegraph_scrape_tool.ScrapegraphScrapeTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.scrapfly_scrape_website_tool.scrapfly_scrape_website_tool.ScrapflyScrapeWebsiteTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.selenium_scraping_tool.selenium_scraping_tool.SeleniumScrapingTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.serpapi_tool.serpapi_base_tool.SerpApiBaseTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.serper_dev_tool.serper_dev_tool.SerperDevTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.serper_scrape_website_tool.serper_scrape_website_tool.SerperScrapeWebsiteTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.serply_api_tool.serply_webpage_to_markdown_tool.SerplyWebpageToMarkdownTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.singlestore_search_tool.singlestore_search_tool.SingleStoreSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.snowflake_search_tool.snowflake_search_tool.SnowflakeSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.spider_tool.spider_tool.SpiderTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.tavily_extractor_tool.tavily_extractor_tool.TavilyExtractorTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.tavily_get_research_tool.tavily_get_research_tool.TavilyGetResearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.tavily_research_tool.tavily_research_tool.TavilyResearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.tavily_search_tool.tavily_search_tool.TavilySearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.txt_search_tool.txt_search_tool.TXTSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.website_search.website_search_tool.WebsiteSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.xml_search_tool.xml_search_tool.XMLSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.youtube_channel_search_tool.youtube_channel_search_tool.YoutubeChannelSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.youtube_video_search_tool.youtube_video_search_tool.YoutubeVideoSearchTool"
+                    "lib.crewai.src.crewai.rag.__init__._RagModule",
+                    "lib.crewai.src.crewai.rag.chromadb.config._default_settings",
+                    "lib.crewai.src.crewai.rag.chromadb.factory.create_client",
+                    "lib.crewai.src.crewai.rag.core.base_client.BaseCollectionAddParams",
+                    "lib.crewai.src.crewai.rag.core.base_client.BaseCollectionSearchParams",
+                    "lib.crewai.src.crewai.rag.core.base_embeddings_callable.EmbeddingFunction",
+                    "lib.crewai.src.crewai.rag.factory.create_client",
+                    "lib.crewai.src.crewai.rag.qdrant.config._default_options",
+                    "lib.crewai.src.crewai.rag.qdrant.types.QdrantEmbeddingFunctionWrapper",
+                    "lib.crewai.src.crewai.rag.qdrant.types.QdrantCollectionCreateParams",
+                    "lib.crewai.src.crewai.rag.qdrant.types.CreateCollectionParams"
                 ]
             },
-            "specialized_api_tools": {
-                "path": "lib/crewai-tools/src/crewai_tools/tools",
+            "tool_adapters_and_specs": {
+                "path": "lib/crewai-tools/src/crewai_tools/adapters, lib/crewai-tools/src/crewai_tools/generate_tool_specs",
                 "components": [
-                    "lib.crewai-tools.src.crewai_tools.tools.ai_mind_tool.ai_mind_tool.AIMindTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.apify_actors_tool.apify_actors_tool.ApifyActorsTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.arxiv_paper_tool.arxiv_paper_tool.ArxivPaperTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.brightdata_tool.brightdata_dataset.BrightDataDatasetTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.code_docs_search_tool.code_docs_search_tool.CodeDocsSearchTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.composio_tool.composio_tool.ComposioTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.contextualai_create_agent_tool.contextual_create_agent_tool.ContextualAICreateAgentTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.contextualai_parse_tool.contextual_parse_tool.ContextualAIParseTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.contextualai_query_tool.contextual_query_tool.ContextualAIQueryTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.databricks_query_tool.databricks_query_tool.DatabricksQueryTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.directory_read_tool.directory_read_tool.DirectoryReadTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.files_compressor_tool.files_compressor_tool.FileCompressorTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.file_read_tool.file_read_tool.FileReadTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.generate_crewai_automation_tool.generate_crewai_automation_tool.GenerateCrewaiAutomationTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.merge_agent_handler_tool.merge_agent_handler_tool.MergeAgentHandlerTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.multion_tool.multion_tool.MultiOnTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.nl2sql.nl2sql_tool.NL2SQLTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.ocr_tool.ocr_tool.OCRTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.stagehand_tool.stagehand_tool.StagehandTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.vision_tool.vision_tool.VisionTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.zapier_action_tool.zapier_action_tool.ZapierActionTools"
+                    "lib.crewai-tools.src.crewai_tools.adapters.enterprise_adapter.EnterpriseActionKitToolAdapter",
+                    "lib.crewai-tools.src.crewai_tools.adapters.lancedb_adapter.LanceDBAdapter",
+                    "lib.crewai-tools.src.crewai_tools.adapters.rag_adapter.RAGAdapter",
+                    "lib.crewai-tools.src.crewai_tools.generate_tool_specs.ToolSpecExtractor"
                 ]
             },
-            "sandbox_and_bedrock_tools": {
-                "path": "lib/crewai-tools/src/crewai_tools/aws, lib/crewai-tools/src/crewai_tools/tools/*sandbox_tool*",
-                "components": [
-                    "lib.crewai-tools.src.crewai_tools.aws.bedrock.agents.invoke_agent_tool.BedrockInvokeAgentTool",
-                    "lib.crewai-tools.src.crewai_tools.aws.bedrock.browser.browser_toolkit.create_browser_toolkit",
-                    "lib.crewai-tools.src.crewai_tools.aws.bedrock.code_interpreter.code_interpreter_toolkit.create_code_interpreter_toolkit",
-                    "lib.crewai-tools.src.crewai_tools.aws.bedrock.knowledge_base.retriever_tool.BedrockKBRetrieverTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.daytona_sandbox_tool.daytona_base_tool.DaytonaBaseTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.e2b_sandbox_tool.e2b_base_tool.E2BBaseTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.e2b_sandbox_tool.e2b_exec_tool.E2BExecTool"
-                ]
-            }
-        }
-    },
-    "data_and_rag_management": {
-        "path": "lib/crewai-files, lib/crewai/src/crewai/knowledge, lib/crewai/src/crewai/rag",
-        "components": [],
-        "children": {
-            "file_processing_and_caching": {
+            "file_management": {
                 "path": "lib/crewai-files/src/crewai_files",
                 "components": [
                     "lib.crewai-files.src.crewai_files.cache.cleanup.cleanup_expired_files",
@@ -376,43 +302,106 @@
                     "lib.crewai-files.src.crewai_files.resolution.resolver.create_resolver",
                     "lib.crewai-files.src.crewai_files.resolution.utils.normalize_input_files",
                     "lib.crewai-files.src.crewai_files.uploaders.factory.OpenAIOpts",
-                    "lib.crewai-files.src.crewai_files.uploaders.factory.AnthropicOpts"
+                    "lib.crewai-files.src.crewai-files.src.crewai_files.uploaders.factory.AnthropicOpts"
                 ]
             },
-            "knowledge_sources": {
-                "path": "lib/crewai/src/crewai/knowledge",
+            "specific_tools": {
+                "path": "lib/crewai-tools/src/crewai_tools/tools",
                 "components": [
-                    "lib.crewai.src.crewai.knowledge.source.base_file_knowledge_source.BaseFileKnowledgeSource",
-                    "lib.crewai.src.crewai.knowledge.source.crew_docling_source.CrewDoclingSource",
-                    "lib.crewai.src.crewai.knowledge.source.excel_knowledge_source.ExcelKnowledgeSource"
-                ]
-            },
-            "rag_vector_stores": {
-                "path": "lib/crewai/src/crewai/rag, lib/crewai-tools/src/crewai_tools/adapters, lib/crewai-tools/src/crewai_tools/tools/*vector_search_tool*",
-                "components": [
-                    "lib.crewai-tools.src.crewai_tools.adapters.lancedb_adapter.LanceDBAdapter",
-                    "lib.crewai-tools.src.crewai_tools.adapters.rag_adapter.RAGAdapter",
+                    "lib.crewai-tools.src.crewai_tools.aws.bedrock.agents.invoke_agent_tool.BedrockInvokeAgentTool",
+                    "lib.crewai-tools.src.crewai_tools.aws.bedrock.browser.browser_toolkit.create_browser_toolkit",
+                    "lib.crewai-tools.src.crewai_tools.aws.bedrock.code_interpreter.code_interpreter_toolkit.create_code_interpreter_toolkit",
+                    "lib.crewai-tools.src.crewai_tools.aws.bedrock.knowledge_base.retriever_tool.BedrockKBRetrieverTool",
+                    "lib.crewai-tools.src.crewai_tools.rag.rag_tool._ensure_adapter",
+                    "lib.crewai-tools.src.crewai_tools.rag.rag_tool._check_url",
+                    "lib.crewai-tools.src.crewai_tools.rag.rag_tool._check_path",
+                    "lib.crewai-tools.src.crewai_tools.tools.ai_mind_tool.ai_mind_tool.AIMindTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.apify_actors_tool.apify_actors_tool.ApifyActorsTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.arxiv_paper_tool.arxiv_paper_tool.ArxivPaperTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.base.BraveSearchToolBase",
+                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.brave_local_pois_tool.BraveLocalPOIsTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.brave_search_tool.BraveSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.LLMContextHeaders",
+                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.LocalPOIsHeaders",
+                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.LocalPOIsDescriptionHeaders",
+                    "lib.crewai-tools.src.crewai_tools.tools.brave_search_tool.schemas.VideoSearchHeaders",
+                    "lib.crewai-tools.src.crewai_tools.tools.brightdata_tool.brightdata_dataset.BrightDataDatasetTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.brightdata_tool.brightdata_unlocker.BrightDataWebUnlockerTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.browserbase_load_tool.browserbase_load_tool.BrowserbaseLoadTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.code_docs_search_tool.code_docs_search_tool.CodeDocsSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.composio_tool.composio_tool.ComposioTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.contextualai_create_agent_tool.contextual_create_agent_tool.ContextualAICreateAgentTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.contextualai_parse_tool.contextual_parse_tool.ContextualAIParseTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.contextualai_query_tool.contextual_query_tool.ContextualAIQueryTool",
                     "lib.crewai-tools.src.crewai_tools.tools.couchbase_tool.couchbase_tool.CouchbaseFTSVectorSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.crewai_platform_tools.crewai_platform_action_tool.CrewAIPlatformActionTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.csv_search_tool.csv_search_tool.CSVSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.databricks_query_tool.databricks_query_tool.DatabricksQueryTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.daytona_sandbox_tool.daytona_base_tool.DaytonaBaseTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.directory_read_tool.directory_read_tool.DirectoryReadTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.directory_search_tool.directory_search_tool.DirectorySearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.docx_search_tool.docx_search_tool.DOCXSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.e2b_sandbox_tool.e2b_base_tool.E2BBaseTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.e2b_sandbox_tool.e2b_exec_tool.E2BExecTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.exa_tools.exa_search_tool.EXASearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.file_read_tool.file_read_tool.FileReadTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.files_compressor_tool.files_compressor_tool.FileCompressorTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.firecrawl_crawl_website_tool.firecrawl_crawl_website_tool.FirecrawlCrawlWebsiteTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.firecrawl_scrape_website_tool.firecrawl_scrape_website_tool.FirecrawlScrapeWebsiteTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.firecrawl_search_tool.firecrawl_search_tool.FirecrawlSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.generate_crewai_automation_tool.generate_crewai_automation_tool.GenerateCrewaiAutomationTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.github_search_tool.github_search_tool.GithubSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.hyperbrowser_load_tool.hyperbrowser_load_tool.HyperbrowserLoadTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.jina_scrape_website_tool.jina_scrape_website_tool.JinaScrapeWebsiteTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.json_search_tool.json_search_tool.JSONSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.linkup.linkup_search_tool.LinkupSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.mdx_search_tool.mdx_search_tool.MDXSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.merge_agent_handler_tool.merge_agent_handler_tool.MergeAgentHandlerTool",
                     "lib.crewai-tools.src.crewai_tools.tools.mongodb_vector_search_tool.vector_search.MongoDBVectorSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.multion_tool.multion_tool.MultiOnTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.mysql_search_tool.mysql_search_tool.MySQLSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.nl2sql.nl2sql_tool.NL2SQLTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.ocr_tool.ocr_tool.OCRTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.oxylabs_amazon_product_scraper_tool.oxylabs_amazon_product_scraper_tool.OxylabsAmazonProductScraperTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.oxylabs_amazon_search_scraper_tool.oxylabs_amazon_search_scraper_tool.OxylabsAmazonSearchScraperTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.oxylabs_google_search_scraper_tool.oxylabs_google_search_scraper_tool.OxylabsGoogleSearchScraperTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.oxylabs_universal_scraper_tool.oxylabs_universal_scraper_tool.OxylabsUniversalScraperTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.patronus_eval_tool.patronus_eval_tool.PatronusEvalTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.patronus_eval_tool.patronus_local_evaluator_tool.PatronusLocalEvaluatorTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.patronus_eval_tool.patronus_predefined_criteria_eval_tool.PatronusPredefinedCriteriaEvalTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.pdf_search_tool.pdf_search_tool.PDFSearchTool",
                     "lib.crewai-tools.src.crewai_tools.tools.qdrant_vector_search_tool.qdrant_search_tool.QdrantVectorSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.scrape_element_from_website.scrape_element_from_website.ScrapeElementFromWebsiteTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.scrape_website_tool.scrape_website_tool.ScrapeWebsiteTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.scrapegraph_scrape_tool.scrapegraph_scrape_tool.ScrapegraphScrapeTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.scrapfly_scrape_website_tool.scrapfly_scrape_website_tool.ScrapflyScrapeWebsiteTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.selenium_scraping_tool.selenium_scraping_tool.SeleniumScrapingTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.serpapi_tool.serpapi_base_tool.SerpApiBaseTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.serper_dev_tool.serper_dev_tool.SerperDevTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.serper_scrape_website_tool.serper_scrape_website_tool.SerperScrapeWebsiteTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.serply_api_tool.serply_webpage_to_markdown_tool.SerplyWebpageToMarkdownTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.singlestore_search_tool.singlestore_search_tool.SingleStoreSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.snowflake_search_tool.snowflake_search_tool.SnowflakeSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.spider_tool.spider_tool.SpiderTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.stagehand_tool.stagehand_tool.StagehandTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.tavily_extractor_tool.tavily_extractor_tool.TavilyExtractorTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.tavily_get_research_tool.tavily_get_research_tool.TavilyGetResearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.tavily_research_tool.tavily_research_tool.TavilyResearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.tavily_search_tool.tavily_search_tool.TavilySearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.txt_search_tool.txt_search_tool.TXTSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.vision_tool.vision_tool.VisionTool",
                     "lib.crewai-tools.src.crewai_tools.tools.weaviate_tool.vector_search.WeaviateVectorSearchTool",
-                    "lib.crewai.src.crewai.rag.__init__._RagModule",
-                    "lib.crewai.src.crewai.rag.chromadb.config._default_settings",
-                    "lib.crewai.src.crewai.rag.chromadb.factory.create_client",
-                    "lib.crewai.src.crewai.rag.core.base_client.BaseCollectionAddParams",
-                    "lib.crewai.src.crewai.rag.core.base_client.BaseCollectionSearchParams",
-                    "lib.crewai.src.crewai.rag.core.base_embeddings_callable.EmbeddingFunction",
-                    "lib.crewai.src.crewai.rag.factory.create_client",
-                    "lib.crewai.src.crewai.rag.qdrant.config._default_options",
-                    "lib.crewai.src.crewai.rag.qdrant.types.QdrantEmbeddingFunctionWrapper",
-                    "lib.crewai.src.crewai.rag.qdrant.types.QdrantCollectionCreateParams",
-                    "lib.crewai.src.crewai.rag.qdrant.types.CreateCollectionParams"
+                    "lib.crewai-tools.src.crewai_tools.tools.website_search.website_search_tool.WebsiteSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.xml_search_tool.xml_search_tool.XMLSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.youtube_channel_search_tool.youtube_channel_search_tool.YoutubeChannelSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.youtube_video_search_tool.youtube_video_search_tool.YoutubeVideoSearchTool",
+                    "lib.crewai-tools.src.crewai_tools.tools.zapier_action_tool.zapier_action_tool.ZapierActionTools"
                 ]
             }
         }
     },
-    "a2a_and_enterprise": {
-        "path": "lib/crewai/src/crewai/a2a, lib/crewai/src/crewai/mcp, lib/crewai/src/crewai/security, lib/crewai-tools/src/crewai_tools/adapters/enterprise_adapter.py, lib/crewai-tools/src/crewai_tools/tools/crewai_platform_tools, lib/crewai-tools/src/crewai_tools/tools/patronus_eval_tool",
+    "agent_to_agent_communication": {
+        "path": "lib/crewai/src/crewai/a2a",
         "components": [],
         "children": {
             "a2a_authentication": {
@@ -434,18 +423,9 @@
                     "lib.crewai.src.crewai.a2a.auth.utils.retry_on_401"
                 ]
             },
-            "a2a_communication_core": {
-                "path": "lib/crewai/src/crewai/a2a/config.py, lib/crewai/src/crewai/a2a/updates, lib/crewai/src/crewai/a2a/wrapper.py",
+            "a2a_core_logic": {
+                "path": "lib/crewai/src/crewai/a2a/wrapper",
                 "components": [
-                    "lib.crewai.src.crewai.a2a.config._get_default_update_config",
-                    "lib.crewai.src.crewai.a2a.config.A2AConfig",
-                    "lib.crewai.src.crewai.a2a.config.A2AClientConfig",
-                    "lib.crewai.src.crewai.a2a.updates.base.PollingHandlerKwargs",
-                    "lib.crewai.src.crewai.a2a.updates.base.StreamingHandlerKwargs",
-                    "lib.crewai.src.crewai.a2a.updates.base.PushNotificationHandlerKwargs",
-                    "lib.crewai.src.crewai.a2a.updates.polling.handler.PollingHandler",
-                    "lib.crewai.src.crewai.a2a.updates.push_notifications.handler.PushNotificationHandler",
-                    "lib.crewai.src.crewai.a2a.updates.streaming.handler.StreamingHandler",
                     "lib.crewai.src.crewai.a2a.wrapper.aexecute_task_with_a2a",
                     "lib.crewai.src.crewai.a2a.wrapper.execute_task_with_a2a",
                     "lib.crewai.src.crewai.a2a.wrapper.kickoff_async_with_a2a",
@@ -453,9 +433,15 @@
                     "lib.crewai.src.crewai.a2a.wrapper._fetch_card_from_config"
                 ]
             },
-            "a2a_extensions_and_utilities": {
-                "path": "lib/crewai/src/crewai/a2a/extensions, lib/crewai/src/crewai/a2a/utils",
+            "a2a_updates_and_extensions": {
+                "path": "lib/crewai/src/crewai/a2a/updates, lib/crewai/src/crewai/a2a/extensions",
                 "components": [
+                    "lib.crewai.src.crewai.a2a.updates.base.PollingHandlerKwargs",
+                    "lib.crewai.src.crewai.a2a.updates.base.StreamingHandlerKwargs",
+                    "lib.crewai.src.crewai.a2a.updates.base.PushNotificationHandlerKwargs",
+                    "lib.crewai.src.crewai.a2a.updates.polling.handler.PollingHandler",
+                    "lib.crewai.src.crewai.a2a.updates.push_notifications.handler.PushNotificationHandler",
+                    "lib.crewai.src.crewai.a2a.updates.streaming.handler.StreamingHandler",
                     "lib.crewai.src.crewai.a2a.extensions.a2ui.client_extension.A2UIClientExtension",
                     "lib.crewai.src.crewai.a2a.extensions.a2ui.server_extension.A2UIServerExtension",
                     "lib.crewai.src.crewai.a2a.extensions.a2ui.server_extension._build_data_part",
@@ -463,7 +449,15 @@
                     "lib.crewai.src.crewai.a2a.extensions.a2ui.validator.validate_a2ui_event",
                     "lib.crewai.src.crewai.a2a.extensions.a2ui.validator.validate_a2ui_event_v09",
                     "lib.crewai.src.crewai.a2a.extensions.a2ui.validator.validate_catalog_components_v09",
-                    "lib.crewai.src.crewai.a2a.extensions.registry.get_extensions_from_config",
+                    "lib.crewai.src.crewai.a2a.extensions.registry.get_extensions_from_config"
+                ]
+            },
+            "a2a_utilities": {
+                "path": "lib/crewai/src/crewai/a2a/config, lib/crewai/src/crewai/a2a/utils",
+                "components": [
+                    "lib.crewai.src.crewai.a2a.config._get_default_update_config",
+                    "lib.crewai.src.crewai.a2a.config.A2AConfig",
+                    "lib.crewai.src.crewai.a2a.config.A2AClientConfig",
                     "lib.crewai.src.crewai.a2a.utils.agent_card._to_agent_card",
                     "lib.crewai.src.crewai.a2a.utils.agent_card._crew_to_agent_card",
                     "lib.crewai.src.crewai.a2a.utils.agent_card_signing.verify_agent_card_signature",
@@ -475,21 +469,6 @@
                     "lib.crewai.src.crewai.a2a.utils.logging.configure_json_logging",
                     "lib.crewai.src.crewai.a2a.utils.task.execute_with_extensions",
                     "lib.crewai.src.crewai.a2a.utils.task.watch_for_cancel"
-                ]
-            },
-            "enterprise_and_evaluation_tools": {
-                "path": "lib/crewai/src/crewai/experimental, lib/crewai/src/crewai/mcp, lib/crewai/src/crewai/security, lib/crewai-tools/src/crewai_tools/adapters/enterprise_adapter.py, lib/crewai-tools/src/crewai_tools/tools/crewai_platform_tools, lib/crewai-tools/src/crewai_tools/tools/patronus_eval_tool",
-                "components": [
-                    "lib.crewai-tools.src.crewai_tools.adapters.enterprise_adapter.EnterpriseActionKitToolAdapter",
-                    "lib.crewai-tools.src.crewai_tools.tools.crewai_platform_tools.crewai_platform_action_tool.CrewAIPlatformActionTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.patronus_eval_tool.patronus_eval_tool.PatronusEvalTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.patronus_eval_tool.patronus_local_evaluator_tool.PatronusLocalEvaluatorTool",
-                    "lib.crewai-tools.src.crewai_tools.tools.patronus_eval_tool.patronus_predefined_criteria_eval_tool.PatronusPredefinedCriteriaEvalTool",
-                    "lib.crewai.src.crewai.experimental.evaluation.base_evaluator.BaseEvaluator",
-                    "lib.crewai.src.crewai.experimental.evaluation.testing.run_experiment",
-                    "lib.crewai.src.crewai.experimental.evaluation.testing.assert_experiment_successfully",
-                    "lib.crewai.src.crewai.mcp.filters.create_static_tool_filter",
-                    "lib.crewai.src.crewai.security.security_config.SecurityConfig"
                 ]
             }
         }

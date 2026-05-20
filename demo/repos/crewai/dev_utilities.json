@@ -1,0 +1,358 @@
+{
+  "title": "Developer Utilities Module",
+  "summary": "This module provides command-line tools for automating version management, Git tagging, and documentation generation/translation based on code changes, streamlining the release process.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "bump_versions",
+        "label": "Bump Package Versions",
+        "type": "component",
+        "link": null,
+        "title": "Update Project Package Versions",
+        "description": "Automates the process of updating version strings across all project packages and prepares a dedicated Git branch and initiates a Pull Request for these version changes."
+      },
+      {
+        "id": "manage_git_branches",
+        "label": "Manage Git Branches",
+        "type": "component",
+        "link": null,
+        "title": "Git Branch Operations",
+        "description": "Handles the creation, checkout, and pushing of specific Git branches to the remote repository, essential for both version updates and documentation changes."
+      },
+      {
+        "id": "create_pr",
+        "label": "Create Pull Request",
+        "type": "component",
+        "link": null,
+        "title": "Initiate GitHub Pull Request",
+        "description": "Generates and submits a new Pull Request on GitHub, facilitating code review and merging for version bumps or documentation updates."
+      },
+      {
+        "id": "validate_versions",
+        "label": "Validate Package Versions",
+        "type": "component",
+        "link": null,
+        "title": "Check Package Version Consistency",
+        "description": "Ensures that all detected project packages maintain a consistent version number, preventing discrepancies before a new release tag is created."
+      },
+      {
+        "id": "create_git_tag",
+        "label": "Create Git Tag & Release",
+        "type": "component",
+        "link": null,
+        "title": "Tag Git Repo and GitHub Release",
+        "description": "Creates and pushes a new Git tag to the repository, typically on the main branch, and subsequently publishes a corresponding release on GitHub."
+      },
+      {
+        "id": "generate_release_notes",
+        "label": "Generate Release Notes",
+        "type": "component",
+        "link": null,
+        "title": "Automate Release Note Creation",
+        "description": "Leverages an AI language model to automatically draft comprehensive release notes for a new software version, summarizing key changes and features."
+      },
+      {
+        "id": "update_docs_for_release",
+        "label": "Update Docs for Release",
+        "type": "component",
+        "link": null,
+        "title": "Integrate Docs into Release Flow",
+        "description": "Orchestrates the process of updating and generating documentation as an integral part of the software release cycle, including creating a dedicated PR."
+      },
+      {
+        "id": "analyze_code_diff",
+        "label": "Analyze Code Changes",
+        "type": "component",
+        "link": null,
+        "title": "Identify Doc Needs from Code Diff",
+        "description": "Examines the differences between code branches (git diff) to intelligently determine if new or updated documentation is required based on code modifications."
+      },
+      {
+        "id": "generate_docs_content",
+        "label": "Generate Documentation Content",
+        "type": "component",
+        "link": null,
+        "title": "Create/Update Docs with LLM",
+        "description": "Utilizes an AI language model to automatically generate new documentation sections or update existing content based on identified code changes and requirements."
+      },
+      {
+        "id": "translate_docs",
+        "label": "Translate Documentation",
+        "type": "component",
+        "link": null,
+        "title": "Localize Documentation Content",
+        "description": "Translates the generated English documentation into multiple supported languages, ensuring broader accessibility for the project's user base."
+      },
+      {
+        "id": "git_repo_ext",
+        "label": "Git Repository",
+        "type": "external",
+        "link": null,
+        "title": "Version Control System",
+        "description": "The central Git repository where all source code, branches, tags, and commit history for the project are managed and stored."
+      },
+      {
+        "id": "github_api_ext",
+        "label": "GitHub API",
+        "type": "external",
+        "link": null,
+        "title": "GitHub Platform Services",
+        "description": "The programmatic interface for interacting with GitHub, used for operations such as creating Pull Requests, managing releases, and fetching repository data."
+      },
+      {
+        "id": "openai_llm_ext",
+        "label": "OpenAI LLM",
+        "type": "external",
+        "link": null,
+        "title": "AI Language Model Service",
+        "description": "An external AI language model service (e.g., OpenAI GPT) used for advanced text generation, code analysis, and translation tasks within the development workflow."
+      },
+      {
+        "id": "package_version_files",
+        "label": "Package Version Files",
+        "type": "data",
+        "link": null,
+        "title": "Source Code Version Information",
+        "description": "Files within individual project packages (e.g., `__version__.py`) that explicitly define and store the current semantic version number of each package."
+      },
+      {
+        "id": "documentation_files",
+        "label": "Documentation Files",
+        "type": "data",
+        "link": null,
+        "title": "Project Documentation Assets",
+        "description": "The collection of Markdown or MDX files that constitute the project's official documentation, stored in various languages and formats."
+      },
+      {
+        "id": "git_diff_data",
+        "label": "Code Changes (Git Diff)",
+        "type": "data",
+        "link": null,
+        "title": "Git Difference Output",
+        "description": "Structured data representing the differences between two Git commits or branches, used as input for analyzing code changes and documentation needs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "bump_versions",
+        "target": "package_version_files",
+        "label": "updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bump_versions",
+        "target": "manage_git_branches",
+        "label": "prepares branch",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_git_branches",
+        "target": "git_repo_ext",
+        "label": "pushes branch",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_git_branches",
+        "target": "create_pr",
+        "label": "initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_pr",
+        "target": "github_api_ext",
+        "label": "creates PR",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_versions",
+        "target": "package_version_files",
+        "label": "reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_versions",
+        "target": "create_git_tag",
+        "label": "proceeds if valid",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_git_tag",
+        "target": "git_repo_ext",
+        "label": "tags & pushes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_git_tag",
+        "target": "generate_release_notes",
+        "label": "triggers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_release_notes",
+        "target": "openai_llm_ext",
+        "label": "uses LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_release_notes",
+        "target": "create_git_tag",
+        "label": "provides notes for release",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_git_tag",
+        "target": "github_api_ext",
+        "label": "creates GitHub release",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_git_tag",
+        "target": "update_docs_for_release",
+        "label": "initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "update_docs_for_release",
+        "target": "analyze_code_diff",
+        "label": "triggers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "analyze_code_diff",
+        "target": "git_repo_ext",
+        "label": "fetches diff",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "analyze_code_diff",
+        "target": "git_diff_data",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "analyze_code_diff",
+        "target": "openai_llm_ext",
+        "label": "uses LLM for analysis",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "analyze_code_diff",
+        "target": "generate_docs_content",
+        "label": "if docs needed",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_docs_content",
+        "target": "openai_llm_ext",
+        "label": "uses LLM for generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_docs_content",
+        "target": "documentation_files",
+        "label": "writes English docs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_docs_content",
+        "target": "translate_docs",
+        "label": "triggers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "translate_docs",
+        "target": "openai_llm_ext",
+        "label": "uses LLM for translation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "translate_docs",
+        "target": "documentation_files",
+        "label": "writes translated docs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "update_docs_for_release",
+        "target": "create_pr",
+        "label": "creates docs PR",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "version_release_management",
+        "label": "Version & Release Management",
+        "nodes": [
+          "bump_versions",
+          "manage_git_branches",
+          "create_pr",
+          "create_git_tag",
+          "generate_release_notes",
+          "update_docs_for_release"
+        ],
+        "title": "Automated Versioning and Release",
+        "description": "Handles bumping package versions, managing Git branches, creating pull requests, and generating Git tags and GitHub releases with automated release notes.",
+        "role": "generative"
+      },
+      {
+        "id": "documentation_automation",
+        "label": "Documentation Automation",
+        "nodes": [
+          "generate_docs_content",
+          "translate_docs"
+        ],
+        "title": "AI-Powered Documentation Workflow",
+        "description": "Automates the process of generating and translating documentation content based on code changes, leveraging AI for content creation and localization.",
+        "role": "generative"
+      },
+      {
+        "id": "code_version_analysis",
+        "label": "Code & Version Analysis",
+        "nodes": [
+          "validate_versions",
+          "analyze_code_diff"
+        ],
+        "title": "Analysis for Development Operations",
+        "description": "Performs analytical tasks such as validating package version consistency and analyzing code differences to inform documentation needs and release readiness.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_artifacts",
+        "label": "Data Artifacts",
+        "nodes": [
+          "package_version_files",
+          "documentation_files",
+          "git_diff_data"
+        ],
+        "title": "Key Data Assets",
+        "description": "Represents the various data files and artifacts that are read from or written to during the development utility operations, including version and documentation files.",
+        "role": "data"
+      }
+    ]
+  }
+}

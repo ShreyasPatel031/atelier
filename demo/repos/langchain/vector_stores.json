@@ -1,0 +1,207 @@
+{
+  "title": "Vector Store Implementations",
+  "summary": "This module defines the abstract interface for vector stores and provides concrete implementations for in-memory storage and integration with the Qdrant vector database. It enables adding, deleting, and searching documents based on their vector embeddings.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "VectorStore_Base",
+        "label": "VectorStore",
+        "type": "component",
+        "link": null,
+        "title": "Base Vector Store Interface",
+        "description": "Defines the abstract interface for all vector store implementations, providing methods for adding, deleting, and searching documents based on vector embeddings."
+      },
+      {
+        "id": "InMemoryVectorStore_Impl",
+        "label": "InMemoryVectorStore",
+        "type": "component",
+        "link": null,
+        "title": "In-Memory Vector Store",
+        "description": "A concrete implementation of VectorStore that stores and manages vector embeddings and documents entirely in local memory, using NumPy for similarity calculations."
+      },
+      {
+        "id": "QdrantVectorStore_Impl",
+        "label": "QdrantVectorStore",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Vector Store (New API)",
+        "description": "Integrates with the Qdrant vector database, supporting dense, sparse, and hybrid retrieval modes for efficient storage and search of vector embeddings using the new Qdrant API."
+      },
+      {
+        "id": "Qdrant_Classic_Impl",
+        "label": "Qdrant (Classic API)",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Vector Store (Classic API)",
+        "description": "An older or alternative integration with the Qdrant vector database, providing core functionalities for adding, deleting, and searching documents using the classic Qdrant API."
+      },
+      {
+        "id": "Embeddings_External",
+        "label": "Embeddings",
+        "type": "external",
+        "link": "embeddings",
+        "title": "Embedding Generation",
+        "description": "An external component responsible for converting text into numerical vector representations (embeddings)."
+      },
+      {
+        "id": "SparseEmbeddings_External",
+        "label": "SparseEmbeddings",
+        "type": "external",
+        "link": null,
+        "title": "Sparse Embedding Generation",
+        "description": "An external component specifically for generating sparse vector embeddings, used in hybrid retrieval modes by QdrantVectorStore."
+      },
+      {
+        "id": "QdrantClient_External",
+        "label": "QdrantClient",
+        "type": "external",
+        "link": null,
+        "title": "Qdrant Database Client",
+        "description": "The official client library for interacting with the Qdrant vector database, handling connection and API calls."
+      },
+      {
+        "id": "Document_External",
+        "label": "Document",
+        "type": "external",
+        "link": "document_loaders",
+        "title": "Document Data Structure",
+        "description": "Represents a piece of text content along with associated metadata, used for storage and retrieval in vector stores."
+      },
+      {
+        "id": "VectorStoreRetriever_External",
+        "label": "VectorStoreRetriever",
+        "type": "external",
+        "link": "retrievers",
+        "title": "Vector Store Retriever",
+        "description": "A component that wraps a VectorStore to provide a standard retrieval interface, allowing for various search types and configurations."
+      }
+    ],
+    "edges": [
+      {
+        "source": "InMemoryVectorStore_Impl",
+        "target": "VectorStore_Base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QdrantVectorStore_Impl",
+        "target": "VectorStore_Base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Qdrant_Classic_Impl",
+        "target": "VectorStore_Base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InMemoryVectorStore_Impl",
+        "target": "Embeddings_External",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QdrantVectorStore_Impl",
+        "target": "Embeddings_External",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QdrantVectorStore_Impl",
+        "target": "SparseEmbeddings_External",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QdrantVectorStore_Impl",
+        "target": "QdrantClient_External",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Qdrant_Classic_Impl",
+        "target": "Embeddings_External",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Qdrant_Classic_Impl",
+        "target": "QdrantClient_External",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorStore_Base",
+        "target": "Document_External",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorStore_Base",
+        "target": "VectorStoreRetriever_External",
+        "label": "creates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "VectorStoreCore",
+        "label": "Vector Store Core",
+        "nodes": [
+          "VectorStore_Base"
+        ],
+        "title": "Core Vector Store Interface",
+        "description": "The foundational abstract class defining the contract for all vector store implementations.",
+        "role": "surface"
+      },
+      {
+        "id": "InMemoryStorage",
+        "label": "In-Memory Storage",
+        "nodes": [
+          "InMemoryVectorStore_Impl"
+        ],
+        "title": "In-Memory Vector Storage",
+        "description": "A lightweight, in-memory implementation of a vector store for local data management.",
+        "role": "data"
+      },
+      {
+        "id": "QdrantIntegrations",
+        "label": "Qdrant Integrations",
+        "nodes": [
+          "QdrantVectorStore_Impl",
+          "Qdrant_Classic_Impl"
+        ],
+        "title": "Qdrant Database Integrations",
+        "description": "Implementations for interacting with the Qdrant vector database, supporting various retrieval strategies.",
+        "role": "data"
+      },
+      {
+        "id": "ExternalDependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "Embeddings_External",
+          "SparseEmbeddings_External",
+          "QdrantClient_External",
+          "Document_External",
+          "VectorStoreRetriever_External"
+        ],
+        "title": "External Components and Data",
+        "description": "Components and data structures from other modules or external libraries that are utilized by the vector stores.",
+        "role": "data"
+      }
+    ]
+  }
+}

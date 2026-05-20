@@ -1,0 +1,129 @@
+{
+  "title": "Composio & Agent Handler Tools",
+  "summary": "This module provides specialized tools for integrating CrewAI agents with Composio actions and Merge Agent Handler, enabling secure and structured interaction with a wide array of third-party applications and services.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "crewai_agent",
+        "label": "CrewAI Agent",
+        "type": "component",
+        "link": null,
+        "title": "CrewAI Agent",
+        "description": "An autonomous entity within the CrewAI framework that orchestrates tasks, makes decisions, and utilizes available tools to achieve its objectives."
+      },
+      {
+        "id": "composio_tool",
+        "label": "Composio Tool Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "ComposioTool",
+        "description": "Enables CrewAI agents to execute specific actions provided by the Composio platform. It handles the conversion of Composio action schemas into a format usable by CrewAI and ensures necessary authentication checks."
+      },
+      {
+        "id": "merge_agent_handler_tool",
+        "label": "Merge Agent Handler Tool",
+        "type": "component",
+        "link": null,
+        "title": "MergeAgentHandlerTool",
+        "description": "Facilitates secure interaction between CrewAI agents and various third-party integrations through the Merge Agent Handler. It manages API requests, authentication, and permissions using the Model Context Protocol (MCP)."
+      },
+      {
+        "id": "composio_platform",
+        "label": "Composio Platform",
+        "type": "external",
+        "link": null,
+        "title": "Composio Platform",
+        "description": "An external integration platform that offers a wide array of pre-built actions for connecting to different applications and services, which can be leveraged by CrewAI agents."
+      },
+      {
+        "id": "merge_agent_handler_api",
+        "label": "Merge Agent Handler API",
+        "type": "external",
+        "link": null,
+        "title": "Merge Agent Handler API",
+        "description": "The central API for the Merge Agent Handler, responsible for receiving Model Context Protocol (MCP) requests from agents, authenticating them, and securely routing them to the appropriate third-party services."
+      },
+      {
+        "id": "third_party_services",
+        "label": "Third-Party Services",
+        "type": "external",
+        "link": null,
+        "title": "Third-Party Services",
+        "description": "Various external applications, APIs, and systems (e.g., CRM, project management, communication tools) that are integrated and accessed indirectly through the Composio platform or Merge Agent Handler."
+      }
+    ],
+    "edges": [
+      {
+        "source": "crewai_agent",
+        "target": "composio_tool",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crewai_agent",
+        "target": "merge_agent_handler_tool",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "composio_tool",
+        "target": "composio_platform",
+        "label": "Executes Actions On",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "merge_agent_handler_tool",
+        "target": "merge_agent_handler_api",
+        "label": "Makes MCP Requests To",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "merge_agent_handler_api",
+        "target": "third_party_services",
+        "label": "Accesses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "crewai_core_group",
+        "label": "CrewAI Core",
+        "nodes": [
+          "crewai_agent"
+        ],
+        "title": "CrewAI Core",
+        "description": "The central intelligent agent component that initiates and utilizes the tools.",
+        "role": "surface"
+      },
+      {
+        "id": "tool_implementations_group",
+        "label": "Tool Implementations",
+        "nodes": [
+          "composio_tool",
+          "merge_agent_handler_tool"
+        ],
+        "title": "Tool Implementations",
+        "description": "Core components that define how CrewAI agents interact with external platforms and services.",
+        "role": "generative"
+      },
+      {
+        "id": "external_integrations_group",
+        "label": "External Integration Platforms",
+        "nodes": [
+          "composio_platform",
+          "merge_agent_handler_api",
+          "third_party_services"
+        ],
+        "title": "External Integration Platforms",
+        "description": "Represents the external services and APIs that provide the underlying functionality for the tools.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,111 @@
+{
+    "title": "AI Core Framework",
+    "summary": "This module provides the foundational components for building and operating AI agents, including core agent definitions, integrations with various large language models, extensible capabilities and tools, and essential utility functions. It forms the backbone for developing intelligent applications.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "agent_orchestration",
+                "label": "Agent Orchestration",
+                "type": "module",
+                "link": "agents_and_orchestration",
+                "title": "Agent Orchestration & Core",
+                "description": "Defines the core agent interface, declarative specifications, and the graph nodes for orchestrating agent runs, including user input, model requests, and tool execution."
+            },
+            {
+                "id": "model_providers",
+                "label": "Model Providers & Wrappers",
+                "type": "module",
+                "link": "model_providers_and_wrappers",
+                "title": "LLM Providers & Wrappers",
+                "description": "Provides abstract and concrete interfaces for various Large Language Models (LLMs) and their providers, enabling flexible model selection and interaction."
+            },
+            {
+                "id": "capabilities_tools",
+                "label": "Capabilities & Tools",
+                "type": "module",
+                "link": "capabilities_and_tools",
+                "title": "Agent Capabilities & Tools",
+                "description": "Defines the core capabilities and tools agents can use, including mechanisms for discovery, execution, output processing, and lifecycle hooks to extend agent behavior."
+            },
+            {
+                "id": "embeddings_utilities",
+                "label": "Embeddings & Utilities",
+                "type": "module",
+                "link": "embeddings_and_utils",
+                "title": "Embeddings & Core Utilities",
+                "description": "Offers functionalities for generating text embeddings, managing concurrency, handling agent response streams, and providing general-purpose utilities."
+            }
+        ],
+        "edges": [
+            {
+                "source": "agent_orchestration",
+                "target": "model_providers",
+                "label": "uses LLMs from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_orchestration",
+                "target": "capabilities_tools",
+                "label": "executes via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "capabilities_tools",
+                "target": "model_providers",
+                "label": "leverages LLMs from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "capabilities_tools",
+                "target": "embeddings_utilities",
+                "label": "uses utilities & embeddings",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_orchestration",
+                "target": "embeddings_utilities",
+                "label": "utilizes",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "agent_core_group",
+                "label": "Agent Core",
+                "nodes": [
+                    "agent_orchestration"
+                ],
+                "title": "Core Agent Components",
+                "description": "The central intelligence and control flow for building and managing AI agents.",
+                "role": null
+            },
+            {
+                "id": "ai_service_integrations_group",
+                "label": "AI Service Integrations",
+                "nodes": [
+                    "model_providers",
+                    "capabilities_tools"
+                ],
+                "title": "LLM & Tool Integrations",
+                "description": "Modules for integrating with various Large Language Models and providing extensible agent functionalities through capabilities and tools.",
+                "role": null
+            },
+            {
+                "id": "foundational_services_group",
+                "label": "Foundational Services",
+                "nodes": [
+                    "embeddings_utilities"
+                ],
+                "title": "Core Data & Utility Services",
+                "description": "Provides essential services for data processing, embedding generation, concurrency management, and general utility functions.",
+                "role": null
+            }
+        ]
+    }
+}

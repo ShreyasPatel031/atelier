@@ -1,0 +1,28 @@
+{
+    "title": "Causal Language Models",
+    "summary": "This module provides a comprehensive suite of causal language model implementations, supporting various text generation and sequence prediction tasks.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "causal_lm_core_models",
+                "label": "Core Causal LM Models",
+                "type": "module",
+                "link": "causal_lm_core_models",
+                "title": "Core Causal LM Models",
+                "description": "Contains the fundamental implementations of various causal language models used for generating sequential data, typically text."
+            }
+        ],
+        "edges": [],
+        "groups": [
+            {
+                "id": "model_implementations",
+                "label": "Model Implementations",
+                "title": "Causal Model Implementations",
+                "description": "Group for the core implementations of various causal language models.",
+                "role": "analytical",
+                "nodes": ["causal_lm_core_models"]
+            }
+        ]
+    }
+}

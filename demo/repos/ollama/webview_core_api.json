@@ -1,0 +1,329 @@
+{
+  "title": "Webview Core API",
+  "summary": "This module provides the core API for managing a webview component, handling its lifecycle, UI interactions, system integrations like DPI awareness, and communication with the underlying webview runtime.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "node_app_launch",
+        "label": "Handle Application Launch",
+        "type": "component",
+        "link": null,
+        "title": "on_application_did_finish_launching",
+        "description": "Manages the application's startup sequence, including window setup and activation policies, especially for non-bundled applications."
+      },
+      {
+        "id": "node_webview_permission",
+        "label": "Process Webview Permissions",
+        "type": "component",
+        "link": null,
+        "title": "Invoke",
+        "description": "Handles permission requests from the webview, such as allowing or denying clipboard read access."
+      },
+      {
+        "id": "node_terminate_webview",
+        "label": "Terminate Webview",
+        "type": "component",
+        "link": null,
+        "title": "terminate",
+        "description": "Shuts down and cleans up the webview instance."
+      },
+      {
+        "id": "node_set_title",
+        "label": "Set Window Title",
+        "type": "component",
+        "link": null,
+        "title": "set_title",
+        "description": "Sets the title displayed in the webview's host window."
+      },
+      {
+        "id": "node_set_html",
+        "label": "Load HTML Content",
+        "type": "component",
+        "link": null,
+        "title": "set_html",
+        "description": "Injects and displays HTML content directly into the webview."
+      },
+      {
+        "id": "node_enable_dpi",
+        "label": "Enable DPI Awareness",
+        "type": "component",
+        "link": null,
+        "title": "enable_dpi_awareness",
+        "description": "Configures the process to correctly handle high-DPI displays, ensuring proper scaling and rendering."
+      },
+      {
+        "id": "node_find_client",
+        "label": "Discover Webview Runtime",
+        "type": "component",
+        "link": null,
+        "title": "find_available_client",
+        "description": "Locates and identifies an available WebView2 runtime client, either embedded or installed."
+      },
+      {
+        "id": "node_run_loop",
+        "label": "Start Event Loop",
+        "type": "component",
+        "link": null,
+        "title": "run",
+        "description": "Initiates the main event loop for the webview, processing UI events and messages."
+      },
+      {
+        "id": "node_dispatch_func",
+        "label": "Dispatch UI Function",
+        "type": "component",
+        "link": null,
+        "title": "dispatch",
+        "description": "Executes a given function on the webview's UI thread, ensuring thread-safe operations."
+      },
+      {
+        "id": "node_set_size",
+        "label": "Set Window Size",
+        "type": "component",
+        "link": null,
+        "title": "set_size",
+        "description": "Adjusts the dimensions (width and height) of the webview's host window."
+      },
+      {
+        "id": "node_init_js",
+        "label": "Initialize with JavaScript",
+        "type": "component",
+        "link": null,
+        "title": "init",
+        "description": "Executes initial JavaScript code within the webview context upon its creation."
+      },
+      {
+        "id": "node_set_zoom",
+        "label": "Set Webview Zoom",
+        "type": "component",
+        "link": null,
+        "title": "set_zoom",
+        "description": "Controls the zoom level of the content displayed within the webview, clamping to min/max values."
+      },
+      {
+        "id": "node_get_zoom",
+        "label": "Get Webview Zoom",
+        "type": "component",
+        "link": null,
+        "title": "get_zoom",
+        "description": "Retrieves the current zoom level of the webview content."
+      },
+      {
+        "id": "node_get_dpi",
+        "label": "Get Window DPI",
+        "type": "component",
+        "link": null,
+        "title": "get_window_dpi",
+        "description": "Queries the Dots Per Inch (DPI) scaling factor for a specific window."
+      },
+      {
+        "id": "node_get_browser_version",
+        "label": "Get Browser Version",
+        "type": "component",
+        "link": null,
+        "title": "get_available_browser_version_string",
+        "description": "Obtains the version string of the underlying WebView2 browser runtime."
+      },
+      {
+        "id": "node_get_size",
+        "label": "Get Window Size",
+        "type": "component",
+        "link": null,
+        "title": "get_size",
+        "description": "Retrieves the current client area dimensions of the webview's host window, and scaled size."
+      },
+      {
+        "id": "ext_os_api",
+        "label": "Operating System APIs",
+        "type": "external",
+        "link": null,
+        "title": "OS APIs",
+        "description": "External operating system functions for window management, DPI settings, and system information."
+      },
+      {
+        "id": "ext_webview2_api",
+        "label": "WebView2 Runtime API",
+        "type": "external",
+        "link": null,
+        "title": "WebView2 Runtime",
+        "description": "The underlying Microsoft WebView2 runtime interface for browser control and events."
+      },
+      {
+        "id": "mod_platform_engines",
+        "label": "Platform Specific Engines",
+        "type": "external",
+        "link": "platform_specific_engines",
+        "title": "Platform Engines",
+        "description": "Module containing platform-specific implementations for webview functionalities (e.g., Win32 Edge, Cocoa WKWebView, GTK WebKit)."
+      }
+    ],
+    "edges": [
+      {
+        "source": "node_app_launch",
+        "target": "ext_os_api",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_webview_permission",
+        "target": "ext_webview2_api",
+        "label": "handles events from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_terminate_webview",
+        "target": "mod_platform_engines",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_set_title",
+        "target": "mod_platform_engines",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_set_html",
+        "target": "mod_platform_engines",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_enable_dpi",
+        "target": "ext_os_api",
+        "label": "configures via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_find_client",
+        "target": "ext_webview2_api",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_run_loop",
+        "target": "mod_platform_engines",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_dispatch_func",
+        "target": "mod_platform_engines",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_set_size",
+        "target": "mod_platform_engines",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_init_js",
+        "target": "mod_platform_engines",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_set_zoom",
+        "target": "mod_platform_engines",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_get_zoom",
+        "target": "mod_platform_engines",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_get_dpi",
+        "target": "ext_os_api",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_get_browser_version",
+        "target": "ext_webview2_api",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_get_size",
+        "target": "ext_os_api",
+        "label": "queries",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "grp_lifecycle",
+        "label": "Application Lifecycle",
+        "nodes": [
+          "node_app_launch",
+          "node_run_loop",
+          "node_terminate_webview"
+        ],
+        "title": "Application Lifecycle Management",
+        "description": "Manages the startup, execution, and termination of the webview application.",
+        "role": "generative"
+      },
+      {
+        "id": "grp_ui_control",
+        "label": "UI Presentation & Control",
+        "nodes": [
+          "node_set_title",
+          "node_set_html",
+          "node_set_size",
+          "node_get_size",
+          "node_set_zoom",
+          "node_get_zoom"
+        ],
+        "title": "User Interface Presentation and Control",
+        "description": "Handles visual aspects and interactive properties of the webview window and its content.",
+        "role": "surface"
+      },
+      {
+        "id": "grp_system_integration",
+        "label": "System & Runtime Integration",
+        "nodes": [
+          "node_enable_dpi",
+          "node_get_dpi",
+          "node_find_client",
+          "node_get_browser_version"
+        ],
+        "title": "System and Webview Runtime Integration",
+        "description": "Facilitates interaction with the operating system and discovery/querying of the webview runtime environment.",
+        "role": "data"
+      },
+      {
+        "id": "grp_event_scripting",
+        "label": "Event & Scripting",
+        "nodes": [
+          "node_webview_permission",
+          "node_dispatch_func",
+          "node_init_js"
+        ],
+        "title": "Event Handling and Scripting",
+        "description": "Manages webview events, permissions, and the execution of JavaScript code.",
+        "role": "generative"
+      }
+    ]
+  }
+}

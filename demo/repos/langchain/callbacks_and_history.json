@@ -1,0 +1,181 @@
+{
+  "title": "Callbacks and Chat History",
+  "summary": "This module provides core functionalities for handling asynchronous callbacks, managing execution traces, dispatching custom events, tracking LLM usage metadata, and storing chat message history in memory.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "async_callback_handler",
+        "label": "Handle Async Events",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Callback Handler",
+        "description": "Provides an abstract base class for handling asynchronous events across LLM, chain, tool, agent, and retriever operations, allowing custom logic to be executed at various stages of a run."
+      },
+      {
+        "id": "file_callback_handler",
+        "label": "Log Events to File",
+        "type": "component",
+        "link": null,
+        "title": "File Callback Logger",
+        "description": "A callback handler that writes detailed event logs from LLM, chain, and agent interactions to a specified file, supporting both synchronous and asynchronous operations."
+      },
+      {
+        "id": "trace_chain_group_sync",
+        "label": "Group Sync Chain Runs",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Chain Group Tracing",
+        "description": "Context manager for grouping multiple synchronous operations into a single logical chain run, enabling unified tracing and monitoring in systems like LangSmith."
+      },
+      {
+        "id": "trace_chain_group_async",
+        "label": "Group Async Chain Runs",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Chain Group Tracing",
+        "description": "Context manager for grouping multiple asynchronous operations into a single logical chain run, facilitating unified tracing and monitoring for complex async workflows."
+      },
+      {
+        "id": "wrapped_async_util",
+        "label": "Wrap Async Functions",
+        "type": "component",
+        "link": null,
+        "title": "Async Context Wrapper",
+        "description": "An internal utility function that wraps asynchronous functions to ensure proper context propagation, especially for `asyncio.create_task` in different Python versions."
+      },
+      {
+        "id": "dispatch_custom_event_sync",
+        "label": "Dispatch Sync Custom Event",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Custom Event Dispatcher",
+        "description": "Allows dispatching arbitrary synchronous custom events to registered callback handlers, enabling flexible instrumentation and custom logging within a run's context."
+      },
+      {
+        "id": "dispatch_custom_event_async",
+        "label": "Dispatch Async Custom Event",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Custom Event Dispatcher",
+        "description": "Enables dispatching arbitrary asynchronous custom events to registered callback handlers, providing flexible instrumentation and custom logging for async operations."
+      },
+      {
+        "id": "get_usage_metadata",
+        "label": "Track LLM Usage",
+        "type": "component",
+        "link": null,
+        "title": "LLM Usage Metadata Tracker",
+        "description": "A context manager that collects and aggregates usage metadata (e.g., token counts) from LLM calls, providing insights into resource consumption and costs."
+      },
+      {
+        "id": "in_memory_chat_history",
+        "label": "Store Chat Messages",
+        "type": "component",
+        "link": null,
+        "title": "In-Memory Chat History",
+        "description": "Provides a simple, in-memory storage solution for chat messages, allowing easy addition, retrieval, and clearing of conversational history within an application."
+      }
+    ],
+    "edges": [
+      {
+        "source": "file_callback_handler",
+        "target": "async_callback_handler",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "trace_chain_group_sync",
+        "target": "async_callback_handler",
+        "label": "manages handlers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "trace_chain_group_async",
+        "target": "async_callback_handler",
+        "label": "manages handlers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dispatch_custom_event_sync",
+        "target": "async_callback_handler",
+        "label": "dispatches to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dispatch_custom_event_async",
+        "target": "async_callback_handler",
+        "label": "dispatches to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_usage_metadata",
+        "target": "async_callback_handler",
+        "label": "provides handler",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "callback_system_core",
+        "label": "Callback System Core",
+        "nodes": [
+          "async_callback_handler",
+          "file_callback_handler"
+        ],
+        "title": "Core Callback Mechanisms",
+        "description": "Defines the foundational interfaces and basic implementations for handling events during various LLM operations.",
+        "role": "surface"
+      },
+      {
+        "id": "tracing_run_management",
+        "label": "Tracing & Run Management",
+        "nodes": [
+          "trace_chain_group_sync",
+          "trace_chain_group_async",
+          "wrapped_async_util"
+        ],
+        "title": "Execution Tracing and Grouping",
+        "description": "Provides utilities for grouping related operations into logical runs for better tracing and monitoring, including async context handling.",
+        "role": "generative"
+      },
+      {
+        "id": "custom_event_handling",
+        "label": "Custom Event Handling",
+        "nodes": [
+          "dispatch_custom_event_sync",
+          "dispatch_custom_event_async"
+        ],
+        "title": "Dispatching Custom Events",
+        "description": "Functions for dispatching user-defined events to callback handlers, allowing for flexible instrumentation and custom logging.",
+        "role": "surface"
+      },
+      {
+        "id": "llm_usage_analytics",
+        "label": "LLM Usage Analytics",
+        "nodes": [
+          "get_usage_metadata"
+        ],
+        "title": "LLM Usage Tracking",
+        "description": "A utility for tracking and aggregating metadata related to LLM usage, such as token counts, for cost and performance analysis.",
+        "role": "analytical"
+      },
+      {
+        "id": "conversational_memory",
+        "label": "Conversational Memory",
+        "nodes": [
+          "in_memory_chat_history"
+        ],
+        "title": "In-Memory Chat History Storage",
+        "description": "A component for storing and managing chat messages in memory, facilitating conversational context for LLM applications.",
+        "role": "data"
+      }
+    ]
+  }
+}

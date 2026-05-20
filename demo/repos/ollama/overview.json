@@ -1,209 +1,201 @@
 {
-    "title": "Ollama: Local LLM Runtime & API",
-    "summary": "Ollama simplifies running large language models (LLMs) locally on your machine, providing a user-friendly command-line interface and a robust API. It enables users to easily download, create, and manage a wide range of models for chat, text generation, and embeddings. For developers, Ollama offers a powerful platform to integrate local AI capabilities into applications, fostering innovation and privacy.",
+    "title": "ollama",
+    "summary": "Ollama simplifies running large language models (LLMs) locally on personal hardware. It provides a user-friendly desktop application and a robust backend for downloading, managing, and interacting with various LLMs. Users can chat with models, perform multimodal tasks like image generation, and developers can integrate its capabilities via a powerful API.",
     "diagram": {
         "direction": "LR",
         "nodes": [
             {
-                "id": "user_developer",
+                "id": "user",
                 "label": "User / Developer",
                 "type": "external",
                 "link": null,
-                "title": "Human User or Developer",
-                "description": "Interacts with Ollama via CLI, desktop application, or integrates it into custom software."
+                "title": "Ollama User / Developer",
+                "description": "Interacts with Ollama via its desktop application, command-line interface, or integrates it into other applications via API."
             },
             {
-                "id": "client_applications",
-                "label": "Client Applications",
+                "id": "user_interface",
+                "label": "Desktop UI",
+                "type": "module",
+                "link": "user_interface",
+                "title": "Ollama Desktop User Interface",
+                "description": "Provides a graphical interface for managing models, chatting with LLMs, and configuring application settings."
+            },
+            {
+                "id": "webview_host_integration",
+                "label": "Native App Host",
+                "type": "module",
+                "link": "webview_host_integration",
+                "title": "Webview Host Integration",
+                "description": "Integrates the web-based user interface with the native desktop application, enabling communication and control between the web content and the operating system."
+            },
+            {
+                "id": "llm_runtime_core",
+                "label": "LLM Inference Engine",
+                "type": "module",
+                "link": "llm_runtime_core",
+                "title": "Core LLM Inference Runtime",
+                "description": "Manages the loading, context, text processing, and token sampling for Large Language Models, providing the core inference capabilities."
+            },
+            {
+                "id": "external_model_registry",
+                "label": "External Model Registry",
                 "type": "external",
                 "link": null,
-                "title": "Ollama Client Applications",
-                "description": "Includes the desktop UI, command-line interface, and any custom applications built on Ollama's API."
+                "title": "Ollama Model Registry",
+                "description": "A remote service or repository where Ollama models are hosted and can be downloaded from."
             },
             {
-                "id": "external_model_sources",
-                "label": "External Model Repositories",
+                "id": "ml_backend_ggml",
+                "label": "ML Hardware Backend",
+                "type": "module",
+                "link": "ml_backend_ggml",
+                "title": "GGML Machine Learning Backend",
+                "description": "Provides efficient, low-level machine learning operations, managing hardware backends (CPU, GPU), tensor computations, and model quantization."
+            },
+            {
+                "id": "image_generation",
+                "label": "Image Generation",
+                "type": "module",
+                "link": "image_generation",
+                "title": "Image Generation Module",
+                "description": "Orchestrates the process of generating images from various inputs, leveraging machine learning models and frameworks like MLX for creative tasks."
+            },
+            {
+                "id": "system_hardware",
+                "label": "System Hardware",
                 "type": "external",
                 "link": null,
-                "title": "Remote Model Sources",
-                "description": "Sources like Hugging Face or other registries where pre-trained models are hosted for download and conversion."
-            },
-            {
-                "id": "core_application",
-                "label": "Core Application Services",
-                "type": "module",
-                "link": "core_application",
-                "title": "Ollama Core Application",
-                "description": "Manages application startup, server infrastructure, configuration, and persistent data storage for the entire system."
-            },
-            {
-                "id": "api_and_middleware",
-                "label": "API & Request Processing",
-                "type": "module",
-                "link": "api_and_middleware",
-                "title": "API Gateway & Middleware",
-                "description": "Processes all incoming API requests, applies middleware transformations, constructs prompts, and routes requests to the model execution layer."
-            },
-            {
-                "id": "model_management",
-                "label": "Model Lifecycle Management",
-                "type": "module",
-                "link": "model_management",
-                "title": "Model Creation, Conversion & Serving",
-                "description": "Handles the creation, conversion, quantization, serving, and scheduling of AI models, managing their entire lifecycle."
-            },
-            {
-                "id": "model_runtime_and_tools",
-                "label": "Model Execution & Tools",
-                "type": "module",
-                "link": "model_runtime_and_tools",
-                "title": "LLM Runtime & External Tools",
-                "description": "Manages the core machine learning runtime for model inference, text generation, and integrates external tools and web services to extend model capabilities."
-            },
-            {
-                "id": "integration_testing",
-                "label": "System Integration Testing",
-                "type": "module",
-                "link": "integration_testing",
-                "title": "End-to-End System Validation",
-                "description": "Comprehensive suite of tests validating the end-to-end functionality, performance, concurrency, and advanced capabilities of the Ollama application."
+                "title": "Underlying System Hardware",
+                "description": "The physical computing resources (CPU, GPU, RAM, storage) that Ollama utilizes for running models and the application."
             }
         ],
         "edges": [
             {
-                "source": "user_developer",
-                "target": "client_applications",
-                "label": "Interacts via",
+                "source": "user",
+                "target": "user_interface",
+                "label": "Interacts with",
                 "title": null,
                 "description": null
             },
             {
-                "source": "client_applications",
-                "target": "core_application",
-                "label": "Launches/Manages",
+                "source": "user_interface",
+                "target": "webview_host_integration",
+                "label": "Renders UI via",
                 "title": null,
                 "description": null
             },
             {
-                "source": "client_applications",
-                "target": "api_and_middleware",
-                "label": "Sends API Requests",
+                "source": "webview_host_integration",
+                "target": "user_interface",
+                "label": "Provides native features to",
                 "title": null,
                 "description": null
             },
             {
-                "source": "api_and_middleware",
-                "target": "client_applications",
-                "label": "Returns API Responses",
+                "source": "user_interface",
+                "target": "llm_runtime_core",
+                "label": "Sends commands / requests inference",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_application",
-                "target": "api_and_middleware",
-                "label": "Provides Infrastructure",
+                "source": "llm_runtime_core",
+                "target": "user_interface",
+                "label": "Returns responses / status",
                 "title": null,
                 "description": null
             },
             {
-                "source": "api_and_middleware",
-                "target": "model_management",
-                "label": "Requests Model Ops (Pull/Create)",
+                "source": "llm_runtime_core",
+                "target": "ml_backend_ggml",
+                "label": "Delegates ML computations to",
                 "title": null,
                 "description": null
             },
             {
-                "source": "model_management",
-                "target": "api_and_middleware",
-                "label": "Provides Model Metadata",
+                "source": "ml_backend_ggml",
+                "target": "llm_runtime_core",
+                "label": "Executes ML operations for",
                 "title": null,
                 "description": null
             },
             {
-                "source": "api_and_middleware",
-                "target": "model_runtime_and_tools",
-                "label": "Dispatches Inference/Tools",
+                "source": "llm_runtime_core",
+                "target": "external_model_registry",
+                "label": "Pulls models from",
                 "title": null,
                 "description": null
             },
             {
-                "source": "model_runtime_and_tools",
-                "target": "api_and_middleware",
-                "label": "Returns Inference/Tool Results",
+                "source": "ml_backend_ggml",
+                "target": "system_hardware",
+                "label": "Utilizes hardware resources",
                 "title": null,
                 "description": null
             },
             {
-                "source": "external_model_sources",
-                "target": "model_management",
-                "label": "Provides Raw Models",
+                "source": "image_generation",
+                "target": "llm_runtime_core",
+                "label": "Uses LLM for multimodal context",
                 "title": null,
                 "description": null
             },
             {
-                "source": "model_management",
-                "target": "core_application",
-                "label": "Utilizes Data/Config Services",
+                "source": "image_generation",
+                "target": "ml_backend_ggml",
+                "label": "Leverages ML backend for generation",
                 "title": null,
                 "description": null
             },
             {
-                "source": "integration_testing",
-                "target": "api_and_middleware",
-                "label": "Tests API Endpoints",
+                "source": "user_interface",
+                "target": "image_generation",
+                "label": "Initiates image generation",
                 "title": null,
                 "description": null
             },
             {
-                "source": "integration_testing",
-                "target": "model_runtime_and_tools",
-                "label": "Validates Model Execution",
+                "source": "image_generation",
+                "target": "user_interface",
+                "label": "Displays generated images",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "user_client_layer",
-                "label": "User & Client Layer",
+                "id": "application_frontend",
+                "label": "Application Frontend",
                 "nodes": [
-                    "user_developer",
-                    "client_applications"
+                    "user",
+                    "user_interface",
+                    "webview_host_integration"
                 ],
-                "title": "User Interaction & Client Apps",
-                "description": "Represents human users and the various client applications (CLI, desktop UI, custom apps) that interact with Ollama.",
+                "title": "User Interaction & Desktop Integration",
+                "description": "This group encompasses all components responsible for user interaction, including the graphical user interface and its integration with the native desktop environment.",
                 "role": null
             },
             {
-                "id": "core_ollama_platform",
-                "label": "Core Ollama Platform",
+                "id": "llm_core_services",
+                "label": "LLM Core Services",
                 "nodes": [
-                    "core_application",
-                    "api_and_middleware"
+                    "llm_runtime_core",
+                    "external_model_registry"
                 ],
-                "title": "Ollama Core Services",
-                "description": "The central components managing application infrastructure, configuration, data, and handling all API requests and responses.",
+                "title": "LLM Loading, Inference & Data",
+                "description": "This group manages the core functionalities for Large Language Models, including model loading, context management, text processing, and interaction with external model registries.",
                 "role": null
             },
             {
-                "id": "ai_model_engine",
-                "label": "AI Model Engine",
+                "id": "hardware_ml_operations",
+                "label": "Hardware & ML Operations",
                 "nodes": [
-                    "model_management",
-                    "model_runtime_and_tools"
+                    "ml_backend_ggml",
+                    "image_generation",
+                    "system_hardware"
                 ],
-                "title": "Model Lifecycle & Execution",
-                "description": "Manages the entire lifecycle of AI models, from creation and conversion to serving, scheduling, and integrating external tools for enhanced capabilities.",
-                "role": null
-            },
-            {
-                "id": "development_testing",
-                "label": "Development & Testing",
-                "nodes": [
-                    "integration_testing"
-                ],
-                "title": "System Validation & Quality",
-                "description": "Ensures the stability, functionality, and performance of the Ollama platform through comprehensive integration testing.",
+                "title": "Hardware Acceleration & ML Backend",
+                "description": "This group provides the low-level machine learning computations, hardware abstraction, and specialized capabilities like image generation, leveraging system resources.",
                 "role": null
             }
         ]

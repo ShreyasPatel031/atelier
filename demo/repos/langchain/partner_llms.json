@@ -1,0 +1,385 @@
+{
+  "title": "Partner LLM Integrations",
+  "summary": "This module provides integrations for various third-party Large Language Models (LLMs) and chat models, including Anthropic, Groq, HuggingFace, Ollama, OpenAI, and OpenRouter. It handles API communication, message conversion, streaming, and usage metadata processing for these services.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "anthropic_llm_interface",
+        "label": "Anthropic LLM Interface",
+        "type": "component",
+        "link": null,
+        "title": "AnthropicLLM",
+        "description": "Provides a legacy LLM interface for interacting with Anthropic models, handling prompt formatting, generation, and streaming."
+      },
+      {
+        "id": "anthropic_usage_processor",
+        "label": "Process Anthropic Usage Data",
+        "type": "component",
+        "link": null,
+        "title": "_create_usage_metadata",
+        "description": "Converts raw usage data from Anthropic API responses into a standardized LangChain UsageMetadata format, including token counts and cache details."
+      },
+      {
+        "id": "anthropic_tool_xml_parser",
+        "label": "Parse Anthropic Tool XML",
+        "type": "component",
+        "link": null,
+        "title": "_xml_to_tool_calls",
+        "description": "Extracts and converts XML elements representing tool calls from Anthropic responses into a structured dictionary format for processing."
+      },
+      {
+        "id": "anthropic_system_message_gen",
+        "label": "Generate Anthropic System Message",
+        "type": "component",
+        "link": null,
+        "title": "get_system_message",
+        "description": "Constructs a system message for Anthropic models that describes the available tools and their parameters in a structured format."
+      },
+      {
+        "id": "groq_message_chunk_converter",
+        "label": "Convert Groq API Chunk to Message",
+        "type": "component",
+        "link": null,
+        "title": "_convert_chunk_to_message_chunk",
+        "description": "Transforms streaming message chunks received from the Groq API into LangChain's BaseMessageChunk format, handling roles, content, and tool calls."
+      },
+      {
+        "id": "groq_dict_to_message_converter",
+        "label": "Convert Groq Dict to Message",
+        "type": "component",
+        "link": null,
+        "title": "_convert_dict_to_message",
+        "description": "Converts a dictionary representation of a message from the Groq API into a corresponding LangChain BaseMessage object, including tool call parsing."
+      },
+      {
+        "id": "groq_message_to_dict_converter",
+        "label": "Convert Message to Groq Dict",
+        "type": "component",
+        "link": null,
+        "title": "_convert_message_to_dict",
+        "description": "Translates a LangChain BaseMessage object into a dictionary format compatible with the Groq API, handling different message types and content structures."
+      },
+      {
+        "id": "groq_usage_processor",
+        "label": "Process Groq Usage Data",
+        "type": "component",
+        "link": null,
+        "title": "_create_usage_metadata",
+        "description": "Generates LangChain UsageMetadata from Groq API token usage statistics, consolidating input, output, and total token counts."
+      },
+      {
+        "id": "huggingface_chat_model",
+        "label": "HuggingFace Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "ChatHuggingFace",
+        "description": "A chat model wrapper that integrates various HuggingFace LLMs (e.g., Endpoint, Pipeline) into the LangChain chat interface, supporting generation, streaming, and structured output."
+      },
+      {
+        "id": "huggingface_pipeline_llm",
+        "label": "HuggingFace Pipeline LLM",
+        "type": "component",
+        "link": null,
+        "title": "HuggingFacePipeline",
+        "description": "An LLM interface for HuggingFace models running locally via the transformers pipeline, supporting text generation tasks."
+      },
+      {
+        "id": "mistral_openai_response_formatter",
+        "label": "Format Schema for OpenAI Response",
+        "type": "component",
+        "link": null,
+        "title": "_convert_to_openai_response_format",
+        "description": "Converts a given schema (e.g., Pydantic model, dict) into an OpenAI-compatible response format, primarily for structured output features."
+      },
+      {
+        "id": "ollama_llm_interface",
+        "label": "Ollama LLM Interface",
+        "type": "component",
+        "link": null,
+        "title": "OllamaLLM",
+        "description": "Provides an LLM interface for interacting with local Ollama models, supporting text generation, streaming, and various model parameters."
+      },
+      {
+        "id": "openai_usage_processor",
+        "label": "Process OpenAI Usage Data",
+        "type": "component",
+        "link": null,
+        "title": "_create_usage_metadata",
+        "description": "Creates LangChain UsageMetadata from OpenAI API token usage, including details for different service tiers and token types."
+      },
+      {
+        "id": "openai_structured_output_parser",
+        "label": "Parse OpenAI Structured Output",
+        "type": "component",
+        "link": null,
+        "title": "_oai_structured_outputs_parser",
+        "description": "Parses structured outputs from OpenAI AIMessage objects, converting them into Pydantic models or handling refusal cases."
+      },
+      {
+        "id": "openrouter_chat_model",
+        "label": "OpenRouter Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "ChatOpenRouter",
+        "description": "A chat model integration for OpenRouter, a unified API for various LLMs. It manages API keys, request parameters, streaming, and structured output."
+      },
+      {
+        "id": "anthropic_api_service",
+        "label": "Anthropic API Service",
+        "type": "external",
+        "link": null,
+        "title": "Anthropic API",
+        "description": "The external API service provided by Anthropic for accessing their large language models."
+      },
+      {
+        "id": "groq_api_service",
+        "label": "Groq API Service",
+        "type": "external",
+        "link": null,
+        "title": "Groq API",
+        "description": "The external API service provided by Groq for accessing their high-performance language models."
+      },
+      {
+        "id": "huggingface_platform",
+        "label": "HuggingFace Platform",
+        "type": "external",
+        "link": null,
+        "title": "HuggingFace Hub/Endpoints",
+        "description": "The HuggingFace ecosystem, including the Hub for models and datasets, and inference endpoints for deploying models."
+      },
+      {
+        "id": "ollama_local_server",
+        "label": "Ollama Local Server",
+        "type": "external",
+        "link": null,
+        "title": "Ollama Server",
+        "description": "A local server that hosts and runs various open-source large language models."
+      },
+      {
+        "id": "openai_api_service",
+        "label": "OpenAI API Service",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI API",
+        "description": "The external API service provided by OpenAI for accessing their powerful language models."
+      },
+      {
+        "id": "openrouter_api_gateway",
+        "label": "OpenRouter API Gateway",
+        "type": "external",
+        "link": null,
+        "title": "OpenRouter API",
+        "description": "A unified API gateway that provides access to a wide range of LLMs from multiple providers."
+      }
+    ],
+    "edges": [
+      {
+        "source": "anthropic_llm_interface",
+        "target": "anthropic_api_service",
+        "label": "Sends requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_api_service",
+        "target": "anthropic_usage_processor",
+        "label": "Returns usage data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_api_service",
+        "target": "anthropic_tool_xml_parser",
+        "label": "Returns tool XML",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_system_message_gen",
+        "target": "anthropic_llm_interface",
+        "label": "Provides system prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_api_service",
+        "target": "groq_message_chunk_converter",
+        "label": "Streams message chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_api_service",
+        "target": "groq_dict_to_message_converter",
+        "label": "Returns full messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_message_to_dict_converter",
+        "target": "groq_api_service",
+        "label": "Formats messages for API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_api_service",
+        "target": "groq_usage_processor",
+        "label": "Returns usage data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_chat_model",
+        "target": "huggingface_platform",
+        "label": "Interacts with HF services",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_pipeline_llm",
+        "target": "huggingface_platform",
+        "label": "Uses HF models/pipelines",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_llm_interface",
+        "target": "ollama_local_server",
+        "label": "Communicates with server",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_api_service",
+        "target": "openai_usage_processor",
+        "label": "Returns usage data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_api_service",
+        "target": "openai_structured_output_parser",
+        "label": "Returns structured responses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_chat_model",
+        "target": "openrouter_api_gateway",
+        "label": "Sends requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_api_gateway",
+        "target": "openai_usage_processor",
+        "label": "Routes usage data (if OpenAI backend)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_api_gateway",
+        "target": "groq_message_chunk_converter",
+        "label": "Routes message chunks (if Groq backend)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mistral_openai_response_formatter",
+        "target": "openrouter_chat_model",
+        "label": "Formats structured output schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mistral_openai_response_formatter",
+        "target": "huggingface_chat_model",
+        "label": "Formats structured output schema",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "anthropic_integration_group",
+        "label": "Anthropic Integration",
+        "nodes": [
+          "anthropic_llm_interface",
+          "anthropic_usage_processor",
+          "anthropic_tool_xml_parser",
+          "anthropic_system_message_gen"
+        ],
+        "title": "Anthropic Integration",
+        "description": "Components for integrating with Anthropic's LLM services.",
+        "role": "generative"
+      },
+      {
+        "id": "groq_integration_group",
+        "label": "Groq Integration",
+        "nodes": [
+          "groq_message_chunk_converter",
+          "groq_dict_to_message_converter",
+          "groq_message_to_dict_converter",
+          "groq_usage_processor"
+        ],
+        "title": "Groq Integration",
+        "description": "Components for integrating with Groq's LLM services.",
+        "role": "generative"
+      },
+      {
+        "id": "huggingface_integration_group",
+        "label": "HuggingFace Integration",
+        "nodes": [
+          "huggingface_chat_model",
+          "huggingface_pipeline_llm"
+        ],
+        "title": "HuggingFace Integration",
+        "description": "Components for integrating with HuggingFace models and services.",
+        "role": "generative"
+      },
+      {
+        "id": "ollama_integration_group",
+        "label": "Ollama Integration",
+        "nodes": [
+          "ollama_llm_interface"
+        ],
+        "title": "Ollama Integration",
+        "description": "Components for integrating with local Ollama LLM servers.",
+        "role": "generative"
+      },
+      {
+        "id": "openrouter_integration_group",
+        "label": "OpenRouter Integration",
+        "nodes": [
+          "openrouter_chat_model"
+        ],
+        "title": "OpenRouter Integration",
+        "description": "Components for integrating with the OpenRouter unified API gateway.",
+        "role": "generative"
+      },
+      {
+        "id": "openai_utilities_group",
+        "label": "OpenAI Utilities",
+        "nodes": [
+          "openai_usage_processor",
+          "openai_structured_output_parser"
+        ],
+        "title": "OpenAI Utilities",
+        "description": "Utility functions for processing OpenAI API responses, including usage and structured outputs.",
+        "role": "analytical"
+      },
+      {
+        "id": "structured_output_utilities_group",
+        "label": "Structured Output Utilities",
+        "nodes": [
+          "mistral_openai_response_formatter"
+        ],
+        "title": "Structured Output Utilities",
+        "description": "General utilities for formatting schemas into OpenAI-compatible structured output formats.",
+        "role": "surface"
+      }
+    ]
+  }
+}

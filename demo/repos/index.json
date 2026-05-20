@@ -5,6 +5,11 @@
     "description": "Multi-agent crews, tasks, and tools for LLM workflows."
   },
   {
+    "id": "crewai-src",
+    "label": "Crewai Src",
+    "description": ""
+  },
+  {
     "id": "dspy",
     "label": "DSPy",
     "description": "Framework for programming not prompting LLM pipelines."

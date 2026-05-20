@@ -1,0 +1,227 @@
+{
+  "title": "Agent Orchestration & Core",
+  "summary": "This module defines the core abstract agent interface, its declarative specification, and the graph nodes responsible for orchestrating agent runs, including processing user input, making model requests, and executing tool calls.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "AbstractAgent",
+        "label": "Define Agent Interface",
+        "type": "component",
+        "link": null,
+        "title": "AbstractAgent",
+        "description": "Abstract base for agents, defining core properties and execution methods for running, streaming, and managing agent behavior."
+      },
+      {
+        "id": "WrapperAgent",
+        "label": "Wrap Agent Behavior",
+        "type": "component",
+        "link": null,
+        "title": "WrapperAgent",
+        "description": "A concrete agent implementation that delegates all its properties and methods to an underlying wrapped agent, enabling easy extension."
+      },
+      {
+        "id": "AgentSpec",
+        "label": "Configure Agent Declaratively",
+        "type": "component",
+        "link": null,
+        "title": "AgentSpec",
+        "description": "Represents a declarative specification for configuring an agent using YAML or JSON, including model, instructions, and capabilities."
+      },
+      {
+        "id": "UserPromptNode",
+        "label": "Process User Input & Prompts",
+        "type": "component",
+        "link": null,
+        "title": "UserPromptNode",
+        "description": "Initializes an agent run by processing user prompts, system instructions, and deferred tool results, determining the next step in the graph."
+      },
+      {
+        "id": "ModelRequestNode",
+        "label": "Request LLM Response",
+        "type": "component",
+        "link": null,
+        "title": "ModelRequestNode",
+        "description": "Manages communication with the underlying language model, handling request preparation, execution (streaming/non-streaming), and response processing."
+      },
+      {
+        "id": "CallToolExecution",
+        "label": "Execute Tool Calls",
+        "type": "component",
+        "link": null,
+        "title": "Tool Call Execution",
+        "description": "Processes and executes tool calls requested by the LLM, handling successful returns, deferred calls, denied calls, and retries."
+      },
+      {
+        "id": "MessageHistoryCapture",
+        "label": "Capture Agent Run Messages",
+        "type": "component",
+        "link": null,
+        "title": "capture_run_messages",
+        "description": "A context manager to capture and access the message history generated during an agent's run, useful for debugging and error handling."
+      },
+      {
+        "id": "CapabilityInstantiation",
+        "label": "Instantiate Capabilities",
+        "type": "component",
+        "link": null,
+        "title": "_instantiate_cap",
+        "description": "A utility function for instantiating capability classes from their type and arguments, applying validation from a specification."
+      },
+      {
+        "id": "ModelProviders",
+        "label": "LLM Providers & Models",
+        "type": "external",
+        "link": "model_providers_and_wrappers",
+        "title": "model_providers_and_wrappers",
+        "description": "Provides interfaces and wrappers for various Large Language Models and their providers."
+      },
+      {
+        "id": "CapabilitiesAndTools",
+        "label": "Capabilities & Tools",
+        "type": "external",
+        "link": "capabilities_and_tools",
+        "title": "capabilities_and_tools",
+        "description": "Defines abstract capabilities and concrete tool implementations that agents can utilize."
+      },
+      {
+        "id": "GraphExecutionEngine",
+        "label": "Graph Execution Engine",
+        "type": "external",
+        "link": "graph_execution_engine",
+        "title": "graph_execution_engine",
+        "description": "Provides the underlying graph execution framework for orchestrating agent steps."
+      }
+    ],
+    "edges": [
+      {
+        "source": "AbstractAgent",
+        "target": "UserPromptNode",
+        "label": "initiates run",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractAgent",
+        "target": "AgentSpec",
+        "label": "configured by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractAgent",
+        "target": "MessageHistoryCapture",
+        "label": "provides history to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractAgent",
+        "target": "GraphExecutionEngine",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "WrapperAgent",
+        "target": "AbstractAgent",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AgentSpec",
+        "target": "CapabilityInstantiation",
+        "label": "specifies capabilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UserPromptNode",
+        "target": "ModelRequestNode",
+        "label": "prepares request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UserPromptNode",
+        "target": "CallToolExecution",
+        "label": "handles deferred tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ModelRequestNode",
+        "target": "ModelProviders",
+        "label": "requests from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ModelRequestNode",
+        "target": "CallToolExecution",
+        "label": "model response includes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ModelRequestNode",
+        "target": "CapabilitiesAndTools",
+        "label": "uses capabilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CallToolExecution",
+        "target": "CapabilitiesAndTools",
+        "label": "executes tools from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CapabilityInstantiation",
+        "target": "CapabilitiesAndTools",
+        "label": "creates instances of",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "AgentCore",
+        "label": "Agent Core Definitions",
+        "nodes": [
+          "AbstractAgent",
+          "WrapperAgent",
+          "AgentSpec"
+        ],
+        "title": "Agent Core Definitions",
+        "description": "Defines the fundamental structure and configuration mechanisms for agents.",
+        "role": "surface"
+      },
+      {
+        "id": "AgentOrchestrationFlow",
+        "label": "Agent Orchestration Flow",
+        "nodes": [
+          "UserPromptNode",
+          "ModelRequestNode",
+          "CallToolExecution"
+        ],
+        "title": "Agent Orchestration Flow",
+        "description": "Components responsible for processing user input, interacting with LLMs, and executing tools within an agent's run.",
+        "role": "generative"
+      },
+      {
+        "id": "AgentUtilities",
+        "label": "Agent Utilities",
+        "nodes": [
+          "MessageHistoryCapture",
+          "CapabilityInstantiation"
+        ],
+        "title": "Agent Utilities",
+        "description": "Helper components supporting agent functionality, such as message capture and capability instantiation.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

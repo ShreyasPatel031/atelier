@@ -6752,12 +6752,76 @@
         const chatSend = document.getElementById('chatSend');
         const chatMessages = document.getElementById('chatMessages');
         
-        // API base: when on port 8080 (static demo server), use FastAPI on 8000; else same origin
-        const CHAT_API_BASE = (window.location.port === '8080') ? 'http://127.0.0.1:8001' : '';
+        // API base: static demo (8080 / npm run demo :9891) → FastAPI on 8001; /viewer on 8000/8001 → same origin
+        function resolveChatApiBase() {
+            const explicit = new URLSearchParams(window.location.search).get('chatApi');
+            if (explicit != null && String(explicit).trim() !== '') {
+                return String(explicit).trim();
+            }
+            const port = window.location.port;
+            if (port === '8080' || port === '9891') {
+                return 'http://127.0.0.1:8001';
+            }
+            if (port === '8000' || port === '8001') {
+                return window.location.origin;
+            }
+            return '';
+        }
+        const CHAT_API_BASE = resolveChatApiBase();
+        /** Help pill: only fall back to Cursor SDK SSE when `?chatMcp=1` (default is arch-agent on :8001). */
+        const HELP_PILL_MCP_FALLBACK =
+            new URLSearchParams(window.location.search).get('chatMcp') === '1';
 
         function getArchAgentChatUrl() {
             if (!CHAT_API_BASE || String(CHAT_API_BASE).trim() === '') return null;
             return String(CHAT_API_BASE).replace(/\/$/, '') + '/api/arch-agent/chat';
+        }
+
+        function archAgentHealthUrl() {
+            if (!CHAT_API_BASE || String(CHAT_API_BASE).trim() === '') return null;
+            return String(CHAT_API_BASE).replace(/\/$/, '') + '/api/llm-health';
+        }
+
+        function formatArchAgentFetchError(e, resDetail) {
+            const detail = resDetail ? String(resDetail).trim().slice(0, 400) : '';
+            if (e && (e.message === 'Failed to fetch' || e.message === 'Load failed')) {
+                return (
+                    'Could not reach the Architectural Agent on port **8001**. ' +
+                    'From the atelier repo run: `python3 -m codewiki.run_web_app --port 8001`, ' +
+                    'then hard-refresh this page (⌘⇧R).'
+                );
+            }
+            if (detail) return detail;
+            return (
+                (e && e.message) ||
+                'Architectural Agent request failed. Check the terminal running CodeWiki on port 8001.'
+            );
+        }
+
+        async function probeArchitecturalAgentApi() {
+            if (!CHAT_ENABLED || !chatMessages) return;
+            const healthUrl = archAgentHealthUrl();
+            if (!healthUrl) return;
+            try {
+                const res = await fetch(healthUrl, { method: 'GET' });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.ok) {
+                    addChatMessage(
+                        'Architectural Agent API responded but LLM is not ready: **' +
+                            (data.detail ||
+                                'run `codewiki config validate --quick` and `gcloud auth application-default login`') +
+                            '**.',
+                        'assistant'
+                    );
+                }
+            } catch (_) {
+                addChatMessage(
+                    'Architectural Agent is **not reachable** at `http://127.0.0.1:8001`. ' +
+                        'Start it with `python3 -m codewiki.run_web_app --port 8001`, then hard-refresh. ' +
+                        '(The **?** pill uses this API — not Cursor SDK — unless you add `?chatMcp=1`.)',
+                    'assistant'
+                );
+            }
         }
         
         function getChatJobId() {
@@ -6839,6 +6903,46 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
             }
             return el;
+        }
+
+        /**
+         * Reveal assistant text progressively (arch-agent returns full body in one JSON blob).
+         * @param {HTMLElement} el
+         * @param {string} text
+         * @param {{ charsPerTick?: number, tickMs?: number }} [opts]
+         */
+        function streamTextIntoChatElement(el, text, opts) {
+            const full = String(text || '').trim();
+            if (!el || !full) {
+                if (el) {
+                    el.classList.remove('loading', 'streaming');
+                    el.textContent = full || 'No response.';
+                }
+                return;
+            }
+            const charsPerTick =
+                opts && typeof opts.charsPerTick === 'number' ? opts.charsPerTick : 2;
+            const tickMs = opts && typeof opts.tickMs === 'number' ? opts.tickMs : 18;
+            el.classList.remove('loading');
+            el.classList.add('assistant', 'streaming');
+            el.textContent = '';
+            let i = 0;
+            if (window.__atelierHelpStreamTimer != null) {
+                clearInterval(window.__atelierHelpStreamTimer);
+                window.__atelierHelpStreamTimer = null;
+            }
+            window.__atelierHelpStreamTimer = setInterval(function () {
+                i = Math.min(i + charsPerTick, full.length);
+                el.textContent = full.slice(0, i);
+                if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+                if (i >= full.length) {
+                    clearInterval(window.__atelierHelpStreamTimer);
+                    window.__atelierHelpStreamTimer = null;
+                    el.classList.remove('streaming');
+                    el.innerHTML = marked.parse(full);
+                    if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }, tickMs);
         }
         
         function atelierSummarizeSdkTraceRow(channel, payload) {
@@ -7048,7 +7152,7 @@
             }
 
             if (!archUrl) {
-                if (fromHelpPill) {
+                if (fromHelpPill && HELP_PILL_MCP_FALLBACK) {
                     return helpPillMcpFallback();
                 }
                 if (ui) {
@@ -7056,7 +7160,7 @@
                 }
                 if (ui) {
                     addChatMessage(
-                        'No chat API is configured for this origin. Serve the demo on port **8080** and run CodeWiki web on **8001**, or paste your question into Cursor chat.',
+                        'No chat API is configured for this origin. Serve the demo on port **9891** (`npm run demo`) or **8080**, run CodeWiki web on **8001** (`python3 -m codewiki.run_web_app --port 8001`), or paste your question into Cursor chat.',
                         'assistant'
                     );
                 }
@@ -7064,9 +7168,16 @@
             }
 
             const body = buildArchAgentChatRequestBody(msg, selectionOverride);
+            let streamEl = null;
             if (ui) {
                 addChatMessage(msg, 'user');
-                loadingEl = addChatMessage('Thinking...', 'loading');
+                if (fromHelpPill) {
+                    streamEl = addChatMessage('', 'assistant');
+                    streamEl.classList.add('loading');
+                    window.__atelierHelpStreamingEl = streamEl;
+                } else {
+                    loadingEl = addChatMessage('Thinking...', 'loading');
+                }
             chatSend.disabled = true;
             }
             try {
@@ -7080,29 +7191,61 @@
                     body: JSON.stringify(body),
                 });
                 if (!res.ok) {
-                    const err = new Error(`HTTP ${res.status}`);
-                    if (fromHelpPill && (res.status === 501 || res.status === 404 || res.status === 405)) {
+                    let resDetail = '';
+                    try {
+                        const errBody = await res.json();
+                        resDetail = errBody.detail != null ? String(errBody.detail) : '';
+                    } catch (_) {
+                        /* ignore */
+                    }
+                    if (
+                        fromHelpPill &&
+                        HELP_PILL_MCP_FALLBACK &&
+                        (res.status === 501 || res.status === 404 || res.status === 405)
+                    ) {
                         if (loadingEl) loadingEl.remove();
                         loadingEl = null;
+                        if (streamEl && streamEl.parentNode) {
+                            streamEl.remove();
+                            window.__atelierHelpStreamingEl = null;
+                        }
                         return helpPillMcpFallback();
                     }
-                    throw err;
+                    if (fromHelpPill && streamEl && streamEl.parentNode) {
+                        streamEl.remove();
+                        window.__atelierHelpStreamingEl = null;
+                    }
+                    throw new Error(
+                        resDetail ? `HTTP ${res.status}: ${resDetail}` : `HTTP ${res.status}`
+                    );
                 }
                 const data = await res.json();
                 chatHistory = data.history != null ? data.history : null;
                 if (loadingEl) loadingEl.remove();
-                if (ui) addChatMessage(data.response || 'No response.', 'assistant');
+                if (ui) {
+                    const answer = data.response || 'No response.';
+                    if (fromHelpPill && streamEl && streamEl.parentNode) {
+                        window.__atelierHelpStreamingEl = null;
+                        streamTextIntoChatElement(streamEl, answer);
+                    } else {
+                        addChatMessage(answer, 'assistant');
+                    }
+                }
                 return { ok: true, mode: 'api' };
             } catch (e) {
                 if (loadingEl) loadingEl.remove();
-                if (fromHelpPill) {
+                if (fromHelpPill && streamEl && streamEl.parentNode) {
+                    streamEl.remove();
+                    window.__atelierHelpStreamingEl = null;
+                }
+                if (
+                    fromHelpPill &&
+                    HELP_PILL_MCP_FALLBACK &&
+                    (e.message === 'Failed to fetch' || e.message === 'Load failed')
+                ) {
                     return helpPillMcpFallback();
                 }
-                const hint =
-                    e.message === 'Failed to fetch' || e.message === 'Load failed'
-                    ? 'Could not reach chat API. Start the CodeWiki server: cd atelier && python3 -m codewiki.run_web_app --port 8001'
-                        : e.message ||
-                          'Could not reach chat API. Is the CodeWiki server running on port 8001?';
+                const hint = formatArchAgentFetchError(e);
                 if (ui) addChatMessage('Error: ' + hint, 'assistant');
                 return { ok: false, mode: 'error' };
             } finally {
@@ -7114,8 +7257,8 @@
         }
 
         /**
-         * React Flow “?” pill → Architectural Agent with this node/cluster as diagram_selection.
-         * If the chat API is unreachable, copies the question to the clipboard (paste into Cursor chat).
+         * React Flow “?” pill → POST /api/arch-agent/chat on CodeWiki (:8001, Vertex ADC).
+         * On failure shows an error in chat (no silent Cursor SDK fallback unless `?chatMcp=1`).
          */
         window.atelierRfAskBriefExplanation = async function atelierRfAskBriefExplanation(ctx) {
             if (!CHAT_ENABLED) return;
@@ -7161,6 +7304,7 @@
             chatInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
             });
+            void probeArchitecturalAgentApi();
         }
 
         // --- SSE: event-driven answers + sdk_trace from diagram_ask_watcher (auto-detects current port; override with ?diagram_sse_port=XXXX) ---
@@ -7220,7 +7364,7 @@
             window.__atelierSSE = es;
         })();
     </script>
-    <script type="module" src="./reactflow-r6.mjs?v=logical-palette-v2"></script>
+    <script type="module" src="./reactflow-r6.mjs?v=deepest-group-hover-v1"></script>
 </body>
 </html>
 

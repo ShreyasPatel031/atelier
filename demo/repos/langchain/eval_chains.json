@@ -1,0 +1,401 @@
+{
+  "title": "Evaluation Chains Module",
+  "summary": "This module provides various chains for evaluating the performance of language models and agents, including specialized chains for agent trajectories, QA, string comparisons, and criteria-based assessments. It also includes an orchestrator for evaluating LangChain runs and examples.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "TrajectoryEvalChain",
+        "label": "Evaluate Agent Trajectories",
+        "type": "component",
+        "link": null,
+        "title": "Trajectory Evaluation Chain",
+        "description": "Evaluates the performance of ReAct-style agents by analyzing their sequence of actions, tool usage, and outcomes against a given question and reference."
+      },
+      {
+        "id": "LabeledPairwiseStringEvalChain",
+        "label": "Compare Labeled String Outputs",
+        "type": "component",
+        "link": null,
+        "title": "Labeled Pairwise String Eval Chain",
+        "description": "Compares two string outputs (e.g., from different models or prompts) based on labeled preferences and user-defined criteria, often requiring a reference answer."
+      },
+      {
+        "id": "LabeledCriteriaEvalChain",
+        "label": "Evaluate Against Labeled Criteria",
+        "type": "component",
+        "link": null,
+        "title": "Labeled Criteria Evaluation Chain",
+        "description": "Assesses model outputs against specific, user-defined criteria, requiring a reference answer for a comprehensive evaluation."
+      },
+      {
+        "id": "CotQAEvalChain",
+        "label": "Evaluate QA with CoT Reasoning",
+        "type": "component",
+        "link": null,
+        "title": "CoT QA Evaluation Chain",
+        "description": "Evaluates Question Answering systems by employing Chain of Thought (CoT) reasoning, providing a more detailed and explainable assessment of correctness."
+      },
+      {
+        "id": "QAEvalChain",
+        "label": "Evaluate Question Answering",
+        "type": "component",
+        "link": null,
+        "title": "QA Evaluation Chain",
+        "description": "Determines the correctness of generated answers in a Question Answering task by comparing the prediction, input query, and a reference answer."
+      },
+      {
+        "id": "LabeledScoreStringEvalChain",
+        "label": "Score Labeled String Outputs",
+        "type": "component",
+        "link": null,
+        "title": "Labeled Score String Eval Chain",
+        "description": "Assigns a numerical score (typically 1-10) to a model's string output based on user-defined criteria and a provided reference answer."
+      },
+      {
+        "id": "StringRunEvaluatorChain",
+        "label": "Orchestrate Evaluation of Runs",
+        "type": "component",
+        "link": null,
+        "title": "String Run Evaluator Chain",
+        "description": "A flexible evaluator that takes a LangChain 'Run' (LLM/Chain execution) and an optional 'Example' (dataset row), maps them to string inputs, and delegates the actual evaluation to a generic StringEvaluator."
+      },
+      {
+        "id": "BaseLanguageModel",
+        "label": "Language Model (LLM/Chat)",
+        "type": "external",
+        "link": "llm_interfaces",
+        "title": "Base Language Model",
+        "description": "Provides core language model capabilities for generating and understanding text, serving as the underlying intelligence for many evaluation chains."
+      },
+      {
+        "id": "PromptTemplate",
+        "label": "Prompt Template",
+        "type": "external",
+        "link": "prompt_templates",
+        "title": "Prompt Template",
+        "description": "Defines the structure and content of prompts used to guide language models in various evaluation tasks."
+      },
+      {
+        "id": "BaseTool",
+        "label": "Agent Tool",
+        "type": "external",
+        "link": "tools_and_output_parsers",
+        "title": "Base Tool",
+        "description": "Represents a specific function or capability that an agent can utilize during its execution."
+      },
+      {
+        "id": "TrajectoryOutputParser",
+        "label": "Parse Trajectory Output",
+        "type": "component",
+        "link": null,
+        "title": "Trajectory Output Parser",
+        "description": "Extracts structured evaluation results, including scores and reasoning, from the raw text output of the trajectory evaluation LLM."
+      },
+      {
+        "id": "StringEvaluator",
+        "label": "Generic String Evaluator Interface",
+        "type": "external",
+        "link": "evaluators",
+        "title": "String Evaluator",
+        "description": "An abstract interface that defines methods for evaluating string inputs, predictions, and optional references, used by higher-level evaluators."
+      },
+      {
+        "id": "LLMChain",
+        "label": "LLM Chain",
+        "type": "external",
+        "link": "chains",
+        "title": "LLM Chain",
+        "description": "A fundamental chain that combines a language model with a prompt template to perform a specific task."
+      },
+      {
+        "id": "Run",
+        "label": "LangChain Run Object",
+        "type": "external",
+        "link": "tracing_and_monitoring",
+        "title": "Run Object",
+        "description": "Represents a single execution of an LLM or a chain, encapsulating its inputs, outputs, and metadata for analysis."
+      },
+      {
+        "id": "Example",
+        "label": "Dataset Example",
+        "type": "external",
+        "link": "evaluation_config_and_runners",
+        "title": "Example Object",
+        "description": "A single data point from an evaluation dataset, typically containing an input query and a ground-truth reference answer."
+      },
+      {
+        "id": "EvaluationResult",
+        "label": "Evaluation Result Object",
+        "type": "external",
+        "link": "evaluators",
+        "title": "Evaluation Result",
+        "description": "A structured object containing the outcome of an evaluation, including scores, comments, and metadata."
+      },
+      {
+        "id": "StringRunMapper",
+        "label": "Map Run to Eval Strings",
+        "type": "component",
+        "link": null,
+        "title": "String Run Mapper",
+        "description": "Component responsible for extracting relevant string inputs (e.g., prediction, input) from a LangChain Run object for evaluation."
+      },
+      {
+        "id": "StringExampleMapper",
+        "label": "Map Example to Reference String",
+        "type": "component",
+        "link": null,
+        "title": "String Example Mapper",
+        "description": "Component responsible for extracting the reference string from a LangChain Example object for evaluation."
+      }
+    ],
+    "edges": [
+      {
+        "source": "TrajectoryEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TrajectoryEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TrajectoryEvalChain",
+        "target": "BaseTool",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TrajectoryEvalChain",
+        "target": "TrajectoryOutputParser",
+        "label": "parses output with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TrajectoryEvalChain",
+        "target": "LLMChain",
+        "label": "internally uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TrajectoryEvalChain",
+        "target": "StringEvaluator",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledPairwiseStringEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledPairwiseStringEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledPairwiseStringEvalChain",
+        "target": "StringEvaluator",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledCriteriaEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledCriteriaEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledCriteriaEvalChain",
+        "target": "StringEvaluator",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CotQAEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CotQAEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CotQAEvalChain",
+        "target": "StringEvaluator",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAEvalChain",
+        "target": "StringEvaluator",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledScoreStringEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledScoreStringEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledScoreStringEvalChain",
+        "target": "StringEvaluator",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringRunEvaluatorChain",
+        "target": "Run",
+        "label": "evaluates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringRunEvaluatorChain",
+        "target": "Example",
+        "label": "uses optional",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringRunEvaluatorChain",
+        "target": "StringEvaluator",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringRunEvaluatorChain",
+        "target": "StringRunMapper",
+        "label": "maps run with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringRunEvaluatorChain",
+        "target": "StringExampleMapper",
+        "label": "maps example with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringRunEvaluatorChain",
+        "target": "EvaluationResult",
+        "label": "produces",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "agent_trajectory_evaluation",
+        "label": "Agent Trajectory Evaluation",
+        "nodes": [
+          "TrajectoryEvalChain",
+          "TrajectoryOutputParser"
+        ],
+        "title": "Agent Trajectory Evaluation",
+        "description": "Components for evaluating the step-by-step execution and tool usage of AI agents.",
+        "role": "analytical"
+      },
+      {
+        "id": "string_comparison_scoring",
+        "label": "String Comparison & Scoring",
+        "nodes": [
+          "LabeledPairwiseStringEvalChain",
+          "LabeledScoreStringEvalChain"
+        ],
+        "title": "String Comparison and Scoring",
+        "description": "Chains designed for comparing and scoring model-generated text outputs, often with human-provided labels or references.",
+        "role": "analytical"
+      },
+      {
+        "id": "criteria_based_evaluation",
+        "label": "Criteria-Based Evaluation",
+        "nodes": [
+          "LabeledCriteriaEvalChain"
+        ],
+        "title": "Criteria-Based Evaluation",
+        "description": "Chains that assess model outputs against a set of predefined qualitative criteria.",
+        "role": "analytical"
+      },
+      {
+        "id": "question_answering_evaluation",
+        "label": "Question Answering Evaluation",
+        "nodes": [
+          "CotQAEvalChain",
+          "QAEvalChain"
+        ],
+        "title": "Question Answering Evaluation",
+        "description": "Specialized chains for evaluating the accuracy and reasoning of question answering systems.",
+        "role": "analytical"
+      },
+      {
+        "id": "evaluation_orchestration",
+        "label": "Evaluation Orchestration",
+        "nodes": [
+          "StringRunEvaluatorChain",
+          "StringRunMapper",
+          "StringExampleMapper"
+        ],
+        "title": "Evaluation Orchestration",
+        "description": "Components that manage the process of evaluating LangChain 'Runs' and 'Examples' by mapping them to generic string evaluators.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "title": "CLI Core Components",
+  "summary": "This module provides the foundational components for the CrewAI Command Line Interface, handling user authentication, secure communication with the CrewAI+ API, and basic command initialization.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "auth_command",
+        "label": "Handle User Authentication",
+        "type": "component",
+        "link": null,
+        "title": "Authentication Command",
+        "description": "Manages user login processes, including authentication with the CrewAI+ platform and the tool repository, providing feedback on success or failure."
+      },
+      {
+        "id": "plus_api_mixin",
+        "label": "Interact with CrewAI+ API",
+        "type": "component",
+        "link": null,
+        "title": "Plus API Interaction Mixin",
+        "description": "Provides methods for secure communication with the CrewAI+ API, handling authentication, request validation, and error reporting for API responses."
+      },
+      {
+        "id": "base_command",
+        "label": "Initialize CLI Command",
+        "type": "component",
+        "link": null,
+        "title": "Base CLI Command",
+        "description": "Serves as the foundational class for all CLI commands, primarily responsible for initializing telemetry for usage tracking."
+      },
+      {
+        "id": "telemetry_service",
+        "label": "Telemetry Service",
+        "type": "external",
+        "link": null,
+        "title": "Telemetry Service",
+        "description": "An external service responsible for collecting and reporting usage data and tracing information from the CLI commands."
+      },
+      {
+        "id": "plus_api_client",
+        "label": "CrewAI+ API Client",
+        "type": "external",
+        "link": null,
+        "title": "CrewAI+ API Client",
+        "description": "An external client library used to make authenticated requests to the CrewAI+ backend API for various operations."
+      },
+      {
+        "id": "tool_command_module",
+        "label": "Tool Repository Commands",
+        "type": "other_module",
+        "link": "cli_commands",
+        "title": "Tool Repository Commands",
+        "description": "Represents the module responsible for managing operations related to the CrewAI Tool Repository, such as tool login, download, and publishing."
+      },
+      {
+        "id": "settings_config",
+        "label": "CLI Settings Configuration",
+        "type": "external",
+        "link": null,
+        "title": "CLI Settings",
+        "description": "Provides access to application-wide configuration settings, including organization name and UUID, used for displaying user context."
+      }
+    ],
+    "edges": [
+      {
+        "source": "auth_command",
+        "target": "tool_command_module",
+        "label": "Performs Tool Repo Login",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "auth_command",
+        "target": "settings_config",
+        "label": "Retrieves Org Info",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "plus_api_mixin",
+        "target": "telemetry_service",
+        "label": "Initializes Tracer & Logs Errors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "plus_api_mixin",
+        "target": "plus_api_client",
+        "label": "Makes API Requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_command",
+        "target": "telemetry_service",
+        "label": "Initializes Telemetry",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cli_core_functions",
+        "label": "Core CLI Functions",
+        "nodes": [
+          "auth_command",
+          "plus_api_mixin",
+          "base_command"
+        ],
+        "title": "Core CLI Functionality",
+        "description": "Encapsulates the fundamental building blocks and common utilities for CrewAI CLI commands, including authentication and API interaction.",
+        "role": "surface"
+      },
+      {
+        "id": "external_dependencies",
+        "label": "External Integrations",
+        "nodes": [
+          "telemetry_service",
+          "plus_api_client",
+          "tool_command_module",
+          "settings_config"
+        ],
+        "title": "External System Integrations",
+        "description": "Represents external services and modules that the core CLI components interact with, such as telemetry, API clients, and configuration.",
+        "role": "data"
+      }
+    ]
+  }
+}

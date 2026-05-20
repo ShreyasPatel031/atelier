@@ -1,0 +1,64 @@
+{
+    "title": "General Multimodal Models",
+    "summary": "Provides a collection of advanced multimodal models that integrate various data types like text, image, and video for complex tasks including understanding, generation, and retrieval.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "image_text_processing",
+                "label": "Image-Text Processing Models",
+                "type": "module",
+                "link": "image_text_processing",
+                "title": "Image-Text Models",
+                "description": "Models integrating and processing both image and text modalities for tasks such as captioning, retrieval, and general multimodal understanding."
+            },
+            {
+                "id": "video_multimodal_processing",
+                "label": "Video Multimodal Processing Models",
+                "type": "module",
+                "link": "video_multimodal_processing",
+                "title": "Video Multimodal Models",
+                "description": "Models designed to process and understand video content in conjunction with text, enabling video-to-text generation and analysis."
+            },
+            {
+                "id": "document_intelligence_models",
+                "label": "Document Intelligence Models",
+                "type": "module",
+                "link": "document_intelligence_models",
+                "title": "Document Intelligence",
+                "description": "Specialized models for document understanding that combine text and visual layout information for tasks like information extraction and semantic parsing."
+            },
+            {
+                "id": "mixture_of_experts_models",
+                "label": "Mixture-of-Experts (MoE) Models",
+                "type": "module",
+                "link": "mixture_of_experts_models",
+                "title": "Mixture-of-Experts",
+                "description": "Multimodal models employing Mixture-of-Experts (MoE) architectures, enhancing scalability and performance by conditionally activating subsets of the model for different inputs."
+            }
+        ],
+        "edges": [
+            {"source": "image_text_processing", "target": "mixture_of_experts_models", "label": "can leverage MoE architectures"},
+            {"source": "video_multimodal_processing", "target": "mixture_of_experts_models", "label": "can leverage MoE architectures"},
+            {"source": "document_intelligence_models", "target": "mixture_of_experts_models", "label": "can leverage MoE architectures"}
+        ],
+        "groups": [
+            {
+                "id": "multimodal_processing_core",
+                "label": "Multimodal Processing Core",
+                "title": "Multimodal Processing Core",
+                "description": "Core components for integrating and processing diverse modalities.",
+                "role": "analytical",
+                "nodes": ["image_text_processing", "video_multimodal_processing", "document_intelligence_models"]
+            },
+            {
+                "id": "advanced_architectures",
+                "label": "Advanced Architectures",
+                "title": "Advanced Architectures",
+                "description": "Models utilizing advanced architectural patterns like Mixture-of-Experts for enhanced efficiency and performance.",
+                "role": "generative",
+                "nodes": ["mixture_of_experts_models"]
+            }
+        ]
+    }
+}

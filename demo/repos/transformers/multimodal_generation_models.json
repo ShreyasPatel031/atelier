@@ -1,0 +1,25 @@
+{
+    "title": "Multimodal Generation Models",
+    "summary": "This module provides various conditional generation models capable of processing and generating content across different modalities, including text, speech, images, and protein sequences. It supports a wide range of tasks from text-to-text to speech-to-speech generation.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "text_generation", "label": "Text Generation Models", "type": "module", "link": "text_generation", "title": "Text Generation", "description": "Models focused on generating text outputs from various input modalities, including text and audio."}, 
+            {"id": "speech_generation", "label": "Speech Generation Models", "type": "module", "link": "speech_generation", "title": "Speech Generation", "description": "Models dedicated to generating speech outputs or performing speech-to-text and speech-to-speech translations."}, 
+            {"id": "multimodal_models", "label": "Multimodal Models", "type": "module", "link": "multimodal_models", "title": "Multimodal Processing", "description": "Comprehensive models handling multiple input and output modalities, such as image, protein, text, and audio."}, 
+            {"id": "data_processing_module", "label": "Input Data Processing", "type": "external", "link": "data_processing", "title": "Data Processing", "description": "Handles the preprocessing and feature extraction for various input modalities before feeding into generation models."}, 
+            {"id": "generation_logic_module", "label": "Generation Core Logic", "type": "external", "link": "generation_core", "title": "Generation Core", "description": "Provides the core generation mechanisms and utilities used by the conditional generation models."}
+        ],
+        "edges": [
+            {"source": "data_processing_module", "target": "text_generation", "label": "processed input"}, 
+            {"source": "data_processing_module", "target": "speech_generation", "label": "processed input"}, 
+            {"source": "data_processing_module", "target": "multimodal_models", "label": "processed input"}, 
+            {"source": "text_generation", "target": "generation_logic_module", "label": "generated text"},
+            {"source": "speech_generation", "target": "generation_logic_module", "label": "generated audio/text"},
+            {"source": "multimodal_models", "target": "generation_logic_module", "label": "generated multimodal content"}
+        ],
+        "groups": [
+            {"id": "conditional_generation_models", "label": "Conditional Generation", "title": "Conditional Generation Models", "description": "Central models for generating new content conditioned on various inputs across different modalities.", "role": "generative", "nodes": ["text_generation", "speech_generation", "multimodal_models"]}
+        ]
+    }
+}

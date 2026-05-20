@@ -1,0 +1,208 @@
+{
+  "title": "Web Automation Tools",
+  "summary": "This module provides a collection of tools for interacting with and extracting information from websites. It includes functionalities for basic web scraping, advanced browser automation, and intelligent content extraction using various underlying services and technologies.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "agent_llm",
+        "label": "Agent / LLM",
+        "type": "external",
+        "link": null,
+        "title": "AI Agent or Large Language Model",
+        "description": "Represents an AI agent or Large Language Model that utilizes these web automation tools to perform tasks requiring web interaction."
+      },
+      {
+        "id": "scrape_element",
+        "label": "Scrape Specific Element",
+        "type": "component",
+        "link": null,
+        "title": "Scrape Specific Web Element",
+        "description": "Extracts content from a specific HTML element on a webpage using CSS selectors, useful for targeted data retrieval."
+      },
+      {
+        "id": "scrape_website",
+        "label": "Scrape Full Webpage",
+        "type": "component",
+        "link": null,
+        "title": "Scrape Entire Webpage Content",
+        "description": "Fetches and parses the entire content of a given website URL, returning the text content for analysis."
+      },
+      {
+        "id": "scrapfly_scrape",
+        "label": "Scrape Webpage (Scrapfly)",
+        "type": "component",
+        "link": null,
+        "title": "Scrape Webpage with Scrapfly API",
+        "description": "Scrapes a webpage URL using the Scrapfly API, returning its content as markdown or plain text."
+      },
+      {
+        "id": "browserbase_load",
+        "label": "Load Webpage (Browserbase)",
+        "type": "component",
+        "link": null,
+        "title": "Load Webpage with Browserbase",
+        "description": "Loads content from a specified URL using a headless browser provided by Browserbase, optionally extracting text content."
+      },
+      {
+        "id": "selenium_scrape",
+        "label": "Automated Browser Scraping (Selenium)",
+        "type": "component",
+        "link": null,
+        "title": "Automated Web Scraping with Selenium",
+        "description": "Controls a headless Chrome browser via Selenium to scrape website content, supporting dynamic pages and element selection."
+      },
+      {
+        "id": "multion_browse",
+        "label": "Control Browser (MultiOn)",
+        "type": "component",
+        "link": null,
+        "title": "AI-Powered Browser Control (MultiOn)",
+        "description": "Enables LLMs to control web browsers using natural language instructions, performing actions like navigation and interaction."
+      },
+      {
+        "id": "stagehand_automate",
+        "label": "Web Automation (Stagehand)",
+        "type": "component",
+        "link": null,
+        "title": "Natural Language Web Automation with Stagehand",
+        "description": "Automates web browser interactions using natural language instructions, supporting atomic actions like clicking, typing, navigating, extracting, and observing elements."
+      },
+      {
+        "id": "hyperbrowser_load",
+        "label": "Scrape/Crawl Web (Hyperbrowser)",
+        "type": "component",
+        "link": null,
+        "title": "Scrape/Crawl with Hyperbrowser",
+        "description": "Scrapes or crawls web pages using Hyperbrowser, returning content in markdown or HTML format with configurable extraction options."
+      },
+      {
+        "id": "scrapegraph_scrape",
+        "label": "Intelligent Web Scraping (Scrapegraph)",
+        "type": "component",
+        "link": null,
+        "title": "Intelligent Web Scraping with Scrapegraph AI",
+        "description": "Uses Scrapegraph AI to intelligently scrape website content based on a user prompt, handling complex extraction scenarios."
+      },
+      {
+        "id": "spider_tool",
+        "label": "Scrape/Crawl Web (Spider.cloud)",
+        "type": "component",
+        "link": null,
+        "title": "Web Scraping and Crawling with Spider.cloud",
+        "description": "Provides functionality to scrape a single webpage or crawl multiple pages using Spider.cloud, returning LLM-ready content."
+      }
+    ],
+    "edges": [
+      {
+        "source": "agent_llm",
+        "target": "scrape_element",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_llm",
+        "target": "scrape_website",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_llm",
+        "target": "scrapfly_scrape",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_llm",
+        "target": "browserbase_load",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_llm",
+        "target": "selenium_scrape",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_llm",
+        "target": "multion_browse",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_llm",
+        "target": "stagehand_automate",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_llm",
+        "target": "hyperbrowser_load",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_llm",
+        "target": "scrapegraph_scrape",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_llm",
+        "target": "spider_tool",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "basic_web_scraping",
+        "label": "Basic Web Scraping",
+        "nodes": [
+          "scrape_element",
+          "scrape_website",
+          "scrapfly_scrape"
+        ],
+        "title": "Basic Web Scraping Tools",
+        "description": "Tools for direct fetching and parsing of static web content or simple API-based scraping.",
+        "role": "data"
+      },
+      {
+        "id": "advanced_browser_automation",
+        "label": "Advanced Browser Automation",
+        "nodes": [
+          "browserbase_load",
+          "selenium_scrape",
+          "multion_browse",
+          "stagehand_automate"
+        ],
+        "title": "Advanced Browser Automation Tools",
+        "description": "Tools that control headless browsers for dynamic web interactions, form filling, and complex navigation.",
+        "role": "generative"
+      },
+      {
+        "id": "intelligent_content_extraction",
+        "label": "Intelligent Content Extraction",
+        "nodes": [
+          "hyperbrowser_load",
+          "scrapegraph_scrape",
+          "spider_tool"
+        ],
+        "title": "Intelligent Content Extraction Tools",
+        "description": "Tools leveraging AI or specialized services for smarter content retrieval, crawling, and structured data extraction.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

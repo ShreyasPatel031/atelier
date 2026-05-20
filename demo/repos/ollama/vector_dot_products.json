@@ -1,0 +1,16 @@
+ proyect_data = {
+    "title": "Quantized Vector Dot Products",
+    "summary": "Efficiently computes vector dot products for various quantization schemes, optimized for ARM and x86 architectures.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "arm_quantized_dot_products", "label": "ARM Dot Products", "type": "module", "link": "arm_quantized_dot_products", "title": "ARM Quantized Dot Products", "description": "Optimized vector dot product implementations for ARM architecture, supporting various quantization types."},
+            {"id": "x86_quantized_dot_products", "label": "x86 Dot Products", "type": "module", "link": "x86_quantized_dot_products", "title": "x86 Quantized Dot Products", "description": "Optimized vector dot product implementations for x86 architecture, supporting various quantization types."}
+        ],
+        "edges": [
+        ],
+        "groups": [
+            {"id": "cpu_architectures", "label": "CPU Architectures", "title": "CPU-specific Optimizations", "description": "Groups vector dot product implementations tailored for different CPU architectures.", "role": "analytical", "nodes": ["arm_quantized_dot_products", "x86_quantized_dot_products"]}
+        ]
+    }
+}

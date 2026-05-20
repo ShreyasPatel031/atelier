@@ -1,83 +1,152 @@
 {
-  "docs_dir": "/Users/shreyaspatel/atelier/.tmp/demo_regen/crewai/docs",
-  "timestamp": "2026-05-15T20:41:14.773157",
+  "docs_dir": "/Users/shreyaspatel/.cursor/worktrees/atelier/7y0n/.tmp/demo_regen/crewai/docs",
+  "timestamp": "2026-05-17T03:51:49.485412",
   "summary": {
-    "total_modules": 33,
+    "total_modules": 22,
     "missing_files": 0,
     "failure_rate_pct": 0.0,
     "success_rate_pct": 100.0,
-    "total_issues": 40,
+    "total_issues": 42,
     "errors": 0,
-    "warnings": 40,
+    "warnings": 42,
     "files_created": 0,
-    "metadata_added": 40,
+    "metadata_added": 34,
     "diagrams_added": 0
   },
   "metrics": {
     "presync_audit": {
-      "modules_total": 33,
-      "missing_md": 33,
-      "missing_title": 20,
-      "missing_description": 20,
+      "modules_total": 22,
+      "missing_md": 22,
+      "missing_title": 17,
+      "missing_description": 17,
       "leaf_missing_diagram": 0,
       "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 0,
-      "children_missing_from_diagram_nodes": 21,
-      "parent_diagram_gaps_to_inject": 21,
+      "diagram_edges_unknown_endpoint": 8,
+      "children_missing_from_diagram_nodes": 16,
+      "parent_diagram_gaps_to_inject": 16,
       "mermaid_fence_blocks_total": 0,
       "placeholder_md_files": 0
     },
     "diagram_ir_audit": {
-      "module_diagrams_total": 33,
+      "module_diagrams_total": 22,
       "overview_has_diagram_json": true,
       "overview_mermaid_parse_ok": true,
       "overview_r1_reason": null,
-      "by_code": {},
-      "samples_by_code": {}
+      "by_code": {
+        "r4_edge_unknown_target": 8
+      },
+      "samples_by_code": {
+        "r4_edge_unknown_target": [
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 9,
+            "source": "define_agents",
+            "target": "core_framework",
+            "module": "project_creation",
+            "path": "cli_and_developer_tools/project_creation"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 10,
+            "source": "define_tasks",
+            "target": "core_framework",
+            "module": "project_creation",
+            "path": "cli_and_developer_tools/project_creation"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 11,
+            "source": "build_crew",
+            "target": "core_framework",
+            "module": "project_creation",
+            "path": "cli_and_developer_tools/project_creation"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 0,
+            "source": "web_scraping_and_search",
+            "target": "data_query_and_storage",
+            "module": "specific_tools",
+            "path": "agent_tools_and_rag/specific_tools"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 1,
+            "source": "web_automation",
+            "target": "data_query_and_storage",
+            "module": "specific_tools",
+            "path": "agent_tools_and_rag/specific_tools"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 2,
+            "source": "file_content_tools",
+            "target": "data_query_and_storage",
+            "module": "specific_tools",
+            "path": "agent_tools_and_rag/specific_tools"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 3,
+            "source": "aws_bedrock_tools",
+            "target": "ai_service_integrations",
+            "module": "specific_tools",
+            "path": "agent_tools_and_rag/specific_tools"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 4,
+            "source": "ai_vision_and_ocr",
+            "target": "ai_service_integrations",
+            "module": "specific_tools",
+            "path": "agent_tools_and_rag/specific_tools"
+          }
+        ]
+      }
     },
     "mermaid_validation": {
       "blocks_checked": 0,
       "blocks_invalid": 0,
-      "validation_ms": 0.0538,
+      "validation_ms": 0.0611,
       "error_type_histogram": {},
       "stage46_fixes_applied": 0,
       "postfix_blocks_invalid": 0,
       "postfix_error_type_histogram": {}
     },
     "postsync_audit": {
-      "modules_total": 33,
-      "missing_md": 33,
+      "modules_total": 22,
+      "missing_md": 22,
       "missing_title": 0,
       "missing_description": 0,
       "leaf_missing_diagram": 0,
       "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 0,
+      "diagram_edges_unknown_endpoint": 8,
       "children_missing_from_diagram_nodes": 0,
       "parent_diagram_gaps_to_inject": 0,
       "mermaid_fence_blocks_total": 0,
       "placeholder_md_files": 0
     },
     "delta_presync_minus_postsync": {
-      "modules_total": 0.0,
-      "missing_title": 20.0,
-      "parent_missing_diagram_with_children": 0.0,
-      "diagram_nodes_with_empty_label": 0.0,
-      "missing_description": 20.0,
       "leaf_missing_diagram": 0.0,
-      "parent_diagram_gaps_to_inject": 21.0,
-      "diagram_edges_unknown_endpoint": 0.0,
-      "placeholder_md_files": 0.0,
-      "missing_md": 0.0,
+      "modules_total": 0.0,
+      "parent_diagram_gaps_to_inject": 16.0,
+      "missing_title": 17.0,
+      "diagram_nodes_with_empty_label": 0.0,
+      "parent_missing_diagram_with_children": 0.0,
       "mermaid_fence_blocks_total": 0.0,
-      "children_missing_from_diagram_nodes": 21.0
+      "missing_description": 17.0,
+      "placeholder_md_files": 0.0,
+      "diagram_edges_unknown_endpoint": 0.0,
+      "missing_md": 0.0,
+      "children_missing_from_diagram_nodes": 16.0
     },
     "fixes_applied_counts": {
-      "metadata_field_updates": 40,
+      "metadata_field_updates": 34,
       "placeholder_md_files_created": 0,
       "leaf_diagrams_added": 0,
-      "parent_diagram_child_nodes_injected": 21,
+      "parent_diagram_child_nodes_injected": 16,
       "overview_md_created": 0,
       "mermaid_stage46_fixes": 0
     },
@@ -85,38 +154,38 @@
       "1_stage3_defects_before_stage45": {
         "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
         "presync_audit": {
-          "modules_total": 33,
-          "missing_md": 33,
-          "missing_title": 20,
-          "missing_description": 20,
+          "modules_total": 22,
+          "missing_md": 22,
+          "missing_title": 17,
+          "missing_description": 17,
           "leaf_missing_diagram": 0,
           "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 0,
-          "children_missing_from_diagram_nodes": 21,
-          "parent_diagram_gaps_to_inject": 21,
+          "diagram_edges_unknown_endpoint": 8,
+          "children_missing_from_diagram_nodes": 16,
+          "parent_diagram_gaps_to_inject": 16,
           "mermaid_fence_blocks_total": 0,
           "placeholder_md_files": 0
         }
       },
       "1b_stage45_fixes_applied_counters": {
-        "metadata_field_updates": 40,
+        "metadata_field_updates": 34,
         "placeholder_md_files_created": 0,
         "leaf_diagrams_added": 0,
-        "parent_diagram_child_nodes_injected": 21,
+        "parent_diagram_child_nodes_injected": 16,
         "overview_md_created": 0,
         "mermaid_stage46_fixes": 0
       },
       "1c_residual_after_stage45": {
         "postsync_audit": {
-          "modules_total": 33,
-          "missing_md": 33,
+          "modules_total": 22,
+          "missing_md": 22,
           "missing_title": 0,
           "missing_description": 0,
           "leaf_missing_diagram": 0,
           "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 0,
+          "diagram_edges_unknown_endpoint": 8,
           "children_missing_from_diagram_nodes": 0,
           "parent_diagram_gaps_to_inject": 0,
           "mermaid_fence_blocks_total": 0,
@@ -126,31 +195,32 @@
       "1d_reduction_delta_presync_minus_postsync": {
         "note": "Positive number = fewer problems after sync for that metric",
         "delta": {
-          "modules_total": 0.0,
-          "missing_title": 20.0,
-          "parent_missing_diagram_with_children": 0.0,
-          "diagram_nodes_with_empty_label": 0.0,
-          "missing_description": 20.0,
           "leaf_missing_diagram": 0.0,
-          "parent_diagram_gaps_to_inject": 21.0,
-          "diagram_edges_unknown_endpoint": 0.0,
-          "placeholder_md_files": 0.0,
-          "missing_md": 0.0,
+          "modules_total": 0.0,
+          "parent_diagram_gaps_to_inject": 16.0,
+          "missing_title": 17.0,
+          "diagram_nodes_with_empty_label": 0.0,
+          "parent_missing_diagram_with_children": 0.0,
           "mermaid_fence_blocks_total": 0.0,
-          "children_missing_from_diagram_nodes": 21.0
+          "missing_description": 17.0,
+          "placeholder_md_files": 0.0,
+          "diagram_edges_unknown_endpoint": 0.0,
+          "missing_md": 0.0,
+          "children_missing_from_diagram_nodes": 16.0
         }
       },
       "1e_issues_logged_this_run_by_type": {
         "all": {
-          "missing_title": 20,
-          "missing_description": 20
+          "missing_title": 17,
+          "missing_description": 17,
+          "diagram_ir_r4_edge_unknown_target": 8
         }
       },
       "2_mermaid": {
         "blocks_checked": 0,
         "blocks_invalid_before_stage46": 0,
         "blocks_invalid_after_stage46": 0,
-        "validation_ms": 0.0538,
+        "validation_ms": 0.0611,
         "error_type_histogram": {},
         "error_type_histogram_after_stage46": {},
         "stage46_fixes_applied": 0,
@@ -158,26 +228,120 @@
       },
       "3_diagram_ir": {
         "audit": {
-          "module_diagrams_total": 33,
+          "module_diagrams_total": 22,
           "overview_has_diagram_json": true,
           "overview_mermaid_parse_ok": true,
           "overview_r1_reason": null,
-          "by_code": {},
-          "samples_by_code": {}
+          "by_code": {
+            "r4_edge_unknown_target": 8
+          },
+          "samples_by_code": {
+            "r4_edge_unknown_target": [
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 9,
+                "source": "define_agents",
+                "target": "core_framework",
+                "module": "project_creation",
+                "path": "cli_and_developer_tools/project_creation"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 10,
+                "source": "define_tasks",
+                "target": "core_framework",
+                "module": "project_creation",
+                "path": "cli_and_developer_tools/project_creation"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 11,
+                "source": "build_crew",
+                "target": "core_framework",
+                "module": "project_creation",
+                "path": "cli_and_developer_tools/project_creation"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 0,
+                "source": "web_scraping_and_search",
+                "target": "data_query_and_storage",
+                "module": "specific_tools",
+                "path": "agent_tools_and_rag/specific_tools"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 1,
+                "source": "web_automation",
+                "target": "data_query_and_storage",
+                "module": "specific_tools",
+                "path": "agent_tools_and_rag/specific_tools"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 2,
+                "source": "file_content_tools",
+                "target": "data_query_and_storage",
+                "module": "specific_tools",
+                "path": "agent_tools_and_rag/specific_tools"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 3,
+                "source": "aws_bedrock_tools",
+                "target": "ai_service_integrations",
+                "module": "specific_tools",
+                "path": "agent_tools_and_rag/specific_tools"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 4,
+                "source": "ai_vision_and_ocr",
+                "target": "ai_service_integrations",
+                "module": "specific_tools",
+                "path": "agent_tools_and_rag/specific_tools"
+              }
+            ]
+          }
         },
-        "by_code": {}
+        "by_code": {
+          "r4_edge_unknown_target": 8
+        }
       }
     }
   },
   "issues_by_type": {
-    "missing_title": 20,
-    "missing_description": 20
+    "missing_title": 17,
+    "missing_description": 17,
+    "diagram_ir_r4_edge_unknown_target": 8
   },
   "issues": [
     {
       "issue_type": "missing_title",
+      "module_name": "cli_core",
+      "module_path": "cli_and_developer_tools/cli_core",
+      "severity": "warning",
+      "details": {
+        "component_count": 3,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "cli_core",
+      "module_path": "cli_and_developer_tools/cli_core",
+      "severity": "warning",
+      "details": {
+        "component_count": 3,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
       "module_name": "cli_commands",
-      "module_path": "cli_and_dev_tools/cli_commands",
+      "module_path": "cli_and_developer_tools/cli_commands",
       "severity": "warning",
       "details": {
         "component_count": 39,
@@ -188,7 +352,7 @@
     {
       "issue_type": "missing_description",
       "module_name": "cli_commands",
-      "module_path": "cli_and_dev_tools/cli_commands",
+      "module_path": "cli_and_developer_tools/cli_commands",
       "severity": "warning",
       "details": {
         "component_count": 39,
@@ -198,30 +362,8 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "cli_base_components",
-      "module_path": "cli_and_dev_tools/cli_base_components",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "cli_base_components",
-      "module_path": "cli_and_dev_tools/cli_base_components",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "cli_template_management",
-      "module_path": "cli_and_dev_tools/cli_template_management",
+      "module_name": "project_creation",
+      "module_path": "cli_and_developer_tools/project_creation",
       "severity": "warning",
       "details": {
         "component_count": 2,
@@ -231,8 +373,8 @@
     },
     {
       "issue_type": "missing_description",
-      "module_name": "cli_template_management",
-      "module_path": "cli_and_dev_tools/cli_template_management",
+      "module_name": "project_creation",
+      "module_path": "cli_and_developer_tools/project_creation",
       "severity": "warning",
       "details": {
         "component_count": 2,
@@ -242,8 +384,8 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "developer_utilities",
-      "module_path": "cli_and_dev_tools/developer_utilities",
+      "module_name": "dev_utilities",
+      "module_path": "cli_and_developer_tools/dev_utilities",
       "severity": "warning",
       "details": {
         "component_count": 3,
@@ -253,8 +395,8 @@
     },
     {
       "issue_type": "missing_description",
-      "module_name": "developer_utilities",
-      "module_path": "cli_and_dev_tools/developer_utilities",
+      "module_name": "dev_utilities",
+      "module_path": "cli_and_developer_tools/dev_utilities",
       "severity": "warning",
       "details": {
         "component_count": 3,
@@ -264,44 +406,44 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "agent_and_crew_orchestration",
-      "module_path": "core_framework/agent_and_crew_orchestration",
+      "module_name": "agents_and_execution",
+      "module_path": "core_framework/agents_and_execution",
       "severity": "warning",
       "details": {
-        "component_count": 8,
+        "component_count": 18,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "agent_and_crew_orchestration",
-      "module_path": "core_framework/agent_and_crew_orchestration",
+      "module_name": "agents_and_execution",
+      "module_path": "core_framework/agents_and_execution",
       "severity": "warning",
       "details": {
-        "component_count": 8,
+        "component_count": 18,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_title",
-      "module_name": "task_and_flow_management",
-      "module_path": "core_framework/task_and_flow_management",
+      "module_name": "tasks_and_flow",
+      "module_path": "core_framework/tasks_and_flow",
       "severity": "warning",
       "details": {
-        "component_count": 33,
+        "component_count": 37,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "task_and_flow_management",
-      "module_path": "core_framework/task_and_flow_management",
+      "module_name": "tasks_and_flow",
+      "module_path": "core_framework/tasks_and_flow",
       "severity": "warning",
       "details": {
-        "component_count": 33,
+        "component_count": 37,
         "has_children": false
       },
       "auto_fixed": true
@@ -330,74 +472,8 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "event_and_state_management",
-      "module_path": "core_framework/event_and_state_management",
-      "severity": "warning",
-      "details": {
-        "component_count": 19,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "event_and_state_management",
-      "module_path": "core_framework/event_and_state_management",
-      "severity": "warning",
-      "details": {
-        "component_count": 19,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "utilities_and_extensions",
-      "module_path": "core_framework/utilities_and_extensions",
-      "severity": "warning",
-      "details": {
-        "component_count": 42,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "utilities_and_extensions",
-      "module_path": "core_framework/utilities_and_extensions",
-      "severity": "warning",
-      "details": {
-        "component_count": 42,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "base_tool_framework",
-      "module_path": "agent_tools_and_integrations/base_tool_framework",
-      "severity": "warning",
-      "details": {
-        "component_count": 9,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "base_tool_framework",
-      "module_path": "agent_tools_and_integrations/base_tool_framework",
-      "severity": "warning",
-      "details": {
-        "component_count": 9,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "rag_tools_and_loaders",
-      "module_path": "agent_tools_and_integrations/rag_tools_and_loaders",
+      "module_name": "events_and_state",
+      "module_path": "core_framework/events_and_state",
       "severity": "warning",
       "details": {
         "component_count": 21,
@@ -407,8 +483,8 @@
     },
     {
       "issue_type": "missing_description",
-      "module_name": "rag_tools_and_loaders",
-      "module_path": "agent_tools_and_integrations/rag_tools_and_loaders",
+      "module_name": "events_and_state",
+      "module_path": "core_framework/events_and_state",
       "severity": "warning",
       "details": {
         "component_count": 21,
@@ -418,52 +494,96 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "specialized_api_tools",
-      "module_path": "agent_tools_and_integrations/specialized_api_tools",
+      "module_name": "utilities_and_config",
+      "module_path": "core_framework/utilities_and_config",
       "severity": "warning",
       "details": {
-        "component_count": 21,
+        "component_count": 47,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "specialized_api_tools",
-      "module_path": "agent_tools_and_integrations/specialized_api_tools",
+      "module_name": "utilities_and_config",
+      "module_path": "core_framework/utilities_and_config",
       "severity": "warning",
       "details": {
-        "component_count": 21,
+        "component_count": 47,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_title",
-      "module_name": "sandbox_and_bedrock_tools",
-      "module_path": "agent_tools_and_integrations/sandbox_and_bedrock_tools",
+      "module_name": "rag_loaders_and_chunkers",
+      "module_path": "agent_tools_and_rag/rag_loaders_and_chunkers",
       "severity": "warning",
       "details": {
-        "component_count": 7,
+        "component_count": 18,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "sandbox_and_bedrock_tools",
-      "module_path": "agent_tools_and_integrations/sandbox_and_bedrock_tools",
+      "module_name": "rag_loaders_and_chunkers",
+      "module_path": "agent_tools_and_rag/rag_loaders_and_chunkers",
       "severity": "warning",
       "details": {
-        "component_count": 7,
+        "component_count": 18,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_title",
-      "module_name": "file_processing_and_caching",
-      "module_path": "data_and_rag_management/file_processing_and_caching",
+      "module_name": "rag_vector_stores",
+      "module_path": "agent_tools_and_rag/rag_vector_stores",
+      "severity": "warning",
+      "details": {
+        "component_count": 11,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "rag_vector_stores",
+      "module_path": "agent_tools_and_rag/rag_vector_stores",
+      "severity": "warning",
+      "details": {
+        "component_count": 11,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "tool_adapters_and_specs",
+      "module_path": "agent_tools_and_rag/tool_adapters_and_specs",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "tool_adapters_and_specs",
+      "module_path": "agent_tools_and_rag/tool_adapters_and_specs",
+      "severity": "warning",
+      "details": {
+        "component_count": 4,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "file_management",
+      "module_path": "agent_tools_and_rag/file_management",
       "severity": "warning",
       "details": {
         "component_count": 16,
@@ -473,55 +593,11 @@
     },
     {
       "issue_type": "missing_description",
-      "module_name": "file_processing_and_caching",
-      "module_path": "data_and_rag_management/file_processing_and_caching",
+      "module_name": "file_management",
+      "module_path": "agent_tools_and_rag/file_management",
       "severity": "warning",
       "details": {
         "component_count": 16,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "knowledge_sources",
-      "module_path": "data_and_rag_management/knowledge_sources",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "knowledge_sources",
-      "module_path": "data_and_rag_management/knowledge_sources",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "rag_vector_stores",
-      "module_path": "data_and_rag_management/rag_vector_stores",
-      "severity": "warning",
-      "details": {
-        "component_count": 17,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "rag_vector_stores",
-      "module_path": "data_and_rag_management/rag_vector_stores",
-      "severity": "warning",
-      "details": {
-        "component_count": 17,
         "has_children": false
       },
       "auto_fixed": true
@@ -529,7 +605,7 @@
     {
       "issue_type": "missing_title",
       "module_name": "a2a_authentication",
-      "module_path": "a2a_and_enterprise/a2a_authentication",
+      "module_path": "agent_to_agent_communication/a2a_authentication",
       "severity": "warning",
       "details": {
         "component_count": 14,
@@ -540,7 +616,7 @@
     {
       "issue_type": "missing_description",
       "module_name": "a2a_authentication",
-      "module_path": "a2a_and_enterprise/a2a_authentication",
+      "module_path": "agent_to_agent_communication/a2a_authentication",
       "severity": "warning",
       "details": {
         "component_count": 14,
@@ -550,8 +626,30 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "a2a_communication_core",
-      "module_path": "a2a_and_enterprise/a2a_communication_core",
+      "module_name": "a2a_core_logic",
+      "module_path": "agent_to_agent_communication/a2a_core_logic",
+      "severity": "warning",
+      "details": {
+        "component_count": 5,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "a2a_core_logic",
+      "module_path": "agent_to_agent_communication/a2a_core_logic",
+      "severity": "warning",
+      "details": {
+        "component_count": 5,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "a2a_updates_and_extensions",
+      "module_path": "agent_to_agent_communication/a2a_updates_and_extensions",
       "severity": "warning",
       "details": {
         "component_count": 14,
@@ -561,8 +659,8 @@
     },
     {
       "issue_type": "missing_description",
-      "module_name": "a2a_communication_core",
-      "module_path": "a2a_and_enterprise/a2a_communication_core",
+      "module_name": "a2a_updates_and_extensions",
+      "module_path": "agent_to_agent_communication/a2a_updates_and_extensions",
       "severity": "warning",
       "details": {
         "component_count": 14,
@@ -572,91 +670,167 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "a2a_extensions_and_utilities",
-      "module_path": "a2a_and_enterprise/a2a_extensions_and_utilities",
+      "module_name": "a2a_utilities",
+      "module_path": "agent_to_agent_communication/a2a_utilities",
       "severity": "warning",
       "details": {
-        "component_count": 19,
+        "component_count": 14,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "a2a_extensions_and_utilities",
-      "module_path": "a2a_and_enterprise/a2a_extensions_and_utilities",
+      "module_name": "a2a_utilities",
+      "module_path": "agent_to_agent_communication/a2a_utilities",
       "severity": "warning",
       "details": {
-        "component_count": 19,
+        "component_count": 14,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
-      "issue_type": "missing_title",
-      "module_name": "enterprise_and_evaluation_tools",
-      "module_path": "a2a_and_enterprise/enterprise_and_evaluation_tools",
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "project_creation",
+      "module_path": "cli_and_developer_tools/project_creation",
       "severity": "warning",
       "details": {
-        "component_count": 10,
-        "has_children": false
+        "code": "r4_edge_unknown_target",
+        "index": 9,
+        "source": "define_agents",
+        "target": "core_framework"
       },
-      "auto_fixed": true
+      "auto_fixed": false
     },
     {
-      "issue_type": "missing_description",
-      "module_name": "enterprise_and_evaluation_tools",
-      "module_path": "a2a_and_enterprise/enterprise_and_evaluation_tools",
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "project_creation",
+      "module_path": "cli_and_developer_tools/project_creation",
       "severity": "warning",
       "details": {
-        "component_count": 10,
-        "has_children": false
+        "code": "r4_edge_unknown_target",
+        "index": 10,
+        "source": "define_tasks",
+        "target": "core_framework"
       },
-      "auto_fixed": true
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "project_creation",
+      "module_path": "cli_and_developer_tools/project_creation",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 11,
+        "source": "build_crew",
+        "target": "core_framework"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "specific_tools",
+      "module_path": "agent_tools_and_rag/specific_tools",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 0,
+        "source": "web_scraping_and_search",
+        "target": "data_query_and_storage"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "specific_tools",
+      "module_path": "agent_tools_and_rag/specific_tools",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 1,
+        "source": "web_automation",
+        "target": "data_query_and_storage"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "specific_tools",
+      "module_path": "agent_tools_and_rag/specific_tools",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 2,
+        "source": "file_content_tools",
+        "target": "data_query_and_storage"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "specific_tools",
+      "module_path": "agent_tools_and_rag/specific_tools",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 3,
+        "source": "aws_bedrock_tools",
+        "target": "ai_service_integrations"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "specific_tools",
+      "module_path": "agent_tools_and_rag/specific_tools",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 4,
+        "source": "ai_vision_and_ocr",
+        "target": "ai_service_integrations"
+      },
+      "auto_fixed": false
     }
   ],
   "files_created": [],
   "metadata_added": [
+    "cli_core:title",
+    "cli_core:description",
     "cli_commands:title",
     "cli_commands:description",
-    "cli_base_components:title",
-    "cli_base_components:description",
-    "cli_template_management:title",
-    "cli_template_management:description",
-    "developer_utilities:title",
-    "developer_utilities:description",
-    "agent_and_crew_orchestration:title",
-    "agent_and_crew_orchestration:description",
-    "task_and_flow_management:title",
-    "task_and_flow_management:description",
+    "project_creation:title",
+    "project_creation:description",
+    "dev_utilities:title",
+    "dev_utilities:description",
+    "agents_and_execution:title",
+    "agents_and_execution:description",
+    "tasks_and_flow:title",
+    "tasks_and_flow:description",
     "llm_integration:title",
     "llm_integration:description",
-    "event_and_state_management:title",
-    "event_and_state_management:description",
-    "utilities_and_extensions:title",
-    "utilities_and_extensions:description",
-    "base_tool_framework:title",
-    "base_tool_framework:description",
-    "rag_tools_and_loaders:title",
-    "rag_tools_and_loaders:description",
-    "specialized_api_tools:title",
-    "specialized_api_tools:description",
-    "sandbox_and_bedrock_tools:title",
-    "sandbox_and_bedrock_tools:description",
-    "file_processing_and_caching:title",
-    "file_processing_and_caching:description",
-    "knowledge_sources:title",
-    "knowledge_sources:description",
+    "events_and_state:title",
+    "events_and_state:description",
+    "utilities_and_config:title",
+    "utilities_and_config:description",
+    "rag_loaders_and_chunkers:title",
+    "rag_loaders_and_chunkers:description",
     "rag_vector_stores:title",
     "rag_vector_stores:description",
+    "tool_adapters_and_specs:title",
+    "tool_adapters_and_specs:description",
+    "file_management:title",
+    "file_management:description",
     "a2a_authentication:title",
     "a2a_authentication:description",
-    "a2a_communication_core:title",
-    "a2a_communication_core:description",
-    "a2a_extensions_and_utilities:title",
-    "a2a_extensions_and_utilities:description",
-    "enterprise_and_evaluation_tools:title",
-    "enterprise_and_evaluation_tools:description"
+    "a2a_core_logic:title",
+    "a2a_core_logic:description",
+    "a2a_updates_and_extensions:title",
+    "a2a_updates_and_extensions:description",
+    "a2a_utilities:title",
+    "a2a_utilities:description"
   ],
   "diagrams_added": []
 }

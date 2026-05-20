@@ -1,0 +1,106 @@
+{
+    "title": "LangChain Core Utilities",
+    "summary": "This module centralizes fundamental utilities for API lifecycle management, security, callback handling, chat history, data serialization, and system information, providing essential building blocks for the LangChain ecosystem.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "base_utilities",
+                "label": "General Base Utilities",
+                "type": "module",
+                "link": "base_utilities",
+                "title": "General Base Utilities",
+                "description": "Provides fundamental utilities for caching, object serialization, system information, iterable manipulation, HTML parsing, and Pydantic enhancements."
+            },
+            {
+                "id": "api_management",
+                "label": "API Lifecycle Management",
+                "type": "module",
+                "link": "api_management",
+                "title": "API Lifecycle Management",
+                "description": "Manages API stability and informs users about changes, including beta features and deprecations."
+            },
+            {
+                "id": "security",
+                "label": "Security & URL Validation",
+                "type": "module",
+                "link": "security",
+                "title": "Security & URL Validation",
+                "description": "Provides URL validation against SSRF policies and creates SSRF-safe HTTP clients to prevent unauthorized access."
+            },
+            {
+                "id": "callbacks_and_history",
+                "label": "Callbacks & Chat History",
+                "type": "module",
+                "link": "callbacks_and_history",
+                "title": "Callbacks & Chat History",
+                "description": "Offers asynchronous callbacks, execution tracing, custom event dispatching, LLM usage tracking, and in-memory chat history storage."
+            }
+        ],
+        "edges": [
+            {
+                "source": "base_utilities",
+                "target": "api_management",
+                "label": "Supports API lifecycle management",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "base_utilities",
+                "target": "security",
+                "label": "Supports security features",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "base_utilities",
+                "target": "callbacks_and_history",
+                "label": "Supports event & state management",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "foundational_services",
+                "label": "Foundational Services",
+                "nodes": [
+                    "base_utilities"
+                ],
+                "title": "Foundational Services",
+                "description": "Core, general-purpose utilities that underpin various functionalities across the LangChain Core.",
+                "role": null
+            },
+            {
+                "id": "api_lifecycle",
+                "label": "API Lifecycle",
+                "nodes": [
+                    "api_management"
+                ],
+                "title": "API Lifecycle Management",
+                "description": "Manages the evolution and stability of API components, providing mechanisms for deprecation and beta feature warnings.",
+                "role": null
+            },
+            {
+                "id": "security_features",
+                "label": "Security Features",
+                "nodes": [
+                    "security"
+                ],
+                "title": "Security Features",
+                "description": "Ensures secure operations, particularly concerning URL validation and protection against server-side request forgery (SSRF).",
+                "role": null
+            },
+            {
+                "id": "observability_state",
+                "label": "Observability & State",
+                "nodes": [
+                    "callbacks_and_history"
+                ],
+                "title": "Observability & State Management",
+                "description": "Provides tools for monitoring execution, handling events, tracking usage, and managing conversational history.",
+                "role": null
+            }
+        ]
+    }
+}

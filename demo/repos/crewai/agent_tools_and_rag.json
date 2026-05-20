@@ -1,0 +1,177 @@
+{
+    "title": "Agent Tools & RAG",
+    "summary": "This module equips agents with diverse tools for interacting with external systems and data, and provides a robust framework for Retrieval-Augmented Generation (RAG) to enhance knowledge retrieval and utilization.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "rag_loaders_chunkers",
+                "label": "RAG Loaders & Chunkers",
+                "type": "module",
+                "link": "rag_loaders_and_chunkers",
+                "title": "Data Ingestion for RAG",
+                "description": "Provides data loaders for various sources (files, web, databases) and utilities for chunking text, preparing content for Retrieval-Augmented Generation."
+            },
+            {
+                "id": "rag_vector_stores",
+                "label": "RAG Vector Store Management",
+                "type": "module",
+                "link": "rag_vector_stores",
+                "title": "Vector Database Integration",
+                "description": "Manages vector databases (e.g., ChromaDB, Qdrant) for storing and retrieving embeddings, forming the core of the RAG system."
+            },
+            {
+                "id": "tool_adapters_specs",
+                "label": "Tool Adapters & Specifications",
+                "type": "module",
+                "link": "tool_adapters_and_specs",
+                "title": "Tool Integration & Definition",
+                "description": "Offers adapters to integrate external systems as CrewAI tools and extracts detailed specifications for dynamic tool loading and documentation."
+            },
+            {
+                "id": "file_management",
+                "label": "File Management & Caching",
+                "type": "module",
+                "link": "file_management",
+                "title": "File Handling & Cleanup",
+                "description": "Provides utilities for managing files, including caching, cleanup, and resolution for various file sources and providers, supporting RAG and tools."
+            },
+            {
+                "id": "specific_agent_tools",
+                "label": "Specific Agent Tools",
+                "type": "module",
+                "link": "specific_tools",
+                "title": "Diverse Agent Capabilities",
+                "description": "A comprehensive collection of pre-built, specialized tools for agents, covering web scraping, data querying, file management, and various platform integrations."
+            },
+            {
+                "id": "crewai_agents",
+                "label": "CrewAI Agents",
+                "type": "external",
+                "link": "core_framework.agents_and_execution",
+                "title": "Intelligent Agents",
+                "description": "The core AI agents within the CrewAI framework that utilize tools and RAG capabilities to perform tasks."
+            },
+            {
+                "id": "external_data_sources",
+                "label": "External Data Sources",
+                "type": "external",
+                "link": null,
+                "title": "Raw Information Providers",
+                "description": "Represents various external sources of raw data, such as documents, websites, and databases, that are ingested by RAG loaders."
+            },
+            {
+                "id": "external_apis_services",
+                "label": "External APIs & Services",
+                "type": "external",
+                "link": null,
+                "title": "Third-Party Integrations",
+                "description": "External systems and APIs that CrewAI agents interact with through specialized tools to perform actions or retrieve information."
+            }
+        ],
+        "edges": [
+            {
+                "source": "external_data_sources",
+                "target": "rag_loaders_chunkers",
+                "label": "Provides raw data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "rag_loaders_chunkers",
+                "target": "rag_vector_stores",
+                "label": "Processes & stores documents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "file_management",
+                "target": "rag_loaders_chunkers",
+                "label": "Manages files for loading",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "file_management",
+                "target": "specific_agent_tools",
+                "label": "Supports file-based tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tool_adapters_specs",
+                "target": "specific_agent_tools",
+                "label": "Enables creation & integration of tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "external_apis_services",
+                "target": "specific_agent_tools",
+                "label": "Interacts with external services",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "crewai_agents",
+                "target": "specific_agent_tools",
+                "label": "Utilizes tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "specific_agent_tools",
+                "target": "rag_vector_stores",
+                "label": "Queries/Adds to RAG (via RAG Tool)",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "rag_system_core",
+                "label": "RAG System Core",
+                "nodes": [
+                    "rag_loaders_chunkers",
+                    "rag_vector_stores"
+                ],
+                "title": "Retrieval-Augmented Generation",
+                "description": "The central components responsible for ingesting, processing, storing, and retrieving knowledge for agents.",
+                "role": null
+            },
+            {
+                "id": "tool_infrastructure",
+                "label": "Tool Infrastructure",
+                "nodes": [
+                    "tool_adapters_specs",
+                    "file_management"
+                ],
+                "title": "Tooling & File Support",
+                "description": "Provides the foundational services for defining, integrating, and managing tools, along with file handling capabilities.",
+                "role": null
+            },
+            {
+                "id": "agent_toolset",
+                "label": "Agent Toolset",
+                "nodes": [
+                    "specific_agent_tools"
+                ],
+                "title": "Agent's Action Capabilities",
+                "description": "The collection of ready-to-use tools that empower CrewAI agents to perform a wide range of actions and interact with external systems.",
+                "role": null
+            },
+            {
+                "id": "system_interactions",
+                "label": "System Interactions",
+                "nodes": [
+                    "crewai_agents",
+                    "external_data_sources",
+                    "external_apis_services"
+                ],
+                "title": "External System Interfaces",
+                "description": "Represents the external entities that interact with or are utilized by the agent tools and RAG system.",
+                "role": null
+            }
+        ]
+    }
+}

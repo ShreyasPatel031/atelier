@@ -1,135 +1,147 @@
 {
-  "title": "Model Laboratory for LLM Comparison",
-  "summary": "This module provides a utility class, `ModelLaboratory`, designed to experiment with and compare the performance of different language models or predefined chains. It allows users to input text and observe the varied outputs from multiple models, facilitating evaluation and selection.",
+  "title": "Model Comparison & Testing Utilities",
+  "summary": "This module offers a `ModelLaboratory` for comparing language model chains and LLMs, complemented by utilities for object serialization, dynamic module imports, and base classes for comprehensive chat model and vector store testing.",
   "diagram": {
     "direction": "TD",
     "nodes": [
       {
-        "id": "model_laboratory",
-        "label": "Model Laboratory",
+        "id": "model_laboratory_main",
+        "label": "Compare Model Outputs",
         "type": "component",
         "link": null,
-        "title": "Manages LLM/Chain Comparisons",
-        "description": "A utility class designed to facilitate experimentation and performance comparison across various language models or predefined chains. It allows users to input text and observe how different models respond, aiding in model selection and evaluation."
+        "title": "ModelLaboratory",
+        "description": "Initializes with multiple language model chains and compares their responses to a given input text, printing results for analysis."
       },
       {
-        "id": "user_input",
-        "label": "User Input Text",
+        "id": "llm_interface",
+        "label": "Language Model Interface",
         "type": "external",
+        "link": "language_models_and_prompts.llm_interfaces",
+        "title": "BaseLLM",
+        "description": "Provides a standardized interface for interacting with various Large Language Models (LLMs)."
+      },
+      {
+        "id": "chain_interface",
+        "label": "Chain Execution Logic",
+        "type": "external",
+        "link": "agents_and_chains.chains",
+        "title": "Chain",
+        "description": "Represents a sequence of operations or components that process input and produce output, often involving LLMs and prompts."
+      },
+      {
+        "id": "prompt_templates",
+        "label": "Prompt Template Management",
+        "type": "external",
+        "link": "language_models_and_prompts.prompt_templates",
+        "title": "PromptTemplate",
+        "description": "Manages and formats prompts for language models, allowing for dynamic input insertion."
+      },
+      {
+        "id": "serialization_utils",
+        "label": "Object Serialization",
+        "type": "component",
         "link": null,
-        "title": "Input for Model Comparison",
-        "description": "The textual data provided by the user to be processed and compared by the different models or chains within the ModelLaboratory."
+        "title": "Serialization Utilities",
+        "description": "Handles the conversion of Python objects (like Serializable and Document) to and from byte representations for storage or transmission."
       },
       {
-        "id": "llm",
-        "label": "Base Language Model",
-        "type": "external",
-        "link": "core_abstractions_and_utilities/base_components",
-        "title": "Generative AI Model",
-        "description": "A foundational large language model that generates text based on given prompts. ModelLaboratory can create comparison chains directly from a list of these models."
-      },
-      {
-        "id": "prompt_template",
-        "label": "Prompt Template",
-        "type": "external",
-        "link": "llm_interaction_and_data_handling/prompts_and_messages",
-        "title": "Structured Input for LLMs",
-        "description": "A reusable blueprint for generating prompts to LLMs, defining the structure and variables for input. Used by ModelLaboratory when constructing chains from raw LLMs."
-      },
-      {
-        "id": "chain",
-        "label": "Executable LLM Chain",
-        "type": "external",
-        "link": "agent_and_workflow_orchestration/chains",
-        "title": "Sequence of LLM Operations",
-        "description": "A sequence of modular components that process input and generate output, often involving an LLM, prompt, and output parser. ModelLaboratory uses these to perform comparisons."
-      },
-      {
-        "id": "comparison_results",
-        "label": "Comparison Results Display",
-        "type": "external",
+        "id": "module_importer",
+        "label": "Dynamic Module Import",
+        "type": "component",
         "link": null,
-        "title": "Visualized Model Outputs",
-        "description": "The aggregated and formatted outputs from each model or chain, displayed to the user for direct comparison and analysis."
+        "title": "import_by_name",
+        "description": "Dynamically imports modules and their attributes by name, handling deprecation warnings and module not found errors."
+      },
+      {
+        "id": "model_profile_cli",
+        "label": "Model Profile CLI Tool",
+        "type": "external",
+        "link": "model_profiles",
+        "title": "langchain_model_profiles.cli.main",
+        "description": "Command-line interface for refreshing and managing model profile data from external sources like models.dev."
+      },
+      {
+        "id": "chat_model_integration_tests_base",
+        "label": "Chat Model Integration Test Base",
+        "type": "external",
+        "link": "evaluation_and_testing.model_laboratory",
+        "title": "ChatModelIntegrationTests",
+        "description": "Provides a base class for comprehensive integration tests of chat models, covering invocation, streaming, tool calling, structured output, and multimodal inputs."
+      },
+      {
+        "id": "vector_store_integration_tests_base",
+        "label": "Vector Store Integration Test Base",
+        "type": "external",
+        "link": "evaluation_and_testing.model_laboratory",
+        "title": "VectorStoreIntegrationTests",
+        "description": "Provides a base class for integration tests of vector store implementations, verifying document addition, deletion, and retrieval."
+      },
+      {
+        "id": "chat_model_unit_tests_base",
+        "label": "Chat Model Unit Test Base",
+        "type": "external",
+        "link": "evaluation_and_testing.model_laboratory",
+        "title": "ChatModelUnitTests",
+        "description": "Provides a base class for unit tests of chat models, focusing on initialization, serialization, and structured output configuration."
       }
     ],
     "edges": [
       {
-        "source": "user_input",
-        "target": "model_laboratory",
-        "label": "Provides text for comparison",
+        "source": "model_laboratory_main",
+        "target": "chain_interface",
+        "label": "uses",
         "title": null,
         "description": null
       },
       {
-        "source": "model_laboratory",
-        "target": "llm",
-        "label": "Creates chains from (via from_llms)",
+        "source": "model_laboratory_main",
+        "target": "llm_interface",
+        "label": "uses (via from_llms)",
         "title": null,
         "description": null
       },
       {
-        "source": "model_laboratory",
-        "target": "prompt_template",
-        "label": "Applies to LLMs (via from_llms)",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "model_laboratory",
-        "target": "chain",
-        "label": "Initializes with (via __init__)",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "model_laboratory",
-        "target": "comparison_results",
-        "label": "Displays outputs",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "chain",
-        "target": "comparison_results",
-        "label": "Generates output for display",
+        "source": "model_laboratory_main",
+        "target": "prompt_templates",
+        "label": "uses (via from_llms)",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "surface_interface",
-        "label": "Surface Interface",
+        "id": "model_experimentation",
+        "label": "Model Experimentation",
         "nodes": [
-          "model_laboratory"
+          "model_laboratory_main"
         ],
-        "title": "Primary Interaction Point",
-        "description": "Components that serve as the main entry or interaction point for users or other modules.",
-        "role": "surface"
-      },
-      {
-        "id": "generative_components",
-        "label": "Generative Components",
-        "nodes": [
-          "llm",
-          "chain"
-        ],
-        "title": "Content Generation & Processing",
-        "description": "Components responsible for generating text, processing information, or orchestrating complex workflows.",
+        "title": "Model Experimentation",
+        "description": "Components dedicated to experimenting with and comparing the performance of different language models and chains.",
         "role": "generative"
       },
       {
-        "id": "data_elements",
-        "label": "Data Elements",
+        "id": "core_utilities",
+        "label": "Core Utilities",
         "nodes": [
-          "user_input",
-          "prompt_template",
-          "comparison_results"
+          "serialization_utils",
+          "module_importer"
         ],
-        "title": "Input, Output, and Structure",
-        "description": "Components representing data inputs, outputs, or structures that define how data is handled.",
-        "role": "data"
+        "title": "Core Utilities",
+        "description": "General-purpose utility functions for object serialization and dynamic module loading.",
+        "role": "surface"
+      },
+      {
+        "id": "testing_frameworks",
+        "label": "Testing Frameworks",
+        "nodes": [
+          "chat_model_integration_tests_base",
+          "vector_store_integration_tests_base",
+          "chat_model_unit_tests_base",
+          "model_profile_cli"
+        ],
+        "title": "Testing Frameworks",
+        "description": "Base classes and tools for unit and integration testing of chat models and vector stores, including CLI for model profile management.",
+        "role": "analytical"
       }
     ]
   }

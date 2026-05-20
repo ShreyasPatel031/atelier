@@ -1,185 +1,184 @@
 {
-  "title": "Model Utility Functions",
-  "summary": "This module provides essential utility functions and base classes for managing model weights, optimizing model architectures through fusion, and defining interfaces for audio tokenization within the Transformers library.",
+  "title": "Model Utilities",
+  "summary": "This module provides core utilities for model management, including extracting weight conversion mappings, defining architectural fusion specifications, and establishing abstract interfaces for audio tokenizers.",
   "diagram": {
     "direction": "TD",
     "nodes": [
       {
         "id": "extract_weight_conversions",
-        "label": "Extract Model Weight Conversions",
+        "label": "Extract Weight Conversions",
         "type": "component",
         "link": null,
-        "title": "Extract Model Weight Conversions",
-        "description": "Analyzes a `PreTrainedModel` to retrieve a list of specific weight conversion rules. It prioritizes class-specific mappings and falls back to general model type mappings, facilitating compatibility across different model versions or frameworks."
+        "title": "Extract Weight Conversions for Model",
+        "description": "Retrieves a list of weight transformation rules for a given pre-trained model, enabling conversion between different model formats or architectures."
       },
       {
-        "id": "patch_embeddings_fusion",
+        "id": "patch_embeddings_fusion_spec",
         "label": "Define Patch Embedding Fusion",
         "type": "component",
         "link": null,
         "title": "Patch Embeddings Fusion Specification",
-        "description": "Defines the logic for fusing 3D convolutional patch embedding layers into more efficient linear projections. It includes criteria for identifying fusable modules and generates the necessary weight transformation operations for optimization."
+        "description": "Specifies how to fuse 3D convolutional patch embeddings into flattened linear projections, optimizing model architecture for efficiency."
       },
       {
         "id": "audio_tokenizer_base",
-        "label": "Abstract Audio Tokenizer Interface",
+        "label": "Audio Tokenizer Base Interface",
         "type": "component",
         "link": null,
-        "title": "Abstract Audio Tokenizer Base",
-        "description": "Provides an abstract base class for audio tokenizers, establishing a standard interface for encoding raw audio into discrete codebooks and decoding these codebooks back into raw audio. This ensures consistent audio processing capabilities."
+        "title": "PreTrained Audio Tokenizer Base",
+        "description": "Abstract base class defining the core `encode` and `decode` methods for any audio tokenizer, handling conversion between raw audio and discrete audio codebooks."
       },
       {
         "id": "pretrained_model",
         "label": "PreTrained Model",
         "type": "external",
-        "link": "model_architectures",
-        "title": "Base PreTrained Model Class",
-        "description": "A foundational class for all pre-trained models, providing common functionalities like loading, saving, and managing configurations. It serves as the base for various model architectures."
+        "link": "other_module",
+        "title": "PreTrainedModel",
+        "description": "A base class for all pre-trained models, providing common functionalities like loading, saving, and configuration management."
       },
       {
         "id": "weight_transform",
-        "label": "Weight Transformation Rules",
+        "label": "Weight Transformation",
         "type": "external",
-        "link": "model_conversion",
-        "title": "Weight Transformation Rules",
-        "description": "A data structure or mechanism defining how model weights should be converted or adapted, often used during model loading or conversion from different frameworks or versions."
+        "link": null,
+        "title": "WeightTransform",
+        "description": "Defines a rule or operation for converting model weights from one format or structure to another."
       },
       {
-        "id": "pretrained_config",
-        "label": "Model Configuration",
-        "type": "external",
-        "link": "model_architectures",
-        "title": "Model Configuration Object",
-        "description": "An object holding the configuration parameters for a model, such as architecture details, hyperparameters, and other settings. It's crucial for initializing and understanding model behavior."
-      },
-      {
-        "id": "pytorch_module",
+        "id": "nn_module",
         "label": "PyTorch Module",
         "type": "external",
         "link": null,
-        "title": "Generic PyTorch Neural Network Module",
-        "description": "The base class for all neural network modules in PyTorch. Models subclass this class to define their computational graph, parameters, and forward pass logic."
+        "title": "torch.nn.Module",
+        "description": "Base class for all neural network modules in PyTorch, handling parameters, submodules, and forward passes."
       },
       {
-        "id": "pytorch_conv3d",
-        "label": "PyTorch 3D Convolution",
+        "id": "pretrained_config",
+        "label": "PreTrained Config",
+        "type": "external",
+        "link": "other_module",
+        "title": "PretrainedConfig",
+        "description": "Base class for model configurations, storing hyperparameters and architecture details."
+      },
+      {
+        "id": "weight_converter",
+        "label": "Weight Converter",
         "type": "external",
         "link": null,
-        "title": "PyTorch 3D Convolutional Layer",
-        "description": "A PyTorch module that applies a 3D convolutional operation over an input signal. It's used for processing volumetric data or sequences of images, extracting spatial and temporal features."
+        "title": "WeightConverter",
+        "description": "A utility for converting specific weight patterns using defined operations."
       },
       {
-        "id": "pytorch_tensor",
+        "id": "weight_renaming",
+        "label": "Weight Renaming",
+        "type": "external",
+        "link": null,
+        "title": "WeightRenaming",
+        "description": "A utility for renaming weight patterns during conversion."
+      },
+      {
+        "id": "conv3d_to_linear",
+        "label": "Conv3d to Linear Op",
+        "type": "external",
+        "link": null,
+        "title": "Conv3dToLinear",
+        "description": "A specific operation to transform 3D convolutional layer weights into linear layer weights."
+      },
+      {
+        "id": "torch_tensor",
         "label": "PyTorch Tensor",
         "type": "external",
         "link": null,
-        "title": "PyTorch Data Tensor",
-        "description": "The fundamental data structure in PyTorch, similar to NumPy arrays, but with GPU acceleration capabilities. Tensors are used for storing and manipulating numerical data in deep learning models."
-      },
-      {
-        "id": "feature_extractor",
-        "label": "Feature Extractor",
-        "type": "external",
-        "link": "data_processing",
-        "title": "Data Feature Extractor",
-        "description": "A component responsible for preprocessing raw input data (e.g., audio, images) into a format suitable for model input. This often involves normalization, resizing, or other domain-specific transformations."
+        "title": "torch.Tensor",
+        "description": "A multi-dimensional matrix containing elements of a single data type, fundamental for data manipulation in PyTorch."
       }
     ],
     "edges": [
       {
         "source": "extract_weight_conversions",
         "target": "pretrained_model",
-        "label": "analyzes",
+        "label": "uses",
         "title": null,
         "description": null
       },
       {
         "source": "extract_weight_conversions",
         "target": "weight_transform",
-        "label": "produces",
+        "label": "returns",
         "title": null,
         "description": null
       },
       {
-        "source": "patch_embeddings_fusion",
-        "target": "pytorch_module",
-        "label": "inspects",
+        "source": "patch_embeddings_fusion_spec",
+        "target": "nn_module",
+        "label": "checks/uses",
         "title": null,
         "description": null
       },
       {
-        "source": "patch_embeddings_fusion",
-        "target": "pytorch_conv3d",
-        "label": "targets",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "patch_embeddings_fusion",
+        "source": "patch_embeddings_fusion_spec",
         "target": "pretrained_config",
         "label": "uses",
         "title": null,
         "description": null
       },
       {
-        "source": "patch_embeddings_fusion",
+        "source": "patch_embeddings_fusion_spec",
         "target": "weight_transform",
         "label": "generates",
         "title": null,
         "description": null
       },
       {
-        "source": "audio_tokenizer_base",
-        "target": "pretrained_model",
-        "label": "inherits from",
+        "source": "patch_embeddings_fusion_spec",
+        "target": "weight_converter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "patch_embeddings_fusion_spec",
+        "target": "weight_renaming",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "patch_embeddings_fusion_spec",
+        "target": "conv3d_to_linear",
+        "label": "applies",
         "title": null,
         "description": null
       },
       {
         "source": "audio_tokenizer_base",
-        "target": "pytorch_tensor",
+        "target": "torch_tensor",
         "label": "processes",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "audio_tokenizer_base",
-        "target": "feature_extractor",
-        "label": "expects input from",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "analytical_utilities",
-        "label": "Analytical Utilities",
+        "id": "model_transform_group",
+        "label": "Model Transformation & Fusion",
         "nodes": [
-          "extract_weight_conversions"
+          "extract_weight_conversions",
+          "patch_embeddings_fusion_spec"
         ],
-        "title": "Model Analysis and Conversion",
-        "description": "Components focused on analyzing model structures and defining rules for weight conversions to ensure compatibility and proper loading.",
-        "role": "analytical"
+        "title": "Model Transformation & Fusion Utilities",
+        "description": "Components for extracting weight conversion rules and defining architectural fusion specifications to optimize or adapt models.",
+        "role": "generative"
       },
       {
-        "id": "architectural_optimization",
-        "label": "Architectural Optimization",
-        "nodes": [
-          "patch_embeddings_fusion"
-        ],
-        "title": "Model Architecture Optimization",
-        "description": "Utilities for defining and applying structural optimizations to model components, such as fusing layers for improved efficiency.",
-        "role": "surface"
-      },
-      {
-        "id": "audio_data_interfaces",
-        "label": "Audio Data Interfaces",
+        "id": "audio_interface_group",
+        "label": "Audio Processing Interfaces",
         "nodes": [
           "audio_tokenizer_base"
         ],
-        "title": "Audio Data Processing Interfaces",
-        "description": "Abstract base classes that define standard interfaces for processing audio data, including encoding and decoding functionalities.",
-        "role": "data"
+        "title": "Audio Processing Interfaces",
+        "description": "Abstract base classes defining standard interfaces for audio tokenization, including encoding raw audio and decoding discrete audio codebooks.",
+        "role": "surface"
       }
     ]
   }

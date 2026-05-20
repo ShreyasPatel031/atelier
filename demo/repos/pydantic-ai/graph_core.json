@@ -1,0 +1,232 @@
+{
+  "title": "Graph Execution Core",
+  "summary": "This module defines the fundamental components for building, executing, and managing directed acyclic graphs (DAGs) or cyclic graphs with state. It provides abstractions for nodes, graph definition, runtime execution, path construction, and parallel processing.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "Define Graph Node",
+        "label": "Define Graph Node",
+        "type": "component",
+        "link": null,
+        "title": "BaseNode",
+        "description": "Abstract base for all graph components, defining execution logic and next steps. It provides methods for node identification and defining potential transitions to other nodes or graph termination."
+      },
+      {
+        "id": "Orchestrate Graph Definition",
+        "label": "Orchestrate Graph Definition",
+        "type": "component",
+        "link": null,
+        "title": "Graph",
+        "description": "Manages the collection of nodes, validates connections, and provides methods to run or visualize the graph. It orchestrates the overall graph definition and execution lifecycle."
+      },
+      {
+        "id": "Execute Graph Flow",
+        "label": "Execute Graph Flow",
+        "type": "component",
+        "link": null,
+        "title": "GraphRun",
+        "description": "Manages the stateful, asynchronous execution of a graph, iterating through nodes and handling state persistence. It allows for step-by-step execution or full completion."
+      },
+      {
+        "id": "Capture Graph Output",
+        "label": "Capture Graph Output",
+        "type": "component",
+        "link": null,
+        "title": "GraphRunResult",
+        "description": "Stores the final output, state, and execution history of a completed graph run. It provides access to the graph's outcome and its final internal state."
+      },
+      {
+        "id": "Define Atomic Step",
+        "label": "Define Atomic Step",
+        "type": "component",
+        "link": null,
+        "title": "Step",
+        "description": "Encapsulates a single function call or operation as an executable unit within a graph path. It defines an atomic action with specific inputs and outputs."
+      },
+      {
+        "id": "Synchronize Parallel Paths",
+        "label": "Synchronize Parallel Paths",
+        "type": "component",
+        "link": null,
+        "title": "Join",
+        "description": "Aggregates results from multiple parallel execution branches using a reducer function. It synchronizes parallel paths and combines their outputs into a single result."
+      },
+      {
+        "id": "Construct Graph Paths",
+        "label": "Construct Graph Paths",
+        "type": "component",
+        "link": null,
+        "title": "PathBuilder",
+        "description": "Provides a fluent API to declaratively build complex execution paths with transformations, forks, and joins. It simplifies the construction of sequential and parallel graph flows."
+      },
+      {
+        "id": "Analyze Fork-Join Structure",
+        "label": "Analyze Fork-Join Structure",
+        "type": "component",
+        "link": null,
+        "title": "ParentForkFinder",
+        "description": "Identifies dominating forks for join nodes to ensure correct parallel execution and prevent deadlocks. It analyzes graph structure to manage complex concurrency patterns."
+      },
+      {
+        "id": "Persist Graph State",
+        "label": "Persist Graph State",
+        "type": "external",
+        "link": "persistence_mechanisms",
+        "title": "BaseStatePersistence",
+        "description": "Handles saving and loading the graph's state and current node during execution. It ensures that graph runs can be paused, resumed, or recovered across sessions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "Orchestrate Graph Definition",
+        "target": "Define Graph Node",
+        "label": "Comprises",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Orchestrate Graph Definition",
+        "target": "Execute Graph Flow",
+        "label": "Initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Execute Graph Flow",
+        "target": "Define Graph Node",
+        "label": "Runs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Define Graph Node",
+        "target": "Define Graph Node",
+        "label": "Determines Next",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Define Graph Node",
+        "target": "Capture Graph Output",
+        "label": "Signals End",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Execute Graph Flow",
+        "target": "Capture Graph Output",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Execute Graph Flow",
+        "target": "Persist Graph State",
+        "label": "Manages State With",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Construct Graph Paths",
+        "target": "Define Atomic Step",
+        "label": "Includes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Construct Graph Paths",
+        "target": "Synchronize Parallel Paths",
+        "label": "Includes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Synchronize Parallel Paths",
+        "target": "Analyze Fork-Join Structure",
+        "label": "Relies On",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Define Atomic Step",
+        "target": "Define Graph Node",
+        "label": "Becomes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Synchronize Parallel Paths",
+        "target": "Define Graph Node",
+        "label": "Becomes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_abstractions",
+        "label": "Core Abstractions",
+        "nodes": [
+          "Define Graph Node"
+        ],
+        "title": "Core Abstractions",
+        "description": "Fundamental building blocks for defining graph components and their behavior.",
+        "role": "surface"
+      },
+      {
+        "id": "graph_definition",
+        "label": "Graph Definition",
+        "nodes": [
+          "Orchestrate Graph Definition",
+          "Construct Graph Paths"
+        ],
+        "title": "Graph Definition",
+        "description": "Components responsible for defining the structure and paths within a graph.",
+        "role": "generative"
+      },
+      {
+        "id": "execution_logic",
+        "label": "Execution Logic",
+        "nodes": [
+          "Define Atomic Step",
+          "Synchronize Parallel Paths"
+        ],
+        "title": "Execution Logic",
+        "description": "Units that represent atomic operations and mechanisms for combining parallel execution flows.",
+        "role": "generative"
+      },
+      {
+        "id": "runtime_management",
+        "label": "Runtime Management",
+        "nodes": [
+          "Execute Graph Flow"
+        ],
+        "title": "Runtime Management",
+        "description": "Manages the dynamic execution flow, state, and lifecycle of a graph run.",
+        "role": "generative"
+      },
+      {
+        "id": "analysis_and_output",
+        "label": "Analysis & Output",
+        "nodes": [
+          "Analyze Fork-Join Structure",
+          "Capture Graph Output"
+        ],
+        "title": "Analysis & Output",
+        "description": "Components for analyzing graph structure and capturing the final results of an execution.",
+        "role": "analytical"
+      },
+      {
+        "id": "external_dependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "Persist Graph State"
+        ],
+        "title": "External Dependencies",
+        "description": "Interfaces with external systems for state management during graph execution.",
+        "role": "data"
+      }
+    ]
+  }
+}

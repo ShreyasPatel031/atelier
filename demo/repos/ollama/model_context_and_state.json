@@ -1,0 +1,185 @@
+{
+  "title": "LLM Context & State Management",
+  "summary": "This module provides core functions for managing the internal state of the LLM inference context, including saving, loading, and querying context and sequence data. It also offers utilities for performance monitoring, memory usage analysis, and parameter optimization.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "copy_state_data",
+        "label": "Copy Context State Data",
+        "type": "component",
+        "link": null,
+        "title": "Copy LLM Context State",
+        "description": "Duplicates the entire internal state of the LLM context into a provided memory buffer."
+      },
+      {
+        "id": "set_state_data",
+        "label": "Restore Context State Data",
+        "type": "component",
+        "link": null,
+        "title": "Restore LLM Context State",
+        "description": "Overwrites the current LLM context state with data from a source memory buffer."
+      },
+      {
+        "id": "load_session_file",
+        "label": "Load Session Tokens",
+        "type": "component",
+        "link": null,
+        "title": "Load LLM Session from File",
+        "description": "Reads and applies previously saved session tokens from a file to the LLM context."
+      },
+      {
+        "id": "save_session_file",
+        "label": "Save Session Tokens",
+        "type": "component",
+        "link": null,
+        "title": "Save LLM Session to File",
+        "description": "Writes the current LLM session's tokens to a specified file for persistent storage."
+      },
+      {
+        "id": "get_seq_data",
+        "label": "Retrieve Sequence Data",
+        "type": "component",
+        "link": null,
+        "title": "Get Specific Sequence State",
+        "description": "Fetches the internal state data for a designated sequence within the LLM context."
+      },
+      {
+        "id": "set_seq_data",
+        "label": "Apply Sequence Data",
+        "type": "component",
+        "link": null,
+        "title": "Set Specific Sequence State",
+        "description": "Updates the internal state of a designated sequence using provided data."
+      },
+      {
+        "id": "get_state_size",
+        "label": "Query Total State Size",
+        "type": "component",
+        "link": null,
+        "title": "Get Full Context State Size",
+        "description": "Calculates the total memory footprint of the entire LLM context's internal state."
+      },
+      {
+        "id": "get_seq_size",
+        "label": "Query Sequence Size",
+        "type": "component",
+        "link": null,
+        "title": "Get Specific Sequence State Size",
+        "description": "Determines the memory size required to store the state of a particular sequence."
+      },
+      {
+        "id": "save_seq_file",
+        "label": "Save Sequence to File",
+        "type": "component",
+        "link": null,
+        "title": "Persist Sequence State",
+        "description": "Stores the state and tokens of a specific sequence to a file."
+      },
+      {
+        "id": "load_seq_file",
+        "label": "Load Sequence from File",
+        "type": "component",
+        "link": null,
+        "title": "Restore Sequence State",
+        "description": "Loads and integrates a saved sequence state from a file into the LLM context."
+      },
+      {
+        "id": "print_perf",
+        "label": "Display Performance Stats",
+        "type": "component",
+        "link": null,
+        "title": "Show LLM Performance",
+        "description": "Presents detailed performance metrics, including processing times and token rates, for the LLM operations."
+      },
+      {
+        "id": "print_memory",
+        "label": "Display Memory Usage",
+        "type": "component",
+        "link": null,
+        "title": "Show Memory Breakdown",
+        "description": "Generates a comprehensive report on memory allocation and usage across various hardware components."
+      },
+      {
+        "id": "fit_params",
+        "label": "Optimize Model Memory",
+        "type": "component",
+        "link": null,
+        "title": "Adjust Model for Memory Fit",
+        "description": "Attempts to modify model and context parameters to ensure efficient memory utilization on the device."
+      }
+    ],
+    "edges": [
+      {
+        "source": "get_state_size",
+        "target": "copy_state_data",
+        "label": "informs buffer size",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_state_size",
+        "target": "set_state_data",
+        "label": "informs buffer size",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_seq_size",
+        "target": "get_seq_data",
+        "label": "informs buffer size",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_seq_size",
+        "target": "set_seq_data",
+        "label": "informs buffer size",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "context_state_mgmt",
+        "label": "Context State Management",
+        "nodes": [
+          "copy_state_data",
+          "set_state_data",
+          "get_state_size"
+        ],
+        "title": "LLM Context State Management",
+        "description": "Functions for copying, restoring, and querying the overall state of the LLM inference context.",
+        "role": "data"
+      },
+      {
+        "id": "sequence_state_persist",
+        "label": "Session & Sequence Persistence",
+        "nodes": [
+          "load_session_file",
+          "save_session_file",
+          "get_seq_data",
+          "set_seq_data",
+          "get_seq_size",
+          "save_seq_file",
+          "load_seq_file"
+        ],
+        "title": "LLM Session & Sequence Handling",
+        "description": "Functions dedicated to managing the state of individual sequences and entire sessions, including data retrieval, application, and file-based saving/loading.",
+        "role": "data"
+      },
+      {
+        "id": "diagnostics_optimization",
+        "label": "Diagnostics & Optimization",
+        "nodes": [
+          "print_perf",
+          "print_memory",
+          "fit_params"
+        ],
+        "title": "Performance & Resource Tools",
+        "description": "Utilities for monitoring LLM performance, analyzing memory usage, and optimizing model parameters for resource constraints.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

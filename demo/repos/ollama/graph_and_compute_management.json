@@ -1,0 +1,28 @@
+{
+    "title": "Graph and Compute Management",
+    "summary": "Manages the execution graph and computational backends (CPU, GPU) for optimized model inference and operations.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {"id": "backend_management", "label": "Manage Compute Backends", "type": "module", "link": "backend_management", "title": "Backend Management", "description": "Registers, initializes, and schedules operations across available computational backends."}, 
+            {"id": "cpu_operations", "label": "Execute CPU Operations", "type": "module", "link": "cpu_operations", "title": "CPU Operations", "description": "Handles graph computation, quantization, and vector operations optimized for various CPU architectures."}, 
+            {"id": "gpu_accelerated_operations", "label": "Accelerate with GPU", "type": "module", "link": "gpu_accelerated_operations", "title": "GPU Accelerated Operations", "description": "Leverages GPU capabilities via BLAS, Metal, and Vulkan for high-performance tensor computations."}, 
+            {"id": "quantization_and_graph_ops", "label": "Optimize Graphs and Quantize", "type": "module", "link": "quantization_and_graph_ops", "title": "Quantization and Graph Operations", "description": "Provides algorithms for model quantization, graph optimization, and tensor manipulation to enhance performance."}, 
+            {"id": "gguf_file_format", "label": "Handle GGUF Model Files", "type": "module", "link": "gguf_file_format", "title": "GGUF File Format", "description": "Manages reading and writing of model metadata and tensor data using the GGUF file format."}, 
+            {"id": "system_utilities", "label": "System Resource Utilities", "type": "module", "link": "system_utilities", "title": "System Utilities", "description": "Offers system-level functions, such as querying device memory, to support backend operations."}
+        ],
+        "edges": [
+            {"source": "backend_management", "target": "cpu_operations", "label": "orchestrates CPU tasks"},
+            {"source": "backend_management", "target": "gpu_accelerated_operations", "label": "orchestrates GPU tasks"},
+            {"source": "quantization_and_graph_ops", "target": "backend_management", "label": "configures compute settings"},
+            {"source": "gguf_file_format", "target": "quantization_and_graph_ops", "label": "provides model data"},
+            {"source": "system_utilities", "target": "backend_management", "label": "supplies system info"}
+        ],
+        "groups": [
+            {"id": "backend_orchestration", "label": "Backend Orchestration", "title": "Backend Orchestration", "description": "Centralized management and scheduling of computational resources.", "role": "analytical", "nodes": ["backend_management"]},
+            {"id": "compute_implementations", "label": "Compute Implementations", "title": "Compute Implementations", "description": "Modules providing specialized compute capabilities for different hardware.", "role": "generative", "nodes": ["cpu_operations", "gpu_accelerated_operations"]},
+            {"id": "model_data_handling", "label": "Model Data Handling", "title": "Model Data Handling", "description": "Functions for optimizing and serializing/deserializing model graphs and data.", "role": "data", "nodes": ["quantization_and_graph_ops", "gguf_file_format"]},
+            {"id": "system_diagnostics", "label": "System Diagnostics", "title": "System Diagnostics", "description": "Tools for querying and managing system-level resources and configurations.", "role": "analytical", "nodes": ["system_utilities"]}
+        ]
+    }
+}

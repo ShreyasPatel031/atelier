@@ -1,24 +1,24 @@
 {
   "title": "Model Quantization Techniques",
-  "summary": "This module provides a collection of quantization methods for optimizing model size and inference speed. It includes implementations for various bit-widths and techniques like BitNet, bitsandbytes (4-bit and 8-bit), FP8, FP-Quant, Metal, MXFP4, Quark, SINQ, and TorchAo, supporting both pre-quantized model loading and on-the-fly quantization.",
+  "summary": "This module provides a collection of quantization methods for optimizing model size and inference speed. It includes various bit-width quantizers and integrations with specialized libraries for different hardware and frameworks.",
   "diagram": {
     "direction": "TD",
     "nodes": [
       {
-        "id": "model_to_quantize",
-        "label": "Pre-trained Model",
-        "type": "external",
-        "link": "model_architectures",
-        "title": "Pre-trained Model",
-        "description": "Represents a pre-trained model loaded into the system, which can be subjected to various quantization techniques."
+        "id": "hf_quantizer_base",
+        "label": "HfQuantizer Base Class",
+        "type": "component",
+        "link": null,
+        "title": "Base Quantizer Interface",
+        "description": "Provides a common interface and base functionality for all quantization methods, handling environment validation and model processing hooks."
       },
       {
         "id": "bitnet_quantizer",
-        "label": "BitNet Quantizer",
+        "label": "BitNet 1.58-bit Quantizer",
         "type": "component",
         "link": null,
         "title": "BitNet 1.58-bit Quantization",
-        "description": "Applies 1.58-bit quantization using the BitNet method, converting linear layers to BitLinear for efficient inference. Requires 'accelerate'."
+        "description": "Implements 1.58-bit quantization from the BitNet method, converting linear layers to BitLinear during model loading for extreme compression."
       },
       {
         "id": "bnb4bit_quantizer",
@@ -26,7 +26,7 @@
         "type": "component",
         "link": null,
         "title": "BitsAndBytes 4-bit Quantization",
-        "description": "Implements 4-bit quantization for model weights using the bitsandbytes library, reducing memory footprint. Requires 'accelerate' and 'bitsandbytes'."
+        "description": "Applies 4-bit quantization using the bitsandbytes library, optimizing memory usage for large models while maintaining reasonable performance."
       },
       {
         "id": "bnb8bit_quantizer",
@@ -34,7 +34,7 @@
         "type": "component",
         "link": null,
         "title": "BitsAndBytes 8-bit Quantization",
-        "description": "Implements 8-bit quantization for model weights using the bitsandbytes library, balancing precision and memory. Requires 'accelerate' and 'bitsandbytes'."
+        "description": "Applies 8-bit quantization using the bitsandbytes library, balancing precision and memory efficiency for model deployment."
       },
       {
         "id": "fp8_quantizer",
@@ -42,158 +42,475 @@
         "type": "component",
         "link": null,
         "title": "Fine-Grained FP8 Quantization",
-        "description": "Provides FP8 quantization, supporting standard and MoE models, leveraging GPU/XPU capabilities for performance. Requires 'accelerate' and compatible GPU/XPU."
+        "description": "Supports FP8 quantization for standard and Mixture-of-Experts (MoE) models, leveraging GPU capabilities for high-performance inference."
       },
       {
         "id": "fpquant_quantizer",
         "label": "FP-Quant Quantizer",
         "type": "component",
         "link": null,
-        "title": "FP-Quant Method",
-        "description": "Handles FP-Quant method for loading pre-quantized models or on-the-fly quantization, optimized for specific hardware. Requires GPU/XPU, 'qutlass' (for real quant), and 'fp_quant'."
+        "title": "FP-Quant Method Implementation",
+        "description": "Handles the FP-Quant method for both pre-quantized models and on-the-fly quantization, requiring specific hardware like Blackwell GPUs for real quantization."
       },
       {
         "id": "metal_quantizer",
-        "label": "Metal Quantizer",
+        "label": "Metal Affine Quantizer",
         "type": "component",
         "link": null,
-        "title": "Metal Affine Quantization (MPS)",
-        "description": "Enables Metal affine quantization for Apple Silicon (MPS) devices, utilizing low-bit uint32 tensors with fused dequantization. Requires MPS device and 'kernels'."
+        "title": "Metal Quantization for Apple Silicon",
+        "description": "Utilizes Metal kernels for low-bit (2/4/8) affine quantization on Apple Silicon (MPS) devices, enabling efficient inference on Apple hardware."
       },
       {
         "id": "mxfp4_quantizer",
         "label": "MXFP4 Quantizer",
         "type": "component",
         "link": null,
-        "title": "MXFP4 Quantization",
-        "description": "Performs FP4 quantization using FBGEMM kernels, suitable for various hardware with specific compute capabilities. Requires 'torch', 'accelerate', 'triton', 'kernels', and compatible GPU/XPU."
+        "title": "MXFP4 Quantization with FBGEMM",
+        "description": "Performs FP4 quantization using fbgemm kernels, supporting various hardware with Triton integration for optimized performance."
       },
       {
         "id": "quark_quantizer",
         "label": "Quark Quantizer",
         "type": "component",
         "link": null,
-        "title": "Quark Quantization",
-        "description": "Integrates Quark quantization for efficient model deployment, primarily for pre-quantized models. Requires the 'quark' library."
+        "title": "Quark Quantization Integration",
+        "description": "Integrates the Quark library for quantization, managing separate quantizers for weights, inputs, and biases for AMD-specific optimizations."
       },
       {
         "id": "sinq_quantizer",
         "label": "SINQ Quantizer",
         "type": "component",
         "link": null,
-        "title": "SINQ Quantization",
-        "description": "Applies SINQ quantization, supporting weight-only or activation-aware methods, converting linear layers to SINQLinear. Requires 'sinq' and CUDA."
+        "title": "SINQ Quantization Methods",
+        "description": "Implements SINQ (weight-only) and A-SINQ (activation-aware) quantization, with specific handling for model loading and serialization processes."
       },
       {
         "id": "torchao_quantizer",
         "label": "TorchAo Quantizer",
         "type": "component",
         "link": null,
-        "title": "TorchAo Quantization",
-        "description": "Utilizes the torchao library for various quantization types, including 4-bit and 8-bit, with support for training. Requires 'torchao'."
+        "title": "TorchAo Quantization Integration",
+        "description": "Provides quantization capabilities through the PyTorch/torchao library, supporting various quantization schemes and tensor subclass handling."
+      },
+      {
+        "id": "weight_converter_util",
+        "label": "Weight Conversion Utility",
+        "type": "component",
+        "link": null,
+        "title": "Model Weight Conversion",
+        "description": "Manages the conversion and deserialization of model weights, crucial for loading pre-quantized models and adapting them to the quantized format."
+      },
+      {
+        "id": "accelerate_lib",
+        "label": "Accelerate Library",
+        "type": "external",
+        "link": null,
+        "title": "Hugging Face Accelerate",
+        "description": "Facilitates distributed training and mixed-precision operations, often a prerequisite for quantization methods to run efficiently."
+      },
+      {
+        "id": "bitsandbytes_lib",
+        "label": "BitsAndBytes Library",
+        "type": "external",
+        "link": null,
+        "title": "BitsAndBytes",
+        "description": "Optimizes memory and speed for large models through 4-bit and 8-bit quantization, widely used for LLM deployment."
+      },
+      {
+        "id": "torch_lib",
+        "label": "PyTorch Library",
+        "type": "external",
+        "link": null,
+        "title": "PyTorch",
+        "description": "The foundational deep learning framework providing tensor operations, automatic differentiation, and model definitions."
+      },
+      {
+        "id": "qutlass_lib",
+        "label": "Qutlass Library",
+        "type": "external",
+        "link": null,
+        "title": "Qutlass",
+        "description": "A specialized library required for real FP-Quant quantization, particularly on Blackwell GPUs, enabling hardware-accelerated operations."
+      },
+      {
+        "id": "fp_quant_lib",
+        "label": "FP-Quant Library",
+        "type": "external",
+        "link": null,
+        "title": "FP-Quant",
+        "description": "Provides the core implementation for the FP-Quant quantization method, used for both pseudo and real quantization."
+      },
+      {
+        "id": "kernels_lib",
+        "label": "Kernels Library",
+        "type": "external",
+        "link": null,
+        "title": "Optimized Kernels",
+        "description": "Offers optimized Metal kernels for efficient low-bit quantization on Apple Silicon, enhancing performance on MPS devices."
+      },
+      {
+        "id": "triton_lib",
+        "label": "Triton Library",
+        "type": "external",
+        "link": null,
+        "title": "Triton",
+        "description": "Enables writing high-performance custom GPU kernels, used in MXFP4 quantization for specialized tensor operations."
+      },
+      {
+        "id": "quark_lib",
+        "label": "Quark Library",
+        "type": "external",
+        "link": null,
+        "title": "AMD Quark",
+        "description": "AMD's library for model quantization, focusing on efficient deployment and hardware-specific optimizations."
+      },
+      {
+        "id": "sinq_lib",
+        "label": "SINQ Library",
+        "type": "external",
+        "link": null,
+        "title": "SINQ",
+        "description": "A dedicated library for SINQ and A-SINQ quantization techniques, providing specialized modules and operations."
+      },
+      {
+        "id": "torchao_lib",
+        "label": "TorchAo Library",
+        "type": "external",
+        "link": null,
+        "title": "PyTorch TorchAo",
+        "description": "PyTorch's advanced quantization toolkit, offering various quantization algorithms and integration with PyTorch's ecosystem."
       }
     ],
     "edges": [
       {
-        "source": "model_to_quantize",
-        "target": "bitnet_quantizer",
-        "label": "Processes",
+        "source": "bitnet_quantizer",
+        "target": "hf_quantizer_base",
+        "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "model_to_quantize",
-        "target": "bnb4bit_quantizer",
-        "label": "Processes",
+        "source": "bnb4bit_quantizer",
+        "target": "hf_quantizer_base",
+        "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "model_to_quantize",
-        "target": "bnb8bit_quantizer",
-        "label": "Processes",
+        "source": "bnb8bit_quantizer",
+        "target": "hf_quantizer_base",
+        "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "model_to_quantize",
-        "target": "fp8_quantizer",
-        "label": "Processes",
+        "source": "fp8_quantizer",
+        "target": "hf_quantizer_base",
+        "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "model_to_quantize",
-        "target": "fpquant_quantizer",
-        "label": "Processes",
+        "source": "fpquant_quantizer",
+        "target": "hf_quantizer_base",
+        "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "model_to_quantize",
-        "target": "metal_quantizer",
-        "label": "Processes",
+        "source": "metal_quantizer",
+        "target": "hf_quantizer_base",
+        "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "model_to_quantize",
-        "target": "mxfp4_quantizer",
-        "label": "Processes",
+        "source": "mxfp4_quantizer",
+        "target": "hf_quantizer_base",
+        "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "model_to_quantize",
-        "target": "quark_quantizer",
-        "label": "Processes",
+        "source": "quark_quantizer",
+        "target": "hf_quantizer_base",
+        "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "model_to_quantize",
-        "target": "sinq_quantizer",
-        "label": "Processes",
+        "source": "sinq_quantizer",
+        "target": "hf_quantizer_base",
+        "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "model_to_quantize",
-        "target": "torchao_quantizer",
-        "label": "Processes",
+        "source": "torchao_quantizer",
+        "target": "hf_quantizer_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bitnet_quantizer",
+        "target": "accelerate_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bnb4bit_quantizer",
+        "target": "accelerate_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bnb4bit_quantizer",
+        "target": "bitsandbytes_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bnb8bit_quantizer",
+        "target": "accelerate_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bnb8bit_quantizer",
+        "target": "bitsandbytes_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fp8_quantizer",
+        "target": "accelerate_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fp8_quantizer",
+        "target": "torch_lib",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fpquant_quantizer",
+        "target": "torch_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fpquant_quantizer",
+        "target": "qutlass_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fpquant_quantizer",
+        "target": "fp_quant_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "metal_quantizer",
+        "target": "torch_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "metal_quantizer",
+        "target": "kernels_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mxfp4_quantizer",
+        "target": "torch_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mxfp4_quantizer",
+        "target": "accelerate_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mxfp4_quantizer",
+        "target": "triton_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mxfp4_quantizer",
+        "target": "kernels_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "quark_quantizer",
+        "target": "quark_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sinq_quantizer",
+        "target": "torch_lib",
+        "label": "requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sinq_quantizer",
+        "target": "sinq_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "torchao_quantizer",
+        "target": "torchao_lib",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bitnet_quantizer",
+        "target": "weight_converter_util",
+        "label": "uses for deserialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bnb4bit_quantizer",
+        "target": "weight_converter_util",
+        "label": "uses for deserialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bnb8bit_quantizer",
+        "target": "weight_converter_util",
+        "label": "uses for deserialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fp8_quantizer",
+        "target": "weight_converter_util",
+        "label": "uses for deserialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fpquant_quantizer",
+        "target": "weight_converter_util",
+        "label": "uses for deserialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "metal_quantizer",
+        "target": "weight_converter_util",
+        "label": "uses for deserialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mxfp4_quantizer",
+        "target": "weight_converter_util",
+        "label": "uses for deserialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "quark_quantizer",
+        "target": "weight_converter_util",
+        "label": "uses for deserialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sinq_quantizer",
+        "target": "weight_converter_util",
+        "label": "uses for deserialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "torchao_quantizer",
+        "target": "weight_converter_util",
+        "label": "uses for deserialization",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "quantization_methods",
-        "label": "Quantization Methods",
+        "id": "core_components",
+        "label": "Core Quantization Components",
         "nodes": [
-          "bitnet_quantizer",
+          "hf_quantizer_base",
+          "weight_converter_util"
+        ],
+        "title": "Core Quantization Components",
+        "description": "Fundamental building blocks for all quantization processes, including the base quantizer interface and weight conversion utilities.",
+        "role": "surface"
+      },
+      {
+        "id": "bnb_quantizers",
+        "label": "BitsAndBytes Quantizers",
+        "nodes": [
           "bnb4bit_quantizer",
-          "bnb8bit_quantizer",
+          "bnb8bit_quantizer"
+        ],
+        "title": "BitsAndBytes Quantizers",
+        "description": "Quantization methods leveraging the BitsAndBytes library for 4-bit and 8-bit model compression.",
+        "role": "generative"
+      },
+      {
+        "id": "fp_quantizers",
+        "label": "Floating Point Quantizers",
+        "nodes": [
           "fp8_quantizer",
           "fpquant_quantizer",
+          "mxfp4_quantizer"
+        ],
+        "title": "Floating Point Quantizers",
+        "description": "Quantization techniques based on various floating-point formats, including FP8, FP-Quant, and MXFP4.",
+        "role": "generative"
+      },
+      {
+        "id": "specialized_quantizers",
+        "label": "Specialized Quantizers",
+        "nodes": [
+          "bitnet_quantizer",
           "metal_quantizer",
-          "mxfp4_quantizer",
           "quark_quantizer",
           "sinq_quantizer",
           "torchao_quantizer"
         ],
-        "title": "Quantization Implementations",
-        "description": "Provides various quantization algorithms and their specific configurations.",
-        "role": "surface"
-      },
-      {
-        "id": "model_interface",
-        "label": "Model Interface",
-        "nodes": [
-          "model_to_quantize"
-        ],
-        "title": "Model to Quantize",
-        "description": "The target model that undergoes quantization.",
-        "role": "data"
+        "title": "Specialized Quantizers",
+        "description": "A collection of unique quantization methods, often integrating with specific libraries or targeting particular hardware architectures.",
+        "role": "generative"
       }
     ]
   }

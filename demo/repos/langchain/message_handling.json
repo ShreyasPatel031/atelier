@@ -1,0 +1,553 @@
+{
+  "title": "LLM Message Handling & Translation",
+  "summary": "This module provides core functionalities for handling and translating messages between various LLM provider formats and LangChain's internal content block representation. It also includes utilities for message manipulation, filtering, and token-based truncation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "register_translators",
+        "label": "Register All Translators",
+        "type": "component",
+        "link": null,
+        "title": "Register Translators",
+        "description": "Initializes and registers all available message block translators for different LLM providers within the LangChain Core system."
+      },
+      {
+        "id": "translate_anthropic_msg",
+        "label": "Translate Anthropic Message",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Message Translation",
+        "description": "Converts a full Anthropic AI message into a list of standard LangChain content blocks."
+      },
+      {
+        "id": "translate_anthropic_chunk",
+        "label": "Translate Anthropic Chunk",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Chunk Translation",
+        "description": "Converts an Anthropic AI message chunk into a list of standard LangChain content blocks, typically used in streaming scenarios."
+      },
+      {
+        "id": "iter_anthropic_blocks",
+        "label": "Iterate Anthropic Blocks",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Block Iterator",
+        "description": "Internal iterator that processes raw Anthropic content blocks and yields them as standard LangChain content block types, handling tool calls, reasoning, and citations."
+      },
+      {
+        "id": "translate_bedrock_msg",
+        "label": "Translate Bedrock Message",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Message Translation",
+        "description": "Converts a full Bedrock AI message into a list of standard LangChain content blocks, with specific handling for Claude models."
+      },
+      {
+        "id": "translate_bedrock_chunk",
+        "label": "Translate Bedrock Chunk",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Chunk Translation",
+        "description": "Converts a Bedrock AI message chunk into a list of standard LangChain content blocks, primarily for streaming."
+      },
+      {
+        "id": "iter_bedrock_converse_blocks",
+        "label": "Iterate Bedrock Converse Blocks",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Converse Block Iterator",
+        "description": "Internal iterator that processes raw Bedrock Converse content blocks and yields them as standard LangChain content block types, including text, reasoning, and tool use."
+      },
+      {
+        "id": "translate_google_genai_msg",
+        "label": "Translate Google GenAI Message",
+        "type": "component",
+        "link": null,
+        "title": "Google GenAI Message Translation",
+        "description": "Converts a full Google GenAI message into a list of standard LangChain content blocks."
+      },
+      {
+        "id": "translate_google_genai_chunk",
+        "label": "Translate Google GenAI Chunk",
+        "type": "component",
+        "link": null,
+        "title": "Google GenAI Chunk Translation",
+        "description": "Converts a Google GenAI message chunk into a list of standard LangChain content blocks, for streaming."
+      },
+      {
+        "id": "translate_groq_msg",
+        "label": "Translate Groq Message",
+        "type": "component",
+        "link": null,
+        "title": "Groq Message Translation",
+        "description": "Converts a full Groq AI message into a list of standard LangChain content blocks."
+      },
+      {
+        "id": "translate_groq_chunk",
+        "label": "Translate Groq Chunk",
+        "type": "component",
+        "link": null,
+        "title": "Groq Chunk Translation",
+        "description": "Converts a Groq AI message chunk into a list of standard LangChain content blocks, for streaming."
+      },
+      {
+        "id": "translate_openai_msg",
+        "label": "Translate OpenAI Message",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Message Translation",
+        "description": "Converts a full OpenAI AI message into a list of standard LangChain content blocks, handling different content formats."
+      },
+      {
+        "id": "translate_openai_chunk",
+        "label": "Translate OpenAI Chunk",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Chunk Translation",
+        "description": "Converts an OpenAI AI message chunk into a list of standard LangChain content blocks, for streaming."
+      },
+      {
+        "id": "iter_openai_blocks",
+        "label": "Iterate OpenAI Blocks",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Block Iterator",
+        "description": "Internal iterator that processes raw OpenAI content blocks and yields them as standard LangChain content block types, including text, image generation, function calls, and server tool calls."
+      },
+      {
+        "id": "convert_openai_chat_input",
+        "label": "Convert OpenAI Chat Input",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Chat Input Conversion",
+        "description": "Converts OpenAI Chat Completions API input blocks (e.g., image_url, file) into standard LangChain v1 content blocks."
+      },
+      {
+        "id": "create_text_block",
+        "label": "Create Text Block",
+        "type": "component",
+        "link": null,
+        "title": "Text Content Block Factory",
+        "description": "Generates a standard 'TextContentBlock' with optional ID, annotations, and index."
+      },
+      {
+        "id": "create_image_block",
+        "label": "Create Image Block",
+        "type": "component",
+        "link": null,
+        "title": "Image Content Block Factory",
+        "description": "Generates an 'ImageContentBlock' from a URL, base64 data, or file ID, with optional MIME type and ID."
+      },
+      {
+        "id": "create_video_block",
+        "label": "Create Video Block",
+        "type": "component",
+        "link": null,
+        "title": "Video Content Block Factory",
+        "description": "Generates a 'VideoContentBlock' from a URL, base64 data, or file ID, with optional MIME type and ID."
+      },
+      {
+        "id": "create_audio_block",
+        "label": "Create Audio Block",
+        "type": "component",
+        "link": null,
+        "title": "Audio Content Block Factory",
+        "description": "Generates an 'AudioContentBlock' from a URL, base64 data, or file ID, with optional MIME type and ID."
+      },
+      {
+        "id": "create_file_block",
+        "label": "Create File Block",
+        "type": "component",
+        "link": null,
+        "title": "File Content Block Factory",
+        "description": "Generates a 'FileContentBlock' from a URL, base64 data, or file ID, with optional MIME type and ID."
+      },
+      {
+        "id": "create_plaintext_block",
+        "label": "Create Plaintext Block",
+        "type": "component",
+        "link": null,
+        "title": "Plaintext Content Block Factory",
+        "description": "Generates a 'PlainTextContentBlock' from text, URL, base64 data, or file ID, with optional title and context."
+      },
+      {
+        "id": "create_reasoning_block",
+        "label": "Create Reasoning Block",
+        "type": "component",
+        "link": null,
+        "title": "Reasoning Content Block Factory",
+        "description": "Generates a 'ReasoningContentBlock' to represent an AI's thought process or internal reasoning."
+      },
+      {
+        "id": "create_non_standard_block",
+        "label": "Create Non-Standard Block",
+        "type": "component",
+        "link": null,
+        "title": "Non-Standard Content Block Factory",
+        "description": "Generates a 'NonStandardContentBlock' to encapsulate provider-specific content that doesn't fit standard types."
+      },
+      {
+        "id": "approximate_token_counter",
+        "label": "Approximate Token Count",
+        "type": "component",
+        "link": null,
+        "title": "Message Token Counter",
+        "description": "Provides an approximate token count for a sequence of messages."
+      },
+      {
+        "id": "wrap_as_runnable",
+        "label": "Wrap Function as Runnable",
+        "type": "component",
+        "link": null,
+        "title": "Runnable Wrapper",
+        "description": "Wraps a given function to make it compatible with the LangChain Runnable interface, allowing it to be part of a chain."
+      },
+      {
+        "id": "merge_message_runs",
+        "label": "Merge Message Runs",
+        "type": "component",
+        "link": null,
+        "title": "Consecutive Message Merger",
+        "description": "Combines consecutive messages of the same type into a single message, useful for consolidating chat history or streaming outputs."
+      },
+      {
+        "id": "filter_messages",
+        "label": "Filter Messages",
+        "type": "component",
+        "link": null,
+        "title": "Message Filter",
+        "description": "Filters a list of messages based on various criteria such as name, type, ID, or tool call IDs."
+      },
+      {
+        "id": "truncate_last_messages",
+        "label": "Truncate Last Messages",
+        "type": "component",
+        "link": null,
+        "title": "Token-Based Message Truncation",
+        "description": "Truncates messages from the end of a sequence to fit within a specified token limit, optionally preserving system messages."
+      },
+      {
+        "id": "chat_prompt_value_concrete",
+        "label": "Chat Prompt Value",
+        "type": "component",
+        "link": null,
+        "title": "Concrete Chat Prompt Value",
+        "description": "A concrete representation of a chat prompt value, explicitly listing the types of messages it accepts, used for external schemas."
+      }
+    ],
+    "edges": [
+      {
+        "source": "register_translators",
+        "target": "translate_anthropic_msg",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "translate_anthropic_chunk",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "translate_bedrock_msg",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "translate_bedrock_chunk",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "translate_google_genai_msg",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "translate_google_genai_chunk",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "translate_groq_msg",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "translate_groq_chunk",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "translate_openai_msg",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "translate_openai_chunk",
+        "label": "registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "translate_anthropic_msg",
+        "target": "iter_anthropic_blocks",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "translate_anthropic_chunk",
+        "target": "iter_anthropic_blocks",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "iter_anthropic_blocks",
+        "target": "create_text_block",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "iter_anthropic_blocks",
+        "target": "create_reasoning_block",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "iter_anthropic_blocks",
+        "target": "create_non_standard_block",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "iter_bedrock_converse_blocks",
+        "target": "create_text_block",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "iter_bedrock_converse_blocks",
+        "target": "create_reasoning_block",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "iter_bedrock_converse_blocks",
+        "target": "create_non_standard_block",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "translate_openai_msg",
+        "target": "iter_openai_blocks",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "translate_openai_msg",
+        "target": "convert_openai_chat_input",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "translate_openai_chunk",
+        "target": "iter_openai_blocks",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "translate_openai_chunk",
+        "target": "convert_openai_chat_input",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "iter_openai_blocks",
+        "target": "create_text_block",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "iter_openai_blocks",
+        "target": "create_image_block",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "iter_openai_blocks",
+        "target": "create_non_standard_block",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "convert_openai_chat_input",
+        "target": "create_image_block",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "truncate_last_messages",
+        "target": "approximate_token_counter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "translator_registration",
+        "label": "Translator Registration",
+        "nodes": [
+          "register_translators"
+        ],
+        "title": "Translator Registration",
+        "description": "Manages the registration of all message block translators for various LLM providers.",
+        "role": "surface"
+      },
+      {
+        "id": "anthropic_translation",
+        "label": "Anthropic Message Translation",
+        "nodes": [
+          "translate_anthropic_msg",
+          "translate_anthropic_chunk",
+          "iter_anthropic_blocks"
+        ],
+        "title": "Anthropic Message Translation",
+        "description": "Handles the conversion of Anthropic-specific AI messages and chunks into a standardized LangChain content block format.",
+        "role": "generative"
+      },
+      {
+        "id": "bedrock_translation",
+        "label": "Bedrock Message Translation",
+        "nodes": [
+          "translate_bedrock_msg",
+          "translate_bedrock_chunk",
+          "iter_bedrock_converse_blocks"
+        ],
+        "title": "Bedrock Message Translation",
+        "description": "Manages the translation of Bedrock AI messages and chunks, including Bedrock Converse specific formats, into LangChain content blocks.",
+        "role": "generative"
+      },
+      {
+        "id": "google_genai_translation",
+        "label": "Google GenAI Message Translation",
+        "nodes": [
+          "translate_google_genai_msg",
+          "translate_google_genai_chunk"
+        ],
+        "title": "Google GenAI Message Translation",
+        "description": "Provides functions to translate Google GenAI messages and chunks into the standard LangChain content block format.",
+        "role": "generative"
+      },
+      {
+        "id": "groq_translation",
+        "label": "Groq Message Translation",
+        "nodes": [
+          "translate_groq_msg",
+          "translate_groq_chunk"
+        ],
+        "title": "Groq Message Translation",
+        "description": "Facilitates the conversion of Groq AI messages and chunks into LangChain's standardized content block representation.",
+        "role": "generative"
+      },
+      {
+        "id": "openai_translation",
+        "label": "OpenAI Message Translation",
+        "nodes": [
+          "translate_openai_msg",
+          "translate_openai_chunk",
+          "iter_openai_blocks",
+          "convert_openai_chat_input"
+        ],
+        "title": "OpenAI Message Translation",
+        "description": "Manages the translation of OpenAI AI messages and chunks, including specific chat completions input formats, into LangChain content blocks.",
+        "role": "generative"
+      },
+      {
+        "id": "basic_content_blocks",
+        "label": "Basic Content Block Factories",
+        "nodes": [
+          "create_text_block",
+          "create_plaintext_block",
+          "create_reasoning_block",
+          "create_non_standard_block"
+        ],
+        "title": "Basic Content Block Factories",
+        "description": "Functions for creating fundamental content blocks like text, plaintext, reasoning, and generic non-standard blocks.",
+        "role": "data"
+      },
+      {
+        "id": "media_content_blocks",
+        "label": "Media Content Block Factories",
+        "nodes": [
+          "create_image_block",
+          "create_video_block",
+          "create_audio_block",
+          "create_file_block"
+        ],
+        "title": "Media Content Block Factories",
+        "description": "Functions for creating content blocks representing various media types such as images, videos, audio, and general files.",
+        "role": "data"
+      },
+      {
+        "id": "message_utilities",
+        "label": "Message Utility Operations",
+        "nodes": [
+          "approximate_token_counter",
+          "wrap_as_runnable",
+          "merge_message_runs",
+          "filter_messages",
+          "truncate_last_messages"
+        ],
+        "title": "Message Utility Operations",
+        "description": "Provides utility functions for common message manipulations, including token counting, merging, filtering, and truncation.",
+        "role": "analytical"
+      },
+      {
+        "id": "message_data_structures",
+        "label": "Message Data Structures",
+        "nodes": [
+          "chat_prompt_value_concrete"
+        ],
+        "title": "Message Data Structures",
+        "description": "Defines concrete data structures for representing chat prompt values.",
+        "role": "data"
+      }
+    ]
+  }
+}

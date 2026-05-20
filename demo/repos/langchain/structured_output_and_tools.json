@@ -1,0 +1,500 @@
+{
+  "title": "Structured Output and Tool Chains",
+  "summary": "This module provides components for generating structured outputs from LLMs, extracting information, answering questions with citations, and interacting with APIs based on schemas and tools. It includes both modern runnable interfaces and legacy chain implementations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "structured_output_runnable",
+        "label": "Generate Structured Output (Runnable)",
+        "type": "component",
+        "link": null,
+        "title": "Generate Structured Output (Runnable)",
+        "description": "Creates a flexible runnable for extracting structured data from LLM responses using various OpenAI modes (functions, tools, JSON)."
+      },
+      {
+        "id": "structured_output_chain_legacy",
+        "label": "Generate Structured Output (Legacy Chain)",
+        "type": "component",
+        "link": null,
+        "title": "Generate Structured Output (Legacy Chain)",
+        "description": "[Legacy] Creates an LLMChain to extract structured output using OpenAI function calling based on a schema."
+      },
+      {
+        "id": "extraction_pydantic_tools",
+        "label": "Extract Data (Pydantic, OpenAI Tools)",
+        "type": "component",
+        "link": null,
+        "title": "Extract Data (Pydantic, OpenAI Tools)",
+        "description": "Creates a runnable to extract information from text using Pydantic schemas and OpenAI tool calling, returning structured data."
+      },
+      {
+        "id": "extraction_pydantic_functions",
+        "label": "Extract Data (Pydantic, OpenAI Functions)",
+        "type": "component",
+        "link": null,
+        "title": "Extract Data (Pydantic, OpenAI Functions)",
+        "description": "Creates a chain to extract information from text using Pydantic schemas and OpenAI function calling, returning structured data."
+      },
+      {
+        "id": "extraction_dict_functions",
+        "label": "Extract Data (Dict, OpenAI Functions)",
+        "type": "component",
+        "link": null,
+        "title": "Extract Data (Dict, OpenAI Functions)",
+        "description": "Creates a chain to extract information from text using dictionary schemas and OpenAI function calling, returning structured data."
+      },
+      {
+        "id": "tagging_pydantic_deprecated",
+        "label": "Tag Information (Pydantic, Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "Tag Information (Pydantic, Deprecated)",
+        "description": "[Deprecated] Creates a chain to tag information from text based on a Pydantic schema using OpenAI functions."
+      },
+      {
+        "id": "tagging_dict_deprecated",
+        "label": "Tag Information (Dict, Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "Tag Information (Dict, Deprecated)",
+        "description": "[Deprecated] Creates a chain to tag information from text based on a dictionary schema using OpenAI functions."
+      },
+      {
+        "id": "citation_qa_runnable",
+        "label": "Answer with Citations (Runnable)",
+        "type": "component",
+        "link": null,
+        "title": "Answer with Citations (Runnable)",
+        "description": "Creates a runnable for question answering that includes fuzzy-matched citations from provided context."
+      },
+      {
+        "id": "citation_qa_chain",
+        "label": "Answer with Citations (Chain)",
+        "type": "component",
+        "link": null,
+        "title": "Answer with Citations (Chain)",
+        "description": "Creates an LLMChain for question answering that includes fuzzy-matched citations from provided context."
+      },
+      {
+        "id": "qa_with_sources_chain",
+        "label": "QA with Sources Chain",
+        "type": "component",
+        "link": null,
+        "title": "QA with Sources Chain",
+        "description": "Creates a question answering chain that returns answers along with their supporting sources."
+      },
+      {
+        "id": "openapi_chain_deprecated",
+        "label": "Query API (OpenAPI, Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "Query API (OpenAPI, Deprecated)",
+        "description": "[Deprecated] Creates a chain to query an API based on an OpenAPI specification using an LLM for function calls."
+      },
+      {
+        "id": "api_request_executor",
+        "label": "Execute API Request",
+        "type": "component",
+        "link": null,
+        "title": "Execute API Request",
+        "description": "Internal helper function to execute HTTP requests based on parsed OpenAPI function arguments and parameters."
+      },
+      {
+        "id": "llm",
+        "label": "Language Model",
+        "type": "external",
+        "link": null,
+        "title": "Language Model",
+        "description": "An external language model (LLM) or chat model that processes prompts and generates responses."
+      },
+      {
+        "id": "prompt_template",
+        "label": "Prompt Template",
+        "type": "external",
+        "link": null,
+        "title": "Prompt Template",
+        "description": "A structured template used to construct prompts for the language model, guiding its response generation."
+      },
+      {
+        "id": "schema_definition",
+        "label": "Schema Definition",
+        "type": "external",
+        "link": null,
+        "title": "Schema Definition",
+        "description": "A Pydantic BaseModel or dictionary defining the desired structure and types of the output data."
+      },
+      {
+        "id": "runnable_interface",
+        "label": "Runnable Interface",
+        "type": "external",
+        "link": null,
+        "title": "Runnable Interface",
+        "description": "The core LangChain Runnable interface, enabling composable and streamable operations."
+      },
+      {
+        "id": "chain_interface",
+        "label": "Chain Interface",
+        "type": "external",
+        "link": null,
+        "title": "Chain Interface",
+        "description": "The core LangChain Chain interface, representing a sequence of operations or components."
+      },
+      {
+        "id": "openapi_spec",
+        "label": "OpenAPI Specification",
+        "type": "external",
+        "link": null,
+        "title": "OpenAPI Specification",
+        "description": "An external OpenAPI specification document (YAML/JSON) describing an API's endpoints and operations."
+      },
+      {
+        "id": "http_client",
+        "label": "HTTP Client",
+        "type": "external",
+        "link": null,
+        "title": "HTTP Client",
+        "description": "An external HTTP client library (e.g., `requests`) used for making network requests to APIs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "structured_output_runnable",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_output_runnable",
+        "target": "prompt_template",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_output_runnable",
+        "target": "schema_definition",
+        "label": "Defines output structure",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_output_runnable",
+        "target": "runnable_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_output_chain_legacy",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_output_chain_legacy",
+        "target": "prompt_template",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_output_chain_legacy",
+        "target": "schema_definition",
+        "label": "Defines output structure",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_output_chain_legacy",
+        "target": "chain_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_pydantic_tools",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_pydantic_tools",
+        "target": "schema_definition",
+        "label": "Defines extraction schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_pydantic_tools",
+        "target": "runnable_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_pydantic_functions",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_pydantic_functions",
+        "target": "prompt_template",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_pydantic_functions",
+        "target": "schema_definition",
+        "label": "Defines extraction schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_pydantic_functions",
+        "target": "chain_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_dict_functions",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_dict_functions",
+        "target": "prompt_template",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_dict_functions",
+        "target": "schema_definition",
+        "label": "Defines extraction schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extraction_dict_functions",
+        "target": "chain_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tagging_pydantic_deprecated",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tagging_pydantic_deprecated",
+        "target": "prompt_template",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tagging_pydantic_deprecated",
+        "target": "schema_definition",
+        "label": "Defines tagging schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tagging_pydantic_deprecated",
+        "target": "chain_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tagging_dict_deprecated",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tagging_dict_deprecated",
+        "target": "prompt_template",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tagging_dict_deprecated",
+        "target": "schema_definition",
+        "label": "Defines tagging schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tagging_dict_deprecated",
+        "target": "chain_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "citation_qa_runnable",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "citation_qa_runnable",
+        "target": "prompt_template",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "citation_qa_runnable",
+        "target": "runnable_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "citation_qa_chain",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "citation_qa_chain",
+        "target": "prompt_template",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "citation_qa_chain",
+        "target": "chain_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qa_with_sources_chain",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "qa_with_sources_chain",
+        "target": "chain_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openapi_chain_deprecated",
+        "target": "llm",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openapi_chain_deprecated",
+        "target": "prompt_template",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openapi_chain_deprecated",
+        "target": "openapi_spec",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openapi_chain_deprecated",
+        "target": "chain_interface",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openapi_chain_deprecated",
+        "target": "api_request_executor",
+        "label": "Delegates API calls to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_request_executor",
+        "target": "http_client",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "structured_output_generation_group",
+        "label": "Structured Output Generation",
+        "nodes": [
+          "structured_output_runnable",
+          "structured_output_chain_legacy"
+        ],
+        "title": "Structured Output Generation",
+        "description": "Components for generating structured outputs from language models, including modern runnable and legacy chain approaches.",
+        "role": "generative"
+      },
+      {
+        "id": "information_extraction_group",
+        "label": "Information Extraction",
+        "nodes": [
+          "extraction_pydantic_tools",
+          "extraction_pydantic_functions",
+          "extraction_dict_functions",
+          "tagging_pydantic_deprecated",
+          "tagging_dict_deprecated"
+        ],
+        "title": "Information Extraction",
+        "description": "Components designed to extract specific information or tags from unstructured text based on defined schemas.",
+        "role": "analytical"
+      },
+      {
+        "id": "qa_with_citations_group",
+        "label": "Question Answering with Citations",
+        "nodes": [
+          "citation_qa_runnable",
+          "citation_qa_chain",
+          "qa_with_sources_chain"
+        ],
+        "title": "Question Answering with Citations",
+        "description": "Components for generating answers to questions, ensuring they are supported by and linked to their original sources.",
+        "role": "generative"
+      },
+      {
+        "id": "api_interaction_group",
+        "label": "API Interaction",
+        "nodes": [
+          "openapi_chain_deprecated",
+          "api_request_executor"
+        ],
+        "title": "API Interaction",
+        "description": "Components for interacting with external APIs, primarily through OpenAPI specifications.",
+        "role": "surface"
+      }
+    ]
+  }
+}

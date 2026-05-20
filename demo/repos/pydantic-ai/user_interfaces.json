@@ -1,0 +1,281 @@
+{
+  "title": "User Interface Integration",
+  "summary": "This module provides adapters and endpoints for integrating Pydantic AI agents with various user interfaces, handling the transformation of UI requests into agent inputs and agent outputs into UI-specific streaming events. It supports protocols like AG-UI and Vercel AI SDK.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "http_request",
+        "label": "Receive HTTP Request",
+        "type": "external",
+        "link": null,
+        "title": "Incoming HTTP Request",
+        "description": "Represents an incoming HTTP request from a client, typically a web browser or a Vercel AI frontend, initiating an interaction."
+      },
+      {
+        "id": "http_response",
+        "label": "Send HTTP Response",
+        "type": "external",
+        "link": null,
+        "title": "Outgoing HTTP Response",
+        "description": "Represents an outgoing HTTP response sent back to the client, often containing streamed events or configuration data."
+      },
+      {
+        "id": "agent_core",
+        "label": "Agent Core Logic",
+        "type": "external",
+        "link": "agents_and_orchestration",
+        "title": "Pydantic AI Agent Execution",
+        "description": "The core Pydantic AI agent responsible for processing prompts, managing conversation state, and executing tools based on its configuration."
+      },
+      {
+        "id": "capabilities_tools",
+        "label": "Capabilities & Tools",
+        "type": "external",
+        "link": "capabilities_and_tools",
+        "title": "Agent Capabilities & Tools",
+        "description": "External capabilities and toolsets that the agent can utilize during its execution, providing extended functionality."
+      },
+      {
+        "id": "run_ag_ui_func",
+        "label": "Run AG-UI Agent",
+        "type": "component",
+        "link": null,
+        "title": "run_ag_ui",
+        "description": "The primary function to initiate an agent run specifically for the AG-UI frontend, handling input and streaming output events according to the AG-UI protocol."
+      },
+      {
+        "id": "ui_adapter_base_cls",
+        "label": "Base UI Adapter",
+        "type": "component",
+        "link": null,
+        "title": "UIAdapter",
+        "description": "An abstract base class providing common logic for adapting UI requests into agent inputs and transforming agent outputs into UI-specific events for various frontends."
+      },
+      {
+        "id": "ui_event_stream_cls",
+        "label": "UI Event Stream Transformer",
+        "type": "component",
+        "link": null,
+        "title": "UIEventStream",
+        "description": "A component responsible for transforming internal Pydantic AI events into a specific UI protocol's event format, managing event flow and encoding for streaming."
+      },
+      {
+        "id": "agui_frontend_toolset_cls",
+        "label": "AG-UI Frontend Toolset",
+        "type": "component",
+        "link": null,
+        "title": "_AGUIFrontendToolset",
+        "description": "Integrates tools defined by the AG-UI frontend, converting them into a format usable by the agent's tool ecosystem for execution."
+      },
+      {
+        "id": "vercel_ai_adapter_cls",
+        "label": "Vercel AI Adapter",
+        "type": "component",
+        "link": null,
+        "title": "VercelAIAdapter",
+        "description": "A concrete implementation of the UI adapter for integrating with the Vercel AI SDK protocol, handling message conversion, tool approval, and event streaming."
+      },
+      {
+        "id": "configure_frontend_func",
+        "label": "Configure Frontend",
+        "type": "component",
+        "link": null,
+        "title": "configure_frontend",
+        "description": "An API endpoint that dynamically provides the UI frontend with necessary configuration, such as available models and integrated tools."
+      },
+      {
+        "id": "post_chat_func",
+        "label": "Handle Vercel AI Chat",
+        "type": "component",
+        "link": null,
+        "title": "post_chat",
+        "description": "An API endpoint that receives chat requests from the Vercel AI frontend, orchestrates agent execution, and streams back protocol-specific responses."
+      },
+      {
+        "id": "vercel_req_data",
+        "label": "Vercel AI Request Data",
+        "type": "data",
+        "link": null,
+        "title": "Vercel AI Incoming Data Structures",
+        "description": "Pydantic models defining the structured data for incoming requests from the Vercel AI frontend, including user messages, tool inputs, and approval responses."
+      },
+      {
+        "id": "vercel_res_data",
+        "label": "Vercel AI Response Data",
+        "type": "data",
+        "link": null,
+        "title": "Vercel AI Outgoing Data Structures",
+        "description": "Pydantic models defining the structured streaming chunks and message metadata for responses sent to the Vercel AI frontend, such as text, sources, and tool states."
+      }
+    ],
+    "edges": [
+      {
+        "source": "http_request",
+        "target": "run_ag_ui_func",
+        "label": "Receives request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "http_request",
+        "target": "post_chat_func",
+        "label": "Receives request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "http_request",
+        "target": "configure_frontend_func",
+        "label": "Receives request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_ag_ui_func",
+        "target": "ui_adapter_base_cls",
+        "label": "Initializes adapter (AG-UI)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "post_chat_func",
+        "target": "vercel_ai_adapter_cls",
+        "label": "Initializes adapter",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_adapter_base_cls",
+        "target": "agent_core",
+        "label": "Transforms & runs agent",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core",
+        "target": "ui_event_stream_cls",
+        "label": "Streams native events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_event_stream_cls",
+        "target": "http_response",
+        "label": "Encodes & sends events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_adapter_base_cls",
+        "target": "ui_event_stream_cls",
+        "label": "Builds event transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agui_frontend_toolset_cls",
+        "target": "ui_adapter_base_cls",
+        "label": "Provides AG-UI tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_ai_adapter_cls",
+        "target": "vercel_req_data",
+        "label": "Parses incoming data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_req_data",
+        "target": "vercel_ai_adapter_cls",
+        "label": "Provides request data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_ai_adapter_cls",
+        "target": "vercel_res_data",
+        "label": "Generates outgoing data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_res_data",
+        "target": "ui_event_stream_cls",
+        "label": "Used for event encoding",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "configure_frontend_func",
+        "target": "http_response",
+        "label": "Returns config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_adapter_base_cls",
+        "target": "capabilities_tools",
+        "label": "Utilizes tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_adapter_base_cls",
+        "target": "agent_core",
+        "label": "Passes model/settings",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_endpoints",
+        "label": "User-Facing Endpoints",
+        "nodes": [
+          "run_ag_ui_func",
+          "configure_frontend_func",
+          "post_chat_func"
+        ],
+        "title": "User-Facing Endpoints",
+        "description": "These components serve as the direct entry points for user interactions with the AI system through various UIs.",
+        "role": "surface"
+      },
+      {
+        "id": "adapter_core",
+        "label": "UI Adapter Core",
+        "nodes": [
+          "ui_adapter_base_cls",
+          "ui_event_stream_cls"
+        ],
+        "title": "UI Adapter Core",
+        "description": "Core components responsible for abstracting UI interactions, handling request/response transformations, and managing event streaming.",
+        "role": "generative"
+      },
+      {
+        "id": "agui_integration",
+        "label": "AG-UI Integration",
+        "nodes": [
+          "agui_frontend_toolset_cls"
+        ],
+        "title": "AG-UI Integration",
+        "description": "Components specifically designed for integrating Pydantic AI agents with the AG-UI frontend protocol.",
+        "role": "generative"
+      },
+      {
+        "id": "vercel_ai_integration",
+        "label": "Vercel AI Integration",
+        "nodes": [
+          "vercel_ai_adapter_cls",
+          "vercel_req_data",
+          "vercel_res_data"
+        ],
+        "title": "Vercel AI Integration",
+        "description": "Components and data structures dedicated to integrating Pydantic AI agents with the Vercel AI SDK protocol.",
+        "role": "generative"
+      }
+    ]
+  }
+}

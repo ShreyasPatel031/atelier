@@ -1,116 +1,86 @@
 {
     "title": "Model Architectures Overview",
-    "summary": "This module encompasses the core definitions of various deep learning models, utilities for converting external model checkpoints, and foundational functions for model management and optimization within the Transformers library.",
+    "summary": "This module serves as the central repository for all model-related code, defining various neural network architectures, providing tools for converting models from external frameworks, and offering general utility functions for model management.",
     "diagram": {
-        "direction": "LR",
+        "direction": "TD",
         "nodes": [
             {
-                "id": "core_architectures",
+                "id": "core_models_node",
                 "label": "Core Model Architectures",
                 "type": "module",
                 "link": "core_models",
                 "title": "Core Model Architectures",
-                "description": "A comprehensive collection of diverse model architectures for various tasks like language, vision, and multimodal processing, ready for use."
+                "description": "Contains the definitions of various neural network architectures for diverse tasks, including language, vision, and multimodal processing."
             },
             {
-                "id": "model_conversion",
-                "label": "Model Checkpoint Conversion",
+                "id": "model_conversion_node",
+                "label": "Model Conversion Utilities",
                 "type": "module",
                 "link": "model_conversion",
-                "title": "Model Checkpoint Conversion",
-                "description": "Utilities to convert model checkpoints from external formats (e.g., TensorFlow, original PyTorch) into the Hugging Face Transformers format for compatibility."
+                "title": "Model Conversion Utilities",
+                "description": "Provides scripts and tools to convert model checkpoints from external frameworks and formats into Hugging Face Transformers compatible models."
             },
             {
-                "id": "model_utilities",
-                "label": "Model Utility Functions",
+                "id": "model_utilities_node",
+                "label": "General Model Utilities",
                 "type": "module",
                 "link": "model_utilities",
-                "title": "Model Utility Functions",
-                "description": "Essential functions for managing model weights, optimizing architectures through fusion, and defining interfaces for audio tokenization."
-            },
-            {
-                "id": "external_checkpoints",
-                "label": "External Model Checkpoints",
-                "type": "external",
-                "link": null,
-                "title": "External Model Checkpoints",
-                "description": "Pre-trained model weights and configurations originating from other deep learning frameworks or research implementations, requiring conversion."
-            },
-            {
-                "id": "data_processors",
-                "label": "Data Processing Modules",
-                "type": "external",
-                "link": "data_processing",
-                "title": "Data Processing Modules",
-                "description": "Components responsible for preparing raw data (text, audio, images) into a format suitable for model input, often using interfaces from this module."
+                "title": "General Model Utilities",
+                "description": "Offers foundational helper functions, base classes, and common components used across model definitions and conversion processes."
             }
         ],
         "edges": [
             {
-                "source": "external_checkpoints",
-                "target": "model_conversion",
-                "label": "Provides raw weights",
+                "source": "model_conversion_node",
+                "target": "core_models_node",
+                "label": "produces HF models",
                 "title": null,
                 "description": null
             },
             {
-                "source": "model_conversion",
-                "target": "core_architectures",
-                "label": "Registers converted models",
+                "source": "model_utilities_node",
+                "target": "core_models_node",
+                "label": "provides base components",
                 "title": null,
                 "description": null
             },
             {
-                "source": "model_utilities",
-                "target": "core_architectures",
-                "label": "Supports model operations",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "model_utilities",
-                "target": "model_conversion",
-                "label": "Defines conversion rules",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "data_processors",
-                "target": "model_utilities",
-                "label": "Implements utility interfaces",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "core_architectures",
-                "target": "data_processors",
-                "label": "Consumes processed data",
+                "source": "model_utilities_node",
+                "target": "model_conversion_node",
+                "label": "supports conversion logic",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "internal_modules",
-                "label": "Internal Sub-Modules",
+                "id": "model_definitions_group",
+                "label": "Model Definitions",
                 "nodes": [
-                    "core_architectures",
-                    "model_conversion",
-                    "model_utilities"
+                    "core_models_node"
                 ],
-                "title": "Internal Sub-Modules",
-                "description": "The primary components within the `model_architectures` module, providing model definitions, conversion tools, and general utilities.",
+                "title": "Model Definitions",
+                "description": "The collection of all implemented neural network architectures within the library.",
                 "role": null
             },
             {
-                "id": "external_interactions",
-                "label": "External Data & Systems",
+                "id": "model_lifecycle_group",
+                "label": "Model Lifecycle",
                 "nodes": [
-                    "external_checkpoints",
-                    "data_processors"
+                    "model_conversion_node"
                 ],
-                "title": "External Data & Systems",
-                "description": "Represents external sources of models and data processing functionalities that interact with this module.",
+                "title": "Model Lifecycle Management",
+                "description": "Components dedicated to managing models throughout their lifecycle, from external conversion to integration.",
+                "role": null
+            },
+            {
+                "id": "supporting_infra_group",
+                "label": "Supporting Infrastructure",
+                "nodes": [
+                    "model_utilities_node"
+                ],
+                "title": "Supporting Infrastructure",
+                "description": "Foundational utilities and common building blocks that support both model definitions and conversion processes.",
                 "role": null
             }
         ]

@@ -1,0 +1,240 @@
+{
+  "title": "A2A Utilities Module",
+  "summary": "This module provides essential utility functions and configuration models for Agent-to-Agent (A2A) communication, including agent card generation, signature verification, gRPC interception, and task management.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "get_default_update_config",
+        "label": "Get Default Update Config",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Default Update Configuration",
+        "description": "Retrieves the default configuration for A2A update mechanisms, typically returning a StreamingConfig instance for communication updates."
+      },
+      {
+        "id": "deprecated_a2a_config",
+        "label": "Deprecated A2A Configuration",
+        "type": "component",
+        "link": null,
+        "title": "A2A Protocol Configuration (Deprecated)",
+        "description": "Defines the configuration for Agent-to-Agent (A2A) protocol integration, including endpoint, authentication, timeouts, and update mechanisms. This class is deprecated and will be removed."
+      },
+      {
+        "id": "a2a_client_config",
+        "label": "A2A Client Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Remote A2A Agent Client Configuration",
+        "description": "Specifies the configuration for connecting to remote A2A agents, covering endpoint details, authentication, timeouts, response models, and supported extensions for client-side interactions."
+      },
+      {
+        "id": "agent_to_agent_card",
+        "label": "Convert Agent to AgentCard",
+        "type": "component",
+        "link": null,
+        "title": "Generate AgentCard from Agent",
+        "description": "Transforms an Agent instance into an AgentCard, which describes the agent's capabilities and metadata for A2A communication, enabling other agents to understand its functions."
+      },
+      {
+        "id": "crew_to_agent_card",
+        "label": "Convert Crew to AgentCard",
+        "type": "component",
+        "link": null,
+        "title": "Generate AgentCard from Crew",
+        "description": "Generates an AgentCard from a Crew instance, detailing the crew's collective capabilities, agents' roles, and available skills for A2A interactions, representing the crew as a single entity."
+      },
+      {
+        "id": "verify_agent_card_sig",
+        "label": "Verify AgentCard Signature",
+        "type": "component",
+        "link": null,
+        "title": "Validate AgentCard JWS Signature",
+        "description": "Validates the JSON Web Signature (JWS) of an AgentCard using a public key, ensuring its authenticity and integrity for secure A2A communication and trust establishment."
+      },
+      {
+        "id": "grpc_auth_plugin",
+        "label": "gRPC Auth Metadata Plugin",
+        "type": "component",
+        "link": null,
+        "title": "gRPC Authentication Metadata Injection",
+        "description": "A gRPC authentication metadata plugin that injects authentication headers into gRPC calls as metadata, facilitating secure communication between services."
+      },
+      {
+        "id": "grpc_unary_unary",
+        "label": "gRPC Unary-Unary Interceptor",
+        "type": "component",
+        "link": null,
+        "title": "Intercept Unary-Unary gRPC Calls",
+        "description": "Intercepts unary-unary gRPC calls to inject authentication or other metadata before the call proceeds, ensuring consistent metadata application for single request/response."
+      },
+      {
+        "id": "grpc_unary_stream",
+        "label": "gRPC Unary-Stream Interceptor",
+        "type": "component",
+        "link": null,
+        "title": "Intercept Unary-Stream gRPC Calls",
+        "description": "Intercepts unary-stream gRPC calls to inject authentication or other metadata, used for requests that send a single message and receive a stream of responses."
+      },
+      {
+        "id": "grpc_stream_unary",
+        "label": "gRPC Stream-Unary Interceptor",
+        "type": "component",
+        "link": null,
+        "title": "Intercept Stream-Unary gRPC Calls",
+        "description": "Intercepts stream-unary gRPC calls to inject authentication or other metadata, used for requests that send a stream of messages and receive a single response."
+      },
+      {
+        "id": "grpc_stream_stream",
+        "label": "gRPC Stream-Stream Interceptor",
+        "type": "component",
+        "link": null,
+        "title": "Intercept Stream-Stream gRPC Calls",
+        "description": "Intercepts stream-stream gRPC calls to inject authentication or other metadata, used for requests that send and receive streams of messages, enabling bidirectional communication."
+      },
+      {
+        "id": "configure_json_log",
+        "label": "Configure JSON Logging",
+        "type": "component",
+        "link": null,
+        "title": "Setup Structured JSON Logging",
+        "description": "Sets up structured JSON logging for the A2A module, replacing default handlers to provide machine-readable log output for easier analysis and integration with log management systems."
+      },
+      {
+        "id": "execute_with_ext",
+        "label": "Execute Task with Extensions",
+        "type": "component",
+        "link": null,
+        "title": "Run A2A Task with Extension Hooks",
+        "description": "Executes an A2A task for a given agent, integrating server-side extension hooks for custom processing, tool injection, or prompt augmentation, enhancing task flexibility."
+      },
+      {
+        "id": "watch_cancel",
+        "label": "Monitor Task Cancellation",
+        "type": "component",
+        "link": null,
+        "title": "Watch for A2A Task Cancellation",
+        "description": "Monitors for task cancellation events, either through a pub/sub mechanism (like Redis) or by polling, to gracefully terminate ongoing A2A tasks and manage resources efficiently."
+      }
+    ],
+    "edges": [
+      {
+        "source": "a2a_client_config",
+        "target": "get_default_update_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprecated_a2a_config",
+        "target": "get_default_update_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grpc_auth_plugin",
+        "target": "grpc_unary_unary",
+        "label": "provides context to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grpc_auth_plugin",
+        "target": "grpc_unary_stream",
+        "label": "provides context to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grpc_auth_plugin",
+        "target": "grpc_stream_unary",
+        "label": "provides context to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grpc_auth_plugin",
+        "target": "grpc_stream_stream",
+        "label": "provides context to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_to_agent_card",
+        "target": "verify_agent_card_sig",
+        "label": "generates card for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_to_agent_card",
+        "target": "verify_agent_card_sig",
+        "label": "generates card for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "config_mgmt",
+        "label": "A2A Configuration Management",
+        "nodes": [
+          "get_default_update_config",
+          "deprecated_a2a_config",
+          "a2a_client_config"
+        ],
+        "title": "A2A Configuration Management",
+        "description": "Components responsible for defining and managing the configuration settings for Agent-to-Agent communication, including client-side and deprecated server-side configurations.",
+        "role": "data"
+      },
+      {
+        "id": "agent_card_mgmt",
+        "label": "Agent Card & Identity",
+        "nodes": [
+          "agent_to_agent_card",
+          "crew_to_agent_card",
+          "verify_agent_card_sig"
+        ],
+        "title": "Agent Card Generation and Verification",
+        "description": "Functions for creating AgentCards from individual agents or crews, and for verifying the digital signatures of these cards to ensure authenticity and integrity in A2A interactions.",
+        "role": "data"
+      },
+      {
+        "id": "grpc_intercept",
+        "label": "gRPC Communication Interception",
+        "nodes": [
+          "grpc_auth_plugin",
+          "grpc_unary_unary",
+          "grpc_unary_stream",
+          "grpc_stream_unary",
+          "grpc_stream_stream"
+        ],
+        "title": "gRPC Interceptors and Authentication",
+        "description": "Components that provide gRPC client-side interception capabilities for various call types (unary, stream) and a plugin for injecting authentication metadata into gRPC requests.",
+        "role": "surface"
+      },
+      {
+        "id": "task_exec_monitor",
+        "label": "Task Execution & Monitoring",
+        "nodes": [
+          "execute_with_ext",
+          "watch_cancel"
+        ],
+        "title": "A2A Task Execution and Cancellation",
+        "description": "Utilities for executing A2A tasks with integrated extension hooks and for monitoring cancellation events, ensuring robust and manageable task lifecycles.",
+        "role": "generative"
+      },
+      {
+        "id": "sys_utilities",
+        "label": "System Utilities",
+        "nodes": [
+          "configure_json_log"
+        ],
+        "title": "A2A System Utilities",
+        "description": "General utility functions for the A2A module, such as configuring structured JSON logging for improved observability and debugging.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

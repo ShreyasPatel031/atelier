@@ -1,0 +1,942 @@
+{
+  "title": "AI Agent Framework",
+  "summary": "This module provides a comprehensive framework for building and managing AI agents, offering various agent types, orchestration mechanisms, and tools for integrating language models with external functionalities.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "AgentBase",
+        "label": "Base Agent Logic",
+        "type": "component",
+        "link": null,
+        "title": "Base Agent Logic",
+        "description": "Abstract base class for agents, defining core planning and execution flow for LLM-driven decision making."
+      },
+      {
+        "id": "LLMSingleActionAgent",
+        "label": "Single Action Agent",
+        "type": "component",
+        "link": null,
+        "title": "LLM Single Action Agent",
+        "description": "Base class for agents designed to perform a single action per turn, driven by an LLMChain and an output parser."
+      },
+      {
+        "id": "AgentTypeEnum",
+        "label": "Agent Type Definitions",
+        "type": "component",
+        "link": null,
+        "title": "Agent Type Enum",
+        "description": "Enumeration of various predefined agent types, guiding agent creation and behavior."
+      },
+      {
+        "id": "ConvertActionToMessages",
+        "label": "Convert Agent Action to Messages",
+        "type": "component",
+        "link": null,
+        "title": "Convert Agent Action to Messages",
+        "description": "Utility to transform an agent's action into a sequence of chat messages, often for history reconstruction."
+      },
+      {
+        "id": "CreateFunctionMessage",
+        "label": "Create Function Message",
+        "type": "component",
+        "link": null,
+        "title": "Create Function Message",
+        "description": "Generates a structured function message from an agent action and its observed result."
+      },
+      {
+        "id": "FormatToToolMessages",
+        "label": "Format to Tool Messages",
+        "type": "component",
+        "link": null,
+        "title": "Format to Tool Messages",
+        "description": "Converts intermediate agent steps (action, observation) into a list of `ToolMessage` objects for LLM input."
+      },
+      {
+        "id": "ConvoOutputParser",
+        "label": "Conversational Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Conversational Output Parser",
+        "description": "Parses LLM output for conversational agents, distinguishing between tool actions and final answers."
+      },
+      {
+        "id": "ReActJsonSingleInputOutputParser",
+        "label": "ReAct JSON Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "ReAct JSON Output Parser",
+        "description": "Parses ReAct-style LLM outputs with single JSON tool inputs."
+      },
+      {
+        "id": "StructuredChatOutputParserWithRetries",
+        "label": "Structured Chat Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Structured Chat Output Parser",
+        "description": "Parses structured chat agent output, incorporating retry logic for robust parsing."
+      },
+      {
+        "id": "OutputToolBinding",
+        "label": "Structured Output Tool Binding",
+        "type": "component",
+        "link": null,
+        "title": "Structured Output Tool Binding",
+        "description": "Manages metadata and parsing logic for structured outputs generated via tool calls within agents."
+      },
+      {
+        "id": "ProviderStrategyBinding",
+        "label": "Provider Strategy Binding",
+        "type": "component",
+        "link": null,
+        "title": "Provider Strategy Binding",
+        "description": "Handles metadata and parsing for native provider-enforced structured outputs from LLMs."
+      },
+      {
+        "id": "InitializeAgent",
+        "label": "Initialize Agent (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "Initialize Agent (Deprecated)",
+        "description": "Deprecated function for loading an agent executor given tools and an LLM. Use `create_agent` instead."
+      },
+      {
+        "id": "CreateAgentFactory",
+        "label": "Create Agent Graph (LangGraph)",
+        "type": "component",
+        "link": null,
+        "title": "Create Agent Graph (LangGraph)",
+        "description": "Modern factory function to build flexible agent graphs with middleware, structured output, and LangGraph integration."
+      },
+      {
+        "id": "ModelNode",
+        "label": "Model Node (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Model Node (Sync)",
+        "description": "Synchronous handler for model requests within the LangGraph agent factory, processing inputs and middleware."
+      },
+      {
+        "id": "AModelNode",
+        "label": "Model Node (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Model Node (Async)",
+        "description": "Asynchronous handler for model requests within the LangGraph agent factory, processing inputs and middleware."
+      },
+      {
+        "id": "ModelToTools",
+        "label": "Model to Tools Transition",
+        "type": "component",
+        "link": null,
+        "title": "Model to Tools Transition",
+        "description": "Determines the next step in the agent graph based on model output, triggering tool calls or signaling completion."
+      },
+      {
+        "id": "ChatAgentImpl",
+        "label": "Chat Agent Implementation",
+        "type": "component",
+        "link": null,
+        "title": "Chat Agent Implementation",
+        "description": "Agent optimized for chat models, using specific output parsing and prompt structures."
+      },
+      {
+        "id": "ConversationalAgentImpl",
+        "label": "Conversational Agent Implementation",
+        "type": "component",
+        "link": null,
+        "title": "Conversational Agent Implementation",
+        "description": "Agent designed to maintain conversation history while interacting with tools."
+      },
+      {
+        "id": "ConversationalChatAgentImpl",
+        "label": "Conversational Chat Agent Implementation",
+        "type": "component",
+        "link": null,
+        "title": "Conversational Chat Agent Implementation",
+        "description": "Chat-specific conversational agent, combining chat model interaction with tool use."
+      },
+      {
+        "id": "JsonChatAgentCreator",
+        "label": "JSON Chat Agent Creator",
+        "type": "component",
+        "link": null,
+        "title": "JSON Chat Agent Creator",
+        "description": "Function to construct a chat agent that uses JSON for its internal logic and tool calls."
+      },
+      {
+        "id": "OpenAIAssistantRunnableImpl",
+        "label": "OpenAI Assistant Runnable",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Assistant Runnable",
+        "description": "Runnable for interacting with OpenAI Assistants, supporting custom tools and agent execution."
+      },
+      {
+        "id": "OpenAIFunctionsAgentCreator",
+        "label": "OpenAI Functions Agent Creator",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Functions Agent Creator",
+        "description": "Function to build an agent that leverages OpenAI's native function calling capabilities."
+      },
+      {
+        "id": "OpenAIMultiFunctionsAgentImpl",
+        "label": "OpenAI Multi-Functions Agent",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Multi-Functions Agent",
+        "description": "Agent driven by OpenAI's API, capable of orchestrating multiple tool calls in a single turn."
+      },
+      {
+        "id": "OpenAIToolsAgentCreator",
+        "label": "OpenAI Tools Agent Creator",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Tools Agent Creator",
+        "description": "Function to create an agent that utilizes OpenAI's tool-calling features."
+      },
+      {
+        "id": "ReActAgentCreator",
+        "label": "ReAct Agent Creator",
+        "type": "component",
+        "link": null,
+        "title": "ReAct Agent Creator",
+        "description": "Function to construct an agent using the ReAct (Reasoning and Acting) prompting paradigm."
+      },
+      {
+        "id": "SelfAskWithSearchAgentImpl",
+        "label": "Self-Ask With Search Agent",
+        "type": "component",
+        "link": null,
+        "title": "Self-Ask With Search Agent",
+        "description": "Agent that breaks down complex questions into simpler ones using a search tool."
+      },
+      {
+        "id": "SelfAskWithSearchAgentCreator",
+        "label": "Self-Ask With Search Agent Creator",
+        "type": "component",
+        "link": null,
+        "title": "Self-Ask With Search Agent Creator",
+        "description": "Function to build an agent implementing the self-ask with search strategy."
+      },
+      {
+        "id": "StructuredChatAgentImpl",
+        "label": "Structured Chat Agent Implementation",
+        "type": "component",
+        "link": null,
+        "title": "Structured Chat Agent Implementation",
+        "description": "Agent for structured conversations, supporting tools with multiple inputs."
+      },
+      {
+        "id": "StructuredChatAgentCreator",
+        "label": "Structured Chat Agent Creator",
+        "type": "component",
+        "link": null,
+        "title": "Structured Chat Agent Creator",
+        "description": "Function to construct a structured chat agent, often using JSON for tool interactions."
+      },
+      {
+        "id": "ToolCallingAgentCreator",
+        "label": "Tool Calling Agent Creator",
+        "type": "component",
+        "link": null,
+        "title": "Tool Calling Agent Creator",
+        "description": "Function to create a generic agent that uses tools, requiring LLMs with `bind_tools` functionality."
+      },
+      {
+        "id": "XMLAgentImpl",
+        "label": "XML Agent Implementation",
+        "type": "component",
+        "link": null,
+        "title": "XML Agent Implementation",
+        "description": "Agent that uses XML tags to structure its reasoning and tool interactions."
+      },
+      {
+        "id": "XMLAgentCreator",
+        "label": "XML Agent Creator",
+        "type": "component",
+        "link": null,
+        "title": "XML Agent Creator",
+        "description": "Function to build an agent that processes and generates XML-formatted logic."
+      },
+      {
+        "id": "LLM",
+        "label": "Language Model",
+        "type": "external",
+        "link": "llm_interfaces",
+        "title": "Language Model",
+        "description": "Provides natural language understanding and generation capabilities to agents."
+      },
+      {
+        "id": "Tools",
+        "label": "External Tools",
+        "type": "external",
+        "link": "tools_and_output_parsers",
+        "title": "External Tools",
+        "description": "Functions or services that agents can call to perform specific tasks and retrieve information."
+      },
+      {
+        "id": "Prompts",
+        "label": "Prompt Templates",
+        "type": "external",
+        "link": "prompt_templates",
+        "title": "Prompt Templates",
+        "description": "Structured inputs that guide the LLM's behavior and reasoning within an agent."
+      },
+      {
+        "id": "AgentExecutor",
+        "label": "Agent Executor",
+        "type": "external",
+        "link": "chains",
+        "title": "Agent Executor",
+        "description": "Orchestrates the agent's execution loop, managing tool calls, intermediate steps, and termination."
+      },
+      {
+        "id": "Callbacks",
+        "label": "Callback Handlers",
+        "type": "external",
+        "link": "callbacks_and_history",
+        "title": "Callback Handlers",
+        "description": "Mechanism for monitoring and interacting with the agent's execution flow, e.g., for logging or tracing."
+      },
+      {
+        "id": "Memory",
+        "label": "Chat Memory",
+        "type": "external",
+        "link": "memory_and_middleware",
+        "title": "Chat Memory",
+        "description": "Stores and manages conversational history, allowing agents to maintain context across turns."
+      }
+    ],
+    "edges": [
+      {
+        "source": "LLM",
+        "target": "AgentBase",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Tools",
+        "target": "AgentBase",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Prompts",
+        "target": "AgentBase",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AgentBase",
+        "target": "ConvertActionToMessages",
+        "label": "Formats actions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AgentBase",
+        "target": "CreateFunctionMessage",
+        "label": "Creates function messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AgentBase",
+        "target": "LLMSingleActionAgent",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMSingleActionAgent",
+        "target": "AgentExecutor",
+        "label": "Can be executed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AgentBase",
+        "target": "AgentExecutor",
+        "label": "Can be executed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InitializeAgent",
+        "target": "AgentExecutor",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InitializeAgent",
+        "target": "AgentTypeEnum",
+        "label": "Selects type from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentFactory",
+        "target": "AgentExecutor",
+        "label": "Creates (modern)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentFactory",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentFactory",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentFactory",
+        "target": "Prompts",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentFactory",
+        "target": "OutputToolBinding",
+        "label": "Manages structured output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentFactory",
+        "target": "ProviderStrategyBinding",
+        "label": "Manages structured output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentFactory",
+        "target": "ModelNode",
+        "label": "Integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentFactory",
+        "target": "AModelNode",
+        "label": "Integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ModelNode",
+        "target": "ModelToTools",
+        "label": "Passes output to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AModelNode",
+        "target": "ModelToTools",
+        "label": "Passes output to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ModelToTools",
+        "target": "Tools",
+        "label": "Triggers tool calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ModelToTools",
+        "target": "AgentExecutor",
+        "label": "Signals completion to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatAgentImpl",
+        "target": "AgentBase",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatAgentImpl",
+        "target": "ConvoOutputParser",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationalAgentImpl",
+        "target": "AgentBase",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationalAgentImpl",
+        "target": "ConvoOutputParser",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationalChatAgentImpl",
+        "target": "AgentBase",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationalChatAgentImpl",
+        "target": "ConvoOutputParser",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JsonChatAgentCreator",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JsonChatAgentCreator",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JsonChatAgentCreator",
+        "target": "Prompts",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JsonChatAgentCreator",
+        "target": "ReActJsonSingleInputOutputParser",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIAssistantRunnableImpl",
+        "target": "AgentExecutor",
+        "label": "Can be executed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIAssistantRunnableImpl",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIFunctionsAgentCreator",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIFunctionsAgentCreator",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIFunctionsAgentCreator",
+        "target": "Prompts",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIMultiFunctionsAgentImpl",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIMultiFunctionsAgentImpl",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIMultiFunctionsAgentImpl",
+        "target": "Prompts",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIToolsAgentCreator",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIToolsAgentCreator",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIToolsAgentCreator",
+        "target": "Prompts",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ReActAgentCreator",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ReActAgentCreator",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ReActAgentCreator",
+        "target": "Prompts",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ReActAgentCreator",
+        "target": "ReActJsonSingleInputOutputParser",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfAskWithSearchAgentImpl",
+        "target": "AgentBase",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfAskWithSearchAgentImpl",
+        "target": "ReActJsonSingleInputOutputParser",
+        "label": "Uses (for self-ask)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfAskWithSearchAgentCreator",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfAskWithSearchAgentCreator",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfAskWithSearchAgentCreator",
+        "target": "Prompts",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredChatAgentImpl",
+        "target": "AgentBase",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredChatAgentImpl",
+        "target": "StructuredChatOutputParserWithRetries",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredChatAgentCreator",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredChatAgentCreator",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredChatAgentCreator",
+        "target": "Prompts",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredChatAgentCreator",
+        "target": "StructuredChatOutputParserWithRetries",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolCallingAgentCreator",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolCallingAgentCreator",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolCallingAgentCreator",
+        "target": "Prompts",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolCallingAgentCreator",
+        "target": "FormatToToolMessages",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "XMLAgentImpl",
+        "target": "AgentBase",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "XMLAgentImpl",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "XMLAgentImpl",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "XMLAgentCreator",
+        "target": "LLM",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "XMLAgentCreator",
+        "target": "Tools",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "XMLAgentCreator",
+        "target": "Prompts",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Callbacks",
+        "target": "AgentExecutor",
+        "label": "Monitors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Memory",
+        "target": "AgentExecutor",
+        "label": "Provides history to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Memory",
+        "target": "ConversationalAgentImpl",
+        "label": "Provides history to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Memory",
+        "target": "ConversationalChatAgentImpl",
+        "label": "Provides history to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Memory",
+        "target": "OpenAIAssistantRunnableImpl",
+        "label": "Manages thread history",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "AgentCoreAbstractions",
+        "label": "Agent Core Abstractions",
+        "nodes": [
+          "AgentBase",
+          "LLMSingleActionAgent",
+          "AgentTypeEnum"
+        ],
+        "title": "Agent Core Abstractions",
+        "description": "Fundamental abstract classes and definitions that form the basis of all agents.",
+        "role": "surface"
+      },
+      {
+        "id": "AgentCreationOrchestration",
+        "label": "Agent Creation & Orchestration",
+        "nodes": [
+          "CreateAgentFactory",
+          "InitializeAgent",
+          "AgentExecutor"
+        ],
+        "title": "Agent Creation & Orchestration",
+        "description": "Components responsible for initializing, configuring, and managing the execution flow of agents.",
+        "role": "generative"
+      },
+      {
+        "id": "ConversationalAgents",
+        "label": "Conversational Agents",
+        "nodes": [
+          "ChatAgentImpl",
+          "ConversationalAgentImpl",
+          "ConversationalChatAgentImpl",
+          "JsonChatAgentCreator"
+        ],
+        "title": "Conversational Agents",
+        "description": "Agents specifically designed to maintain dialogue context and interact conversationally.",
+        "role": "generative"
+      },
+      {
+        "id": "OpenAISpecificAgents",
+        "label": "OpenAI-Specific Agents",
+        "nodes": [
+          "OpenAIAssistantRunnableImpl",
+          "OpenAIFunctionsAgentCreator",
+          "OpenAIMultiFunctionsAgentImpl",
+          "OpenAIToolsAgentCreator"
+        ],
+        "title": "OpenAI-Specific Agents",
+        "description": "Agents leveraging unique features of OpenAI models, such as Assistants API or function/tool calling.",
+        "role": "generative"
+      },
+      {
+        "id": "ReActSelfAskAgents",
+        "label": "ReAct & Self-Ask Agents",
+        "nodes": [
+          "ReActAgentCreator",
+          "SelfAskWithSearchAgentImpl",
+          "SelfAskWithSearchAgentCreator"
+        ],
+        "title": "ReAct & Self-Ask Agents",
+        "description": "Agents implementing specific reasoning paradigms like ReAct (Reasoning and Acting) and Self-Ask with Search.",
+        "role": "generative"
+      },
+      {
+        "id": "StructuredXMLAgents",
+        "label": "Structured & XML Agents",
+        "nodes": [
+          "StructuredChatAgentImpl",
+          "StructuredChatAgentCreator",
+          "XMLAgentImpl",
+          "XMLAgentCreator"
+        ],
+        "title": "Structured & XML Agents",
+        "description": "Agents that utilize structured formats like JSON or XML for their internal logic and tool interactions.",
+        "role": "generative"
+      },
+      {
+        "id": "GenericToolCallingAgents",
+        "label": "Generic Tool-Calling Agents",
+        "nodes": [
+          "ToolCallingAgentCreator"
+        ],
+        "title": "Generic Tool-Calling Agents",
+        "description": "A general-purpose agent for interacting with tools, adaptable to various LLMs supporting tool binding.",
+        "role": "generative"
+      },
+      {
+        "id": "OutputProcessingFormatting",
+        "label": "Output Processing & Formatting",
+        "nodes": [
+          "ConvoOutputParser",
+          "ReActJsonSingleInputOutputParser",
+          "StructuredChatOutputParserWithRetries",
+          "FormatToToolMessages",
+          "ConvertActionToMessages",
+          "CreateFunctionMessage",
+          "OutputToolBinding",
+          "ProviderStrategyBinding"
+        ],
+        "title": "Output Processing & Formatting",
+        "description": "Components dedicated to parsing LLM outputs, formatting intermediate steps, and handling structured responses.",
+        "role": "analytical"
+      },
+      {
+        "id": "LangGraphIntegration",
+        "label": "LangGraph Integration",
+        "nodes": [
+          "ModelNode",
+          "AModelNode",
+          "ModelToTools"
+        ],
+        "title": "LangGraph Integration",
+        "description": "Internal components facilitating the integration and execution of agents within the LangGraph framework.",
+        "role": "data"
+      }
+    ]
+  }
+}

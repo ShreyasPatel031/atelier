@@ -1,0 +1,29 @@
+{
+    "title": "Segmentation Models",
+    "summary": "Provides a comprehensive collection of models for various image and video segmentation tasks, including instance, panoptic, and universal segmentation.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "image_segmentation",
+                "label": "Image Segmentation Models",
+                "type": "module",
+                "link": "image_segmentation",
+                "title": "Image Segmentation Models",
+                "description": "Contains models specialized in segmenting objects and regions within static images, covering instance, panoptic, and universal segmentation tasks."
+            },
+            {
+                "id": "video_segmentation",
+                "label": "Video Segmentation Models",
+                "type": "module",
+                "link": "video_segmentation",
+                "title": "Video Segmentation Models",
+                "description": "Houses models designed for advanced video segmentation, including object tracking and universal segmentation across video frames."
+            }
+        ],
+        "edges": [
+            {"source": "image_segmentation", "target": "video_segmentation", "label": "provides features for tracking"}
+        ],
+        "groups": []
+    }
+}
