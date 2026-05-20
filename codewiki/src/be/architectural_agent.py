@@ -22,8 +22,13 @@ from typing import Dict, Any, Optional, List
 
 from pydantic_core import to_jsonable_python
 from pydantic_ai import Agent, Tool
-from pydantic_ai import ModelMessagesTypeAdapter
-from pydantic_ai.messages import ModelRequest, ModelResponse, UserPromptPart, TextPart
+from pydantic_ai.messages import (
+    ModelMessagesTypeAdapter,
+    ModelRequest,
+    ModelResponse,
+    UserPromptPart,
+    TextPart,
+)
 
 from codewiki.src.file_manager import file_manager
 

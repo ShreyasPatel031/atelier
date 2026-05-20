@@ -2,7 +2,6 @@
   "version": 2,
   "buildCommand": "node demo/scripts/generate-repos-index.js",
   "outputDirectory": "demo",
-  "installCommand": "pip install -r api/requirements.txt",
   "functions": {
     "api/chat.py": {
       "maxDuration": 60,
