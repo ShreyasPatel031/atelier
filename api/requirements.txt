@@ -1,5 +1,5 @@
 # Vercel serverless deps for POST /api/arch-agent/chat (keep small; full repo pins are in requirements.txt).
-pydantic-ai[google]==1.0.6
+pydantic-ai-slim[google]==1.0.6
 pydantic>=2.10,<3
 google-genai>=1.36.0
 google-auth>=2.40.0
