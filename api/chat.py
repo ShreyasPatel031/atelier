@@ -221,6 +221,6 @@ class handler(BaseHTTPRequestHandler):
             err = result.get("error", "error")
             trace = result.get("trace")
             body = {"detail": err}
-            if trace and os.getenv("VERCEL_ENV") == "development":
-                body["trace"] = trace
+            if trace:
+                body["trace"] = trace[-4000:] if len(trace) > 4000 else trace
             _json_response(self, st if st >= 400 else 500, body)
