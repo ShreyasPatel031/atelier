@@ -6744,12 +6744,14 @@
                 .join(' ');
             const svgUrl = origin + '/repos/' + encodeURIComponent(id) + '/architecture.svg';
             const viewerUrl = origin + '/?repo=' + encodeURIComponent(id);
+            // GitHub strips target="_blank" on README HTML; open-viewer.html uses window.open on click-through.
+            const launchUrl =
+                origin + '/open-viewer.html?repo=' + encodeURIComponent(id);
             const alt = label + ' architecture';
-            // GitHub README: markdown links open same tab; HTML target="_blank" opens a new tab.
             return (
                 '<a href="' +
-                viewerUrl +
-                '" target="_blank" rel="noopener noreferrer">' +
+                launchUrl +
+                '">' +
                 '<img src="' +
                 svgUrl +
                 '" alt="' +

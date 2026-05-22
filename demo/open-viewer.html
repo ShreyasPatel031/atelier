@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open architecture viewer</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 2rem;
+            color: #0f172a;
+            line-height: 1.5;
+        }
+        a.btn {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.6rem 1rem;
+            background: #2563eb;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        a.secondary {
+            color: #475569;
+            margin-left: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <p id="status">Opening interactive viewer in a new tab…</p>
+    <p>
+        <a id="openBtn" class="btn" href="#">Open viewer (new tab)</a>
+        <a id="sameTab" class="secondary" href="#">Open in this tab</a>
+    </p>
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var repo = params.get('repo') || 'persona-selection-model';
+            var viewer =
+                window.location.origin.replace(/\/$/, '') +
+                '/?repo=' +
+                encodeURIComponent(repo);
+
+            var status = document.getElementById('status');
+            var openBtn = document.getElementById('openBtn');
+            var sameTab = document.getElementById('sameTab');
+
+            openBtn.href = viewer;
+            openBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                window.open(viewer, '_blank', 'noopener,noreferrer');
+            });
+
+            sameTab.href = viewer;
+
+            var popup = window.open(viewer, '_blank', 'noopener,noreferrer');
+            if (popup && !popup.closed) {
+                status.textContent =
+                    'Viewer opened in a new tab. You can close this page.';
+            } else {
+                status.textContent =
+                    'Your browser blocked the popup. Click the blue button to open the viewer in a new tab.';
+            }
+        })();
+    </script>
+</body>
+</html>
