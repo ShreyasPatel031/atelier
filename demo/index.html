@@ -6743,11 +6743,11 @@
                 .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ''))
                 .join(' ');
             const svgUrl = origin + '/repos/' + encodeURIComponent(id) + '/architecture.svg';
-            const launchUrl = origin + '/open-viewer.html?repo=' + encodeURIComponent(id);
+            const viewerUrl = origin + '/?repo=' + encodeURIComponent(id);
             const alt = label + ' architecture';
             return (
                 '<p align="center"><a href="' +
-                launchUrl +
+                viewerUrl +
                 '"><img src="' +
                 svgUrl +
                 '" alt="' +
