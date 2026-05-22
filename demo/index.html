@@ -6744,7 +6744,18 @@
                 .join(' ');
             const svgUrl = origin + '/repos/' + encodeURIComponent(id) + '/architecture.svg';
             const viewerUrl = origin + '/?repo=' + encodeURIComponent(id);
-            return '[![' + label + ' architecture](' + svgUrl + ')](' + viewerUrl + ')';
+            const alt = label + ' architecture';
+            // GitHub README: markdown links open same tab; HTML target="_blank" opens a new tab.
+            return (
+                '<a href="' +
+                viewerUrl +
+                '" target="_blank" rel="noopener noreferrer">' +
+                '<img src="' +
+                svgUrl +
+                '" alt="' +
+                alt +
+                '" /></a>'
+            );
         }
 
         async function copyReadmeEmbedToClipboard() {
