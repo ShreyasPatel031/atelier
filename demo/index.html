@@ -6743,19 +6743,16 @@
                 .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ''))
                 .join(' ');
             const svgUrl = origin + '/repos/' + encodeURIComponent(id) + '/architecture.svg';
-            const viewerUrl = origin + '/?repo=' + encodeURIComponent(id);
+            const launchUrl = origin + '/open-viewer.html?repo=' + encodeURIComponent(id);
             const alt = label + ' architecture';
-            // GitHub strips target="_blank"; only ⌘/Ctrl+click on the link opens a new tab and keeps README open.
             return (
-                '<p align="center">' +
-                '<a href="' +
-                viewerUrl +
+                '<p align="center"><a href="' +
+                launchUrl +
                 '"><img src="' +
                 svgUrl +
                 '" alt="' +
                 alt +
-                '" /></a></p>' +
-                '<p align="center"><sub>⌘-click or Ctrl+click the diagram to open the interactive viewer in a new tab.</sub></p>'
+                '" /></a></p>'
             );
         }
 

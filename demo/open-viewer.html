@@ -2,16 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0;url=/?repo=persona-selection-model" />
-    <title>Redirecting…</title>
-    <script>
-        (function () {
-            var repo = new URLSearchParams(location.search).get('repo') || 'persona-selection-model';
-            location.replace('/?repo=' + encodeURIComponent(repo));
-        })();
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open Architecture Viewer</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+        .card {
+            text-align: center;
+            padding: 2.5rem 3rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.04);
+            max-width: 420px;
+        }
+        .card h1 { font-size: 1.15rem; font-weight: 600; margin-bottom: .5rem; }
+        .card p { font-size: .9rem; color: #475569; margin-bottom: 1.25rem; line-height: 1.5; }
+        .btn {
+            display: inline-block;
+            padding: .7rem 1.6rem;
+            background: #2563eb;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .btn:hover, .btn:focus-visible { background: #1d4ed8; }
+    </style>
 </head>
 <body>
-    <p><a href="/?repo=persona-selection-model">Continue to interactive viewer</a></p>
+    <div class="card">
+        <h1 id="title">Architecture Viewer</h1>
+        <p>Opens the interactive diagram in a <strong>new tab</strong> and returns you to GitHub.</p>
+        <button id="openBtn" class="btn" autofocus>Open Viewer →</button>
+    </div>
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            var repo = params.get('repo') || 'persona-selection-model';
+            var label = repo.replace(/[-_]+/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+            var viewer = window.location.origin.replace(/\/$/, '') + '/?repo=' + encodeURIComponent(repo);
+
+            document.getElementById('title').textContent = label;
+
+            document.getElementById('openBtn').addEventListener('click', function () {
+                window.open(viewer, '_blank', 'noopener,noreferrer');
+                var ref = document.referrer;
+                if (ref && ref.indexOf('github.com') !== -1) {
+                    window.location.replace(ref);
+                } else {
+                    history.back();
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
