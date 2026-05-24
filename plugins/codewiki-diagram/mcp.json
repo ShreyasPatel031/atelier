@@ -1,0 +1,13 @@
+{
+  "$schema": "https://cursor.com/schemas/mcp.json",
+  "mcpServers": {
+    "codewiki-diagram": {
+      "command": "npx",
+      "args": ["-y", "@atelier-inc/codewiki-diagram-mcp"],
+      "env": {
+        "CODEWIKI_DATA_ORIGIN": "https://app.atelier-inc.net"
+      },
+      "description": "Read architecture diagrams from CodeWiki — overview, modules, and drill-down views for any indexed repository"
+    }
+  }
+}

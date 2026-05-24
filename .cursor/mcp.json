@@ -9,6 +9,14 @@
         "CODEWIKI_MCP_PORT": "18765",
         "PYTHONWARNINGS": "ignore::FutureWarning"
       }
+    },
+    "codewiki-diagram": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${workspaceFolder}/packages/codewiki-diagram-mcp/dist/index.js"],
+      "env": {
+        "CODEWIKI_DATA_ORIGIN": "https://app.atelier-inc.net"
+      }
     }
   }
 }

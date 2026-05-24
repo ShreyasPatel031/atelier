@@ -1,0 +1,41 @@
+{
+  "name": "@atelier-inc/codewiki-diagram-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for browsing CodeWiki architecture diagrams — fetches hosted diagram data, zero local setup required",
+  "type": "module",
+  "bin": {
+    "codewiki-diagram-mcp": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "mcp",
+    "cursor",
+    "architecture",
+    "diagram",
+    "codewiki"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/atelier-inc/atelier"
+  }
+}

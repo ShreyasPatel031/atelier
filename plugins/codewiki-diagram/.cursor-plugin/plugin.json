@@ -1,0 +1,5 @@
+{
+  "name": "codewiki-diagram",
+  "description": "Browse and query architecture diagrams for open-source repositories — powered by CodeWiki",
+  "mcpServers": "./mcp.json"
+}

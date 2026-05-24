@@ -6827,9 +6827,18 @@
             return origin + '/?repo=' + encodeURIComponent(id);
         }
 
+        function getCursorMcpInstallDeeplink() {
+            var config = {
+                command: 'npx',
+                args: ['-y', '@atelier-inc/codewiki-diagram-mcp'],
+                env: { CODEWIKI_DATA_ORIGIN: 'https://app.atelier-inc.net' }
+            };
+            var b64 = btoa(JSON.stringify(config));
+            return 'cursor://anysphere.cursor-deeplink/mcp/install?name=codewiki-diagram&config=' + b64;
+        }
+
         function getCursorOpenUrl(repoId) {
-            var url = getViewerUrl(repoId);
-            return 'https://cursor.com/link/prompt?text=' + encodeURIComponent(url);
+            return getCursorMcpInstallDeeplink();
         }
 
         function showEmbedActionToast(message) {
@@ -6853,9 +6862,9 @@
         }
 
         function openDiagramInCursor() {
-            var deeplink = getCursorOpenUrl();
-            showEmbedActionToast('Opening in Cursor…');
-            window.open(deeplink, '_blank', 'noopener,noreferrer');
+            var mcpLink = getCursorMcpInstallDeeplink();
+            showEmbedActionToast('Installing MCP in Cursor…');
+            window.location.href = mcpLink;
         }
 
         window.formatDiagramSelectionForCursorPaste = formatDiagramSelectionForCursorPaste;
@@ -6864,6 +6873,7 @@
         window.copyReadmeEmbedToClipboard = copyReadmeEmbedToClipboard;
         window.getViewerUrl = getViewerUrl;
         window.getCursorOpenUrl = getCursorOpenUrl;
+        window.getCursorMcpInstallDeeplink = getCursorMcpInstallDeeplink;
         window.openDiagramInCursor = openDiagramInCursor;
         window.showEmbedActionToast = showEmbedActionToast;
 

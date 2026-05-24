@@ -1,0 +1,23 @@
+---
+description: How to use the CodeWiki diagram MCP tools and viewer
+alwaysApply: true
+---
+
+# CodeWiki Architecture Diagrams
+
+You have access to a `codewiki-diagram` MCP server with two tools:
+
+- **list_repos** — returns all available architecture diagram repositories with their viewer URLs.
+- **get_diagram** — reads diagram data for a repository.
+  - `target="overview"` (default): full top-level architecture diagram.
+  - `target="__inventory__"`: compact summary of all modules.
+  - `target="{module_id}"`: drill-down into a specific module.
+
+When the user asks to open or view a diagram, call `open_viewer(repo_id)` first.
+It starts a local server and attempts to open the viewer in Cursor automatically.
+If auto-open fails, open the returned `url` in Cursor Simple Browser manually.
+
+When answering architecture questions:
+1. Call `get_diagram` with `target="__inventory__"` first to understand the repo structure.
+2. Drill into specific modules with `get_diagram(repo_id, target="{module_id}")`.
+3. Reference the viewer URL so the user can explore visually.
