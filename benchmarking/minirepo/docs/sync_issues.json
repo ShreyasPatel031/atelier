@@ -1,0 +1,174 @@
+{
+  "docs_dir": "/Users/shreyaspatel/atelier/benchmarking/minirepo/docs",
+  "timestamp": "2026-05-24T18:15:51.398836",
+  "summary": {
+    "total_modules": 9,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "total_issues": 0,
+    "errors": 0,
+    "warnings": 0,
+    "files_created": 0,
+    "metadata_added": 0,
+    "diagrams_added": 0
+  },
+  "metrics": {
+    "presync_audit": {
+      "modules_total": 9,
+      "missing_md": 9,
+      "missing_title": 0,
+      "missing_description": 0,
+      "leaf_missing_diagram": 0,
+      "parent_missing_diagram_with_children": 0,
+      "diagram_nodes_with_empty_label": 0,
+      "diagram_edges_unknown_endpoint": 0,
+      "children_missing_from_diagram_nodes": 5,
+      "parent_diagram_gaps_to_inject": 5,
+      "mermaid_fence_blocks_total": 0,
+      "placeholder_md_files": 0
+    },
+    "diagram_ir_audit": {
+      "module_diagrams_total": 9,
+      "overview_has_diagram_json": true,
+      "overview_mermaid_parse_ok": true,
+      "overview_r1_reason": null,
+      "by_code": {},
+      "samples_by_code": {}
+    },
+    "mermaid_validation": {
+      "blocks_checked": 0,
+      "blocks_invalid": 0,
+      "validation_ms": 0.0625,
+      "error_type_histogram": {},
+      "stage46_fixes_applied": 0,
+      "postfix_blocks_invalid": 0,
+      "postfix_error_type_histogram": {}
+    },
+    "postsync_audit": {
+      "modules_total": 9,
+      "missing_md": 9,
+      "missing_title": 0,
+      "missing_description": 0,
+      "leaf_missing_diagram": 0,
+      "parent_missing_diagram_with_children": 0,
+      "diagram_nodes_with_empty_label": 0,
+      "diagram_edges_unknown_endpoint": 0,
+      "children_missing_from_diagram_nodes": 0,
+      "parent_diagram_gaps_to_inject": 0,
+      "mermaid_fence_blocks_total": 0,
+      "placeholder_md_files": 0
+    },
+    "delta_presync_minus_postsync": {
+      "children_missing_from_diagram_nodes": 5.0,
+      "placeholder_md_files": 0.0,
+      "missing_title": 0.0,
+      "diagram_nodes_with_empty_label": 0.0,
+      "modules_total": 0.0,
+      "leaf_missing_diagram": 0.0,
+      "missing_md": 0.0,
+      "parent_missing_diagram_with_children": 0.0,
+      "diagram_edges_unknown_endpoint": 0.0,
+      "parent_diagram_gaps_to_inject": 5.0,
+      "missing_description": 0.0,
+      "mermaid_fence_blocks_total": 0.0
+    },
+    "fixes_applied_counts": {
+      "metadata_field_updates": 0,
+      "placeholder_md_files_created": 0,
+      "leaf_diagrams_added": 0,
+      "parent_diagram_child_nodes_injected": 5,
+      "overview_md_created": 0,
+      "mermaid_stage46_fixes": 0
+    },
+    "measurement_summary": {
+      "1_stage3_defects_before_stage45": {
+        "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
+        "presync_audit": {
+          "modules_total": 9,
+          "missing_md": 9,
+          "missing_title": 0,
+          "missing_description": 0,
+          "leaf_missing_diagram": 0,
+          "parent_missing_diagram_with_children": 0,
+          "diagram_nodes_with_empty_label": 0,
+          "diagram_edges_unknown_endpoint": 0,
+          "children_missing_from_diagram_nodes": 5,
+          "parent_diagram_gaps_to_inject": 5,
+          "mermaid_fence_blocks_total": 0,
+          "placeholder_md_files": 0
+        }
+      },
+      "1b_stage45_fixes_applied_counters": {
+        "metadata_field_updates": 0,
+        "placeholder_md_files_created": 0,
+        "leaf_diagrams_added": 0,
+        "parent_diagram_child_nodes_injected": 5,
+        "overview_md_created": 0,
+        "mermaid_stage46_fixes": 0
+      },
+      "1c_residual_after_stage45": {
+        "postsync_audit": {
+          "modules_total": 9,
+          "missing_md": 9,
+          "missing_title": 0,
+          "missing_description": 0,
+          "leaf_missing_diagram": 0,
+          "parent_missing_diagram_with_children": 0,
+          "diagram_nodes_with_empty_label": 0,
+          "diagram_edges_unknown_endpoint": 0,
+          "children_missing_from_diagram_nodes": 0,
+          "parent_diagram_gaps_to_inject": 0,
+          "mermaid_fence_blocks_total": 0,
+          "placeholder_md_files": 0
+        }
+      },
+      "1d_reduction_delta_presync_minus_postsync": {
+        "note": "Positive number = fewer problems after sync for that metric",
+        "delta": {
+          "children_missing_from_diagram_nodes": 5.0,
+          "placeholder_md_files": 0.0,
+          "missing_title": 0.0,
+          "diagram_nodes_with_empty_label": 0.0,
+          "modules_total": 0.0,
+          "leaf_missing_diagram": 0.0,
+          "missing_md": 0.0,
+          "parent_missing_diagram_with_children": 0.0,
+          "diagram_edges_unknown_endpoint": 0.0,
+          "parent_diagram_gaps_to_inject": 5.0,
+          "missing_description": 0.0,
+          "mermaid_fence_blocks_total": 0.0
+        }
+      },
+      "1e_issues_logged_this_run_by_type": {
+        "all": {}
+      },
+      "2_mermaid": {
+        "blocks_checked": 0,
+        "blocks_invalid_before_stage46": 0,
+        "blocks_invalid_after_stage46": 0,
+        "validation_ms": 0.0625,
+        "error_type_histogram": {},
+        "error_type_histogram_after_stage46": {},
+        "stage46_fixes_applied": 0,
+        "validator": "mermaid_validator (Mermaid.js 11.9 via Node, same as viewer)"
+      },
+      "3_diagram_ir": {
+        "audit": {
+          "module_diagrams_total": 9,
+          "overview_has_diagram_json": true,
+          "overview_mermaid_parse_ok": true,
+          "overview_r1_reason": null,
+          "by_code": {},
+          "samples_by_code": {}
+        },
+        "by_code": {}
+      }
+    }
+  },
+  "issues_by_type": {},
+  "issues": [],
+  "files_created": [],
+  "metadata_added": [],
+  "diagrams_added": []
+}

@@ -1,101 +1,127 @@
 {
     "core_primitives": {
-        "path": "dspy/primitives, dspy/signatures, dspy/utils, dspy/streaming",
+        "path": "dspy/primitives",
         "components": [],
         "children": {
-            "base_modules_and_signatures": {
-                "path": "dspy/primitives, dspy/signatures",
+            "base_modules": {
+                "path": "dspy/primitives/module.py",
                 "components": [
                     "dspy.primitives.base_module.BaseModule",
                     "dspy.primitives.module.Module",
-                    "dspy.signatures.field.new_to_old_field",
-                    "dspy.signatures.field.OldInputField",
-                    "dspy.signatures.field.OldOutputField",
-                    "dspy.signatures.signature.SignatureMeta"
-                ]
-            },
-            "utilities": {
-                "path": "dspy/utils",
-                "components": [
-                    "dspy.utils.__init__.download",
-                    "dspy.utils.annotation.decorator",
-                    "dspy.utils.asyncify.wrapped_program",
-                    "dspy.utils.asyncify.async_program",
-                    "dspy.utils.asyncify.get_limiter",
-                    "dspy.utils.callback.async_wrapper",
-                    "dspy.utils.callback.sync_wrapper",
-                    "dspy.utils.dummies.DummyLM",
-                    "dspy.utils.dummies.inner",
-                    "dspy.utils.syncify.SyncWrapper"
-                ]
-            },
-            "streaming": {
-                "path": "dspy/streaming",
-                "components": [
-                    "dspy.streaming.messages.run_in_new_loop",
-                    "dspy.streaming.streamify.streamify",
-                    "dspy.streaming.streamify.sync_streamer",
-                    "dspy.streaming.streamify.streaming_response",
-                    "dspy.streaming.streaming_listener.StreamListener"
-                ]
-            },
-            "repl_and_serialization": {
-                "path": "dspy/primitives",
-                "components": [
-                    "dspy.primitives.repl_types.REPLVariable",
                     "dspy.primitives.sandbox_serializable.SandboxSerializable"
+                ]
+            },
+            "core_types": {
+                "path": "dspy/core/types.py",
+                "components": [
+                    "dspy.core.types.LMRequest",
+                    "dspy.core.types.System",
+                    "dspy.core.types.Developer",
+                    "dspy.core.types.User",
+                    "dspy.core.types.Assistant",
+                    "dspy.core.types.ToolResult",
+                    "dspy.core.types.LMStream",
+                    "dspy.core.types.AsyncLMStream",
+                    "dspy.core.types.LMHistoryEntry",
+                    "dspy.core.types.LMToolChoice",
+                    "dspy.core.types.LMReasoningConfig",
+                    "dspy.core.types.LMCacheConfig",
+                    "dspy.core.types.LMPromptCacheConfig",
+                    "dspy.core.types._json_default",
+                    "dspy.core.types.LMTextDelta",
+                    "dspy.core.types.LMThinkingDelta",
+                    "dspy.core.types.LMToolCallDelta",
+                    "dspy.core.types.LMCitationDelta",
+                    "dspy.core.types.LMImageDelta",
+                    "dspy.core.types.LMAudioDelta",
+                    "dspy.core.types.LMStreamStartEvent",
+                    "dspy.core.types.LMStreamDeltaEvent",
+                    "dspy.core.types.LMStreamOutputEndEvent",
+                    "dspy.core.types.LMStreamEndEvent"
+                ]
+            },
+            "repl_utilities": {
+                "path": "dspy/primitives/repl_types.py",
+                "components": [
+                    "dspy.primitives.repl_types.REPLVariable"
                 ]
             }
         }
     },
-    "lm_and_client_management": {
+    "lm_integration": {
         "path": "dspy/clients",
         "components": [],
         "children": {
-            "base_lm_and_core_clients": {
-                "path": "dspy/clients",
+            "lm_clients": {
+                "path": "dspy/clients/lm.py",
                 "components": [
                     "dspy.clients.__init__.configure_cache",
                     "dspy.clients.__init__._get_dspy_cache",
                     "dspy.clients.__init__.enable_litellm_logging",
                     "dspy.clients.__init__.disable_litellm_logging",
                     "dspy.clients.base_lm.BaseLM",
-                    "dspy.clients.cache.sync_wrapper",
-                    "dspy.clients.cache.async_wrapper",
-                    "dspy.clients.disk_serialization._RestrictedDisk"
-                ]
-            },
-            "lm_completion_and_embedding": {
-                "path": "dspy/clients",
-                "components": [
-                    "dspy.clients.embedding._cached_compute_embeddings",
-                    "dspy.clients.embedding._cached_acompute_embeddings",
+                    "dspy.clients.databricks.DatabricksProvider",
+                    "dspy.clients.databricks.TrainingJobDatabricks",
                     "dspy.clients.lm.litellm_completion",
                     "dspy.clients.lm.alitellm_completion",
                     "dspy.clients.lm.litellm_responses_completion",
                     "dspy.clients.lm.alitellm_responses_completion",
                     "dspy.clients.lm.async_stream_completion",
                     "dspy.clients.lm.litellm_text_completion",
-                    "dspy.clients.lm.alitellm_text_completion"
-                ]
-            },
-            "specific_lm_providers": {
-                "path": "dspy/clients",
-                "components": [
-                    "dspy.clients.databricks.DatabricksProvider",
-                    "dspy.clients.databricks.TrainingJobDatabricks",
+                    "dspy.clients.lm.alitellm_text_completion",
                     "dspy.clients.lm_local.LocalProvider",
                     "dspy.clients.lm_local.tokenize_function",
-                    "dspy.clients.openai.TrainingJobOpenAI"
+                    "dspy.clients.openai.TrainingJobOpenAI",
+                    "dspy.clients.openai_format.to_openai_responses_request",
+                    "dspy.clients.openai_format.completion_to_lm_response",
+                    "dspy.clients.openai_format.responses_to_lm_response",
+                    "dspy.clients.openai_format.cost_from_response",
+                    "dspy.clients.openai_format.to_openai_text_request"
+                ]
+            },
+            "data_adapters": {
+                "path": "dspy/adapters",
+                "components": [
+                    "dspy.adapters.baml_adapter.BAMLAdapter",
+                    "dspy.adapters.base.Adapter",
+                    "dspy.adapters.two_step_adapter.TwoStepAdapter",
+                    "dspy.adapters.types.audio.Audio",
+                    "dspy.adapters.types.base_type.Type",
+                    "dspy.adapters.types.citation.from_dict_list",
+                    "dspy.adapters.types.citation.format",
+                    "dspy.adapters.types.citation.validate_input",
+                    "dspy.adapters.types.code.Code",
+                    "dspy.adapters.types.document.Document",
+                    "dspy.adapters.types.file.File",
+                    "dspy.adapters.types.image.Image",
+                    "dspy.adapters.types.image._get_file_extension",
+                    "dspy.adapters.types.image.is_image",
+                    "dspy.adapters.types.tool.Tool",
+                    "dspy.adapters.types.tool.validate_input"
+                ]
+            },
+            "caching_streaming": {
+                "path": "dspy/clients/cache.py",
+                "components": [
+                    "dspy.clients.cache.sync_wrapper",
+                    "dspy.clients.cache.async_wrapper",
+                    "dspy.clients.disk_serialization._RestrictedDisk",
+                    "dspy.clients.embedding._cached_compute_embeddings",
+                    "dspy.clients.embedding._cached_acompute_embeddings",
+                    "dspy.streaming.messages.run_in_new_loop",
+                    "dspy.streaming.streamify.streamify",
+                    "dspy.streaming.streamify.sync_streamer",
+                    "dspy.streaming.streamify.streaming_response",
+                    "dspy.streaming.streaming_listener.StreamListener"
                 ]
             }
         }
     },
-    "program_development_and_optimization": {
-        "path": "dspy/predict, dspy/propose, dspy/teleprompt",
+    "program_execution": {
+        "path": "dspy/predict",
         "components": [],
         "children": {
-            "predictors_and_program_flow": {
+            "prediction_modules": {
                 "path": "dspy/predict",
                 "components": [
                     "dspy.predict.aggregation.majority",
@@ -114,19 +140,37 @@
                     "dspy.predict.rlm.RLM"
                 ]
             },
-            "program_proposal_and_description": {
-                "path": "dspy/propose",
+            "retrieval_modules": {
+                "path": "dspy/retrievers",
                 "components": [
-                    "dspy.propose.dataset_summary_generator.ObservationSummarizer",
-                    "dspy.propose.dataset_summary_generator.DatasetDescriptor",
-                    "dspy.propose.dataset_summary_generator.DatasetDescriptorWithPriorObservations",
-                    "dspy.propose.grounded_proposer.DescribeProgram",
-                    "dspy.propose.grounded_proposer.DescribeModule",
-                    "dspy.propose.grounded_proposer.GenerateSingleModuleInstruction",
-                    "dspy.propose.utils.create_instruction_set_history_string"
+                    "dspy.dsp.colbertv2.ColBERTv2RetrieverLocal",
+                    "dspy.dsp.colbertv2.colbertv2_get_request_v2_wrapped",
+                    "dspy.dsp.colbertv2.colbertv2_post_request_v2_wrapped",
+                    "dspy.dsp.colbertv2.ColBERTv2RerankerLocal",
+                    "dspy.dsp.colbertv2.ColBERTv2",
+                    "dspy.retrievers.databricks_rm.DatabricksRM",
+                    "dspy.retrievers.embeddings.EmbeddingsWithScores",
+                    "dspy.retrievers.retrieve.Retrieve",
+                    "dspy.retrievers.retrieve.single_query_passage",
+                    "dspy.retrievers.weaviate_rm.WeaviateRM"
                 ]
             },
-            "teleprompters_and_optimizers": {
+            "signature_definition": {
+                "path": "dspy/signatures",
+                "components": [
+                    "dspy.signatures.field.new_to_old_field",
+                    "dspy.signatures.field.OldInputField",
+                    "dspy.signatures.field.OldOutputField",
+                    "dspy.signatures.signature.SignatureMeta"
+                ]
+            }
+        }
+    },
+    "optimization_evaluation": {
+        "path": "dspy/teleprompt",
+        "components": [],
+        "children": {
+            "teleprompters": {
                 "path": "dspy/teleprompt",
                 "components": [
                     "dspy.teleprompt.avatar_optimizer.AvatarOptimizer",
@@ -155,23 +199,17 @@
                     "dspy.teleprompt.utils.log_token_usage",
                     "dspy.teleprompt.utils.calculate_last_n_proposed_quality"
                 ]
-            }
-        }
-    },
-    "data_and_evaluation": {
-        "path": "dspy/datasets, dspy/evaluate",
-        "components": [],
-        "children": {
-            "datasets": {
-                "path": "dspy/datasets",
+            },
+            "program_proposers": {
+                "path": "dspy/propose",
                 "components": [
-                    "dspy.datasets.alfworld.alfworld.AlfWorld",
-                    "dspy.datasets.alfworld.alfworld.env_worker",
-                    "dspy.datasets.dataloader.DataLoader",
-                    "dspy.datasets.dataset.Dataset",
-                    "dspy.datasets.gsm8k.GSM8K",
-                    "dspy.datasets.gsm8k.gsm8k_metric",
-                    "dspy.datasets.math.MATH"
+                    "dspy.propose.dataset_summary_generator.ObservationSummarizer",
+                    "dspy.propose.dataset_summary_generator.DatasetDescriptor",
+                    "dspy.propose.dataset_summary_generator.DatasetDescriptorWithPriorObservations",
+                    "dspy.propose.grounded_proposer.DescribeProgram",
+                    "dspy.propose.grounded_proposer.DescribeModule",
+                    "dspy.propose.grounded_proposer.GenerateSingleModuleInstruction",
+                    "dspy.propose.utils.create_instruction_set_history_string"
                 ]
             },
             "evaluation_metrics": {
@@ -192,53 +230,44 @@
             }
         }
     },
-    "adapters_and_retrievers": {
-        "path": "dspy/adapters, dspy/dsp, dspy/retrievers",
+    "data_utilities": {
+        "path": "dspy/datasets",
         "components": [],
         "children": {
-            "data_type_adapters": {
-                "path": "dspy/adapters/types",
+            "datasets": {
+                "path": "dspy/datasets",
                 "components": [
-                    "dspy.adapters.types.audio.Audio",
-                    "dspy.adapters.types.base_type.Type",
-                    "dspy.adapters.types.citation.from_dict_list",
-                    "dspy.adapters.types.citation.format",
-                    "dspy.adapters.types.citation.validate_input",
-                    "dspy.adapters.types.code.Code",
-                    "dspy.adapters.types.document.Document",
-                    "dspy.adapters.types.file.File",
-                    "dspy.adapters.types.image.Image",
-                    "dspy.adapters.types.image._get_file_extension",
-                    "dspy.adapters.types.image.is_image",
-                    "dspy.adapters.types.tool.Tool",
-                    "dspy.adapters.types.tool.validate_input"
+                    "dspy.datasets.alfworld.alfworld.AlfWorld",
+                    "dspy.datasets.alfworld.alfworld.env_worker",
+                    "dspy.datasets.dataloader.DataLoader",
+                    "dspy.datasets.dataset.Dataset",
+                    "dspy.datasets.gsm8k.GSM8K",
+                    "dspy.datasets.gsm8k.gsm8k_metric",
+                    "dspy.datasets.math.MATH"
                 ]
             },
-            "system_adapters": {
-                "path": "dspy/adapters",
+            "dsp_utilities": {
+                "path": "dspy/dsp/utils",
                 "components": [
-                    "dspy.adapters.baml_adapter.BAMLAdapter",
-                    "dspy.adapters.base.Adapter",
-                    "dspy.adapters.two_step_adapter.TwoStepAdapter"
-                ]
-            },
-            "retrievers": {
-                "path": "dspy/retrievers, dspy/dsp",
-                "components": [
-                    "dspy.dsp.colbertv2.ColBERTv2RetrieverLocal",
-                    "dspy.dsp.colbertv2.colbertv2_get_request_v2_wrapped",
-                    "dspy.dsp.colbertv2.colbertv2_post_request_v2_wrapped",
-                    "dspy.dsp.colbertv2.ColBERTv2RerankerLocal",
-                    "dspy.dsp.colbertv2.ColBERTv2",
                     "dspy.dsp.utils.dpr.SimpleTokenizer",
                     "dspy.dsp.utils.dpr.locate_answers",
                     "dspy.dsp.utils.settings.Settings",
-                    "dspy.dsp.utils.utils.load_batch_backgrounds",
-                    "dspy.retrievers.databricks_rm.DatabricksRM",
-                    "dspy.retrievers.embeddings.EmbeddingsWithScores",
-                    "dspy.retrievers.retrieve.Retrieve",
-                    "dspy.retrievers.retrieve.single_query_passage",
-                    "dspy.retrievers.weaviate_rm.WeaviateRM"
+                    "dspy.dsp.utils.utils.load_batch_backgrounds"
+                ]
+            },
+            "general_utilities": {
+                "path": "dspy/utils",
+                "components": [
+                    "dspy.utils.__init__.download",
+                    "dspy.utils.annotation.decorator",
+                    "dspy.utils.asyncify.wrapped_program",
+                    "dspy.utils.asyncify.async_program",
+                    "dspy.utils.asyncify.get_limiter",
+                    "dspy.utils.callback.async_wrapper",
+                    "dspy.utils.callback.sync_wrapper",
+                    "dspy.utils.dummies.DummyLM",
+                    "dspy.utils.dummies.inner",
+                    "dspy.utils.syncify.SyncWrapper"
                 ]
             }
         }

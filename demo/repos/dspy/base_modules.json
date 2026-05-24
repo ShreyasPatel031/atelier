@@ -1,0 +1,208 @@
+{
+  "title": "DSPy Base Modules",
+  "summary": "This module defines the foundational building blocks for DSPy programs, including the base class for all modules, core parameter management, and an interface for sandbox serialization.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "base_module_node",
+        "label": "BaseModule",
+        "type": "component",
+        "link": null,
+        "title": "BaseModule",
+        "description": "Provides fundamental functionalities for DSPy modules, including parameter management, sub-module discovery, deep copying, and state serialization/deserialization."
+      },
+      {
+        "id": "module_node",
+        "label": "Module",
+        "type": "component",
+        "link": null,
+        "title": "DSPy Program Base Class",
+        "description": "The base class for all DSPy programs, extending BaseModule with core program logic, callback handling, LM usage tracking, and methods for managing Predict modules."
+      },
+      {
+        "id": "sandbox_serializable_node",
+        "label": "SandboxSerializable",
+        "type": "component",
+        "link": null,
+        "title": "RLM Sandbox Interface",
+        "description": "An abstract base class for types that can be injected into an RLM (Reinforcement Learning Module) sandbox, defining an interface for serialization and reconstruction."
+      },
+      {
+        "id": "parameter_node",
+        "label": "Parameter",
+        "type": "component",
+        "link": null,
+        "title": "Optimizable Parameter",
+        "description": "Represents an optimizable parameter within a DSPy module, managed by BaseModule for state and optimization."
+      },
+      {
+        "id": "predict_node",
+        "label": "Predict",
+        "type": "component",
+        "link": "prediction_modules",
+        "title": "Language Model Predictor",
+        "description": "A core DSPy primitive that performs language model predictions based on a defined signature, managed by the Module class."
+      },
+      {
+        "id": "parallel_node",
+        "label": "Parallel",
+        "type": "component",
+        "link": null,
+        "title": "Parallel Execution Utility",
+        "description": "A utility for processing lists of examples in parallel, used by the Module class for batch execution of its forward method."
+      },
+      {
+        "id": "repl_variable_node",
+        "label": "REPLVariable",
+        "type": "component",
+        "link": "repl_utilities",
+        "title": "REPL Sandbox Variable",
+        "description": "Represents a variable within the REPL sandbox environment, often created from SandboxSerializable objects."
+      },
+      {
+        "id": "signature_node",
+        "label": "dspy.Signature",
+        "type": "component",
+        "link": "signature_definition",
+        "title": "LM Input/Output Definition",
+        "description": "Defines the input and output fields for language model interactions, capable of using SandboxSerializable types as annotations."
+      },
+      {
+        "id": "lm_client_node",
+        "label": "LM Client",
+        "type": "external",
+        "link": "lm_clients",
+        "title": "Language Model Integration",
+        "description": "External service or client responsible for interacting with various Language Models to perform text generation or other LM tasks."
+      },
+      {
+        "id": "storage_node",
+        "label": "Serialization Storage",
+        "type": "external",
+        "link": null,
+        "title": "Persistent Storage",
+        "description": "File system or database used for persisting the state or entire program architecture of DSPy modules (e.g., JSON, PKL files)."
+      }
+    ],
+    "edges": [
+      {
+        "source": "module_node",
+        "target": "base_module_node",
+        "label": "Inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_module_node",
+        "target": "parameter_node",
+        "label": "Manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_module_node",
+        "target": "module_node",
+        "label": "Manages sub-modules",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_module_node",
+        "target": "storage_node",
+        "label": "Saves/Loads state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "module_node",
+        "target": "predict_node",
+        "label": "Contains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "module_node",
+        "target": "parallel_node",
+        "label": "Uses for batching",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "predict_node",
+        "target": "lm_client_node",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sandbox_serializable_node",
+        "target": "repl_variable_node",
+        "label": "Converts to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "signature_node",
+        "target": "sandbox_serializable_node",
+        "label": "Uses as type annotation",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_primitives_group",
+        "label": "Core Primitives",
+        "nodes": [
+          "base_module_node",
+          "sandbox_serializable_node"
+        ],
+        "title": "Fundamental Building Blocks",
+        "description": "Essential classes that provide the basic structure and capabilities for DSPy modules and sandbox integration.",
+        "role": "generative"
+      },
+      {
+        "id": "surface_api_group",
+        "label": "Surface API",
+        "nodes": [
+          "module_node"
+        ],
+        "title": "User-Facing Program Interface",
+        "description": "The primary class that users inherit from to define their DSPy programs, orchestrating various components.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_components_group",
+        "label": "Generative Components",
+        "nodes": [
+          "predict_node"
+        ],
+        "title": "Language Model Interaction",
+        "description": "Components responsible for interacting with language models to generate outputs based on defined instructions.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_utilities_group",
+        "label": "Analytical Utilities",
+        "nodes": [
+          "parallel_node"
+        ],
+        "title": "Performance and Batch Processing",
+        "description": "Utilities that support efficient execution and analysis of DSPy programs, such as parallel processing.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_structures_group",
+        "label": "Data Structures",
+        "nodes": [
+          "parameter_node",
+          "repl_variable_node"
+        ],
+        "title": "Internal Data Representation",
+        "description": "Classes representing data elements and structures used within DSPy modules and for sandbox interactions.",
+        "role": "data"
+      }
+    ]
+  }
+}

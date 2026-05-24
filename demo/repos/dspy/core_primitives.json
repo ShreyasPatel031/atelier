@@ -1,232 +1,232 @@
 {
-    "title": "DSPy Core Primitives",
-    "summary": "This module defines the foundational building blocks of DSPy programs, including core module structures, signature definitions, essential utilities, and mechanisms for asynchronous execution, streaming, and sandbox serialization. It provides the fundamental abstractions for building robust LLM-powered applications.",
+    "title": "Core DSPy Primitives",
+    "summary": "This module defines the fundamental building blocks and data structures for constructing DSPy programs, managing language model interactions, and supporting REPL environments. It provides the core abstractions for modules, types, and serialization.",
     "diagram": {
         "direction": "TD",
         "nodes": [
             {
-                "id": "dspy_module",
-                "label": "Define DSPy Program Logic",
-                "type": "component",
-                "link": null,
-                "title": "DSPy Module",
-                "description": "The central class for defining DSPy programs, encapsulating forward logic, sub-modules, and interactions with language models and retrievers."
-            },
-            {
                 "id": "base_module",
-                "label": "Manage Module State",
+                "label": "BaseModule",
                 "type": "component",
-                "link": null,
-                "title": "Base Module State Management",
-                "description": "Provides foundational functionalities for DSPy modules, including parameter management, deep copying, and state serialization/deserialization."
+                "link": "base_modules",
+                "title": "Base DSPy Module",
+                "description": "The foundational class for all DSPy modules, providing core functionalities like parameter management, sub-module discovery, and state serialization/deserialization."
             },
             {
-                "id": "signature_definition",
-                "label": "Define Program Signatures",
+                "id": "dspy_module",
+                "label": "Module",
                 "type": "component",
-                "link": null,
-                "title": "DSPy Signature Definition",
-                "description": "A metaclass responsible for dynamically creating DSPy Signature classes, handling field validation, and managing input/output definitions for language model prompts."
-            },
-            {
-                "id": "async_execution",
-                "label": "Orchestrate Async Execution",
-                "type": "component",
-                "link": null,
-                "title": "Asynchronous Program Execution",
-                "description": "Executes DSPy programs asynchronously, managing thread-local overrides and respecting global concurrency limits for non-blocking operations."
-            },
-            {
-                "id": "program_streaming",
-                "label": "Enable Program Streaming",
-                "type": "component",
-                "link": null,
-                "title": "DSPy Program Streaming",
-                "description": "Wraps standard DSPy programs to enable incremental output streaming, supporting both synchronous and asynchronous consumption and API formatting."
-            },
-            {
-                "id": "repl_variable",
-                "label": "Represent REPL Variables",
-                "type": "component",
-                "link": null,
-                "title": "REPL Variable Metadata",
-                "description": "Defines a data structure to hold metadata about a variable in a REPL environment, including its type, description, and a truncated preview for LLMs."
+                "link": "base_modules",
+                "title": "DSPy Program Base Class",
+                "description": "The primary class for defining DSPy programs, extending BaseModule with program logic, callback handling, and management of prediction components."
             },
             {
                 "id": "sandbox_serializable",
-                "label": "Enable Sandbox Serialization",
+                "label": "SandboxSerializable",
                 "type": "component",
-                "link": null,
-                "title": "Sandbox Serializable Interface",
-                "description": "An abstract base class for objects that need to be serialized and reconstructed within a sandboxed Python environment, providing methods for setup and code generation."
+                "link": "base_modules",
+                "title": "RLM Sandbox Interface",
+                "description": "An abstract base class for types that can be serialized and injected into an RLM (Reinforcement Learning Module) sandbox for dynamic execution."
             },
             {
-                "id": "download_utility",
-                "label": "Download External Resources",
+                "id": "lm_request",
+                "label": "LM Request Object",
                 "type": "component",
+                "link": "core_types",
+                "title": "Language Model Request",
+                "description": "A standardized object encapsulating all parameters for a Language Model call, including messages, tools, and configuration settings."
+            },
+            {
+                "id": "lm_message",
+                "label": "LM Message",
+                "type": "external",
+                "link": "core_types",
+                "title": "Language Model Message",
+                "description": "A fundamental data structure representing a single message in an LM conversation, with a role (e.g., system, user, assistant) and content parts."
+            },
+            {
+                "id": "lm_stream",
+                "label": "LM Stream Handler",
+                "type": "component",
+                "link": "core_types",
+                "title": "Language Model Stream",
+                "description": "Manages the synchronous or asynchronous streaming of Language Model responses, processing events and building the final LMResponse object."
+            },
+            {
+                "id": "lm_response",
+                "label": "LM Response Object",
+                "type": "external",
+                "link": "core_types",
+                "title": "Language Model Response",
+                "description": "Represents the complete output from a Language Model, including generated text, tool calls, usage statistics, and other metadata."
+            },
+            {
+                "id": "lm_history_entry",
+                "label": "LM History Entry",
+                "type": "component",
+                "link": "core_types",
+                "title": "LM Call History Record",
+                "description": "A typed record of an LM call, storing the request, response, and derived convenience fields for historical analysis and debugging."
+            },
+            {
+                "id": "repl_variable",
+                "label": "REPLVariable",
+                "type": "component",
+                "link": "repl_utilities",
+                "title": "REPL Sandbox Variable",
+                "description": "A Pydantic model that stores and formats metadata for a variable within a REPL session, including its name, type, description, and a preview of its value."
+            },
+            {
+                "id": "lm_client",
+                "label": "LM Client",
+                "type": "external",
+                "link": "lm_clients",
+                "title": "Language Model Integration",
+                "description": "An external service or client responsible for interacting with various Language Models to perform text generation or other LM tasks."
+            },
+            {
+                "id": "serialization_storage",
+                "label": "Serialization Storage",
+                "type": "external",
                 "link": null,
-                "title": "File Download Utility",
-                "description": "Provides utility functions for downloading files from URLs, with features like resuming partial downloads and ensuring file integrity."
+                "title": "Persistent Storage",
+                "description": "File system or database used for persisting the state or entire program architecture of DSPy modules (e.g., JSON, PKL files)."
             },
             {
-                "id": "lm_predictor",
-                "label": "Execute LM Prediction",
-                "type": "external",
-                "link": "program_development_and_optimization/predictors_and_program_flow",
-                "title": "DSPy Predictor",
-                "description": "A core DSPy component used within Modules to make predictions using a language model based on a defined signature."
-            },
-            {
-                "id": "language_model",
-                "label": "Language Model (LM)",
-                "type": "external",
-                "link": "lm_and_client_management",
-                "title": "DSPy Language Model",
-                "description": "The abstract interface for all language models in DSPy, providing text generation capabilities."
-            },
-            {
-                "id": "pydantic_model",
-                "label": "Pydantic Base Model",
+                "id": "pydantic_base",
+                "label": "Pydantic BaseModel",
                 "type": "external",
                 "link": null,
-                "title": "Pydantic BaseModel",
-                "description": "A foundational class from Pydantic for creating data models, used by SignatureMeta and REPLVariable for robust and validated structures."
-            },
-            {
-                "id": "asyncio_loop",
-                "label": "Asyncio Event Loop",
-                "type": "external",
-                "link": null,
-                "title": "Python Asyncio Event Loop",
-                "description": "The core mechanism for running asynchronous operations in Python, utilized by DSPy for non-blocking execution and streaming."
+                "title": "Pydantic Data Model",
+                "description": "An external library's base class for creating data models with type hints and validation, used by DSPy for structured data definitions."
             }
         ],
         "edges": [
             {
                 "source": "dspy_module",
                 "target": "base_module",
-                "label": "inherits state management from",
+                "label": "Extends functionality of",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "base_module",
+                "target": "serialization_storage",
+                "label": "Saves/Loads state",
                 "title": null,
                 "description": null
             },
             {
                 "source": "dspy_module",
-                "target": "signature_definition",
-                "label": "uses to define I/O",
+                "target": "lm_client",
+                "label": "Interacts with",
                 "title": null,
                 "description": null
             },
             {
-                "source": "dspy_module",
-                "target": "lm_predictor",
-                "label": "contains & orchestrates",
+                "source": "lm_request",
+                "target": "lm_message",
+                "label": "Comprises messages",
                 "title": null,
                 "description": null
             },
             {
-                "source": "async_execution",
-                "target": "dspy_module",
-                "label": "executes",
+                "source": "lm_stream",
+                "target": "lm_request",
+                "label": "Processes requests",
                 "title": null,
                 "description": null
             },
             {
-                "source": "program_streaming",
-                "target": "dspy_module",
-                "label": "wraps for incremental output",
+                "source": "lm_stream",
+                "target": "lm_response",
+                "label": "Generates responses",
                 "title": null,
                 "description": null
             },
             {
-                "source": "signature_definition",
-                "target": "pydantic_model",
-                "label": "builds upon",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "repl_variable",
-                "target": "pydantic_model",
-                "label": "is structured by",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "async_execution",
-                "target": "asyncio_loop",
-                "label": "manages via",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "program_streaming",
-                "target": "asyncio_loop",
-                "label": "operates within",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "lm_predictor",
-                "target": "language_model",
-                "label": "interacts with",
+                "source": "lm_response",
+                "target": "lm_history_entry",
+                "label": "Recorded as",
                 "title": null,
                 "description": null
             },
             {
                 "source": "sandbox_serializable",
                 "target": "repl_variable",
-                "label": "provides display info to",
+                "label": "Can be converted to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "repl_variable",
+                "target": "pydantic_base",
+                "label": "Inherits from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_client",
+                "target": "lm_request",
+                "label": "Receives",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_client",
+                "target": "lm_response",
+                "label": "Sends",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "program_core",
-                "label": "Program Core & Interfaces",
+                "id": "program_foundations",
+                "label": "Program Building Blocks",
                 "nodes": [
-                    "dspy_module",
                     "base_module",
-                    "signature_definition",
-                    "lm_predictor"
-                ],
-                "title": "DSPy Program Core & Interfaces",
-                "description": "Defines the fundamental structure of DSPy programs, their state management, input/output interfaces, and core language model interaction.",
-                "role": null
-            },
-            {
-                "id": "execution_utilities",
-                "label": "Execution & General Utilities",
-                "nodes": [
-                    "async_execution",
-                    "download_utility"
-                ],
-                "title": "Program Execution & Utilities",
-                "description": "Components for managing program execution flow, including asynchronous operations, and general-purpose utilities like file downloading.",
-                "role": null
-            },
-            {
-                "id": "advanced_data_primitives",
-                "label": "Advanced Data Handling",
-                "nodes": [
-                    "program_streaming",
-                    "repl_variable",
+                    "dspy_module",
                     "sandbox_serializable"
                 ],
-                "title": "Advanced Data Handling Primitives",
-                "description": "Specialized primitives for handling data streams, representing variables for introspection, and enabling secure serialization for sandboxed environments.",
+                "title": "Core Program Building Blocks",
+                "description": "Foundational classes for defining DSPy modules, managing their lifecycle, and enabling serialization for advanced features like sandboxing.",
                 "role": null
             },
             {
-                "id": "external_integrations",
-                "label": "External Integrations",
+                "id": "lm_interaction_data_flow",
+                "label": "LM Interaction Data Flow",
                 "nodes": [
-                    "language_model",
-                    "pydantic_model",
-                    "asyncio_loop"
+                    "lm_request",
+                    "lm_message",
+                    "lm_stream",
+                    "lm_response",
+                    "lm_history_entry"
                 ],
-                "title": "External System Integrations",
-                "description": "Key external libraries and systems that DSPy's core primitives integrate with, such as language models, data validation frameworks, and asynchronous execution environments.",
+                "title": "Language Model Interaction Data",
+                "description": "Standardized data structures and processes for constructing LM requests, handling messages, streaming responses, and maintaining a history of LM calls.",
+                "role": null
+            },
+            {
+                "id": "serialization_utilities",
+                "label": "Serialization & REPL Utilities",
+                "nodes": [
+                    "repl_variable",
+                    "serialization_storage",
+                    "pydantic_base"
+                ],
+                "title": "Serialization & REPL Utilities",
+                "description": "Components facilitating the persistence of module states, representing variables in REPL environments, and leveraging Pydantic for structured data.",
+                "role": null
+            },
+            {
+                "id": "external_interfaces",
+                "label": "External LM Interface",
+                "nodes": [
+                    "lm_client"
+                ],
+                "title": "External LM Interface",
+                "description": "Represents the external Language Model services that DSPy's core primitives interact with to perform generative tasks.",
                 "role": null
             }
         ]

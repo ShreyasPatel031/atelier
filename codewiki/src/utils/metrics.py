@@ -45,6 +45,8 @@ class RepoMetrics:
     # Totals
     total_duration: Optional[float] = None
     total_tokens: int = 0
+    estimated_cost_usd: float = 0.0
+    total_llm_calls: int = 0
     total_files_created: int = 0
     
     # Start/end times
@@ -72,9 +74,19 @@ class RepoMetrics:
         """Finalize metrics and calculate totals."""
         self.end_time = time.time()
         self.total_duration = self.end_time - self.start_time
-        
-        # Sum up tokens and files from all stages
-        self.total_tokens = sum(stage.tokens_used for stage in self.stages.values())
+
+        try:
+            from codewiki.src.be.llm_services import get_token_tracker, sync_token_tracker_to_metrics
+
+            sync_token_tracker_to_metrics(reset_stage_tokens=True)
+            tracker = get_token_tracker()
+            self.total_tokens = tracker.total_tokens
+            self.estimated_cost_usd = round(tracker.total_cost, 4)
+            self.total_llm_calls = len(tracker.calls)
+        except Exception:
+            self.total_tokens = sum(stage.tokens_used for stage in self.stages.values())
+            self.estimated_cost_usd = round((self.total_tokens / 1000) * 0.02, 4)
+
         self.total_files_created = sum(stage.files_created for stage in self.stages.values())
     
     def to_dict(self) -> Dict[str, Any]:
@@ -99,6 +111,8 @@ class RepoMetrics:
             "first_overview_file": self.first_overview_file,
             "total_duration": self.total_duration,
             "total_tokens": self.total_tokens,
+            "estimated_cost_usd": self.estimated_cost_usd,
+            "total_llm_calls": self.total_llm_calls,
             "total_files_created": self.total_files_created,
             "start_time": self.start_time,
             "end_time": self.end_time

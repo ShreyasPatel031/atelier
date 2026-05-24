@@ -1,0 +1,289 @@
+{
+  "title": "DSPy Retrieval Modules",
+  "summary": "This module provides various components for integrating retrieval mechanisms into DSPy programs, including local ColBERTv2 indexing, reranking, and connectors for external vector databases like Databricks Vector Search and Weaviate. It defines the core `Retrieve` primitive for abstracting document retrieval.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "ColBERTv2RetrieverLocal",
+        "label": "Manage Local ColBERTv2 Index",
+        "type": "component",
+        "link": null,
+        "title": "Local ColBERTv2 Retriever",
+        "description": "Builds and searches a local ColBERTv2 index from a collection of passages, enabling efficient retrieval of relevant documents based on a given query."
+      },
+      {
+        "id": "ColBERTv2GetRequest",
+        "label": "Wrap ColBERTv2 GET Call",
+        "type": "component",
+        "link": null,
+        "title": "ColBERTv2 GET Wrapper",
+        "description": "A thin wrapper function that facilitates making GET requests to a remote ColBERTv2 service, abstracting the underlying HTTP communication details."
+      },
+      {
+        "id": "ColBERTv2PostRequest",
+        "label": "Wrap ColBERTv2 POST Call",
+        "type": "component",
+        "link": null,
+        "title": "ColBERTv2 POST Wrapper",
+        "description": "A thin wrapper function that facilitates making POST requests to a remote ColBERTv2 service, abstracting the underlying HTTP communication details."
+      },
+      {
+        "id": "ColBERTv2RerankerLocal",
+        "label": "Rerank Passages with ColBERTv2",
+        "type": "component",
+        "link": null,
+        "title": "Local ColBERTv2 Reranker",
+        "description": "Reranks an existing list of passages based on their semantic relevance to a query using a local ColBERTv2 model, improving retrieval quality."
+      },
+      {
+        "id": "ColBERTv2Remote",
+        "label": "Query Remote ColBERTv2 Endpoint",
+        "type": "component",
+        "link": null,
+        "title": "Remote ColBERTv2 Client",
+        "description": "Provides an interface to interact with a remote ColBERTv2 service, sending queries and receiving top-k passages via HTTP GET or POST requests."
+      },
+      {
+        "id": "DatabricksRM",
+        "label": "Retrieve from Databricks Vector Search",
+        "type": "component",
+        "link": null,
+        "title": "Databricks Retriever Module",
+        "description": "Integrates with Databricks Mosaic AI Vector Search to retrieve relevant documents. It supports both text and vector queries and handles authentication."
+      },
+      {
+        "id": "EmbeddingsWithScores",
+        "label": "Retrieve Embeddings with Scores",
+        "type": "component",
+        "link": null,
+        "title": "Scored Embeddings Retriever",
+        "description": "Extends a base embeddings retriever to return similarity scores alongside passages and their indices, enabling advanced filtering and re-ranking strategies."
+      },
+      {
+        "id": "Retrieve",
+        "label": "Execute Configured Retrieval",
+        "type": "component",
+        "link": null,
+        "title": "DSPy Core Retrieve Primitive",
+        "description": "The central DSPy primitive for retrieval. It delegates the actual search operation to the globally configured retrieval module (`dspy.settings.rm`) and formats the results."
+      },
+      {
+        "id": "SingleQueryPassage",
+        "label": "Format Passages to Prediction",
+        "type": "component",
+        "link": null,
+        "title": "Passage Formatting Utility",
+        "description": "A utility function designed to transform a list of passage dictionaries into a standardized `dspy.Prediction` object, suitable for DSPy programs."
+      },
+      {
+        "id": "WeaviateRM",
+        "label": "Retrieve from Weaviate Database",
+        "type": "component",
+        "link": null,
+        "title": "Weaviate Retriever Module",
+        "description": "Connects to a Weaviate vector database to perform hybrid searches, retrieving top-k passages relevant to a given query using either v3 or v4 clients."
+      },
+      {
+        "id": "ColBERTv2Library",
+        "label": "ColBERTv2 Library",
+        "type": "external",
+        "link": null,
+        "title": "ColBERTv2 Library",
+        "description": "The external `colbert-ai` Python library, providing core functionalities for local ColBERTv2 indexing, retrieval, and reranking."
+      },
+      {
+        "id": "DatabricksVectorSearch",
+        "label": "Databricks Vector Search Service",
+        "type": "external",
+        "link": null,
+        "title": "Databricks Vector Search",
+        "description": "The external Databricks Mosaic AI Vector Search service, a cloud-based vector database for performing similarity searches on large datasets."
+      },
+      {
+        "id": "WeaviateDB",
+        "label": "Weaviate Vector Database",
+        "type": "external",
+        "link": null,
+        "title": "Weaviate Database",
+        "description": "An external open-source vector database used for storing, indexing, and retrieving vector embeddings and associated data."
+      },
+      {
+        "id": "DSPyPrediction",
+        "label": "DSPy Prediction Object",
+        "type": "external",
+        "link": null,
+        "title": "DSPy Prediction",
+        "description": "A standard DSPy data structure used to encapsulate the output of a module, typically containing retrieved passages or generated text."
+      },
+      {
+        "id": "DSPySettingsRM",
+        "label": "DSPy Global Retriever Configuration",
+        "type": "external",
+        "link": null,
+        "title": "DSPy Global RM",
+        "description": "The global configuration point in DSPy (`dspy.settings.rm`) where a specific retrieval module is registered for use by `dspy.Retrieve`."
+      }
+    ],
+    "edges": [
+      {
+        "source": "ColBERTv2RetrieverLocal",
+        "target": "ColBERTv2Library",
+        "label": "Uses for indexing/search",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ColBERTv2RerankerLocal",
+        "target": "ColBERTv2Library",
+        "label": "Uses for reranking",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ColBERTv2Remote",
+        "target": "ColBERTv2GetRequest",
+        "label": "Delegates GET to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ColBERTv2Remote",
+        "target": "ColBERTv2PostRequest",
+        "label": "Delegates POST to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatabricksRM",
+        "target": "DatabricksVectorSearch",
+        "label": "Queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "WeaviateRM",
+        "target": "WeaviateDB",
+        "label": "Queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Retrieve",
+        "target": "DSPySettingsRM",
+        "label": "Delegates to configured RM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DSPySettingsRM",
+        "target": "ColBERTv2RetrieverLocal",
+        "label": "Implemented by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DSPySettingsRM",
+        "target": "ColBERTv2Remote",
+        "label": "Implemented by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DSPySettingsRM",
+        "target": "DatabricksRM",
+        "label": "Implemented by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DSPySettingsRM",
+        "target": "WeaviateRM",
+        "label": "Implemented by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DSPySettingsRM",
+        "target": "EmbeddingsWithScores",
+        "label": "Implemented by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Retrieve",
+        "target": "DSPyPrediction",
+        "label": "Returns formatted passages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EmbeddingsWithScores",
+        "target": "DSPyPrediction",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SingleQueryPassage",
+        "target": "DSPyPrediction",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatabricksRM",
+        "target": "DSPyPrediction",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "WeaviateRM",
+        "target": "DSPyPrediction",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "colbert_integration",
+        "label": "ColBERTv2 Integration",
+        "nodes": [
+          "ColBERTv2RetrieverLocal",
+          "ColBERTv2GetRequest",
+          "ColBERTv2PostRequest",
+          "ColBERTv2RerankerLocal",
+          "ColBERTv2Remote"
+        ],
+        "title": "ColBERTv2 Retrieval & Reranking",
+        "description": "Components for integrating ColBERTv2, including local indexing, retrieval, reranking, and interaction with remote ColBERTv2 services.",
+        "role": "data"
+      },
+      {
+        "id": "external_vector_dbs",
+        "label": "External Vector Database Connectors",
+        "nodes": [
+          "DatabricksRM",
+          "WeaviateRM"
+        ],
+        "title": "Connectors for Vector Databases",
+        "description": "Modules providing interfaces to external vector search services like Databricks Vector Search and Weaviate.",
+        "role": "data"
+      },
+      {
+        "id": "dspy_retrieval_core",
+        "label": "DSPy Core Retrieval Primitives",
+        "nodes": [
+          "Retrieve",
+          "EmbeddingsWithScores",
+          "SingleQueryPassage"
+        ],
+        "title": "DSPy Retrieval Abstractions",
+        "description": "The fundamental DSPy components for defining and executing retrieval operations, including the main `Retrieve` primitive and specialized embeddings retrieval.",
+        "role": "surface"
+      }
+    ]
+  }
+}

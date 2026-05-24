@@ -1,0 +1,277 @@
+{
+  "title": "General Utilities Module",
+  "summary": "This module provides a collection of general-purpose utility functions for DSPy, including file downloading, asynchronous execution management, callback handling, and dummy components for testing.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "download_file",
+        "label": "Download File from URL",
+        "type": "component",
+        "link": null,
+        "title": "Download Utility",
+        "description": "Downloads a file from a specified URL, checking for existing files and their sizes to avoid redundant downloads."
+      },
+      {
+        "id": "annotation_decorator",
+        "label": "Apply Annotation Decorator",
+        "type": "component",
+        "link": null,
+        "title": "Annotation Decorator",
+        "description": "A decorator factory used to mark functions as experimental, providing a structured way to manage feature maturity."
+      },
+      {
+        "id": "async_execution",
+        "label": "Execute Program Asynchronously",
+        "type": "component",
+        "link": null,
+        "title": "Async Program Wrapper",
+        "description": "Wraps a synchronous program to allow asynchronous execution in a separate thread, managing thread-local settings and concurrency limits."
+      },
+      {
+        "id": "concurrency_limiter",
+        "label": "Manage Asynchronous Concurrency",
+        "type": "component",
+        "link": null,
+        "title": "Concurrency Limiter",
+        "description": "Provides a singleton `anyio.CapacityLimiter` to control the number of concurrent asynchronous operations, preventing resource exhaustion."
+      },
+      {
+        "id": "async_callback_wrapper",
+        "label": "Wrap Async Function with Callbacks",
+        "type": "component",
+        "link": null,
+        "title": "Async Callback Wrapper",
+        "description": "An asynchronous decorator that executes registered callbacks before and after an async function call, handling call IDs and exceptions."
+      },
+      {
+        "id": "sync_callback_wrapper",
+        "label": "Wrap Sync Function with Callbacks",
+        "type": "component",
+        "link": null,
+        "title": "Sync Callback Wrapper",
+        "description": "A synchronous decorator that executes registered callbacks before and after a synchronous function call, managing call IDs and exceptions."
+      },
+      {
+        "id": "dummy_lm",
+        "label": "Simulate Language Model for Testing",
+        "type": "component",
+        "link": null,
+        "title": "Dummy Language Model",
+        "description": "A mock language model for unit testing, capable of returning predefined responses based on various input configurations or example following."
+      },
+      {
+        "id": "sync_module_wrapper",
+        "label": "Synchronize Asynchronous Module",
+        "type": "component",
+        "link": null,
+        "title": "Sync Module Wrapper",
+        "description": "A class that wraps an asynchronous DSPy Module to expose a synchronous `forward` method, executing the async method in a new event loop."
+      },
+      {
+        "id": "external_requests",
+        "label": "HTTP Requests Library",
+        "type": "external",
+        "link": null,
+        "title": "Requests Library",
+        "description": "A popular Python library for making HTTP requests."
+      },
+      {
+        "id": "external_os",
+        "label": "Operating System Utilities",
+        "type": "external",
+        "link": null,
+        "title": "OS Module",
+        "description": "Standard Python module for interacting with the operating system, including file path operations."
+      },
+      {
+        "id": "external_anyio",
+        "label": "AnyIO Concurrency Library",
+        "type": "external",
+        "link": null,
+        "title": "AnyIO Library",
+        "description": "A library for asynchronous concurrency and I/O, used for running async code in threads and managing capacity."
+      },
+      {
+        "id": "external_settings",
+        "label": "DSPy Thread-Local Settings",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Settings",
+        "description": "Manages thread-local overrides for DSPy configurations, ensuring isolated settings for concurrent operations."
+      },
+      {
+        "id": "external_callbacks",
+        "label": "DSPy Callback System",
+        "type": "external",
+        "link": null,
+        "title": "DSPy Callbacks",
+        "description": "Internal DSPy mechanism for registering and executing functions before and after core operations."
+      },
+      {
+        "id": "external_baselm",
+        "label": "Base Language Model Interface",
+        "type": "external",
+        "link": "other_module",
+        "title": "BaseLM",
+        "description": "The abstract base class for all language models in DSPy, defining the common interface."
+      },
+      {
+        "id": "external_module",
+        "label": "Base DSPy Module",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Module",
+        "description": "The fundamental building block for DSPy programs, representing a callable component."
+      },
+      {
+        "id": "external_chat_adapter",
+        "label": "DSPy Chat Adapter",
+        "type": "external",
+        "link": "other_module",
+        "title": "ChatAdapter",
+        "description": "Adapts language model interactions to a chat-based format, handling message structures and formatting."
+      },
+      {
+        "id": "external_run_async",
+        "label": "Async to Sync Runner",
+        "type": "external",
+        "link": null,
+        "title": "Run Async Utility",
+        "description": "A utility function to synchronously run an asynchronous coroutine in a new event loop."
+      }
+    ],
+    "edges": [
+      {
+        "source": "download_file",
+        "target": "external_requests",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "download_file",
+        "target": "external_os",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_execution",
+        "target": "concurrency_limiter",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_execution",
+        "target": "external_anyio",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_execution",
+        "target": "external_settings",
+        "label": "Manages overrides in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "concurrency_limiter",
+        "target": "external_anyio",
+        "label": "Implements via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_callback_wrapper",
+        "target": "external_callbacks",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_callback_wrapper",
+        "target": "external_callbacks",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dummy_lm",
+        "target": "external_baselm",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dummy_lm",
+        "target": "external_chat_adapter",
+        "label": "Uses for formatting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_module_wrapper",
+        "target": "external_module",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_module_wrapper",
+        "target": "external_run_async",
+        "label": "Uses to run",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "concurrency_group",
+        "label": "Concurrency & Async Utilities",
+        "nodes": [
+          "async_execution",
+          "concurrency_limiter",
+          "sync_module_wrapper"
+        ],
+        "title": "Concurrency & Async Utilities",
+        "description": "Components for managing asynchronous execution, concurrency limits, and synchronizing async modules.",
+        "role": "generative"
+      },
+      {
+        "id": "callback_group",
+        "label": "Callback & Annotation Utilities",
+        "nodes": [
+          "async_callback_wrapper",
+          "sync_callback_wrapper",
+          "annotation_decorator"
+        ],
+        "title": "Callback & Annotation Utilities",
+        "description": "Utilities for applying annotations and wrapping functions with callback mechanisms for both synchronous and asynchronous contexts.",
+        "role": "surface"
+      },
+      {
+        "id": "testing_group",
+        "label": "Testing & Mocking",
+        "nodes": [
+          "dummy_lm"
+        ],
+        "title": "Testing & Mocking",
+        "description": "Components designed to simulate external systems, primarily for testing and development purposes.",
+        "role": "analytical"
+      },
+      {
+        "id": "file_group",
+        "label": "File & System Utilities",
+        "nodes": [
+          "download_file"
+        ],
+        "title": "File & System Utilities",
+        "description": "Basic utilities for interacting with the file system and external resources.",
+        "role": "data"
+      }
+    ]
+  }
+}

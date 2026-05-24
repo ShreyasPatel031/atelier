@@ -1,0 +1,55 @@
+{
+  "repo_name": "minirepo",
+  "repo_path": "/Users/shreyaspatel/atelier/benchmarking/minirepo",
+  "repo_size_mb": 447328.37109375,
+  "total_files": 0,
+  "total_code_files": 20,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 1.0160839557647705,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 11.124615907669067,
+      "tokens_used": 781,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 41.697153091430664,
+      "tokens_used": 53926,
+      "files_created": 15,
+      "files_created_list": [
+        "metrics.json",
+        "external_api.json",
+        "main_logic.json",
+        "system_metrics.json",
+        "first_module_tree.json",
+        "metadata.json",
+        "observability.json",
+        "api_interface.json",
+        "module_tree.json",
+        "overview.json",
+        "sync_issues.json",
+        "core_workflow.json",
+        "data_processing.json",
+        "input_output.json",
+        "data_management.json"
+      ]
+    }
+  },
+  "time_to_first_overview": 53.84001159667969,
+  "first_overview_file": "/Users/shreyaspatel/atelier/benchmarking/minirepo/docs/overview.json",
+  "total_duration": 53.84008073806763,
+  "total_tokens": 54707,
+  "estimated_cost_usd": 0.012,
+  "total_llm_calls": 10,
+  "total_files_created": 15,
+  "start_time": 1779626697.9205382,
+  "end_time": 1779626751.760619
+}

@@ -210,7 +210,8 @@ async def generate_sub_module_documentation(
                 from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
                 import json as _json
 
-                doc = generate_leaf_doc_json(
+                doc = await asyncio.to_thread(
+                    generate_leaf_doc_json,
                     module_name=sub_module_name,
                     core_component_ids=core_component_ids,
                     components=ctx.deps.components,

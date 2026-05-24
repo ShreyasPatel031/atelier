@@ -1,5 +1,10 @@
 [
   {
+    "id": "cortex-ops-architecture",
+    "label": "Cortex Ops Architecture",
+    "description": ""
+  },
+  {
     "id": "crewai",
     "label": "CrewAI",
     "description": "Multi-agent crews, tasks, and tools for LLM workflows."
@@ -18,6 +23,11 @@
     "id": "langchain",
     "label": "LangChain",
     "description": "Building blocks and agents for LLM apps and RAG."
+  },
+  {
+    "id": "minirepo",
+    "label": "Minirepo",
+    "description": ""
   },
   {
     "id": "ollama",

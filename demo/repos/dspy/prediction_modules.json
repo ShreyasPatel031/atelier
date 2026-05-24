@@ -1,0 +1,686 @@
+{
+  "title": "Advanced Prediction Modules",
+  "summary": "This module provides advanced prediction strategies and control flow mechanisms for DSPy programs, including techniques like ReAct, Program of Thought, Best-of-N, and Refine, to enhance the reliability and performance of language model interactions.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "majority_agg",
+        "label": "Aggregate Predictions",
+        "type": "component",
+        "link": null,
+        "title": "Majority Aggregation",
+        "description": "Selects the most common completion from a set of predictions for a specified field, using a normalization function to handle variations. Prioritizes earlier completions in case of ties."
+      },
+      {
+        "id": "default_normalize_func",
+        "label": "Normalize Text",
+        "type": "component",
+        "link": null,
+        "title": "Default Text Normalization",
+        "description": "A utility function that normalizes text strings, typically used to standardize completions before aggregation. Returns None if the input is empty after normalization."
+      },
+      {
+        "id": "avatar_module",
+        "label": "Agent with Tools",
+        "type": "component",
+        "link": null,
+        "title": "Avatar Agent",
+        "description": "An agent module that uses a defined signature and a set of tools to iteratively accomplish a goal. It reasons about actions, calls tools, and updates its state until the task is complete."
+      },
+      {
+        "id": "actor_signature",
+        "label": "Avatar Action Signature",
+        "type": "component",
+        "link": null,
+        "title": "Actor Signature",
+        "description": "Defines the signature for the Avatar agent, guiding it to select tools and provide inputs based on a given goal and available tools. It structures the agent's thought process and action outputs."
+      },
+      {
+        "id": "best_of_n_module",
+        "label": "Select Best Prediction",
+        "type": "component",
+        "link": null,
+        "title": "Best-of-N Module",
+        "description": "Runs a given module multiple times (N) with different rollouts and selects the best prediction based on a reward function. It can stop early if a prediction meets a specified threshold."
+      },
+      {
+        "id": "code_act_module",
+        "label": "Execute Code with Tools",
+        "type": "component",
+        "link": null,
+        "title": "CodeAct Module",
+        "description": "A module that combines reasoning and code execution. It generates and runs Python code within an interpreter, leveraging predefined tools to solve problems iteratively until a solution is found."
+      },
+      {
+        "id": "multi_chain_comparison_module",
+        "label": "Compare Reasoning Chains",
+        "type": "component",
+        "link": null,
+        "title": "Multi-Chain Comparison",
+        "description": "Compares multiple reasoning attempts (M chains) for a given problem. It aggregates these attempts and generates a refined rationale and answer based on the comparison."
+      },
+      {
+        "id": "program_of_thought_module",
+        "label": "Run Python Programs",
+        "type": "component",
+        "link": null,
+        "title": "Program of Thought",
+        "description": "A module that generates and executes Python programs to solve problems. It iteratively refines code based on execution results and errors, aiming to produce a final answer through programmatic computation."
+      },
+      {
+        "id": "react_module",
+        "label": "Reason and Act with Tools",
+        "type": "component",
+        "link": null,
+        "title": "ReAct Agent",
+        "description": "Implements the ReAct (Reasoning and Acting) paradigm, where an LLM iteratively reasons about a situation, selects tools to gather information, and acts upon the environment until a task is completed."
+      },
+      {
+        "id": "refine_module",
+        "label": "Refine Module Output",
+        "type": "component",
+        "link": null,
+        "title": "Refine Module",
+        "description": "Improves the output of a module by running it multiple times, evaluating predictions with a reward function, and generating feedback to guide subsequent attempts. It aims to achieve a desired performance threshold."
+      },
+      {
+        "id": "wrapper_adapter_class",
+        "label": "Refine Hint Adapter",
+        "type": "component",
+        "link": null,
+        "title": "Wrapper Adapter for Refine",
+        "description": "An internal adapter used by the Refine module to inject hints into the module's input during iterative refinement, based on feedback from previous runs."
+      },
+      {
+        "id": "inspect_modules_func",
+        "label": "Inspect Program Modules",
+        "type": "component",
+        "link": null,
+        "title": "Inspect Modules",
+        "description": "Utility function to generate a detailed string representation of a program's modules, including their input/output fields and original instructions, primarily used for debugging and feedback generation."
+      },
+      {
+        "id": "offer_feedback_signature",
+        "label": "Feedback Generation Signature",
+        "type": "component",
+        "link": null,
+        "title": "Offer Feedback Signature",
+        "description": "Defines the signature for generating constructive feedback for modules within a program. It analyzes program trajectory, inputs, outputs, and reward to assign blame and suggest concrete improvements."
+      },
+      {
+        "id": "rlm_module",
+        "label": "Recursive Language Model",
+        "type": "component",
+        "link": null,
+        "title": "RLM (Recursive Language Model)",
+        "description": "A powerful module that enables an LLM to programmatically explore contexts using a sandboxed REPL. It writes and executes Python code, calls sub-LLMs, and builds up answers iteratively, supporting complex problem-solving."
+      },
+      {
+        "id": "dspy_module",
+        "label": "DSPy Base Module",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Base Module",
+        "description": "The foundational class for all DSPy modules, providing core functionality for program construction and execution."
+      },
+      {
+        "id": "dspy_signature",
+        "label": "DSPy Signature",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Signature",
+        "description": "Defines the input and output fields and instructions for a language model call, structuring the interaction with the LLM."
+      },
+      {
+        "id": "dspy_predict",
+        "label": "DSPy Predictor",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Predictor",
+        "description": "A basic DSPy module that makes a single call to a language model based on a given signature."
+      },
+      {
+        "id": "dspy_chain_of_thought",
+        "label": "DSPy Chain of Thought",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Chain of Thought",
+        "description": "A DSPy module that encourages the language model to generate intermediate reasoning steps before producing the final output."
+      },
+      {
+        "id": "dspy_typed_predictor",
+        "label": "DSPy Typed Predictor",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Typed Predictor",
+        "description": "A DSPy module that makes a single call to a language model, enforcing type constraints on inputs and outputs."
+      },
+      {
+        "id": "dspy_prediction",
+        "label": "DSPy Prediction Object",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Prediction",
+        "description": "An object representing the output of a DSPy module, containing the predicted fields and potentially additional metadata like trajectory."
+      },
+      {
+        "id": "dspy_tool",
+        "label": "DSPy Tool",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Tool",
+        "description": "Represents a callable function or object that an LLM agent can use to interact with external systems or perform specific operations."
+      },
+      {
+        "id": "python_interpreter",
+        "label": "Python Interpreter",
+        "type": "external",
+        "link": "other_module",
+        "title": "Python Interpreter",
+        "description": "An environment for executing Python code, used by modules like CodeAct and ProgramOfThought to run generated programs."
+      },
+      {
+        "id": "code_interpreter",
+        "label": "Code Interpreter Interface",
+        "type": "external",
+        "link": "other_module",
+        "title": "Code Interpreter Interface",
+        "description": "An abstract interface for executing code in a sandboxed environment, allowing RLM to run Python or other languages."
+      },
+      {
+        "id": "dspy_settings_lm",
+        "label": "Global Language Model",
+        "type": "external",
+        "link": "other_module",
+        "title": "Global LM Setting",
+        "description": "The globally configured language model used by DSPy modules when no specific LM is provided."
+      },
+      {
+        "id": "dspy_context",
+        "label": "DSPy Context Manager",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Context",
+        "description": "A context manager for DSPy that allows temporary modification of global settings, such as the trace or adapter."
+      },
+      {
+        "id": "dspy_input_field",
+        "label": "DSPy Input Field",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Input Field",
+        "description": "Defines an input parameter for a DSPy Signature, specifying its description and type."
+      },
+      {
+        "id": "dspy_output_field",
+        "label": "DSPy Output Field",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Output Field",
+        "description": "Defines an output parameter for a DSPy Signature, specifying its description and type."
+      },
+      {
+        "id": "dspy_lm",
+        "label": "DSPy Language Model",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Language Model",
+        "description": "The base class for all language models integrated with DSPy."
+      }
+    ],
+    "edges": [
+      {
+        "source": "avatar_module",
+        "target": "dspy_module",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "avatar_module",
+        "target": "actor_signature",
+        "label": "uses signature",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "avatar_module",
+        "target": "dspy_typed_predictor",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "avatar_module",
+        "target": "dspy_tool",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "avatar_module",
+        "target": "dspy_prediction",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "actor_signature",
+        "target": "dspy_signature",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "actor_signature",
+        "target": "dspy_input_field",
+        "label": "defines fields with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "actor_signature",
+        "target": "dspy_output_field",
+        "label": "defines fields with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "best_of_n_module",
+        "target": "dspy_module",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "best_of_n_module",
+        "target": "dspy_settings_lm",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "best_of_n_module",
+        "target": "dspy_prediction",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "best_of_n_module",
+        "target": "dspy_context",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_module",
+        "target": "react_module",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_module",
+        "target": "program_of_thought_module",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_module",
+        "target": "dspy_signature",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_module",
+        "target": "dspy_predict",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_module",
+        "target": "dspy_chain_of_thought",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_module",
+        "target": "dspy_tool",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_module",
+        "target": "python_interpreter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act_module",
+        "target": "dspy_prediction",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_chain_comparison_module",
+        "target": "dspy_module",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_chain_comparison_module",
+        "target": "dspy_signature",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_chain_comparison_module",
+        "target": "dspy_predict",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_chain_comparison_module",
+        "target": "dspy_input_field",
+        "label": "defines fields with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_chain_comparison_module",
+        "target": "dspy_output_field",
+        "label": "defines fields with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_of_thought_module",
+        "target": "dspy_module",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_of_thought_module",
+        "target": "dspy_signature",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_of_thought_module",
+        "target": "dspy_chain_of_thought",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_of_thought_module",
+        "target": "python_interpreter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_of_thought_module",
+        "target": "dspy_prediction",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react_module",
+        "target": "dspy_module",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react_module",
+        "target": "dspy_signature",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react_module",
+        "target": "dspy_predict",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react_module",
+        "target": "dspy_chain_of_thought",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react_module",
+        "target": "dspy_tool",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react_module",
+        "target": "dspy_prediction",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_module",
+        "target": "dspy_module",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_module",
+        "target": "dspy_settings_lm",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_module",
+        "target": "dspy_context",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_module",
+        "target": "dspy_prediction",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_module",
+        "target": "dspy_predict",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_module",
+        "target": "offer_feedback_signature",
+        "label": "uses signature",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_module",
+        "target": "inspect_modules_func",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine_module",
+        "target": "wrapper_adapter_class",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapper_adapter_class",
+        "target": "dspy_input_field",
+        "label": "appends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "offer_feedback_signature",
+        "target": "dspy_signature",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "offer_feedback_signature",
+        "target": "dspy_input_field",
+        "label": "defines fields with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "offer_feedback_signature",
+        "target": "dspy_output_field",
+        "label": "defines fields with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm_module",
+        "target": "dspy_module",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm_module",
+        "target": "dspy_signature",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm_module",
+        "target": "dspy_predict",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm_module",
+        "target": "code_interpreter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm_module",
+        "target": "dspy_tool",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm_module",
+        "target": "dspy_lm",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm_module",
+        "target": "dspy_prediction",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "majority_agg",
+        "target": "default_normalize_func",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "majority_agg",
+        "target": "dspy_prediction",
+        "label": "returns",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_modules",
+        "label": "Surface Modules",
+        "nodes": [
+          "avatar_module",
+          "best_of_n_module",
+          "code_act_module",
+          "multi_chain_comparison_module",
+          "program_of_thought_module",
+          "react_module",
+          "refine_module",
+          "rlm_module"
+        ],
+        "title": "Primary Prediction Modules",
+        "description": "These are the main user-facing modules that implement various advanced prediction and control flow strategies within DSPy programs.",
+        "role": "generative"
+      },
+      {
+        "id": "helper_functions",
+        "label": "Helper Functions",
+        "nodes": [
+          "majority_agg",
+          "default_normalize_func",
+          "inspect_modules_func"
+        ],
+        "title": "Utility Functions",
+        "description": "Auxiliary functions that support the core prediction modules, performing tasks like aggregation, normalization, or introspection.",
+        "role": "analytical"
+      },
+      {
+        "id": "signatures",
+        "label": "Signatures",
+        "nodes": [
+          "actor_signature",
+          "offer_feedback_signature"
+        ],
+        "title": "LLM Interaction Signatures",
+        "description": "Specialized DSPy Signatures that define the structure and instructions for specific LLM interactions within the prediction modules.",
+        "role": "surface"
+      },
+      {
+        "id": "internal_components",
+        "label": "Internal Components",
+        "nodes": [
+          "wrapper_adapter_class"
+        ],
+        "title": "Internal Utility Components",
+        "description": "Components primarily used internally by other modules to facilitate their operations, often for specific integration or adaptation tasks.",
+        "role": "generative"
+      }
+    ]
+  }
+}

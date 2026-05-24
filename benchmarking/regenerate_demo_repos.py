@@ -107,6 +107,7 @@ REPOS = {
     "ollama": "https://github.com/ollama/ollama.git",
     "pydantic-ai": "https://github.com/pydantic/pydantic-ai.git",
     "transformers": "https://github.com/huggingface/transformers.git",
+    "persona-selection-model": "https://github.com/ShreyasPatel031/Persona-Selection-Model.git",
 }
 
 DEMO_REPOS = REPO_ROOT / "demo" / "repos"

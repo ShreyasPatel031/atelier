@@ -538,6 +538,8 @@ Rules:
 - 4-5 top-level modules, 3-5 sub-modules within each
 - Top-level "components" must be empty [] — all components go into children sub-modules
 - Every component must appear in exactly one sub-module
+- Every sub-module MUST have at least one component — do NOT create empty sub-modules with "components": []
+- If there are fewer components than sub-module slots, use fewer sub-modules — never pad with empty ones
 - Group by functional responsibility, not directory structure
 - Use snake_case for module names
 - DO NOT include any reasoning, explanation, or text before the <GROUPED_COMPONENTS> tag

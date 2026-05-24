@@ -1,5 +1,6 @@
 from pydantic_ai import Agent
 # import logfire
+import asyncio
 import logging
 import os
 import time
@@ -491,7 +492,8 @@ class AgentOrchestrator:
                 from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
                 import json as _json
 
-                doc = generate_leaf_doc_json(
+                doc = await asyncio.to_thread(
+                    generate_leaf_doc_json,
                     module_name=module_name,
                     core_component_ids=core_component_ids,
                     components=components,
@@ -507,7 +509,7 @@ class AgentOrchestrator:
 
                 # Update module tree
                 if module_tree_lock:
-                    async with module_tree_lock:
+                    with module_tree_lock:
                         current_tree = file_manager.load_json(module_tree_path)
                         node = current_tree
                         for key in module_path:
@@ -641,8 +643,7 @@ class AgentOrchestrator:
             
             # Save updated module tree (with lock if provided)
             if module_tree_lock:
-                async with module_tree_lock:
-                    # Reload to get latest, merge our changes, save
+                with module_tree_lock:
                     current_tree = file_manager.load_json(module_tree_path)
                     self._merge_module_tree(current_tree, deps.module_tree)
                     file_manager.save_json(current_tree, module_tree_path)
@@ -781,12 +782,9 @@ class AgentOrchestrator:
             # Save updated module tree (with lock if provided for parallel safety)
             save_start = time.time()
             if module_tree_lock:
-                async with module_tree_lock:
-                    # Reload to get latest changes from other parallel tasks
+                with module_tree_lock:
                     current_tree = file_manager.load_json(module_tree_path)
-                    # Merge our changes
                     self._merge_module_tree(current_tree, deps.module_tree)
-                    # Apply extracted metadata (title, description, diagram) to correct nested position
                     if extracted_title:
                         apply_metadata_to_tree_path(
                             current_tree,
