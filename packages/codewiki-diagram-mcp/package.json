@@ -1,6 +1,6 @@
 {
   "name": "@atelier-inc/codewiki-diagram-mcp",
-  "version": "0.1.0",
+  "version": "0.5.2",
   "description": "MCP server for browsing CodeWiki architecture diagrams — fetches hosted diagram data, zero local setup required",
   "type": "module",
   "bin": {
@@ -36,6 +36,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/atelier-inc/atelier"
+    "url": "https://github.com/ShreyasPatel031/atelier"
   }
 }

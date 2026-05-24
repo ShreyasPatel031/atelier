@@ -1,8 +1,8 @@
-import { getLocalOrigin } from "./local-server.js";
+import { readFile, access } from "node:fs/promises";
+import { join } from "node:path";
 
-const HOSTED_ORIGIN =
-  process.env.CODEWIKI_DATA_ORIGIN?.replace(/\/+$/, "") ||
-  "https://app.atelier-inc.net";
+import { getLocalOrigin } from "./local-server.js";
+import { CACHE_BASE, getHostedOrigin } from "./paths.js";
 
 const TTL_MS = 60_000;
 
@@ -12,6 +12,10 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
+
+export function clearFetchCache(): void {
+  cache.clear();
+}
 
 export async function fetchJson<T = unknown>(path: string): Promise<T> {
   const cleanPath = path.replace(/^\/+/, "");
@@ -38,8 +42,19 @@ export async function fetchJson<T = unknown>(path: string): Promise<T> {
     }
   }
 
-  // Fall back to hosted origin
-  const hostedUrl = `${HOSTED_ORIGIN}/${cleanPath}`;
+  // Fall back to local cache on disk (works even if viewer server is down)
+  const cachePath = join(CACHE_BASE, cleanPath);
+  try {
+    await access(cachePath);
+    const data = JSON.parse(await readFile(cachePath, "utf-8")) as T;
+    cache.set(cacheKey, { data, expiry: Date.now() + TTL_MS });
+    return data;
+  } catch {
+    // not in cache
+  }
+
+  const hostedOrigin = getHostedOrigin();
+  const hostedUrl = `${hostedOrigin}/${cleanPath}`;
   const res = await fetch(hostedUrl);
   if (!res.ok) {
     throw new Error(`GET ${hostedUrl} -> ${res.status} ${res.statusText}`);
@@ -51,5 +66,5 @@ export async function fetchJson<T = unknown>(path: string): Promise<T> {
 }
 
 export function getDataOrigin(): string {
-  return getLocalOrigin() || HOSTED_ORIGIN;
+  return getLocalOrigin() || getHostedOrigin();
 }

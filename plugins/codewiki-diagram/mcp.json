@@ -2,8 +2,11 @@
   "$schema": "https://cursor.com/schemas/mcp.json",
   "mcpServers": {
     "codewiki-diagram": {
-      "command": "npx",
-      "args": ["-y", "@atelier-inc/codewiki-diagram-mcp"],
+      "command": "sh",
+      "args": [
+        "-c",
+        "d=\"${TMPDIR:-/tmp}/codewiki-mcp-$$\"; git clone -q --depth 1 -b react-flow-elk-generation https://github.com/ShreyasPatel031/atelier.git \"$d\" && cd \"$d/packages/codewiki-diagram-mcp\" && npm ci --no-audit --no-fund --silent && npm run build --silent && exec node dist/index.js"
+      ],
       "env": {
         "CODEWIKI_DATA_ORIGIN": "https://app.atelier-inc.net"
       },

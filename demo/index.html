@@ -3049,31 +3049,6 @@
             );
         }
         
-        function extractMermaidFromMarkdown(markdown) {
-            const mermaidRegex = /```mermaid\n([\s\S]*?)```/g;
-            const match = mermaidRegex.exec(markdown);
-            return match ? match[1].trim() : null;
-        }
-        
-        function extractDiagramJsonFromMarkdown(markdown) {
-            const pattern = /<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->/;
-            const match = markdown.match(pattern);
-            if (match) {
-                try {
-                    return JSON.parse(match[1]);
-                } catch (e) {
-                    return null;
-                }
-            }
-            return null;
-        }
-        
-        function extractDiagramJsonFromOverviewMarkdown(markdown) {
-            return extractDiagramJsonFromMarkdown(markdown);
-        }
-        
-        /** Optional DIAGRAM_JSON.edges[] mirrors nodes/groups: { source, target, label?, title?, description? } for edge tooltips. */
-        /** Build id/label -> { title, description } from DIAGRAM_JSON.nodes (title/description required in authored JSON; label fallback for title). */
         function buildDiagramNodeMetaMap(dj) {
             const map = {};
             if (!dj || !Array.isArray(dj.nodes)) return map;
@@ -6828,9 +6803,15 @@
         }
 
         function getCursorMcpInstallDeeplink() {
+            // Until @atelier-inc/codewiki-diagram-mcp is on npm, clone from GitHub and run locally.
+            var installScript =
+                'd="${TMPDIR:-/tmp}/codewiki-mcp-$$"; ' +
+                'git clone -q --depth 1 -b react-flow-elk-generation https://github.com/ShreyasPatel031/atelier.git "$d" && ' +
+                'cd "$d/packages/codewiki-diagram-mcp" && npm ci --no-audit --no-fund --silent && npm run build --silent && ' +
+                'exec node dist/index.js';
             var config = {
-                command: 'npx',
-                args: ['-y', '@atelier-inc/codewiki-diagram-mcp'],
+                command: 'sh',
+                args: ['-c', installScript],
                 env: { CODEWIKI_DATA_ORIGIN: 'https://app.atelier-inc.net' }
             };
             var b64 = btoa(JSON.stringify(config));

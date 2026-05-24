@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { fetchJson } from "../fetch.js";
+import { fetchJson, getDataOrigin } from "../fetch.js";
+import { listLocalRepoIds } from "../repo-sources.js";
 
 export const listReposSchema = z.object({});
 
@@ -12,7 +13,26 @@ interface RepoEntry {
 export async function listRepos(): Promise<{
   content: Array<{ type: "text"; text: string }>;
 }> {
-  const repos = await fetchJson<RepoEntry[]>("repos/index.json");
+  let hosted: RepoEntry[] = [];
+  try {
+    hosted = await fetchJson<RepoEntry[]>("repos/index.json");
+  } catch {
+    hosted = [];
+  }
+
+  const localIds = await listLocalRepoIds();
+  const byId = new Map<string, RepoEntry>();
+
+  for (const r of hosted) {
+    byId.set(r.id, r);
+  }
+  for (const id of localIds) {
+    if (!byId.has(id)) {
+      byId.set(id, { id, label: id, description: "local only" });
+    }
+  }
+
+  const origin = getDataOrigin();
 
   return {
     content: [
@@ -21,12 +41,14 @@ export async function listRepos(): Promise<{
         text: JSON.stringify(
           {
             ok: true,
-            repos: repos.map((r) => ({
-              id: r.id,
-              label: r.label,
-              description: r.description || "",
-              viewer_url: `https://app.atelier-inc.net/?repo=${r.id}`,
-            })),
+            repos: [...byId.values()]
+              .sort((a, b) => a.id.localeCompare(b.id))
+              .map((r) => ({
+                id: r.id,
+                label: r.label,
+                description: r.description || "",
+                viewer_url: `${origin}/?repo=${r.id}`,
+              })),
           },
           null,
           2
