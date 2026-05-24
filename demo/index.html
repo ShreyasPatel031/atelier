@@ -178,6 +178,28 @@
             display: block;
             pointer-events: none;
         }
+
+        .embed-action-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 18px;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #f8fafc;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
+        }
+
+        .embed-action-toast.is-visible {
+            opacity: 1;
+        }
         
         .zoom-level {
             font-size: 13px;
@@ -1189,6 +1211,29 @@
                     clip-rule="evenodd"
                     fill="#24292E"
                     d="M16 0C7.16 0 0 7.16 0 16C0 23.08 4.58 29.06 10.94 31.18C11.74 31.32 12.04 30.84 12.04 30.42C12.04 30.04 12.02 28.78 12.02 27.44C8 28.18 6.96 26.46 6.64 25.56C6.46 25.1 5.68 23.68 5 23.3C4.44 23 3.64 22.26 4.98 22.24C6.24 22.22 7.14 23.4 7.44 23.88C8.88 26.3 11.18 25.62 12.1 25.2C12.24 24.16 12.66 23.46 13.12 23.06C9.56 22.66 5.84 21.28 5.84 15.16C5.84 13.42 6.46 11.98 7.48 10.86C7.32 10.46 6.76 8.82 7.64 6.62C7.64 6.62 8.98 6.2 12.04 8.26C13.32 7.9 14.68 7.72 16.04 7.72C17.4 7.72 18.76 7.9 20.04 8.26C23.1 6.18 24.44 6.62 24.44 6.62C25.32 8.82 24.76 10.46 24.6 10.86C25.62 11.98 26.24 13.4 26.24 15.16C26.24 21.3 22.5 22.66 18.94 23.06C19.52 23.56 20.02 24.52 20.02 26.02C20.02 28.16 20 29.88 20 30.42C20 30.84 20.3 31.34 21.1 31.18C27.42 29.06 32 23.06 32 16C32 7.16 24.84 0 16 0V0Z"
+                />
+            </svg>
+        </button>
+        <button
+            type="button"
+            class="zoom-btn readme-embed-btn cursor-embed-btn"
+            id="cursorEmbedBtn"
+            title="Open in Cursor"
+            aria-label="Open architecture diagram in Cursor"
+            onclick="openDiagramInCursor()"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 22 22"
+                fill="none"
+                aria-hidden="true"
+                focusable="false"
+            >
+                <path
+                    fill="#0F0F0F"
+                    d="M4 2 20 11l-7 2-2 7z"
                 />
             </svg>
         </button>
@@ -6762,6 +6807,7 @@
             const prevTitle = btn ? btn.title : '';
             try {
                 await navigator.clipboard.writeText(text);
+                showEmbedActionToast('Copied README embed');
                 if (btn) {
                     btn.title = 'Copied README embed';
                     setTimeout(function () {
@@ -6770,7 +6816,52 @@
                 }
             } catch (err) {
                 console.warn('README embed clipboard write failed', err);
+                showEmbedActionToast('Copy failed — see console');
                 if (btn) btn.title = 'Copy failed — see console';
+            }
+        }
+
+        function formatCursorOpenDeeplink(repoId) {
+            const origin = getViewerPublicOrigin();
+            const id = repoId || repoPath || 'crewai';
+            const viewerUrl = origin + '/?repo=' + encodeURIComponent(id);
+            const promptText = 'Open ' + viewerUrl + ' in Simple Browser.';
+            return 'https://cursor.com/link/prompt?text=' + encodeURIComponent(promptText);
+        }
+
+        function showEmbedActionToast(message) {
+            let el = document.getElementById('embedActionToast');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'embedActionToast';
+                el.className = 'embed-action-toast';
+                el.setAttribute('role', 'status');
+                el.setAttribute('aria-live', 'polite');
+                document.body.appendChild(el);
+            }
+            el.textContent = message;
+            el.classList.add('is-visible');
+            if (el._hideTimer) {
+                clearTimeout(el._hideTimer);
+            }
+            el._hideTimer = setTimeout(function () {
+                el.classList.remove('is-visible');
+            }, 2800);
+        }
+
+        function openDiagramInCursor() {
+            const deeplink = formatCursorOpenDeeplink();
+            showEmbedActionToast('Opening in Cursor…');
+            const win = window.open(deeplink, '_blank', 'noopener,noreferrer');
+            if (!win) {
+                const link = document.createElement('a');
+                link.href = deeplink;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                showEmbedActionToast('Allow popups to open Cursor');
             }
         }
 
@@ -6778,6 +6869,9 @@
         window.copyDiagramSelectionToClipboard = copyDiagramSelectionToClipboard;
         window.formatReadmeEmbedMarkdown = formatReadmeEmbedMarkdown;
         window.copyReadmeEmbedToClipboard = copyReadmeEmbedToClipboard;
+        window.formatCursorOpenDeeplink = formatCursorOpenDeeplink;
+        window.openDiagramInCursor = openDiagramInCursor;
+        window.showEmbedActionToast = showEmbedActionToast;
 
         /** Playwright / automated tests: read pan zoom and measure node vs expanded cluster frame (viewport px). */
         window.__diagramViewState = () => ({
