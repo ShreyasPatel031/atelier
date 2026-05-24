@@ -6821,12 +6821,15 @@
             }
         }
 
-        function formatCursorOpenDeeplink(repoId) {
+        function getViewerUrl(repoId) {
             const origin = getViewerPublicOrigin();
             const id = repoId || repoPath || 'crewai';
-            const viewerUrl = origin + '/?repo=' + encodeURIComponent(id);
-            const promptText = 'Open ' + viewerUrl + ' in Simple Browser.';
-            return 'https://cursor.com/link/prompt?text=' + encodeURIComponent(promptText);
+            return origin + '/?repo=' + encodeURIComponent(id);
+        }
+
+        function getCursorOpenUrl(repoId) {
+            var url = getViewerUrl(repoId);
+            return 'https://cursor.com/link/prompt?text=' + encodeURIComponent(url);
         }
 
         function showEmbedActionToast(message) {
@@ -6850,26 +6853,17 @@
         }
 
         function openDiagramInCursor() {
-            const deeplink = formatCursorOpenDeeplink();
+            var deeplink = getCursorOpenUrl();
             showEmbedActionToast('Opening in Cursor…');
-            const win = window.open(deeplink, '_blank', 'noopener,noreferrer');
-            if (!win) {
-                const link = document.createElement('a');
-                link.href = deeplink;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                showEmbedActionToast('Allow popups to open Cursor');
-            }
+            window.open(deeplink, '_blank', 'noopener,noreferrer');
         }
 
         window.formatDiagramSelectionForCursorPaste = formatDiagramSelectionForCursorPaste;
         window.copyDiagramSelectionToClipboard = copyDiagramSelectionToClipboard;
         window.formatReadmeEmbedMarkdown = formatReadmeEmbedMarkdown;
         window.copyReadmeEmbedToClipboard = copyReadmeEmbedToClipboard;
-        window.formatCursorOpenDeeplink = formatCursorOpenDeeplink;
+        window.getViewerUrl = getViewerUrl;
+        window.getCursorOpenUrl = getCursorOpenUrl;
         window.openDiagramInCursor = openDiagramInCursor;
         window.showEmbedActionToast = showEmbedActionToast;
 
