@@ -1,161 +1,237 @@
 {
-    "title": "Language Model Core Interfaces",
-    "summary": "This module defines the fundamental interfaces and utilities for interacting with language models, including message representation, prompt engineering, model implementations, and output parsing. It provides the building blocks for integrating and controlling LLMs within LangChain.",
+    "title": "Language Model Interfaces",
+    "summary": "This module defines the core interfaces and components for interacting with language models, covering message representation, prompt construction, model implementations, and output parsing. It provides the foundational building blocks for any LLM-powered application in LangChain.",
     "diagram": {
-        "direction": "LR",
+        "direction": "TD",
         "nodes": [
             {
-                "id": "user_input",
-                "label": "User Input",
+                "id": "llm_interface",
+                "label": "Abstract Language Model Interface",
                 "type": "external",
-                "link": null,
-                "title": "User Provided Input",
-                "description": "The initial text, query, or data provided by the user or application, which serves as the starting point for LLM interaction."
+                "link": "base_abstractions",
+                "title": "Base Language Model Interface",
+                "description": "Defines the abstract interface for all language models (LLMs), providing methods for text generation and interaction."
             },
             {
-                "id": "prompts_mod",
-                "label": "Prompt Engineering",
-                "type": "module",
-                "link": "prompt_engineering",
-                "title": "Prompt Engineering Module",
-                "description": "Manages the creation, formatting, and templating of prompts for language models, including chat and string-based prompts, handling input variables and partial application."
-            },
-            {
-                "id": "messages_mod",
-                "label": "Message Handling",
-                "type": "module",
-                "link": "message_handling",
-                "title": "Message Handling Module",
-                "description": "Provides utilities for representing, translating, and manipulating chat messages, including content blocks, provider-specific message translation, and chat history management."
-            },
-            {
-                "id": "models_mod",
-                "label": "Core LLM Interfaces",
-                "type": "module",
-                "link": "model_implementations",
-                "title": "Language Model Interfaces Module",
-                "description": "Defines abstract base classes for various language models (LLMs, chat models) and provides concrete implementations or wrappers for interacting with external LLM providers."
-            },
-            {
-                "id": "llm_provider",
-                "label": "External LLM Provider",
+                "id": "chat_model_interface",
+                "label": "Abstract Chat Model Interface",
                 "type": "external",
+                "link": "base_abstractions",
+                "title": "Base Chat Model Interface",
+                "description": "Extends the base language model interface for conversational AI, handling message lists and chat-specific interactions."
+            },
+            {
+                "id": "model_implementations",
+                "label": "Concrete Model Implementations",
+                "type": "component",
                 "link": null,
-                "title": "External Language Model Service",
-                "description": "Represents an external Large Language Model service (e.g., OpenAI, Anthropic, Google) that processes prompts and generates raw text or structured responses."
+                "title": "Concrete LLM/Chat Models",
+                "description": "Actual implementations of language models, including fake models for testing and integrations with various LLM providers."
             },
             {
-                "id": "parsers_mod",
-                "label": "Output Parsing",
-                "type": "module",
-                "link": "output_parsing",
-                "title": "Output Parsing Module",
-                "description": "Contains parsers to convert raw language model outputs into structured formats like lists, JSON, or Pydantic objects, supporting both synchronous and streaming results."
-            },
-            {
-                "id": "application_output",
-                "label": "Application Output",
+                "id": "message_interface",
+                "label": "Abstract Message Interface",
                 "type": "external",
+                "link": "base_abstractions",
+                "title": "Base Message Abstraction",
+                "description": "Defines the fundamental structure for all message types (e.g., Human, AI, System) in conversational contexts."
+            },
+            {
+                "id": "content_blocks",
+                "label": "Standard Message Content Blocks",
+                "type": "component",
                 "link": null,
-                "title": "Structured Application Output",
-                "description": "The final, processed, and structured data or response consumed by the application after being generated by the LLM and transformed by output parsers."
+                "title": "Message Content Blocks",
+                "description": "Standardized representations for various types of content within messages, such as text, images, and tool calls."
+            },
+            {
+                "id": "message_utils",
+                "label": "Message Utility Functions",
+                "type": "component",
+                "link": null,
+                "title": "Message Utilities",
+                "description": "Helper functions for manipulating messages, including token counting, filtering, merging, and chat history management."
+            },
+            {
+                "id": "prompt_template_interface",
+                "label": "Abstract Prompt Template Interface",
+                "type": "external",
+                "link": "base_abstractions",
+                "title": "Base Prompt Template",
+                "description": "Defines the abstract base for all prompt templates, enabling dynamic construction and formatting of inputs for language models."
+            },
+            {
+                "id": "chat_prompt_templates",
+                "label": "Chat Prompt Templates",
+                "type": "component",
+                "link": null,
+                "title": "Chat-Specific Prompt Templates",
+                "description": "Templates designed for constructing prompts in conversational settings, often composed of a sequence of message prompt templates."
+            },
+            {
+                "id": "string_prompt_templates",
+                "label": "String Prompt Templates",
+                "type": "component",
+                "link": null,
+                "title": "String-Based Prompt Templates",
+                "description": "Templates for creating simple string-based prompts, allowing for variable substitution and formatting."
+            },
+            {
+                "id": "output_parser_interface",
+                "label": "Abstract Output Parser Interface",
+                "type": "external",
+                "link": "base_abstractions",
+                "title": "Base Output Parser",
+                "description": "Defines the abstract interface for parsing raw language model outputs into structured and usable formats."
+            },
+            {
+                "id": "structured_parsers",
+                "label": "Structured Output Parsers",
+                "type": "component",
+                "link": null,
+                "title": "Specific Output Parsers",
+                "description": "Concrete implementations of output parsers that convert LLM text into structured data like lists, XML, or Pydantic objects."
             }
         ],
         "edges": [
             {
-                "source": "user_input",
-                "target": "prompts_mod",
-                "label": "Forms initial prompt",
+                "source": "llm_interface",
+                "target": "chat_model_interface",
+                "label": "Specializes for chat",
                 "title": null,
                 "description": null
             },
             {
-                "source": "prompts_mod",
-                "target": "models_mod",
-                "label": "Sends formatted prompt",
+                "source": "model_implementations",
+                "target": "llm_interface",
+                "label": "Implements",
                 "title": null,
                 "description": null
             },
             {
-                "source": "models_mod",
-                "target": "llm_provider",
-                "label": "Invokes external LLM",
+                "source": "model_implementations",
+                "target": "chat_model_interface",
+                "label": "Implements",
                 "title": null,
                 "description": null
             },
             {
-                "source": "llm_provider",
-                "target": "models_mod",
-                "label": "Returns raw generation",
+                "source": "message_interface",
+                "target": "content_blocks",
+                "label": "Composed of",
                 "title": null,
                 "description": null
             },
             {
-                "source": "models_mod",
-                "target": "messages_mod",
-                "label": "Generates chat messages",
+                "source": "message_utils",
+                "target": "message_interface",
+                "label": "Operates on",
                 "title": null,
                 "description": null
             },
             {
-                "source": "messages_mod",
-                "target": "prompts_mod",
-                "label": "Provides chat history/context",
+                "source": "prompt_template_interface",
+                "target": "chat_prompt_templates",
+                "label": "Specializes for chat",
                 "title": null,
                 "description": null
             },
             {
-                "source": "models_mod",
-                "target": "parsers_mod",
-                "label": "Sends raw output for parsing",
+                "source": "prompt_template_interface",
+                "target": "string_prompt_templates",
+                "label": "Specializes for string",
                 "title": null,
                 "description": null
             },
             {
-                "source": "messages_mod",
-                "target": "parsers_mod",
-                "label": "Sends messages for structured parsing",
+                "source": "chat_prompt_templates",
+                "target": "message_interface",
+                "label": "Generates messages",
                 "title": null,
                 "description": null
             },
             {
-                "source": "parsers_mod",
-                "target": "application_output",
-                "label": "Produces structured data",
+                "source": "string_prompt_templates",
+                "target": "llm_interface",
+                "label": "Formats input for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "llm_interface",
+                "target": "output_parser_interface",
+                "label": "Generates raw output for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "chat_model_interface",
+                "target": "output_parser_interface",
+                "label": "Generates raw output for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "structured_parsers",
+                "target": "output_parser_interface",
+                "label": "Implements",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "prompt_template_interface",
+                "target": "llm_interface",
+                "label": "Provides input to",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "input_preparation",
-                "label": "Input Preparation",
-                "nodes": [
-                    "prompts_mod",
-                    "messages_mod"
-                ],
-                "title": "Input Preparation & Context Management",
-                "description": "This group handles the initial stages of LLM interaction, including constructing prompts from user input and managing conversational history.",
-                "role": null
-            },
-            {
                 "id": "llm_core",
-                "label": "LLM Interaction Core",
+                "label": "Language Model Core",
                 "nodes": [
-                    "models_mod"
+                    "llm_interface",
+                    "chat_model_interface",
+                    "model_implementations"
                 ],
-                "title": "Language Model Interaction Core",
-                "description": "This group defines the central interfaces for interacting with various language models and manages the direct communication with external LLM providers.",
+                "title": "Core Language Model Definitions",
+                "description": "This group encompasses the fundamental interfaces and concrete implementations for interacting with various types of language models.",
                 "role": null
             },
             {
-                "id": "output_processing",
-                "label": "Output Processing",
+                "id": "message_handling",
+                "label": "Message Handling",
                 "nodes": [
-                    "parsers_mod"
+                    "message_interface",
+                    "content_blocks",
+                    "message_utils"
                 ],
-                "title": "Output Processing & Structuring",
-                "description": "This group is responsible for transforming the raw, unstructured output from language models into a usable, structured format for the application.",
+                "title": "Conversational Message Management",
+                "description": "This group focuses on the representation, construction, and utility functions for managing messages within conversational AI systems.",
+                "role": null
+            },
+            {
+                "id": "prompt_engineering",
+                "label": "Prompt Engineering",
+                "nodes": [
+                    "prompt_template_interface",
+                    "chat_prompt_templates",
+                    "string_prompt_templates"
+                ],
+                "title": "Prompt Construction & Formatting",
+                "description": "This group provides the tools and templates for building and formatting effective prompts for both traditional LLMs and chat models.",
+                "role": null
+            },
+            {
+                "id": "output_parsing",
+                "label": "Output Parsing",
+                "nodes": [
+                    "output_parser_interface",
+                    "structured_parsers"
+                ],
+                "title": "Structured Output Interpretation",
+                "description": "This group contains the interfaces and implementations for parsing raw language model outputs into structured and actionable data.",
                 "role": null
             }
         ]

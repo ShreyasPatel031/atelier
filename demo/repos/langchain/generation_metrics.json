@@ -1,29 +1,29 @@
 {
   "repo_name": "langchain",
   "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/langchain",
-  "repo_size_mb": 461679.40234375,
+  "repo_size_mb": 461723.703125,
   "total_files": 0,
   "total_code_files": 2481,
   "stages": {
     "Dependency Analysis": {
       "stage_name": "Dependency Analysis",
-      "duration": 2.706616163253784,
+      "duration": 3.540616035461426,
       "tokens_used": 0,
       "files_created": 0,
       "files_created_list": []
     },
     "Module Clustering": {
       "stage_name": "Module Clustering",
-      "duration": 45.00347328186035,
+      "duration": 62.12950301170349,
       "tokens_used": 23650,
       "files_created": 0,
       "files_created_list": []
     },
     "Documentation Generation": {
       "stage_name": "Documentation Generation",
-      "duration": 169.17731714248657,
-      "tokens_used": 1413477,
-      "files_created": 29,
+      "duration": 750.642993927002,
+      "tokens_used": 1278338,
+      "files_created": 28,
       "files_created_list": [
         "document_loading.json",
         "evaluation_and_testing.json",
@@ -45,7 +45,6 @@
         "overview.json",
         "memory_management.json",
         "general_utilities.json",
-        "agent_and_chain_orchestration.json",
         "developer_tools_and_integrations.json",
         "data_management_and_retrieval.json",
         "callbacks_and_tracing.json",
@@ -57,13 +56,13 @@
       ]
     }
   },
-  "time_to_first_overview": 217.11360597610474,
+  "time_to_first_overview": 816.5678639411926,
   "first_overview_file": "/Users/shreyaspatel/atelier/.tmp/demo_regen/langchain/docs/overview.json",
-  "total_duration": 217.11364793777466,
-  "total_tokens": 1437127,
-  "estimated_cost_usd": 0.2585,
-  "total_llm_calls": 26,
-  "total_files_created": 29,
-  "start_time": 1779782278.66847,
-  "end_time": 1779782495.7821178
+  "total_duration": 816.5679159164429,
+  "total_tokens": 1301988,
+  "estimated_cost_usd": 0.2369,
+  "total_llm_calls": 25,
+  "total_files_created": 28,
+  "start_time": 1779785893.604396,
+  "end_time": 1779786710.172312
 }

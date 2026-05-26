@@ -1,6 +1,6 @@
 {
     "generation_info": {
-        "timestamp": "2026-05-26T13:31:35.722978",
+        "timestamp": "2026-05-26T14:41:50.129805",
         "main_model": "gemini-2.5-flash",
         "generator_version": "1.0.0",
         "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/langchain",
@@ -31,7 +31,6 @@
         "model_implementations.json",
         "memory_management.json",
         "general_utilities.json",
-        "agent_and_chain_orchestration.json",
         "developer_tools_and_integrations.json",
         "data_management_and_retrieval.json",
         "callbacks_and_tracing.json",

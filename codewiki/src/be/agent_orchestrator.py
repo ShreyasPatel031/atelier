@@ -518,25 +518,21 @@ class AgentOrchestrator:
 
 
 
-                # Update module tree
+                # Update module tree (navigate via "children" like apply_metadata_to_tree_path)
                 if module_tree_lock:
                     with module_tree_lock:
                         current_tree = file_manager.load_json(module_tree_path)
-                        node = current_tree
-                        for key in module_path:
-                            node = node.setdefault(key, {})
-                        node["title"] = doc["title"]
-                        node["description"] = doc["summary"]
-                        node["diagram"] = doc["diagram"]
+                        apply_metadata_to_tree_path(
+                            current_tree, module_path,
+                            doc["title"], doc["summary"], doc["diagram"],
+                        )
                         file_manager.save_json(current_tree, module_tree_path)
                         deps.module_tree = current_tree
                 else:
-                    node = deps.module_tree
-                    for key in module_path:
-                        node = node.setdefault(key, {})
-                    node["title"] = doc["title"]
-                    node["description"] = doc["summary"]
-                    node["diagram"] = doc["diagram"]
+                    apply_metadata_to_tree_path(
+                        deps.module_tree, module_path,
+                        doc["title"], doc["summary"], doc["diagram"],
+                    )
                     file_manager.save_json(deps.module_tree, module_tree_path)
 
                 logger.info(

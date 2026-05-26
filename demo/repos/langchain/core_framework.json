@@ -1,109 +1,95 @@
 {
     "title": "Core Framework Overview",
-    "summary": "This module provides the foundational components and utilities for building LangChain applications. It defines core abstractions, manages API lifecycle and security, handles callbacks and tracing, and offers general-purpose utilities for various framework operations.",
+    "summary": "This module defines the fundamental building blocks, interfaces, and essential utilities that form the foundation of the LangChain ecosystem. It provides core abstractions for AI components, manages API lifecycle, ensures security, and offers observability features.",
     "diagram": {
         "direction": "TD",
         "nodes": [
             {
                 "id": "core_abstractions",
-                "label": "Core Abstractions",
+                "label": "Define Core Interfaces",
                 "type": "module",
                 "link": "base_abstractions",
                 "title": "Fundamental LangChain Abstractions",
-                "description": "Defines the abstract base classes and interfaces for all core LangChain components, including serializable objects, composable runnables, language models, prompts, and tools. It forms the architectural backbone."
+                "description": "Establishes the foundational abstract classes and interfaces for building all LangChain components, including runnables, language models, prompts, and tools. It forms the architectural backbone."
             },
             {
                 "id": "api_security",
-                "label": "API & Security Utilities",
+                "label": "Manage API & Security",
                 "type": "module",
                 "link": "api_and_security",
-                "title": "API Lifecycle & Security Management",
-                "description": "Provides essential utilities for managing API lifecycle (beta features, deprecations) and robust security features, primarily focusing on Server-Side Request Forgery (SSRF) protection for URL validation."
+                "title": "API Lifecycle & Security Utilities",
+                "description": "Provides mechanisms for managing API deprecations and beta features, alongside robust security measures like SSRF protection for URL validation and secure HTTP client creation."
             },
             {
                 "id": "callbacks_tracing",
-                "label": "Callbacks & Tracing",
+                "label": "Handle Events & Tracing",
                 "type": "module",
                 "link": "callbacks_and_tracing",
-                "title": "Observability & Event Handling",
-                "description": "Offers core functionalities for handling asynchronous and synchronous callbacks, managing execution traces, and dispatching custom events for detailed logging, monitoring, and integration with tracing platforms."
+                "title": "Observability with Callbacks & Tracing",
+                "description": "Offers core functionalities for handling synchronous and asynchronous events, managing execution traces, and dispatching custom events for monitoring and debugging LangChain applications."
             },
             {
-                "id": "general_utilities",
-                "label": "General Utilities",
+                "id": "general_utils",
+                "label": "Provide General Utilities",
                 "type": "module",
                 "link": "general_utilities",
-                "title": "Common Helper Functions & Tools",
-                "description": "Contains a collection of fundamental utility functions and classes, including tools for managing data streams, parsing HTML, handling Pydantic models, argument validation, and in-memory caching."
+                "title": "Essential General Utilities",
+                "description": "Contains a collection of fundamental utility functions and classes for tasks such as data stream management, HTML parsing, Pydantic model handling, system information, and in-memory caching."
             }
         ],
         "edges": [
             {
-                "source": "core_abstractions",
-                "target": "callbacks_tracing",
-                "label": "Generates events for",
-                "title": "Event Generation",
-                "description": "Core components like Runnables emit events that are captured and processed by the callbacks and tracing system for observability."
-            },
-            {
-                "source": "core_abstractions",
-                "target": "api_security",
-                "label": "Uses for validation",
-                "title": "Security Integration",
-                "description": "Some core abstractions (e.g., tools, models) might leverage security utilities for input validation or safe operations, such as URL checks."
-            },
-            {
-                "source": "core_abstractions",
-                "target": "general_utilities",
-                "label": "Leverages common helpers",
-                "title": "Utility Dependency",
-                "description": "Core components often rely on general utilities for tasks like serialization, data manipulation, or environment checks, ensuring efficient operations."
+                "source": "api_security",
+                "target": "core_abstractions",
+                "label": "Applies to core components",
+                "title": null,
+                "description": null
             },
             {
                 "source": "callbacks_tracing",
-                "target": "general_utilities",
-                "label": "Uses for internal tasks",
-                "title": "Internal Utility Usage",
-                "description": "The tracing system might use general utilities for tasks like caching trace data, managing internal data structures, or other supporting operations."
+                "target": "core_abstractions",
+                "label": "Monitors core component execution",
+                "title": null,
+                "description": null
             },
             {
-                "source": "api_security",
-                "target": "callbacks_tracing",
-                "label": "Reports security events to",
-                "title": "Security Event Reporting",
-                "description": "Security utilities can report warnings or incidents (e.g., deprecation warnings, SSRF alerts) to the tracing system for logging and monitoring purposes."
+                "source": "general_utils",
+                "target": "core_abstractions",
+                "label": "Supports core component development",
+                "title": null,
+                "description": null
             }
         ],
         "groups": [
             {
-                "id": "foundational_components",
-                "label": "Foundational Components",
+                "id": "core_foundation_group",
+                "label": "Core Foundation",
                 "nodes": [
                     "core_abstractions"
                 ],
-                "title": "Core Architectural Elements",
-                "description": "These modules establish the fundamental structure, interfaces, and core building blocks upon which all LangChain applications are constructed, defining the basic types and behaviors.",
+                "title": "Core Framework Foundation",
+                "description": "This group represents the central abstract definitions and interfaces that all other LangChain components are built upon, providing the fundamental structure and behavior.",
                 "role": null
             },
             {
-                "id": "cross_cutting_concerns",
-                "label": "Cross-Cutting Concerns",
+                "id": "cross_cutting_services_group",
+                "label": "Cross-Cutting Services",
                 "nodes": [
                     "api_security",
                     "callbacks_tracing"
                 ],
-                "title": "System-Wide Support Services",
-                "description": "These modules provide essential services that span across the entire framework, enabling observability, security, and robust API management for all components, ensuring reliability and maintainability.",
+                "title": "Cross-Cutting Framework Services",
+                "description": "These modules provide essential services that span across various components of the framework, such as managing API lifecycle, ensuring security, and offering comprehensive observability features.",
                 "role": null
             },
             {
-                "id": "supporting_utilities",
-                "label": "Supporting Utilities",
+                "id": "general_support_group",
+                "label": "General Support",
                 "nodes": [
-                    "general_utilities"
+                    "general_utils"
                 ],
-                "title": "General Purpose Helper Tools",
-                "description": "This module offers a collection of versatile utility functions and classes that support various operations across the framework, from data handling and parsing to system information and caching.",
+                "title": "General Framework Support Utilities",
+                "description": "This group encompasses a collection of versatile utility functions and classes that support the overall framework, aiding in common tasks like data manipulation, system diagnostics, and caching.",
                 "role": null
             }
         ]
