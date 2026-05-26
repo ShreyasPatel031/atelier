@@ -1,0 +1,518 @@
+{
+  "title": "Agent Middleware V1",
+  "summary": "This module provides a collection of middleware components designed to enhance agent functionality by controlling model and tool interactions, managing context, handling PII, and enabling human oversight. It offers features like call limiting, retries, fallbacks, summarization, and secure shell execution.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "agent_core_model",
+        "label": "Agent Core (Model)",
+        "type": "component",
+        "link": null,
+        "title": "Agent Core (Model)",
+        "description": "The central language model component of the agent, responsible for reasoning and generating responses based on current state and tools."
+      },
+      {
+        "id": "agent_core_tools",
+        "label": "Agent Core (Tools)",
+        "type": "component",
+        "link": null,
+        "title": "Agent Core (Tools)",
+        "description": "Manages the execution of various tools available to the agent, processing tool calls and their results."
+      },
+      {
+        "id": "agent_state",
+        "label": "Agent State Management",
+        "type": "component",
+        "link": null,
+        "title": "Agent State Management",
+        "description": "Stores and manages the conversational history, internal variables, and other state relevant to the agent's operation and middleware."
+      },
+      {
+        "id": "context_editing",
+        "label": "Manage Conversation Context",
+        "type": "component",
+        "link": null,
+        "title": "Manage Conversation Context",
+        "description": "Prunes messages and tool results to keep the conversation within the language model's token limits, preventing context overflow."
+      },
+      {
+        "id": "file_search",
+        "label": "Provide Filesystem Search",
+        "type": "component",
+        "link": null,
+        "title": "Provide Filesystem Search",
+        "description": "Integrates tools for searching local filesystem files and their content (Glob, Grep), enabling agents to interact with the local environment."
+      },
+      {
+        "id": "human_in_loop",
+        "label": "Enable Human Approval",
+        "type": "component",
+        "link": null,
+        "title": "Enable Human Approval",
+        "description": "Allows human users to review and approve, edit, or reject agent's proposed tool calls, ensuring oversight and control."
+      },
+      {
+        "id": "model_call_limit",
+        "label": "Enforce Model Call Limits",
+        "type": "component",
+        "link": null,
+        "title": "Enforce Model Call Limits",
+        "description": "Monitors and restricts the number of calls made to the language model per thread or run, preventing excessive usage and managing costs."
+      },
+      {
+        "id": "model_fallback",
+        "label": "Handle Model Failovers",
+        "type": "component",
+        "link": null,
+        "title": "Handle Model Failovers",
+        "description": "Provides automatic fallback to alternative language models if the primary model call fails, enhancing agent robustness."
+      },
+      {
+        "id": "model_retry",
+        "label": "Retry Failed Model Calls",
+        "type": "component",
+        "link": null,
+        "title": "Retry Failed Model Calls",
+        "description": "Automatically retries language model calls that fail due to transient errors, with configurable backoff strategies."
+      },
+      {
+        "id": "pii_handling",
+        "label": "Detect & Redact PII",
+        "type": "component",
+        "link": null,
+        "title": "Detect & Redact PII",
+        "description": "Identifies and processes Personally Identifiable Information (PII) in agent communications, applying redaction, masking, or blocking strategies for privacy."
+      },
+      {
+        "id": "pii_stream_transformer",
+        "label": "Stream PII Redaction",
+        "type": "component",
+        "link": null,
+        "title": "Stream PII Redaction",
+        "description": "Applies PII redaction rules to streaming agent events and messages in real-time, ensuring PII is scrubbed before reaching consumers."
+      },
+      {
+        "id": "shell_tool",
+        "label": "Provide Persistent Shell",
+        "type": "component",
+        "link": null,
+        "title": "Provide Persistent Shell",
+        "description": "Offers a long-lived shell session as a tool for the agent, with various execution policies for secure command execution."
+      },
+      {
+        "id": "summarization",
+        "label": "Summarize Conversation History",
+        "type": "component",
+        "link": null,
+        "title": "Summarize Conversation History",
+        "description": "Generates summaries of older conversation history to maintain context while staying within token limits, improving efficiency."
+      },
+      {
+        "id": "todo_list",
+        "label": "Manage Agent Todo List",
+        "type": "component",
+        "link": null,
+        "title": "Manage Agent Todo List",
+        "description": "Enables the agent to create and manage structured task lists for complex multi-step operations, improving planning."
+      },
+      {
+        "id": "tool_call_limit",
+        "label": "Enforce Tool Call Limits",
+        "type": "component",
+        "link": null,
+        "title": "Enforce Tool Call Limits",
+        "description": "Monitors and restricts the number of calls made to specific tools or all tools, preventing overuse and managing resource consumption."
+      },
+      {
+        "id": "llm_tool_emulator",
+        "label": "Emulate Tools with LLM",
+        "type": "component",
+        "link": null,
+        "title": "Emulate Tools with LLM",
+        "description": "Simulates tool execution using a language model instead of actual tool calls, useful for testing and development without real-world side effects."
+      },
+      {
+        "id": "tool_retry",
+        "label": "Retry Failed Tool Calls",
+        "type": "component",
+        "link": null,
+        "title": "Retry Failed Tool Calls",
+        "description": "Automatically retries tool calls that fail due to transient errors, with configurable backoff strategies."
+      },
+      {
+        "id": "llm_tool_selector",
+        "label": "Select Relevant Tools",
+        "type": "component",
+        "link": null,
+        "title": "Select Relevant Tools",
+        "description": "Uses a language model to intelligently filter and select the most relevant tools for a given user query, optimizing tool usage."
+      },
+      {
+        "id": "external_llm",
+        "label": "External LLM Service",
+        "type": "external",
+        "link": null,
+        "title": "External LLM Service",
+        "description": "Provides language model capabilities for agent reasoning, summarization, tool emulation, and tool selection."
+      },
+      {
+        "id": "external_filesystem",
+        "label": "External Filesystem",
+        "type": "external",
+        "link": null,
+        "title": "External Filesystem",
+        "description": "Provides access to local files and directories for search and shell operations."
+      },
+      {
+        "id": "external_human",
+        "label": "Human User",
+        "type": "external",
+        "link": null,
+        "title": "Human User",
+        "description": "Provides input and receives output, and can intervene in agent decisions."
+      },
+      {
+        "id": "external_sandbox",
+        "label": "Execution Sandbox",
+        "type": "external",
+        "link": null,
+        "title": "Execution Sandbox",
+        "description": "Isolated environment (e.g., Codex CLI, Docker) for secure command execution, used by the shell tool."
+      }
+    ],
+    "edges": [
+      {
+        "source": "agent_state",
+        "target": "context_editing",
+        "label": "Read Messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "context_editing",
+        "target": "agent_core_model",
+        "label": "Pruned Messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_model",
+        "target": "model_call_limit",
+        "label": "Check Call",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_call_limit",
+        "target": "agent_core_model",
+        "label": "Allow/Block Call",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_model",
+        "target": "model_fallback",
+        "label": "Attempt Call",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_fallback",
+        "target": "external_llm",
+        "label": "Invoke LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_model",
+        "target": "model_retry",
+        "label": "Attempt Call",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_retry",
+        "target": "external_llm",
+        "label": "Invoke LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_model",
+        "target": "llm_tool_selector",
+        "label": "Available Tools & Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_tool_selector",
+        "target": "external_llm",
+        "label": "Select Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_tool_selector",
+        "target": "agent_core_model",
+        "label": "Filtered Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_model",
+        "target": "pii_handling",
+        "label": "Process Input/Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pii_handling",
+        "target": "agent_core_model",
+        "label": "Redacted Messages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_model",
+        "target": "summarization",
+        "label": "Messages for Summary",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "summarization",
+        "target": "external_llm",
+        "label": "Generate Summary",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "summarization",
+        "target": "agent_state",
+        "label": "Update with Summary",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_model",
+        "target": "human_in_loop",
+        "label": "Proposed Tool Calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "human_in_loop",
+        "target": "external_human",
+        "label": "Request Approval",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "external_human",
+        "target": "human_in_loop",
+        "label": "Decision",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "human_in_loop",
+        "target": "agent_core_tools",
+        "label": "Approved Tool Calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_model",
+        "target": "todo_list",
+        "label": "Check Todo Tool Calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "todo_list",
+        "target": "agent_state",
+        "label": "Update Todo State",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_tools",
+        "target": "tool_call_limit",
+        "label": "Check Call",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_call_limit",
+        "target": "agent_core_tools",
+        "label": "Allow/Block Call",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_tools",
+        "target": "tool_retry",
+        "label": "Attempt Tool Call",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_retry",
+        "target": "agent_core_tools",
+        "label": "Execute Tool",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_tools",
+        "target": "llm_tool_emulator",
+        "label": "Emulate Tool",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_tool_emulator",
+        "target": "external_llm",
+        "label": "Emulate with LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_tool_emulator",
+        "target": "agent_core_tools",
+        "label": "Emulated Result",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_tools",
+        "target": "file_search",
+        "label": "Perform Search",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_search",
+        "target": "external_filesystem",
+        "label": "Access Files",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_search",
+        "target": "agent_core_tools",
+        "label": "Search Results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core_tools",
+        "target": "shell_tool",
+        "label": "Execute Command",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "shell_tool",
+        "target": "external_sandbox",
+        "label": "Run in Sandbox",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "shell_tool",
+        "target": "external_filesystem",
+        "label": "Access Files",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "shell_tool",
+        "target": "agent_core_tools",
+        "label": "Command Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pii_handling",
+        "target": "pii_stream_transformer",
+        "label": "Configure Stream Redaction",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pii_stream_transformer",
+        "target": "agent_state",
+        "label": "Redacted Stream Events",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "agent_core",
+        "label": "Agent Core",
+        "nodes": [
+          "agent_core_model",
+          "agent_core_tools",
+          "agent_state"
+        ],
+        "title": "Agent Core",
+        "description": "The fundamental components of the agent, including its language model for reasoning, tool execution capabilities, and state management.",
+        "role": "surface"
+      },
+      {
+        "id": "model_interaction_control",
+        "label": "Model Interaction Control",
+        "nodes": [
+          "model_call_limit",
+          "model_fallback",
+          "model_retry",
+          "llm_tool_selector"
+        ],
+        "title": "Model Interaction Control",
+        "description": "Middleware components that govern how the agent interacts with language models, including managing call limits, handling failures, and optimizing tool selection.",
+        "role": "generative"
+      },
+      {
+        "id": "agent_context_state_management",
+        "label": "Agent Context & State Management",
+        "nodes": [
+          "context_editing",
+          "summarization",
+          "todo_list"
+        ],
+        "title": "Agent Context & State Management",
+        "description": "Middleware focused on maintaining and optimizing the agent's conversational context and internal state, such as pruning messages, summarizing history, and managing task lists.",
+        "role": "analytical"
+      },
+      {
+        "id": "security_external_access",
+        "label": "Security & External Access",
+        "nodes": [
+          "pii_handling",
+          "pii_stream_transformer",
+          "file_search",
+          "shell_tool",
+          "human_in_loop"
+        ],
+        "title": "Security & External Access",
+        "description": "Middleware components that handle security concerns like PII detection and redaction, and facilitate secure interaction with external systems like filesystems and human users.",
+        "role": "data"
+      },
+      {
+        "id": "tool_interaction_control",
+        "label": "Tool Interaction Control",
+        "nodes": [
+          "tool_call_limit",
+          "tool_retry",
+          "llm_tool_emulator"
+        ],
+        "title": "Tool Interaction Control",
+        "description": "Middleware components that manage and control the agent's use of tools, including enforcing call limits, retrying failed calls, and emulating tool behavior.",
+        "role": "generative"
+      }
+    ]
+  }
+}

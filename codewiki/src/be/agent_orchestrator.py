@@ -482,12 +482,23 @@ class AgentOrchestrator:
             raise
 
         # STAGE 4-FAST: Small modules → JSON mode, no agent
-        SMALL_MODULE_THRESHOLD = 50
-        if len(core_component_ids) <= SMALL_MODULE_THRESHOLD:
-            logger.info(
-                f"[STAGE 4-FAST] Small module ({len(core_component_ids)} components "
-                f"<= {SMALL_MODULE_THRESHOLD}) — using direct JSON mode for {module_name}"
-            )
+        SMALL_MODULE_THRESHOLD = 60
+        force_fast = os.environ.get("CODEWIKI_FORCE_FAST_LEAF", "").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        if force_fast or len(core_component_ids) <= SMALL_MODULE_THRESHOLD:
+            if force_fast and len(core_component_ids) > SMALL_MODULE_THRESHOLD:
+                logger.info(
+                    f"[STAGE 4-FAST] CODEWIKI_FORCE_FAST_LEAF — forcing direct JSON mode "
+                    f"for {module_name} ({len(core_component_ids)} components)"
+                )
+            elif len(core_component_ids) <= SMALL_MODULE_THRESHOLD:
+                logger.info(
+                    f"[STAGE 4-FAST] Small module ({len(core_component_ids)} components "
+                    f"<= {SMALL_MODULE_THRESHOLD}) — using direct JSON mode for {module_name}"
+                )
             try:
                 from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
                 import json as _json

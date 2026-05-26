@@ -13,6 +13,9 @@ IMPORTANT: This module does NOT silently fix issues. It:
 3. CREATES a sync_issues.json report for later analysis
 4. Optionally creates placeholder files when CODEWIKI_SYNC_ALLOW_PLACEHOLDER_MD=1 (default: off)
 
+Pipeline philosophy (Stage 3 → Stage 4 catch → prompt → tests): see
+``codewiki/docs/generation-quality-pipeline.md``.
+
 Usage:
     from codewiki.src.be.doc_file_sync import sync_docs_with_tree, get_sync_report
     
@@ -23,26 +26,19 @@ Usage:
     issues = get_sync_report(docs_dir)
 """
 
-import asyncio
 import json
 import logging
 import os
 import re
-import threading
 import time
 from collections import Counter
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Set, Tuple
 from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 
-from codewiki.src.be.diagram_ir_validator import (
-    MODULE_TREE_OVERVIEW_KEY,
-    fill_missing_diagram_tooltip_fields,
-)
+from codewiki.src.be.diagram_ir_validator import MODULE_TREE_OVERVIEW_KEY
 from codewiki.src.config import OVERVIEW_FILENAME, module_doc_path
 from codewiki.src.be.doc_schema import validate_module_doc
 
@@ -55,12 +51,6 @@ AUTO_GENERATED_PLACEHOLDER_MARKER = "AUTO_GENERATED_PLACEHOLDER"
 ALLOW_SYNC_PLACEHOLDER_MD = os.environ.get(
     "CODEWIKI_SYNC_ALLOW_PLACEHOLDER_MD", ""
 ).strip().lower() in ("1", "true", "yes")
-
-
-# Mermaid validation is delegated to ``mermaid_validator`` — there is exactly
-# one Mermaid parser in this repo (Mermaid.js 11.9 via Node), shared by
-# ``validate_mermaid``, Stage 4.6, and the CLI. No regex/character-counting
-# heuristics live here anymore.
 
 
 class IssueType(Enum):
@@ -128,7 +118,7 @@ class SyncReport:
     files_created: List[str] = field(default_factory=list)
     metadata_added: List[str] = field(default_factory=list)
     diagrams_added: List[str] = field(default_factory=list)
-    # presync/postsync audits, mermaid timings, histograms (see run_full_sync)
+    # presync/postsync audits and diagram IR histograms (see run_full_sync)
     metrics: Dict[str, Any] = field(default_factory=dict)
     
     @property
@@ -378,6 +368,64 @@ def get_all_modules_in_tree(tree: Dict[str, Any], path: str = "") -> List[Tuple[
     return modules
 
 
+def _module_json_skip_stems() -> Set[str]:
+    """Infrastructure JSON stems — not per-module documentation."""
+    return {
+        "module_tree",
+        "first_module_tree",
+        "metadata",
+        "entry_points",
+        "generation_report",
+        "generation_metrics",
+        "viewer_epoch",
+        "sync_issues",
+        "overview",
+    }
+
+
+def _tree_module_names(tree: Dict[str, Any]) -> Set[str]:
+    return {
+        name
+        for name, _path, _data in get_all_modules_in_tree(tree)
+        if name != "overview"
+    }
+
+
+def _repair_agent_json_literal_n_newlines(text: str) -> str:
+    """
+    Repair agent-written JSON where newlines were written as literal `,n` between values.
+
+    Example: `"},n            {"id"` → `"},\\n            {"id"`.
+  """
+    if ",n" not in text:
+        return text
+    return re.sub(r"\},n\s+", "},\n            ", text)
+
+
+def _check_module_json_file(
+    json_path: Path, *, try_repair: bool = False
+) -> Tuple[bool, Optional[str], bool]:
+    """Return (parse_ok, error_message, repaired_file_written)."""
+    if not json_path.is_file():
+        return False, None, False
+    raw = json_path.read_text(encoding="utf-8", errors="replace")
+    try:
+        json.loads(raw)
+        return True, None, False
+    except json.JSONDecodeError as first_err:
+        repaired = _repair_agent_json_literal_n_newlines(raw)
+        if repaired != raw:
+            try:
+                json.loads(repaired)
+                if try_repair:
+                    json_path.write_text(repaired, encoding="utf-8")
+                    return True, None, True
+                return True, None, False
+            except json.JSONDecodeError:
+                pass
+        return False, str(first_err), False
+
+
 def audit_docs_state(docs_dir: str) -> Dict[str, Any]:
     """
     Read-only audit of docs vs module_tree (Stage 3 output before sync repairs).
@@ -398,6 +446,7 @@ def audit_docs_state(docs_dir: str) -> Dict[str, Any]:
         "children_missing_from_diagram_nodes": 0,
         "parent_diagram_gaps_to_inject": 0,
         "mermaid_fence_blocks_total": 0,
+        "invalid_module_json_parse": 0,
         # *.md files whose body is the sync fallback (not LLM-written module docs)
         "placeholder_md_files": 0,
     }
@@ -418,7 +467,11 @@ def audit_docs_state(docs_dir: str) -> Dict[str, Any]:
         if module_name == "overview":
             continue
         out["modules_total"] += 1
-        if module_name not in existing_md:
+        json_path = docs_path / f"{module_name}.json"
+        json_ok, _err, _repaired = _check_module_json_file(json_path)
+        if json_path.is_file() and not json_ok:
+            out["invalid_module_json_parse"] += 1
+        if module_name not in existing_md and not json_ok:
             out["missing_md"] += 1
         if not module_data.get("title"):
             out["missing_title"] += 1
@@ -476,270 +529,7 @@ def audit_docs_state(docs_dir: str) -> Dict[str, Any]:
     return out
 
 
-_MERMAID_VALIDATOR_PROBE = "flowchart TD\n    A-->B\n"
-
-
-@lru_cache(maxsize=1)
-def mermaid_validator_operational() -> bool:
-    """
-    True if validate_single_diagram reports no error for a minimal diagram.
-    When False (missing mermaid-parser / mermaid-py or broken install), counts from
-    audit_mermaid_syntax_state are not meaningful for syntax — every diagram may
-    look like an error.
-    """
-    from codewiki.src.be.utils import validate_single_diagram
-
-    async def _probe() -> bool:
-        err = await validate_single_diagram(_MERMAID_VALIDATOR_PROBE, 1, 1)
-        return not err
-
-    try:
-        return asyncio.run(_probe())
-    except Exception:
-        return False
-
-
-async def _audit_mermaid_syntax_state_async(
-    docs_dir: str, operational: bool
-) -> Dict[str, Any]:
-    """
-    Walk *.md in docs_dir, extract ```mermaid blocks with the same logic as the
-    generation pipeline, and validate each with validate_single_diagram.
-    """
-    from codewiki.src.be.utils import extract_mermaid_blocks, validate_single_diagram
-
-    docs_path = Path(docs_dir)
-    out: Dict[str, Any] = {
-        "md_files_scanned": 0,
-        "mermaid_diagrams_total": 0,
-        "mermaid_diagrams_syntax_errors": 0 if operational else None,
-        "mermaid_validator_operational": operational,
-    }
-    if not docs_path.is_dir():
-        return out
-
-    for md_file in sorted(docs_path.glob("*.md")):
-        out["md_files_scanned"] += 1
-        try:
-            content = md_file.read_text(encoding="utf-8", errors="replace")
-        except Exception:
-            continue
-        blocks = extract_mermaid_blocks(content)
-        for i, (line_start, diagram_content) in enumerate(blocks, 1):
-            out["mermaid_diagrams_total"] += 1
-            if not operational:
-                continue
-            err = await validate_single_diagram(diagram_content, i, line_start)
-            if err:
-                out["mermaid_diagrams_syntax_errors"] += 1
-    return out
-
-
-def audit_mermaid_syntax_state(docs_dir: str) -> Dict[str, Any]:
-    """
-    Read-only audit: count Mermaid fenced diagrams under docs_dir and how many fail
-    the same syntax check used during doc generation (mermaid-parser-py / mermaid-py).
-
-    Returns:
-        md_files_scanned: number of *.md files read
-        mermaid_diagrams_total: number of non-empty ```mermaid blocks
-        mermaid_diagrams_syntax_errors: blocks where validation returned an error string,
-            or None if mermaid_validator_operational() is False (install deps; otherwise counts are meaningless)
-        mermaid_validator_operational: whether a probe diagram passed validate_single_diagram
-    """
-    operational = mermaid_validator_operational()
-    return asyncio.run(_audit_mermaid_syntax_state_async(docs_dir, operational))
-
-
-_DIAGRAM_JSON_BLOCK_RE = re.compile(
-    r"<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->", re.IGNORECASE
-)
-
 _MAX_SAMPLES_PER_DIAGRAM_IR_CODE = 50
-
-
-def overview_mermaid_to_diagram_json(text: str) -> Dict[str, Any]:
-    """Python port of demo/pipeline-overview-mermaid.js (narrow subset)."""
-    warnings: List[str] = []
-    unsupported_lines: List[str] = []
-    if not text or not str(text).strip():
-        return {
-            "ok": False,
-            "reason": "empty_mermaid",
-            "warnings": warnings,
-            "unsupportedLines": unsupported_lines,
-        }
-
-    nodes_map: Dict[str, Dict[str, Any]] = {}
-    edges: List[Dict[str, Any]] = []
-    groups_map: Dict[str, Dict[str, Any]] = {}
-    click_map: Dict[str, str] = {}
-    direction = "TD"
-    subgraph_stack: List[str] = []
-
-    def ensure_node(nid: str, label: Any, extra: Optional[Dict[str, Any]] = None) -> None:
-        if not nid:
-            return
-        lab = str(label if label is not None else nid).strip()
-        prev = nodes_map.get(nid)
-        if prev:
-            if lab and prev.get("label") == nid and lab != nid:
-                prev["label"] = lab
-            if extra:
-                prev.update(extra)
-            return
-        node: Dict[str, Any] = {"id": nid, "label": lab or nid, "type": "component"}
-        if extra:
-            node.update(extra)
-        nodes_map[nid] = node
-
-    def add_node_to_current_groups(node_id: str) -> None:
-        if not subgraph_stack:
-            return
-        gid = subgraph_stack[-1]
-        g = groups_map.get(gid)
-        if g and node_id not in g["nodes"]:
-            g["nodes"].append(node_id)
-
-    lines: List[str] = []
-    for raw in text.splitlines():
-        line = raw.strip()
-        if not line or line.startswith("%%"):
-            continue
-        lines.append(line)
-
-    for line in lines:
-        if (
-            re.match(r"^classDef\s", line, re.I)
-            or re.match(r"^class\s+", line, re.I)
-            or re.match(r"^style\s+", line, re.I)
-        ):
-            continue
-
-        click_m = re.match(r'^click\s+(\w+)\s+"([^"]+)"', line)
-        if click_m:
-            raw_path = click_m.group(2)
-            base = re.sub(r"\.md$", "", raw_path, flags=re.I)
-            click_map[click_m.group(1)] = base + ".md"
-            continue
-
-        sub_open = re.match(r'^subgraph\s+(\w+)(?:\["([^"]*)"\])?', line, re.I)
-        if sub_open:
-            gid = sub_open.group(1)
-            glabel = sub_open.group(2) if sub_open.group(2) is not None else gid
-            if gid not in groups_map:
-                groups_map[gid] = {"id": gid, "label": glabel, "nodes": []}
-            subgraph_stack.append(gid)
-            continue
-
-        if re.match(r"^end\s*$", line, re.I):
-            if not subgraph_stack:
-                warnings.append("unmatched_end")
-            else:
-                subgraph_stack.pop()
-            continue
-
-        hdr = re.match(r"^(flowchart|graph)\s+(\w+)\s*$", line, re.I)
-        if hdr:
-            direction = hdr.group(2).upper()
-            continue
-
-        edge_labeled = re.match(
-            r'^(\w+)\s*(-->|==>|-\.->)\s*\|\s*"([^"]*)"\s*\|\s*(\w+)\s*$', line
-        )
-        if edge_labeled:
-            edges.append(
-                {
-                    "source": edge_labeled.group(1),
-                    "target": edge_labeled.group(4),
-                    "label": edge_labeled.group(3),
-                }
-            )
-            ensure_node(edge_labeled.group(1), edge_labeled.group(1))
-            ensure_node(edge_labeled.group(4), edge_labeled.group(4))
-            continue
-
-        edge_plain = re.match(r"^(\w+)\s*(-->|==>|-\.->)\s*(\w+)\s*$", line)
-        if edge_plain:
-            edges.append(
-                {"source": edge_plain.group(1), "target": edge_plain.group(3), "label": ""}
-            )
-            ensure_node(edge_plain.group(1), edge_plain.group(1))
-            ensure_node(edge_plain.group(3), edge_plain.group(3))
-            continue
-
-        node_match = re.match(r'^(\w+)\s*\[\s*"([^"]*)"\s*\]\s*$', line)
-        if node_match:
-            ensure_node(node_match.group(1), node_match.group(2))
-            add_node_to_current_groups(node_match.group(1))
-            continue
-
-        node_match = re.match(r"^(\w+)\s*\[\s*([^\]]+?)\s*\]\s*$", line)
-        if node_match:
-            inner = re.sub(r'^["\']|["\']$', "", node_match.group(2).strip()).strip()
-            ensure_node(node_match.group(1), inner)
-            add_node_to_current_groups(node_match.group(1))
-            continue
-
-        node_match = re.match(r'^(\w+)\s*\(\s*"([^"]*)"\s*\)\s*$', line)
-        if node_match:
-            ensure_node(node_match.group(1), node_match.group(2))
-            add_node_to_current_groups(node_match.group(1))
-            continue
-
-        node_match = re.match(r'^(\w+)\s*\(\(\s*"([^"]*)"\s*\)\)\s*$', line)
-        if node_match:
-            ensure_node(node_match.group(1), node_match.group(2))
-            add_node_to_current_groups(node_match.group(1))
-            continue
-
-        node_match = re.match(r"^(\w+)\s*\(\(\s*([^)]+?)\s*\)\)\s*$", line)
-        if node_match:
-            inner = re.sub(r'^["\']|["\']$', "", node_match.group(2).strip()).strip()
-            ensure_node(node_match.group(1), inner)
-            add_node_to_current_groups(node_match.group(1))
-            continue
-
-        unsupported_lines.append(line)
-
-    if subgraph_stack:
-        warnings.append("unclosed_subgraph:" + ",".join(subgraph_stack))
-
-    for nid, md_path in click_map.items():
-        n = nodes_map.get(nid)
-        if n:
-            n["type"] = "module"
-            n["link"] = md_path
-        else:
-            ensure_node(nid, nid, {"type": "module", "link": md_path})
-
-    nodes = sorted(nodes_map.values(), key=lambda x: str(x["id"]))
-    groups = [{"id": g["id"], "label": g["label"], "nodes": list(g["nodes"])} for g in groups_map.values()]
-
-    diagram = {"direction": direction, "nodes": nodes, "edges": edges, "groups": groups}
-    fill_missing_diagram_tooltip_fields(diagram)
-
-    ok = len(unsupported_lines) == 0 or len(unsupported_lines) <= max(
-        3, int(len(lines) * 0.15)
-    )
-    if not ok:
-        return {
-            "ok": False,
-            "reason": "too_many_unsupported_lines",
-            "diagram": diagram,
-            "warnings": warnings,
-            "unsupportedLines": unsupported_lines,
-            "unsupportedLineCount": len(unsupported_lines),
-        }
-
-    return {
-        "ok": True,
-        "diagram": diagram,
-        "warnings": warnings,
-        "unsupportedLines": unsupported_lines,
-        "unsupportedLineCount": len(unsupported_lines),
-        "counts": {"nodes": len(nodes), "edges": len(edges), "groups": len(groups)},
-    }
 
 
 def _elk_label(parent_id: str, index: int, text: str, w: float, h: float) -> Dict[str, Any]:
@@ -772,6 +562,20 @@ def _map_diagram_direction_to_elk(diagram_direction: Any) -> str:
     return "DOWN"
 
 
+def _elk_port_edge_spacing_layout_options() -> Dict[str, str]:
+    """Unified port + edge lane spacing for ELK layered (matches demo/elk-node-dimensions.js)."""
+    sp = max(4, min(48, 16))
+    s = str(sp)
+    return {
+        "elk.spacing.portPort": s,
+        "elk.spacing.edgeEdge": s,
+        "elk.spacing.edgeNode": s,
+        "elk.layered.spacing.edgeEdgeBetweenLayers": s,
+        "elk.layered.spacing.edgeNodeBetweenLayers": s,
+        "elk.portAlignment.default": "DISTRIBUTED",
+    }
+
+
 def _root_layout_options(elk_direction: str, target: str) -> Dict[str, Any]:
     if target == "elkjs":
         return {
@@ -781,6 +585,7 @@ def _root_layout_options(elk_direction: str, target: str) -> Dict[str, Any]:
             "elk.spacing.nodeNode": "48",
             "elk.layered.spacing.nodeNodeBetweenLayers": "56",
             "elk.padding": "[top=20,left=20,bottom=20,right=20]",
+            **_elk_port_edge_spacing_layout_options(),
         }
     return {"algorithm": "layered", "direction": elk_direction, "hierarchyHandling": "INCLUDE_CHILDREN"}
 
@@ -791,6 +596,7 @@ def _compound_layout_options(target: str) -> Dict[str, Any]:
             "elk.hierarchyHandling": "INCLUDE_CHILDREN",
             "elk.padding": "[top=24,left=14,bottom=14,right=14]",
             "elk.spacing.nodeNode": "28",
+            **_elk_port_edge_spacing_layout_options(),
         }
     return {"algorithm": "layered", "direction": "DOWN", "hierarchyHandling": "INCLUDE_CHILDREN"}
 
@@ -1205,11 +1011,8 @@ def _metrics_delta(before: Dict[str, Any], after: Dict[str, Any]) -> Dict[str, A
     return delta
 
 
-def _build_measurement_summary(report: SyncReport, mermaid_stats: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    One JSON blob for experiments: presync/postsync audits, fix counters, and Mermaid
-    validation (validate_mermaid per block) plus Stage 4.6 LLM fix counts.
-    """
+def _build_measurement_summary(report: SyncReport) -> Dict[str, Any]:
+    """One JSON blob for experiments: presync/postsync audits and fix counters."""
     by_type: Dict[str, int] = {}
     for i in report.issues:
         by_type[i.issue_type] = by_type.get(i.issue_type, 0) + 1
@@ -1233,17 +1036,7 @@ def _build_measurement_summary(report: SyncReport, mermaid_stats: Dict[str, Any]
         "1e_issues_logged_this_run_by_type": {
             "all": by_type,
         },
-        "2_mermaid": {
-            "blocks_checked": mermaid_stats.get("blocks_checked", 0),
-            "blocks_invalid_before_stage46": mermaid_stats.get("blocks_invalid", 0),
-            "blocks_invalid_after_stage46": mermaid_stats.get("postfix_blocks_invalid", 0),
-            "validation_ms": mermaid_stats.get("validation_ms", 0),
-            "error_type_histogram": mermaid_stats.get("error_type_histogram") or {},
-            "error_type_histogram_after_stage46": mermaid_stats.get("postfix_error_type_histogram") or {},
-            "stage46_fixes_applied": mermaid_stats.get("stage46_fixes_applied", 0),
-            "validator": "mermaid_validator (Mermaid.js 11.9 via Node, same as viewer)",
-        },
-        "3_diagram_ir": {
+        "2_diagram_ir": {
             "audit": report.metrics.get("diagram_ir_audit"),
             "by_code": (report.metrics.get("diagram_ir_audit") or {}).get("by_code", {}),
         },
@@ -1388,19 +1181,36 @@ def sync_docs_with_tree(docs_dir: str, report: SyncReport, components: Dict = No
     all_modules = get_all_modules_in_tree(tree)
     logger.info(f"[DOC_SYNC] Found {len(all_modules)} modules in tree")
     
-    _skip_json = {
-        "module_tree",
-        "first_module_tree",
-        "metadata",
-        "entry_points",
-        "generation_report",
-        "viewer_epoch",
-        "sync_issues",
-        "overview",
-    }
+    _skip_json = _module_json_skip_stems()
     json_stems = {f.stem for f in docs_path.glob("*.json") if f.stem not in _skip_json}
     md_stems = {f.stem for f in docs_path.glob("*.md")}
-    existing_files = json_stems | md_stems
+    tree_names = _tree_module_names(tree)
+    valid_json_stems: Set[str] = set()
+    for stem in json_stems:
+        if stem not in tree_names:
+            continue
+        json_path = docs_path / f"{stem}.json"
+        ok, err, repaired = _check_module_json_file(json_path, try_repair=True)
+        if ok:
+            valid_json_stems.add(stem)
+            if repaired:
+                logger.info(
+                    "[DOC_SYNC] Repaired agent JSON literal-newline corruption in %s.json",
+                    stem,
+                )
+        else:
+            report.add_issue(
+                SyncIssue(
+                    issue_type=IssueType.JSON_PARSE_ERROR.value,
+                    module_name=stem,
+                    module_path=stem,
+                    severity="error",
+                    details={"error": err or "invalid json"},
+                    auto_fixed=False,
+                )
+            )
+            logger.error("[DOC_SYNC] Invalid JSON in %s.json: %s", stem, err)
+    existing_files = valid_json_stems | md_stems
     logger.info(
         "[DOC_SYNC] Found %s module doc stems (.json/.md combined)",
         len(existing_files),
@@ -1567,373 +1377,6 @@ def add_leaf_diagrams(docs_dir: str, report: SyncReport = None) -> int:
         logger.info(f"[DOC_SYNC] Added {added} diagrams to leaf modules")
     
     return added
-
-
-def validate_mermaid_diagrams(docs_dir: str) -> Dict[str, Any]:
-    """
-    Validate every ```mermaid``` block using ``mermaid_validator.validate_mermaid`` only.
-    Logs failures; does not emit SyncIssue rows for Mermaid (avoids duplicate / misleading counts).
-
-    Returns:
-        blocks_checked, blocks_invalid, validation_ms, error_type_histogram (MermaidErrorType -> count).
-    """
-    from codewiki.src.be.mermaid_validator import validate_mermaid
-
-    docs_path = Path(docs_dir)
-    pattern = re.compile(r"```mermaid\s*([\s\S]*?)```", re.IGNORECASE)
-    blocks_checked = 0
-    blocks_invalid = 0
-    err_hist: Counter = Counter()
-    t0 = time.perf_counter()
-
-    for md_file in sorted(docs_path.glob("*.md")):
-        try:
-            content = md_file.read_text(encoding="utf-8", errors="replace")
-        except Exception:
-            continue
-        block_idx = 0
-        for match in pattern.finditer(content):
-            block_idx += 1
-            blocks_checked += 1
-            diagram = match.group(1).strip()
-            vr = validate_mermaid(diagram, f"{md_file.name}#{block_idx}")
-            if not vr.valid:
-                blocks_invalid += 1
-                msgs = " | ".join(e.message for e in vr.errors)
-                logger.info("[MERMAID_SYNTAX] %s block %s: %s", md_file.name, block_idx, msgs)
-                for e in vr.errors:
-                    err_hist[e.error_type.value] += 1
-            for w in vr.warnings:
-                err_hist[f"warning:{w.error_type.value}"] += 1
-
-    validation_ms = (time.perf_counter() - t0) * 1000.0
-    result = {
-        "blocks_checked": blocks_checked,
-        "blocks_invalid": blocks_invalid,
-        "validation_ms": round(validation_ms, 4),
-        "error_type_histogram": dict(err_hist),
-    }
-    logger.info(
-        "[DOC_SYNC] Mermaid validation: %s blocks, %s invalid, %.2fms",
-        blocks_checked,
-        blocks_invalid,
-        validation_ms,
-    )
-    return result
-
-
-_MERMAID_FENCE_RE = re.compile(r"```mermaid\s*([\s\S]*?)```", re.IGNORECASE)
-_MD_TITLE_RE = re.compile(r"^#\s+(.+?)\s*$", re.MULTILINE)
-
-
-def _safe_id(name: str) -> str:
-    """Mermaid-safe node id: alphanumeric + underscore, must start with a letter."""
-    cleaned = re.sub(r"\W+", "_", name).strip("_")
-    if not cleaned:
-        return "node"
-    if not cleaned[0].isalpha() and cleaned[0] != "_":
-        cleaned = "n_" + cleaned
-    return cleaned[:40]
-
-
-def _strip_mermaid_fence(text: str) -> str:
-    """Strip leading/trailing ```mermaid fences and whitespace from an LLM response."""
-    s = text.strip()
-    if s.startswith("```"):
-        s = re.sub(r"^```mermaid\s*", "", s, flags=re.IGNORECASE)
-        s = re.sub(r"^```\s*", "", s)
-        s = re.sub(r"\s*```\s*$", "", s)
-    return s.strip()
-
-
-def _sanitize_label(text: str) -> str:
-    """Reduce a string to characters Mermaid's quoted-label lexer always accepts.
-
-    Mermaid 11 chokes on ``"``, ``\\``, backtick, angle brackets, braces, and #
-    even inside ``["..."]``. We keep only ASCII letters/digits/space + a few
-    punctuation chars known to be safe, collapse whitespace, and cap length.
-    """
-    if not text:
-        return "module"
-    keep = []
-    for ch in text:
-        if ch.isalnum() or ch in " _-.,:/+":
-            keep.append(ch)
-        elif ch in "\t\n":
-            keep.append(" ")
-    out = re.sub(r"\s+", " ", "".join(keep)).strip(" .,:-_/")
-    if not out:
-        return "module"
-    if len(out) > 60:
-        out = out[:57].rstrip(" .,:-_/") + "..."
-    return out
-
-
-def _synthesize_safe_diagram(title: str) -> str:
-    """Last-resort guaranteed-valid diagram (single sanitized node).
-
-    The label goes through ``_sanitize_label`` so even pathological titles
-    (backticks, HTML, unicode quotes, ``<>``, ``{}``, ``#``) can't break the
-    Mermaid lexer. The output parses in Mermaid.js 11 unconditionally.
-    """
-    safe = _sanitize_label(title)
-    return f'flowchart TD\n    n0["{safe}"]'
-
-
-def _module_title_from_md(md_path: Path, content: str) -> str:
-    """Best-effort title for the safe-fallback diagram: first ``# Heading`` else filename stem."""
-    m = _MD_TITLE_RE.search(content)
-    if m:
-        return m.group(1).strip()
-    return md_path.stem.replace("_", " ").title()
-
-
-@dataclass
-class _BlockJob:
-    """One ```mermaid block awaiting repair."""
-    md_path: Path
-    block_index: int           # 1-based, for logs
-    span: Tuple[int, int]      # (start, end) of the full ```mermaid ... ``` match in original content
-    original: str              # raw diagram text inside the fences
-    md_title: str              # used by safe-fallback synthesis
-
-
-# Tunable: parallel LLM workers for Stage 4.6. Gemini Flash ~2-3s per call,
-# so 12-way fan-out finishes ~10x faster than the old serial loop while
-# staying well under provider QPS limits.
-STAGE46_MAX_WORKERS = int(os.getenv("STAGE46_MAX_WORKERS", "12"))
-STAGE46_MAX_LLM_ATTEMPTS = int(os.getenv("STAGE46_MAX_LLM_ATTEMPTS", "2"))
-
-
-def stage46_fix_mermaid_diagrams(docs_dir: str, config: Any) -> int:
-    """
-    Stage 4.6: drive ```mermaid blocks in ``docs/*.md`` to **0 parse errors**.
-
-    Pipeline (designed for low latency, single source of truth = Mermaid.js):
-      1. Walk every ``.md`` once and collect every ```mermaid block.
-      2. Parse each block with ``mermaid.parse`` (Mermaid.js 11, viewer truth)
-         via the long-running shared Node subprocess. Skip blocks that parse.
-      3. **De-duplicate** identical broken diagrams across files so the same
-         fix is computed once and reused (cache: original text → repaired text).
-      4. **LLM repair in parallel** (``STAGE46_MAX_WORKERS`` threads,
-         ``STAGE46_MAX_LLM_ATTEMPTS`` attempts per block, each attempt feeds the
-         previous parser error back into the prompt).
-      5. **Last-resort synthesis** — if a diagram still fails after retries, the
-         block is replaced with a tiny ``flowchart TD`` node carrying the module
-         title. Universally valid → guarantees 0 parse errors after the stage.
-      6. Each ``.md`` file is written **once** with all of its blocks resolved.
-
-    Returns the number of blocks that were rewritten (LLM + safe fallback).
-    """
-    from codewiki.src.be.llm_services import call_llm
-    from codewiki.src.be.mermaid_validator import get_shared_parser
-    from codewiki.src.be.prompt_template import DIAGRAM_SYNTAX_RULES_SECTION, MERMAID_DIAGRAM_FIX_INSTRUCTIONS
-
-    docs_path = Path(docs_dir)
-
-    try:
-        js = get_shared_parser()
-    except RuntimeError as e:
-        logger.error("[STAGE 4.6] Cannot run Mermaid.js parser: %s", e)
-        return 0
-
-    t_total_start = time.perf_counter()
-    fixes = 0
-    safe_fallbacks = 0
-    llm_fixes = 0
-    cache_hits = 0
-
-    try:
-        if True:
-            file_contents: Dict[Path, str] = {}
-            file_dirty: Dict[Path, bool] = {}
-            jobs: List[_BlockJob] = []
-
-            # ---- Phase 1: collect all blocks --------------------------------
-            for md_file in sorted(docs_path.glob("*.md")):
-                try:
-                    content = md_file.read_text(encoding="utf-8", errors="replace")
-                except Exception:
-                    continue
-                file_contents[md_file] = content
-                file_dirty[md_file] = False
-                title = _module_title_from_md(md_file, content)
-                for bi, m in enumerate(_MERMAID_FENCE_RE.finditer(content), start=1):
-                    jobs.append(_BlockJob(
-                        md_path=md_file,
-                        block_index=bi,
-                        span=(m.start(), m.end()),
-                        original=m.group(1).strip(),
-                        md_title=title,
-                    ))
-
-            if not jobs:
-                logger.info("[STAGE 4.6] No ```mermaid blocks found in %s", docs_dir)
-                return 0
-
-            # ---- Phase 2: initial parse pass --------------------------------
-            broken: List[_BlockJob] = []
-            results: Dict[int, str] = {}  # id(job) -> repaired text
-            for job in jobs:
-                ok, err = js.parse(f"{job.md_path.name}#{job.block_index}", job.original)
-                if not ok:
-                    broken.append(job)
-                    setattr(job, "_first_err", err or "parse failed")
-
-            t_parse_done = time.perf_counter()
-            logger.info(
-                "[STAGE 4.6] %d total blocks, %d failing initial mermaid.parse (%.2fs)",
-                len(jobs),
-                len(broken),
-                t_parse_done - t_total_start,
-            )
-            if not broken:
-                return 0
-
-            still_broken: List[_BlockJob] = list(broken)
-
-            # ---- Phase 3 + 4: dedup + parallel LLM repair -------------------
-            # Cache shared across all jobs so identical broken diagrams are fixed once.
-            shared_cache: Dict[str, Optional[str]] = {}
-            cache_lock = threading.Lock()
-
-            def _llm_repair(text: str, last_err: str, log_prefix: str) -> Optional[str]:
-                """Call LLM up to STAGE46_MAX_LLM_ATTEMPTS times, re-parse each result."""
-                current = text
-                current_err = last_err
-                for attempt in range(1, STAGE46_MAX_LLM_ATTEMPTS + 1):
-                    extra = (
-                        ""
-                        if attempt == 1
-                        else f"\n\n## Previous attempt still failed\n{current_err}\n"
-                            "Carefully re-read the syntax rules and produce a different fix."
-                    )
-                    prompt = (
-                        MERMAID_DIAGRAM_FIX_INSTRUCTIONS
-                        + DIAGRAM_SYNTAX_RULES_SECTION
-                        + "\n\n## Mermaid.js parse error (viewer truth)\n"
-                        + current_err
-                        + extra
-                        + "\n\n## Diagram to fix\n"
-                        + current
-                        + "\n\nOutput ONLY the fixed Mermaid source (no ``` fence, no commentary).\n"
-                    )
-                    try:
-                        raw = call_llm(prompt, config, temperature=0.0)
-                    except Exception as e:
-                        logger.warning("[STAGE 4.6] %s LLM call %d failed: %s", log_prefix, attempt, e)
-                        return None
-                    candidate = _strip_mermaid_fence(raw)
-                    if not candidate:
-                        continue
-                    ok, err = js.parse(f"{log_prefix}_attempt{attempt}", candidate)
-                    if ok:
-                        return candidate
-                    current = candidate
-                    current_err = err or "parse failed"
-                return None
-
-            def _worker(job: _BlockJob) -> Tuple[_BlockJob, Optional[str], bool]:
-                """Returns (job, repaired_text_or_None, served_from_cache)."""
-                key = job.original
-                with cache_lock:
-                    if key in shared_cache:
-                        return job, shared_cache[key], True
-                fixed = _llm_repair(
-                    text=job.original,
-                    last_err=getattr(job, "_first_err", "parse failed"),
-                    log_prefix=f"{job.md_path.name}#{job.block_index}",
-                )
-                with cache_lock:
-                    # Race-tolerant: first writer wins.
-                    if key not in shared_cache:
-                        shared_cache[key] = fixed
-                return job, fixed, False
-
-            if still_broken:
-                with ThreadPoolExecutor(max_workers=min(STAGE46_MAX_WORKERS, len(still_broken))) as pool:
-                    futures = [pool.submit(_worker, job) for job in still_broken]
-                    for fut in as_completed(futures):
-                        try:
-                            job, repaired, from_cache = fut.result()
-                        except Exception as e:
-                            logger.warning("[STAGE 4.6] worker crashed: %s", e)
-                            continue
-                        if from_cache:
-                            cache_hits += 1
-                        if repaired is not None:
-                            results[id(job)] = repaired
-                            llm_fixes += 1
-
-            # ---- Phase 6: synthesize safe fallback for anything still bad ---
-            # Universal last resort — guaranteed by Mermaid spec to parse,
-            # used only if even the title-based synthesis somehow fails.
-            MINIMAL_VALID_DIAGRAM = "flowchart TD\n    n0[\"module\"]"
-
-            for job in still_broken:
-                if id(job) in results:
-                    continue
-                safe = _synthesize_safe_diagram(job.md_title)
-                ok, _ = js.parse(f"{job.md_path.name}#{job.block_index}_safe", safe)
-                if not ok:
-                    # Title-based synthesis failed; fall back to the universal minimal diagram.
-                    safe = MINIMAL_VALID_DIAGRAM
-                    ok, err2 = js.parse(f"{job.md_path.name}#{job.block_index}_safe2", safe)
-                    if not ok:
-                        # This should be impossible — Mermaid 11 must accept this.
-                        logger.error(
-                            "[STAGE 4.6] Universal minimal diagram failed to parse for %s#%d: %s",
-                            job.md_path.name,
-                            job.block_index,
-                            err2,
-                        )
-                        continue
-                results[id(job)] = safe
-                safe_fallbacks += 1
-                logger.warning(
-                    "[STAGE 4.6] Used safe fallback diagram for %s block %d (LLM could not repair)",
-                    job.md_path.name,
-                    job.block_index,
-                )
-
-            # ---- Phase 7: apply all repairs back to file content ------------
-            # Group by file, replace from last block to first so spans stay valid.
-            jobs_by_file: Dict[Path, List[_BlockJob]] = {}
-            for job in jobs:
-                if id(job) in results:
-                    jobs_by_file.setdefault(job.md_path, []).append(job)
-
-            for md_file, file_jobs in jobs_by_file.items():
-                content = file_contents[md_file]
-                for job in sorted(file_jobs, key=lambda j: j.span[0], reverse=True):
-                    repaired = results[id(job)].strip()
-                    replacement = "```mermaid\n" + repaired + "\n```"
-                    start, end = job.span
-                    content = content[:start] + replacement + content[end:]
-                    fixes += 1
-                file_contents[md_file] = content
-                file_dirty[md_file] = True
-
-            for md_file, dirty in file_dirty.items():
-                if not dirty:
-                    continue
-                try:
-                    md_file.write_text(file_contents[md_file], encoding="utf-8")
-                except Exception as e:
-                    logger.error("[STAGE 4.6] Could not write %s: %s", md_file, e)
-
-            logger.info(
-                "[STAGE 4.6] DONE in %.2fs — total fixes=%d (llm=%d, safe_fallback=%d, dedup_hits=%d)",
-                time.perf_counter() - t_total_start,
-                fixes,
-                llm_fixes,
-                safe_fallbacks,
-                cache_hits,
-            )
-            return fixes
-    except RuntimeError as e:
-        logger.error("[STAGE 4.6] Mermaid.js parser failed mid-run: %s", e)
-        return fixes
 
 
 def update_tree_diagrams(docs_dir: str) -> int:
@@ -2303,28 +1746,6 @@ def run_full_sync(
         _emit_diagram_ir_sync_issues(report, ir_audit)
     except Exception as e:
         logger.warning("[DOC_SYNC] diagram IR sync issue emit failed: %s", e)
-    
-    # Mermaid: structural validation (validate_mermaid), then optional Stage 4.6 LLM repair.
-    # We snapshot pre-fix counts, run the fix, then re-validate so the metric also
-    # records the post-fix state — gives us hard proof Stage 4.6 reaches 0 errors.
-    mermaid_stats: Dict[str, Any] = dict(validate_mermaid_diagrams(docs_dir))
-    mermaid_stats["stage46_fixes_applied"] = 0
-    mermaid_stats["postfix_blocks_invalid"] = mermaid_stats.get("blocks_invalid", 0)
-    mermaid_stats["postfix_error_type_histogram"] = dict(mermaid_stats.get("error_type_histogram") or {})
-    if config is not None:
-        mermaid_stats["stage46_fixes_applied"] = stage46_fix_mermaid_diagrams(docs_dir, config)
-        post = validate_mermaid_diagrams(docs_dir)
-        mermaid_stats["postfix_blocks_invalid"] = post.get("blocks_invalid", 0)
-        mermaid_stats["postfix_error_type_histogram"] = dict(post.get("error_type_histogram") or {})
-        logger.info(
-            "[STAGE 4.6] Post-fix validation: %s/%s blocks invalid (was %s)",
-            mermaid_stats["postfix_blocks_invalid"],
-            post.get("blocks_checked", 0),
-            mermaid_stats.get("blocks_invalid", 0),
-        )
-    else:
-        logger.info("[DOC_SYNC] Stage 4.6 mermaid LLM fix skipped (no config; e.g. CLI doc_file_sync)")
-    report.metrics["mermaid_validation"] = mermaid_stats
 
     try:
         report.metrics["postsync_audit"] = audit_docs_state(docs_dir)
@@ -2350,10 +1771,9 @@ def run_full_sync(
         "leaf_diagrams_added": leaf_diagrams,
         "parent_diagram_child_nodes_injected": diagram_updates,
         "overview_md_created": int(overview_created),
-        "mermaid_stage46_fixes": mermaid_stats.get("stage46_fixes_applied", 0),
     }
 
-    report.metrics["measurement_summary"] = _build_measurement_summary(report, mermaid_stats)
+    report.metrics["measurement_summary"] = _build_measurement_summary(report)
 
     # Save issue report
     report_path = Path(docs_dir) / "sync_issues.json"
@@ -2378,7 +1798,6 @@ def run_full_sync(
         "metadata_updates": metadata_updates,
         "leaf_diagrams_added": leaf_diagrams,
         "diagrams_updated": diagram_updates,
-        "mermaid_validation": mermaid_stats,
         "metrics": report.metrics,
         "measurement_summary": report.metrics.get("measurement_summary"),
         "issues": len(report.issues),

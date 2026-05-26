@@ -1,0 +1,275 @@
+{
+  "title": "Core LangChain Abstractions",
+  "summary": "This module defines the fundamental abstract base classes and interfaces for building LangChain applications, including serializable components, composable runnables, language models, prompts, output parsers, tools, retrievers, and vector stores. It establishes the core architecture for creating flexible and extensible AI systems.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "Serializable",
+        "label": "Serializable",
+        "type": "component",
+        "link": null,
+        "title": "Serializable Base Class",
+        "description": "Provides a common interface for objects that can be serialized to JSON, enabling persistence and transferability across the LangChain ecosystem."
+      },
+      {
+        "id": "Runnable",
+        "label": "Runnable",
+        "type": "component",
+        "link": null,
+        "title": "Composable Unit of Work",
+        "description": "Defines the fundamental interface for composable units of work, supporting synchronous/asynchronous invocation, batching, streaming, and various modifications for building chains."
+      },
+      {
+        "id": "RunnableSerializable",
+        "label": "RunnableSerializable",
+        "type": "component",
+        "link": null,
+        "title": "Serializable & Composable Unit",
+        "description": "Combines the capabilities of serialization with the Runnable interface, allowing composable units to be saved, loaded, and configured at runtime."
+      },
+      {
+        "id": "RunnableEachBase",
+        "label": "RunnableEachBase",
+        "type": "component",
+        "link": null,
+        "title": "Apply Runnable to List Items",
+        "description": "A base class for runnables that apply another runnable to each element of an input sequence, facilitating parallel processing of list inputs."
+      },
+      {
+        "id": "RunnableBindingBase",
+        "label": "RunnableBindingBase",
+        "type": "component",
+        "link": null,
+        "title": "Bind Args/Config to Runnable",
+        "description": "A base class for runnables that delegate calls to another runnable with bound arguments or configuration, creating a new runnable with modified behavior."
+      },
+      {
+        "id": "BaseLanguageModel",
+        "label": "Base Language Model",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Language Model Interface",
+        "description": "Abstract base class for all language models (LLMs and Chat Models), providing a common interface for prompt generation, token counting, and structured output."
+      },
+      {
+        "id": "SimpleChatModel",
+        "label": "Simple Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "Simplified Chat Model",
+        "description": "A simplified implementation for chat models, primarily for backward compatibility, inheriting from BaseChatModel (which extends BaseLanguageModel)."
+      },
+      {
+        "id": "LLM",
+        "label": "LLM",
+        "type": "component",
+        "link": null,
+        "title": "Simplified LLM Interface",
+        "description": "A simple interface for implementing custom Large Language Models (LLMs), inheriting from BaseLLM (which extends BaseLanguageModel)."
+      },
+      {
+        "id": "BasePromptTemplate",
+        "label": "Base Prompt Template",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Prompt Template",
+        "description": "Base class for all prompt templates, defining the interface for creating and formatting prompts, handling input variables and partial application."
+      },
+      {
+        "id": "BaseOutputParser",
+        "label": "Base Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Output Parser",
+        "description": "Base class for parsing language model outputs into various structured formats, providing methods for parsing results and generating format instructions."
+      },
+      {
+        "id": "BaseGenerationOutputParser",
+        "label": "Base Generation Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Parse LLM Generations",
+        "description": "A base class specifically designed to parse the raw output of LLM generations into structured formats, inheriting from BaseOutputParser."
+      },
+      {
+        "id": "BaseTool",
+        "label": "Base Tool",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Tool Interface",
+        "description": "Base class for all LangChain tools, defining the interface for tools that agents can use to perform specific actions, including input validation and execution."
+      },
+      {
+        "id": "BaseRetriever",
+        "label": "Base Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Document Retriever",
+        "description": "Abstract base class for document retrieval systems, defining the interface for retrieving relevant documents based on a query."
+      },
+      {
+        "id": "VectorStore",
+        "label": "Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "Vector Database Interface",
+        "description": "An interface for vector databases, providing methods for adding, deleting, searching, and retrieving documents based on vector embeddings."
+      }
+    ],
+    "edges": [
+      {
+        "source": "Serializable",
+        "target": "RunnableSerializable",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Runnable",
+        "target": "RunnableSerializable",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunnableSerializable",
+        "target": "RunnableEachBase",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunnableSerializable",
+        "target": "RunnableBindingBase",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunnableSerializable",
+        "target": "BaseLanguageModel",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunnableSerializable",
+        "target": "BasePromptTemplate",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunnableSerializable",
+        "target": "BaseOutputParser",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunnableSerializable",
+        "target": "BaseGenerationOutputParser",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunnableSerializable",
+        "target": "BaseTool",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RunnableSerializable",
+        "target": "BaseRetriever",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLanguageModel",
+        "target": "SimpleChatModel",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLanguageModel",
+        "target": "LLM",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseRetriever",
+        "target": "VectorStore",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_abstractions",
+        "label": "Core Abstractions",
+        "nodes": [
+          "Serializable",
+          "Runnable",
+          "RunnableSerializable",
+          "RunnableEachBase",
+          "RunnableBindingBase"
+        ],
+        "title": "Fundamental Building Blocks",
+        "description": "These components provide the foundational interfaces for serialization, composable execution, and dynamic configuration within LangChain.",
+        "role": "surface"
+      },
+      {
+        "id": "language_model_interfaces",
+        "label": "Language Model Interfaces",
+        "nodes": [
+          "BaseLanguageModel",
+          "SimpleChatModel",
+          "LLM"
+        ],
+        "title": "Abstract Language Model Definitions",
+        "description": "Interfaces for interacting with various types of language models, including abstract base classes for general LLMs and simplified chat models.",
+        "role": "surface"
+      },
+      {
+        "id": "prompting_and_parsing",
+        "label": "Prompting & Parsing",
+        "nodes": [
+          "BasePromptTemplate",
+          "BaseOutputParser",
+          "BaseGenerationOutputParser"
+        ],
+        "title": "Prompt Construction and Output Interpretation",
+        "description": "Components for defining and formatting prompts, and for parsing the structured or unstructured outputs generated by language models.",
+        "role": "surface"
+      },
+      {
+        "id": "agentic_components",
+        "label": "Agentic Components",
+        "nodes": [
+          "BaseTool",
+          "BaseRetriever"
+        ],
+        "title": "Tools and Retrieval for Agents",
+        "description": "Core interfaces for tools that agents can utilize to perform actions and for retrieval systems that fetch relevant documents.",
+        "role": "surface"
+      },
+      {
+        "id": "data_storage",
+        "label": "Data Storage",
+        "nodes": [
+          "VectorStore"
+        ],
+        "title": "Vector Data Management",
+        "description": "The interface for managing and querying vector embeddings, crucial for retrieval-augmented generation and semantic search.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,749 @@
+{
+  "title": "Message Handling & Translation",
+  "summary": "This module provides core functionalities for handling messages, including translating LLM provider-specific content into a standardized format, constructing various content blocks, and offering utilities for message manipulation and chat history management.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "register_translators",
+        "label": "Register Block Translators",
+        "type": "component",
+        "link": null,
+        "title": "Register Block Translators",
+        "description": "Initializes and registers various LLM provider-specific content block translators within the framework, enabling standardized message processing."
+      },
+      {
+        "id": "anthropic_llm",
+        "label": "Anthropic LLM",
+        "type": "external",
+        "link": null,
+        "title": "Anthropic LLM",
+        "description": "An external language model provider that generates messages in its native format, requiring translation for internal use."
+      },
+      {
+        "id": "anthropic_iter_blocks",
+        "label": "Anthropic Block Iterator",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Block Iterator",
+        "description": "Iterates and converts Anthropic-specific content blocks (text, tool_use, reasoning, server_tool_use, mcp_tool_use) into a standardized internal format, handling streaming chunks and full messages."
+      },
+      {
+        "id": "bedrock_llm",
+        "label": "Bedrock LLM",
+        "type": "external",
+        "link": null,
+        "title": "Bedrock LLM",
+        "description": "An external language model provider (e.g., Anthropic models via Bedrock) that generates messages in its native format."
+      },
+      {
+        "id": "bedrock_translate_content",
+        "label": "Bedrock Content Translator",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Content Translator",
+        "description": "Translates full AI messages from Bedrock (specifically Anthropic models) into a list of standard content blocks for unified processing."
+      },
+      {
+        "id": "bedrock_translate_chunk",
+        "label": "Bedrock Chunk Translator",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Chunk Translator",
+        "description": "Translates streaming AI message chunks from Bedrock into a list of standard content blocks, primarily for Anthropic models, enabling real-time processing."
+      },
+      {
+        "id": "bedrock_converse_iter_blocks",
+        "label": "Bedrock Converse Block Iterator",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Converse Block Iterator",
+        "description": "Iterates and converts Bedrock Converse-specific content blocks (text, reasoning_content, tool_use) into a standardized internal format, handling streaming chunks and full messages."
+      },
+      {
+        "id": "google_genai_llm",
+        "label": "Google GenAI LLM",
+        "type": "external",
+        "link": null,
+        "title": "Google GenAI LLM",
+        "description": "An external language model provider from Google that generates messages in its native format."
+      },
+      {
+        "id": "google_genai_translate_content",
+        "label": "Google GenAI Content Translator",
+        "type": "component",
+        "link": null,
+        "title": "Google GenAI Content Translator",
+        "description": "Translates full AI messages from Google GenAI into a list of standard content blocks, ensuring compatibility with the framework's message structure."
+      },
+      {
+        "id": "google_genai_translate_chunk",
+        "label": "Google GenAI Chunk Translator",
+        "type": "component",
+        "link": null,
+        "title": "Google GenAI Chunk Translator",
+        "description": "Translates streaming AI message chunks from Google GenAI into a list of standard content blocks, facilitating incremental message processing."
+      },
+      {
+        "id": "groq_llm",
+        "label": "Groq LLM",
+        "type": "external",
+        "link": null,
+        "title": "Groq LLM",
+        "description": "An external language model provider from Groq that generates messages in its native format."
+      },
+      {
+        "id": "groq_translate_content",
+        "label": "Groq Content Translator",
+        "type": "component",
+        "link": null,
+        "title": "Groq Content Translator",
+        "description": "Translates full AI messages from Groq into a list of standard content blocks, enabling consistent handling across different LLMs."
+      },
+      {
+        "id": "groq_translate_chunk",
+        "label": "Groq Chunk Translator",
+        "type": "component",
+        "link": null,
+        "title": "Groq Chunk Translator",
+        "description": "Translates streaming AI message chunks from Groq into a list of standard content blocks, supporting efficient stream processing."
+      },
+      {
+        "id": "openai_llm",
+        "label": "OpenAI LLM",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI LLM",
+        "description": "An external language model provider from OpenAI that generates messages in its native format."
+      },
+      {
+        "id": "openai_translate_content",
+        "label": "OpenAI Content Translator",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Content Translator",
+        "description": "Translates full AI messages from OpenAI into a list of standard content blocks, handling both string and structured content for broad compatibility."
+      },
+      {
+        "id": "openai_translate_chunk",
+        "label": "OpenAI Chunk Translator",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Chunk Translator",
+        "description": "Translates streaming AI message chunks from OpenAI into a list of standard content blocks, supporting incremental updates during generation."
+      },
+      {
+        "id": "openai_iter_blocks",
+        "label": "OpenAI Block Iterator",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Block Iterator",
+        "description": "Iterates and converts OpenAI-specific content blocks (text, reasoning, image_generation_call, function_call, web_search_call, file_search_call, code_interpreter_call, mcp_call, mcp_list_tools, tool_search_call/output) into a standardized internal format, managing various tool and server calls."
+      },
+      {
+        "id": "openai_chat_completions_input_converter",
+        "label": "OpenAI Chat Completions Input Converter",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Chat Completions Input Converter",
+        "description": "Converts OpenAI Chat Completions format blocks, including non-standard ones, into the internal v1 ContentBlock format, ensuring proper interpretation."
+      },
+      {
+        "id": "create_text_block",
+        "label": "Create Text Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Text Block",
+        "description": "Constructs a standardized text content block with optional ID, annotations, and index, facilitating the creation of rich text messages."
+      },
+      {
+        "id": "create_image_block",
+        "label": "Create Image Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Image Block",
+        "description": "Constructs a standardized image content block from URL, base64 data, or file ID, with optional MIME type and ID, for multimedia message creation."
+      },
+      {
+        "id": "create_video_block",
+        "label": "Create Video Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Video Block",
+        "description": "Constructs a standardized video content block from URL, base64 data, or file ID, with optional MIME type and ID, for multimedia message creation."
+      },
+      {
+        "id": "create_audio_block",
+        "label": "Create Audio Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Audio Block",
+        "description": "Constructs a standardized audio content block from URL, base64 data, or file ID, with optional MIME type and ID, for multimedia message creation."
+      },
+      {
+        "id": "create_file_block",
+        "label": "Create File Block",
+        "type": "component",
+        "link": null,
+        "title": "Create File Block",
+        "description": "Constructs a standardized file content block from URL, base64 data, or file ID, with optional MIME type and ID, for attaching files to messages."
+      },
+      {
+        "id": "create_plaintext_block",
+        "label": "Create Plaintext Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Plaintext Block",
+        "description": "Constructs a standardized plaintext content block, supporting text, URL, base64, file ID, title, and context, for flexible text representation."
+      },
+      {
+        "id": "create_reasoning_block",
+        "label": "Create Reasoning Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Reasoning Block",
+        "description": "Constructs a standardized reasoning content block with optional reasoning text and ID, useful for representing LLM thought processes."
+      },
+      {
+        "id": "create_non_standard_block",
+        "label": "Create Non-Standard Block",
+        "type": "component",
+        "link": null,
+        "title": "Create Non-Standard Block",
+        "description": "Constructs a block for provider-specific content that doesn't fit standard types, preserving its original value for later interpretation or debugging."
+      },
+      {
+        "id": "approximate_token_counter",
+        "label": "Approximate Token Counter",
+        "type": "component",
+        "link": null,
+        "title": "Approximate Token Counter",
+        "description": "Estimates the number of tokens in a sequence of messages, providing a quick metric for cost or length management without exact tokenization."
+      },
+      {
+        "id": "runnable_wrapper",
+        "label": "Runnable Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Runnable Wrapper",
+        "description": "Wraps a function to make it compatible with the Runnable interface, allowing it to be seamlessly integrated into LangChain expression language chains."
+      },
+      {
+        "id": "merge_message_runs",
+        "label": "Merge Message Runs",
+        "type": "component",
+        "link": null,
+        "title": "Merge Message Runs",
+        "description": "Combines consecutive messages of the same type into a single message, concatenating content with a specified separator for cleaner message history."
+      },
+      {
+        "id": "filter_messages",
+        "label": "Filter Messages",
+        "type": "component",
+        "link": null,
+        "title": "Filter Messages",
+        "description": "Filters a list of messages based on criteria such as name, type, ID, or tool call IDs, allowing for selective message processing."
+      },
+      {
+        "id": "truncate_last_messages",
+        "label": "Truncate Last Messages",
+        "type": "component",
+        "link": null,
+        "title": "Truncate Last Messages",
+        "description": "Selects a subset of messages from the end, ensuring the total token count does not exceed a specified maximum, optionally preserving system messages."
+      },
+      {
+        "id": "in_memory_chat_history",
+        "label": "In-Memory Chat History",
+        "type": "component",
+        "link": null,
+        "title": "In-Memory Chat History",
+        "description": "Provides an in-memory storage and retrieval mechanism for chat messages, supporting asynchronous operations for quick access to conversation history."
+      },
+      {
+        "id": "base_message",
+        "label": "Base Message Abstraction",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Base Message Abstraction",
+        "description": "The fundamental abstraction for all message types in the LangChain framework, providing a common interface for message content and metadata."
+      },
+      {
+        "id": "standard_content_block",
+        "label": "Standard Content Block",
+        "type": "external",
+        "link": null,
+        "title": "Standard Content Block",
+        "description": "A standardized representation for various types of content within messages (text, image, tool calls, etc.), enabling uniform processing."
+      },
+      {
+        "id": "prompt_value",
+        "label": "Prompt Value",
+        "type": "external",
+        "link": "prompt_engineering",
+        "title": "Prompt Value",
+        "description": "Represents a prompt that can be converted into a list of messages, serving as input for language models."
+      },
+      {
+        "id": "runnable_interface",
+        "label": "Runnable Interface",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Runnable Interface",
+        "description": "A core abstraction for composable units of logic in LangChain, allowing for flexible and modular chain construction."
+      }
+    ],
+    "edges": [
+      {
+        "source": "register_translators",
+        "target": "anthropic_iter_blocks",
+        "label": "Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "bedrock_translate_content",
+        "label": "Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "bedrock_translate_chunk",
+        "label": "Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "bedrock_converse_iter_blocks",
+        "label": "Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "google_genai_translate_content",
+        "label": "Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "google_genai_translate_chunk",
+        "label": "Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "groq_translate_content",
+        "label": "Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "groq_translate_chunk",
+        "label": "Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "openai_translate_content",
+        "label": "Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "register_translators",
+        "target": "openai_translate_chunk",
+        "label": "Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_llm",
+        "target": "anthropic_iter_blocks",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_llm",
+        "target": "bedrock_translate_content",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_llm",
+        "target": "bedrock_translate_chunk",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_llm",
+        "target": "bedrock_converse_iter_blocks",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "google_genai_llm",
+        "target": "google_genai_translate_content",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "google_genai_llm",
+        "target": "google_genai_translate_chunk",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_llm",
+        "target": "groq_translate_content",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_llm",
+        "target": "groq_translate_chunk",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_llm",
+        "target": "openai_translate_content",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_llm",
+        "target": "openai_translate_chunk",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_translate_content",
+        "target": "openai_iter_blocks",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_translate_chunk",
+        "target": "openai_iter_blocks",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_translate_content",
+        "target": "openai_chat_completions_input_converter",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_translate_chunk",
+        "target": "openai_chat_completions_input_converter",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_iter_blocks",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_translate_content",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_translate_chunk",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_converse_iter_blocks",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "google_genai_translate_content",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "google_genai_translate_chunk",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_translate_content",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_translate_chunk",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_iter_blocks",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_chat_completions_input_converter",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_text_block",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_image_block",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_video_block",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_audio_block",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_file_block",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_plaintext_block",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_reasoning_block",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_non_standard_block",
+        "target": "standard_content_block",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "standard_content_block",
+        "target": "base_message",
+        "label": "Composes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_message",
+        "target": "filter_messages",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_message",
+        "target": "merge_message_runs",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_message",
+        "target": "approximate_token_counter",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_message",
+        "target": "truncate_last_messages",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "filter_messages",
+        "target": "base_message",
+        "label": "Outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "merge_message_runs",
+        "target": "base_message",
+        "label": "Outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "truncate_last_messages",
+        "target": "base_message",
+        "label": "Outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_message",
+        "target": "in_memory_chat_history",
+        "label": "Stores",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "in_memory_chat_history",
+        "target": "base_message",
+        "label": "Retrieves",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runnable_wrapper",
+        "target": "runnable_interface",
+        "label": "Creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prompt_value",
+        "target": "merge_message_runs",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prompt_value",
+        "target": "filter_messages",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "llm_provider_translation",
+        "label": "LLM Provider Content Translation",
+        "nodes": [
+          "register_translators",
+          "anthropic_iter_blocks",
+          "bedrock_translate_content",
+          "bedrock_translate_chunk",
+          "bedrock_converse_iter_blocks",
+          "google_genai_translate_content",
+          "google_genai_translate_chunk",
+          "groq_translate_content",
+          "groq_translate_chunk",
+          "openai_translate_content",
+          "openai_translate_chunk",
+          "openai_iter_blocks",
+          "openai_chat_completions_input_converter"
+        ],
+        "title": "LLM Provider Content Translation",
+        "description": "Handles the conversion of messages from various LLM providers (Anthropic, Bedrock, Google GenAI, Groq, OpenAI) into a standardized internal content block format, ensuring interoperability.",
+        "role": "generative"
+      },
+      {
+        "id": "content_block_construction",
+        "label": "Standard Content Block Construction",
+        "nodes": [
+          "create_text_block",
+          "create_image_block",
+          "create_video_block",
+          "create_audio_block",
+          "create_file_block",
+          "create_plaintext_block",
+          "create_reasoning_block",
+          "create_non_standard_block"
+        ],
+        "title": "Standard Content Block Construction",
+        "description": "Provides functions for programmatically creating various types of standardized content blocks, such as text, images, videos, audio, files, plaintext, reasoning, and non-standard data.",
+        "role": "surface"
+      },
+      {
+        "id": "message_utility_functions",
+        "label": "Message Utility Functions",
+        "nodes": [
+          "approximate_token_counter",
+          "runnable_wrapper",
+          "merge_message_runs",
+          "filter_messages",
+          "truncate_last_messages"
+        ],
+        "title": "Message Utility Functions",
+        "description": "Offers a suite of utilities for manipulating messages, including token counting, filtering, merging consecutive messages, and truncating message history.",
+        "role": "analytical"
+      },
+      {
+        "id": "chat_history_management",
+        "label": "Chat History Management",
+        "nodes": [
+          "in_memory_chat_history"
+        ],
+        "title": "Chat History Management",
+        "description": "Manages the storage and retrieval of chat messages in memory, providing a simple yet effective way to maintain conversation context.",
+        "role": "data"
+      }
+    ]
+  }
+}

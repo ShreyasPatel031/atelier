@@ -1,0 +1,310 @@
+{
+  "title": "Indexing and Vector Stores",
+  "summary": "This module provides core functionalities for indexing documents and managing vector stores, including an asynchronous indexing API, in-memory implementations, and utilities for creating vector store indexes. It handles document lifecycle management, hashing, and similarity-based retrieval.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "aindex_func",
+        "label": "Asynchronously Index Documents",
+        "type": "component",
+        "link": null,
+        "title": "Async Document Indexer",
+        "description": "Manages the asynchronous indexing of documents into a vector store or document index, handling additions, updates, and deletions while tracking document state with a record manager. Supports various cleanup strategies."
+      },
+      {
+        "id": "hash_dict_util",
+        "label": "Hash Data to UUID",
+        "type": "component",
+        "link": null,
+        "title": "Data Hashing Utility",
+        "description": "Generates a unique UUID by hashing nested dictionary data using specified algorithms (SHA1, SHA256, SHA512, Blake2b), primarily used for creating stable document identifiers."
+      },
+      {
+        "id": "DocumentIndex_abc",
+        "label": "Document Index Interface",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Document Index",
+        "description": "An abstract base class defining the interface for document indexing systems. It specifies methods for upserting, deleting, and retrieving documents by ID, and inherits from BaseRetriever."
+      },
+      {
+        "id": "InMemoryDocumentIndex_impl",
+        "label": "In-Memory Document Index",
+        "type": "component",
+        "link": null,
+        "title": "Ephemeral Document Index",
+        "description": "A concrete, in-memory implementation of the Document Index Interface. It stores documents in a dictionary and offers a basic search mechanism based on query term frequency within document content."
+      },
+      {
+        "id": "InMemoryVectorStore_impl",
+        "label": "In-Memory Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "Ephemeral Vector Store",
+        "description": "A concrete, in-memory implementation of a vector store. It stores documents and their embeddings in a dictionary, supporting efficient similarity searches using cosine similarity and various retrieval methods."
+      },
+      {
+        "id": "VectorstoreIndexCreator_util",
+        "label": "Create Vector Store Index",
+        "type": "component",
+        "link": null,
+        "title": "Vector Store Index Builder",
+        "description": "A utility class responsible for constructing vector store indexes. It orchestrates the loading of documents, splitting them into chunks, generating embeddings, and populating a chosen vector store."
+      },
+      {
+        "id": "default_text_splitter_util",
+        "label": "Provide Default Text Splitter",
+        "type": "component",
+        "link": null,
+        "title": "Default Text Splitter Provider",
+        "description": "A helper function that returns a default RecursiveCharacterTextSplitter instance, configured for chunking documents into manageable sizes for indexing."
+      },
+      {
+        "id": "VectorStore_base",
+        "label": "Vector Store Base",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Abstract Vector Store",
+        "description": "An abstract base class defining the fundamental interface for all vector store implementations, including methods for adding, deleting, and searching documents by vector similarity."
+      },
+      {
+        "id": "BaseRetriever_base",
+        "label": "Base Retriever",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Abstract Document Retriever",
+        "description": "An abstract base class that defines the common interface for all document retrieval systems, enabling consistent interaction with various data sources."
+      },
+      {
+        "id": "Document_data",
+        "label": "Document Object",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Core Document Structure",
+        "description": "Represents a piece of text content along with associated metadata, serving as the fundamental unit for indexing, storage, and retrieval operations within the framework."
+      },
+      {
+        "id": "BaseLoader_external",
+        "label": "Document Loader",
+        "type": "external",
+        "link": "document_loading",
+        "title": "Data Ingestion Interface",
+        "description": "An abstract base class for components responsible for loading raw data from various sources and converting it into a standardized Document format for further processing."
+      },
+      {
+        "id": "Embeddings_external",
+        "label": "Embeddings Generator",
+        "type": "external",
+        "link": "miscellaneous_utilities",
+        "title": "Text Embedding Service",
+        "description": "A component responsible for converting text or documents into numerical vector representations (embeddings), which are crucial for similarity search in vector stores."
+      },
+      {
+        "id": "TextSplitter_external",
+        "label": "Text Splitter",
+        "type": "external",
+        "link": "miscellaneous_utilities",
+        "title": "Document Chunking Utility",
+        "description": "A utility that breaks down large text documents into smaller, more manageable chunks, often used before indexing to optimize retrieval performance and context window usage."
+      },
+      {
+        "id": "RecordManager_external",
+        "label": "Record Manager",
+        "type": "external",
+        "link": null,
+        "title": "Document State Tracker",
+        "description": "An external component responsible for tracking the state and timestamps of indexed documents, enabling efficient incremental updates and cleanup operations within vector stores."
+      }
+    ],
+    "edges": [
+      {
+        "source": "aindex_func",
+        "target": "RecordManager_external",
+        "label": "manages document state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aindex_func",
+        "target": "VectorStore_base",
+        "label": "indexes into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aindex_func",
+        "target": "DocumentIndex_abc",
+        "label": "indexes into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aindex_func",
+        "target": "BaseLoader_external",
+        "label": "loads documents from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aindex_func",
+        "target": "Document_data",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aindex_func",
+        "target": "hash_dict_util",
+        "label": "uses for ID generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DocumentIndex_abc",
+        "target": "BaseRetriever_base",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InMemoryDocumentIndex_impl",
+        "target": "DocumentIndex_abc",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InMemoryDocumentIndex_impl",
+        "target": "Document_data",
+        "label": "stores",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InMemoryVectorStore_impl",
+        "target": "VectorStore_base",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InMemoryVectorStore_impl",
+        "target": "Embeddings_external",
+        "label": "uses for vector generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InMemoryVectorStore_impl",
+        "target": "Document_data",
+        "label": "stores",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorstoreIndexCreator_util",
+        "target": "VectorStore_base",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorstoreIndexCreator_util",
+        "target": "Embeddings_external",
+        "label": "uses for embeddings",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorstoreIndexCreator_util",
+        "target": "TextSplitter_external",
+        "label": "uses for splitting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorstoreIndexCreator_util",
+        "target": "BaseLoader_external",
+        "label": "loads documents from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorstoreIndexCreator_util",
+        "target": "Document_data",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorstoreIndexCreator_util",
+        "target": "default_text_splitter_util",
+        "label": "uses as default",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "default_text_splitter_util",
+        "target": "TextSplitter_external",
+        "label": "provides instance of",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_api",
+        "label": "Surface APIs",
+        "nodes": [
+          "VectorstoreIndexCreator_util"
+        ],
+        "title": "User-Facing Indexing APIs",
+        "description": "Components that provide high-level, user-facing functionalities for creating and managing document indexes.",
+        "role": "surface"
+      },
+      {
+        "id": "indexing_core",
+        "label": "Core Indexing Logic",
+        "nodes": [
+          "aindex_func",
+          "hash_dict_util"
+        ],
+        "title": "Document Indexing & Lifecycle Management",
+        "description": "Central components responsible for the core logic of indexing documents, including hashing, managing document state, and orchestrating upsert/delete operations.",
+        "role": "generative"
+      },
+      {
+        "id": "index_implementations",
+        "label": "Index Implementations",
+        "nodes": [
+          "InMemoryDocumentIndex_impl",
+          "InMemoryVectorStore_impl"
+        ],
+        "title": "Concrete Index & Vector Store Implementations",
+        "description": "Concrete implementations of the abstract document index and vector store interfaces, providing in-memory storage and retrieval capabilities.",
+        "role": "analytical"
+      },
+      {
+        "id": "interfaces_and_abstractions",
+        "label": "Interfaces & Abstractions",
+        "nodes": [
+          "DocumentIndex_abc"
+        ],
+        "title": "Abstract Definitions for Indexing",
+        "description": "Abstract base classes that define the contracts for document indexing and retrieval, allowing for flexible and interchangeable implementations.",
+        "role": "data"
+      },
+      {
+        "id": "utilities",
+        "label": "Helper Utilities",
+        "nodes": [
+          "default_text_splitter_util"
+        ],
+        "title": "Supporting Functions for Indexing",
+        "description": "Auxiliary functions that provide specific helper functionalities, such as default text splitting.",
+        "role": "generative"
+      }
+    ]
+  }
+}

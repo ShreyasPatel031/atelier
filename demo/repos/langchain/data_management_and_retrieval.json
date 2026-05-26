@@ -1,0 +1,329 @@
+{
+    "title": "Data Management & Retrieval",
+    "summary": "This module provides comprehensive functionalities for loading, indexing, storing, and retrieving documents. It encompasses tools for ingesting data from various sources, managing vector stores and document indexes, and implementing diverse retrieval strategies to efficiently access relevant information.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "raw_data_sources",
+                "label": "Raw Data Sources",
+                "type": "external",
+                "link": null,
+                "title": "Raw Data Sources",
+                "description": "External data sources like files, APIs, or databases that provide unstructured or semi-structured content for ingestion."
+            },
+            {
+                "id": "document_loader",
+                "label": "Load & Parse Raw Data",
+                "type": "component",
+                "link": null,
+                "title": "Document Loader",
+                "description": "Components responsible for ingesting raw data from various sources and converting it into a standardized Document object format."
+            },
+            {
+                "id": "document_object",
+                "label": "Standardized Document Object",
+                "type": "component",
+                "link": null,
+                "title": "Document Object",
+                "description": "The core data structure representing a piece of text content along with its associated metadata, used throughout the system."
+            },
+            {
+                "id": "text_splitter",
+                "label": "Split Documents into Chunks",
+                "type": "component",
+                "link": null,
+                "title": "Text Splitter",
+                "description": "Utility that breaks down large documents into smaller, manageable chunks, optimizing them for embedding and retrieval processes."
+            },
+            {
+                "id": "embedding_model",
+                "label": "Generate Vector Embeddings",
+                "type": "external",
+                "link": null,
+                "title": "Embedding Model",
+                "description": "External service or model that converts text chunks into numerical vector representations, crucial for semantic similarity search."
+            },
+            {
+                "id": "document_indexer",
+                "label": "Index Documents & Metadata",
+                "type": "component",
+                "link": null,
+                "title": "Document Indexer",
+                "description": "Manages the storage and retrieval of documents and their associated metadata, often supporting full-text search or ID-based lookup."
+            },
+            {
+                "id": "vector_store",
+                "label": "Store Vector Embeddings",
+                "type": "component",
+                "link": null,
+                "title": "Vector Store",
+                "description": "A specialized database designed to store and efficiently query vector embeddings, enabling fast similarity searches."
+            },
+            {
+                "id": "index_creator",
+                "label": "Orchestrate Index Creation",
+                "type": "component",
+                "link": null,
+                "title": "Index Creator",
+                "description": "A utility that automates the end-to-end process of creating a document or vector index, from loading to embedding and storage."
+            },
+            {
+                "id": "user_query_input",
+                "label": "User Query Input",
+                "type": "external",
+                "link": null,
+                "title": "User Query Input",
+                "description": "The natural language query or structured request provided by the user to initiate the information retrieval process."
+            },
+            {
+                "id": "retrieval_strategies",
+                "label": "Apply Retrieval Strategies",
+                "type": "component",
+                "link": null,
+                "title": "Retrieval Strategies",
+                "description": "Implements various techniques (e.g., multi-query, ensemble, self-query) to fetch relevant documents or examples from indexes and vector stores."
+            },
+            {
+                "id": "document_refiner",
+                "label": "Refine & Filter Documents",
+                "type": "component",
+                "link": null,
+                "title": "Document Refiner",
+                "description": "Components that process initially retrieved documents, performing tasks like extraction, filtering, compression, or reranking to improve relevance and quality."
+            },
+            {
+                "id": "example_selector",
+                "label": "Select Examples for Prompts",
+                "type": "component",
+                "link": null,
+                "title": "Example Selector",
+                "description": "Chooses a subset of relevant examples from a collection based on criteria like semantic similarity or maximal marginal relevance, for few-shot prompting."
+            },
+            {
+                "id": "llm_for_retrieval",
+                "label": "LLM for Query/Refinement",
+                "type": "external",
+                "link": null,
+                "title": "LLM for Query/Refinement",
+                "description": "A Large Language Model used to assist in retrieval tasks, such as generating multiple queries, structuring queries, or refining retrieved content."
+            },
+            {
+                "id": "final_output",
+                "label": "Retrieved & Processed Output",
+                "type": "external",
+                "link": null,
+                "title": "Final Output",
+                "description": "The ultimate result of the data management and retrieval pipeline, consisting of refined documents or selected examples ready for consumption."
+            }
+        ],
+        "edges": [
+            {
+                "source": "raw_data_sources",
+                "target": "document_loader",
+                "label": "Provides raw data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "document_loader",
+                "target": "document_object",
+                "label": "Produces standardized documents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "document_object",
+                "target": "text_splitter",
+                "label": "Provides documents for chunking",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "text_splitter",
+                "target": "embedding_model",
+                "label": "Provides text chunks for embedding",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "embedding_model",
+                "target": "vector_store",
+                "label": "Stores embeddings",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "document_object",
+                "target": "document_indexer",
+                "label": "Indexes full documents/metadata",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "text_splitter",
+                "target": "document_indexer",
+                "label": "Indexes chunks",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "index_creator",
+                "target": "document_loader",
+                "label": "Orchestrates loading",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "index_creator",
+                "target": "text_splitter",
+                "label": "Orchestrates splitting",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "index_creator",
+                "target": "embedding_model",
+                "label": "Orchestrates embedding",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "index_creator",
+                "target": "vector_store",
+                "label": "Orchestrates storage",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "index_creator",
+                "target": "document_indexer",
+                "label": "Orchestrates indexing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_query_input",
+                "target": "retrieval_strategies",
+                "label": "Provides query",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_query_input",
+                "target": "llm_for_retrieval",
+                "label": "Provides query for enhancement",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "llm_for_retrieval",
+                "target": "retrieval_strategies",
+                "label": "Generates enhanced queries",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "vector_store",
+                "target": "retrieval_strategies",
+                "label": "Searches for relevant vectors",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "document_indexer",
+                "target": "retrieval_strategies",
+                "label": "Searches for relevant documents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrieval_strategies",
+                "target": "document_refiner",
+                "label": "Provides initial retrieved documents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrieval_strategies",
+                "target": "example_selector",
+                "label": "Provides documents/embeddings",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "llm_for_retrieval",
+                "target": "document_refiner",
+                "label": "Filters, extracts, summarizes",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "document_refiner",
+                "target": "final_output",
+                "label": "Produces refined documents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "example_selector",
+                "target": "final_output",
+                "label": "Produces selected examples",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "data_ingestion",
+                "label": "Data Ingestion",
+                "nodes": [
+                    "raw_data_sources",
+                    "document_loader",
+                    "document_object"
+                ],
+                "title": "Data Ingestion",
+                "description": "Handles loading raw data from various external sources and converting it into a standardized document format for internal processing.",
+                "role": null
+            },
+            {
+                "id": "document_processing_indexing",
+                "label": "Document Processing & Indexing",
+                "nodes": [
+                    "text_splitter",
+                    "embedding_model",
+                    "document_indexer",
+                    "vector_store",
+                    "index_creator"
+                ],
+                "title": "Document Processing & Indexing",
+                "description": "Prepares documents for efficient retrieval by splitting them into chunks, generating vector embeddings, and storing them in specialized indexes or vector databases.",
+                "role": null
+            },
+            {
+                "id": "query_retrieval",
+                "label": "Query & Retrieval Execution",
+                "nodes": [
+                    "user_query_input",
+                    "retrieval_strategies",
+                    "llm_for_retrieval"
+                ],
+                "title": "Query & Retrieval Execution",
+                "description": "Processes user queries, potentially enhancing them with LLMs, and executes various retrieval strategies against the indexed data to fetch relevant information.",
+                "role": null
+            },
+            {
+                "id": "result_refinement_output",
+                "label": "Result Refinement & Output",
+                "nodes": [
+                    "document_refiner",
+                    "example_selector",
+                    "final_output"
+                ],
+                "title": "Result Refinement & Output",
+                "description": "Post-processes the retrieved information by refining, filtering, or selecting examples, ultimately preparing the final output for the user or downstream applications.",
+                "role": null
+            }
+        ]
+    }
+}

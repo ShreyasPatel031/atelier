@@ -19,6 +19,7 @@ FIRST_MODULE_TREE_FILENAME = 'first_module_tree.json'
 MODULE_TREE_FILENAME = 'module_tree.json'
 OVERVIEW_FILENAME = 'overview.json'
 MODULE_DOC_EXT = '.json'
+GENERATION_METRICS_FILENAME = 'generation_metrics.json'
 
 
 def module_doc_filename(stem: str) -> str:

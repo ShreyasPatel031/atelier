@@ -1,0 +1,111 @@
+{
+    "title": "Core Framework Overview",
+    "summary": "This module provides the foundational components and utilities for building LangChain applications. It defines core abstractions, manages API lifecycle and security, handles callbacks and tracing, and offers general-purpose utilities for various framework operations.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "core_abstractions",
+                "label": "Core Abstractions",
+                "type": "module",
+                "link": "base_abstractions",
+                "title": "Fundamental LangChain Abstractions",
+                "description": "Defines the abstract base classes and interfaces for all core LangChain components, including serializable objects, composable runnables, language models, prompts, and tools. It forms the architectural backbone."
+            },
+            {
+                "id": "api_security",
+                "label": "API & Security Utilities",
+                "type": "module",
+                "link": "api_and_security",
+                "title": "API Lifecycle & Security Management",
+                "description": "Provides essential utilities for managing API lifecycle (beta features, deprecations) and robust security features, primarily focusing on Server-Side Request Forgery (SSRF) protection for URL validation."
+            },
+            {
+                "id": "callbacks_tracing",
+                "label": "Callbacks & Tracing",
+                "type": "module",
+                "link": "callbacks_and_tracing",
+                "title": "Observability & Event Handling",
+                "description": "Offers core functionalities for handling asynchronous and synchronous callbacks, managing execution traces, and dispatching custom events for detailed logging, monitoring, and integration with tracing platforms."
+            },
+            {
+                "id": "general_utilities",
+                "label": "General Utilities",
+                "type": "module",
+                "link": "general_utilities",
+                "title": "Common Helper Functions & Tools",
+                "description": "Contains a collection of fundamental utility functions and classes, including tools for managing data streams, parsing HTML, handling Pydantic models, argument validation, and in-memory caching."
+            }
+        ],
+        "edges": [
+            {
+                "source": "core_abstractions",
+                "target": "callbacks_tracing",
+                "label": "Generates events for",
+                "title": "Event Generation",
+                "description": "Core components like Runnables emit events that are captured and processed by the callbacks and tracing system for observability."
+            },
+            {
+                "source": "core_abstractions",
+                "target": "api_security",
+                "label": "Uses for validation",
+                "title": "Security Integration",
+                "description": "Some core abstractions (e.g., tools, models) might leverage security utilities for input validation or safe operations, such as URL checks."
+            },
+            {
+                "source": "core_abstractions",
+                "target": "general_utilities",
+                "label": "Leverages common helpers",
+                "title": "Utility Dependency",
+                "description": "Core components often rely on general utilities for tasks like serialization, data manipulation, or environment checks, ensuring efficient operations."
+            },
+            {
+                "source": "callbacks_tracing",
+                "target": "general_utilities",
+                "label": "Uses for internal tasks",
+                "title": "Internal Utility Usage",
+                "description": "The tracing system might use general utilities for tasks like caching trace data, managing internal data structures, or other supporting operations."
+            },
+            {
+                "source": "api_security",
+                "target": "callbacks_tracing",
+                "label": "Reports security events to",
+                "title": "Security Event Reporting",
+                "description": "Security utilities can report warnings or incidents (e.g., deprecation warnings, SSRF alerts) to the tracing system for logging and monitoring purposes."
+            }
+        ],
+        "groups": [
+            {
+                "id": "foundational_components",
+                "label": "Foundational Components",
+                "nodes": [
+                    "core_abstractions"
+                ],
+                "title": "Core Architectural Elements",
+                "description": "These modules establish the fundamental structure, interfaces, and core building blocks upon which all LangChain applications are constructed, defining the basic types and behaviors.",
+                "role": null
+            },
+            {
+                "id": "cross_cutting_concerns",
+                "label": "Cross-Cutting Concerns",
+                "nodes": [
+                    "api_security",
+                    "callbacks_tracing"
+                ],
+                "title": "System-Wide Support Services",
+                "description": "These modules provide essential services that span across the entire framework, enabling observability, security, and robust API management for all components, ensuring reliability and maintainability.",
+                "role": null
+            },
+            {
+                "id": "supporting_utilities",
+                "label": "Supporting Utilities",
+                "nodes": [
+                    "general_utilities"
+                ],
+                "title": "General Purpose Helper Tools",
+                "description": "This module offers a collection of versatile utility functions and classes that support various operations across the framework, from data handling and parsing to system information and caching.",
+                "role": null
+            }
+        ]
+    }
+}

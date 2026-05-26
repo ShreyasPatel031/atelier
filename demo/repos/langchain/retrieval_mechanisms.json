@@ -1,0 +1,416 @@
+{
+  "title": "Retrieval Mechanisms",
+  "summary": "This module offers diverse strategies for retrieving and processing documents, encompassing example selection based on similarity, document compression and filtering using LLMs or external APIs, and advanced retrieval techniques like multi-query, multi-vector, and self-query retrieval.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "user_query",
+        "label": "User Query",
+        "type": "external",
+        "link": null,
+        "title": "User Input Query",
+        "description": "The initial query provided by the user or system to initiate a retrieval process."
+      },
+      {
+        "id": "raw_documents",
+        "label": "Raw Documents",
+        "type": "external",
+        "link": null,
+        "title": "Unprocessed Documents",
+        "description": "A collection of raw, uncompressed, or unfiltered documents that serve as the source for retrieval or processing."
+      },
+      {
+        "id": "llm_service",
+        "label": "LLM Service",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "Large Language Model",
+        "description": "An external Large Language Model used for tasks such as query generation, document extraction, or filtering decisions."
+      },
+      {
+        "id": "vector_store",
+        "label": "Vector Store",
+        "type": "external",
+        "link": "indexing_and_vectorstores",
+        "title": "Vector Database",
+        "description": "A database storing vector embeddings of documents or examples, enabling similarity searches."
+      },
+      {
+        "id": "doc_store",
+        "label": "Document Store",
+        "type": "external",
+        "link": "document_loading",
+        "title": "Document Storage",
+        "description": "A storage mechanism for retrieving full parent documents, often by ID, after child chunks have been identified."
+      },
+      {
+        "id": "cohere_api",
+        "label": "Cohere Rerank API",
+        "type": "external",
+        "link": "partner_integrations",
+        "title": "Cohere Reranking Service",
+        "description": "An external API service provided by Cohere for reranking documents based on their relevance to a query."
+      },
+      {
+        "id": "sem_sim_selector",
+        "label": "Semantic Similarity Example Selector",
+        "type": "component",
+        "link": null,
+        "title": "Select Examples by Semantic Similarity",
+        "description": "Selects a specified number of examples from a collection based on their semantic similarity to an input query, using a vector store."
+      },
+      {
+        "id": "mmr_selector",
+        "label": "Max Marginal Relevance Example Selector",
+        "type": "component",
+        "link": null,
+        "title": "Select Examples by Max Marginal Relevance",
+        "description": "Selects diverse examples by optimizing for both relevance to the query and diversity among the selected examples, using Max Marginal Relevance (MMR)."
+      },
+      {
+        "id": "llm_extractor",
+        "label": "LLM Chain Extractor",
+        "type": "component",
+        "link": null,
+        "title": "Extract Relevant Document Parts (LLM)",
+        "description": "Utilizes an LLM chain to identify and extract only the most relevant sections or summaries from a set of documents based on a given query."
+      },
+      {
+        "id": "llm_filter",
+        "label": "LLM Chain Filter",
+        "type": "component",
+        "link": null,
+        "title": "Filter Documents by Relevance (LLM)",
+        "description": "Filters out irrelevant documents from a collection by using an LLM chain to assess each document's relevance to a specific query."
+      },
+      {
+        "id": "cohere_reranker",
+        "label": "Cohere Rerank Compressor",
+        "type": "component",
+        "link": null,
+        "title": "Rerank Documents (Cohere API)",
+        "description": "Reorders a list of documents based on their relevance to a query, leveraging the Cohere Rerank API to assign relevance scores."
+      },
+      {
+        "id": "ensemble_retriever",
+        "label": "Ensemble Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Combine Multiple Retrievers (Rank Fusion)",
+        "description": "Aggregates and re-ranks results from multiple underlying retrievers using a rank fusion algorithm, such as weighted reciprocal rank, to produce a consolidated list of documents."
+      },
+      {
+        "id": "multi_query_retriever",
+        "label": "Multi-Query Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Generate & Retrieve with Multiple Queries",
+        "description": "Transforms a single input query into multiple distinct queries using an LLM, then retrieves documents for each generated query and returns a unique union of all results."
+      },
+      {
+        "id": "multi_vector_retriever",
+        "label": "Multi-Vector Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Parent Documents from Chunks",
+        "description": "Performs similarity search on small, embedded document chunks in a vector store, then retrieves the corresponding full parent documents from a document store."
+      },
+      {
+        "id": "self_query_retriever",
+        "label": "Self-Query Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Construct & Execute Structured Queries",
+        "description": "Uses an LLM to parse a natural language query into a structured query, which is then executed against a vector store to retrieve documents based on both semantic and metadata filters."
+      },
+      {
+        "id": "output_retrieved_docs",
+        "label": "Retrieved Documents",
+        "type": "external",
+        "link": null,
+        "title": "Processed Documents Output",
+        "description": "The final set of documents after being retrieved, compressed, filtered, or reranked by the various mechanisms."
+      },
+      {
+        "id": "output_selected_examples",
+        "label": "Selected Examples",
+        "type": "external",
+        "link": null,
+        "title": "Selected Examples Output",
+        "description": "A list of examples chosen based on similarity or relevance to the input query, typically used for few-shot prompting."
+      }
+    ],
+    "edges": [
+      {
+        "source": "user_query",
+        "target": "sem_sim_selector",
+        "label": "Input Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vector_store",
+        "target": "sem_sim_selector",
+        "label": "Search Examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sem_sim_selector",
+        "target": "output_selected_examples",
+        "label": "Selected Examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_query",
+        "target": "mmr_selector",
+        "label": "Input Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vector_store",
+        "target": "mmr_selector",
+        "label": "Search Examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mmr_selector",
+        "target": "output_selected_examples",
+        "label": "Selected Examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_query",
+        "target": "llm_extractor",
+        "label": "Query for Extraction",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "raw_documents",
+        "target": "llm_extractor",
+        "label": "Documents to Extract From",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_service",
+        "target": "llm_extractor",
+        "label": "LLM for Extraction",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_extractor",
+        "target": "output_retrieved_docs",
+        "label": "Compressed Documents",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_query",
+        "target": "llm_filter",
+        "label": "Query for Filtering",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "raw_documents",
+        "target": "llm_filter",
+        "label": "Documents to Filter",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_service",
+        "target": "llm_filter",
+        "label": "LLM for Filtering",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_filter",
+        "target": "output_retrieved_docs",
+        "label": "Filtered Documents",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_query",
+        "target": "cohere_reranker",
+        "label": "Query for Reranking",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "raw_documents",
+        "target": "cohere_reranker",
+        "label": "Documents to Rerank",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cohere_api",
+        "target": "cohere_reranker",
+        "label": "Reranking Service",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cohere_reranker",
+        "target": "output_retrieved_docs",
+        "label": "Reranked Documents",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_query",
+        "target": "ensemble_retriever",
+        "label": "Input Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vector_store",
+        "target": "ensemble_retriever",
+        "label": "Sub-Retriever Results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ensemble_retriever",
+        "target": "output_retrieved_docs",
+        "label": "Fused Documents",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_query",
+        "target": "multi_query_retriever",
+        "label": "Initial Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_service",
+        "target": "multi_query_retriever",
+        "label": "Generate Queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vector_store",
+        "target": "multi_query_retriever",
+        "label": "Retrieve for Generated Queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_query_retriever",
+        "target": "output_retrieved_docs",
+        "label": "Unique Union Documents",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_query",
+        "target": "multi_vector_retriever",
+        "label": "Input Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vector_store",
+        "target": "multi_vector_retriever",
+        "label": "Search Child Chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "doc_store",
+        "target": "multi_vector_retriever",
+        "label": "Fetch Parent Documents",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_vector_retriever",
+        "target": "output_retrieved_docs",
+        "label": "Parent Documents",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_query",
+        "target": "self_query_retriever",
+        "label": "Initial Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_service",
+        "target": "self_query_retriever",
+        "label": "Construct Structured Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vector_store",
+        "target": "self_query_retriever",
+        "label": "Execute Structured Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "self_query_retriever",
+        "target": "output_retrieved_docs",
+        "label": "Filtered/Retrieved Documents",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "example_selection_group",
+        "label": "Example Selection",
+        "nodes": [
+          "sem_sim_selector",
+          "mmr_selector"
+        ],
+        "title": "Example Selection Strategies",
+        "description": "Components for dynamically selecting relevant examples to improve prompt engineering, based on similarity or diversity.",
+        "role": "generative"
+      },
+      {
+        "id": "doc_processing_group",
+        "label": "Document Processing",
+        "nodes": [
+          "llm_extractor",
+          "llm_filter",
+          "cohere_reranker"
+        ],
+        "title": "Document Compression and Filtering",
+        "description": "Mechanisms to refine and optimize retrieved documents by extracting key information, filtering irrelevant content, or reranking based on relevance.",
+        "role": "analytical"
+      },
+      {
+        "id": "advanced_retrieval_group",
+        "label": "Advanced Retrieval",
+        "nodes": [
+          "ensemble_retriever",
+          "multi_query_retriever",
+          "multi_vector_retriever",
+          "self_query_retriever"
+        ],
+        "title": "Advanced Retrieval Strategies",
+        "description": "Sophisticated retrieval techniques that combine multiple sources, generate varied queries, or use structured query construction for more effective document fetching.",
+        "role": "generative"
+      }
+    ]
+  }
+}

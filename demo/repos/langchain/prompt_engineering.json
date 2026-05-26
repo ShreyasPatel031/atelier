@@ -1,0 +1,354 @@
+{
+  "title": "Prompt Engineering Components",
+  "summary": "This module provides various prompt template classes for constructing and managing prompts, including chat-based, string-based, few-shot, and structured output prompts. It also includes utilities for loading and formatting prompts, enabling flexible prompt creation for language models.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "DefineMessagePromptStructure",
+        "label": "Define Message Prompt Structure",
+        "type": "component",
+        "link": null,
+        "title": "BaseMessagePromptTemplate",
+        "description": "Abstract base class for all message-based prompt templates, defining the interface for formatting messages and handling input variables."
+      },
+      {
+        "id": "StringPromptTemplate",
+        "label": "Define String Prompt Structure",
+        "type": "component",
+        "link": null,
+        "title": "StringPromptTemplate",
+        "description": "Abstract base class for string-based prompt templates, providing methods to format prompts into strings or StringPromptValue objects."
+      },
+      {
+        "id": "FormatIndividualChatMessage",
+        "label": "Format Individual Chat Message",
+        "type": "component",
+        "link": null,
+        "title": "ChatMessagePromptTemplate",
+        "description": "Formats a single chat message with a specified role (e.g., 'human', 'AI') and content, based on a prompt template."
+      },
+      {
+        "id": "FormatAIMessage",
+        "label": "Format AI Message",
+        "type": "component",
+        "link": null,
+        "title": "AIMessagePromptTemplate",
+        "description": "A specialized chat message prompt template for messages originating from an AI."
+      },
+      {
+        "id": "FormatSystemMessage",
+        "label": "Format System Message",
+        "type": "component",
+        "link": null,
+        "title": "SystemMessagePromptTemplate",
+        "description": "A specialized chat message prompt template for system-level instructions or context, not directly shown to the user."
+      },
+      {
+        "id": "CreateFewShotChatPrompt",
+        "label": "Create Few-Shot Chat Prompt",
+        "type": "component",
+        "link": null,
+        "title": "FewShotChatMessagePromptTemplate",
+        "description": "Generates a list of chat messages by incorporating few-shot examples, which can be fixed or dynamically selected, into a conversation flow."
+      },
+      {
+        "id": "CreateFewShotStringPrompt",
+        "label": "Create Few-Shot String Prompt",
+        "type": "component",
+        "link": null,
+        "title": "FewShotPromptWithTemplates",
+        "description": "Constructs a string-based prompt by embedding few-shot examples, using a prefix, suffix, and an example selector or fixed examples."
+      },
+      {
+        "id": "CreateStructuredOutputPrompt",
+        "label": "Create Structured Output Prompt",
+        "type": "component",
+        "link": null,
+        "title": "StructuredPrompt",
+        "description": "A chat prompt template designed to enforce a specific output schema (e.g., JSON, Pydantic model) from a language model."
+      },
+      {
+        "id": "RepresentConcreteChatPrompt",
+        "label": "Represent Concrete Chat Prompt",
+        "type": "component",
+        "link": null,
+        "title": "ChatPromptValueConcrete",
+        "description": "A concrete representation of a chat prompt value, explicitly listing the sequence of messages it contains for external schema compatibility."
+      },
+      {
+        "id": "LoadGenericPromptFromConfig",
+        "label": "Load Generic Prompt from Config",
+        "type": "component",
+        "link": null,
+        "title": "_load_prompt",
+        "description": "Utility function to deserialize a generic prompt template from a configuration dictionary, handling template formats and output parsers."
+      },
+      {
+        "id": "LoadFewShotPromptFromConfig",
+        "label": "Load Few-Shot Prompt from Config",
+        "type": "component",
+        "link": null,
+        "title": "_load_few_shot_prompt",
+        "description": "Utility function to deserialize a few-shot prompt template from a configuration, including its example prompt and examples."
+      },
+      {
+        "id": "Jinja2Formatter",
+        "label": "Format with Jinja2",
+        "type": "component",
+        "link": null,
+        "title": "jinja2_formatter",
+        "description": "Formats a string template using the Jinja2 templating engine, with built-in sandboxing for security."
+      },
+      {
+        "id": "MustacheFormatter",
+        "label": "Format with Mustache",
+        "type": "component",
+        "link": null,
+        "title": "mustache_formatter",
+        "description": "Formats a string template using the Mustache templating engine."
+      },
+      {
+        "id": "SelectFewShotExamples",
+        "label": "Select Few-Shot Examples",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "BaseExampleSelector",
+        "description": "An external component responsible for selecting relevant examples to be included in few-shot prompts, often based on similarity or other criteria."
+      },
+      {
+        "id": "GenericMessageObject",
+        "label": "Generic Message Object",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "BaseMessage",
+        "description": "The base class for all message types (e.g., HumanMessage, AIMessage, SystemMessage) used in chat-based interactions."
+      },
+      {
+        "id": "LanguageModelInterface",
+        "label": "Language Model Interface",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "BaseLanguageModel",
+        "description": "An abstract base class defining the interface for all language models, enabling interaction with various LLM providers."
+      },
+      {
+        "id": "DefineOutputSchema",
+        "label": "Define Output Schema",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic Schema",
+        "description": "An external Pydantic model or dictionary used to define the expected structure of the output from a language model."
+      },
+      {
+        "id": "GenericStringPromptTemplate",
+        "label": "Generic String Prompt Template",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "PromptTemplate",
+        "description": "A foundational template for creating string-based prompts, allowing for variable substitution."
+      },
+      {
+        "id": "GenericChatPromptTemplate",
+        "label": "Generic Chat Prompt Template",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "ChatPromptTemplate",
+        "description": "A foundational template for creating chat-based prompts, composed of a sequence of message prompt templates."
+      }
+    ],
+    "edges": [
+      {
+        "source": "FormatIndividualChatMessage",
+        "target": "DefineMessagePromptStructure",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FormatAIMessage",
+        "target": "FormatIndividualChatMessage",
+        "label": "specializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FormatSystemMessage",
+        "target": "FormatIndividualChatMessage",
+        "label": "specializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateFewShotChatPrompt",
+        "target": "DefineMessagePromptStructure",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateFewShotChatPrompt",
+        "target": "SelectFewShotExamples",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateFewShotChatPrompt",
+        "target": "GenericChatPromptTemplate",
+        "label": "uses for example formatting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateFewShotChatPrompt",
+        "target": "GenericMessageObject",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateFewShotStringPrompt",
+        "target": "StringPromptTemplate",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateFewShotStringPrompt",
+        "target": "SelectFewShotExamples",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateFewShotStringPrompt",
+        "target": "GenericStringPromptTemplate",
+        "label": "uses for example formatting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputPrompt",
+        "target": "GenericChatPromptTemplate",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputPrompt",
+        "target": "DefineOutputSchema",
+        "label": "uses for output definition",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputPrompt",
+        "target": "LanguageModelInterface",
+        "label": "pipes to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringPromptTemplate",
+        "target": "Jinja2Formatter",
+        "label": "uses for formatting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringPromptTemplate",
+        "target": "MustacheFormatter",
+        "label": "uses for formatting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericPromptFromConfig",
+        "target": "GenericStringPromptTemplate",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadFewShotPromptFromConfig",
+        "target": "CreateFewShotStringPrompt",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadFewShotPromptFromConfig",
+        "target": "CreateFewShotChatPrompt",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadFewShotPromptFromConfig",
+        "target": "GenericStringPromptTemplate",
+        "label": "uses for example prompt loading",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RepresentConcreteChatPrompt",
+        "target": "GenericMessageObject",
+        "label": "contains",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "PromptCreation",
+        "label": "Prompt Creation",
+        "nodes": [
+          "FormatIndividualChatMessage",
+          "FormatAIMessage",
+          "FormatSystemMessage",
+          "CreateFewShotChatPrompt",
+          "CreateFewShotStringPrompt",
+          "CreateStructuredOutputPrompt"
+        ],
+        "title": "Prompt Creation",
+        "description": "Components responsible for defining and constructing various types of prompts.",
+        "role": "generative"
+      },
+      {
+        "id": "PromptBases",
+        "label": "Prompt Base Structures",
+        "nodes": [
+          "DefineMessagePromptStructure",
+          "StringPromptTemplate"
+        ],
+        "title": "Prompt Base Structures",
+        "description": "Abstract base classes that define the fundamental structure and behavior of different prompt types.",
+        "role": "generative"
+      },
+      {
+        "id": "PromptData",
+        "label": "Prompt Data Representation",
+        "nodes": [
+          "RepresentConcreteChatPrompt"
+        ],
+        "title": "Prompt Data Representation",
+        "description": "Components that represent the concrete values or structures of formatted prompts.",
+        "role": "data"
+      },
+      {
+        "id": "PromptLoading",
+        "label": "Prompt Loading & Utilities",
+        "nodes": [
+          "LoadGenericPromptFromConfig",
+          "LoadFewShotPromptFromConfig",
+          "Jinja2Formatter",
+          "MustacheFormatter"
+        ],
+        "title": "Prompt Loading & Utilities",
+        "description": "Functions for loading prompt templates from configurations and utilities for different formatting syntaxes.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

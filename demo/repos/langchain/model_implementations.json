@@ -1,0 +1,324 @@
+{
+  "title": "Fake Language Model Implementations",
+  "summary": "This module provides various fake chat model implementations for testing and development purposes, allowing simulation of LLM responses and streaming behavior. It includes utilities for managing LLM retry callbacks.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "fake_list_chat_model",
+        "label": "Simulate Chat with Response List",
+        "type": "component",
+        "link": null,
+        "title": "Fake Chat Model with Response List",
+        "description": "A test chat model that cycles through a predefined list of string responses. It supports both synchronous and asynchronous calls, including streaming, and can simulate errors during chunk generation. Useful for controlled testing of LLM interactions."
+      },
+      {
+        "id": "fake_chat_model",
+        "label": "Provide Generic Fake Chat Response",
+        "type": "component",
+        "link": null,
+        "title": "Generic Fake Chat Model",
+        "description": "A basic fake chat model designed for simple testing scenarios. It consistently returns a fixed 'fake response' string, providing a predictable output for unit tests and quick validations of chat model integrations."
+      },
+      {
+        "id": "fake_messages_list_chat_model",
+        "label": "Simulate Chat with Message List",
+        "type": "component",
+        "link": null,
+        "title": "Fake Chat Model with Message List",
+        "description": "A test chat model that cycles through a predefined list of BaseMessage objects. This allows for more complex and structured fake responses compared to simple strings, enabling detailed testing of message-based chat flows."
+      },
+      {
+        "id": "parrot_fake_chat_model",
+        "label": "Echo Last Input Message",
+        "type": "component",
+        "link": null,
+        "title": "Parrot Fake Chat Model",
+        "description": "A straightforward fake chat model that returns the last received BaseMessage as its response. This model is useful for testing scenarios where the output should directly reflect the input, such as identity transformations or simple conversational loops."
+      },
+      {
+        "id": "llm_retry_callback_handler",
+        "label": "Manage LLM Retry Callbacks",
+        "type": "component",
+        "link": null,
+        "title": "LLM Retry Callback Handler",
+        "description": "A utility function responsible for managing callbacks during LLM retry attempts. It ensures that on_retry events are properly dispatched to both synchronous and asynchronous callback managers, handling background tasks for async calls."
+      },
+      {
+        "id": "base_chat_model",
+        "label": "Base Chat Model Interface",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Base Chat Model Abstraction",
+        "description": "The foundational abstract class for all chat models, defining the core interface and methods for interacting with conversational AI systems. It provides the blueprint for concrete chat model implementations."
+      },
+      {
+        "id": "simple_chat_model",
+        "label": "Simple Chat Model Interface",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Simple Chat Model Abstraction",
+        "description": "A simplified abstract chat model class that extends the BaseChatModel. It provides a basic structure for chat models, often used as an intermediate base for more specific implementations, simplifying the required overrides."
+      },
+      {
+        "id": "base_message",
+        "label": "Represent Chat Message",
+        "type": "external",
+        "link": "message_handling",
+        "title": "Base Chat Message",
+        "description": "An abstract base class representing a single message within a chat conversation. It serves as the foundation for various message types (e.g., human, AI, system) and ensures consistent handling of conversational data."
+      },
+      {
+        "id": "chat_result",
+        "label": "Represent Chat Generation Result",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Chat Generation Result",
+        "description": "A data structure encapsulating the outcome of a chat model generation request. It typically contains a list of ChatGeneration objects, each representing a potential response from the model."
+      },
+      {
+        "id": "chat_generation_chunk",
+        "label": "Represent Streaming Chat Chunk",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Streaming Chat Generation Chunk",
+        "description": "A data structure representing a partial response or a chunk of content received during a streaming chat model interaction. It allows for incremental processing of LLM outputs."
+      },
+      {
+        "id": "ai_message_chunk",
+        "label": "Represent AI Message Chunk",
+        "type": "external",
+        "link": "message_handling",
+        "title": "AI Message Streaming Chunk",
+        "description": "A specific type of BaseMessage chunk representing a partial message generated by an AI model during a streaming response. It contains the content and potentially the chunk's position in the stream."
+      },
+      {
+        "id": "ai_message",
+        "label": "Represent AI Message",
+        "type": "external",
+        "link": "message_handling",
+        "title": "AI Generated Message",
+        "description": "A concrete implementation of BaseMessage representing a message generated by an AI model. It typically contains the AI's textual response and can include additional metadata."
+      },
+      {
+        "id": "runnable_config",
+        "label": "Runnable Configuration",
+        "type": "external",
+        "link": "runnable_composition",
+        "title": "Runnable Execution Configuration",
+        "description": "A configuration object used to control the execution behavior of Runnable components. It can specify parameters like callbacks, tags, metadata, and other settings for a particular run."
+      },
+      {
+        "id": "callback_manager_llm_run",
+        "label": "Handle LLM Callbacks (Sync)",
+        "type": "external",
+        "link": "callbacks_and_tracing",
+        "title": "Synchronous LLM Callback Manager",
+        "description": "Manages and dispatches synchronous callbacks during the execution of an LLM run. It allows for custom logic to be injected at various stages of the LLM's lifecycle, such as on_retry events."
+      },
+      {
+        "id": "async_callback_manager_llm_run",
+        "label": "Handle LLM Callbacks (Async)",
+        "type": "external",
+        "link": "callbacks_and_tracing",
+        "title": "Asynchronous LLM Callback Manager",
+        "description": "Manages and dispatches asynchronous callbacks during the execution of an LLM run. It supports non-blocking custom logic at different stages of the LLM's lifecycle, including handling on_retry events asynchronously."
+      }
+    ],
+    "edges": [
+      {
+        "source": "fake_list_chat_model",
+        "target": "simple_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_chat_model",
+        "target": "simple_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_messages_list_chat_model",
+        "target": "base_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "parrot_fake_chat_model",
+        "target": "base_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "simple_chat_model",
+        "target": "base_chat_model",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_list_chat_model",
+        "target": "base_message",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_list_chat_model",
+        "target": "chat_generation_chunk",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_list_chat_model",
+        "target": "ai_message_chunk",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_list_chat_model",
+        "target": "ai_message",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_list_chat_model",
+        "target": "runnable_config",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_list_chat_model",
+        "target": "callback_manager_llm_run",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_list_chat_model",
+        "target": "async_callback_manager_llm_run",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_chat_model",
+        "target": "base_message",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_chat_model",
+        "target": "chat_result",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_chat_model",
+        "target": "ai_message",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_chat_model",
+        "target": "callback_manager_llm_run",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_chat_model",
+        "target": "async_callback_manager_llm_run",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_messages_list_chat_model",
+        "target": "base_message",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_messages_list_chat_model",
+        "target": "chat_result",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fake_messages_list_chat_model",
+        "target": "callback_manager_llm_run",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "parrot_fake_chat_model",
+        "target": "base_message",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "parrot_fake_chat_model",
+        "target": "chat_result",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_retry_callback_handler",
+        "target": "callback_manager_llm_run",
+        "label": "invokes on_retry",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_retry_callback_handler",
+        "target": "async_callback_manager_llm_run",
+        "label": "invokes on_retry",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "fake_models_group",
+        "label": "Fake Chat Models",
+        "nodes": [
+          "fake_list_chat_model",
+          "fake_chat_model",
+          "fake_messages_list_chat_model",
+          "parrot_fake_chat_model"
+        ],
+        "title": "Fake Chat Model Implementations",
+        "description": "This group encompasses various fake chat model implementations designed for testing and development, offering different simulation behaviors for LLM interactions.",
+        "role": "generative"
+      },
+      {
+        "id": "llm_utilities_group",
+        "label": "LLM Utilities",
+        "nodes": [
+          "llm_retry_callback_handler"
+        ],
+        "title": "LLM Utility Functions",
+        "description": "This group contains utility functions that support LLM operations, such as managing retry callbacks during model invocations.",
+        "role": "surface"
+      }
+    ]
+  }
+}
