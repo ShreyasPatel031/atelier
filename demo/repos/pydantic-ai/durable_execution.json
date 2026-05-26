@@ -1,0 +1,426 @@
+{
+  "title": "Durable Execution Integrations",
+  "summary": "This module provides integrations for making Pydantic AI agents durable using platforms like DBOS, Prefect, and Temporal. It wraps agents, models, and toolsets to offload operations to durable workflows or tasks, ensuring fault tolerance and state persistence.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "DBOSAgent",
+        "label": "DBOS Agent Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "DBOS Agent Wrapper",
+        "description": "Wraps an existing Pydantic AI agent to enable durable execution using DBOS workflows. It offloads model requests and tool calls to DBOS steps, ensuring fault tolerance and state persistence."
+      },
+      {
+        "id": "DBOSMCPToolsetBase",
+        "label": "DBOS MCP Toolset Base",
+        "type": "component",
+        "link": null,
+        "title": "DBOS MCP Toolset Base",
+        "description": "Abstract base class for DBOS-wrapped MCP toolsets, integrating 'get_tools', 'get_instructions', and 'call_tool' methods as DBOS steps for durable execution."
+      },
+      {
+        "id": "PrefectAgent",
+        "label": "Prefect Agent Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Prefect Agent Wrapper",
+        "description": "Wraps an existing Pydantic AI agent to enable durable execution using Prefect flows and tasks. It offloads model requests and tool calls to Prefect tasks."
+      },
+      {
+        "id": "PrefectAgentInputs",
+        "label": "Prefect Agent Cache Policy",
+        "type": "component",
+        "link": null,
+        "title": "Prefect Agent Cache Policy",
+        "description": "A Prefect cache policy that computes cache keys for 'PrefectAgent' inputs, filtering out non-deterministic fields like timestamps and run IDs for consistent caching."
+      },
+      {
+        "id": "prefectify_toolset",
+        "label": "Prefect Toolset Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Prefect Toolset Wrapper",
+        "description": "Function to wrap Pydantic AI toolsets (like 'FunctionToolset' and 'MCPServer') with Prefect tasks, enabling durable execution of tool operations within Prefect flows."
+      },
+      {
+        "id": "PydanticAIPlugin",
+        "label": "Temporal Pydantic AI Plugin",
+        "type": "component",
+        "link": null,
+        "title": "Temporal Pydantic AI Plugin",
+        "description": "A Temporal plugin that configures the Temporal worker to recognize and execute workflows and activities defined by 'TemporalAgent' instances."
+      },
+      {
+        "id": "AgentPlugin",
+        "label": "Temporal Agent Plugin",
+        "type": "component",
+        "link": null,
+        "title": "Temporal Agent Plugin",
+        "description": "A specialized Temporal worker plugin for a single 'TemporalAgent' instance, registering its specific activities for execution within the Temporal workflow."
+      },
+      {
+        "id": "TemporalAgent",
+        "label": "Temporal Agent Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Temporal Agent Wrapper",
+        "description": "Wraps an existing Pydantic AI agent to enable durable execution using Temporal workflows and activities. It offloads model requests and tool calls to Temporal activities."
+      },
+      {
+        "id": "_default_setup_logfire",
+        "label": "Default Logfire Setup",
+        "type": "component",
+        "link": null,
+        "title": "Default Logfire Setup",
+        "description": "A utility function that configures and returns a Logfire instance, instrumenting Pydantic AI for observability within Temporal workflows."
+      },
+      {
+        "id": "LogfirePlugin",
+        "label": "Temporal Logfire Plugin",
+        "type": "component",
+        "link": null,
+        "title": "Temporal Logfire Plugin",
+        "description": "A Temporal client plugin that integrates Logfire for observability, setting up tracing interceptors and configuring metrics reporting to Logfire."
+      },
+      {
+        "id": "TemporalMCPToolsetBase",
+        "label": "Temporal MCP Toolset Base",
+        "type": "component",
+        "link": null,
+        "title": "Temporal MCP Toolset Base",
+        "description": "Abstract base class for Temporal-wrapped MCP toolsets, integrating 'get_tools', 'get_instructions', and 'call_tool' methods as Temporal activities for durable execution."
+      },
+      {
+        "id": "TemporalRunContext",
+        "label": "Temporal Run Context",
+        "type": "component",
+        "link": null,
+        "title": "Temporal Run Context",
+        "description": "A specialized 'RunContext' subclass designed for Temporal workflows, providing serialization and deserialization logic for agent execution context within Temporal activities."
+      },
+      {
+        "id": "temporalize_toolset",
+        "label": "Temporal Toolset Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Temporal Toolset Wrapper",
+        "description": "Function to wrap Pydantic AI toolsets (like 'FunctionToolset', 'DynamicToolset', 'MCPServer') with Temporal activities, enabling durable execution of tool operations."
+      },
+      {
+        "id": "TemporalWrapperToolset",
+        "label": "Temporal Wrapper Toolset",
+        "type": "component",
+        "link": null,
+        "title": "Temporal Wrapper Toolset",
+        "description": "Abstract base class for all Temporal-wrapped toolsets, providing common logic for managing lifecycle and handling tool call results within Temporal activities."
+      },
+      {
+        "id": "AbstractAgent",
+        "label": "Abstract Agent",
+        "type": "external",
+        "link": "other_module",
+        "title": "Abstract Agent",
+        "description": "The base interface for Pydantic AI agents, defining core execution methods."
+      },
+      {
+        "id": "AbstractToolset",
+        "label": "Abstract Toolset",
+        "type": "external",
+        "link": "other_module",
+        "title": "Abstract Toolset",
+        "description": "The base interface for Pydantic AI toolsets, defining methods for tool management and execution."
+      },
+      {
+        "id": "Model",
+        "label": "LLM Model",
+        "type": "external",
+        "link": "other_module",
+        "title": "LLM Model",
+        "description": "Represents a Large Language Model used by the agent."
+      },
+      {
+        "id": "RunContext",
+        "label": "Agent Run Context",
+        "type": "external",
+        "link": "other_module",
+        "title": "Agent Run Context",
+        "description": "Provides contextual information during an agent's execution."
+      },
+      {
+        "id": "DBOS",
+        "label": "DBOS Framework",
+        "type": "external",
+        "link": null,
+        "title": "DBOS Framework",
+        "description": "A durable workflow orchestration system."
+      },
+      {
+        "id": "Prefect",
+        "label": "Prefect Framework",
+        "type": "external",
+        "link": null,
+        "title": "Prefect Framework",
+        "description": "A workflow orchestration and data pipeline management system."
+      },
+      {
+        "id": "Temporal",
+        "label": "Temporal Framework",
+        "type": "external",
+        "link": null,
+        "title": "Temporal Framework",
+        "description": "A durable execution system for microservices."
+      },
+      {
+        "id": "Logfire",
+        "label": "Logfire Observability",
+        "type": "external",
+        "link": null,
+        "title": "Logfire Observability",
+        "description": "An observability platform for application monitoring."
+      }
+    ],
+    "edges": [
+      {
+        "source": "DBOSAgent",
+        "target": "AbstractAgent",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSAgent",
+        "target": "Model",
+        "label": "wraps model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSAgent",
+        "target": "DBOSMCPToolsetBase",
+        "label": "uses wrapped toolsets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSAgent",
+        "target": "DBOS",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSMCPToolsetBase",
+        "target": "AbstractToolset",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "AbstractAgent",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "Model",
+        "label": "wraps model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "prefectify_toolset",
+        "label": "uses to wrap toolsets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "Prefect",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgentInputs",
+        "target": "PrefectAgent",
+        "label": "provides caching for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prefectify_toolset",
+        "target": "AbstractToolset",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PydanticAIPlugin",
+        "target": "TemporalAgent",
+        "label": "configures worker for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AgentPlugin",
+        "target": "TemporalAgent",
+        "label": "configures worker for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "AbstractAgent",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "Model",
+        "label": "wraps model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "temporalize_toolset",
+        "label": "uses to wrap toolsets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "TemporalRunContext",
+        "label": "uses for context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "Temporal",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_default_setup_logfire",
+        "target": "Logfire",
+        "label": "sets up",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LogfirePlugin",
+        "target": "_default_setup_logfire",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LogfirePlugin",
+        "target": "Temporal",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LogfirePlugin",
+        "target": "Logfire",
+        "label": "sends metrics to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalMCPToolsetBase",
+        "target": "AbstractToolset",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalMCPToolsetBase",
+        "target": "TemporalRunContext",
+        "label": "uses for context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporalize_toolset",
+        "target": "AbstractToolset",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporalize_toolset",
+        "target": "TemporalWrapperToolset",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalWrapperToolset",
+        "target": "AbstractToolset",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalRunContext",
+        "target": "RunContext",
+        "label": "extends",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "dbos_integration",
+        "label": "DBOS Integration",
+        "nodes": [
+          "DBOSAgent",
+          "DBOSMCPToolsetBase"
+        ],
+        "title": "DBOS Integration",
+        "description": "Components for integrating Pydantic AI agents with the DBOS durable workflow system.",
+        "role": "generative"
+      },
+      {
+        "id": "prefect_integration",
+        "label": "Prefect Integration",
+        "nodes": [
+          "PrefectAgent",
+          "PrefectAgentInputs",
+          "prefectify_toolset"
+        ],
+        "title": "Prefect Integration",
+        "description": "Components for integrating Pydantic AI agents with the Prefect workflow orchestration system.",
+        "role": "generative"
+      },
+      {
+        "id": "temporal_integration",
+        "label": "Temporal Integration",
+        "nodes": [
+          "PydanticAIPlugin",
+          "AgentPlugin",
+          "TemporalAgent",
+          "_default_setup_logfire",
+          "LogfirePlugin",
+          "TemporalMCPToolsetBase",
+          "TemporalRunContext",
+          "temporalize_toolset",
+          "TemporalWrapperToolset"
+        ],
+        "title": "Temporal Integration",
+        "description": "Components for integrating Pydantic AI agents with the Temporal durable execution system, including observability with Logfire.",
+        "role": "generative"
+      }
+    ]
+  }
+}

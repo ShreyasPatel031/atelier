@@ -1,6 +1,6 @@
 """Structural diagram IR validation (generation boundary). Run: pytest tests/test_diagram_ir_validator.py -q"""
 
-from codewiki.src.be.diagram_ir_validator import validate_diagram_ir
+from codewiki.src.be.diagram_ir_validator import drop_invalid_diagram_edges, validate_diagram_ir
 
 
 def test_valid_minimal_diagram():
@@ -84,10 +84,30 @@ def test_rejects_missing_node_description():
     assert "node_missing_description" in codes
 
 
+def test_drop_invalid_edges_removes_unknown_target():
+    d = {
+        "direction": "TD",
+        "nodes": [
+            {"id": "hub", "label": "Hub node", "title": "Hub", "description": "Central node."},
+        ],
+        "edges": [
+            {"source": "hub", "target": "MissingClass", "label": "uses"},
+            {"source": "hub", "target": "hub", "label": "self"},
+        ],
+        "groups": [],
+    }
+    stats = drop_invalid_diagram_edges(d)
+    assert stats["dropped"] == 1
+    assert len(d["edges"]) == 1
+    assert d["edges"][0]["target"] == "hub"
+    assert validate_diagram_ir(d) == []
+
+
 if __name__ == "__main__":
     test_valid_minimal_diagram()
     test_rejects_empty_group()
     test_rejects_edge_to_unknown_node()
     test_rejects_node_group_id_collision()
     test_rejects_missing_node_description()
+    test_drop_invalid_edges_removes_unknown_target()
     print("diagram_ir_validator tests: ok")

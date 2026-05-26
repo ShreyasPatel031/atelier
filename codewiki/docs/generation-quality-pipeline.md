@@ -45,7 +45,8 @@ flowchart TD
 | 3 | `sync_docs_with_tree` | Missing doc, **JSON parse errors** | Log; placeholders if env on |
 | 4 | `add_leaf_diagrams` | Leaf without diagram | Inject minimal diagram |
 | 5 | `update_tree_diagrams` | Parent missing child nodes | Inject nodes/edges |
-| 6 | `audit_diagram_ir_state` | R4 ELK issues | Audit only (no repair) |
+| 6 | `sanitize_module_diagram_edges_in_docs` | R4 unknown edge endpoints | Drop invalid edges; rewrite JSON + tree (`diagram_ir_sync_dropped_edges`) |
+| 7 | `audit_diagram_ir_state` | R4 ELK issues | Audit only (post-sanitize) |
 
 `IssueType.JSON_PARSE_ERROR`: `{module}.json` exists but fails `json.loads` — treated as invalid/missing for sync.
 

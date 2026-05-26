@@ -1,0 +1,287 @@
+{
+    "title": "UI & MCP Server Infrastructure",
+    "summary": "This module provides the foundational components for integrating Pydantic AI agents with various user interfaces and for implementing Model Context Protocol (MCP) servers. It handles request/response adaptation, event streaming, and configuration management for seamless interaction with external systems.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "frontend_client",
+                "label": "Frontend Client",
+                "type": "external",
+                "link": null,
+                "title": "User Interface Client",
+                "description": "External client application (e.g., web browser, mobile app) that interacts with the Pydantic AI UI endpoints to send user input and receive streamed responses."
+            },
+            {
+                "id": "ui_endpoints",
+                "label": "UI API Endpoints",
+                "type": "component",
+                "link": null,
+                "title": "Exposed UI Interaction Points",
+                "description": "HTTP endpoints that receive requests from frontend clients, such as chat messages or configuration queries, and initiate agent runs or provide metadata."
+            },
+            {
+                "id": "ui_adapter_base",
+                "label": "Abstract UI Adapter",
+                "type": "component",
+                "link": null,
+                "title": "Base UI Protocol Adapter",
+                "description": "Abstract class for adapting UI-specific request formats into Pydantic AI agent inputs and transforming agent outputs back into UI-specific event streams."
+            },
+            {
+                "id": "ui_event_stream_proc",
+                "label": "UI Event Stream Processor",
+                "type": "component",
+                "link": null,
+                "title": "Agent Event Stream Transformer",
+                "description": "Transforms Pydantic AI's native event stream into a UI-specific event stream, handling event encoding and dispatching to the frontend client."
+            },
+            {
+                "id": "mcp_server_core",
+                "label": "MCP Server Core",
+                "type": "component",
+                "link": null,
+                "title": "Model Context Protocol Server",
+                "description": "Implements the core logic for the Model Context Protocol (MCP) server, processing incoming sampling messages and orchestrating LLM interactions to generate responses."
+            },
+            {
+                "id": "mcp_config_loader",
+                "label": "MCP Configuration Loader",
+                "type": "component",
+                "link": null,
+                "title": "Load MCP Server & Toolset Configs",
+                "description": "Reads and processes configuration files to instantiate MCP server definitions and load MCPToolset objects, supporting environment variable expansion."
+            },
+            {
+                "id": "mcp_data_models",
+                "label": "MCP Data Models",
+                "type": "component",
+                "link": null,
+                "title": "Model Context Protocol Data Structures",
+                "description": "Pydantic models defining the structure of various entities within the MCP, such as resources, templates, prompts, and resource links."
+            },
+            {
+                "id": "mcp_client_ext",
+                "label": "MCP Client",
+                "type": "external",
+                "link": null,
+                "title": "External MCP Client",
+                "description": "An external client application that communicates with the MCP server to send requests and receive responses, typically for model sampling or tool execution."
+            },
+            {
+                "id": "agent_framework_ext",
+                "label": "Pydantic AI Agent Core",
+                "type": "external",
+                "link": "agent_framework",
+                "title": "Core Agent Execution Logic",
+                "description": "The central Pydantic AI agent module responsible for processing messages, executing tools, and generating responses based on its configured model and capabilities."
+            },
+            {
+                "id": "model_abstraction_ext",
+                "label": "LLM Model Abstraction",
+                "type": "external",
+                "link": "model_abstraction",
+                "title": "Language Model Interface",
+                "description": "Provides abstract interfaces and concrete implementations for interacting with various Large Language Models (LLMs), used by both UI and MCP servers."
+            },
+            {
+                "id": "capabilities_tools_ext",
+                "label": "Capabilities & Tools",
+                "type": "external",
+                "link": "capabilities_and_tools",
+                "title": "Agent Capabilities and Tool Management",
+                "description": "Defines the core capabilities and tool management mechanisms for AI agents, including structured output, tool discovery, and lifecycle hooks."
+            },
+            {
+                "id": "internal_messages_events",
+                "label": "Internal Messages & Events",
+                "type": "external",
+                "link": null,
+                "title": "Pydantic AI Internal Data Flow",
+                "description": "Standardized internal message representations and raw events generated by the Pydantic AI agent during its execution, used for communication between core components."
+            },
+            {
+                "id": "config_files_ext",
+                "label": "Configuration Files",
+                "type": "external",
+                "link": null,
+                "title": "External Configuration Sources",
+                "description": "JSON or YAML files that define the setup and properties for MCP servers, toolsets, and UI integrations."
+            },
+            {
+                "id": "ui_protocol_data",
+                "label": "UI Protocol Data",
+                "type": "component",
+                "link": null,
+                "title": "UI-Specific Data Structures",
+                "description": "Pydantic models defining the structure of incoming request data and outgoing streamed data chunks for specific UI protocols like Vercel AI."
+            }
+        ],
+        "edges": [
+            {
+                "source": "frontend_client",
+                "target": "ui_endpoints",
+                "label": "Sends UI requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_endpoints",
+                "target": "ui_adapter_base",
+                "label": "Routes requests to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_adapter_base",
+                "target": "agent_framework_ext",
+                "label": "Translates to agent input",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_framework_ext",
+                "target": "internal_messages_events",
+                "label": "Emits internal events",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "internal_messages_events",
+                "target": "ui_event_stream_proc",
+                "label": "Processes agent events",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_event_stream_proc",
+                "target": "frontend_client",
+                "label": "Streams UI responses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_adapter_base",
+                "target": "ui_protocol_data",
+                "label": "Uses for data mapping",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "ui_event_stream_proc",
+                "target": "ui_protocol_data",
+                "label": "Uses for data encoding",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mcp_client_ext",
+                "target": "mcp_server_core",
+                "label": "Sends MCP requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mcp_server_core",
+                "target": "model_abstraction_ext",
+                "label": "Queries LLM",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_abstraction_ext",
+                "target": "mcp_server_core",
+                "label": "Returns LLM response",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mcp_server_core",
+                "target": "mcp_data_models",
+                "label": "Formats output as",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mcp_config_loader",
+                "target": "config_files_ext",
+                "label": "Reads configurations from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mcp_config_loader",
+                "target": "capabilities_tools_ext",
+                "label": "Instantiates MCP toolsets",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mcp_config_loader",
+                "target": "agent_framework_ext",
+                "label": "Provides toolsets to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_framework_ext",
+                "target": "capabilities_tools_ext",
+                "label": "Utilizes tools from",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "ui_interaction_layer",
+                "label": "UI Interaction Layer",
+                "nodes": [
+                    "frontend_client",
+                    "ui_endpoints",
+                    "ui_adapter_base",
+                    "ui_event_stream_proc"
+                ],
+                "title": "User Interface Integration",
+                "description": "Components responsible for handling user input from various frontends, adapting it for agent processing, and streaming agent outputs back to the UI.",
+                "role": null
+            },
+            {
+                "id": "mcp_server_layer",
+                "label": "MCP Server Layer",
+                "nodes": [
+                    "mcp_server_core",
+                    "mcp_config_loader",
+                    "mcp_data_models",
+                    "mcp_client_ext"
+                ],
+                "title": "Model Context Protocol Server",
+                "description": "Components that implement and manage the Model Context Protocol (MCP) server, enabling external clients to interact with Pydantic AI models and tools.",
+                "role": null
+            },
+            {
+                "id": "core_ai_integration",
+                "label": "Core AI Integration",
+                "nodes": [
+                    "agent_framework_ext",
+                    "model_abstraction_ext",
+                    "capabilities_tools_ext",
+                    "internal_messages_events"
+                ],
+                "title": "Pydantic AI Core Integration",
+                "description": "Central Pydantic AI modules that provide the core agent logic, LLM abstraction, and tool management, which are leveraged by both UI and MCP server components.",
+                "role": null
+            },
+            {
+                "id": "configuration_data",
+                "label": "Configuration & Data",
+                "nodes": [
+                    "config_files_ext",
+                    "ui_protocol_data"
+                ],
+                "title": "System Configuration and Data Models",
+                "description": "External configuration sources and internal data models that define the structure and settings for UI protocols and MCP server operations.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,67 @@
+{
+  "repo_name": "pydantic-ai",
+  "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/pydantic-ai",
+  "repo_size_mb": 448708.95703125,
+  "total_files": 0,
+  "total_code_files": 583,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 2.5462892055511475,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 43.25152015686035,
+      "tokens_used": 17978,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 185.93537402153015,
+      "tokens_used": 1004346,
+      "files_created": 27,
+      "files_created_list": [
+        "embedding_models.json",
+        "pydantic_ai_ui_and_mcp_server.json",
+        "pydantic_ai_core.json",
+        "external_integrations.json",
+        "documentation_tools.json",
+        "evaluator_types.json",
+        "first_module_tree.json",
+        "metadata.json",
+        "ui_framework.json",
+        "reporting_and_telemetry.json",
+        "mcp_server.json",
+        "model_specific_adapters.json",
+        "pydantic_evals.json",
+        "module_tree.json",
+        "overview.json",
+        "graph_processing.json",
+        "durable_execution.json",
+        "model_abstraction.json",
+        "core_utilities.json",
+        "evaluation_core.json",
+        "scripts_and_testing.json",
+        "llm_providers.json",
+        "agent_framework.json",
+        "capabilities_and_tools.json",
+        "sync_issues.json",
+        "pydantic_ai_integrations.json",
+        "utilities_and_graph.json"
+      ]
+    }
+  },
+  "time_to_first_overview": 231.82314014434814,
+  "first_overview_file": "/Users/shreyaspatel/atelier/.tmp/demo_regen/pydantic-ai/docs/overview.json",
+  "total_duration": 231.82317996025085,
+  "total_tokens": 1022324,
+  "estimated_cost_usd": 0.1858,
+  "total_llm_calls": 24,
+  "total_files_created": 27,
+  "start_time": 1779824926.025845,
+  "end_time": 1779825157.849025
+}

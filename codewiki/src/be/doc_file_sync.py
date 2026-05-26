@@ -38,7 +38,7 @@ from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 
-from codewiki.src.be.diagram_ir_validator import MODULE_TREE_OVERVIEW_KEY
+from codewiki.src.be.diagram_ir_validator import MODULE_TREE_OVERVIEW_KEY, drop_invalid_diagram_edges
 from codewiki.src.config import OVERVIEW_FILENAME, module_doc_path
 from codewiki.src.be.doc_schema import validate_module_doc
 
@@ -92,6 +92,7 @@ class IssueType(Enum):
     DIAGRAM_IR_R1_UNCLOSED_SUBGRAPH = "diagram_ir_r1_unclosed_subgraph"
     DIAGRAM_IR_R1_EMPTY_MERMAID = "diagram_ir_r1_empty_mermaid"
     DIAGRAM_IR_R1_TOO_MANY_UNSUPPORTED_LINES = "diagram_ir_r1_too_many_unsupported_lines"
+    DIAGRAM_IR_SYNC_DROPPED_EDGES = "diagram_ir_sync_dropped_edges"
 
 
 @dataclass
@@ -893,6 +894,131 @@ def _merge_samples(
             sample["module"] = module_name
             sample["path"] = module_path
             bucket.append(sample)
+
+
+def _sanitize_diagram_in_doc_payload(
+    doc: Dict[str, Any],
+) -> Optional[Dict[str, Any]]:
+    """Return drop stats if diagram edges were removed, else None."""
+    diagram = doc.get("diagram")
+    if not isinstance(diagram, dict) or not isinstance(diagram.get("nodes"), list):
+        return None
+    stats = drop_invalid_diagram_edges(diagram)
+    if stats.get("dropped", 0) > 0:
+        return stats
+    return None
+
+
+def sanitize_module_diagram_edges_in_docs(docs_dir: str, report: SyncReport) -> int:
+    """
+    Stage 4.5: drop diagram edges with unknown endpoints in module JSON + module_tree.
+
+    Rewrites ``{module}.json`` and syncs repaired diagrams onto tree nodes so IR audit
+    sees clean graphs. Returns total edges dropped.
+    """
+    docs_path = Path(docs_dir)
+    tree_path = docs_path / "module_tree.json"
+    if not tree_path.is_file():
+        return 0
+
+    try:
+        tree = json.loads(tree_path.read_text(encoding="utf-8", errors="replace"))
+    except Exception as e:
+        logger.warning("[DOC_SYNC] sanitize diagrams: could not load module_tree: %s", e)
+        return 0
+
+    skip = _module_json_skip_stems()
+    total_dropped = 0
+    modules_updated = 0
+    tree_dirty = False
+
+    for module_name, module_path, module_data in get_all_modules_in_tree(tree):
+        if module_name == "overview":
+            continue
+
+        stats: Optional[Dict[str, Any]] = None
+        json_path = module_doc_path(docs_dir, module_name)
+        if json_path.is_file():
+            try:
+                doc = json.loads(json_path.read_text(encoding="utf-8", errors="replace"))
+            except json.JSONDecodeError as e:
+                logger.warning("[DOC_SYNC] skip diagram sanitize for %s: %s", module_name, e)
+                doc = None
+            if isinstance(doc, dict):
+                stats = _sanitize_diagram_in_doc_payload(doc)
+                if stats:
+                    json_path.write_text(
+                        json.dumps(doc, indent=2) + "\n", encoding="utf-8"
+                    )
+                    module_data["diagram"] = doc["diagram"]
+                    tree_dirty = True
+        elif isinstance(module_data.get("diagram"), dict):
+            inline = {"diagram": module_data["diagram"]}
+            stats = _sanitize_diagram_in_doc_payload(inline)
+            if stats:
+                module_data["diagram"] = inline["diagram"]
+                tree_dirty = True
+
+        if stats and stats.get("dropped", 0) > 0:
+            dropped = int(stats["dropped"])
+            total_dropped += dropped
+            modules_updated += 1
+            report.add_issue(
+                SyncIssue(
+                    issue_type=IssueType.DIAGRAM_IR_SYNC_DROPPED_EDGES.value,
+                    module_name=module_name,
+                    module_path=module_path,
+                    severity="warning",
+                    details={
+                        "dropped_edges": dropped,
+                        "samples": (stats.get("dropped_edges") or [])[:5],
+                    },
+                    auto_fixed=True,
+                )
+            )
+            logger.info(
+                "[DOC_SYNC] Dropped %s invalid diagram edge(s) in %s",
+                dropped,
+                module_name,
+            )
+
+    overview_path = docs_path / OVERVIEW_FILENAME
+    if overview_path.is_file():
+        try:
+            odoc = json.loads(overview_path.read_text(encoding="utf-8", errors="replace"))
+        except json.JSONDecodeError:
+            odoc = None
+        if isinstance(odoc, dict):
+            ostats = _sanitize_diagram_in_doc_payload(odoc)
+            if ostats and ostats.get("dropped", 0) > 0:
+                overview_path.write_text(
+                    json.dumps(odoc, indent=2) + "\n", encoding="utf-8"
+                )
+                total_dropped += int(ostats["dropped"])
+                report.add_issue(
+                    SyncIssue(
+                        issue_type=IssueType.DIAGRAM_IR_SYNC_DROPPED_EDGES.value,
+                        module_name="overview",
+                        module_path="overview",
+                        severity="warning",
+                        details={
+                            "dropped_edges": ostats["dropped"],
+                            "samples": (ostats.get("dropped_edges") or [])[:5],
+                        },
+                        auto_fixed=True,
+                    )
+                )
+
+    if tree_dirty:
+        tree_path.write_text(json.dumps(tree, indent=2) + "\n", encoding="utf-8")
+
+    if total_dropped:
+        logger.info(
+            "[DOC_SYNC] Diagram edge sanitize: %s edge(s) dropped across %s module(s)",
+            total_dropped,
+            modules_updated,
+        )
+    return total_dropped
 
 
 def audit_diagram_ir_state(docs_dir: str) -> Dict[str, Any]:
@@ -1732,6 +1858,8 @@ def run_full_sync(
     # Update parent diagrams to include children
     diagram_updates = update_tree_diagrams(docs_dir)
 
+    edges_dropped = sanitize_module_diagram_edges_in_docs(docs_dir, report)
+
     ir_audit: Dict[str, Any] = {}
     try:
         ir_audit = audit_diagram_ir_state(docs_dir)
@@ -1770,6 +1898,7 @@ def run_full_sync(
         "placeholder_md_files_created": len(created_files),
         "leaf_diagrams_added": leaf_diagrams,
         "parent_diagram_child_nodes_injected": diagram_updates,
+        "diagram_ir_edges_dropped": edges_dropped,
         "overview_md_created": int(overview_created),
     }
 

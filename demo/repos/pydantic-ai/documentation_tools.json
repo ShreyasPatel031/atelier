@@ -1,0 +1,305 @@
+{
+  "title": "Documentation Build Tools",
+  "summary": "This module provides hooks and utilities for the MkDocs documentation build process, including code snippet injection, Algolia search indexing preparation, and environment configuration.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "mkdocs_system",
+        "label": "MkDocs Build System",
+        "type": "external",
+        "link": null,
+        "title": "MkDocs Build System",
+        "description": "The main documentation generation engine that orchestrates the build process and calls various hooks."
+      },
+      {
+        "id": "markdown_docs",
+        "label": "Markdown Documentation Files",
+        "type": "external",
+        "link": null,
+        "title": "Markdown Docs",
+        "description": "The raw Markdown files that form the content of the documentation."
+      },
+      {
+        "id": "source_code_repo",
+        "label": "Source Code Repository",
+        "type": "external",
+        "link": null,
+        "title": "Source Code",
+        "description": "Contains the actual code files from which snippets are extracted for documentation."
+      },
+      {
+        "id": "generated_html",
+        "label": "Generated HTML Documentation",
+        "type": "external",
+        "link": null,
+        "title": "Generated HTML",
+        "description": "The final HTML output of the MkDocs build process, which is served to users."
+      },
+      {
+        "id": "algolia_index_file",
+        "label": "Algolia Search Index JSON",
+        "type": "external",
+        "link": null,
+        "title": "Algolia Index File",
+        "description": "The output JSON file containing structured data for Algolia to index, enabling search functionality."
+      },
+      {
+        "id": "markdown_preprocess_hook",
+        "label": "Pre-process Markdown",
+        "type": "component",
+        "link": null,
+        "title": "Markdown Pre-processor",
+        "description": "Applies various transformations to Markdown content, including injecting code snippets, before it's converted to HTML. (on_page_markdown)"
+      },
+      {
+        "id": "snippet_injector",
+        "label": "Inject Code Snippets",
+        "type": "component",
+        "link": null,
+        "title": "Snippet Injector",
+        "description": "Scans Markdown content for snippet directives and uses the snippet replacement logic to embed actual code from source files."
+      },
+      {
+        "id": "snippet_replacement_logic",
+        "label": "Replace Snippet Directive",
+        "type": "component",
+        "link": null,
+        "title": "Snippet Replacer",
+        "description": "Core logic for parsing a snippet directive and replacing it with formatted code extracted from a source file."
+      },
+      {
+        "id": "snippet_directive_parser",
+        "label": "Parse Snippet Directive",
+        "type": "component",
+        "link": null,
+        "title": "Directive Parser",
+        "description": "Extracts attributes like path, title, fragments, and highlights from a Markdown snippet directive string."
+      },
+      {
+        "id": "file_section_parser",
+        "label": "Parse Code File Sections",
+        "type": "component",
+        "link": null,
+        "title": "File Section Parser",
+        "description": "Reads a source code file and identifies named sections and line ranges for selective extraction."
+      },
+      {
+        "id": "highlight_formatter",
+        "label": "Format Highlight Lines",
+        "type": "component",
+        "link": null,
+        "title": "Highlight Formatter",
+        "description": "Converts internal line range representations into a string format suitable for code block highlighting in documentation."
+      },
+      {
+        "id": "algolia_page_content_hook",
+        "label": "Process Page Content for Algolia",
+        "type": "component",
+        "link": null,
+        "title": "Algolia Content Processor",
+        "description": "Cleans up HTML, extracts sections, and generates structured records for Algolia search based on page content. (on_page_content)"
+      },
+      {
+        "id": "algolia_post_build_hook",
+        "label": "Finalize Algolia Records",
+        "type": "component",
+        "link": null,
+        "title": "Algolia Record Finalizer",
+        "description": "Collects all generated Algolia records and writes them to a JSON file after the documentation build is complete. (on_post_build)"
+      },
+      {
+        "id": "env_config_hook",
+        "label": "Configure Build Environment",
+        "type": "component",
+        "link": null,
+        "title": "Environment Configurer",
+        "description": "Modifies the MkDocs build environment, setting global variables and resolving asset paths. (on_env)"
+      }
+    ],
+    "edges": [
+      {
+        "source": "mkdocs_system",
+        "target": "markdown_docs",
+        "label": "Reads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mkdocs_system",
+        "target": "markdown_preprocess_hook",
+        "label": "Triggers 'on_page_markdown'",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "markdown_preprocess_hook",
+        "target": "snippet_injector",
+        "label": "Calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "snippet_injector",
+        "target": "snippet_replacement_logic",
+        "label": "Processes Directives",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "snippet_replacement_logic",
+        "target": "snippet_directive_parser",
+        "label": "Parses Directive",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "snippet_replacement_logic",
+        "target": "file_section_parser",
+        "label": "Extracts Content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "source_code_repo",
+        "target": "file_section_parser",
+        "label": "Reads Code",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "snippet_replacement_logic",
+        "target": "highlight_formatter",
+        "label": "Formats Highlights",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_section_parser",
+        "target": "snippet_replacement_logic",
+        "label": "Returns Sections",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "highlight_formatter",
+        "target": "snippet_replacement_logic",
+        "label": "Returns Formatted Lines",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "snippet_replacement_logic",
+        "target": "snippet_injector",
+        "label": "Returns Formatted Code",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "snippet_injector",
+        "target": "markdown_preprocess_hook",
+        "label": "Returns Modified Markdown",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "markdown_preprocess_hook",
+        "target": "mkdocs_system",
+        "label": "Passes Processed Markdown",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mkdocs_system",
+        "target": "algolia_page_content_hook",
+        "label": "Triggers 'on_page_content'",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generated_html",
+        "target": "algolia_page_content_hook",
+        "label": "Receives HTML",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "algolia_page_content_hook",
+        "target": "algolia_index_file",
+        "label": "Prepares Records",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mkdocs_system",
+        "target": "algolia_post_build_hook",
+        "label": "Triggers 'on_post_build'",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "algolia_post_build_hook",
+        "target": "algolia_index_file",
+        "label": "Writes Final Index",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mkdocs_system",
+        "target": "env_config_hook",
+        "label": "Triggers 'on_env'",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "env_config_hook",
+        "target": "mkdocs_system",
+        "label": "Modifies Environment",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "mkdocs_lifecycle",
+        "label": "MkDocs Lifecycle Hooks",
+        "nodes": [
+          "markdown_preprocess_hook",
+          "algolia_page_content_hook",
+          "algolia_post_build_hook",
+          "env_config_hook"
+        ],
+        "title": "MkDocs Lifecycle Hooks",
+        "description": "Components that integrate with and extend the MkDocs documentation build process at various stages.",
+        "role": "surface"
+      },
+      {
+        "id": "snippet_generation",
+        "label": "Code Snippet Management",
+        "nodes": [
+          "snippet_injector",
+          "snippet_replacement_logic",
+          "snippet_directive_parser",
+          "file_section_parser",
+          "highlight_formatter"
+        ],
+        "title": "Code Snippet Management",
+        "description": "Handles the parsing of snippet directives in Markdown and the extraction and formatting of corresponding code from source files.",
+        "role": "generative"
+      },
+      {
+        "id": "data_sources_sinks",
+        "label": "Data Sources & Sinks",
+        "nodes": [
+          "markdown_docs",
+          "source_code_repo",
+          "generated_html",
+          "algolia_index_file"
+        ],
+        "title": "Data Sources & Sinks",
+        "description": "Represents the various inputs and outputs involved in the documentation generation process.",
+        "role": "data"
+      }
+    ]
+  }
+}

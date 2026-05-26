@@ -1,0 +1,951 @@
+{
+  "title": "Agent Capabilities and Tools",
+  "summary": "This module defines the core capabilities and tool management mechanisms for AI agents, enabling structured output, tool discovery, lifecycle hooks, and integration with native or external tools. It provides a flexible framework for extending agent behavior and interacting with various services.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "_takes_ctx",
+        "label": "Check for RunContext",
+        "type": "component",
+        "link": null,
+        "title": "Check for RunContext Argument",
+        "description": "Determines if a given callable object accepts a `RunContext` as its first argument, which is crucial for context-aware operations within the agent framework."
+      },
+      {
+        "id": "_validate_single_arg",
+        "label": "Validate Single Argument",
+        "type": "component",
+        "link": null,
+        "title": "Validate Single Argument Input",
+        "description": "Validates a single argument, handling both plain unwrapped model input and wrapped envelope formats, with a fallback mechanism for re-validation after round-trips."
+      },
+      {
+        "id": "OutputSchema",
+        "label": "Define Output Structure",
+        "type": "component",
+        "link": null,
+        "title": "Agent Output Schema Definition",
+        "description": "Abstract base class for defining the structure and processing of agent outputs, supporting various output types like text, tools, deferred requests, and images. It orchestrates the building of output processors and toolsets."
+      },
+      {
+        "id": "OutputToolset",
+        "label": "Manage Output Tools",
+        "type": "component",
+        "link": null,
+        "title": "Output Toolset Management",
+        "description": "A specialized toolset for managing output tools, which define how an agent's final output should be structured. It handles tool definitions, processors, and retry logic for output-specific operations."
+      },
+      {
+        "id": "OutputValidator",
+        "label": "Validate Output Results",
+        "type": "component",
+        "link": null,
+        "title": "Output Validation Logic",
+        "description": "Encapsulates a function for validating agent output results, supporting both synchronous and asynchronous validation, and handling `RunContext` awareness."
+      },
+      {
+        "id": "StructuredTextOutputSchema",
+        "label": "Structured Text Output",
+        "type": "component",
+        "link": null,
+        "title": "Structured Text Output Schema",
+        "description": "An abstract base class for output schemas that produce structured text, combining an object processor with an optional template for generating instructions based on the output's JSON schema."
+      },
+      {
+        "id": "CapabilitySpec",
+        "label": "Capability Specification",
+        "type": "component",
+        "link": null,
+        "title": "Agent Capability Specification",
+        "description": "A specification class for agent capabilities, used for schema generation where it's replaced by the full capability Union type."
+      },
+      {
+        "id": "_narrow_native_tool_search_call",
+        "label": "Narrow Native Search Call",
+        "type": "component",
+        "link": null,
+        "title": "Narrow Native Tool Search Call",
+        "description": "Narrows a native tool call part to a native tool search call part, validating its arguments for tool search operations."
+      },
+      {
+        "id": "_narrow_native_tool_search_return",
+        "label": "Narrow Native Search Return",
+        "type": "component",
+        "link": null,
+        "title": "Narrow Native Tool Search Return",
+        "description": "Narrows a native tool return part to a native tool search return part, validating its content for tool search results."
+      },
+      {
+        "id": "_narrow_tool_search_call",
+        "label": "Narrow Tool Search Call",
+        "type": "component",
+        "link": null,
+        "title": "Narrow Tool Search Call",
+        "description": "Narrows a generic tool call part to a tool search call part, validating its arguments for tool search operations."
+      },
+      {
+        "id": "_narrow_tool_search_return",
+        "label": "Narrow Tool Search Return",
+        "type": "component",
+        "link": null,
+        "title": "Narrow Tool Search Return",
+        "description": "Narrows a generic tool return part to a tool search return part, validating its content for tool search results."
+      },
+      {
+        "id": "sort_capabilities",
+        "label": "Sort Capabilities",
+        "type": "component",
+        "link": null,
+        "title": "Capability Ordering and Sorting",
+        "description": "Sorts a sequence of capabilities based on their declared ordering constraints, ensuring proper execution flow and raising errors for conflicts or missing requirements."
+      },
+      {
+        "id": "PendingMessageDrainCapability",
+        "label": "Drain Pending Messages",
+        "type": "component",
+        "link": null,
+        "title": "Pending Message Drainage",
+        "description": "A capability that manages and drains pending messages (e.g., 'asap' or 'when_idle') into model requests or redirects, ensuring messages are processed at appropriate times during an agent's run."
+      },
+      {
+        "id": "ToolSearch",
+        "label": "Discover Deferred Tools",
+        "type": "component",
+        "link": null,
+        "title": "Tool Discovery Capability",
+        "description": "Enables tool discovery for large toolsets, hiding deferred tools until they are found. It supports various search strategies, including native model support and local keyword matching."
+      },
+      {
+        "id": "AbstractCapability",
+        "label": "Base Agent Capability",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Agent Capability",
+        "description": "The foundational abstract class for all agent capabilities, defining a common interface for reusable agent behaviors and lifecycle hooks."
+      },
+      {
+        "id": "HandleDeferredToolCalls",
+        "label": "Handle Deferred Tool Calls",
+        "type": "component",
+        "link": null,
+        "title": "Deferred Tool Call Handler",
+        "description": "A capability that intercepts and resolves deferred tool calls (e.g., approval-required or external execution) using a user-provided handler function, allowing the agent run to continue automatically."
+      },
+      {
+        "id": "Hooks",
+        "label": "Register Agent Hooks",
+        "type": "component",
+        "link": null,
+        "title": "Agent Lifecycle Hooks",
+        "description": "Provides a flexible mechanism to register hook functions for various agent lifecycle events (run, node, model request, tool validation/execution, output processing) using decorators or constructor arguments."
+      },
+      {
+        "id": "Hooks_wrapper",
+        "label": "Hook Wrapper Function",
+        "type": "component",
+        "link": null,
+        "title": "Internal Hook Wrapper",
+        "description": "Internal helper function used by the `Hooks` capability to wrap and call registered hook functions, ensuring proper context and argument passing."
+      },
+      {
+        "id": "Hooks_wrapper_no_arg",
+        "label": "Hook Wrapper (No Arg)",
+        "type": "component",
+        "link": null,
+        "title": "Internal Hook Wrapper (No Arg)",
+        "description": "Internal helper function for `Hooks` to wrap and call registered hook functions that do not require an argument to be passed to the handler."
+      },
+      {
+        "id": "Hooks_decorator",
+        "label": "Hook Registration Decorator",
+        "type": "component",
+        "link": null,
+        "title": "Hook Registration Decorator",
+        "description": "A decorator used internally by the `Hooks` capability to register hook functions with specific keys and optional timeouts or tool filters."
+      },
+      {
+        "id": "IncludeToolReturnSchemas",
+        "label": "Include Tool Return Schemas",
+        "type": "component",
+        "link": null,
+        "title": "Tool Return Schema Inclusion",
+        "description": "A capability that configures selected tools to include their return type schemas in the information provided to the model, enhancing the model's understanding of tool outputs."
+      },
+      {
+        "id": "Instrumentation",
+        "label": "Instrument Agent Runs",
+        "type": "component",
+        "link": null,
+        "title": "OpenTelemetry Instrumentation",
+        "description": "Provides OpenTelemetry/Logfire tracing for agent runs, model requests, and tool executions, allowing for detailed monitoring and observability of agent behavior."
+      },
+      {
+        "id": "MCP",
+        "label": "MCP Server Integration",
+        "type": "component",
+        "link": null,
+        "title": "Model Context Protocol Integration",
+        "description": "Integrates with an MCP (Model Context Protocol) server, using native model support when available or falling back to a local HTTP connection for tool execution."
+      },
+      {
+        "id": "NativeOrLocalTool",
+        "label": "Native/Local Tool Pairing",
+        "type": "component",
+        "link": null,
+        "title": "Native or Local Tool Capability",
+        "description": "A capability that pairs a provider-native tool with a local fallback, dynamically choosing which to use based on model support. It allows for flexible tool integration."
+      },
+      {
+        "id": "ProcessEventStream",
+        "label": "Process Event Stream",
+        "type": "component",
+        "link": null,
+        "title": "Agent Event Stream Processor",
+        "description": "Forwards the agent's event stream to a user-provided asynchronous handler or processor, allowing for observation, modification, or transformation of agent events during streaming and tool execution."
+      },
+      {
+        "id": "SetToolMetadata",
+        "label": "Set Tool Metadata",
+        "type": "component",
+        "link": null,
+        "title": "Tool Metadata Assignment",
+        "description": "A capability that merges specified metadata key-value pairs onto selected tools, allowing for dynamic annotation and configuration of tool definitions."
+      },
+      {
+        "id": "Thinking",
+        "label": "Configure Model Thinking",
+        "type": "component",
+        "link": null,
+        "title": "Model Thinking Configuration",
+        "description": "Enables and configures the model's thinking or reasoning capabilities, using a unified setting that works across different providers while allowing provider-specific overrides."
+      },
+      {
+        "id": "ThreadExecutor",
+        "label": "Custom Thread Executor",
+        "type": "component",
+        "link": null,
+        "title": "Custom Thread Pool Executor",
+        "description": "Allows the use of a custom `ThreadPoolExecutor` or any `Executor` for running synchronous functions in threads, preventing thread accumulation in long-running servers."
+      },
+      {
+        "id": "WebFetch",
+        "label": "Web Fetching Capability",
+        "type": "component",
+        "link": null,
+        "title": "URL Fetching Capability",
+        "description": "Provides URL fetching functionality, utilizing native model support when available or falling back to a local function tool (e.g., markdownify-based fetch) with domain restrictions."
+      },
+      {
+        "id": "WebSearch",
+        "label": "Web Search Capability",
+        "type": "component",
+        "link": null,
+        "title": "Web Search Integration",
+        "description": "Integrates web search functionality, leveraging native model support or falling back to a local search tool (e.g., DuckDuckGo) with options for context size, location, and domain filtering."
+      },
+      {
+        "id": "WrapperCapability",
+        "label": "Wrap Agent Capability",
+        "type": "component",
+        "link": null,
+        "title": "Capability Wrapper",
+        "description": "A capability that wraps another capability, delegating all methods and allowing subclasses to override specific behaviors while maintaining the core functionality of the wrapped capability."
+      },
+      {
+        "id": "FunctionSignature",
+        "label": "Function Signature Definition",
+        "type": "component",
+        "link": null,
+        "title": "Function Signature Representation",
+        "description": "Represents a function's signature, including parameters, return type, and referenced type definitions, enabling rendering of function signatures from JSON schemas and handling type conflicts."
+      },
+      {
+        "id": "ToolManager",
+        "label": "Manage Agent Tools",
+        "type": "component",
+        "link": null,
+        "title": "Agent Tool Management",
+        "description": "Manages tools for an agent run step, handling tool definitions, argument validation, execution, and retry logic. It orchestrates the interaction between the agent and its available tools."
+      },
+      {
+        "id": "keywords_search_fn",
+        "label": "Keyword Search Algorithm",
+        "type": "component",
+        "link": null,
+        "title": "Keyword Overlap Search",
+        "description": "A built-in keyword-overlap search algorithm used by the `ToolSearch` capability to discover tools based on matching keywords in their names or descriptions."
+      },
+      {
+        "id": "AbstractToolset",
+        "label": "Base Toolset",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Toolset Definition",
+        "description": "The abstract base class for all toolsets, defining the interface for managing collections of tools, including listing, validating arguments, and calling tools within an agent's context."
+      },
+      {
+        "id": "DeferredToolset",
+        "label": "Deprecated External Toolset",
+        "type": "component",
+        "link": null,
+        "title": "Deprecated External Toolset Alias",
+        "description": "A deprecated alias for `ExternalToolset`, maintained for backward compatibility."
+      },
+      {
+        "id": "FastMCPToolset",
+        "label": "FastMCP Toolset (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "Deprecated FastMCP Toolset",
+        "description": "A toolset backed by a FastMCP `Client` for calling tools on a local or remote MCP server. This class is deprecated in favor of `MCPToolset`."
+      },
+      {
+        "id": "WrapperToolset",
+        "label": "Wrap Toolset",
+        "type": "component",
+        "link": null,
+        "title": "Toolset Wrapper",
+        "description": "A toolset that wraps another toolset, delegating all methods and allowing subclasses to modify behavior while preserving the wrapped toolset's core functionality."
+      },
+      {
+        "id": "UrlContextTool",
+        "label": "Deprecated Web Fetch Tool",
+        "type": "component",
+        "link": null,
+        "title": "Deprecated URL Context Tool",
+        "description": "A deprecated alias for `WebFetchTool`, maintained for backward compatibility. It overrides the tool kind for deserialization of older payloads."
+      },
+      {
+        "id": "CodeExecutionTool",
+        "label": "Native Code Execution",
+        "type": "component",
+        "link": null,
+        "title": "Native Code Execution Tool",
+        "description": "A native tool that enables the agent to execute code, supported by various LLM providers like Anthropic, OpenAI, Google, Bedrock, and xAI."
+      },
+      {
+        "id": "MemoryTool",
+        "label": "Native Memory Tool",
+        "type": "component",
+        "link": null,
+        "title": "Native Memory Tool",
+        "description": "A native tool that allows the agent to utilize memory, currently supported by Anthropic."
+      },
+      {
+        "id": "FileSearchTool",
+        "label": "Native File Search",
+        "type": "component",
+        "link": null,
+        "title": "Native File Search Tool",
+        "description": "A native tool for vector-based search through uploaded files, providing a managed RAG system for file storage, chunking, embedding, and context injection."
+      },
+      {
+        "id": "ExaToolset",
+        "label": "Exa Search Toolset",
+        "type": "component",
+        "link": null,
+        "title": "Exa Search Integration",
+        "description": "A toolset providing Exa search tools (search, find_similar, get_contents, answer) with a shared client for efficient web data retrieval."
+      },
+      {
+        "id": "tavily_search_tool",
+        "label": "Tavily Search Tool",
+        "type": "component",
+        "link": null,
+        "title": "Tavily Web Search Tool",
+        "description": "A function that creates a Tavily search tool, allowing agents to perform web searches with configurable parameters like max results, search depth, and domain filtering."
+      },
+      {
+        "id": "ToolDefinition",
+        "label": "Tool Definition",
+        "type": "component",
+        "link": null,
+        "title": "Tool Definition Structure",
+        "description": "Defines the structure and metadata of a tool, including its name, description, parameters, return schema, and other configuration."
+      },
+      {
+        "id": "RunContext",
+        "label": "Run Context",
+        "type": "external",
+        "link": "core_utilities",
+        "title": "Agent Run Context",
+        "description": "Provides contextual information for the current agent run, including messages, dependencies, and retry counts, enabling context-aware operations."
+      },
+      {
+        "id": "Model",
+        "label": "LLM Model",
+        "type": "external",
+        "link": "model_abstraction",
+        "title": "Language Model Abstraction",
+        "description": "Represents an abstract interface for interacting with various Large Language Models, handling requests, responses, and streaming."
+      },
+      {
+        "id": "AbstractAgent",
+        "label": "Abstract Agent",
+        "type": "external",
+        "link": "agent_framework",
+        "title": "Base Agent Interface",
+        "description": "The abstract base class for all agents, defining the fundamental interface for agent creation, configuration, and execution."
+      }
+    ],
+    "edges": [
+      {
+        "source": "_takes_ctx",
+        "target": "RunContext",
+        "label": "checks for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_validate_single_arg",
+        "target": "OutputSchema",
+        "label": "used in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OutputSchema",
+        "target": "OutputToolset",
+        "label": "builds/uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OutputSchema",
+        "target": "StructuredTextOutputSchema",
+        "label": "base for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OutputToolset",
+        "target": "OutputValidator",
+        "label": "uses for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OutputToolset",
+        "target": "ToolManager",
+        "label": "managed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OutputValidator",
+        "target": "RunContext",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredTextOutputSchema",
+        "target": "OutputSchema",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CapabilitySpec",
+        "target": "AbstractCapability",
+        "label": "specifies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sort_capabilities",
+        "target": "AbstractCapability",
+        "label": "operates on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PendingMessageDrainCapability",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PendingMessageDrainCapability",
+        "target": "RunContext",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolSearch",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolSearch",
+        "target": "AbstractToolset",
+        "label": "wraps/uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolSearch",
+        "target": "keywords_search_fn",
+        "label": "uses as strategy",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractCapability",
+        "target": "RunContext",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractCapability",
+        "target": "AbstractAgent",
+        "label": "configured on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "HandleDeferredToolCalls",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "HandleDeferredToolCalls",
+        "target": "ToolManager",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Hooks",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Hooks",
+        "target": "Hooks_wrapper",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Hooks",
+        "target": "Hooks_wrapper_no_arg",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Hooks",
+        "target": "Hooks_decorator",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "IncludeToolReturnSchemas",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "IncludeToolReturnSchemas",
+        "target": "AbstractToolset",
+        "label": "modifies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Instrumentation",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Instrumentation",
+        "target": "RunContext",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Instrumentation",
+        "target": "Model",
+        "label": "monitors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MCP",
+        "target": "NativeOrLocalTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MCP",
+        "target": "FastMCPToolset",
+        "label": "uses/replaces (deprecated)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "NativeOrLocalTool",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "WebFetch",
+        "target": "NativeOrLocalTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "WebSearch",
+        "target": "NativeOrLocalTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ProcessEventStream",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SetToolMetadata",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SetToolMetadata",
+        "target": "AbstractToolset",
+        "label": "modifies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Thinking",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Thinking",
+        "target": "Model",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ThreadExecutor",
+        "target": "AbstractCapability",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "WrapperCapability",
+        "target": "AbstractCapability",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FunctionSignature",
+        "target": "ToolDefinition",
+        "label": "defines schema for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolManager",
+        "target": "AbstractToolset",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolManager",
+        "target": "AbstractCapability",
+        "label": "uses hooks from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolManager",
+        "target": "OutputSchema",
+        "label": "validates output with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "keywords_search_fn",
+        "target": "ToolSearch",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractToolset",
+        "target": "WrapperToolset",
+        "label": "base for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractToolset",
+        "target": "ToolDefinition",
+        "label": "provides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FastMCPToolset",
+        "target": "AbstractToolset",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "WrapperToolset",
+        "target": "AbstractToolset",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UrlContextTool",
+        "target": "WebFetch",
+        "label": "deprecated alias for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CodeExecutionTool",
+        "target": "NativeOrLocalTool",
+        "label": "can be native tool for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MemoryTool",
+        "target": "NativeOrLocalTool",
+        "label": "can be native tool for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FileSearchTool",
+        "target": "NativeOrLocalTool",
+        "label": "can be native tool for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaToolset",
+        "target": "AbstractToolset",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tavily_search_tool",
+        "target": "AbstractToolset",
+        "label": "creates tool for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolManager",
+        "target": "RunContext",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractToolset",
+        "target": "RunContext",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FastMCPToolset",
+        "target": "RunContext",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "WrapperToolset",
+        "target": "RunContext",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaToolset",
+        "target": "RunContext",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tavily_search_tool",
+        "target": "RunContext",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_narrow_native_tool_search_call",
+        "target": "ToolSearch",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_narrow_native_tool_search_return",
+        "target": "ToolSearch",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_narrow_tool_search_call",
+        "target": "ToolSearch",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_narrow_tool_search_return",
+        "target": "ToolSearch",
+        "label": "used by",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "output_management",
+        "label": "Output Management",
+        "nodes": [
+          "OutputSchema",
+          "OutputToolset",
+          "OutputValidator",
+          "StructuredTextOutputSchema",
+          "_validate_single_arg"
+        ],
+        "title": "Agent Output Management",
+        "description": "Components responsible for defining, structuring, validating, and processing the agent's outputs, including text, structured data, and tool calls.",
+        "role": "data"
+      },
+      {
+        "id": "capability_core",
+        "label": "Capability Core",
+        "nodes": [
+          "AbstractCapability",
+          "CapabilitySpec",
+          "WrapperCapability",
+          "sort_capabilities",
+          "_takes_ctx"
+        ],
+        "title": "Core Agent Capability Framework",
+        "description": "Fundamental components that define the structure, lifecycle, and management of agent capabilities, enabling modular and extensible agent behaviors.",
+        "role": "surface"
+      },
+      {
+        "id": "tool_management",
+        "label": "Tool Management",
+        "nodes": [
+          "ToolManager",
+          "AbstractToolset",
+          "WrapperToolset",
+          "FunctionSignature",
+          "DeferredToolset",
+          "FastMCPToolset",
+          "ExaToolset",
+          "tavily_search_tool",
+          "ToolDefinition"
+        ],
+        "title": "Agent Tool Orchestration",
+        "description": "Components for managing, defining, and executing tools available to the agent, including abstract interfaces, wrappers, and specific toolset implementations.",
+        "role": "generative"
+      },
+      {
+        "id": "native_local_tool_integration",
+        "label": "Native/Local Tool Integration",
+        "nodes": [
+          "NativeOrLocalTool",
+          "WebFetch",
+          "WebSearch",
+          "MCP",
+          "UrlContextTool",
+          "CodeExecutionTool",
+          "MemoryTool",
+          "FileSearchTool"
+        ],
+        "title": "Integrating Native and Local Tools",
+        "description": "Capabilities for seamlessly integrating tools that are either natively supported by the LLM provider or implemented locally, with fallback mechanisms.",
+        "role": "generative"
+      },
+      {
+        "id": "agent_lifecycle_hooks",
+        "label": "Agent Lifecycle Hooks",
+        "nodes": [
+          "Hooks",
+          "Hooks_wrapper",
+          "Hooks_wrapper_no_arg",
+          "Hooks_decorator",
+          "PendingMessageDrainCapability",
+          "ProcessEventStream",
+          "HandleDeferredToolCalls",
+          "Instrumentation",
+          "ThreadExecutor"
+        ],
+        "title": "Agent Execution Lifecycle Hooks",
+        "description": "Components that provide hooks and mechanisms to observe, modify, and control the agent's execution flow at various stages, from run initiation to tool execution and event processing.",
+        "role": "analytical"
+      },
+      {
+        "id": "tool_configuration",
+        "label": "Tool Configuration",
+        "nodes": [
+          "ToolSearch",
+          "keywords_search_fn",
+          "IncludeToolReturnSchemas",
+          "SetToolMetadata",
+          "Thinking",
+          "_narrow_native_tool_search_call",
+          "_narrow_native_tool_search_return",
+          "_narrow_tool_search_call",
+          "_narrow_tool_search_return"
+        ],
+        "title": "Tool Discovery and Configuration",
+        "description": "Capabilities focused on how tools are discovered, presented to the model, and configured, including search strategies, metadata assignment, and model thinking settings.",
+        "role": "generative"
+      }
+    ]
+  }
+}

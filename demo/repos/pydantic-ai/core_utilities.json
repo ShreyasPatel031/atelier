@@ -1,0 +1,326 @@
+{
+  "title": "Pydantic AI Core Utilities",
+  "summary": "This module provides fundamental utilities for Pydantic AI, including concurrency management, asynchronous execution helpers, prompt formatting, and deprecated callable handling. It also defines core concepts like `RunContext` and `PendingMessage` for agent execution flow.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "deprecated_decorator",
+        "label": "Handle Deprecated Callables",
+        "type": "component",
+        "link": null,
+        "title": "Deprecated Callable Decorator",
+        "description": "Decorator to mark callable properties as deprecated, issuing warnings upon access."
+      },
+      {
+        "id": "flush_requests",
+        "label": "Flush Pending Messages",
+        "type": "component",
+        "link": null,
+        "title": "Flush Pending Requests",
+        "description": "Aggregates pending message parts into a `ModelRequest` and adds it to the message queue."
+      },
+      {
+        "id": "pending_message",
+        "label": "Queue Agent Messages",
+        "type": "component",
+        "link": null,
+        "title": "Pending Message Queue",
+        "description": "A data structure representing messages queued for injection into the agent's conversation flow."
+      },
+      {
+        "id": "run_context",
+        "label": "Manage Agent Run Context",
+        "type": "component",
+        "link": null,
+        "title": "Agent Run Context",
+        "description": "Manages the state and contextual information for an active agent execution run."
+      },
+      {
+        "id": "run_in_executor",
+        "label": "Execute Sync in Thread",
+        "type": "component",
+        "link": null,
+        "title": "Run In Executor",
+        "description": "Executes synchronous functions in a separate thread to prevent blocking the asynchronous event loop."
+      },
+      {
+        "id": "get_union_args",
+        "label": "Extract Union Type Args",
+        "type": "component",
+        "link": null,
+        "title": "Get Union Arguments",
+        "description": "Extracts and returns the constituent types from a Python `Union` type hint."
+      },
+      {
+        "id": "get_event_loop",
+        "label": "Get Async Event Loop",
+        "type": "component",
+        "link": null,
+        "title": "Get Event Loop",
+        "description": "Retrieves the current asyncio event loop or initializes a new one if none is active."
+      },
+      {
+        "id": "concurrency_limiter",
+        "label": "Limit Concurrency",
+        "type": "component",
+        "link": null,
+        "title": "Concurrency Limiter",
+        "description": "Manages and limits the number of concurrent operations and queued tasks, with observability features."
+      },
+      {
+        "id": "model_request_stream_sync",
+        "label": "Stream Model Response (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Stream Model Request Sync",
+        "description": "Provides a synchronous, streaming interface for making requests to language models."
+      },
+      {
+        "id": "model_request_sync",
+        "label": "Request Model Response (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Model Request Sync",
+        "description": "Facilitates synchronous, non-streaming requests to language models, blocking until a full response is received."
+      },
+      {
+        "id": "format_as_xml",
+        "label": "Format Object as XML",
+        "type": "component",
+        "link": null,
+        "title": "Format As XML",
+        "description": "Converts Python objects into an XML string, often used for structured prompt examples for LLMs."
+      },
+      {
+        "id": "agent_stream",
+        "label": "Stream Agent Output",
+        "type": "component",
+        "link": null,
+        "title": "Agent Stream",
+        "description": "Manages the asynchronous streaming of agent outputs, including validation, usage tracking, and cancellation."
+      },
+      {
+        "id": "usage_alias",
+        "label": "Deprecated Usage Alias",
+        "type": "component",
+        "link": null,
+        "title": "Usage Alias",
+        "description": "A deprecated class serving as an alias for `RunUsage`, used for tracking LLM token and resource consumption."
+      },
+      {
+        "id": "model_abstraction",
+        "label": "Model Abstraction",
+        "type": "other_module",
+        "link": "model_abstraction",
+        "title": "Model Abstraction Module",
+        "description": "Handles the core logic for interacting with various language models, including request handling and response parsing."
+      },
+      {
+        "id": "capabilities_and_tools",
+        "label": "Capabilities & Tools",
+        "type": "other_module",
+        "link": "capabilities_and_tools",
+        "title": "Capabilities and Tools Module",
+        "description": "Manages the definition, registration, and execution of agent capabilities and tools."
+      },
+      {
+        "id": "run_usage",
+        "label": "Run Usage Tracking",
+        "type": "component",
+        "link": null,
+        "title": "Run Usage",
+        "description": "A class responsible for tracking and aggregating token usage and other metrics during an agent's execution."
+      },
+      {
+        "id": "anyio",
+        "label": "AnyIO Library",
+        "type": "external",
+        "link": null,
+        "title": "AnyIO",
+        "description": "A library providing asynchronous concurrency primitives, such as task groups and capacity limiters."
+      },
+      {
+        "id": "asyncio",
+        "label": "Asyncio Library",
+        "type": "external",
+        "link": null,
+        "title": "Asyncio",
+        "description": "Python's standard library for writing concurrent code using the async/await syntax."
+      },
+      {
+        "id": "opentelemetry",
+        "label": "OpenTelemetry",
+        "type": "external",
+        "link": null,
+        "title": "OpenTelemetry",
+        "description": "A set of tools, APIs, and SDKs used to instrument, generate, collect, and export telemetry data (metrics, logs, and traces) to help analyze software performance and behavior."
+      },
+      {
+        "id": "xml_tree",
+        "label": "XML ElementTree",
+        "type": "external",
+        "link": null,
+        "title": "XML ElementTree",
+        "description": "Python's standard library module for parsing and generating XML data."
+      }
+    ],
+    "edges": [
+      {
+        "source": "run_context",
+        "target": "pending_message",
+        "label": "enqueues",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_stream",
+        "target": "run_context",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_stream",
+        "target": "deprecated_decorator",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_stream",
+        "target": "anyio",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_stream_sync",
+        "target": "model_abstraction",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_stream_sync",
+        "target": "agent_stream",
+        "label": "returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_sync",
+        "target": "model_abstraction",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "model_request_sync",
+        "target": "get_event_loop",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "concurrency_limiter",
+        "target": "anyio",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "concurrency_limiter",
+        "target": "opentelemetry",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_in_executor",
+        "target": "asyncio",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_event_loop",
+        "target": "asyncio",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "format_as_xml",
+        "target": "xml_tree",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "usage_alias",
+        "target": "run_usage",
+        "label": "alias for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_context",
+        "target": "capabilities_and_tools",
+        "label": "manages tools via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_stream",
+        "target": "capabilities_and_tools",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_apis",
+        "label": "Surface APIs",
+        "nodes": [
+          "model_request_stream_sync",
+          "model_request_sync",
+          "format_as_xml",
+          "agent_stream",
+          "concurrency_limiter",
+          "run_context"
+        ],
+        "title": "User-Facing APIs",
+        "description": "Key components providing direct interaction points or central management functionality for users.",
+        "role": "surface"
+      },
+      {
+        "id": "data_structures",
+        "label": "Data Structures",
+        "nodes": [
+          "pending_message",
+          "usage_alias",
+          "run_usage"
+        ],
+        "title": "Core Data Structures",
+        "description": "Components primarily serving as data containers or data-related abstractions within the system.",
+        "role": "data"
+      },
+      {
+        "id": "utility_functions",
+        "label": "Utility Functions",
+        "nodes": [
+          "deprecated_decorator",
+          "flush_requests",
+          "run_in_executor",
+          "get_union_args",
+          "get_event_loop"
+        ],
+        "title": "General Utility Functions",
+        "description": "Helper functions providing common, reusable functionalities across the module.",
+        "role": "utility"
+      }
+    ]
+  }
+}
