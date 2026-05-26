@@ -159,6 +159,10 @@ def generate_docs(name: str, clone_path: Path) -> dict:
                "--no-cache", "--demo-slug", name, "--verbose"]
         use_shell = False
 
+    env = os.environ.copy()
+    # Relative PYTHONPATH breaks when cwd is the clone dir — always use repo root.
+    env["PYTHONPATH"] = str(REPO_ROOT)
+
     start = time.time()
     result = subprocess.run(
         cmd,
@@ -166,6 +170,7 @@ def generate_docs(name: str, clone_path: Path) -> dict:
         cwd=str(clone_path),
         capture_output=True,
         text=True,
+        env=env,
         timeout=int(os.environ.get("CODEWIKI_REGEN_TIMEOUT_SEC", str(4 * 3600))),
     )
     duration = time.time() - start
