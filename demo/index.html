@@ -6873,15 +6873,38 @@
             a.remove();
         }
 
-        function copyCursorAgentPrompt(repoId) {
-            var text = buildCursorAgentPrompt(repoId);
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                return navigator.clipboard.writeText(text);
+        function copyTextFallback(text) {
+            try {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                var ok = document.execCommand('copy');
+                ta.remove();
+                return ok;
+            } catch (e) {
+                return false;
             }
-            return Promise.resolve();
         }
 
-        function openDiagramInCursor(ev) {
+        async function copyCursorAgentPrompt(repoId) {
+            var text = buildCursorAgentPrompt(repoId);
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                }
+            } catch (e) {
+                /* fall through */
+            }
+            return copyTextFallback(text);
+        }
+
+        async function openDiagramInCursor(ev) {
             if (ev && ev.shiftKey) {
                 launchCursorDeeplinkOnce(getCursorMcpInstallDeeplink());
                 showEmbedActionToast('MCP install: approve in Settings, enable server, then click again.');
@@ -6889,9 +6912,13 @@
             }
             var id = repoPath || 'crewai';
             var promptUrl = getCursorPromptDeeplink(id);
-            copyCursorAgentPrompt(id);
+            var copied = await copyCursorAgentPrompt(id);
             launchCursorDeeplinkOnce(promptUrl);
-            showEmbedActionToast('Opening Cursor chat. Confirm the prompt (also copied to clipboard).');
+            showEmbedActionToast(
+                copied
+                    ? 'Sent to Cursor. Approve the pre-filled prompt in chat (Cmd+V if empty).'
+                    : 'Sent to Cursor. Paste the prompt in chat with Cmd+V if needed.'
+            );
         }
 
         window.formatDiagramSelectionForCursorPaste = formatDiagramSelectionForCursorPaste;
