@@ -12,8 +12,8 @@ import { openViewer } from "./local-server.js";
 import { VIEWER_UI_HTML, VIEWER_UI_URI } from "./ui/viewer.html.js";
 
 const server = new McpServer({
-  name: "codewiki-diagram",
-  version: "0.5.2",
+  name: "atelier",
+  version: "0.6.0",
 });
 
 server.registerResource(
@@ -63,7 +63,7 @@ server.registerTool(
       "Also renders an embedded diagram panel when the host supports MCP Apps UI.",
     ].join("\n"),
     inputSchema: {
-      repo_id: z.string().describe("Repository id — any repo on hosted site or under CODEWIKI_LOCAL_REPO_ROOT"),
+      repo_id: z.string().describe("Repository id — any repo on hosted site or under ATELIER_LOCAL_REPO_ROOT"),
       refresh: z
         .boolean()
         .optional()

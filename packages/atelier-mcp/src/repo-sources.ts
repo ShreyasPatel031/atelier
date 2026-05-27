@@ -101,7 +101,7 @@ export async function ensureRepoInCache(
   options: { refresh?: boolean } = {}
 ): Promise<{ downloaded: string[]; source: "cache" | "hosted" | "local" }> {
   const dest = repoDir(repoId);
-  const refresh = options.refresh || process.env.CODEWIKI_REFRESH === "1";
+  const refresh = options.refresh || process.env.ATELIER_REFRESH === "1";
 
   if (!refresh && (await exists(join(dest, "overview.json")))) {
     return { downloaded: ["overview.json (cache)"], source: "cache" };
@@ -125,7 +125,7 @@ export async function ensureRepoInCache(
     throw new Error(
       `Repo '${repoId}' not found. Tried hosted (${getHostedOrigin()})` +
         (localRoot ? ` and local (${localRoot})` : "") +
-        ". Set CODEWIKI_LOCAL_REPO_ROOT to a directory containing repo folders, or call open_viewer after the repo exists on the hosted site."
+        ". Set ATELIER_LOCAL_REPO_ROOT to a directory containing repo folders, or call open_viewer after the repo exists on the hosted site."
     );
   }
 }

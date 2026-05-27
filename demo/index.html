@@ -1218,9 +1218,9 @@
             type="button"
             class="zoom-btn readme-embed-btn cursor-embed-btn"
             id="cursorInstallBtn"
-            title="Add codewiki-diagram MCP to Cursor (one-time). Approve install, then enable under Tools and MCP."
-            aria-label="Install CodeWiki diagram MCP in Cursor"
-            onclick="installCodewikiMcpInCursor()"
+            title="Add Atelier MCP to Cursor (copies config to clipboard)"
+            aria-label="Install Atelier MCP in Cursor"
+            onclick="installAtelierMcpInCursor()"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -6829,15 +6829,16 @@
 
         function getCursorMcpInstallConfig() {
             return {
+                type: 'stdio',
                 command: 'npx',
-                args: ['-y', '@atelier-inc/codewiki-diagram-mcp'],
-                env: { CODEWIKI_DATA_ORIGIN: 'https://app.atelier-inc.net' }
+                args: ['-y', '@atelier-inc/atelier-mcp'],
+                env: { ATELIER_DATA_ORIGIN: 'https://app.atelier-inc.net' }
             };
         }
 
         function getCursorMcpInstallQuery() {
             var b64 = base64EncodeUtf8(JSON.stringify(getCursorMcpInstallConfig()));
-            return 'name=codewiki-diagram&config=' + encodeURIComponent(b64);
+            return 'name=atelier&config=' + encodeURIComponent(b64);
         }
 
         function getCursorMcpInstallDeeplink() {
@@ -6846,7 +6847,7 @@
 
         function getCursorMcpJsonSnippet() {
             return JSON.stringify(
-                { mcpServers: { 'codewiki-diagram': getCursorMcpInstallConfig() } },
+                { mcpServers: { atelier: getCursorMcpInstallConfig() } },
                 null,
                 2
             );
@@ -6856,7 +6857,7 @@
         function buildCursorAgentPrompt(repoId) {
             var id = repoId || repoPath || 'crewai';
             return (
-                'Use codewiki-diagram MCP tool open_viewer with repo_id=' +
+                'Use atelier MCP tool open_viewer with repo_id=' +
                 id +
                 '. Open the returned local viewer URL. Hosted: ' +
                 getViewerUrl(id)
@@ -6899,26 +6900,85 @@
             window.location.assign(url);
         }
 
-        async function installCodewikiMcpInCursor() {
+        async function installAtelierMcpInCursor() {
             var snippet = getCursorMcpJsonSnippet();
+            var deeplink = getCursorMcpInstallDeeplink();
             var copied = false;
             try {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(snippet);
                     copied = true;
                 }
-            } catch (e) {
-                /* fall through */
+            } catch (e) { /* fall through */ }
+            if (!copied) copied = copyTextFallback(snippet);
+            try {
+                window.open(deeplink, '_blank');
+            } catch (e) { /* embedded browser may block cursor:// */ }
+            showInstallModal(snippet, copied, deeplink);
+        }
+
+        function showInstallModal(snippet, copied, deeplink) {
+            var existing = document.getElementById('mcpInstallModal');
+            if (existing) existing.remove();
+            var overlay = document.createElement('div');
+            overlay.id = 'mcpInstallModal';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);font-family:system-ui,sans-serif';
+            var box = document.createElement('div');
+            box.style.cssText = 'background:#fff;border-radius:12px;padding:28px 32px;max-width:540px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)';
+            var statusLine = copied
+                ? '<p style="margin:0 0 8px;font-size:14px;color:#16a34a;font-weight:500">&#10003; Config copied to clipboard</p>'
+                : '';
+            var linkBlock = deeplink
+                ? '<p style="margin:0 0 8px;font-size:13px;color:#555"><strong>One-click:</strong> paste this link in Safari or Chrome address bar, then click Install in Cursor:</p>' +
+                  '<input id="mcpInstallLink" readonly value="' +
+                  deeplink.replace(/"/g, '&quot;') +
+                  '" style="width:100%;box-sizing:border-box;font-size:11px;padding:8px;border:1px solid #ccc;border-radius:6px;margin:8px 0" />' +
+                  '<p style="margin:0 0 12px;font-size:12px;color:#888">Or paste the config below into <code>~/.cursor/mcp.json</code></p>'
+                : '<p style="margin:0 0 8px;font-size:13px;color:#555">Paste into <code style="background:#f0f0f0;padding:2px 5px;border-radius:3px;font-size:12px">~/.cursor/mcp.json</code></p>';
+            box.innerHTML =
+                '<h3 style="margin:0 0 12px;font-size:18px">Install Atelier MCP in Cursor</h3>' +
+                statusLine +
+                linkBlock +
+                '<pre id="mcpInstallSnippet" style="background:#1e1e1e;color:#d4d4d4;padding:14px;border-radius:8px;font-size:12px;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all;cursor:text;user-select:all">' +
+                snippet.replace(/</g, '&lt;') +
+                '</pre>' +
+                '<p style="margin:0 0 16px;font-size:13px;color:#666">Enable <strong>atelier</strong> under Settings → Tools &amp; MCP.</p>' +
+                '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">' +
+                '<button id="mcpCopyLinkBtn" style="padding:8px 18px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:14px">Copy install link</button>' +
+                '<button id="mcpCopyBtn" style="padding:8px 18px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:14px">Copy config</button>' +
+                '<button onclick="document.getElementById(\'mcpInstallModal\').remove()" style="padding:8px 18px;border-radius:6px;border:none;background:#2563eb;color:#fff;cursor:pointer;font-size:14px">Done</button>' +
+                '</div>';
+            overlay.appendChild(box);
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) overlay.remove();
+            });
+            document.body.appendChild(overlay);
+            document.getElementById('mcpCopyBtn').addEventListener('click', function () {
+                var s = getCursorMcpJsonSnippet();
+                try {
+                    navigator.clipboard.writeText(s).then(function () {
+                        document.getElementById('mcpCopyBtn').textContent = 'Copied!';
+                    });
+                } catch (_) {
+                    copyTextFallback(s);
+                    document.getElementById('mcpCopyBtn').textContent = 'Copied!';
+                }
+            });
+            var linkBtn = document.getElementById('mcpCopyLinkBtn');
+            if (linkBtn && deeplink) {
+                linkBtn.addEventListener('click', function () {
+                    try {
+                        navigator.clipboard.writeText(deeplink).then(function () {
+                            linkBtn.textContent = 'Copied!';
+                        });
+                    } catch (_) {
+                        copyTextFallback(deeplink);
+                        linkBtn.textContent = 'Copied!';
+                    }
+                });
+            } else if (linkBtn) {
+                linkBtn.style.display = 'none';
             }
-            if (!copied) {
-                copied = copyTextFallback(snippet);
-            }
-            launchCursorDeeplinkOnce(getCursorMcpInstallDeeplink());
-            showEmbedActionToast(
-                copied
-                    ? 'Cursor MCP install opened. Approve the prompt, enable codewiki-diagram under Tools & MCP. mcp.json copied as backup.'
-                    : 'Cursor MCP install opened. Approve and enable codewiki-diagram under Tools & MCP.'
-            );
         }
 
         function copyTextFallback(text) {
@@ -6978,7 +7038,7 @@
         window.getCursorPromptDeeplink = getCursorPromptDeeplink;
         window.buildCursorAgentPrompt = buildCursorAgentPrompt;
         window.getCursorMcpInstallDeeplink = getCursorMcpInstallDeeplink;
-        window.installCodewikiMcpInCursor = installCodewikiMcpInCursor;
+        window.installAtelierMcpInCursor = installAtelierMcpInCursor;
         window.openDiagramInCursor = openDiagramInCursor;
         window.showEmbedActionToast = showEmbedActionToast;
 

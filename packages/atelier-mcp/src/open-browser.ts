@@ -3,7 +3,7 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-const AUTO_OPEN = process.env.CODEWIKI_AUTO_OPEN_BROWSER !== "0";
+const AUTO_OPEN = process.env.ATELIER_AUTO_OPEN_BROWSER !== "0";
 
 export async function tryOpenInCursor(url: string): Promise<{
   attempted: boolean;

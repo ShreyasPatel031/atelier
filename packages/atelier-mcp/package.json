@@ -1,16 +1,17 @@
 {
-  "name": "@atelier-inc/codewiki-diagram-mcp",
-  "version": "0.5.2",
-  "description": "MCP server for browsing CodeWiki architecture diagrams — fetches hosted diagram data, zero local setup required",
+  "name": "@atelier-inc/atelier-mcp",
+  "version": "0.6.0",
+  "description": "MCP server for browsing Atelier architecture diagrams — fetches hosted diagram data, zero local setup required",
   "type": "module",
   "bin": {
-    "codewiki-diagram-mcp": "./dist/index.js"
+    "atelier-mcp": "./dist/index.js"
   },
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
@@ -31,11 +32,14 @@
     "cursor",
     "architecture",
     "diagram",
-    "codewiki"
+    "atelier"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/ShreyasPatel031/atelier"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -1,4 +1,4 @@
-export const VIEWER_UI_URI = "ui://codewiki-diagram/viewer.html";
+export const VIEWER_UI_URI = "ui://atelier/viewer.html";
 
 export const VIEWER_UI_HTML = `<!DOCTYPE html>
 <html lang="en">
