@@ -1217,10 +1217,31 @@
         <button
             type="button"
             class="zoom-btn readme-embed-btn cursor-embed-btn"
+            id="cursorInstallBtn"
+            title="Add codewiki-diagram MCP to Cursor (one-time). Approve install, then enable under Tools and MCP."
+            aria-label="Install CodeWiki diagram MCP in Cursor"
+            onclick="installCodewikiMcpInCursor()"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 22 22"
+                fill="none"
+                aria-hidden="true"
+                focusable="false"
+            >
+                <circle cx="11" cy="11" r="8.5" stroke="#0F0F0F" stroke-width="1.5" />
+                <path stroke="#0F0F0F" stroke-width="1.5" stroke-linecap="round" d="M11 7.5v7M7.5 11h7" />
+            </svg>
+        </button>
+        <button
+            type="button"
+            class="zoom-btn readme-embed-btn cursor-embed-btn"
             id="cursorEmbedBtn"
-            title="Open in Cursor chat (agent runs open_viewer via MCP). Shift+click: install MCP only."
+            title="Open diagram in Cursor chat (requires MCP installed). Agent calls open_viewer."
             aria-label="Open architecture diagram in Cursor chat"
-            onclick="openDiagramInCursor(event)"
+            onclick="openDiagramInCursor()"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -6802,22 +6823,36 @@
             return origin + '/?repo=' + encodeURIComponent(id);
         }
 
-        function getCursorMcpInstallDeeplink() {
-            // Until @atelier-inc/codewiki-diagram-mcp is on npm, clone from GitHub and run locally.
-            var installScript =
-                'd="${TMPDIR:-/tmp}/codewiki-mcp-$$"; ' +
-                'git clone -q --depth 1 -b react-flow-elk-generation https://github.com/ShreyasPatel031/atelier.git "$d" && ' +
-                'cd "$d/packages/codewiki-diagram-mcp" && npm ci --no-audit --no-fund --silent && npm run build --silent && ' +
-                'exec node dist/index.js';
-            var config = {
-                command: 'sh',
-                args: ['-c', installScript],
+        function base64EncodeUtf8(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function getCursorMcpInstallConfig() {
+            return {
+                command: 'npx',
+                args: ['-y', '@atelier-inc/codewiki-diagram-mcp'],
                 env: { CODEWIKI_DATA_ORIGIN: 'https://app.atelier-inc.net' }
             };
-            var b64 = btoa(JSON.stringify(config));
-            return (
-                'cursor://anysphere.cursor-deeplink/mcp/install?name=codewiki-diagram&config=' +
-                encodeURIComponent(b64)
+        }
+
+        function getCursorMcpInstallQuery() {
+            var b64 = base64EncodeUtf8(JSON.stringify(getCursorMcpInstallConfig()));
+            return 'name=codewiki-diagram&config=' + encodeURIComponent(b64);
+        }
+
+        function getCursorMcpInstallDeeplink() {
+            return 'cursor://anysphere.cursor-deeplink/mcp/install?' + getCursorMcpInstallQuery();
+        }
+
+        function getCursorMcpInstallWebLink() {
+            return 'https://cursor.com/link/mcp/install?' + getCursorMcpInstallQuery();
+        }
+
+        function getCursorMcpJsonSnippet() {
+            return JSON.stringify(
+                { mcpServers: { 'codewiki-diagram': getCursorMcpInstallConfig() } },
+                null,
+                2
             );
         }
 
@@ -6930,6 +6965,8 @@
         window.getCursorPromptDeeplink = getCursorPromptDeeplink;
         window.buildCursorAgentPrompt = buildCursorAgentPrompt;
         window.getCursorMcpInstallDeeplink = getCursorMcpInstallDeeplink;
+        window.getCursorMcpInstallWebLink = getCursorMcpInstallWebLink;
+        window.installCodewikiMcpInCursor = installCodewikiMcpInCursor;
         window.openDiagramInCursor = openDiagramInCursor;
         window.showEmbedActionToast = showEmbedActionToast;
 
