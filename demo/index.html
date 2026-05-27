@@ -6821,26 +6821,22 @@
             );
         }
 
-        /** Pre-filled agent prompt — opens Cursor chat (not MCP settings). */
+        /** Short ASCII prompt — Cursor deeplinks reject/truncate some Unicode and long text. */
         function buildCursorAgentPrompt(repoId) {
             var id = repoId || repoPath || 'crewai';
-            var viewerUrl = getViewerUrl(id);
             return (
-                'Open the "' +
+                'Use codewiki-diagram MCP tool open_viewer with repo_id=' +
                 id +
-                '" architecture diagram in the local CodeWiki viewer.\n\n' +
-                'Use the codewiki-diagram MCP tool `open_viewer` with repo_id="' +
-                id +
-                '".\n' +
-                'That starts the local viewer server and returns a URL.\n\n' +
-                'If codewiki-diagram is not installed, add it under Cursor Settings → Tools & MCP first (Shift+click the viewer Cursor button for an install link).\n\n' +
-                'Hosted diagram: ' +
-                viewerUrl
+                '. Open the returned local viewer URL. Hosted: ' +
+                getViewerUrl(id)
             );
         }
 
         function getCursorPromptDeeplink(repoId) {
-            return 'https://cursor.com/link/prompt?text=' + encodeURIComponent(buildCursorAgentPrompt(repoId));
+            var text = buildCursorAgentPrompt(repoId);
+            return (
+                'cursor://anysphere.cursor-deeplink/prompt?text=' + encodeURIComponent(text)
+            );
         }
 
         function getCursorOpenUrl(repoId) {
@@ -6867,15 +6863,35 @@
             }, 2800);
         }
 
+        function launchCursorDeeplinkOnce(url) {
+            var a = document.createElement('a');
+            a.href = url;
+            a.rel = 'noopener';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        function copyCursorAgentPrompt(repoId) {
+            var text = buildCursorAgentPrompt(repoId);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text);
+            }
+            return Promise.resolve();
+        }
+
         function openDiagramInCursor(ev) {
             if (ev && ev.shiftKey) {
-                window.open(getCursorMcpInstallDeeplink(), '_blank', 'noopener,noreferrer');
-                showEmbedActionToast('MCP install — approve in Cursor, enable the server, then click again.');
+                launchCursorDeeplinkOnce(getCursorMcpInstallDeeplink());
+                showEmbedActionToast('MCP install: approve in Settings, enable server, then click again.');
                 return;
             }
-            var promptUrl = getCursorPromptDeeplink();
-            window.open(promptUrl, '_blank', 'noopener,noreferrer');
-            showEmbedActionToast('Opening Cursor chat… Confirm the prompt so the agent can run open_viewer.');
+            var id = repoPath || 'crewai';
+            var promptUrl = getCursorPromptDeeplink(id);
+            copyCursorAgentPrompt(id);
+            launchCursorDeeplinkOnce(promptUrl);
+            showEmbedActionToast('Opening Cursor chat. Confirm the prompt (also copied to clipboard).');
         }
 
         window.formatDiagramSelectionForCursorPaste = formatDiagramSelectionForCursorPaste;
