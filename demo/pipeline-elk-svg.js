@@ -50,6 +50,30 @@
         return d;
     }
 
+    /** Collect polyline points for an ELK edge section (absolute coords). */
+    function sectionPoints(section, ox, oy) {
+        var pts = [];
+        if (!section) return pts;
+        if (section.startPoint) {
+            pts.push({
+                x: section.startPoint.x + ox,
+                y: section.startPoint.y + oy,
+            });
+        }
+        var bends = section.bendPoints || [];
+        for (var b = 0; b < bends.length; b++) {
+            var bp = bends[b];
+            pts.push({ x: bp.x + ox, y: bp.y + oy });
+        }
+        if (section.endPoint) {
+            pts.push({
+                x: section.endPoint.x + ox,
+                y: section.endPoint.y + oy,
+            });
+        }
+        return pts;
+    }
+
     function svgColorWithAlpha(hex, alpha) {
         if (alpha <= 0) return 'transparent';
         if (!hex || typeof hex !== 'string') return 'transparent';
@@ -607,6 +631,8 @@
     var SVG_GROUP_LABEL_LINE_H = SVG_GROUP_LABEL_FONT_PX + 2 * SVG_GROUP_LABEL_PAD_Y;
     /** Uniform inset from frame edge to diagram + logo block (all sides). */
     var SVG_FRAME_PAD = 28;
+    /** Extra inset for edge strokes and arrow markers outside path endpoints. */
+    var SVG_EDGE_BOUNDS_PAD = 14;
     var ATELIER_LOGO_DISPLAY_H = 48;
     var ATELIER_LOGO_RADIUS = 8;
     var ATELIER_LOGO_BORDER = '#E4E4E4';
@@ -695,7 +721,7 @@
             typeof global.atelierPillWidthByLabel === 'object' &&
             global.atelierPillWidthByLabel[t];
         if (typeof pre === 'number' && !isNaN(pre)) {
-            return Math.max(32, Math.ceil(pre) + 2 * SVG_GROUP_LABEL_PAD_X);
+            return Math.max(32, Math.ceil(pre) + 2 * SVG_GROUP_LABEL_PAD_X + 4);
         }
         var w = 0;
         for (var i = 0; i < t.length; i++) {
@@ -759,23 +785,6 @@
         var gh = laidOutGraph.height || 300;
         var logoUri = options.logoDataUri || resolveAtelierLogoDataUri();
 
-        var edgePaths = '';
-        for (var i = 0; i < acc.edgePlacements.length; i++) {
-            var ep = acc.edgePlacements[i];
-            var edge = ep.edge;
-            if (!edge) continue;
-            var secs = edge.sections || [];
-            for (var s = 0; s < secs.length; s++) {
-                var d = sectionToPathD(secs[s], ep.ox, ep.oy);
-                if (!d) continue;
-                edgePaths +=
-                    '<path d="' +
-                    d +
-                    '" fill="none" stroke="#64748b" stroke-width="1.25" stroke-linejoin="round" ' +
-                    'marker-end="url(#elk-edge-arrow)"/>';
-            }
-        }
-
         var compoundMarkup = '';
         var leafMarkup = '';
         var pillMarkup = '';
@@ -789,6 +798,33 @@
             if (y0 < minCy) minCy = y0;
             if (x1 > maxCx) maxCx = x1;
             if (y1 > maxCy) maxCy = y1;
+        }
+
+        function bumpPointBounds(x, y, pad) {
+            var p = pad == null ? 0 : pad;
+            bumpContentBounds(x - p, y - p, x + p, y + p);
+        }
+
+        var edgePaths = '';
+        for (var i = 0; i < acc.edgePlacements.length; i++) {
+            var ep = acc.edgePlacements[i];
+            var edge = ep.edge;
+            if (!edge) continue;
+            var secs = edge.sections || [];
+            for (var s = 0; s < secs.length; s++) {
+                var sec = secs[s];
+                var pts = sectionPoints(sec, ep.ox, ep.oy);
+                for (var pi = 0; pi < pts.length; pi++) {
+                    bumpPointBounds(pts[pi].x, pts[pi].y, SVG_EDGE_BOUNDS_PAD);
+                }
+                var d = sectionToPathD(sec, ep.ox, ep.oy);
+                if (!d) continue;
+                edgePaths +=
+                    '<path d="' +
+                    d +
+                    '" fill="none" stroke="#64748b" stroke-width="1.25" stroke-linejoin="round" ' +
+                    'marker-end="url(#elk-edge-arrow)"/>';
+            }
         }
 
         for (var n = 0; n < acc.nodes.length; n++) {
@@ -956,11 +992,11 @@
         var blockMaxX = maxCx;
         var blockMaxY = maxCy;
 
+        var logoW = logoUri ? ATELIER_LOGO_DISPLAY_H * ATELIER_LOGO_ASPECT : 0;
         var logoX = minCx;
-        var logoY = minCy;
+        var logoY = maxCy - ATELIER_LOGO_DISPLAY_H;
         var brandMarkup = atelierLogoMarkup(logoUri, logoX, logoY);
         if (logoUri) {
-            var logoW = ATELIER_LOGO_DISPLAY_H * ATELIER_LOGO_ASPECT;
             blockMaxX = Math.max(blockMaxX, logoX + logoW);
             blockMaxY = Math.max(blockMaxY, logoY + ATELIER_LOGO_DISPLAY_H);
         }
@@ -968,7 +1004,7 @@
         var legendLayout = svgSemanticLegendLayout(diagram);
         var legendMarkup = '';
         if (legendLayout) {
-            var legendX = minCx;
+            var legendX = minCx + (logoUri ? logoW + SVG_LEGEND_GAP : 0);
             var legendY = maxCy - legendLayout.h;
             blockMaxX = Math.max(blockMaxX, legendX + legendLayout.w);
             blockMinY = Math.min(blockMinY, legendY);
