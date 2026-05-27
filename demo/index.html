@@ -1218,9 +1218,9 @@
             type="button"
             class="zoom-btn readme-embed-btn cursor-embed-btn"
             id="cursorEmbedBtn"
-            title="Open in Cursor"
-            aria-label="Open architecture diagram in Cursor"
-            onclick="openDiagramInCursor()"
+            title="Open in Cursor chat (agent runs open_viewer via MCP). Shift+click: install MCP only."
+            aria-label="Open architecture diagram in Cursor chat"
+            onclick="openDiagramInCursor(event)"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -6815,11 +6815,36 @@
                 env: { CODEWIKI_DATA_ORIGIN: 'https://app.atelier-inc.net' }
             };
             var b64 = btoa(JSON.stringify(config));
-            return 'cursor://anysphere.cursor-deeplink/mcp/install?name=codewiki-diagram&config=' + b64;
+            return (
+                'cursor://anysphere.cursor-deeplink/mcp/install?name=codewiki-diagram&config=' +
+                encodeURIComponent(b64)
+            );
+        }
+
+        /** Pre-filled agent prompt — opens Cursor chat (not MCP settings). */
+        function buildCursorAgentPrompt(repoId) {
+            var id = repoId || repoPath || 'crewai';
+            var viewerUrl = getViewerUrl(id);
+            return (
+                'Open the "' +
+                id +
+                '" architecture diagram in the local CodeWiki viewer.\n\n' +
+                'Use the codewiki-diagram MCP tool `open_viewer` with repo_id="' +
+                id +
+                '".\n' +
+                'That starts the local viewer server and returns a URL.\n\n' +
+                'If codewiki-diagram is not installed, add it under Cursor Settings → Tools & MCP first (Shift+click the viewer Cursor button for an install link).\n\n' +
+                'Hosted diagram: ' +
+                viewerUrl
+            );
+        }
+
+        function getCursorPromptDeeplink(repoId) {
+            return 'https://cursor.com/link/prompt?text=' + encodeURIComponent(buildCursorAgentPrompt(repoId));
         }
 
         function getCursorOpenUrl(repoId) {
-            return getCursorMcpInstallDeeplink();
+            return getCursorPromptDeeplink(repoId);
         }
 
         function showEmbedActionToast(message) {
@@ -6842,10 +6867,15 @@
             }, 2800);
         }
 
-        function openDiagramInCursor() {
-            var mcpLink = getCursorMcpInstallDeeplink();
-            showEmbedActionToast('Installing MCP in Cursor…');
-            window.location.href = mcpLink;
+        function openDiagramInCursor(ev) {
+            if (ev && ev.shiftKey) {
+                window.open(getCursorMcpInstallDeeplink(), '_blank', 'noopener,noreferrer');
+                showEmbedActionToast('MCP install — approve in Cursor, enable the server, then click again.');
+                return;
+            }
+            var promptUrl = getCursorPromptDeeplink();
+            window.open(promptUrl, '_blank', 'noopener,noreferrer');
+            showEmbedActionToast('Opening Cursor chat… Confirm the prompt so the agent can run open_viewer.');
         }
 
         window.formatDiagramSelectionForCursorPaste = formatDiagramSelectionForCursorPaste;
@@ -6854,6 +6884,8 @@
         window.copyReadmeEmbedToClipboard = copyReadmeEmbedToClipboard;
         window.getViewerUrl = getViewerUrl;
         window.getCursorOpenUrl = getCursorOpenUrl;
+        window.getCursorPromptDeeplink = getCursorPromptDeeplink;
+        window.buildCursorAgentPrompt = buildCursorAgentPrompt;
         window.getCursorMcpInstallDeeplink = getCursorMcpInstallDeeplink;
         window.openDiagramInCursor = openDiagramInCursor;
         window.showEmbedActionToast = showEmbedActionToast;
