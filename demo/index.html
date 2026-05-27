@@ -6844,10 +6844,6 @@
             return 'cursor://anysphere.cursor-deeplink/mcp/install?' + getCursorMcpInstallQuery();
         }
 
-        function getCursorMcpInstallWebLink() {
-            return 'https://cursor.com/link/mcp/install?' + getCursorMcpInstallQuery();
-        }
-
         function getCursorMcpJsonSnippet() {
             return JSON.stringify(
                 { mcpServers: { 'codewiki-diagram': getCursorMcpInstallConfig() } },
@@ -6899,13 +6895,30 @@
         }
 
         function launchCursorDeeplinkOnce(url) {
-            var a = document.createElement('a');
-            a.href = url;
-            a.rel = 'noopener';
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
+            /* Must run from a user click; location.assign is more reliable than synthetic <a> for cursor:// */
+            window.location.assign(url);
+        }
+
+        async function installCodewikiMcpInCursor() {
+            var snippet = getCursorMcpJsonSnippet();
+            var copied = false;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(snippet);
+                    copied = true;
+                }
+            } catch (e) {
+                /* fall through */
+            }
+            if (!copied) {
+                copied = copyTextFallback(snippet);
+            }
+            launchCursorDeeplinkOnce(getCursorMcpInstallDeeplink());
+            showEmbedActionToast(
+                copied
+                    ? 'Cursor MCP install opened. Approve the prompt, enable codewiki-diagram under Tools & MCP. mcp.json copied as backup.'
+                    : 'Cursor MCP install opened. Approve and enable codewiki-diagram under Tools & MCP.'
+            );
         }
 
         function copyTextFallback(text) {
@@ -6965,7 +6978,6 @@
         window.getCursorPromptDeeplink = getCursorPromptDeeplink;
         window.buildCursorAgentPrompt = buildCursorAgentPrompt;
         window.getCursorMcpInstallDeeplink = getCursorMcpInstallDeeplink;
-        window.getCursorMcpInstallWebLink = getCursorMcpInstallWebLink;
         window.installCodewikiMcpInCursor = installCodewikiMcpInCursor;
         window.openDiagramInCursor = openDiagramInCursor;
         window.showEmbedActionToast = showEmbedActionToast;
