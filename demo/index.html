@@ -1214,34 +1214,13 @@
                 />
             </svg>
         </button>
-        <button
-            type="button"
+        <a
             class="zoom-btn readme-embed-btn cursor-embed-btn"
             id="cursorInstallBtn"
-            title="Add Atelier MCP to Cursor (copies config to clipboard)"
+            href="cursor://anysphere.cursor-deeplink/mcp/install?name=atelier&amp;config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBhdGVsaWVyLWluYy9hdGVsaWVyLW1jcCJdLCJlbnYiOnsiQVRFTElFUl9EQVRBX09SSUdJTiI6Imh0dHBzOi8vYXBwLmF0ZWxpZXItaW5jLm5ldCJ9fQ%3D%3D"
+            title="Install Atelier MCP in Cursor (opens install dialog)"
             aria-label="Install Atelier MCP in Cursor"
-            onclick="installAtelierMcpInCursor()"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 22 22"
-                fill="none"
-                aria-hidden="true"
-                focusable="false"
-            >
-                <circle cx="11" cy="11" r="8.5" stroke="#0F0F0F" stroke-width="1.5" />
-                <path stroke="#0F0F0F" stroke-width="1.5" stroke-linecap="round" d="M11 7.5v7M7.5 11h7" />
-            </svg>
-        </button>
-        <button
-            type="button"
-            class="zoom-btn readme-embed-btn cursor-embed-btn"
-            id="cursorEmbedBtn"
-            title="Open diagram in Cursor chat (requires MCP installed). Agent calls open_viewer."
-            aria-label="Open architecture diagram in Cursor chat"
-            onclick="openDiagramInCursor()"
+            onclick="return installAtelierMcpInCursor(event)"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1257,7 +1236,7 @@
                     d="M4 2 20 11l-7 2-2 7z"
                 />
             </svg>
-        </button>
+        </a>
     </div>
             
     <div class="module-tooltip" id="moduleTooltip">
@@ -6827,9 +6806,9 @@
             return btoa(unescape(encodeURIComponent(str)));
         }
 
+        /** Inner config only (no mcpServers wrapper) — matches Cursor install deeplink format. */
         function getCursorMcpInstallConfig() {
             return {
-                type: 'stdio',
                 command: 'npx',
                 args: ['-y', '@atelier-inc/atelier-mcp'],
                 env: { ATELIER_DATA_ORIGIN: 'https://app.atelier-inc.net' }
@@ -6900,85 +6879,19 @@
             window.location.assign(url);
         }
 
-        async function installAtelierMcpInCursor() {
-            var snippet = getCursorMcpJsonSnippet();
+        function installAtelierMcpInCursor(ev) {
             var deeplink = getCursorMcpInstallDeeplink();
-            var copied = false;
+            var btn = document.getElementById('cursorInstallBtn');
+            if (btn) btn.href = deeplink;
             try {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(snippet);
-                    copied = true;
-                }
-            } catch (e) { /* fall through */ }
-            if (!copied) copied = copyTextFallback(snippet);
-            try {
-                window.open(deeplink, '_blank');
-            } catch (e) { /* embedded browser may block cursor:// */ }
-            showInstallModal(snippet, copied, deeplink);
-        }
-
-        function showInstallModal(snippet, copied, deeplink) {
-            var existing = document.getElementById('mcpInstallModal');
-            if (existing) existing.remove();
-            var overlay = document.createElement('div');
-            overlay.id = 'mcpInstallModal';
-            overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);font-family:system-ui,sans-serif';
-            var box = document.createElement('div');
-            box.style.cssText = 'background:#fff;border-radius:12px;padding:28px 32px;max-width:540px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)';
-            var statusLine = copied
-                ? '<p style="margin:0 0 8px;font-size:14px;color:#16a34a;font-weight:500">&#10003; Config copied to clipboard</p>'
-                : '';
-            var linkBlock = deeplink
-                ? '<p style="margin:0 0 8px;font-size:13px;color:#555"><strong>One-click:</strong> paste this link in Safari or Chrome address bar, then click Install in Cursor:</p>' +
-                  '<input id="mcpInstallLink" readonly value="' +
-                  deeplink.replace(/"/g, '&quot;') +
-                  '" style="width:100%;box-sizing:border-box;font-size:11px;padding:8px;border:1px solid #ccc;border-radius:6px;margin:8px 0" />' +
-                  '<p style="margin:0 0 12px;font-size:12px;color:#888">Or paste the config below into <code>~/.cursor/mcp.json</code></p>'
-                : '<p style="margin:0 0 8px;font-size:13px;color:#555">Paste into <code style="background:#f0f0f0;padding:2px 5px;border-radius:3px;font-size:12px">~/.cursor/mcp.json</code></p>';
-            box.innerHTML =
-                '<h3 style="margin:0 0 12px;font-size:18px">Install Atelier MCP in Cursor</h3>' +
-                statusLine +
-                linkBlock +
-                '<pre id="mcpInstallSnippet" style="background:#1e1e1e;color:#d4d4d4;padding:14px;border-radius:8px;font-size:12px;overflow-x:auto;margin:12px 0;white-space:pre-wrap;word-break:break-all;cursor:text;user-select:all">' +
-                snippet.replace(/</g, '&lt;') +
-                '</pre>' +
-                '<p style="margin:0 0 16px;font-size:13px;color:#666">Enable <strong>atelier</strong> under Settings → Tools &amp; MCP.</p>' +
-                '<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">' +
-                '<button id="mcpCopyLinkBtn" style="padding:8px 18px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:14px">Copy install link</button>' +
-                '<button id="mcpCopyBtn" style="padding:8px 18px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:14px">Copy config</button>' +
-                '<button onclick="document.getElementById(\'mcpInstallModal\').remove()" style="padding:8px 18px;border-radius:6px;border:none;background:#2563eb;color:#fff;cursor:pointer;font-size:14px">Done</button>' +
-                '</div>';
-            overlay.appendChild(box);
-            overlay.addEventListener('click', function (e) {
-                if (e.target === overlay) overlay.remove();
-            });
-            document.body.appendChild(overlay);
-            document.getElementById('mcpCopyBtn').addEventListener('click', function () {
-                var s = getCursorMcpJsonSnippet();
-                try {
-                    navigator.clipboard.writeText(s).then(function () {
-                        document.getElementById('mcpCopyBtn').textContent = 'Copied!';
-                    });
-                } catch (_) {
-                    copyTextFallback(s);
-                    document.getElementById('mcpCopyBtn').textContent = 'Copied!';
-                }
-            });
-            var linkBtn = document.getElementById('mcpCopyLinkBtn');
-            if (linkBtn && deeplink) {
-                linkBtn.addEventListener('click', function () {
-                    try {
-                        navigator.clipboard.writeText(deeplink).then(function () {
-                            linkBtn.textContent = 'Copied!';
-                        });
-                    } catch (_) {
-                        copyTextFallback(deeplink);
-                        linkBtn.textContent = 'Copied!';
-                    }
-                });
-            } else if (linkBtn) {
-                linkBtn.style.display = 'none';
+                navigator.clipboard.writeText(deeplink);
+            } catch (_) {
+                copyTextFallback(deeplink);
             }
+            showEmbedActionToast(
+                'Install link copied. Paste in Safari/Chrome if Cursor did not open.'
+            );
+            return true;
         }
 
         function copyTextFallback(text) {
