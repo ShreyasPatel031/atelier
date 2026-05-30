@@ -1225,11 +1225,11 @@
         </button>
         <a
             class="zoom-btn readme-embed-btn cursor-embed-btn"
-            id="cursorInstallBtn"
-            href="cursor://anysphere.cursor-deeplink/mcp/install?name=atelier&amp;config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBhdGVsaWVyLWluYy9hdGVsaWVyLW1jcCJdLCJlbnYiOnsiQVRFTElFUl9EQVRBX09SSUdJTiI6Imh0dHBzOi8vYXBwLmF0ZWxpZXItaW5jLm5ldCJ9fQ%3D%3D"
-            title="Install Atelier MCP in Cursor (opens install dialog)"
-            aria-label="Install Atelier MCP in Cursor"
-            onclick="return installAtelierMcpInCursor(event)"
+            id="cursorExportBtn"
+            href="#"
+            title="Work in Cursor — context mapper for this repo"
+            aria-label="Work in Cursor"
+            onclick="openDiagramInCursor(event); return false;"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -6833,6 +6833,31 @@
             return 'cursor://anysphere.cursor-deeplink/mcp/install?' + getCursorMcpInstallQuery();
         }
 
+        /** Exact install deeplink verified on app.atelier-inc.net (Vercel). Do not regenerate. */
+        var ATELIER_MCP_INSTALL_DEEPLINK =
+            'cursor://anysphere.cursor-deeplink/mcp/install?name=atelier&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBhdGVsaWVyLWluYy9hdGVsaWVyLW1jcCJdLCJlbnYiOnsiQVRFTElFUl9EQVRBX09SSUdJTiI6Imh0dHBzOi8vYXBwLmF0ZWxpZXItaW5jLm5ldCJ9fQ%3D%3D';
+
+        var REPO_GIT_URLS = {
+            crewai: 'https://github.com/crewAIInc/crewAI.git',
+            'crewai-src': 'https://github.com/crewAIInc/crewAI.git',
+            dspy: 'https://github.com/stanfordnlp/dspy.git',
+            langchain: 'https://github.com/langchain-ai/langchain.git',
+            'pydantic-ai': 'https://github.com/pydantic/pydantic-ai.git',
+            ollama: 'https://github.com/ollama/ollama.git',
+            transformers: 'https://github.com/huggingface/transformers.git',
+            'transformers-fast': 'https://github.com/huggingface/transformers.git'
+        };
+
+        function getRepoGitUrl(repoId) {
+            var id = repoId || repoPath || 'crewai';
+            if (REPO_GIT_URLS[id]) return REPO_GIT_URLS[id];
+            if (REPO_URL) {
+                var m = String(REPO_URL).match(/github\.com\/([^/]+\/[^/]+)/i);
+                if (m) return 'https://github.com/' + m[1] + '.git';
+            }
+            return '';
+        }
+
         function getCursorMcpJsonSnippet() {
             return JSON.stringify(
                 { mcpServers: { atelier: getCursorMcpInstallConfig() } },
@@ -6841,26 +6866,92 @@
             );
         }
 
-        /** Short ASCII prompt — Cursor deeplinks reject/truncate some Unicode and long text. */
-        function buildCursorAgentPrompt(repoId) {
+        /** Slash command name for this repo (Cursor: letters, numbers, hyphens). */
+        function getCursorCommandName(repoId) {
+            var id = String(repoId || repoPath || 'crewai')
+                .toLowerCase()
+                .replace(/[^a-z0-9-]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            return 'atelier-mapper-' + (id || 'crewai');
+        }
+
+        /**
+         * Formatted command body — written to .cursor/commands/{name}.md via command deeplink.
+         */
+        function buildCursorAgentCommand(repoId) {
             var id = repoId || repoPath || 'crewai';
+            var gitUrl = getRepoGitUrl(id);
+            var lines = [
+                '# Atelier context mapper — ' + id,
+                '',
+                'Keep replies short. No extra explanation.',
+                '',
+                '## 1. Install MCP',
+                '',
+                '```bash',
+                'npm install -g @atelier-inc/atelier-mcp',
+                'NODE=$(which node)',
+                'ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js',
+                '```',
+                '',
+                'Write `~/.cursor/mcp.json` (replace NODE and ENTRY with the paths above):',
+                '',
+                '```json',
+                '{',
+                '  "mcpServers": {',
+                '    "atelier": {',
+                '      "command": "NODE",',
+                '      "args": ["ENTRY"]',
+                '    }',
+                '  }',
+                '}',
+                '```',
+                '',
+                '- Never use npx',
+                '- Never test-run the package',
+                '',
+                '## 2. Open viewer',
+                '',
+                '- `open_viewer(repo_id=' + id + ')`',
+                '- `browser_navigate` to the returned URL',
+                '- If browser_navigate fails, reply with the URL on its own line',
+                ''
+            ];
+            if (gitUrl) {
+                lines.push(
+                    '## 3. Clone',
+                    '',
+                    '```bash',
+                    'git clone ' + gitUrl,
+                    '```',
+                    ''
+                );
+            }
+            return lines.join('\n').replace(/\n$/, '');
+        }
+
+        function buildCursorAgentPrompt(repoId) {
+            return buildCursorAgentCommand(repoId);
+        }
+
+        function getCursorCommandDeeplink(repoId) {
+            var name = getCursorCommandName(repoId);
+            var text = buildCursorAgentCommand(repoId);
             return (
-                'Use atelier MCP tool open_viewer with repo_id=' +
-                id +
-                '. Open the returned local viewer URL. Hosted: ' +
-                getViewerUrl(id)
+                'cursor://anysphere.cursor-deeplink/command?' +
+                'name=' + encodeURIComponent(name) +
+                '&text=' + encodeURIComponent(text)
             );
         }
 
         function getCursorPromptDeeplink(repoId) {
-            var text = buildCursorAgentPrompt(repoId);
-            return (
-                'cursor://anysphere.cursor-deeplink/prompt?text=' + encodeURIComponent(text)
-            );
+            var slash = '/' + getCursorCommandName(repoId);
+            var text = 'Run ' + slash + ' in this chat. Keep replies short.';
+            return 'cursor://anysphere.cursor-deeplink/prompt?text=' + encodeURIComponent(text);
         }
 
         function getCursorOpenUrl(repoId) {
-            return getCursorPromptDeeplink(repoId);
+            return getCursorCommandDeeplink(repoId);
         }
 
         function showEmbedActionToast(message) {
@@ -6890,7 +6981,7 @@
 
         function installAtelierMcpInCursor(ev) {
             var deeplink = getCursorMcpInstallDeeplink();
-            var btn = document.getElementById('cursorInstallBtn');
+            var btn = document.getElementById('cursorExportBtn');
             if (btn) btn.href = deeplink;
             try {
                 navigator.clipboard.writeText(deeplink);
@@ -6935,19 +7026,20 @@
         }
 
         async function openDiagramInCursor(ev) {
-            if (ev && ev.shiftKey) {
-                launchCursorDeeplinkOnce(getCursorMcpInstallDeeplink());
-                showEmbedActionToast('MCP install: approve in Settings, enable server, then click again.');
-                return;
-            }
             var id = repoPath || 'crewai';
-            var promptUrl = getCursorPromptDeeplink(id);
-            var copied = await copyCursorAgentPrompt(id);
-            launchCursorDeeplinkOnce(promptUrl);
+            var slash = '/' + getCursorCommandName(id);
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(slash);
+                } else {
+                    copyTextFallback(slash);
+                }
+            } catch (_) {
+                copyTextFallback(slash);
+            }
+            launchCursorDeeplinkOnce(getCursorCommandDeeplink(id));
             showEmbedActionToast(
-                copied
-                    ? 'Sent to Cursor. Approve the pre-filled prompt in chat (Cmd+V if empty).'
-                    : 'Sent to Cursor. Paste the prompt in chat with Cmd+V if needed.'
+                'Approve the command in Cursor, then run ' + slash + ' in chat (copied).'
             );
         }
 
@@ -6959,9 +7051,13 @@
         window.getCursorOpenUrl = getCursorOpenUrl;
         window.getCursorPromptDeeplink = getCursorPromptDeeplink;
         window.buildCursorAgentPrompt = buildCursorAgentPrompt;
+        window.buildCursorAgentCommand = buildCursorAgentCommand;
+        window.getCursorCommandName = getCursorCommandName;
+        window.getCursorCommandDeeplink = getCursorCommandDeeplink;
         window.getCursorMcpInstallDeeplink = getCursorMcpInstallDeeplink;
         window.installAtelierMcpInCursor = installAtelierMcpInCursor;
         window.openDiagramInCursor = openDiagramInCursor;
+        window.exportToCursor = openDiagramInCursor;
         window.showEmbedActionToast = showEmbedActionToast;
 
         /** Playwright / automated tests: read pan zoom and measure node vs expanded cluster frame (viewport px). */
