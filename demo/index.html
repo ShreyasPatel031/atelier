@@ -6866,7 +6866,25 @@
             );
         }
 
-        /** Full setup steps (clipboard). Prompt deeplinks cannot preserve newlines in chat. */
+        /**
+         * Succinct prompt for cursor:// deeplink (newlines collapse to spaces — use · between steps).
+         * No ampersands or cursor:// URLs (Cursor truncates prompt deeplinks at &).
+         */
+        function buildCursorAgentPromptDeeplink(repoId) {
+            var id = repoId || repoPath || 'crewai';
+            var gitUrl = getRepoGitUrl(id);
+            var parts = [
+                'Atelier context mapper · ' + id + ' · Keep replies short · No extra explanation',
+                '① Install MCP · npm install -g @atelier-inc/atelier-mcp · NODE=$(which node) · ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js · ~/.cursor/mcp.json {"mcpServers":{"atelier":{"command":"NODE","args":["ENTRY"]}}} · replace NODE/ENTRY · never npx · never test-run',
+                '② Open viewer · open_viewer(repo_id=' + id + ') · browser_navigate to URL · if fail reply URL on its own line'
+            ];
+            if (gitUrl) {
+                parts.push('③ Clone · git clone ' + gitUrl);
+            }
+            return parts.join(' · ');
+        }
+
+        /** Multiline copy for Cmd+V if user wants readable formatting in chat. */
         function buildCursorAgentPrompt(repoId) {
             var id = repoId || repoPath || 'crewai';
             var gitUrl = getRepoGitUrl(id);
@@ -6875,32 +6893,28 @@
                 'Keep replies short. No extra explanation.',
                 '',
                 '1. Install MCP',
-                '   npm install -g @atelier-inc/atelier-mcp',
-                '   NODE=$(which node)',
-                '   ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js',
-                '   Write ~/.cursor/mcp.json:',
-                '   {"mcpServers":{"atelier":{"command":"NODE","args":["ENTRY"]}}}',
-                '   Replace NODE and ENTRY with the real paths.',
-                '   Never use npx. Never test-run the package.',
+                '  npm install -g @atelier-inc/atelier-mcp',
+                '  NODE=$(which node)',
+                '  ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js',
+                '  Write ~/.cursor/mcp.json:',
+                '  {"mcpServers":{"atelier":{"command":"NODE","args":["ENTRY"]}}}',
+                '  Replace NODE and ENTRY with the real paths.',
+                '  Never use npx. Never test-run the package.',
                 '',
                 '2. Open viewer',
-                '   open_viewer(repo_id=' + id + ')',
-                '   browser_navigate to the returned URL',
-                '   If browser_navigate fails, reply with the URL on its own line',
+                '  open_viewer(repo_id=' + id + ')',
+                '  browser_navigate to the returned URL',
+                '  If browser_navigate fails, reply with the URL on its own line',
                 ''
             ];
             if (gitUrl) {
-                lines.push('3. Clone', '   git clone ' + gitUrl, '');
+                lines.push('3. Clone', '  git clone ' + gitUrl, '');
             }
             return lines.join('\n').replace(/\n$/, '');
         }
 
         function getCursorPromptDeeplink(repoId) {
-            var id = repoId || repoPath || 'crewai';
-            var text =
-                'Atelier context mapper for ' + id + '. ' +
-                'Full setup steps are in your clipboard — paste with Cmd+V, then run them. ' +
-                'Keep replies short.';
+            var text = buildCursorAgentPromptDeeplink(repoId);
             return 'cursor://anysphere.cursor-deeplink/prompt?text=' + encodeURIComponent(text);
         }
 
@@ -6981,13 +6995,8 @@
 
         async function openDiagramInCursor(ev) {
             var id = repoPath || 'crewai';
-            var copied = await copyCursorAgentPrompt(id);
             launchCursorDeeplinkOnce(getCursorPromptDeeplink(id));
-            showEmbedActionToast(
-                copied
-                    ? 'Opening Cursor chat — paste setup with Cmd+V (copied).'
-                    : 'Opening Cursor chat with setup instructions.'
-            );
+            showEmbedActionToast('Opening Cursor chat with setup instructions.');
         }
 
         window.formatDiagramSelectionForCursorPaste = formatDiagramSelectionForCursorPaste;
@@ -6998,6 +7007,7 @@
         window.getCursorOpenUrl = getCursorOpenUrl;
         window.getCursorPromptDeeplink = getCursorPromptDeeplink;
         window.buildCursorAgentPrompt = buildCursorAgentPrompt;
+        window.buildCursorAgentPromptDeeplink = buildCursorAgentPromptDeeplink;
         window.getCursorMcpInstallDeeplink = getCursorMcpInstallDeeplink;
         window.installAtelierMcpInCursor = installAtelierMcpInCursor;
         window.openDiagramInCursor = openDiagramInCursor;
