@@ -6876,7 +6876,7 @@
             var parts = [
                 'Atelier context mapper · ' + id + ' · Keep replies short · No extra explanation',
                 '① Install MCP · npm install -g @atelier-inc/atelier-mcp · NODE=$(which node) · ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js · ~/.cursor/mcp.json {"mcpServers":{"atelier":{"command":"NODE","args":["ENTRY"]}}} · replace NODE/ENTRY · never npx · never test-run',
-                '② Open viewer · open_viewer(repo_id=' + id + ') · browser_navigate to URL · if fail reply URL on its own line'
+                '② Open viewer · open_viewer(repo_id=' + id + ') · browser_navigate returned URL · when done put that http URL on its own last line so I can click it'
             ];
             if (gitUrl) {
                 parts.push('③ Clone · git clone ' + gitUrl);
@@ -6904,7 +6904,7 @@
                 '2. Open viewer',
                 '  open_viewer(repo_id=' + id + ')',
                 '  browser_navigate to the returned URL',
-                '  If browser_navigate fails, reply with the URL on its own line',
+                '  When done: last line of your reply must be that URL alone (clickable)',
                 ''
             ];
             if (gitUrl) {
