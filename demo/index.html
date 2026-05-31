@@ -10,7 +10,6 @@
     <script src="./viewer-debug.js"></script>
     <script src="./viewer-config.js"></script>
     <script src="./pipeline-overview-mermaid.js"></script>
-    <script src="./pipeline-ir-repair.js"></script>
     <script src="./elk-node-dimensions.js"></script>
     <script src="./pipeline-diagram-to-elk.js"></script>
     <!-- CDN: ../node_modules/… breaks when static server roots at demo/ (e.g. :8080/). -->
@@ -3445,6 +3444,39 @@
                 );
             }
 
+            // Prefixing can recreate group.id === node.id; rename colliding groups (construction, not repair).
+            const nodeIdSet = new Set(d.nodes.map((n) => (n && n.id != null ? String(n.id) : '')));
+            nodeIdSet.delete('');
+            const allIds = new Set(nodeIdSet);
+            for (const g of d.groups) {
+                if (g && g.id != null) allIds.add(String(g.id));
+            }
+            const renamed = new Map();
+            for (const g of d.groups) {
+                if (!g || g.id == null) continue;
+                const gid = String(g.id);
+                if (!nodeIdSet.has(gid)) continue;
+                let newId = gid + '_grp';
+                let suffix = 2;
+                while (allIds.has(newId)) {
+                    newId = gid + '_grp' + suffix;
+                    suffix++;
+                }
+                renamed.set(gid, newId);
+                g.id = newId;
+                allIds.add(newId);
+            }
+            if (renamed.size > 0) {
+                const renamedNew = new Set(renamed.values());
+                for (const g of d.groups) {
+                    if (!g || !Array.isArray(g.nodes) || renamedNew.has(String(g.id))) continue;
+                    for (let mi = 0; mi < g.nodes.length; mi++) {
+                        const mid = String(g.nodes[mi]);
+                        if (renamed.has(mid)) g.nodes[mi] = renamed.get(mid);
+                    }
+                }
+            }
+
             return d;
         }
 
@@ -3530,16 +3562,8 @@
             try {
                 const diagram = resolveWorkingDiagramIrOrBaseline();
                 console.log('working diagram IR', diagram);
-                if (
-                    diagram &&
-                    typeof repairDiagramIR === 'function' &&
-                    typeof diagramToElkInput === 'function'
-                ) {
-                    const rep = repairDiagramIR(JSON.parse(JSON.stringify(diagram)));
-                    const d = rep.ok && rep.diagram ? rep.diagram : diagram;
-                    if (rep.warnings && rep.warnings.length) {
-                        console.log('IR repair warnings', rep.warnings);
-                    }
+                if (diagram && typeof diagramToElkInput === 'function') {
+                    const d = diagram;
                     const elkOpts = { target: 'elkjs' };
                     const vt = typeof viewTune !== 'undefined' ? viewTune : {};
                     if (
@@ -3562,7 +3586,7 @@
                         console.log('validateElkInputIdentifiers', validateElkInputIdentifiers(pack.elkGraph));
                     }
                 } else {
-                    console.log('skip ELK pack (no diagram or diagramToElkInput / repairDiagramIR)');
+                    console.log('skip ELK pack (no diagram or diagramToElkInput)');
                 }
                 console.log('atelierRfLastRfSnapshot', window.atelierRfLastRfSnapshot ?? null);
                 console.log('atelierRfLastNodeParentById', window.atelierRfLastNodeParentById ?? null);
@@ -4118,27 +4142,18 @@
                     { skipped: true, reason: 'same as R2 — no IR to convert' },
                     ''
                 );
-            } else if (typeof repairDiagramIR !== 'function') {
-                preR2.textContent =
-                    '(R2 unavailable — load demo/pipeline-ir-repair.js)';
-                setR4View(
-                    '(R4 needs R2 — load demo/pipeline-ir-repair.js)',
-                    { note: 'Load demo/pipeline-ir-repair.js' },
-                    ''
-                );
             } else {
-                const rep = repairDiagramIR(irBefore);
-                const r2Payload = {
-                    r2InputSource,
-                    ok: rep.ok,
-                    reason: rep.reason || null,
-                    summary: rep.summary,
-                    warnings: rep.warnings,
-                    repairedDiagram: rep.ok ? rep.diagram : null,
-                };
-                preR2.textContent = JSON.stringify(r2Payload, null, 2);
+                preR2.textContent = JSON.stringify(
+                    {
+                        r2InputSource,
+                        note: 'IR repair removed — diagram passed through unchanged',
+                        diagram: irBefore,
+                    },
+                    null,
+                    2
+                );
 
-                repairedForElk = rep.ok && rep.diagram ? rep.diagram : irBefore;
+                repairedForElk = irBefore;
 
                 if (typeof diagramToElkInput !== 'function') {
                     setR4View(

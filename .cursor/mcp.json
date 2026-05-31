@@ -1,3 +1,14 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "atelier": {
+      "type": "stdio",
+      "command": "/bin/bash",
+      "args": ["${workspaceFolder}/scripts/run_codewiki_mcp.sh"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "CODEWIKI_MCP_PORT": "18765",
+        "PYTHONWARNINGS": "ignore::FutureWarning"
+      }
+    }
+  }
 }

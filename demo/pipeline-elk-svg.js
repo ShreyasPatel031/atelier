@@ -1058,7 +1058,7 @@
     }
 
     /**
-     * Repair → diagramToElkInput (elkjs) → elk.layout. Shared by R5 SVG and R6 React Flow.
+     * diagramToElkInput (elkjs) → elk.layout. Shared by R5 SVG and R6 React Flow.
      * @param {object|null} diagram
      * @returns {Promise<{ ok: boolean, laidOut?: object, error?: string, warnings?: object[] }>}
      */
@@ -1071,24 +1071,12 @@
             return { ok: false, error: 'diagramToElkInput missing', warnings: mergedWarnings };
         }
 
-        // R2: repair IR before ELK conversion (dissolves identity groups, etc.).
-        var repairedDiagram = diagram;
-        if (typeof global.repairDiagramIR === 'function') {
-            var rep = global.repairDiagramIR(JSON.parse(JSON.stringify(diagram)));
-            if (rep.ok && rep.diagram) {
-                repairedDiagram = rep.diagram;
-            }
-            if (rep.warnings && rep.warnings.length) {
-                mergedWarnings = mergedWarnings.concat(rep.warnings);
-            }
-        }
-
         var elkInputOpts = { target: 'elkjs' };
         var vt = global.viewTune;
         if (vt && typeof vt.elkLeafNodeWidth === 'number' && !isNaN(vt.elkLeafNodeWidth)) {
             elkInputOpts.leafNodeWidth = vt.elkLeafNodeWidth;
         }
-        var pack = global.diagramToElkInput(repairedDiagram, elkInputOpts);
+        var pack = global.diagramToElkInput(diagram, elkInputOpts);
         if (pack.warnings && pack.warnings.length) mergedWarnings = mergedWarnings.concat(pack.warnings);
         if (!pack.ok || !pack.elkGraph) {
             return {

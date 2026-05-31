@@ -560,6 +560,19 @@ class DocumentationGenerator:
                 continue
             diagram = data.get("diagram")
             if isinstance(diagram, dict) and isinstance(diagram.get("nodes"), list):
+                from codewiki.src.be.diagram_ir_validator import validate_diagram_ir
+
+                issues = validate_diagram_ir(diagram)
+                errors = [i for i in issues if i.get("severity") == "error"]
+                if errors:
+                    codes = [e.get("code") for e in errors[:5]]
+                    logger.warning(
+                        "[STAGE 3.5] Reject diagram for %s (%s error(s)): %s",
+                        stem,
+                        len(errors),
+                        codes,
+                    )
+                    continue
                 if self._apply_diagram_to_tree(module_tree, stem, diagram):
                     diagrams_found += 1
 

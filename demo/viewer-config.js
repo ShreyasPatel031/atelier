@@ -5,4 +5,7 @@
 window.ATELIER_VIEWER_CONFIG = {
   /** Public viewer origin for README embed links (no trailing slash). */
   publicViewerOrigin: 'https://app.atelier-inc.net',
+  defaultRepo: 'cortex-ops-architecture',
+  chatEnabled: false,
+  repoSwitcherEnabled: false,
 };

@@ -308,14 +308,11 @@
             var gLabel = gg.label != null ? String(gg.label) : gId;
             var ls = estimateGroupLabelSize(gLabel, merged);
             var memberIds = Array.isArray(gg.nodes) ? gg.nodes.map(String) : [];
-            // Module node id === group id (e.g. prompt_templates) → duplicate ELK ids; edges break.
             var compoundElkId = gId;
             if (nodeById.has(gId) && memberIds.indexOf(gId) >= 0) {
-                compoundElkId = gId + '_group';
                 warnings.push({
                     code: 'r4_node_id_collides_with_group',
                     id: gId,
-                    compoundId: compoundElkId,
                 });
             }
             var compoundChildren = [];
@@ -348,7 +345,6 @@
             if (!node || node.id == null) continue;
             var idStr = String(node.id);
             if (groupIdsSet.has(idStr)) {
-                // Leaf is rendered inside buildGroupCompound (compound id gets _group suffix).
                 continue;
             }
             if (inAnyGroup.has(idStr)) continue;
