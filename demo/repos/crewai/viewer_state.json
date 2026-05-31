@@ -1,0 +1,13 @@
+{
+  "updated_at_ms": 1778564417709,
+  "repo_id": "crewai",
+  "current_module_id": "overview",
+  "selected_module_id": "overview",
+  "diagram_tab": "reactflow",
+  "opened_modules": [
+    "overview"
+  ],
+  "selections": [],
+  "primary": null,
+  "last_diagram_ask": null
+}

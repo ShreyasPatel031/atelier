@@ -1342,6 +1342,7 @@
         <div class="pane-resizer" id="paneResizer" role="separator" aria-orientation="vertical" aria-label="Resize chat panel" tabindex="0" title="Drag to resize chat"></div>
         <div class="doc-pane open">
             <div class="chat-section">
+                <div id="atelierDiagramHelpActivity" class="atelier-diagram-help-activity" aria-live="polite" hidden></div>
                 <div class="chat-messages" id="chatMessages">
                     <div class="chat-message assistant">Ask about this codebase's architecture. Select nodes, subgraphs, or edges on the diagram for context.</div>
                 </div>
@@ -7231,6 +7232,290 @@
                 }
             }, tickMs);
         }
+
+        function atelierAppendSdkTrace(channel, payload) {
+            try {
+                if (new URLSearchParams(window.location.search).get('sdk_trace') !== '1') return;
+            } catch (_) {
+                return;
+            }
+            const wrap = document.getElementById('atelierSdkTraceWrap');
+            const pre = document.getElementById('atelierSdkTraceLog');
+            if (!pre || !wrap) return;
+            wrap.hidden = false;
+            const t = new Date().toISOString().slice(11, 23);
+            const line = '[' + t + '] ' + channel + ': ' + atelierSummarizeSdkTraceRow(channel, payload);
+            pre.textContent += line + '\n';
+            pre.scrollTop = pre.scrollHeight;
+            console.log('[atelier sdk_trace]', line);
+        }
+
+        function atelierClearSdkAnswerPoll() {
+            window.__atelierSdkAnswerPollActive = false;
+            if (window.__atelierSdkAnswerPollTimer != null) {
+                clearTimeout(window.__atelierSdkAnswerPollTimer);
+                clearInterval(window.__atelierSdkAnswerPollTimer);
+                window.__atelierSdkAnswerPollTimer = null;
+            }
+        }
+
+        /**
+         * Few one-shot GETs of viewer_sdk_answer.json — only to recover if the final SSE was missed
+         * (watcher can finish before EventSource connects). Not a poll loop; primary path is SSE.
+         */
+        function atelierScheduleSdkAnswerGapFill(askedAt, applyAnswerFn) {
+            const repoId = getChatJobId();
+            const pollUrl = new URL(
+                'repos/' + encodeURIComponent(repoId) + '/viewer_sdk_answer.json',
+                window.location.href
+            ).href;
+            const delays = [350, 1200, 3500, 9000, 20000, 45000, 75000, 105000];
+            delays.forEach(function (ms) {
+                setTimeout(async function () {
+                    if (!window.__atelierSdkAnswerCallback) return;
+                    try {
+                        const res = await fetch(pollUrl, { cache: 'no-store' });
+                        if (!res.ok) return;
+                        const data = await res.json();
+                        if (!data || String(data.asked_at_ms) !== String(askedAt)) return;
+                        const hasFinal =
+                            data.answered_at_ms != null ||
+                            data.kind === 'diagram_answer' ||
+                            data.ok === false ||
+                            (typeof data.answer === 'string' && data.answer.trim() !== '') ||
+                            (data.error != null && String(data.error).trim() !== '');
+                        if (!hasFinal) return;
+                        if (window.__atelierSdkAnswerCallback) applyAnswerFn(data);
+                    } catch (_) {}
+                }, ms);
+            });
+        }
+
+        function atelierClearDiagramHelpActivity() {
+            const box = document.getElementById('atelierDiagramHelpActivity');
+            if (!box) return;
+            box.innerHTML = '';
+            box.hidden = true;
+            window.__atelierDiagramHelpActivityCount = 0;
+        }
+
+        function atelierOnDiagramActivity(data) {
+            if (data == null || data.asked_at_ms == null || window.__atelierDiagramHelpAskedAtMs == null) return;
+            if (String(data.asked_at_ms) !== String(window.__atelierDiagramHelpAskedAtMs)) return;
+            const label = data.label != null ? String(data.label).trim() : '';
+            if (!label) return;
+            window.__atelierDiagramHelpActivityCount = (window.__atelierDiagramHelpActivityCount || 0) + 1;
+            const box = document.getElementById('atelierDiagramHelpActivity');
+            if (!box) return;
+            box.hidden = false;
+            box.innerHTML =
+                '<span class="atelier-dha-label">Working</span><span class="atelier-dha-text"></span>';
+            const textEl = box.querySelector('.atelier-dha-text');
+            if (textEl) textEl.textContent = label;
+            if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function atelierOnAnswerProgress(data) {
+            if (data == null || data.asked_at_ms == null || window.__atelierDiagramHelpAskedAtMs == null) return;
+            if (String(data.asked_at_ms) !== String(window.__atelierDiagramHelpAskedAtMs)) return;
+            const el = window.__atelierHelpStreamingEl;
+            if (!el || !el.parentNode) return;
+            if (data.partial == null) return;
+            const p = String(data.partial);
+            if (!p) return;
+            const allow =
+                (window.__atelierDiagramHelpActivityCount || 0) > 0 ||
+                (typeof window.__atelierHelpStreamRevealAt === 'number' && Date.now() >= window.__atelierHelpStreamRevealAt);
+            if (!allow) return;
+            el.textContent = p;
+            el.classList.remove('loading');
+            el.classList.add('assistant');
+            el.classList.add('streaming');
+            if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        /**
+         * POST to Architectural Agent when URL is configured; otherwise static-demo / MCP path.
+         * @param {{ fromHelpPill?: boolean }} options — help pill syncs question to MCP viewer_state + clipboard.
+         * @returns {Promise<{ ok: boolean, mode?: string }>}
+         */
+        async function sendArchAgentChatMessage(message, selectionOverride, options) {
+            if (!CHAT_ENABLED) return { ok: false, mode: 'disabled' };
+            const opts = options || {};
+            const fromHelpPill = !!opts.fromHelpPill;
+            const msg = String(message || '').trim();
+            if (!msg) return { ok: false, mode: 'empty' };
+
+            const archUrl = getArchAgentChatUrl();
+            const ui = !!(chatMessages && chatSend);
+            let loadingEl = null;
+
+            async function helpPillMcpFallback() {
+                if (ui) {
+            addChatMessage(msg, 'user');
+                }
+
+                var synced = await recordLastDiagramAskForMcp(msg, selectionOverride);
+                try {
+                    await navigator.clipboard.writeText(msg);
+                } catch (_) {
+                    /* ignore */
+                }
+                var askedAt = window.__atelierLastDiagramAsk && window.__atelierLastDiagramAsk.asked_at_ms;
+                if (ui) {
+                    window.__atelierDiagramHelpAskedAtMs = askedAt;
+                    window.__atelierDiagramHelpActivityCount = 0;
+                    window.__atelierHelpStreamRevealAt = Date.now() + 2200;
+                    atelierClearDiagramHelpActivity();
+                    const waitingEl = addChatMessage('Waiting for answer…', 'loading');
+                    window.__atelierHelpStreamingEl = waitingEl;
+                    window.__atelierSdkAnswerCallback = function (data) {
+                        if (!data || data.asked_at_ms == null || String(data.asked_at_ms) !== String(askedAt)) return;
+                        if (data.kind === 'answer_progress') return;
+                        if (data.partial && data.answered_at_ms == null && data.answer == null) return;
+                        atelierClearSdkAnswerPoll();
+                        window.__atelierDiagramHelpAskedAtMs = null;
+                        window.__atelierHelpStreamingEl = null;
+                        atelierClearDiagramHelpActivity();
+                        if (waitingEl && waitingEl.parentNode) waitingEl.remove();
+                        if (data.answer != null && String(data.answer).trim()) {
+                            addChatMessage(data.answer, 'assistant');
+                        } else {
+                            addChatMessage(
+                                'SDK finished without answer text: **' +
+                                    String(data.error || data.ok === false ? 'error' : 'empty') +
+                                    '**. Check terminal running `diagram:watch`.',
+                                'assistant'
+                            );
+                        }
+                        window.__atelierSdkAnswerCallback = null;
+                    };
+                    scheduleAnswerTimeout(askedAt, waitingEl);
+                    atelierScheduleSdkAnswerGapFill(askedAt, function (data) {
+                        if (window.__atelierSdkAnswerCallback) window.__atelierSdkAnswerCallback(data);
+                    });
+                }
+                return { ok: true, mode: 'mcp' };
+            }
+
+            function scheduleAnswerTimeout(askedAtMs, loadingEl) {
+                setTimeout(() => {
+                    if (window.__atelierSdkAnswerCallback) {
+                        window.__atelierSdkAnswerCallback = null;
+                        atelierClearSdkAnswerPoll();
+                        window.__atelierDiagramHelpAskedAtMs = null;
+                        window.__atelierHelpStreamingEl = null;
+                        atelierClearDiagramHelpActivity();
+                        if (loadingEl && loadingEl.parentNode) loadingEl.remove();
+                        addChatMessage(
+                            'Timed out waiting for SDK answer (3 min). Run `npm run diagram:watch` from repo root (same port as this page), set `CURSOR_API_KEY` in `scripts/cursor-sdk.env`, then reload.',
+                            'assistant'
+                        );
+                    }
+                }, 180000);
+            }
+
+            if (!archUrl) {
+                if (fromHelpPill) {
+                    return helpPillMcpFallback();
+                }
+                if (ui) {
+                    addChatMessage(msg, 'user');
+                }
+                if (ui) {
+                    addChatMessage(
+                        'No chat API is configured for this origin. Serve the demo on port **8080** and run CodeWiki web on **8001**, or paste your question into Cursor chat.',
+                        'assistant'
+                    );
+                }
+                return { ok: false, mode: 'no_api' };
+            }
+
+            const body = buildArchAgentChatRequestBody(msg, selectionOverride);
+            if (ui) {
+                addChatMessage(msg, 'user');
+                loadingEl = addChatMessage('Thinking...', 'loading');
+            chatSend.disabled = true;
+            }
+            try {
+                console.log(
+                    '[MODULE TRACKING] Sending chat request with opened modules:',
+                    Array.from(openedModules)
+                );
+                const res = await fetch(archUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+                if (!res.ok) {
+                    const err = new Error(`HTTP ${res.status}`);
+                    if (fromHelpPill && (res.status === 501 || res.status === 404 || res.status === 405)) {
+                        if (loadingEl) loadingEl.remove();
+                        loadingEl = null;
+                        return helpPillMcpFallback();
+                    }
+                    throw err;
+                }
+                const data = await res.json();
+                chatHistory = data.history != null ? data.history : null;
+                if (loadingEl) loadingEl.remove();
+                if (ui) addChatMessage(data.response || 'No response.', 'assistant');
+                return { ok: true, mode: 'api' };
+            } catch (e) {
+                if (loadingEl) loadingEl.remove();
+                if (fromHelpPill) {
+                    return helpPillMcpFallback();
+                }
+                const hint =
+                    e.message === 'Failed to fetch' || e.message === 'Load failed'
+                    ? 'Could not reach chat API. Start the CodeWiki server: cd atelier && python3 -m codewiki.run_web_app --port 8001'
+                        : e.message ||
+                          'Could not reach chat API. Is the CodeWiki server running on port 8001?';
+                if (ui) addChatMessage('Error: ' + hint, 'assistant');
+                return { ok: false, mode: 'error' };
+            } finally {
+                if (ui && chatSend) {
+                chatSend.disabled = false;
+                    if (chatInput) chatInput.focus();
+                }
+            }
+        }
+
+        /**
+         * React Flow “?” pill → Architectural Agent with this node/cluster as diagram_selection.
+         * If the chat API is unreachable, copies the question to the clipboard (paste into Cursor chat).
+         */
+        window.atelierRfAskBriefExplanation = async function atelierRfAskBriefExplanation(ctx) {
+            if (!CHAT_ENABLED) return;
+            const nodeId =
+                ctx && ctx.nodeId != null && String(ctx.nodeId).length
+                    ? String(ctx.nodeId)
+                    : '';
+            const label =
+                ctx && ctx.label != null ? String(ctx.label).trim() : '';
+            const kind =
+                ctx && ctx.kind === 'cluster' ? 'cluster' : 'node';
+            const display = label || nodeId || 'this diagram element';
+            const moduleId =
+                typeof currentModuleId !== 'undefined' ? currentModuleId : null;
+            const message =
+                'Give a brief explanation of what "' +
+                display +
+                '" is in the context of this architecture diagram.';
+            const payload = {
+                kind,
+                logical_id: nodeId || null,
+                label: label || null,
+                module_id: moduleId,
+                dom_ref: null,
+                edge: null,
+            };
+            const selectionOverride = {
+                diagram_selection: payload,
+                diagram_selections: [payload],
+            };
+            await sendArchAgentChatMessage(message, selectionOverride, { fromHelpPill: true });
+        };
         
         function atelierSummarizeSdkTraceRow(channel, payload) {
             try {

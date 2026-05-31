@@ -1,0 +1,22 @@
+{
+  "gateway": {
+    "path": "",
+    "title": "API Gateway",
+    "description": "Routes, middleware, rate limiting",
+    "components": [
+      "routes.py",
+      "middleware.py"
+    ],
+    "children": {}
+  },
+  "auth": {
+    "path": "",
+    "title": "Auth Service",
+    "description": "JWT validation, OAuth flows",
+    "components": [
+      "jwt.py",
+      "oauth.py"
+    ],
+    "children": {}
+  }
+}

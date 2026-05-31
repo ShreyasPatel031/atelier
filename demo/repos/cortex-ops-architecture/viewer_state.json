@@ -1,0 +1,16 @@
+{
+  "updated_at_ms": 1778793092735,
+  "repo_id": "cortex-ops-architecture",
+  "current_module_id": "overview",
+  "selected_module_id": "role_data_reg_flow",
+  "diagram_tab": "reactflow",
+  "opened_modules": [
+    "overview",
+    "role_field_flow",
+    "role_ops_flow",
+    "role_data_reg_flow"
+  ],
+  "selections": [],
+  "primary": null,
+  "last_diagram_ask": null
+}

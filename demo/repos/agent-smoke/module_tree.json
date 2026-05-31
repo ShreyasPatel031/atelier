@@ -1,0 +1,9 @@
+{
+  "module_a": {
+    "path": "src/a",
+    "title": "Module A",
+    "description": "Leaf module for smoke test.",
+    "components": [],
+    "children": {}
+  }
+}
