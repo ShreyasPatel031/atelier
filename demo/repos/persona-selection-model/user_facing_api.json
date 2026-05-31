@@ -1,0 +1,150 @@
+{
+    "title": "User-Facing API Services",
+    "summary": "This module provides a unified interface for external users to interact with various AI functionalities, including diverse chat experiences, interactive D&D playground sessions, and retrieval of UI configuration metadata.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "user_client",
+                "label": "External User/Client",
+                "type": "external",
+                "link": null,
+                "title": "External API Consumer",
+                "description": "Represents any external application or user interacting with the public API endpoints to access chat, D&D playground, or metadata services."
+            },
+            {
+                "id": "chat_endpoints",
+                "label": "Chat Interface Endpoints",
+                "type": "module",
+                "link": "chat_interfaces",
+                "title": "Chat API Services",
+                "description": "Provides various API endpoints for chat interactions, including basic chat, persona-steered chat, and gated chat, with both synchronous and streaming options."
+            },
+            {
+                "id": "playground_endpoints",
+                "label": "D&D Playground Endpoints",
+                "type": "module",
+                "link": "playground_interfaces",
+                "title": "D&D Playground API",
+                "description": "Exposes a streaming API for interactive Dungeons and Dragons playground sessions, allowing real-time event updates and complex interactions."
+            },
+            {
+                "id": "metadata_endpoints",
+                "label": "API Metadata Endpoints",
+                "type": "module",
+                "link": "api_metadata",
+                "title": "UI Metadata Retrieval",
+                "description": "Offers API endpoints to retrieve essential metadata, default prompts, and configuration details for the gated chat and D&D playground user interfaces."
+            },
+            {
+                "id": "core_persona_logic",
+                "label": "Core Persona Logic",
+                "type": "module",
+                "link": "core_persona_logic",
+                "title": "Persona & Gating Backend",
+                "description": "Encapsulates the core logic for persona activations, dynamic gating mechanisms, and vector composition, driving the intelligent behavior of the chat and playground features."
+            },
+            {
+                "id": "llm_backend",
+                "label": "Language Model Backend",
+                "type": "external",
+                "link": null,
+                "title": "Underlying LLM Service",
+                "description": "The large language model service responsible for generating text responses, which is utilized by the various API endpoints for conversational and interactive features."
+            }
+        ],
+        "edges": [
+            {
+                "source": "user_client",
+                "target": "chat_endpoints",
+                "label": "Requests Chat Services",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_client",
+                "target": "playground_endpoints",
+                "label": "Requests D&D Sessions",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_client",
+                "target": "metadata_endpoints",
+                "label": "Requests UI Metadata",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "chat_endpoints",
+                "target": "core_persona_logic",
+                "label": "Utilizes Persona Logic",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "chat_endpoints",
+                "target": "llm_backend",
+                "label": "Generates Text via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "playground_endpoints",
+                "target": "core_persona_logic",
+                "label": "Utilizes D&D Logic",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "playground_endpoints",
+                "target": "llm_backend",
+                "label": "Generates Text via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "metadata_endpoints",
+                "target": "core_persona_logic",
+                "label": "Retrieves Config from",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "user_interface",
+                "label": "User Interaction",
+                "nodes": [
+                    "user_client"
+                ],
+                "title": "External User Interface",
+                "description": "Represents the external client or user interacting with the system's public API endpoints.",
+                "role": null
+            },
+            {
+                "id": "api_surface",
+                "label": "API Surface",
+                "nodes": [
+                    "chat_endpoints",
+                    "playground_endpoints",
+                    "metadata_endpoints"
+                ],
+                "title": "Public API Endpoints",
+                "description": "The collection of user-facing API endpoints provided by this module for chat, D&D playground, and metadata services.",
+                "role": null
+            },
+            {
+                "id": "backend_services",
+                "label": "Backend Services",
+                "nodes": [
+                    "core_persona_logic",
+                    "llm_backend"
+                ],
+                "title": "Core AI Backend",
+                "description": "The underlying AI logic and language model services that power the user-facing API functionalities.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,68 @@
+{
+  "repo_name": "langchain",
+  "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/langchain",
+  "repo_size_mb": 461723.703125,
+  "total_files": 0,
+  "total_code_files": 2481,
+  "stages": {
+    "Dependency Analysis": {
+      "stage_name": "Dependency Analysis",
+      "duration": 3.540616035461426,
+      "tokens_used": 0,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Module Clustering": {
+      "stage_name": "Module Clustering",
+      "duration": 62.12950301170349,
+      "tokens_used": 23650,
+      "files_created": 0,
+      "files_created_list": []
+    },
+    "Documentation Generation": {
+      "stage_name": "Documentation Generation",
+      "duration": 750.642993927002,
+      "tokens_used": 1278338,
+      "files_created": 28,
+      "files_created_list": [
+        "document_loading.json",
+        "evaluation_and_testing.json",
+        "language_model_interface.json",
+        "partner_integrations.json",
+        "miscellaneous_utilities.json",
+        "api_and_security.json",
+        "agent_middleware_v1.json",
+        "prompt_engineering.json",
+        "first_module_tree.json",
+        "metadata.json",
+        "core_framework.json",
+        "agents.json",
+        "indexing_and_vectorstores.json",
+        "chains.json",
+        "base_abstractions.json",
+        "model_implementations.json",
+        "module_tree.json",
+        "overview.json",
+        "memory_management.json",
+        "general_utilities.json",
+        "developer_tools_and_integrations.json",
+        "data_management_and_retrieval.json",
+        "callbacks_and_tracing.json",
+        "retrieval_mechanisms.json",
+        "message_handling.json",
+        "sync_issues.json",
+        "output_parsing.json",
+        "runnable_composition.json"
+      ]
+    }
+  },
+  "time_to_first_overview": 816.5678639411926,
+  "first_overview_file": "/Users/shreyaspatel/atelier/.tmp/demo_regen/langchain/docs/overview.json",
+  "total_duration": 816.5679159164429,
+  "total_tokens": 1301988,
+  "estimated_cost_usd": 0.2369,
+  "total_llm_calls": 25,
+  "total_files_created": 28,
+  "start_time": 1779785893.604396,
+  "end_time": 1779786710.172312
+}

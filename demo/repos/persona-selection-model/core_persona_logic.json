@@ -1,0 +1,205 @@
+{
+    "title": "Core Persona Logic",
+    "summary": "This module encapsulates the core logic for persona activations, dynamic gating mechanisms, and vector composition, driving the intelligent behavior of the chat and playground features.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "persona_activations_mod",
+                "label": "Persona Activations",
+                "type": "module",
+                "link": "persona_activations",
+                "title": "Extract & Manage Persona Activations",
+                "description": "This module processes model outputs to extract and aggregate residual stream activations, quantifying how specific personas manifest internally within the language model."
+            },
+            {
+                "id": "gating_mechanisms_mod",
+                "label": "Dynamic Gating Mechanisms",
+                "type": "module",
+                "link": "gating_mechanisms",
+                "title": "Orchestrate Dynamic Persona Gating",
+                "description": "Manages multi-round agent interactions, dynamically applying and adjusting persona gates based on model output, streaming responses and trace information."
+            },
+            {
+                "id": "vector_composition_tools_mod",
+                "label": "Vector Composition Tools",
+                "type": "module",
+                "link": "vector_composition_tools",
+                "title": "Compose & Analyze Steering Vectors",
+                "description": "Provides command-line tools for composing, calibrating, and analyzing steering vectors, including generating steered response grids and performing orthogonalization."
+            },
+            {
+                "id": "dnd_playground_logic_mod",
+                "label": "D&D Playground Logic",
+                "type": "module",
+                "link": "dnd_playground_logic",
+                "title": "Manage D&D Playground Configurations",
+                "description": "Offers core logic for a D&D playground feature, retrieving specific configuration details like alpha values and best cell configurations for interactive sessions."
+            },
+            {
+                "id": "llm_backend",
+                "label": "Language Model (LLM)",
+                "type": "external",
+                "link": null,
+                "title": "Underlying LLM Service",
+                "description": "The core large language model service responsible for generating text responses, utilized by various components for conversational and steered features."
+            },
+            {
+                "id": "persona_vectors_data",
+                "label": "Persona Vectors & Data",
+                "type": "external",
+                "link": null,
+                "title": "Stored Persona Data & Vectors",
+                "description": "Repository for pre-trained persona steering vectors, calibration data, and other structured information defining persona traits and their properties."
+            },
+            {
+                "id": "external_eval_services",
+                "label": "External Evaluation Services",
+                "type": "external",
+                "link": null,
+                "title": "AI Evaluation & Judging Services",
+                "description": "External AI services (e.g., Vertex AI) used for judging model responses, evaluating coherence, and generating artifacts during persona development."
+            },
+            {
+                "id": "user_facing_api_mod",
+                "label": "User-Facing API",
+                "type": "module",
+                "link": "user_facing_api",
+                "title": "API Endpoints for Users",
+                "description": "The module exposing public API endpoints for chat interfaces, D&D playground sessions, and metadata retrieval, consuming the core persona logic."
+            },
+            {
+                "id": "persona_dev_eval_mod",
+                "label": "Persona Dev & Evaluation",
+                "type": "module",
+                "link": "persona_development_and_evaluation",
+                "title": "Persona Development & Evaluation Tools",
+                "description": "The module containing tools for developing, evaluating, and demonstrating persona steering vectors, which heavily relies on the core persona logic."
+            }
+        ],
+        "edges": [
+            {
+                "source": "user_facing_api_mod",
+                "target": "gating_mechanisms_mod",
+                "label": "Consumes Gating Logic",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_facing_api_mod",
+                "target": "dnd_playground_logic_mod",
+                "label": "Consumes D&D Config",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "persona_dev_eval_mod",
+                "target": "persona_activations_mod",
+                "label": "Uses for Activation Extraction",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "persona_dev_eval_mod",
+                "target": "vector_composition_tools_mod",
+                "label": "Uses for Vector Analysis",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "gating_mechanisms_mod",
+                "target": "llm_backend",
+                "label": "Steers LLM Generation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "gating_mechanisms_mod",
+                "target": "persona_vectors_data",
+                "label": "Reads Active Persona Vectors",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "vector_composition_tools_mod",
+                "target": "llm_backend",
+                "label": "Generates Steered Responses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "vector_composition_tools_mod",
+                "target": "persona_vectors_data",
+                "label": "Reads/Writes Vectors & Config",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "vector_composition_tools_mod",
+                "target": "external_eval_services",
+                "label": "Submits for Evaluation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "persona_activations_mod",
+                "target": "llm_backend",
+                "label": "Extracts LLM Activations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "persona_activations_mod",
+                "target": "persona_vectors_data",
+                "label": "Stores Extracted Vectors",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dnd_playground_logic_mod",
+                "target": "persona_vectors_data",
+                "label": "Retrieves D&D Config",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_logic_modules",
+                "label": "Core Logic Modules",
+                "nodes": [
+                    "persona_activations_mod",
+                    "gating_mechanisms_mod",
+                    "vector_composition_tools_mod",
+                    "dnd_playground_logic_mod"
+                ],
+                "title": "Internal Persona Logic Components",
+                "description": "These modules encapsulate the fundamental algorithms and functionalities for persona activation, dynamic gating, vector composition, and D&D playground configurations.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "llm_backend",
+                    "persona_vectors_data",
+                    "external_eval_services"
+                ],
+                "title": "Shared External Resources",
+                "description": "Critical external systems and data stores that provide essential services or data, such as the language model, stored persona vectors, and evaluation platforms.",
+                "role": null
+            },
+            {
+                "id": "consumers_of_logic",
+                "label": "Consumers of Logic",
+                "nodes": [
+                    "user_facing_api_mod",
+                    "persona_dev_eval_mod"
+                ],
+                "title": "Modules Utilizing Core Persona Logic",
+                "description": "These modules integrate and utilize the functionalities provided by the core persona logic to deliver user-facing features and support the persona development lifecycle.",
+                "role": null
+            }
+        ]
+    }
+}

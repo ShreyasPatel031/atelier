@@ -158,6 +158,57 @@
         .zoom-btn:active {
             transform: scale(0.95);
         }
+
+        .readme-embed-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            flex-shrink: 0;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .readme-embed-btn:hover {
+            border-color: #0039A6;
+        }
+
+        .readme-embed-btn svg {
+            width: 24px;
+            height: 24px;
+            display: block;
+            pointer-events: none;
+        }
+
+        a.readme-embed-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: inherit;
+            box-sizing: border-box;
+        }
+
+        .embed-action-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 18px;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #f8fafc;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
+        }
+
+        .embed-action-toast.is-visible {
+            opacity: 1;
+        }
         
         .zoom-level {
             font-size: 13px;
@@ -1030,25 +1081,6 @@
             white-space: pre-wrap;
             word-break: break-word;
         }
-        .atelier-diagram-help-activity {
-            margin: 6px 0 4px;
-            padding: 6px 10px;
-            font-size: 11px;
-            line-height: 1.35;
-            color: #475569;
-            background: #eef2ff;
-            border: 1px solid #c7d2fe;
-            border-radius: 6px;
-            align-self: stretch;
-        }
-        .atelier-diagram-help-activity[hidden] {
-            display: none !important;
-        }
-        .atelier-diagram-help-activity .atelier-dha-label {
-            font-weight: 600;
-            color: #4338ca;
-            margin-right: 6px;
-        }
         .atelier-sdk-trace-wrap {
             flex-shrink: 0;
             border-top: 1px solid #e2e8f0;
@@ -1166,6 +1198,54 @@
             <option value="">Switch Repo...</option>
         </select>
         <a href="#" class="repo-link" id="repoLink" target="_blank" style="display: none;">🔗 View Repository</a>
+        <button
+            type="button"
+            class="zoom-btn readme-embed-btn"
+            id="readmeEmbedBtn"
+            title="Copy README embed (architecture.svg)"
+            aria-label="Copy GitHub README embed markdown"
+            onclick="copyReadmeEmbedToClipboard()"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 32 32"
+                fill="none"
+                aria-hidden="true"
+                focusable="false"
+            >
+                <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    fill="#24292E"
+                    d="M16 0C7.16 0 0 7.16 0 16C0 23.08 4.58 29.06 10.94 31.18C11.74 31.32 12.04 30.84 12.04 30.42C12.04 30.04 12.02 28.78 12.02 27.44C8 28.18 6.96 26.46 6.64 25.56C6.46 25.1 5.68 23.68 5 23.3C4.44 23 3.64 22.26 4.98 22.24C6.24 22.22 7.14 23.4 7.44 23.88C8.88 26.3 11.18 25.62 12.1 25.2C12.24 24.16 12.66 23.46 13.12 23.06C9.56 22.66 5.84 21.28 5.84 15.16C5.84 13.42 6.46 11.98 7.48 10.86C7.32 10.46 6.76 8.82 7.64 6.62C7.64 6.62 8.98 6.2 12.04 8.26C13.32 7.9 14.68 7.72 16.04 7.72C17.4 7.72 18.76 7.9 20.04 8.26C23.1 6.18 24.44 6.62 24.44 6.62C25.32 8.82 24.76 10.46 24.6 10.86C25.62 11.98 26.24 13.4 26.24 15.16C26.24 21.3 22.5 22.66 18.94 23.06C19.52 23.56 20.02 24.52 20.02 26.02C20.02 28.16 20 29.88 20 30.42C20 30.84 20.3 31.34 21.1 31.18C27.42 29.06 32 23.06 32 16C32 7.16 24.84 0 16 0V0Z"
+                />
+            </svg>
+        </button>
+        <a
+            class="zoom-btn readme-embed-btn cursor-embed-btn"
+            id="cursorExportBtn"
+            href="#"
+            title="Work in Cursor — context mapper for this repo"
+            aria-label="Work in Cursor"
+            onclick="openDiagramInCursor(event); return false;"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                role="img"
+                aria-label="Cursor"
+                focusable="false"
+            >
+                <path
+                    fill="#0F0F0F"
+                    d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"
+                />
+            </svg>
+        </a>
     </div>
             
     <div class="module-tooltip" id="moduleTooltip">
@@ -1262,7 +1342,6 @@
         <div class="pane-resizer" id="paneResizer" role="separator" aria-orientation="vertical" aria-label="Resize chat panel" tabindex="0" title="Drag to resize chat"></div>
         <div class="doc-pane open">
             <div class="chat-section">
-                <div id="atelierDiagramHelpActivity" class="atelier-diagram-help-activity" aria-live="polite" hidden></div>
                 <div class="chat-messages" id="chatMessages">
                     <div class="chat-message assistant">Ask about this codebase's architecture. Select nodes, subgraphs, or edges on the diagram for context.</div>
                 </div>
@@ -2820,11 +2899,6 @@
             try {
                 var rid = typeof repoPath !== 'undefined' ? repoPath : '';
                 if (!rid || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(rid)) return false;
-                var lastAsk = null;
-                try {
-                    lastAsk = window.__atelierLastDiagramAsk || null;
-                } catch (_) {}
-
                 var payload = {
                     updated_at_ms: Date.now(),
                     repo_id: rid,
@@ -2841,8 +2915,6 @@
                         typeof buildDiagramChatPayload === 'function'
                             ? buildDiagramChatPayload()
                             : null,
-                    /** Latest “?” pill question — read via MCP get_diagram(repo_id).viewer.last_diagram_ask */
-                    last_diagram_ask: lastAsk,
                 };
                 var body = JSON.stringify(payload);
                 var pathSeg = '/repos/' + encodeURIComponent(rid) + '/viewer_state.json';
@@ -2933,26 +3005,6 @@
         }
 
         /**
-         * Persist a diagram “?” question so Cursor / MCP can answer via get_diagram(repo_id).viewer.
-         * @returns {Promise<boolean>} true if viewer_state.json was POSTed somewhere that accepts it
-         */
-        async function recordLastDiagramAskForMcp(message, selectionOverride) {
-            const msg = String(message || '').trim();
-            if (!msg) return false;
-            const body = buildArchAgentChatRequestBody(msg, selectionOverride);
-            window.__atelierLastDiagramAsk = {
-                asked_at_ms: Date.now(),
-                message: msg,
-                diagram_selection: body.diagram_selection,
-                diagram_selections: body.diagram_selections,
-                opened_modules: body.opened_modules,
-                job_id: body.job_id,
-                source: 'help_pill',
-            };
-            return await pushViewerStateToMcpImmediate();
-        }
-
-        /**
          * @param {object} sel kind: 'none'|'node'|'cluster'|'edge'; logicalId; optional label, moduleId, domRef, edge
          * @param {MouseEvent} [ev] — if ⌘/Ctrl/Shift+click, toggles this shape in the multi-selection instead of replacing.
          */
@@ -3006,31 +3058,6 @@
             );
         }
         
-        function extractMermaidFromMarkdown(markdown) {
-            const mermaidRegex = /```mermaid\n([\s\S]*?)```/g;
-            const match = mermaidRegex.exec(markdown);
-            return match ? match[1].trim() : null;
-        }
-        
-        function extractDiagramJsonFromMarkdown(markdown) {
-            const pattern = /<!--\s*DIAGRAM_JSON\s*\n([\s\S]*?)\n\s*-->/;
-            const match = markdown.match(pattern);
-            if (match) {
-                try {
-                    return JSON.parse(match[1]);
-                } catch (e) {
-                    return null;
-                }
-            }
-            return null;
-        }
-        
-        function extractDiagramJsonFromOverviewMarkdown(markdown) {
-            return extractDiagramJsonFromMarkdown(markdown);
-        }
-        
-        /** Optional DIAGRAM_JSON.edges[] mirrors nodes/groups: { source, target, label?, title?, description? } for edge tooltips. */
-        /** Build id/label -> { title, description } from DIAGRAM_JSON.nodes (title/description required in authored JSON; label fallback for title). */
         function buildDiagramNodeMetaMap(dj) {
             const map = {};
             if (!dj || !Array.isArray(dj.nodes)) return map;
@@ -6726,8 +6753,266 @@
                 console.warn('Clipboard write failed', err);
             }
         }
+        function getViewerPublicOrigin() {
+            const cfg = viewerConfig.publicViewerOrigin;
+            if (typeof cfg === 'string' && cfg.trim()) {
+                return cfg.trim().replace(/\/$/, '');
+            }
+            if (window.location.origin && window.location.origin !== 'null') {
+                return window.location.origin;
+            }
+            return '';
+        }
+
+        function formatReadmeEmbedMarkdown(repoId) {
+            const origin = getViewerPublicOrigin();
+            const id = repoId || repoPath || 'crewai';
+            const label = id
+                .split('-')
+                .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ''))
+                .join(' ');
+            const svgUrl = origin + '/repos/' + encodeURIComponent(id) + '/architecture.svg';
+            const viewerUrl = origin + '/?repo=' + encodeURIComponent(id);
+            const alt = label + ' architecture';
+            return (
+                '<p align="center"><a href="' +
+                viewerUrl +
+                '"><img src="' +
+                svgUrl +
+                '" alt="' +
+                alt +
+                '" /></a></p>'
+            );
+        }
+
+        async function copyReadmeEmbedToClipboard() {
+            const text = formatReadmeEmbedMarkdown(repoPath);
+            const btn = document.getElementById('readmeEmbedBtn');
+            const prevTitle = btn ? btn.title : '';
+            try {
+                await navigator.clipboard.writeText(text);
+                showEmbedActionToast('Copied README embed');
+                if (btn) {
+                    btn.title = 'Copied README embed';
+                    setTimeout(function () {
+                        btn.title = prevTitle || 'Copy README embed (architecture.svg)';
+                    }, 2000);
+                }
+            } catch (err) {
+                console.warn('README embed clipboard write failed', err);
+                showEmbedActionToast('Copy failed — see console');
+                if (btn) btn.title = 'Copy failed — see console';
+            }
+        }
+
+        function getViewerUrl(repoId) {
+            const origin = getViewerPublicOrigin();
+            const id = repoId || repoPath || 'crewai';
+            return origin + '/?repo=' + encodeURIComponent(id);
+        }
+
+        function base64EncodeUtf8(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        /** Inner config only (no mcpServers wrapper) — matches Cursor install deeplink format. */
+        function getCursorMcpInstallConfig() {
+            return {
+                command: 'npx',
+                args: ['-y', '@atelier-inc/atelier-mcp'],
+                env: { ATELIER_DATA_ORIGIN: 'https://app.atelier-inc.net' }
+            };
+        }
+
+        function getCursorMcpInstallQuery() {
+            var b64 = base64EncodeUtf8(JSON.stringify(getCursorMcpInstallConfig()));
+            return 'name=atelier&config=' + encodeURIComponent(b64);
+        }
+
+        function getCursorMcpInstallDeeplink() {
+            return 'cursor://anysphere.cursor-deeplink/mcp/install?' + getCursorMcpInstallQuery();
+        }
+
+        /** Exact install deeplink verified on app.atelier-inc.net (Vercel). Do not regenerate. */
+        var ATELIER_MCP_INSTALL_DEEPLINK =
+            'cursor://anysphere.cursor-deeplink/mcp/install?name=atelier&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBhdGVsaWVyLWluYy9hdGVsaWVyLW1jcCJdLCJlbnYiOnsiQVRFTElFUl9EQVRBX09SSUdJTiI6Imh0dHBzOi8vYXBwLmF0ZWxpZXItaW5jLm5ldCJ9fQ%3D%3D';
+
+        var REPO_GIT_URLS = {
+            crewai: 'https://github.com/crewAIInc/crewAI.git',
+            'crewai-src': 'https://github.com/crewAIInc/crewAI.git',
+            dspy: 'https://github.com/stanfordnlp/dspy.git',
+            langchain: 'https://github.com/langchain-ai/langchain.git',
+            'pydantic-ai': 'https://github.com/pydantic/pydantic-ai.git',
+            ollama: 'https://github.com/ollama/ollama.git',
+            transformers: 'https://github.com/huggingface/transformers.git',
+            'transformers-fast': 'https://github.com/huggingface/transformers.git'
+        };
+
+        function getRepoGitUrl(repoId) {
+            var id = repoId || repoPath || 'crewai';
+            if (REPO_GIT_URLS[id]) return REPO_GIT_URLS[id];
+            if (REPO_URL) {
+                var m = String(REPO_URL).match(/github\.com\/([^/]+\/[^/]+)/i);
+                if (m) return 'https://github.com/' + m[1] + '.git';
+            }
+            return '';
+        }
+
+        function getCursorMcpJsonSnippet() {
+            return JSON.stringify(
+                { mcpServers: { atelier: getCursorMcpInstallConfig() } },
+                null,
+                2
+            );
+        }
+
+        /**
+         * Succinct prompt for cursor:// deeplink (newlines collapse to spaces — use · between steps).
+         * No ampersands or cursor:// URLs (Cursor truncates prompt deeplinks at &).
+         */
+        function buildCursorAgentPromptDeeplink(repoId) {
+            var id = repoId || repoPath || 'crewai';
+            var gitUrl = getRepoGitUrl(id);
+            var parts = [
+                'Atelier context mapper · ' + id + ' · Keep replies short · No extra explanation',
+                '① Install MCP · npm install -g @atelier-inc/atelier-mcp · NODE=$(which node) · ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js · ~/.cursor/mcp.json {"mcpServers":{"atelier":{"command":"NODE","args":["ENTRY"]}}} · replace NODE/ENTRY · never npx · never test-run',
+                '② Open viewer · open_viewer(repo_id=' + id + ') · browser_navigate returned URL · when done put that http URL on its own last line so I can click it'
+            ];
+            if (gitUrl) {
+                parts.push('③ Clone · git clone ' + gitUrl);
+            }
+            return parts.join(' · ');
+        }
+
+        /** Multiline copy for Cmd+V if user wants readable formatting in chat. */
+        function buildCursorAgentPrompt(repoId) {
+            var id = repoId || repoPath || 'crewai';
+            var gitUrl = getRepoGitUrl(id);
+            var lines = [
+                'Atelier context mapper — ' + id,
+                'Keep replies short. No extra explanation.',
+                '',
+                '1. Install MCP',
+                '  npm install -g @atelier-inc/atelier-mcp',
+                '  NODE=$(which node)',
+                '  ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js',
+                '  Write ~/.cursor/mcp.json:',
+                '  {"mcpServers":{"atelier":{"command":"NODE","args":["ENTRY"]}}}',
+                '  Replace NODE and ENTRY with the real paths.',
+                '  Never use npx. Never test-run the package.',
+                '',
+                '2. Open viewer',
+                '  open_viewer(repo_id=' + id + ')',
+                '  browser_navigate to the returned URL',
+                '  When done: last line of your reply must be that URL alone (clickable)',
+                ''
+            ];
+            if (gitUrl) {
+                lines.push('3. Clone', '  git clone ' + gitUrl, '');
+            }
+            return lines.join('\n').replace(/\n$/, '');
+        }
+
+        function getCursorPromptDeeplink(repoId) {
+            var text = buildCursorAgentPromptDeeplink(repoId);
+            return 'cursor://anysphere.cursor-deeplink/prompt?text=' + encodeURIComponent(text);
+        }
+
+        function getCursorOpenUrl(repoId) {
+            return getCursorPromptDeeplink(repoId);
+        }
+
+        function showEmbedActionToast(message) {
+            let el = document.getElementById('embedActionToast');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'embedActionToast';
+                el.className = 'embed-action-toast';
+                el.setAttribute('role', 'status');
+                el.setAttribute('aria-live', 'polite');
+                document.body.appendChild(el);
+            }
+            el.textContent = message;
+            el.classList.add('is-visible');
+            if (el._hideTimer) {
+                clearTimeout(el._hideTimer);
+            }
+            el._hideTimer = setTimeout(function () {
+                el.classList.remove('is-visible');
+            }, 2800);
+        }
+
+        function launchCursorDeeplinkOnce(url) {
+            /* Must run from a user click; location.assign is more reliable than synthetic <a> for cursor:// */
+            window.location.assign(url);
+        }
+
+        function installAtelierMcpInCursor(ev) {
+            var deeplink = getCursorMcpInstallDeeplink();
+            var btn = document.getElementById('cursorExportBtn');
+            if (btn) btn.href = deeplink;
+            try {
+                navigator.clipboard.writeText(deeplink);
+            } catch (_) {
+                copyTextFallback(deeplink);
+            }
+            showEmbedActionToast(
+                'Install link copied. Paste in Safari/Chrome if Cursor did not open.'
+            );
+            return true;
+        }
+
+        function copyTextFallback(text) {
+            try {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                var ok = document.execCommand('copy');
+                ta.remove();
+                return ok;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function copyCursorAgentPrompt(repoId) {
+            var text = buildCursorAgentPrompt(repoId);
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                }
+            } catch (e) {
+                /* fall through */
+            }
+            return copyTextFallback(text);
+        }
+
+        async function openDiagramInCursor(ev) {
+            var id = repoPath || 'crewai';
+            launchCursorDeeplinkOnce(getCursorPromptDeeplink(id));
+            showEmbedActionToast('Opening Cursor chat with setup instructions.');
+        }
+
         window.formatDiagramSelectionForCursorPaste = formatDiagramSelectionForCursorPaste;
         window.copyDiagramSelectionToClipboard = copyDiagramSelectionToClipboard;
+        window.formatReadmeEmbedMarkdown = formatReadmeEmbedMarkdown;
+        window.copyReadmeEmbedToClipboard = copyReadmeEmbedToClipboard;
+        window.getViewerUrl = getViewerUrl;
+        window.getCursorOpenUrl = getCursorOpenUrl;
+        window.getCursorPromptDeeplink = getCursorPromptDeeplink;
+        window.buildCursorAgentPrompt = buildCursorAgentPrompt;
+        window.buildCursorAgentPromptDeeplink = buildCursorAgentPromptDeeplink;
+        window.getCursorMcpInstallDeeplink = getCursorMcpInstallDeeplink;
+        window.installAtelierMcpInCursor = installAtelierMcpInCursor;
+        window.openDiagramInCursor = openDiagramInCursor;
+        window.exportToCursor = openDiagramInCursor;
+        window.showEmbedActionToast = showEmbedActionToast;
 
         /** Playwright / automated tests: read pan zoom and measure node vs expanded cluster frame (viewport px). */
         window.__diagramViewState = () => ({
@@ -6752,7 +7037,7 @@
         const chatSend = document.getElementById('chatSend');
         const chatMessages = document.getElementById('chatMessages');
         
-        // API base: static demo (8080 / npm run demo :9891) → FastAPI on 8001; /viewer on 8000/8001 → same origin
+        // API base: static demo (8080 / npm run demo :9891) → FastAPI on 8001; production → same-origin /api (Vercel)
         function resolveChatApiBase() {
             const explicit = new URLSearchParams(window.location.search).get('chatApi');
             if (explicit != null && String(explicit).trim() !== '') {
@@ -6765,7 +7050,9 @@
             if (port === '8000' || port === '8001') {
                 return window.location.origin;
             }
-            return '';
+            const origin = window.location.origin;
+            if (!origin || origin === 'null') return '';
+            return origin.replace(/\/$/, '');
         }
         const CHAT_API_BASE = resolveChatApiBase();
         /** Help pill: only fall back to Cursor SDK SSE when `?chatMcp=1` (default is arch-agent on :8001). */
@@ -6878,7 +7165,7 @@
                     : (chatInput && chatInput.value.trim()) ||
                       '(no message — type in the chat box or run peekArchAgentChat("your question"))';
             const body = buildArchAgentChatRequestBody(msg);
-            const url = getArchAgentChatUrl() || '(no Architectural Agent — CHAT_API_BASE empty)';
+            const url = getArchAgentChatUrl() || '(no Architectural Agent chat URL for this origin)';
             console.log('[peekArchAgentChat] POST', url);
             console.log('[peekArchAgentChat] body object:', body);
             console.log('[peekArchAgentChat] JSON.stringify (exact wire payload):\n' + JSON.stringify(body, null, 2));
@@ -6986,99 +7273,12 @@
             console.log('[atelier sdk_trace]', line);
         }
 
-        function atelierClearSdkAnswerPoll() {
-            window.__atelierSdkAnswerPollActive = false;
-            if (window.__atelierSdkAnswerPollTimer != null) {
-                clearTimeout(window.__atelierSdkAnswerPollTimer);
-                clearInterval(window.__atelierSdkAnswerPollTimer);
-                window.__atelierSdkAnswerPollTimer = null;
-            }
-        }
-
         /**
-         * Few one-shot GETs of viewer_sdk_answer.json — only to recover if the final SSE was missed
-         * (watcher can finish before EventSource connects). Not a poll loop; primary path is SSE.
-         */
-        function atelierScheduleSdkAnswerGapFill(askedAt, applyAnswerFn) {
-            const repoId = getChatJobId();
-            const pollUrl = new URL(
-                'repos/' + encodeURIComponent(repoId) + '/viewer_sdk_answer.json',
-                window.location.href
-            ).href;
-            const delays = [350, 1200, 3500, 9000, 20000, 45000, 75000, 105000];
-            delays.forEach(function (ms) {
-                setTimeout(async function () {
-                    if (!window.__atelierSdkAnswerCallback) return;
-                    try {
-                        const res = await fetch(pollUrl, { cache: 'no-store' });
-                        if (!res.ok) return;
-                        const data = await res.json();
-                        if (!data || String(data.asked_at_ms) !== String(askedAt)) return;
-                        const hasFinal =
-                            data.answered_at_ms != null ||
-                            data.kind === 'diagram_answer' ||
-                            data.ok === false ||
-                            (typeof data.answer === 'string' && data.answer.trim() !== '') ||
-                            (data.error != null && String(data.error).trim() !== '');
-                        if (!hasFinal) return;
-                        if (window.__atelierSdkAnswerCallback) applyAnswerFn(data);
-                    } catch (_) {}
-                }, ms);
-            });
-        }
-
-        function atelierClearDiagramHelpActivity() {
-            const box = document.getElementById('atelierDiagramHelpActivity');
-            if (!box) return;
-            box.innerHTML = '';
-            box.hidden = true;
-            window.__atelierDiagramHelpActivityCount = 0;
-        }
-
-        function atelierOnDiagramActivity(data) {
-            if (data == null || data.asked_at_ms == null || window.__atelierDiagramHelpAskedAtMs == null) return;
-            if (String(data.asked_at_ms) !== String(window.__atelierDiagramHelpAskedAtMs)) return;
-            const label = data.label != null ? String(data.label).trim() : '';
-            if (!label) return;
-            window.__atelierDiagramHelpActivityCount = (window.__atelierDiagramHelpActivityCount || 0) + 1;
-            const box = document.getElementById('atelierDiagramHelpActivity');
-            if (!box) return;
-            box.hidden = false;
-            box.innerHTML =
-                '<span class="atelier-dha-label">Working</span><span class="atelier-dha-text"></span>';
-            const textEl = box.querySelector('.atelier-dha-text');
-            if (textEl) textEl.textContent = label;
-            if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function atelierOnAnswerProgress(data) {
-            if (data == null || data.asked_at_ms == null || window.__atelierDiagramHelpAskedAtMs == null) return;
-            if (String(data.asked_at_ms) !== String(window.__atelierDiagramHelpAskedAtMs)) return;
-            const el = window.__atelierHelpStreamingEl;
-            if (!el || !el.parentNode) return;
-            if (data.partial == null) return;
-            const p = String(data.partial);
-            if (!p) return;
-            const allow =
-                (window.__atelierDiagramHelpActivityCount || 0) > 0 ||
-                (typeof window.__atelierHelpStreamRevealAt === 'number' && Date.now() >= window.__atelierHelpStreamRevealAt);
-            if (!allow) return;
-            el.textContent = p;
-            el.classList.remove('loading');
-            el.classList.add('assistant');
-            el.classList.add('streaming');
-            if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        /**
-         * POST to Architectural Agent when URL is configured; otherwise static-demo / MCP path.
-         * @param {{ fromHelpPill?: boolean }} options — help pill syncs question to MCP viewer_state + clipboard.
+         * POST /api/arch-agent/chat (CodeWiki on 8001 for demo ports 8080/9891, or same-origin).
          * @returns {Promise<{ ok: boolean, mode?: string }>}
          */
-        async function sendArchAgentChatMessage(message, selectionOverride, options) {
+        async function sendArchAgentChatMessage(message, selectionOverride) {
             if (!CHAT_ENABLED) return { ok: false, mode: 'disabled' };
-            const opts = options || {};
-            const fromHelpPill = !!opts.fromHelpPill;
             const msg = String(message || '').trim();
             if (!msg) return { ok: false, mode: 'empty' };
 
@@ -7086,79 +7286,12 @@
             const ui = !!(chatMessages && chatSend);
             let loadingEl = null;
 
-            async function helpPillMcpFallback() {
-                if (ui) {
-            addChatMessage(msg, 'user');
-                }
-
-                var synced = await recordLastDiagramAskForMcp(msg, selectionOverride);
-                try {
-                    await navigator.clipboard.writeText(msg);
-                } catch (_) {
-                    /* ignore */
-                }
-                var askedAt = window.__atelierLastDiagramAsk && window.__atelierLastDiagramAsk.asked_at_ms;
-                if (ui) {
-                    window.__atelierDiagramHelpAskedAtMs = askedAt;
-                    window.__atelierDiagramHelpActivityCount = 0;
-                    window.__atelierHelpStreamRevealAt = Date.now() + 2200;
-                    atelierClearDiagramHelpActivity();
-                    const waitingEl = addChatMessage('Waiting for answer…', 'loading');
-                    window.__atelierHelpStreamingEl = waitingEl;
-                    window.__atelierSdkAnswerCallback = function (data) {
-                        if (!data || data.asked_at_ms == null || String(data.asked_at_ms) !== String(askedAt)) return;
-                        if (data.kind === 'answer_progress') return;
-                        if (data.partial && data.answered_at_ms == null && data.answer == null) return;
-                        atelierClearSdkAnswerPoll();
-                        window.__atelierDiagramHelpAskedAtMs = null;
-                        window.__atelierHelpStreamingEl = null;
-                        atelierClearDiagramHelpActivity();
-                        if (waitingEl && waitingEl.parentNode) waitingEl.remove();
-                        if (data.answer != null && String(data.answer).trim()) {
-                            addChatMessage(data.answer, 'assistant');
-                        } else {
-                            addChatMessage(
-                                'SDK finished without answer text: **' +
-                                    String(data.error || data.ok === false ? 'error' : 'empty') +
-                                    '**. Check terminal running `diagram:watch`.',
-                                'assistant'
-                            );
-                        }
-                        window.__atelierSdkAnswerCallback = null;
-                    };
-                    scheduleAnswerTimeout(askedAt, waitingEl);
-                    atelierScheduleSdkAnswerGapFill(askedAt, function (data) {
-                        if (window.__atelierSdkAnswerCallback) window.__atelierSdkAnswerCallback(data);
-                    });
-                }
-                return { ok: true, mode: 'mcp' };
-            }
-
-            function scheduleAnswerTimeout(askedAtMs, loadingEl) {
-                setTimeout(() => {
-                    if (window.__atelierSdkAnswerCallback) {
-                        window.__atelierSdkAnswerCallback = null;
-                        atelierClearSdkAnswerPoll();
-                        window.__atelierDiagramHelpAskedAtMs = null;
-                        window.__atelierHelpStreamingEl = null;
-                        atelierClearDiagramHelpActivity();
-                        if (loadingEl && loadingEl.parentNode) loadingEl.remove();
-                        addChatMessage(
-                            'Timed out waiting for SDK answer (3 min). Run `npm run diagram:watch` from repo root (same port as this page), set `CURSOR_API_KEY` in `scripts/cursor-sdk.env`, then reload.',
-                            'assistant'
-                        );
-                    }
-                }, 180000);
-            }
-
             if (!archUrl) {
                 if (fromHelpPill && HELP_PILL_MCP_FALLBACK) {
                     return helpPillMcpFallback();
                 }
                 if (ui) {
                     addChatMessage(msg, 'user');
-                }
-                if (ui) {
                     addChatMessage(
                         'No chat API is configured for this origin. Serve the demo on port **9891** (`npm run demo`) or **8080**, run CodeWiki web on **8001** (`python3 -m codewiki.run_web_app --port 8001`), or paste your question into Cursor chat.',
                         'assistant'
@@ -7178,7 +7311,7 @@
                 } else {
                     loadingEl = addChatMessage('Thinking...', 'loading');
                 }
-            chatSend.disabled = true;
+                chatSend.disabled = true;
             }
             try {
                 console.log(
@@ -7194,7 +7327,8 @@
                     let resDetail = '';
                     try {
                         const errBody = await res.json();
-                        resDetail = errBody.detail != null ? String(errBody.detail) : '';
+                        if (errBody && errBody.detail != null) resDetail = String(errBody.detail);
+                        else if (errBody && errBody.error) resDetail = String(errBody.error);
                     } catch (_) {
                         /* ignore */
                     }
@@ -7211,9 +7345,19 @@
                         }
                         return helpPillMcpFallback();
                     }
+                    if (loadingEl) loadingEl.remove();
                     if (fromHelpPill && streamEl && streamEl.parentNode) {
                         streamEl.remove();
                         window.__atelierHelpStreamingEl = null;
+                    }
+                    if (res.status === 404 && ui) {
+                        addChatMessage(
+                            'No documentation bundle for **' +
+                                getChatJobId() +
+                                '**. Restart CodeWiki from the atelier repo root: `python3 -m codewiki.run_web_app --port 8001`.',
+                            'assistant'
+                        );
+                        return { ok: false, mode: 'not_found' };
                     }
                     throw new Error(
                         resDetail ? `HTTP ${res.status}: ${resDetail}` : `HTTP ${res.status}`
@@ -7245,12 +7389,14 @@
                 ) {
                     return helpPillMcpFallback();
                 }
-                const hint = formatArchAgentFetchError(e);
+                const isNetwork =
+                    e && (e.message === 'Failed to fetch' || e.message === 'Load failed');
+                const hint = formatArchAgentFetchError(e, isNetwork ? '' : e.message);
                 if (ui) addChatMessage('Error: ' + hint, 'assistant');
-                return { ok: false, mode: 'error' };
+                return { ok: false, mode: isNetwork ? 'network' : 'error' };
             } finally {
                 if (ui && chatSend) {
-                chatSend.disabled = false;
+                    chatSend.disabled = false;
                     if (chatInput) chatInput.focus();
                 }
             }
@@ -7289,14 +7435,14 @@
                 diagram_selection: payload,
                 diagram_selections: [payload],
             };
-            await sendArchAgentChatMessage(message, selectionOverride, { fromHelpPill: true });
+            await sendArchAgentChatMessage(message, selectionOverride);
         };
         
         async function sendChatMessage() {
             if (!chatInput || !chatInput.value.trim()) return;
             const msg = chatInput.value.trim();
             chatInput.value = '';
-            await sendArchAgentChatMessage(msg, null, {});
+            await sendArchAgentChatMessage(msg, null);
         }
         
         if (CHAT_ENABLED && chatSend && chatInput) {
@@ -7307,9 +7453,14 @@
             void probeArchitecturalAgentApi();
         }
 
-        // --- SSE: event-driven answers + sdk_trace from diagram_ask_watcher (auto-detects current port; override with ?diagram_sse_port=XXXX) ---
-        (function connectSSE() {
+        // Optional SSE for ?sdk_trace=1 (diagram_ask_watcher debug only; not used for chat answers).
+        (function connectSdkTraceSSE() {
             if (!CHAT_ENABLED) return;
+            try {
+                if (new URLSearchParams(window.location.search).get('sdk_trace') !== '1') return;
+            } catch (_) {
+                return;
+            }
             const qp = new URLSearchParams(window.location.search).get('diagram_sse_port');
             const parsedPort = qp && /^[0-9]+$/.test(qp) ? parseInt(qp, 10) : null;
             const locPort = window.location.port ? String(window.location.port) : '';
@@ -7336,21 +7487,6 @@
                     const data = JSON.parse(evt.data);
                     if (data.kind === 'sdk_trace') {
                         atelierAppendSdkTrace(data.channel, data.payload);
-                        return;
-                    }
-                    if (data.kind === 'diagram_activity') {
-                        atelierOnDiagramActivity(data);
-                        return;
-                    }
-                    if (data.kind === 'answer_progress') {
-                        atelierOnAnswerProgress(data);
-                        return;
-                    }
-                    if (
-                        window.__atelierSdkAnswerCallback &&
-                        (data.kind === 'diagram_answer' || data.answered_at_ms != null)
-                    ) {
-                        window.__atelierSdkAnswerCallback(data);
                     }
                 } catch (e) {
                     console.warn('[atelier SSE] parse error', e);
@@ -7359,7 +7495,7 @@
             es.onerror = function () {
                 if (statusEl) statusEl.textContent = 'SSE: reconnecting…';
                 es.close();
-                setTimeout(connectSSE, 5000);
+                setTimeout(connectSdkTraceSSE, 5000);
             };
             window.__atelierSSE = es;
         })();

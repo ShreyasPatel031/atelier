@@ -1,0 +1,161 @@
+{
+  "title": "Application Lifecycle Management",
+  "summary": "This module manages the application's startup and shutdown processes, including loading the core text generation model and its dependencies. It also provides an endpoint to report the current health status of various application components.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "lifespan_init",
+        "label": "Initialize Application",
+        "type": "component",
+        "link": null,
+        "title": "Application Initialization",
+        "description": "Handles application startup and shutdown, including loading the text generation model (Hugging Face pipeline) based on environment variables and GPU availability. Manages the global model pipeline and triggers SAE loading."
+      },
+      {
+        "id": "health_check",
+        "label": "Provide Health Status",
+        "type": "component",
+        "link": null,
+        "title": "Application Health Endpoint",
+        "description": "Exposes an API endpoint to report the current health status of the application, including model loading, SAE status, persona steering configurations, and DND playground bundles."
+      },
+      {
+        "id": "hf_token_env",
+        "label": "Hugging Face Token",
+        "type": "external",
+        "link": null,
+        "title": "HF_TOKEN Environment Variable",
+        "description": "An environment variable crucial for authenticating with Hugging Face to download and load the text generation model. If not set, the model loading is skipped."
+      },
+      {
+        "id": "hf_model_pipeline",
+        "label": "Text Generation Pipeline",
+        "type": "external",
+        "link": null,
+        "title": "Hugging Face Model Pipeline",
+        "description": "The core text generation pipeline, loaded using the Hugging Face transformers library. Its availability is critical for chat functionalities."
+      },
+      {
+        "id": "sae_analysis_module",
+        "label": "SAE Analysis Module",
+        "type": "other_module",
+        "link": "sae_analysis",
+        "title": "Sparse Autoencoder Module",
+        "description": "A module responsible for loading and managing Sparse Autoencoders (SAEs) for advanced model analysis, integrated during application startup."
+      },
+      {
+        "id": "persona_steer_state",
+        "label": "Persona Steering State",
+        "type": "external",
+        "link": null,
+        "title": "Persona Steering Configuration",
+        "description": "In-memory state and environment variables related to persona steering vectors and bundles, influencing how personas are applied."
+      },
+      {
+        "id": "dnd_playground_state",
+        "label": "DND Playground State",
+        "type": "external",
+        "link": null,
+        "title": "DND Playground Configuration",
+        "description": "In-memory state related to DND playground bundles, used for interactive persona exploration."
+      }
+    ],
+    "edges": [
+      {
+        "source": "hf_token_env",
+        "target": "lifespan_init",
+        "label": "Requires",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lifespan_init",
+        "target": "hf_model_pipeline",
+        "label": "Loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lifespan_init",
+        "target": "sae_analysis_module",
+        "label": "Triggers Load",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hf_model_pipeline",
+        "target": "health_check",
+        "label": "Reports Status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sae_analysis_module",
+        "target": "health_check",
+        "label": "Reports Status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "persona_steer_state",
+        "target": "health_check",
+        "label": "Reports Status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_playground_state",
+        "target": "health_check",
+        "label": "Reports Status",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_api",
+        "label": "Surface API",
+        "nodes": [
+          "health_check"
+        ],
+        "title": "User-Facing API",
+        "description": "Components that expose functionality directly to users or other services.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_core",
+        "label": "Generative Core",
+        "nodes": [
+          "lifespan_init"
+        ],
+        "title": "Core Generation Setup",
+        "description": "Components responsible for setting up and managing the generative AI model.",
+        "role": "generative"
+      },
+      {
+        "id": "data_sources",
+        "label": "Data & Configuration",
+        "nodes": [
+          "hf_token_env",
+          "hf_model_pipeline",
+          "persona_steer_state",
+          "dnd_playground_state"
+        ],
+        "title": "Data Sources and Configuration",
+        "description": "External data sources or configuration states that influence application behavior.",
+        "role": "data"
+      },
+      {
+        "id": "analytical_components",
+        "label": "Analytical Components",
+        "nodes": [
+          "sae_analysis_module"
+        ],
+        "title": "Analytical Modules",
+        "description": "Modules primarily involved in analysis or introspection of the model.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

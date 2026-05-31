@@ -1,0 +1,97 @@
+{
+    "title": "Core Framework Overview",
+    "summary": "This module defines the fundamental building blocks, interfaces, and essential utilities that form the foundation of the LangChain ecosystem. It provides core abstractions for AI components, manages API lifecycle, ensures security, and offers observability features.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "core_abstractions",
+                "label": "Define Core Interfaces",
+                "type": "module",
+                "link": "base_abstractions",
+                "title": "Fundamental LangChain Abstractions",
+                "description": "Establishes the foundational abstract classes and interfaces for building all LangChain components, including runnables, language models, prompts, and tools. It forms the architectural backbone."
+            },
+            {
+                "id": "api_security",
+                "label": "Manage API & Security",
+                "type": "module",
+                "link": "api_and_security",
+                "title": "API Lifecycle & Security Utilities",
+                "description": "Provides mechanisms for managing API deprecations and beta features, alongside robust security measures like SSRF protection for URL validation and secure HTTP client creation."
+            },
+            {
+                "id": "callbacks_tracing",
+                "label": "Handle Events & Tracing",
+                "type": "module",
+                "link": "callbacks_and_tracing",
+                "title": "Observability with Callbacks & Tracing",
+                "description": "Offers core functionalities for handling synchronous and asynchronous events, managing execution traces, and dispatching custom events for monitoring and debugging LangChain applications."
+            },
+            {
+                "id": "general_utils",
+                "label": "Provide General Utilities",
+                "type": "module",
+                "link": "general_utilities",
+                "title": "Essential General Utilities",
+                "description": "Contains a collection of fundamental utility functions and classes for tasks such as data stream management, HTML parsing, Pydantic model handling, system information, and in-memory caching."
+            }
+        ],
+        "edges": [
+            {
+                "source": "api_security",
+                "target": "core_abstractions",
+                "label": "Applies to core components",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "callbacks_tracing",
+                "target": "core_abstractions",
+                "label": "Monitors core component execution",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "general_utils",
+                "target": "core_abstractions",
+                "label": "Supports core component development",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_foundation_group",
+                "label": "Core Foundation",
+                "nodes": [
+                    "core_abstractions"
+                ],
+                "title": "Core Framework Foundation",
+                "description": "This group represents the central abstract definitions and interfaces that all other LangChain components are built upon, providing the fundamental structure and behavior.",
+                "role": null
+            },
+            {
+                "id": "cross_cutting_services_group",
+                "label": "Cross-Cutting Services",
+                "nodes": [
+                    "api_security",
+                    "callbacks_tracing"
+                ],
+                "title": "Cross-Cutting Framework Services",
+                "description": "These modules provide essential services that span across various components of the framework, such as managing API lifecycle, ensuring security, and offering comprehensive observability features.",
+                "role": null
+            },
+            {
+                "id": "general_support_group",
+                "label": "General Support",
+                "nodes": [
+                    "general_utils"
+                ],
+                "title": "General Framework Support Utilities",
+                "description": "This group encompasses a collection of versatile utility functions and classes that support the overall framework, aiding in common tasks like data manipulation, system diagnostics, and caching.",
+                "role": null
+            }
+        ]
+    }
+}

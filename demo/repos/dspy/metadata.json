@@ -1,42 +1,39 @@
 {
     "generation_info": {
-        "timestamp": "2026-05-17T01:43:59.821066",
+        "timestamp": "2026-05-24T18:31:41.964188",
         "main_model": "gemini-2.5-flash",
         "generator_version": "1.0.0",
-        "repo_path": "/Users/shreyaspatel/.cursor/worktrees/atelier/7y0n/.tmp/demo_regen/dspy",
+        "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/dspy",
         "commit_id": null
     },
     "statistics": {
-        "total_components": 527,
-        "leaf_nodes": 145,
+        "total_components": 651,
+        "leaf_nodes": 168,
         "max_depth": 2
     },
     "files_generated": [
         "overview.json",
         "module_tree.json",
         "first_module_tree.json",
+        "caching_streaming.json",
         "prediction_modules.json",
-        "tool_execution.json",
         "base_modules.json",
         "program_proposers.json",
         "teleprompters.json",
-        "documentation_tools.json",
+        "core_types.json",
         "lm_clients.json",
-        "prediction_and_retrieval_strategies.json",
-        "core_framework.json",
+        "lm_integration.json",
         "evaluation_metrics.json",
-        "signatures.json",
+        "optimization_evaluation.json",
+        "repl_utilities.json",
+        "core_primitives.json",
         "datasets.json",
-        "data_and_utilities.json",
         "general_utilities.json",
-        "optimization_utilities.json",
+        "data_utilities.json",
+        "signature_definition.json",
         "retrieval_modules.json",
-        "data_types_and_adapters.json",
-        "program_optimization_and_evaluation.json",
+        "program_execution.json",
         "dsp_utilities.json",
-        "caching_and_embeddings.json",
-        "provider_specific_integrations.json",
-        "streaming.json",
-        "language_model_integration.json"
+        "data_adapters.json"
     ]
 }

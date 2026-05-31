@@ -1,0 +1,2159 @@
+{
+  "title": "LLM Provider Integrations",
+  "summary": "This module defines an abstract interface for Large Language Model (LLM) providers and implements concrete classes for integrating with various LLM APIs, handling authentication, client instantiation, and model-specific configurations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "provider_interface",
+        "label": "Abstract LLM Provider Interface",
+        "type": "component",
+        "link": null,
+        "title": "Provider",
+        "description": "Defines the common interface for all LLM providers, including properties for name, base URL, client, and a static method for model profiling. Manages HTTP client lifecycle."
+      },
+      {
+        "id": "alibaba_provider",
+        "label": "Alibaba Cloud Provider",
+        "type": "component",
+        "link": null,
+        "title": "AlibabaProvider",
+        "description": "Integrates with Alibaba Cloud Model Studio (DashScope) OpenAI-compatible API, providing an AsyncOpenAI client and specific model profiling for Qwen models."
+      },
+      {
+        "id": "anthropic_provider",
+        "label": "Anthropic API Provider",
+        "type": "component",
+        "link": null,
+        "title": "AnthropicProvider",
+        "description": "Integrates with the Anthropic API, providing an AsyncAnthropicClient and specific model profiling for Anthropic models, including Bedrock variants."
+      },
+      {
+        "id": "azure_provider",
+        "label": "Azure OpenAI Provider",
+        "type": "component",
+        "link": null,
+        "title": "AzureProvider",
+        "description": "Integrates with Azure OpenAI API, providing an AsyncOpenAI client and model profiling for various models hosted on Azure, including Meta, DeepSeek, Mistral, Cohere, Grok, and OpenAI models."
+      },
+      {
+        "id": "cerebras_provider",
+        "label": "Cerebras API Provider",
+        "type": "component",
+        "link": null,
+        "title": "CerebrasProvider",
+        "description": "Integrates with Cerebras API, providing an AsyncOpenAI client and model profiling for Llama, Qwen, GPT-OSS, and ZAI models, with specific handling for unsupported OpenAI features."
+      },
+      {
+        "id": "cohere_provider",
+        "label": "Cohere API Provider",
+        "type": "component",
+        "link": null,
+        "title": "CohereProvider",
+        "description": "Integrates with Cohere API, providing AsyncClientV2 and AsyncClient (V1) clients, and model profiling for Cohere models."
+      },
+      {
+        "id": "deepseek_provider",
+        "label": "DeepSeek API Provider",
+        "type": "component",
+        "link": null,
+        "title": "DeepSeekProvider",
+        "description": "Integrates with DeepSeek API, providing an AsyncOpenAI client and model profiling with specific settings for JSON object output, thinking fields, and tool choice."
+      },
+      {
+        "id": "fireworks_provider",
+        "label": "Fireworks AI Provider",
+        "type": "component",
+        "link": null,
+        "title": "FireworksProvider",
+        "description": "Integrates with Fireworks AI API, providing an AsyncOpenAI client and model profiling for Llama, Qwen, DeepSeek, Mistral, and Gemma models."
+      },
+      {
+        "id": "github_provider",
+        "label": "GitHub Models Provider",
+        "type": "component",
+        "link": null,
+        "title": "GitHubProvider",
+        "description": "Integrates with GitHub Models API, providing an OpenAI-compatible client and model profiling for various LLMs including xAI, Meta, Microsoft, Mistral, Cohere, and DeepSeek."
+      },
+      {
+        "id": "grok_provider",
+        "label": "Grok API Provider (xAI)",
+        "type": "component",
+        "link": null,
+        "title": "GrokProvider",
+        "description": "Integrates with Grok API (xAI's OpenAI-compatible interface), providing an AsyncOpenAI client and model profiling, noting lack of strict tool definition support."
+      },
+      {
+        "id": "groq_provider",
+        "label": "Groq API Provider",
+        "type": "component",
+        "link": null,
+        "title": "GroqProvider",
+        "description": "Integrates with Groq API, providing an AsyncGroq client and model profiling for Llama, Gemma, Qwen, DeepSeek, Mistral, MoonshotAI, Compound, and OpenAI models."
+      },
+      {
+        "id": "heroku_provider",
+        "label": "Heroku API Provider",
+        "type": "component",
+        "link": null,
+        "title": "HerokuProvider",
+        "description": "Integrates with Heroku API, providing an OpenAI-compatible client and a generic model profile."
+      },
+      {
+        "id": "huggingface_provider",
+        "label": "Hugging Face Provider",
+        "type": "component",
+        "link": null,
+        "title": "HuggingFaceProvider",
+        "description": "Integrates with Hugging Face Inference API, providing an AsyncInferenceClient and model profiling for DeepSeek, Google, Qwen, Meta Llama, Mistral, and MoonshotAI models."
+      },
+      {
+        "id": "litellm_provider",
+        "label": "LiteLLM Proxy Provider",
+        "type": "component",
+        "link": null,
+        "title": "LiteLLMProvider",
+        "description": "Acts as a proxy provider using LiteLLM, providing an AsyncOpenAI client and routing model profiles to various underlying providers like Anthropic, OpenAI, Google, Mistral, Cohere, Amazon, Meta, Groq, DeepSeek, MoonshotAI, xAI, and Qwen."
+      },
+      {
+        "id": "mistral_provider",
+        "label": "Mistral API Provider",
+        "type": "component",
+        "link": null,
+        "title": "MistralProvider",
+        "description": "Integrates with Mistral API, providing a Mistral client and model profiling for Mistral models."
+      },
+      {
+        "id": "moonshotai_provider",
+        "label": "MoonshotAI Provider",
+        "type": "component",
+        "link": null,
+        "title": "MoonshotAIProvider",
+        "description": "Integrates with MoonshotAI platform (Kimi models), providing an AsyncOpenAI client and model profiling with specific settings for JSON object output and thinking parts."
+      },
+      {
+        "id": "nebius_provider",
+        "label": "Nebius AI Studio Provider",
+        "type": "component",
+        "link": null,
+        "title": "NebiusProvider",
+        "description": "Integrates with Nebius AI Studio API, providing an AsyncOpenAI client and model profiling for Meta Llama, DeepSeek, Qwen, Google, OpenAI (gpt-oss), Mistral, and MoonshotAI models."
+      },
+      {
+        "id": "ollama_provider",
+        "label": "Ollama API Provider",
+        "type": "component",
+        "link": null,
+        "title": "OllamaProvider",
+        "description": "Integrates with local or remote Ollama API, providing an AsyncOpenAI client and model profiling for Llama, Gemma, Qwen, DeepSeek, Mistral, Command, and GPT-OSS models, with native JSON schema support."
+      },
+      {
+        "id": "openai_provider",
+        "label": "OpenAI API Provider",
+        "type": "component",
+        "link": null,
+        "title": "OpenAIProvider",
+        "description": "Integrates directly with the OpenAI API, providing an AsyncOpenAI client and model profiling for OpenAI models."
+      },
+      {
+        "id": "outlines_provider",
+        "label": "Outlines Structured Output Provider",
+        "type": "component",
+        "link": null,
+        "title": "OutlinesProvider",
+        "description": "Provides an interface for models that support structured output via the Outlines library, without a specific base URL or client, focusing on JSON schema and object output capabilities."
+      },
+      {
+        "id": "ovhcloud_provider",
+        "label": "OVHcloud AI Endpoints Provider",
+        "type": "component",
+        "link": null,
+        "title": "OVHcloudProvider",
+        "description": "Integrates with OVHcloud AI Endpoints, providing an AsyncOpenAI client and model profiling for Llama, DeepSeek, Mistral, GPT, and Qwen models."
+      },
+      {
+        "id": "sambanova_provider",
+        "label": "SambaNova AI Provider",
+        "type": "component",
+        "link": null,
+        "title": "SambaNovaProvider",
+        "description": "Integrates with SambaNova AI models via an OpenAI-compatible API, providing an AsyncOpenAI client and model profiling for DeepSeek, Meta Llama, Qwen, and Mistral models."
+      },
+      {
+        "id": "together_provider",
+        "label": "Together AI Provider",
+        "type": "component",
+        "link": null,
+        "title": "TogetherProvider",
+        "description": "Integrates with Together AI API, providing an AsyncOpenAI client and model profiling for DeepSeek, Google, Qwen, Meta Llama, and Mistral models."
+      },
+      {
+        "id": "vercel_provider",
+        "label": "Vercel AI Gateway Provider",
+        "type": "component",
+        "link": null,
+        "title": "VercelProvider",
+        "description": "Integrates with Vercel AI Gateway API, providing an AsyncOpenAI client and model profiling for Anthropic, Bedrock, Cohere, DeepSeek, Mistral, OpenAI, Vertex, and xAI models."
+      },
+      {
+        "id": "voyageai_provider",
+        "label": "VoyageAI Provider",
+        "type": "component",
+        "link": null,
+        "title": "VoyageAIProvider",
+        "description": "Integrates with VoyageAI API, providing an AsyncClient for embedding models."
+      },
+      {
+        "id": "xai_provider",
+        "label": "xAI Native SDK Provider",
+        "type": "component",
+        "link": null,
+        "title": "XaiProvider",
+        "description": "Integrates with xAI API using its native SDK, providing an AsyncClient and model profiling for Grok models."
+      },
+      {
+        "id": "bedrock_qwen_model_profile",
+        "label": "Qwen Bedrock Profile",
+        "type": "component",
+        "link": null,
+        "title": "bedrock_qwen_model_profile",
+        "description": "Generates a ModelProfile for Qwen models when accessed via AWS Bedrock, including specific JSON schema transformer and structured output support."
+      },
+      {
+        "id": "bedrock_anthropic_model_profile",
+        "label": "Anthropic Bedrock Profile",
+        "type": "component",
+        "link": null,
+        "title": "bedrock_anthropic_model_profile",
+        "description": "Generates a ModelProfile for Anthropic models when accessed via AWS Bedrock, including tool choice, thinking parts, and adaptive thinking support."
+      },
+      {
+        "id": "bedrock_amazon_model_profile",
+        "label": "Amazon Bedrock Profile",
+        "type": "component",
+        "link": null,
+        "title": "bedrock_amazon_model_profile",
+        "description": "Generates a ModelProfile for Amazon models (e.g., Titan, Nova) when accessed via AWS Bedrock, including tool choice and prompt caching support."
+      },
+      {
+        "id": "bedrock_mistral_model_profile",
+        "label": "Mistral Bedrock Profile",
+        "type": "component",
+        "link": null,
+        "title": "bedrock_mistral_model_profile",
+        "description": "Generates a ModelProfile for Mistral models when accessed via AWS Bedrock, including tool result format and structured output support."
+      },
+      {
+        "id": "bedrock_google_model_profile",
+        "label": "Google Bedrock Profile",
+        "type": "component",
+        "link": null,
+        "title": "bedrock_google_model_profile",
+        "description": "Generates a ModelProfile for Google models when accessed via AWS Bedrock, including structured output support and limitations on JSON object mode and tool return schemas."
+      },
+      {
+        "id": "bedrock_minimax_model_profile",
+        "label": "MiniMax Bedrock Profile",
+        "type": "component",
+        "link": null,
+        "title": "bedrock_minimax_model_profile",
+        "description": "Generates a ModelProfile for MiniMax models when accessed via AWS Bedrock, including structured output support."
+      },
+      {
+        "id": "bedrock_nvidia_model_profile",
+        "label": "NVIDIA Bedrock Profile",
+        "type": "component",
+        "link": null,
+        "title": "bedrock_nvidia_model_profile",
+        "description": "Generates a ModelProfile for NVIDIA models when accessed via AWS Bedrock, including structured output support."
+      },
+      {
+        "id": "openrouter_google_model_profile",
+        "label": "OpenRouter Google Profile",
+        "type": "component",
+        "link": null,
+        "title": "_openrouter_google_model_profile",
+        "description": "Generates a ModelProfile for Google models accessed via OpenRouter, using a legacy JSON schema transformer for compatibility."
+      },
+      {
+        "id": "openrouter_google_json_schema_transformer",
+        "label": "OpenRouter Google JSON Schema Adapter",
+        "type": "component",
+        "link": null,
+        "title": "_OpenRouterGoogleJsonSchemaTransformer",
+        "description": "A legacy JSON schema transformer specifically for OpenRouter's compatibility layer with Google models, inlining definitions and simplifying nullable unions."
+      },
+      {
+        "id": "groq_moonshotai_model_profile",
+        "label": "MoonshotAI Groq Profile",
+        "type": "component",
+        "link": null,
+        "title": "groq_moonshotai_model_profile",
+        "description": "Generates a ModelProfile for MoonshotAI models when used with the Groq provider, enabling JSON object and schema output."
+      },
+      {
+        "id": "meta_groq_model_profile",
+        "label": "Meta Groq Profile",
+        "type": "component",
+        "link": null,
+        "title": "meta_groq_model_profile",
+        "description": "Generates a ModelProfile for Meta models when used with the Groq provider, enabling JSON object and schema output for specific Llama models."
+      },
+      {
+        "id": "async_openai_client",
+        "label": "OpenAI-compatible Client",
+        "type": "external",
+        "link": null,
+        "title": "AsyncOpenAI",
+        "description": "An asynchronous client for interacting with OpenAI-compatible APIs."
+      },
+      {
+        "id": "async_anthropic_client",
+        "label": "Anthropic Client",
+        "type": "external",
+        "link": null,
+        "title": "AsyncAnthropicClient",
+        "description": "An asynchronous client for interacting with the Anthropic API."
+      },
+      {
+        "id": "async_cohere_client_v2",
+        "label": "Cohere Client (V2)",
+        "type": "external",
+        "link": null,
+        "title": "AsyncClientV2",
+        "description": "An asynchronous client for interacting with the Cohere V2 API."
+      },
+      {
+        "id": "async_groq_client",
+        "label": "Groq Client",
+        "type": "external",
+        "link": null,
+        "title": "AsyncGroq",
+        "description": "An asynchronous client for interacting with the Groq API."
+      },
+      {
+        "id": "async_hf_inference_client",
+        "label": "Hugging Face Inference Client",
+        "type": "external",
+        "link": null,
+        "title": "AsyncInferenceClient",
+        "description": "An asynchronous client for interacting with Hugging Face Inference APIs."
+      },
+      {
+        "id": "mistral_client",
+        "label": "Mistral Client",
+        "type": "external",
+        "link": null,
+        "title": "Mistral",
+        "description": "An asynchronous client for interacting with the Mistral API."
+      },
+      {
+        "id": "async_voyageai_client",
+        "label": "VoyageAI Client",
+        "type": "external",
+        "link": null,
+        "title": "AsyncClient (VoyageAI)",
+        "description": "An asynchronous client for interacting with the VoyageAI API, typically for embeddings."
+      },
+      {
+        "id": "async_xai_client",
+        "label": "xAI Client",
+        "type": "external",
+        "link": null,
+        "title": "AsyncClient (xAI)",
+        "description": "An asynchronous client for interacting with the xAI API."
+      },
+      {
+        "id": "httpx_async_client",
+        "label": "Asynchronous HTTP Client",
+        "type": "external",
+        "link": null,
+        "title": "httpx.AsyncClient",
+        "description": "A low-level asynchronous HTTP client used by various provider clients for making network requests."
+      },
+      {
+        "id": "model_profile_data",
+        "label": "LLM Model Capabilities",
+        "type": "component",
+        "link": "model_abstraction",
+        "title": "ModelProfile",
+        "description": "A data structure encapsulating the capabilities and specific settings of an LLM, such as tool support, JSON schema output, and thinking variants."
+      },
+      {
+        "id": "openai_json_schema_transformer",
+        "label": "OpenAI JSON Schema Adapter",
+        "type": "external",
+        "link": "external_integrations",
+        "title": "OpenAIJsonSchemaTransformer",
+        "description": "Transforms JSON schemas for compatibility with OpenAI-style APIs."
+      },
+      {
+        "id": "bedrock_json_schema_transformer",
+        "label": "Bedrock JSON Schema Adapter",
+        "type": "external",
+        "link": "model_specific_adapters",
+        "title": "BedrockJsonSchemaTransformer",
+        "description": "Transforms JSON schemas for compatibility with AWS Bedrock APIs."
+      },
+      {
+        "id": "anthropic_json_schema_transformer",
+        "label": "Anthropic JSON Schema Adapter",
+        "type": "external",
+        "link": "model_specific_adapters",
+        "title": "AnthropicJsonSchemaTransformer",
+        "description": "Transforms JSON schemas for compatibility with Anthropic APIs."
+      },
+      {
+        "id": "qwen_model_profile_func",
+        "label": "Qwen Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "qwen_model_profile",
+        "description": "External function providing base model profile for Qwen models."
+      },
+      {
+        "id": "meta_model_profile_func",
+        "label": "Meta Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "meta_model_profile",
+        "description": "External function providing base model profile for Meta Llama models."
+      },
+      {
+        "id": "deepseek_model_profile_func",
+        "label": "DeepSeek Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "deepseek_model_profile",
+        "description": "External function providing base model profile for DeepSeek models."
+      },
+      {
+        "id": "mistral_model_profile_func",
+        "label": "Mistral Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "mistral_model_profile",
+        "description": "External function providing base model profile for Mistral models."
+      },
+      {
+        "id": "google_model_profile_func",
+        "label": "Google Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "google_model_profile",
+        "description": "External function providing base model profile for Google models."
+      },
+      {
+        "id": "openai_model_profile_func",
+        "label": "OpenAI Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "openai_model_profile",
+        "description": "External function providing base model profile for OpenAI models."
+      },
+      {
+        "id": "anthropic_model_profile_func",
+        "label": "Anthropic Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "anthropic_model_profile",
+        "description": "External function providing base model profile for Anthropic models."
+      },
+      {
+        "id": "grok_model_profile_func",
+        "label": "Grok Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "grok_model_profile",
+        "description": "External function providing base model profile for Grok models."
+      },
+      {
+        "id": "moonshotai_model_profile_func",
+        "label": "MoonshotAI Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "moonshotai_model_profile",
+        "description": "External function providing base model profile for MoonshotAI models."
+      },
+      {
+        "id": "harmony_model_profile_func",
+        "label": "Harmony Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "harmony_model_profile",
+        "description": "External function providing base model profile for Harmony models (e.g., gpt-oss)."
+      },
+      {
+        "id": "zai_model_profile_func",
+        "label": "ZAI Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "zai_model_profile",
+        "description": "External function providing base model profile for ZAI models."
+      },
+      {
+        "id": "amazon_model_profile_func",
+        "label": "Amazon Model Profile Function",
+        "type": "external",
+        "link": null,
+        "title": "amazon_model_profile",
+        "description": "External function providing base model profile for Amazon models."
+      },
+      {
+        "id": "json_schema_transformer_base",
+        "label": "Base JSON Schema Transformer",
+        "type": "external",
+        "link": null,
+        "title": "JsonSchemaTransformer",
+        "description": "Abstract base class for transforming JSON schemas."
+      }
+    ],
+    "edges": [
+      {
+        "source": "alibaba_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cerebras_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cohere_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deepseek_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grok_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "heroku_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mistral_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "moonshotai_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "outlines_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ovhcloud_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sambanova_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "together_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "voyageai_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "xai_provider",
+        "target": "provider_interface",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alibaba_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alibaba_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_provider",
+        "target": "async_anthropic_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cerebras_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cerebras_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cohere_provider",
+        "target": "async_cohere_client_v2",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cohere_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deepseek_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deepseek_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grok_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grok_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "async_groq_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "heroku_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "heroku_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_provider",
+        "target": "async_hf_inference_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mistral_provider",
+        "target": "mistral_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mistral_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "moonshotai_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "moonshotai_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ovhcloud_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ovhcloud_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sambanova_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sambanova_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "together_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "together_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "async_openai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "httpx_async_client",
+        "label": "uses http client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "voyageai_provider",
+        "target": "async_voyageai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "xai_provider",
+        "target": "async_xai_client",
+        "label": "uses client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alibaba_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cerebras_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cohere_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deepseek_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grok_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "heroku_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mistral_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "moonshotai_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "outlines_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ovhcloud_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sambanova_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "together_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "voyageai_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "xai_provider",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alibaba_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alibaba_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_provider",
+        "target": "anthropic_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "anthropic_provider",
+        "target": "anthropic_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_provider",
+        "target": "grok_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_provider",
+        "target": "openai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "azure_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cerebras_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cerebras_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cerebras_provider",
+        "target": "harmony_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cerebras_provider",
+        "target": "zai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cerebras_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deepseek_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deepseek_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_provider",
+        "target": "google_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_provider",
+        "target": "grok_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_provider",
+        "target": "openai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grok_provider",
+        "target": "grok_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grok_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "meta_groq_model_profile",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "google_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "groq_moonshotai_model_profile",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "grok_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_provider",
+        "target": "openai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "heroku_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_provider",
+        "target": "google_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "huggingface_provider",
+        "target": "moonshotai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "anthropic_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "openai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "google_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "amazon_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "grok_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "moonshotai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mistral_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "moonshotai_provider",
+        "target": "moonshotai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "moonshotai_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "google_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "harmony_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "moonshotai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "nebius_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "google_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "harmony_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ollama_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_provider",
+        "target": "openai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ovhcloud_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ovhcloud_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ovhcloud_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ovhcloud_provider",
+        "target": "harmony_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ovhcloud_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ovhcloud_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sambanova_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sambanova_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sambanova_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sambanova_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sambanova_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "together_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "together_provider",
+        "target": "google_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "together_provider",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "together_provider",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "together_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "together_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "anthropic_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "amazon_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "deepseek_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "openai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "google_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "grok_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_provider",
+        "target": "openai_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "xai_provider",
+        "target": "grok_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_qwen_model_profile",
+        "target": "qwen_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_qwen_model_profile",
+        "target": "bedrock_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_qwen_model_profile",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_anthropic_model_profile",
+        "target": "anthropic_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_anthropic_model_profile",
+        "target": "bedrock_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_anthropic_model_profile",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_amazon_model_profile",
+        "target": "amazon_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_amazon_model_profile",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_mistral_model_profile",
+        "target": "mistral_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_mistral_model_profile",
+        "target": "bedrock_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_mistral_model_profile",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_google_model_profile",
+        "target": "google_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_google_model_profile",
+        "target": "bedrock_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_google_model_profile",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_minimax_model_profile",
+        "target": "bedrock_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_minimax_model_profile",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_nvidia_model_profile",
+        "target": "bedrock_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bedrock_nvidia_model_profile",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_google_model_profile",
+        "target": "google_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_google_model_profile",
+        "target": "openrouter_google_json_schema_transformer",
+        "label": "uses transformer",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_google_model_profile",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_google_json_schema_transformer",
+        "target": "json_schema_transformer_base",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_moonshotai_model_profile",
+        "target": "moonshotai_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "groq_moonshotai_model_profile",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "meta_groq_model_profile",
+        "target": "meta_model_profile_func",
+        "label": "calls profile func",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "meta_groq_model_profile",
+        "target": "model_profile_data",
+        "label": "returns profile",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_api",
+        "label": "Surface API",
+        "nodes": [
+          "provider_interface"
+        ],
+        "title": "Core Provider Interface",
+        "description": "The abstract base class defining the common contract for all LLM providers.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_providers",
+        "label": "Concrete LLM Providers",
+        "nodes": [
+          "alibaba_provider",
+          "anthropic_provider",
+          "azure_provider",
+          "cerebras_provider",
+          "cohere_provider",
+          "deepseek_provider",
+          "fireworks_provider",
+          "github_provider",
+          "grok_provider",
+          "groq_provider",
+          "heroku_provider",
+          "huggingface_provider",
+          "litellm_provider",
+          "mistral_provider",
+          "moonshotai_provider",
+          "nebius_provider",
+          "ollama_provider",
+          "openai_provider",
+          "outlines_provider",
+          "ovhcloud_provider",
+          "sambanova_provider",
+          "together_provider",
+          "vercel_provider",
+          "voyageai_provider",
+          "xai_provider"
+        ],
+        "title": "Specific LLM Integrations",
+        "description": "Classes implementing the Provider interface for various LLM services, handling client instantiation and API interactions.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_components",
+        "label": "Model Profiling & Schema Adapters",
+        "nodes": [
+          "bedrock_qwen_model_profile",
+          "bedrock_anthropic_model_profile",
+          "bedrock_amazon_model_profile",
+          "bedrock_mistral_model_profile",
+          "bedrock_google_model_profile",
+          "bedrock_minimax_model_profile",
+          "bedrock_nvidia_model_profile",
+          "openrouter_google_model_profile",
+          "openrouter_google_json_schema_transformer",
+          "groq_moonshotai_model_profile",
+          "meta_groq_model_profile"
+        ],
+        "title": "LLM Capability Analysis and Transformation",
+        "description": "Functions and classes responsible for determining LLM capabilities (ModelProfile) and adapting JSON schemas for specific API requirements.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_structures",
+        "label": "Model Data Structures",
+        "nodes": [
+          "model_profile_data"
+        ],
+        "title": "LLM Model Metadata",
+        "description": "Data structures used to describe the features and limitations of various LLM models.",
+        "role": "data"
+      }
+    ]
+  }
+}

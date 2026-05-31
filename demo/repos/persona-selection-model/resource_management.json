@@ -1,0 +1,129 @@
+{
+  "title": "GPU Resource Management",
+  "summary": "This module provides command-line utilities for probing and orchestrating GPU resources. It acts as an interface to initiate GPU-related operations based on command-line flags.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "cli_args",
+        "label": "Receive Command Line Arguments",
+        "type": "external",
+        "link": null,
+        "title": "CLI Input",
+        "description": "Input arguments provided via the command line, including flags like 'gpu_run' that control GPU orchestration behavior."
+      },
+      {
+        "id": "cmd_gpu_probe",
+        "label": "Initiate GPU Probe Command",
+        "type": "component",
+        "link": null,
+        "title": "GPU Probe CLI Entry Point",
+        "description": "Parses command-line arguments, checks for specific flags (e.g., 'gpu_run'), logs the activation status, and orchestrates the underlying GPU probing process."
+      },
+      {
+        "id": "run_gpu_probe",
+        "label": "Execute Core GPU Probing Logic",
+        "type": "component",
+        "link": null,
+        "title": "Core GPU Probing Function",
+        "description": "Performs the actual low-level probing and interaction with the system's GPU resources to gather information or execute specific GPU-related operations."
+      },
+      {
+        "id": "system_gpu_resources",
+        "label": "Interact with System GPU Resources",
+        "type": "external",
+        "link": null,
+        "title": "Hardware/Software GPUs",
+        "description": "The underlying GPU hardware, drivers, and associated APIs that are being probed, monitored, or managed by the module."
+      },
+      {
+        "id": "logger",
+        "label": "Log Operational Information",
+        "type": "external",
+        "link": null,
+        "title": "Application Logger",
+        "description": "Records operational messages, status updates, and debugging information to provide insights into the module's execution."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_args",
+        "target": "cmd_gpu_probe",
+        "label": "Provides arguments",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cmd_gpu_probe",
+        "target": "logger",
+        "label": "Logs status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cmd_gpu_probe",
+        "target": "run_gpu_probe",
+        "label": "Invokes core logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_gpu_probe",
+        "target": "system_gpu_resources",
+        "label": "Interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "system_gpu_resources",
+        "target": "run_gpu_probe",
+        "label": "Returns probe data",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cli_interface",
+        "label": "CLI Interface",
+        "nodes": [
+          "cmd_gpu_probe"
+        ],
+        "title": "Command Line Interface",
+        "description": "Handles user interaction and argument parsing from the command line.",
+        "role": "surface"
+      },
+      {
+        "id": "core_logic",
+        "label": "Core Logic",
+        "nodes": [
+          "run_gpu_probe"
+        ],
+        "title": "GPU Probing Logic",
+        "description": "Encapsulates the primary functionality for interacting with and probing GPU resources.",
+        "role": "generative"
+      },
+      {
+        "id": "inputs",
+        "label": "Inputs",
+        "nodes": [
+          "cli_args"
+        ],
+        "title": "Module Inputs",
+        "description": "Represents data provided to the module for processing.",
+        "role": "data"
+      },
+      {
+        "id": "external_dependencies",
+        "label": "External Dependencies",
+        "nodes": [
+          "system_gpu_resources",
+          "logger"
+        ],
+        "title": "External Systems & Services",
+        "description": "Components or systems outside the direct control of this module that it interacts with.",
+        "role": "external"
+      }
+    ]
+  }
+}

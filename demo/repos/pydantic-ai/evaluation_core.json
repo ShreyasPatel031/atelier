@@ -1,171 +1,298 @@
 {
   "title": "Evaluation Core Module",
-  "summary": "This module provides the foundational components for defining, generating, and executing evaluation datasets. It includes data models for datasets, utilities for asynchronous task execution, and logic for AI-driven dataset generation.",
+  "summary": "Provides the foundational components for defining, configuring, and executing both online and dataset-based evaluations, including LLM-driven dataset generation and integration with agent workflows.",
   "diagram": {
-    "direction": "TD",
+    "direction": "LR",
     "nodes": [
       {
+        "id": "online_config",
+        "label": "Configure Online Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "OnlineEvalConfig",
+        "description": "Defines global settings for online evaluations, including default sinks, sampling rates, error handling, and OpenTelemetry event emission."
+      },
+      {
+        "id": "base_evaluator",
+        "label": "Define Base Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "BaseEvaluator",
+        "description": "Provides common serialization, specification building, and representation logic for all evaluation classes, ensuring consistent structure."
+      },
+      {
+        "id": "evaluator_class",
+        "label": "Implement Custom Evaluator",
+        "type": "component",
+        "link": null,
+        "title": "Evaluator",
+        "description": "Abstract base class for creating specific evaluation logic. Subclasses implement the `evaluate` method to assess task performance."
+      },
+      {
         "id": "dataset_model",
-        "label": "Evaluation Dataset Schema",
+        "label": "Structure Evaluation Dataset",
         "type": "component",
         "link": null,
-        "title": "Dataset Definition",
-        "description": "Defines the Pydantic model for evaluation datasets, including test cases, input/output types, and references to evaluators and report evaluators."
+        "title": "Dataset",
+        "description": "A Pydantic model that defines the structure of evaluation datasets, including test cases, inputs, expected outputs, and associated evaluators."
       },
       {
-        "id": "generate_data",
-        "label": "Generate Evaluation Data",
+        "id": "generate_dataset_fn",
+        "label": "Generate Dataset with LLM",
         "type": "component",
         "link": null,
-        "title": "Dataset Generation Logic",
-        "description": "Leverages an LLM agent to create synthetic test cases, inputs, outputs, and metadata, structured according to a specified Dataset schema. Can save the generated dataset to a file."
+        "title": "generate_dataset",
+        "description": "Uses a Large Language Model (LLM) to automatically create structured evaluation datasets based on provided schemas and instructions."
       },
       {
-        "id": "execute_eval_task",
-        "label": "Execute Single Evaluation Task",
+        "id": "online_eval_decorator",
+        "label": "Decorate Function for Online Eval",
         "type": "component",
         "link": null,
-        "title": "Task Execution Runner",
-        "description": "Manages the execution of a single evaluation task, capturing its output, duration, and observability traces. Ensures proper context management for nested task runs."
+        "title": "online.wrapper",
+        "description": "A decorator that enables online evaluation for a function, capturing its execution, sampling evaluators, and dispatching results asynchronously."
       },
       {
-        "id": "async_loop_helper",
-        "label": "Async Event Loop Utility",
+        "id": "online_eval_capability",
+        "label": "Integrate Online Eval into Agent",
         "type": "component",
         "link": null,
-        "title": "Event Loop Provider",
-        "description": "Provides or creates an asyncio event loop, ensuring that asynchronous operations within the evaluation framework have a running event loop to execute on."
+        "title": "OnlineEvaluation",
+        "description": "An agent capability that automatically dispatches online evaluators after each agent run, integrating evaluation directly into agent workflows."
       },
       {
-        "id": "llm_agent_comp",
-        "label": "AI Agent",
+        "id": "run_and_collect",
+        "label": "Execute & Collect Evaluator Results",
+        "type": "component",
+        "link": null,
+        "title": "_run_and_collect",
+        "description": "Internal function that runs a single online evaluator, manages concurrency, emits OpenTelemetry events, and collects evaluation outcomes."
+      },
+      {
+        "id": "submit_to_sink",
+        "label": "Batch Submit Results to Sink",
+        "type": "component",
+        "link": null,
+        "title": "_submit_group_to_sink",
+        "description": "Internal function responsible for batching and submitting evaluation results to configured sinks, handling errors and routing them to appropriate handlers."
+      },
+      {
+        "id": "get_event_loop_util",
+        "label": "Manage Async Event Loop",
+        "type": "component",
+        "link": null,
+        "title": "get_event_loop",
+        "description": "Utility function to retrieve the current asyncio event loop or create a new one if no loop is active, ensuring asynchronous operations can proceed."
+      },
+      {
+        "id": "dataset_run_once",
+        "label": "Execute Single Dataset Case",
+        "type": "component",
+        "link": null,
+        "title": "_run_once",
+        "description": "Internal function to execute a single test case within a dataset, capturing its output, duration, and OpenTelemetry spans for detailed analysis."
+      },
+      {
+        "id": "_run_internal",
+        "label": "Execute Single Evaluator (Internal)",
+        "type": "component",
+        "link": null,
+        "title": "online._run",
+        "description": "An internal asynchronous function used to execute a single evaluator within the online evaluation framework, collecting its results."
+      },
+      {
+        "id": "agent_framework",
+        "label": "Agent Framework",
         "type": "external",
-        "link": "agents_and_orchestration",
-        "title": "AI Agent for Generation",
-        "description": "An AI agent component responsible for orchestrating calls to language models to fulfill complex tasks, such as generating structured data based on prompts and schemas."
+        "link": "agent_framework",
+        "title": "Agent Framework",
+        "description": "Provides the core agent functionality, including the `Agent` class and `AbstractCapability` for building intelligent systems."
       },
       {
-        "id": "llm_model_comp",
-        "label": "Language Model",
+        "id": "model_abstraction",
+        "label": "LLM Model Abstraction",
         "type": "external",
-        "link": "model_providers_and_wrappers",
-        "title": "Underlying LLM",
-        "description": "The actual large language model (e.g., GPT, Gemini) that provides text generation capabilities, used by the AI agent to produce dataset content."
+        "link": "model_abstraction",
+        "title": "Model Abstraction",
+        "description": "Offers an abstract interface for interacting with various Large Language Models (LLMs), enabling model-agnostic operations."
       },
       {
-        "id": "evaluator_defs",
-        "label": "Evaluator Definitions",
-        "type": "external",
-        "link": "evaluator_implementations",
-        "title": "Evaluator Schemas",
-        "description": "Schemas and types for various evaluators and report evaluators, which are used to define how the generated dataset will be assessed."
-      },
-      {
-        "id": "observability_platform",
-        "label": "Observability & Tracing",
-        "type": "external",
-        "link": "online_evaluation_and_reporting",
-        "title": "Tracing System",
-        "description": "An external system (e.g., Logfire, OpenTelemetry) used to capture and monitor the execution flow, performance metrics, and contextual information of evaluation tasks."
-      },
-      {
-        "id": "file_system_storage",
-        "label": "File System Storage",
+        "id": "evaluation_sink",
+        "label": "Evaluation Sink",
         "type": "external",
         "link": null,
-        "title": "Dataset Persistence",
-        "description": "The local or remote file system used for saving and loading generated evaluation datasets, ensuring data persistence across sessions."
+        "title": "Evaluation Sink",
+        "description": "Represents external systems or services where evaluation results are stored, analyzed, or reported (e.g., databases, dashboards, telemetry systems)."
+      },
+      {
+        "id": "otel_system",
+        "label": "OpenTelemetry System",
+        "type": "external",
+        "link": null,
+        "title": "OpenTelemetry System",
+        "description": "An external observability framework used for emitting traces, metrics, and logs related to evaluation events and function executions."
       }
     ],
     "edges": [
       {
-        "source": "generate_data",
-        "target": "llm_agent_comp",
-        "label": "Uses",
+        "source": "online_eval_decorator",
+        "target": "online_config",
+        "label": "uses config",
         "title": null,
         "description": null
       },
       {
-        "source": "llm_agent_comp",
-        "target": "llm_model_comp",
-        "label": "Interacts with",
+        "source": "online_eval_decorator",
+        "target": "run_and_collect",
+        "label": "dispatches evaluators",
         "title": null,
         "description": null
       },
       {
-        "source": "generate_data",
+        "source": "online_eval_decorator",
+        "target": "get_event_loop_util",
+        "label": "manages async dispatch",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "online_eval_capability",
+        "target": "online_config",
+        "label": "uses config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "online_eval_capability",
+        "target": "run_and_collect",
+        "label": "dispatches evaluators",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "online_eval_capability",
+        "target": "agent_framework",
+        "label": "is agent capability",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_and_collect",
+        "target": "evaluator_class",
+        "label": "executes logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_and_collect",
+        "target": "submit_to_sink",
+        "label": "prepares results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_and_collect",
+        "target": "otel_system",
+        "label": "emits events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "submit_to_sink",
+        "target": "evaluation_sink",
+        "label": "sends batched results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluator_class",
+        "target": "base_evaluator",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_dataset_fn",
         "target": "dataset_model",
-        "label": "Generates instances of",
+        "label": "generates instances",
         "title": null,
         "description": null
       },
       {
-        "source": "generate_data",
-        "target": "evaluator_defs",
-        "label": "Incorporates schemas from",
+        "source": "generate_dataset_fn",
+        "target": "agent_framework",
+        "label": "uses Agent",
         "title": null,
         "description": null
       },
       {
-        "source": "generate_data",
-        "target": "file_system_storage",
-        "label": "Saves dataset to",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "execute_eval_task",
-        "target": "observability_platform",
-        "label": "Reports traces to",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "execute_eval_task",
-        "target": "async_loop_helper",
-        "label": "Relies on",
+        "source": "generate_dataset_fn",
+        "target": "model_abstraction",
+        "label": "uses LLM",
         "title": null,
         "description": null
       },
       {
         "source": "dataset_model",
-        "target": "evaluator_defs",
-        "label": "Includes references to",
+        "target": "dataset_run_once",
+        "label": "defines structure for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_run_once",
+        "target": "otel_system",
+        "label": "captures spans",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_run_internal",
+        "target": "evaluator_class",
+        "label": "executes evaluator",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "data_definition_group",
-        "label": "Data Definition",
+        "id": "surface_api",
+        "label": "Surface API",
         "nodes": [
-          "dataset_model"
+          "online_config",
+          "evaluator_class",
+          "dataset_model",
+          "generate_dataset_fn",
+          "online_eval_decorator",
+          "online_eval_capability"
         ],
-        "title": "Evaluation Data Structures",
-        "description": "Components responsible for defining the schema and structure of evaluation datasets.",
-        "role": "data"
-      },
-      {
-        "id": "dataset_generation_group",
-        "label": "Dataset Generation",
-        "nodes": [
-          "generate_data"
-        ],
-        "title": "Automated Dataset Creation",
-        "description": "Logic and processes for programmatically generating evaluation datasets, often leveraging AI models.",
-        "role": "generative"
-      },
-      {
-        "id": "task_execution_group",
-        "label": "Task Execution & Utilities",
-        "nodes": [
-          "execute_eval_task",
-          "async_loop_helper"
-        ],
-        "title": "Core Execution Logic",
-        "description": "Components handling the execution of individual evaluation tasks and providing necessary asynchronous utilities.",
+        "title": "User-Facing Components",
+        "description": "Components that users directly interact with to set up and trigger evaluations.",
         "role": "surface"
+      },
+      {
+        "id": "evaluation_core_logic",
+        "label": "Evaluation Core Logic",
+        "nodes": [
+          "base_evaluator",
+          "run_and_collect",
+          "submit_to_sink",
+          "dataset_run_once",
+          "_run_internal"
+        ],
+        "title": "Internal Evaluation Mechanisms",
+        "description": "Base classes and internal mechanisms for defining, executing, and managing evaluation runs.",
+        "role": "analytical"
+      },
+      {
+        "id": "utilities",
+        "label": "Utilities",
+        "nodes": [
+          "get_event_loop_util"
+        ],
+        "title": "Helper Functions",
+        "description": "General-purpose helper functions used across the evaluation framework.",
+        "role": "data"
       }
     ]
   }

@@ -1,0 +1,510 @@
+{
+  "title": "Partner Integrations Module",
+  "summary": "This module provides integrations with various external AI service providers and data platforms, including LLMs, embedding models, search engines, and vector stores. It enables LangChain applications to leverage a wide array of third-party capabilities.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "AnthropicLLM",
+        "label": "Anthropic LLM",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic LLM Integration",
+        "description": "Provides an interface for interacting with Anthropic's legacy text completion models, handling prompt formatting and API calls."
+      },
+      {
+        "id": "AnthropicToolsMiddleware",
+        "label": "Anthropic Tool Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Tool Middleware",
+        "description": "Manages Anthropic's text editor and memory tools, storing file content in LangGraph state or local filesystem."
+      },
+      {
+        "id": "AnthropicFileSearchMiddleware",
+        "label": "Anthropic File Search Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic File Search Middleware",
+        "description": "Enables glob and grep search functionalities over virtual files stored in the agent's state for Anthropic tools."
+      },
+      {
+        "id": "AnthropicPromptCacheMiddleware",
+        "label": "Anthropic Prompt Caching Middleware",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Prompt Caching Middleware",
+        "description": "Optimizes API usage for Anthropic models by applying cache control to conversation prefixes, system messages, and tool definitions."
+      },
+      {
+        "id": "AnthropicToolsOutputParser",
+        "label": "Anthropic Tools Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Tools Output Parser",
+        "description": "Parses tool call information from Anthropic model generations, converting them into structured formats or Pydantic models."
+      },
+      {
+        "id": "ExaSearchRetriever",
+        "label": "Exa Search Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Exa Search Retriever",
+        "description": "Retrieves relevant documents from the Exa search engine based on a query and various filtering options."
+      },
+      {
+        "id": "ExaTools",
+        "label": "Exa Search Tools",
+        "type": "component",
+        "link": null,
+        "title": "Exa Search Tools",
+        "description": "Provides tools for performing web searches and finding similar content using the Exa API."
+      },
+      {
+        "id": "FireworksEmbeddings",
+        "label": "Fireworks Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Fireworks Embeddings",
+        "description": "Generates vector embeddings for text using models hosted by Fireworks AI."
+      },
+      {
+        "id": "GroqMessageConverters",
+        "label": "Groq Message Converters",
+        "type": "component",
+        "link": null,
+        "title": "Groq Message Converters",
+        "description": "Handles the conversion of message formats between LangChain's internal representation and Groq's API requirements, including streaming chunks."
+      },
+      {
+        "id": "ChatHuggingFace",
+        "label": "HuggingFace Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "HuggingFace Chat Model",
+        "description": "Integrates various HuggingFace LLMs (e.g., TextGenInference, Endpoint, Hub, Pipeline) as chat models, supporting generation, streaming, and tool calling."
+      },
+      {
+        "id": "HuggingFacePipelineLLM",
+        "label": "HuggingFace Pipeline LLM",
+        "type": "component",
+        "link": null,
+        "title": "HuggingFace Pipeline LLM",
+        "description": "Provides an interface for using HuggingFace models via their pipeline API for tasks like text generation, summarization, and translation."
+      },
+      {
+        "id": "MistralAIOutputConverter",
+        "label": "MistralAI Output Converter",
+        "type": "component",
+        "link": null,
+        "title": "MistralAI Output Converter",
+        "description": "Utility for converting structured output schemas into a format compatible with OpenAI's response format, used by MistralAI integrations."
+      },
+      {
+        "id": "OllamaLLM",
+        "label": "Ollama LLM",
+        "type": "component",
+        "link": null,
+        "title": "Ollama LLM",
+        "description": "Integrates with local Ollama language models, supporting text generation, streaming, and optional reasoning modes."
+      },
+      {
+        "id": "OpenAIModerationMiddleware",
+        "label": "OpenAI Moderation Middleware",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Moderation Middleware",
+        "description": "Moderates agent inputs, outputs, and tool results using OpenAI's moderation API to detect and handle unsafe content."
+      },
+      {
+        "id": "OpenAICustomToolDecorator",
+        "label": "OpenAI Custom Tool Decorator",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Custom Tool Decorator",
+        "description": "A decorator to create custom tools compatible with OpenAI's function calling API, allowing flexible tool definition."
+      },
+      {
+        "id": "OpenRouterChatModel",
+        "label": "OpenRouter Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "OpenRouter Chat Model",
+        "description": "Integrates with the OpenRouter unified API, providing access to various chat models with advanced features like attribution, reasoning, and provider preferences."
+      },
+      {
+        "id": "PerplexitySearchRetriever",
+        "label": "Perplexity Search Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Perplexity Search Retriever",
+        "description": "Retrieves search results from the Perplexity AI search engine, offering various filtering and result customization options."
+      },
+      {
+        "id": "QdrantVectorStore",
+        "label": "Qdrant Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Vector Store",
+        "description": "Provides a modern integration with Qdrant for vector storage and retrieval, supporting dense, sparse, and hybrid embedding modes."
+      },
+      {
+        "id": "QdrantLegacyVectorStore",
+        "label": "Qdrant Vector Store (Legacy)",
+        "type": "component",
+        "link": null,
+        "title": "Qdrant Vector Store (Legacy)",
+        "description": "Offers a legacy integration with Qdrant for vector storage and retrieval, primarily supporting dense embeddings."
+      },
+      {
+        "id": "LLMBase",
+        "label": "Base LLM",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "Base Language Model",
+        "description": "Defines the fundamental interface for large language models (LLMs)."
+      },
+      {
+        "id": "ChatModelBase",
+        "label": "Base Chat Model",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "Base Chat Model",
+        "description": "Defines the base interface for chat-oriented language models."
+      },
+      {
+        "id": "RetrieverBase",
+        "label": "Base Retriever",
+        "type": "external",
+        "link": "data_management_and_retrieval",
+        "title": "Base Retriever",
+        "description": "Abstract base class for document retrieval systems."
+      },
+      {
+        "id": "VectorStoreBase",
+        "label": "Base Vector Store",
+        "type": "external",
+        "link": "data_management_and_retrieval",
+        "title": "Base Vector Store",
+        "description": "Abstract base class for vector database integrations."
+      },
+      {
+        "id": "ToolBase",
+        "label": "Base Tool",
+        "type": "external",
+        "link": "agent_and_chain_orchestration",
+        "title": "Base Tool",
+        "description": "Base class for defining tools that agents can use."
+      },
+      {
+        "id": "OutputParserBase",
+        "label": "Base Output Parser",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "Base Output Parser",
+        "description": "Base class for parsing model outputs into structured formats."
+      },
+      {
+        "id": "AgentMiddlewareBase",
+        "label": "Base Agent Middleware",
+        "type": "external",
+        "link": "agent_middleware_v1",
+        "title": "Base Agent Middleware",
+        "description": "Base class for intercepting and modifying agent execution flow."
+      },
+      {
+        "id": "EmbeddingsBase",
+        "label": "Base Embeddings",
+        "type": "external",
+        "link": "data_management_and_retrieval",
+        "title": "Base Embeddings",
+        "description": "Abstract base class for text embedding models."
+      },
+      {
+        "id": "MessageTypes",
+        "label": "Core Message Types",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "Core Message Types",
+        "description": "Represents various types of messages used in conversational AI (e.g., Human, AI, System)."
+      },
+      {
+        "id": "UsageMetadataCore",
+        "label": "Core Usage Metadata",
+        "type": "external",
+        "link": "api_and_security",
+        "title": "Core Usage Metadata",
+        "description": "Standardized structure for reporting token usage and other API metrics."
+      }
+    ],
+    "edges": [
+      {
+        "source": "AnthropicLLM",
+        "target": "LLMBase",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AnthropicLLM",
+        "target": "UsageMetadataCore",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AnthropicToolsMiddleware",
+        "target": "AgentMiddlewareBase",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AnthropicFileSearchMiddleware",
+        "target": "AgentMiddlewareBase",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AnthropicPromptCacheMiddleware",
+        "target": "AgentMiddlewareBase",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AnthropicToolsOutputParser",
+        "target": "OutputParserBase",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaSearchRetriever",
+        "target": "RetrieverBase",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaTools",
+        "target": "ToolBase",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FireworksEmbeddings",
+        "target": "EmbeddingsBase",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GroqMessageConverters",
+        "target": "MessageTypes",
+        "label": "converts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatHuggingFace",
+        "target": "ChatModelBase",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "HuggingFacePipelineLLM",
+        "target": "LLMBase",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MistralAIOutputConverter",
+        "target": "OutputParserBase",
+        "label": "converts to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OllamaLLM",
+        "target": "LLMBase",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIModerationMiddleware",
+        "target": "AgentMiddlewareBase",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAICustomToolDecorator",
+        "target": "ToolBase",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenRouterChatModel",
+        "target": "ChatModelBase",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenRouterChatModel",
+        "target": "UsageMetadataCore",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PerplexitySearchRetriever",
+        "target": "RetrieverBase",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QdrantVectorStore",
+        "target": "VectorStoreBase",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QdrantLegacyVectorStore",
+        "target": "VectorStoreBase",
+        "label": "implements",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "AnthropicIntegrations",
+        "label": "Anthropic",
+        "nodes": [
+          "AnthropicLLM",
+          "AnthropicToolsMiddleware",
+          "AnthropicFileSearchMiddleware",
+          "AnthropicPromptCacheMiddleware",
+          "AnthropicToolsOutputParser"
+        ],
+        "title": "Anthropic Integrations",
+        "description": "Integrations for Anthropic's LLMs, tools, and middleware.",
+        "role": "generative"
+      },
+      {
+        "id": "ExaIntegrations",
+        "label": "Exa",
+        "nodes": [
+          "ExaSearchRetriever",
+          "ExaTools"
+        ],
+        "title": "Exa Integrations",
+        "description": "Integrations for Exa search and retrieval tools.",
+        "role": "data"
+      },
+      {
+        "id": "FireworksIntegrations",
+        "label": "Fireworks AI",
+        "nodes": [
+          "FireworksEmbeddings"
+        ],
+        "title": "Fireworks AI Integrations",
+        "description": "Integration for Fireworks AI embedding models.",
+        "role": "generative"
+      },
+      {
+        "id": "GroqIntegrations",
+        "label": "Groq",
+        "nodes": [
+          "GroqMessageConverters"
+        ],
+        "title": "Groq Integrations",
+        "description": "Utilities for message format conversion for Groq models.",
+        "role": "generative"
+      },
+      {
+        "id": "HuggingFaceIntegrations",
+        "label": "HuggingFace",
+        "nodes": [
+          "ChatHuggingFace",
+          "HuggingFacePipelineLLM"
+        ],
+        "title": "HuggingFace Integrations",
+        "description": "Integrations for HuggingFace chat models and pipelines.",
+        "role": "generative"
+      },
+      {
+        "id": "MistralAIIntegrations",
+        "label": "MistralAI",
+        "nodes": [
+          "MistralAIOutputConverter"
+        ],
+        "title": "MistralAI Integrations",
+        "description": "Utilities for structured output conversion for MistralAI models.",
+        "role": "generative"
+      },
+      {
+        "id": "OllamaIntegrations",
+        "label": "Ollama",
+        "nodes": [
+          "OllamaLLM"
+        ],
+        "title": "Ollama Integrations",
+        "description": "Integration for local Ollama language models.",
+        "role": "generative"
+      },
+      {
+        "id": "OpenAIIntegrations",
+        "label": "OpenAI",
+        "nodes": [
+          "OpenAIModerationMiddleware",
+          "OpenAICustomToolDecorator"
+        ],
+        "title": "OpenAI Integrations",
+        "description": "Integrations for OpenAI moderation middleware and custom tool creation.",
+        "role": "generative"
+      },
+      {
+        "id": "OpenRouterIntegrations",
+        "label": "OpenRouter",
+        "nodes": [
+          "OpenRouterChatModel"
+        ],
+        "title": "OpenRouter Integrations",
+        "description": "Integration for the OpenRouter unified API for chat models.",
+        "role": "generative"
+      },
+      {
+        "id": "PerplexityIntegrations",
+        "label": "Perplexity AI",
+        "nodes": [
+          "PerplexitySearchRetriever"
+        ],
+        "title": "Perplexity AI Integrations",
+        "description": "Integration for Perplexity AI search and retrieval.",
+        "role": "data"
+      },
+      {
+        "id": "QdrantIntegrations",
+        "label": "Qdrant",
+        "nodes": [
+          "QdrantVectorStore",
+          "QdrantLegacyVectorStore"
+        ],
+        "title": "Qdrant Integrations",
+        "description": "Integrations for Qdrant vector database for storage and retrieval.",
+        "role": "data"
+      }
+    ]
+  }
+}

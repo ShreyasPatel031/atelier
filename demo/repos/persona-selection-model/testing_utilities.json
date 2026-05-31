@@ -1,0 +1,93 @@
+{
+  "title": "Rotating Gate Test Utility",
+  "summary": "Provides an API endpoint for performing a rotating gate test, streaming the results as server-sent events. This utility helps in evaluating dynamic gating mechanisms.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "test_request",
+        "label": "Rotating Gate Test Request",
+        "type": "external",
+        "link": null,
+        "title": "Incoming Test Request",
+        "description": "Represents the input parameters for initiating a rotating gate test, including configuration for the gate's behavior."
+      },
+      {
+        "id": "handle_test_endpoint",
+        "label": "Handle Test Endpoint",
+        "type": "component",
+        "link": null,
+        "title": "API Endpoint for Gate Test",
+        "description": "Receives HTTP requests for the rotating gate test and orchestrates the streaming of test results back to the client."
+      },
+      {
+        "id": "stream_test_logic",
+        "label": "Stream Test Data",
+        "type": "component",
+        "link": null,
+        "title": "Internal Test Data Streamer",
+        "description": "An internal function responsible for generating and continuously streaming the data and events related to the rotating gate test."
+      },
+      {
+        "id": "stream_response",
+        "label": "Streamed Test Response",
+        "type": "external",
+        "link": null,
+        "title": "Server-Sent Event Stream",
+        "description": "The output stream delivering real-time updates and results of the rotating gate test to the requesting client."
+      }
+    ],
+    "edges": [
+      {
+        "source": "test_request",
+        "target": "handle_test_endpoint",
+        "label": "Receives",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "handle_test_endpoint",
+        "target": "stream_test_logic",
+        "label": "Calls to generate stream",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "stream_test_logic",
+        "target": "stream_response",
+        "label": "Produces stream data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "handle_test_endpoint",
+        "target": "stream_response",
+        "label": "Returns stream",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "api_endpoint_group",
+        "label": "API Endpoint",
+        "nodes": [
+          "handle_test_endpoint"
+        ],
+        "title": "API Endpoint for Testing",
+        "description": "Exposes the rotating gate test functionality as an API endpoint for external consumption.",
+        "role": "surface"
+      },
+      {
+        "id": "streaming_logic_group",
+        "label": "Streaming Logic",
+        "nodes": [
+          "stream_test_logic"
+        ],
+        "title": "Internal Streaming Mechanism",
+        "description": "Encapsulates the core logic for generating and streaming the dynamic test data for the rotating gate.",
+        "role": "generative"
+      }
+    ]
+  }
+}

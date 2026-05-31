@@ -1,0 +1,38 @@
+{
+    "generation_info": {
+        "timestamp": "2026-05-19T10:51:40.587642",
+        "main_model": "gemini-2.5-flash",
+        "generator_version": "1.0.0",
+        "repo_path": "/Users/shreyaspatel/atelier/.tmp/demo_regen/persona-selection-model",
+        "commit_id": null
+    },
+    "statistics": {
+        "total_components": 219,
+        "leaf_nodes": 43,
+        "max_depth": 2
+    },
+    "files_generated": [
+        "overview.json",
+        "module_tree.json",
+        "first_module_tree.json",
+        "chat_interfaces.json",
+        "system_infrastructure.json",
+        "dnd_playground_logic.json",
+        "api_metadata.json",
+        "data_generation_and_rollouts.json",
+        "vector_composition_tools.json",
+        "persona_development_and_evaluation.json",
+        "testing_utilities.json",
+        "gating_mechanisms.json",
+        "application_lifecycle.json",
+        "user_facing_api.json",
+        "experiment_runners.json",
+        "sae_analysis.json",
+        "core_persona_logic.json",
+        "resource_management.json",
+        "playground_interfaces.json",
+        "persona_activations.json",
+        "steering_demonstrations.json",
+        "data_schemas.json"
+    ]
+}

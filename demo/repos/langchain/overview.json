@@ -1,6 +1,6 @@
 {
-    "title": "LangChain Repository",
-    "summary": "LangChain is a framework for developing applications powered by large language models (LLMs). It simplifies the process of building complex LLM workflows by providing modular components for interacting with LLMs, managing data, orchestrating agents, and evaluating performance. Developers can use LangChain to create sophisticated applications like chatbots, question-answering systems, and autonomous agents.",
+    "title": "LangChain Repository Overview",
+    "summary": "LangChain is a framework for developing applications powered by large language models (LLMs). It simplifies the orchestration of LLMs with external components like data sources, tools, and memory, enabling the creation of complex, context-aware, and agentic AI systems. Developers use it to build, deploy, and evaluate intelligent applications that go beyond simple LLM calls.",
     "diagram": {
         "direction": "LR",
         "nodes": [
@@ -9,174 +9,190 @@
                 "label": "Developer / User",
                 "type": "external",
                 "link": null,
-                "title": "Human User/Developer",
-                "description": "Interacts with the LangChain framework to build, run, and evaluate LLM-powered applications."
+                "title": "Human User",
+                "description": "A developer or end-user interacting with or building applications using the LangChain framework, designing and running AI systems."
             },
             {
-                "id": "core_utilities",
-                "label": "Core Utilities",
+                "id": "core_framework",
+                "label": "Core Framework & Utilities",
                 "type": "module",
-                "link": "core_utilities",
-                "title": "LangChain Core Utilities",
-                "description": "Provides foundational utilities for API lifecycle management, security, callback handling, chat history, data serialization, and system information, forming the base for the LangChain ecosystem."
+                "link": "core_framework",
+                "title": "LangChain Core Framework",
+                "description": "Provides the foundational interfaces, base abstractions, and essential utilities for building all LangChain components and applications, ensuring consistency and extensibility."
             },
             {
-                "id": "language_models_and_prompts",
-                "label": "Language Models & Prompts",
+                "id": "language_model_interface",
+                "label": "Language Model Interaction",
                 "type": "module",
-                "link": "language_models_and_prompts",
-                "title": "Language Models & Prompts",
-                "description": "Offers interfaces for interacting with LLMs, managing prompts, handling messages, generating embeddings, and integrating with third-party LLM providers."
+                "link": "language_model_interface",
+                "title": "LLM & Chat Model Interfaces",
+                "description": "Defines how to interact with various language models, including standardized message formats, prompt engineering techniques, and structured output parsing for diverse LLM providers."
             },
             {
-                "id": "agents_and_chains",
-                "label": "Agents & Chains",
+                "id": "agent_and_chain_orchestration",
+                "label": "Agent & Chain Orchestration",
                 "type": "module",
-                "link": "agents_and_chains",
-                "title": "Agents and Chains Module",
-                "description": "Provides core components for building intelligent agents and orchestrating complex workflows (chains) using language models, tools, memory, and runnables."
+                "link": "agent_and_chain_orchestration",
+                "title": "Complex Workflow Orchestration",
+                "description": "Enables building sophisticated multi-step applications by composing LLMs, tools, and data sources into intelligent agents and sequential chains, managing conversational memory and execution flow."
             },
             {
-                "id": "data_and_retrieval",
-                "label": "Data & Retrieval",
+                "id": "data_management_and_retrieval",
+                "label": "Data Management & Retrieval",
                 "type": "module",
-                "link": "data_and_retrieval",
-                "title": "Data and Retrieval Module",
-                "description": "Offers functionalities for loading, splitting, indexing, and retrieving documents from various sources, along with managing vector stores and implementing diverse retrieval strategies."
+                "link": "data_management_and_retrieval",
+                "title": "Document & Knowledge Management",
+                "description": "Provides tools for loading, indexing, storing, and retrieving documents from various sources, crucial for retrieval-augmented generation (RAG) applications and maintaining external knowledge bases."
             },
             {
-                "id": "evaluation_and_testing",
-                "label": "Evaluation & Testing",
+                "id": "developer_tools_and_integrations",
+                "label": "Developer Tools & Integrations",
                 "type": "module",
-                "link": "evaluation_and_testing",
-                "title": "LLM Evaluation and Testing",
-                "description": "Provides core functionalities for evaluating the performance of language models and agents, including various evaluation chains, evaluators, configuration runners, and tracing tools."
+                "link": "developer_tools_and_integrations",
+                "title": "Ecosystem & Development Support",
+                "description": "Offers a suite of tools for evaluation, testing, partner integrations, agent middleware, and general utilities to support the entire development lifecycle of LangChain applications."
             }
         ],
         "edges": [
             {
                 "source": "user",
-                "target": "language_models_and_prompts",
-                "label": "configures LLMs & prompts",
+                "target": "core_framework",
+                "label": "builds upon",
                 "title": null,
                 "description": null
             },
             {
                 "source": "user",
-                "target": "agents_and_chains",
-                "label": "builds applications with",
+                "target": "language_model_interface",
+                "label": "configures & uses",
                 "title": null,
                 "description": null
             },
             {
                 "source": "user",
-                "target": "data_and_retrieval",
-                "label": "manages data for",
+                "target": "agent_and_chain_orchestration",
+                "label": "designs & runs",
                 "title": null,
                 "description": null
             },
             {
                 "source": "user",
-                "target": "evaluation_and_testing",
-                "label": "evaluates applications",
+                "target": "data_management_and_retrieval",
+                "label": "manages data with",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_utilities",
-                "target": "language_models_and_prompts",
-                "label": "provides base services",
+                "source": "user",
+                "target": "developer_tools_and_integrations",
+                "label": "uses for testing & extending",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_utilities",
-                "target": "agents_and_chains",
-                "label": "provides base services",
+                "source": "core_framework",
+                "target": "language_model_interface",
+                "label": "provides base abstractions for",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_utilities",
-                "target": "data_and_retrieval",
-                "label": "provides base services",
+                "source": "core_framework",
+                "target": "agent_and_chain_orchestration",
+                "label": "provides base abstractions for",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_utilities",
-                "target": "evaluation_and_testing",
-                "label": "provides base services",
+                "source": "core_framework",
+                "target": "data_management_and_retrieval",
+                "label": "provides base abstractions for",
                 "title": null,
                 "description": null
             },
             {
-                "source": "language_models_and_prompts",
-                "target": "agents_and_chains",
-                "label": "powers intelligence for",
+                "source": "core_framework",
+                "target": "developer_tools_and_integrations",
+                "label": "provides core utilities to",
                 "title": null,
                 "description": null
             },
             {
-                "source": "language_models_and_prompts",
-                "target": "data_and_retrieval",
-                "label": "generates embeddings for",
+                "source": "language_model_interface",
+                "target": "agent_and_chain_orchestration",
+                "label": "powers agents & chains with",
                 "title": null,
                 "description": null
             },
             {
-                "source": "data_and_retrieval",
-                "target": "agents_and_chains",
+                "source": "language_model_interface",
+                "target": "developer_tools_and_integrations",
+                "label": "integrates with models via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_management_and_retrieval",
+                "target": "agent_and_chain_orchestration",
                 "label": "provides context to",
                 "title": null,
                 "description": null
             },
             {
-                "source": "agents_and_chains",
-                "target": "evaluation_and_testing",
-                "label": "are evaluated by",
+                "source": "data_management_and_retrieval",
+                "target": "language_model_interface",
+                "label": "enhances prompts for",
                 "title": null,
                 "description": null
             },
             {
-                "source": "language_models_and_prompts",
-                "target": "evaluation_and_testing",
-                "label": "are evaluated by",
+                "source": "agent_and_chain_orchestration",
+                "target": "developer_tools_and_integrations",
+                "label": "monitored & enhanced by",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "core_building_blocks",
-                "label": "Core Building Blocks",
+                "id": "foundation_group",
+                "label": "Core Foundations",
                 "nodes": [
-                    "core_utilities",
-                    "language_models_and_prompts"
+                    "core_framework"
                 ],
-                "title": "Core Building Blocks",
-                "description": "Fundamental components for interacting with language models, managing prompts, and providing essential utilities for the framework.",
+                "title": "LangChain Core Foundations",
+                "description": "This group encompasses the fundamental building blocks, abstract interfaces, and essential utilities that form the architectural backbone of the entire LangChain ecosystem.",
                 "role": null
             },
             {
-                "id": "application_orchestration",
-                "label": "Application Orchestration",
+                "id": "ai_logic_orchestration_group",
+                "label": "AI Logic & Orchestration",
                 "nodes": [
-                    "agents_and_chains"
+                    "language_model_interface",
+                    "agent_and_chain_orchestration"
                 ],
-                "title": "Application Orchestration",
-                "description": "Modules dedicated to constructing and managing complex LLM-powered applications, including agents and sequential chains of operations.",
+                "title": "AI Logic & Workflow Orchestration",
+                "description": "This group focuses on defining how to interact with language models, engineer prompts, and orchestrate complex, multi-step AI workflows using agents and chains.",
                 "role": null
             },
             {
-                "id": "data_management_and_quality",
-                "label": "Data Management & Quality",
+                "id": "data_knowledge_group",
+                "label": "Data & Knowledge Management",
                 "nodes": [
-                    "data_and_retrieval",
-                    "evaluation_and_testing"
+                    "data_management_and_retrieval"
                 ],
-                "title": "Data Management & Quality",
-                "description": "Components for handling data ingestion, storage, retrieval, and ensuring the quality and performance of LLM applications through evaluation and testing.",
+                "title": "Data & Knowledge Management",
+                "description": "This group provides comprehensive tools for loading, indexing, storing, and retrieving documents, enabling applications to access and utilize external knowledge efficiently.",
+                "role": null
+            },
+            {
+                "id": "development_ecosystem_group",
+                "label": "Development & Ecosystem Support",
+                "nodes": [
+                    "developer_tools_and_integrations"
+                ],
+                "title": "Development & Ecosystem Support",
+                "description": "This group offers a suite of tools for evaluating, testing, integrating with external partners, and enhancing agent behavior, supporting the full development lifecycle of LangChain applications.",
                 "role": null
             }
         ]

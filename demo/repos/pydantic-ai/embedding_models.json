@@ -1,0 +1,305 @@
+{
+  "title": "Text Embedding Management",
+  "summary": "This module provides a high-level interface for generating text embeddings using various models and providers. It includes an abstract base for embedding models, specific implementations for different providers, and utilities for managing settings and usage.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "Embedder",
+        "label": "Manage Text Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "High-level Embedding Interface",
+        "description": "Provides a high-level, unified API for generating text embeddings from various providers, managing model settings, and integrating with OpenTelemetry for monitoring."
+      },
+      {
+        "id": "EmbeddingModel",
+        "label": "Define Embedding Model Interface",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Embedding Model",
+        "description": "An abstract base class that defines the contract for all embedding models, specifying methods for generating embeddings, counting tokens, and accessing model metadata."
+      },
+      {
+        "id": "_CohereEmbeddingHandler",
+        "label": "Handle Bedrock Cohere Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Cohere Handler",
+        "description": "An internal component responsible for adapting requests and parsing responses specifically for Cohere embedding models hosted on AWS Bedrock, including batch support."
+      },
+      {
+        "id": "_NovaEmbeddingHandler",
+        "label": "Handle Bedrock Nova Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Nova Handler",
+        "description": "An internal component for handling Amazon Nova embedding models on AWS Bedrock, managing request preparation and response parsing for single text embeddings."
+      },
+      {
+        "id": "_TitanEmbeddingHandler",
+        "label": "Handle Bedrock Titan Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Titan Handler",
+        "description": "An internal component for managing Amazon Titan embedding models on AWS Bedrock, handling request formatting and response extraction for single text embeddings."
+      },
+      {
+        "id": "TestEmbeddingModel",
+        "label": "Provide Mock Embeddings for Testing",
+        "type": "component",
+        "link": null,
+        "title": "Mock Embedding Model",
+        "description": "A specialized mock embedding model designed for testing purposes, providing predictable, all-1.0 embeddings and capturing the settings used in its calls."
+      },
+      {
+        "id": "WrapperEmbeddingModel",
+        "label": "Wrap Existing Embedding Models",
+        "type": "component",
+        "link": null,
+        "title": "Wrapper Embedding Model",
+        "description": "A foundational class for creating custom embedding model wrappers, enabling modification of behavior like caching or logging while delegating core functionality to an underlying model."
+      },
+      {
+        "id": "_map_usage_cohere",
+        "label": "Process Cohere Usage Data",
+        "type": "component",
+        "link": null,
+        "title": "Map Cohere Usage",
+        "description": "A utility function that extracts and standardizes usage metrics from Cohere embedding API responses, converting them into a standardized RequestUsage object."
+      },
+      {
+        "id": "_map_usage_google",
+        "label": "Process Google Usage Data",
+        "type": "component",
+        "link": null,
+        "title": "Map Google Usage",
+        "description": "A utility function to process usage information from Google embedding API responses, primarily focusing on token counts, and mapping them to RequestUsage."
+      },
+      {
+        "id": "_map_usage_openai",
+        "label": "Process OpenAI Usage Data",
+        "type": "component",
+        "link": null,
+        "title": "Map OpenAI Usage",
+        "description": "A utility function that converts OpenAI embedding API usage data into a standardized RequestUsage object, including prompt tokens and other details."
+      },
+      {
+        "id": "_map_usage_voyageai",
+        "label": "Process VoyageAI Usage Data",
+        "type": "component",
+        "link": null,
+        "title": "Map VoyageAI Usage",
+        "description": "A utility function to map the total token count from VoyageAI embedding responses into a RequestUsage object for consistent usage tracking."
+      },
+      {
+        "id": "EmbeddingSettings",
+        "label": "Configure Embedding Parameters",
+        "type": "external",
+        "link": null,
+        "title": "Embedding Configuration",
+        "description": "A Pydantic model defining various configurable parameters for embedding operations, such as output dimensions, truncation strategies, and specific provider settings."
+      },
+      {
+        "id": "EmbeddingResult",
+        "label": "Store Embedding Outputs",
+        "type": "external",
+        "link": null,
+        "title": "Embedding Output",
+        "description": "A data structure encapsulating the outcome of an embedding operation, including the generated vector embeddings, the original input texts, and associated usage statistics."
+      },
+      {
+        "id": "RequestUsage",
+        "label": "Track API Usage Metrics",
+        "type": "external",
+        "link": null,
+        "title": "API Usage Metrics",
+        "description": "A standardized data model used across the system to record and report API call metrics, such as input/output token counts and other billing-related details."
+      },
+      {
+        "id": "InstrumentationSettings",
+        "label": "Configure Telemetry",
+        "type": "external",
+        "link": null,
+        "title": "Telemetry Configuration",
+        "description": "Configuration options for integrating with OpenTelemetry, allowing for detailed tracing, logging, and monitoring of embedding model interactions and performance."
+      },
+      {
+        "id": "EmbedInputType",
+        "label": "Specify Embedding Input Type",
+        "type": "external",
+        "link": null,
+        "title": "Embedding Input Type",
+        "description": "An enumeration or string literal that categorizes the purpose of the input text (e.g., 'query' or 'document'), which can influence how embeddings are generated by some models."
+      }
+    ],
+    "edges": [
+      {
+        "source": "Embedder",
+        "target": "EmbeddingModel",
+        "label": "Delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Embedder",
+        "target": "EmbeddingSettings",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Embedder",
+        "target": "InstrumentationSettings",
+        "label": "Applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Embedder",
+        "target": "EmbeddingResult",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EmbeddingModel",
+        "target": "EmbeddingSettings",
+        "label": "Configured by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EmbeddingModel",
+        "target": "EmbeddingResult",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EmbeddingModel",
+        "target": "EmbedInputType",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "WrapperEmbeddingModel",
+        "target": "EmbeddingModel",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TestEmbeddingModel",
+        "target": "EmbeddingModel",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_CohereEmbeddingHandler",
+        "target": "RequestUsage",
+        "label": "Contributes to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_NovaEmbeddingHandler",
+        "target": "RequestUsage",
+        "label": "Contributes to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_TitanEmbeddingHandler",
+        "target": "RequestUsage",
+        "label": "Contributes to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_map_usage_cohere",
+        "target": "RequestUsage",
+        "label": "Outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_map_usage_google",
+        "target": "RequestUsage",
+        "label": "Outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_map_usage_openai",
+        "target": "RequestUsage",
+        "label": "Outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_map_usage_voyageai",
+        "target": "RequestUsage",
+        "label": "Outputs",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_group",
+        "label": "Surface Components",
+        "nodes": [
+          "Embedder"
+        ],
+        "title": "User-Facing Interfaces",
+        "description": "Components directly exposed to the user for interacting with the embedding system.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_group",
+        "label": "Generative Components",
+        "nodes": [
+          "EmbeddingModel",
+          "TestEmbeddingModel",
+          "WrapperEmbeddingModel",
+          "_CohereEmbeddingHandler",
+          "_NovaEmbeddingHandler",
+          "_TitanEmbeddingHandler"
+        ],
+        "title": "Embedding Generation Logic",
+        "description": "Components responsible for the core logic of generating embeddings, including abstract definitions and specific model handlers.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_group",
+        "label": "Analytical Components",
+        "nodes": [
+          "_map_usage_cohere",
+          "_map_usage_google",
+          "_map_usage_openai",
+          "_map_usage_voyageai"
+        ],
+        "title": "Usage Data Processing",
+        "description": "Components focused on processing and standardizing usage metrics from various embedding providers.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_group",
+        "label": "Data Structures",
+        "nodes": [
+          "EmbeddingSettings",
+          "EmbeddingResult",
+          "RequestUsage",
+          "InstrumentationSettings",
+          "EmbedInputType"
+        ],
+        "title": "Data Models and Configurations",
+        "description": "Key data structures used for configuring embedding operations, storing results, and tracking API usage.",
+        "role": "data"
+      }
+    ]
+  }
+}

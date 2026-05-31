@@ -1,0 +1,11 @@
+{
+    "enabled": true,
+    "palette": "system_design",
+    "title": "Legend",
+    "roles": {
+        "actor": "Actor / Client",
+        "domain_group": "Domain / subsystem",
+        "external_dependency": "External dependency",
+        "data_store": "Data store"
+    }
+}

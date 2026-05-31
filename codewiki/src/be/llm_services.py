@@ -4,6 +4,7 @@ LLM service factory for creating configured LLM clients.
 import os
 import logging
 import time
+import threading
 from dataclasses import dataclass, field
 from typing import Dict, Optional
 from pydantic_ai.models.openai import OpenAIModel
@@ -107,6 +108,8 @@ PRICING = {
     "gpt-4o-mini": {"input": 0.15 / 1_000_000, "output": 0.60 / 1_000_000},
     "gpt-4-turbo": {"input": 10.00 / 1_000_000, "output": 30.00 / 1_000_000},
     "claude-sonnet-4": {"input": 3.00 / 1_000_000, "output": 15.00 / 1_000_000},
+    "gemini-2.5-flash": {"input": 0.15 / 1_000_000, "output": 0.60 / 1_000_000},
+    "gemini-2.0-flash": {"input": 0.10 / 1_000_000, "output": 0.40 / 1_000_000},
     "default": {"input": 5.00 / 1_000_000, "output": 15.00 / 1_000_000},
 }
 
@@ -134,26 +137,29 @@ class LLMCallStats:
 
 @dataclass
 class TokenTracker:
-    """Global tracker for all LLM calls and costs."""
+    """Global tracker for all LLM calls and costs. Thread-safe."""
     calls: list = field(default_factory=list)
     current_stage: str = ""
+    _lock: threading.Lock = field(default_factory=threading.Lock)
     
     def add_call(self, stats: LLMCallStats):
-        stats.stage = self.current_stage
-        self.calls.append(stats)
-        
-        # Log the call
-        logger.info(f"[TOKEN TRACKER] Call #{len(self.calls)}: {stats.model}")
+        with self._lock:
+            stats.stage = self.current_stage
+            self.calls.append(stats)
+            call_num = len(self.calls)
+            cost = self.total_cost
+        logger.info(f"[TOKEN TRACKER] Call #{call_num}: {stats.model}")
         logger.info(f"[TOKEN TRACKER]   Stage: {stats.stage}")
         logger.info(f"[TOKEN TRACKER]   Prompt tokens: {stats.prompt_tokens:,}")
         logger.info(f"[TOKEN TRACKER]   Completion tokens: {stats.completion_tokens:,}")
         logger.info(f"[TOKEN TRACKER]   Total tokens: {stats.total_tokens:,}")
         logger.info(f"[TOKEN TRACKER]   Duration: {stats.duration_seconds:.1f}s")
         logger.info(f"[TOKEN TRACKER]   Cost: ${stats.cost:.4f}")
-        logger.info(f"[TOKEN TRACKER]   Running total: ${self.total_cost:.4f}")
+        logger.info(f"[TOKEN TRACKER]   Running total: ${cost:.4f}")
     
     def set_stage(self, stage: str):
-        self.current_stage = stage
+        with self._lock:
+            self.current_stage = stage
         logger.info(f"[TOKEN TRACKER] === Stage: {stage} ===")
     
     @property
@@ -223,6 +229,69 @@ _token_tracker = TokenTracker()
 def get_token_tracker() -> TokenTracker:
     """Get the global token tracker."""
     return _token_tracker
+
+
+def _metrics_stage_for_tracker_stage(tracker_stage: str, metrics_stages: dict) -> str:
+    """Map token-tracker stage labels onto metrics.json stage names."""
+    s = (tracker_stage or "").lower()
+    if "dependency" in s or "stage 1" in s:
+        key = "Dependency Analysis"
+    elif "cluster" in s or "stage 2" in s:
+        key = "Module Clustering"
+    else:
+        key = "Documentation Generation"
+    if key in metrics_stages:
+        return key
+    if metrics_stages:
+        return next(iter(metrics_stages.keys()))
+    return key
+
+
+def sync_token_tracker_to_metrics(reset_stage_tokens: bool = True) -> None:
+    """Flush global TokenTracker usage into RepoMetrics (metrics.json)."""
+    tracker = get_token_tracker()
+    try:
+        from codewiki.src.utils.metrics import get_metrics_collector
+
+        metrics = get_metrics_collector().get_current()
+    except Exception:
+        metrics = None
+    if not metrics or not tracker.calls:
+        return
+    if reset_stage_tokens:
+        for stage in metrics.stages.values():
+            stage.tokens_used = 0
+    for call in tracker.calls:
+        stage_key = _metrics_stage_for_tracker_stage(call.stage, metrics.stages)
+        if stage_key in metrics.stages:
+            metrics.stages[stage_key].tokens_used += call.total_tokens
+    try:
+        from codewiki.src.be.generation_tracker import get_generation_tracker
+
+        gen = get_generation_tracker()
+        if gen.report:
+            gen.report.total_tokens = tracker.total_tokens
+            gen.report.estimated_cost = tracker.total_cost
+            gen.report.total_llm_calls = len(tracker.calls)
+            gen.report.successful_llm_calls = tracker.successful_calls
+            gen.report.failed_llm_calls = tracker.failed_calls
+    except Exception:
+        pass
+
+
+def _append_call_to_metrics(stats: "LLMCallStats") -> None:
+    """Attribute a single LLM call to the active metrics stage (OpenAI path helper)."""
+    try:
+        from codewiki.src.utils.metrics import get_metrics_collector
+
+        metrics = get_metrics_collector().get_current()
+        if metrics and metrics.stages:
+            stage_key = _metrics_stage_for_tracker_stage(get_token_tracker().current_stage, metrics.stages)
+            if stage_key in metrics.stages:
+                metrics.stages[stage_key].tokens_used += stats.total_tokens
+    except Exception:
+        pass
+
 
 
 def _is_gemini_model(model_name: str) -> bool:
@@ -403,6 +472,23 @@ def create_fallback_models(config: Config) -> FallbackModel:
     return FallbackModel(main, fallback)
 
 
+_genai_configured = False
+_genai_lock = threading.Lock()
+
+
+def _ensure_genai_configured(config: Config) -> None:
+    """Call genai.configure() exactly once (thread-safe)."""
+    global _genai_configured
+    if _genai_configured:
+        return
+    with _genai_lock:
+        if _genai_configured:
+            return
+        api_key = os.getenv('GEMINI_API_KEY') or config.llm_api_key
+        genai.configure(api_key=api_key)
+        _genai_configured = True
+
+
 def create_openai_client(config: Config) -> OpenAI:
     """Create OpenAI client from configuration."""
     return OpenAI(
@@ -468,13 +554,32 @@ def _call_gemini_rest(
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         req_kwargs = {"json": body, "timeout": 600}
 
+    import random
+
+    max_retries = 3
     llm_start = time.time()
-    try:
-        r = requests.post(url, **req_kwargs)
+    for _retry in range(max_retries + 1):
+        try:
+            r = requests.post(url, **req_kwargs)
+        except requests.exceptions.ConnectionError as ce:
+            if _retry < max_retries:
+                delay = (2 ** _retry) + random.uniform(0, 1)
+                logger.warning(f"[LLM] Gemini REST connection error, retry {_retry+1}/{max_retries} in {delay:.1f}s: {ce}")
+                time.sleep(delay)
+                continue
+            raise
+
         llm_duration = time.time() - llm_start
         data = r.json()
         if r.status_code != 200:
             err = data.get("error", {}).get("message", r.text)
+            is_retryable = r.status_code in (429, 503, 500, 502)
+            if is_retryable and _retry < max_retries:
+                delay = (2 ** _retry) + random.uniform(0, 1)
+                logger.warning(f"[LLM] Gemini REST {r.status_code}, retry {_retry+1}/{max_retries} in {delay:.1f}s: {err[:100]}")
+                time.sleep(delay)
+                llm_start = time.time()
+                continue
             logger.error(f"[LLM] Gemini REST error {r.status_code}: {err}")
             stats = LLMCallStats(
                 model=model,
@@ -486,7 +591,9 @@ def _call_gemini_rest(
             )
             tracker.add_call(stats)
             raise RuntimeError(f"Gemini REST error {r.status_code}: {err}")
+        break  # success
 
+    try:
         cands = data.get("candidates") or []
         if not cands:
             logger.error(f"[LLM] Gemini REST: no candidates: {data}")
@@ -510,6 +617,7 @@ def _call_gemini_rest(
             success=True,
         )
         tracker.add_call(stats)
+        _append_call_to_metrics(stats)
         logger.info(
             f"[LLM] Gemini REST done in {llm_duration:.1f}s "
             f"(thoughts={um.get('thoughtsTokenCount', 0)}, out={actual_completion_tokens})"
@@ -556,9 +664,8 @@ def _call_gemini_native(
 
     logger.info(f"[LLM] Using native Gemini API (API key) for {model}")
 
-    # Prefer GEMINI_API_KEY env var, fallback to config
-    api_key = os.getenv('GEMINI_API_KEY') or config.llm_api_key
-    genai.configure(api_key=api_key)
+    # genai.configure() is called once at module init via _ensure_genai_configured()
+    _ensure_genai_configured(config)
     if system_instruction:
         genai_model = genai.GenerativeModel(model, system_instruction=system_instruction)
     else:
@@ -642,6 +749,7 @@ def _call_gemini_native(
             success=True
         )
         tracker.add_call(stats)
+        _append_call_to_metrics(stats)
         
         return response_text
 
@@ -812,15 +920,5 @@ def call_llm(
         logger.error(f"[LLM] Traceback: {traceback.format_exc()}")
         raise
     
-    # Also track in old metrics system for compatibility
-    try:
-        from codewiki.src.utils.metrics import get_metrics_collector
-        metrics = get_metrics_collector().get_current()
-        if metrics and hasattr(metrics, 'stages') and metrics.stages:
-            latest_stage = list(metrics.stages.values())[-1] if metrics.stages else None
-            if latest_stage:
-                latest_stage.tokens_used += stats.total_tokens
-    except Exception:
-        pass  # Non-critical
-    
+    _append_call_to_metrics(stats)
     return response_content

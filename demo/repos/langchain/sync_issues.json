@@ -1,806 +1,506 @@
 {
-  "docs_dir": "/Users/shreyaspatel/.cursor/worktrees/atelier/7y0n/.tmp/demo_regen/langchain/docs",
-  "timestamp": "2026-05-17T03:55:08.730294",
+  "docs_dir": "/Users/shreyaspatel/atelier/.tmp/demo_regen/langchain/docs",
+  "timestamp": "2026-05-26T14:41:50.136238",
   "summary": {
-    "total_modules": 40,
-    "missing_files": 0,
-    "failure_rate_pct": 0.0,
-    "success_rate_pct": 100.0,
-    "total_issues": 49,
-    "errors": 0,
-    "warnings": 49,
+    "total_modules": 24,
+    "missing_files": 1,
+    "failure_rate_pct": 4.17,
+    "success_rate_pct": 95.83,
+    "total_issues": 21,
+    "errors": 1,
+    "warnings": 20,
     "files_created": 0,
-    "metadata_added": 46,
+    "metadata_added": 2,
     "diagrams_added": 0
   },
   "metrics": {
     "presync_audit": {
-      "modules_total": 40,
-      "missing_md": 40,
-      "missing_title": 23,
-      "missing_description": 23,
+      "modules_total": 24,
+      "missing_md": 1,
+      "missing_title": 1,
+      "missing_description": 1,
       "leaf_missing_diagram": 0,
-      "parent_missing_diagram_with_children": 0,
+      "parent_missing_diagram_with_children": 1,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 0,
-      "children_missing_from_diagram_nodes": 5,
-      "parent_diagram_gaps_to_inject": 5,
+      "diagram_edges_unknown_endpoint": 15,
+      "children_missing_from_diagram_nodes": 12,
+      "parent_diagram_gaps_to_inject": 16,
       "mermaid_fence_blocks_total": 0,
+      "invalid_module_json_parse": 0,
       "placeholder_md_files": 0
     },
     "diagram_ir_audit": {
-      "module_diagrams_total": 40,
+      "module_diagrams_total": 24,
       "overview_has_diagram_json": true,
       "overview_mermaid_parse_ok": true,
       "overview_r1_reason": null,
       "by_code": {
-        "r4_node_id_collides_with_group": 2,
-        "r4_edge_placement_violations": 1
+        "r4_node_id_collides_with_group": 3,
+        "r4_edge_unknown_target": 15
       },
       "samples_by_code": {
         "r4_node_id_collides_with_group": [
           {
             "code": "r4_node_id_collides_with_group",
             "id": "message_handling",
-            "module": "language_models_and_prompts",
-            "path": "language_models_and_prompts"
+            "module": "language_model_interface",
+            "path": "language_model_interface"
           },
           {
             "code": "r4_node_id_collides_with_group",
-            "id": "prompt_templates",
-            "module": "language_models_and_prompts",
-            "path": "language_models_and_prompts"
+            "id": "prompt_engineering",
+            "module": "language_model_interface",
+            "path": "language_model_interface"
+          },
+          {
+            "code": "r4_node_id_collides_with_group",
+            "id": "output_parsing",
+            "module": "language_model_interface",
+            "path": "language_model_interface"
           }
         ],
-        "r4_edge_placement_violations": [
+        "r4_edge_unknown_target": [
           {
-            "code": "r4_edge_placement_violations",
-            "violations": [
-              {
-                "edgeId": "e_llm_interfaces_message_handling_0",
-                "placedIn": "root",
-                "expectedLca": null,
-                "source": "llm_interfaces",
-                "target": "message_handling"
-              },
-              {
-                "edgeId": "e_llm_interfaces_prompt_templates_1",
-                "placedIn": "root",
-                "expectedLca": null,
-                "source": "llm_interfaces",
-                "target": "prompt_templates"
-              },
-              {
-                "edgeId": "e_prompt_templates_llm_interfaces_2",
-                "placedIn": "root",
-                "expectedLca": null,
-                "source": "prompt_templates",
-                "target": "llm_interfaces"
-              },
-              {
-                "edgeId": "e_message_handling_partner_llms_5",
-                "placedIn": "root",
-                "expectedLca": null,
-                "source": "message_handling",
-                "target": "partner_llms"
-              }
-            ],
-            "module": "language_models_and_prompts",
-            "path": "language_models_and_prompts"
+            "code": "r4_edge_unknown_target",
+            "index": 60,
+            "source": "CreateTaggingChain",
+            "target": "JsonOutputFunctionsParser",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 78,
+            "source": "StructuredQueryOutputParser",
+            "target": "BaseOutputParser",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 96,
+            "source": "CreateStructuredOutputRunnable",
+            "target": "BaseOutputParser",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 104,
+            "source": "LoadGenericChain",
+            "target": "LLMCheckerChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 105,
+            "source": "LoadGenericChain",
+            "target": "LLMMathChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 106,
+            "source": "LoadGenericChain",
+            "target": "QAWithSourcesChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 107,
+            "source": "LoadGenericChain",
+            "target": "APIChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 108,
+            "source": "LoadGenericChain",
+            "target": "HypotheticalDocumentEmbedder",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 112,
+            "source": "LoadGenericChain",
+            "target": "VectorDBQA",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 114,
+            "source": "LoadGenericChain",
+            "target": "VectorDBQAWithSourcesChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 115,
+            "source": "LoadGenericChain",
+            "target": "RetrievalQAWithSourcesChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 116,
+            "source": "LoadGenericChain",
+            "target": "MapRerankDocumentsChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 117,
+            "source": "LoadGenericChain",
+            "target": "LLMRequestsChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 118,
+            "source": "LoadGenericChain",
+            "target": "GraphCypherQAChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 120,
+            "source": "LoadGenericChain",
+            "target": "BasePromptTemplate",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
           }
         ]
       }
     },
-    "mermaid_validation": {
-      "blocks_checked": 0,
-      "blocks_invalid": 0,
-      "validation_ms": 0.0777,
-      "error_type_histogram": {},
-      "stage46_fixes_applied": 0,
-      "postfix_blocks_invalid": 0,
-      "postfix_error_type_histogram": {}
-    },
     "postsync_audit": {
-      "modules_total": 40,
-      "missing_md": 40,
+      "modules_total": 24,
+      "missing_md": 1,
       "missing_title": 0,
       "missing_description": 0,
       "leaf_missing_diagram": 0,
       "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 0,
+      "diagram_edges_unknown_endpoint": 15,
       "children_missing_from_diagram_nodes": 0,
       "parent_diagram_gaps_to_inject": 0,
       "mermaid_fence_blocks_total": 0,
+      "invalid_module_json_parse": 0,
       "placeholder_md_files": 0
     },
     "delta_presync_minus_postsync": {
-      "missing_md": 0.0,
-      "diagram_nodes_with_empty_label": 0.0,
       "leaf_missing_diagram": 0.0,
-      "children_missing_from_diagram_nodes": 5.0,
-      "mermaid_fence_blocks_total": 0.0,
+      "missing_description": 1.0,
+      "missing_md": 0.0,
+      "invalid_module_json_parse": 0.0,
+      "missing_title": 1.0,
+      "diagram_nodes_with_empty_label": 0.0,
+      "parent_missing_diagram_with_children": 1.0,
       "diagram_edges_unknown_endpoint": 0.0,
-      "modules_total": 0.0,
-      "missing_description": 23.0,
+      "parent_diagram_gaps_to_inject": 16.0,
+      "mermaid_fence_blocks_total": 0.0,
       "placeholder_md_files": 0.0,
-      "parent_diagram_gaps_to_inject": 5.0,
-      "parent_missing_diagram_with_children": 0.0,
-      "missing_title": 23.0
+      "children_missing_from_diagram_nodes": 12.0,
+      "modules_total": 0.0
     },
     "fixes_applied_counts": {
-      "metadata_field_updates": 46,
+      "metadata_field_updates": 2,
       "placeholder_md_files_created": 0,
       "leaf_diagrams_added": 0,
-      "parent_diagram_child_nodes_injected": 5,
-      "overview_md_created": 0,
-      "mermaid_stage46_fixes": 0
+      "parent_diagram_child_nodes_injected": 16,
+      "overview_md_created": 0
     },
     "measurement_summary": {
       "1_stage3_defects_before_stage45": {
         "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
         "presync_audit": {
-          "modules_total": 40,
-          "missing_md": 40,
-          "missing_title": 23,
-          "missing_description": 23,
+          "modules_total": 24,
+          "missing_md": 1,
+          "missing_title": 1,
+          "missing_description": 1,
           "leaf_missing_diagram": 0,
-          "parent_missing_diagram_with_children": 0,
+          "parent_missing_diagram_with_children": 1,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 0,
-          "children_missing_from_diagram_nodes": 5,
-          "parent_diagram_gaps_to_inject": 5,
+          "diagram_edges_unknown_endpoint": 15,
+          "children_missing_from_diagram_nodes": 12,
+          "parent_diagram_gaps_to_inject": 16,
           "mermaid_fence_blocks_total": 0,
+          "invalid_module_json_parse": 0,
           "placeholder_md_files": 0
         }
       },
       "1b_stage45_fixes_applied_counters": {
-        "metadata_field_updates": 46,
+        "metadata_field_updates": 2,
         "placeholder_md_files_created": 0,
         "leaf_diagrams_added": 0,
-        "parent_diagram_child_nodes_injected": 5,
-        "overview_md_created": 0,
-        "mermaid_stage46_fixes": 0
+        "parent_diagram_child_nodes_injected": 16,
+        "overview_md_created": 0
       },
       "1c_residual_after_stage45": {
         "postsync_audit": {
-          "modules_total": 40,
-          "missing_md": 40,
+          "modules_total": 24,
+          "missing_md": 1,
           "missing_title": 0,
           "missing_description": 0,
           "leaf_missing_diagram": 0,
           "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 0,
+          "diagram_edges_unknown_endpoint": 15,
           "children_missing_from_diagram_nodes": 0,
           "parent_diagram_gaps_to_inject": 0,
           "mermaid_fence_blocks_total": 0,
+          "invalid_module_json_parse": 0,
           "placeholder_md_files": 0
         }
       },
       "1d_reduction_delta_presync_minus_postsync": {
         "note": "Positive number = fewer problems after sync for that metric",
         "delta": {
-          "missing_md": 0.0,
-          "diagram_nodes_with_empty_label": 0.0,
           "leaf_missing_diagram": 0.0,
-          "children_missing_from_diagram_nodes": 5.0,
-          "mermaid_fence_blocks_total": 0.0,
+          "missing_description": 1.0,
+          "missing_md": 0.0,
+          "invalid_module_json_parse": 0.0,
+          "missing_title": 1.0,
+          "diagram_nodes_with_empty_label": 0.0,
+          "parent_missing_diagram_with_children": 1.0,
           "diagram_edges_unknown_endpoint": 0.0,
-          "modules_total": 0.0,
-          "missing_description": 23.0,
+          "parent_diagram_gaps_to_inject": 16.0,
+          "mermaid_fence_blocks_total": 0.0,
           "placeholder_md_files": 0.0,
-          "parent_diagram_gaps_to_inject": 5.0,
-          "parent_missing_diagram_with_children": 0.0,
-          "missing_title": 23.0
+          "children_missing_from_diagram_nodes": 12.0,
+          "modules_total": 0.0
         }
       },
       "1e_issues_logged_this_run_by_type": {
         "all": {
-          "missing_title": 23,
-          "missing_description": 23,
-          "diagram_ir_r4_node_id_collides_with_group": 2,
-          "diagram_ir_r4_edge_placement_violations": 1
+          "missing_title": 1,
+          "missing_description": 1,
+          "missing_md_file": 1,
+          "diagram_ir_r4_node_id_collides_with_group": 3,
+          "diagram_ir_r4_edge_unknown_target": 15
         }
       },
-      "2_mermaid": {
-        "blocks_checked": 0,
-        "blocks_invalid_before_stage46": 0,
-        "blocks_invalid_after_stage46": 0,
-        "validation_ms": 0.0777,
-        "error_type_histogram": {},
-        "error_type_histogram_after_stage46": {},
-        "stage46_fixes_applied": 0,
-        "validator": "mermaid_validator (Mermaid.js 11.9 via Node, same as viewer)"
-      },
-      "3_diagram_ir": {
+      "2_diagram_ir": {
         "audit": {
-          "module_diagrams_total": 40,
+          "module_diagrams_total": 24,
           "overview_has_diagram_json": true,
           "overview_mermaid_parse_ok": true,
           "overview_r1_reason": null,
           "by_code": {
-            "r4_node_id_collides_with_group": 2,
-            "r4_edge_placement_violations": 1
+            "r4_node_id_collides_with_group": 3,
+            "r4_edge_unknown_target": 15
           },
           "samples_by_code": {
             "r4_node_id_collides_with_group": [
               {
                 "code": "r4_node_id_collides_with_group",
                 "id": "message_handling",
-                "module": "language_models_and_prompts",
-                "path": "language_models_and_prompts"
+                "module": "language_model_interface",
+                "path": "language_model_interface"
               },
               {
                 "code": "r4_node_id_collides_with_group",
-                "id": "prompt_templates",
-                "module": "language_models_and_prompts",
-                "path": "language_models_and_prompts"
+                "id": "prompt_engineering",
+                "module": "language_model_interface",
+                "path": "language_model_interface"
+              },
+              {
+                "code": "r4_node_id_collides_with_group",
+                "id": "output_parsing",
+                "module": "language_model_interface",
+                "path": "language_model_interface"
               }
             ],
-            "r4_edge_placement_violations": [
+            "r4_edge_unknown_target": [
               {
-                "code": "r4_edge_placement_violations",
-                "violations": [
-                  {
-                    "edgeId": "e_llm_interfaces_message_handling_0",
-                    "placedIn": "root",
-                    "expectedLca": null,
-                    "source": "llm_interfaces",
-                    "target": "message_handling"
-                  },
-                  {
-                    "edgeId": "e_llm_interfaces_prompt_templates_1",
-                    "placedIn": "root",
-                    "expectedLca": null,
-                    "source": "llm_interfaces",
-                    "target": "prompt_templates"
-                  },
-                  {
-                    "edgeId": "e_prompt_templates_llm_interfaces_2",
-                    "placedIn": "root",
-                    "expectedLca": null,
-                    "source": "prompt_templates",
-                    "target": "llm_interfaces"
-                  },
-                  {
-                    "edgeId": "e_message_handling_partner_llms_5",
-                    "placedIn": "root",
-                    "expectedLca": null,
-                    "source": "message_handling",
-                    "target": "partner_llms"
-                  }
-                ],
-                "module": "language_models_and_prompts",
-                "path": "language_models_and_prompts"
+                "code": "r4_edge_unknown_target",
+                "index": 60,
+                "source": "CreateTaggingChain",
+                "target": "JsonOutputFunctionsParser",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 78,
+                "source": "StructuredQueryOutputParser",
+                "target": "BaseOutputParser",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 96,
+                "source": "CreateStructuredOutputRunnable",
+                "target": "BaseOutputParser",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 104,
+                "source": "LoadGenericChain",
+                "target": "LLMCheckerChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 105,
+                "source": "LoadGenericChain",
+                "target": "LLMMathChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 106,
+                "source": "LoadGenericChain",
+                "target": "QAWithSourcesChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 107,
+                "source": "LoadGenericChain",
+                "target": "APIChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 108,
+                "source": "LoadGenericChain",
+                "target": "HypotheticalDocumentEmbedder",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 112,
+                "source": "LoadGenericChain",
+                "target": "VectorDBQA",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 114,
+                "source": "LoadGenericChain",
+                "target": "VectorDBQAWithSourcesChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 115,
+                "source": "LoadGenericChain",
+                "target": "RetrievalQAWithSourcesChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 116,
+                "source": "LoadGenericChain",
+                "target": "MapRerankDocumentsChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 117,
+                "source": "LoadGenericChain",
+                "target": "LLMRequestsChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 118,
+                "source": "LoadGenericChain",
+                "target": "GraphCypherQAChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 120,
+                "source": "LoadGenericChain",
+                "target": "BasePromptTemplate",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
               }
             ]
           }
         },
         "by_code": {
-          "r4_node_id_collides_with_group": 2,
-          "r4_edge_placement_violations": 1
+          "r4_node_id_collides_with_group": 3,
+          "r4_edge_unknown_target": 15
         }
       }
     }
   },
   "issues_by_type": {
-    "missing_title": 23,
-    "missing_description": 23,
-    "diagram_ir_r4_node_id_collides_with_group": 2,
-    "diagram_ir_r4_edge_placement_violations": 1
+    "missing_title": 1,
+    "missing_description": 1,
+    "missing_md_file": 1,
+    "diagram_ir_r4_node_id_collides_with_group": 3,
+    "diagram_ir_r4_edge_unknown_target": 15
   },
   "issues": [
     {
       "issue_type": "missing_title",
-      "module_name": "api_management",
-      "module_path": "core_utilities/api_management",
+      "module_name": "agent_and_chain_orchestration",
+      "module_path": "agent_and_chain_orchestration",
       "severity": "warning",
       "details": {
-        "component_count": 9,
-        "has_children": false
+        "component_count": 0,
+        "has_children": true
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "api_management",
-      "module_path": "core_utilities/api_management",
+      "module_name": "agent_and_chain_orchestration",
+      "module_path": "agent_and_chain_orchestration",
       "severity": "warning",
       "details": {
-        "component_count": 9,
-        "has_children": false
+        "component_count": 0,
+        "has_children": true
       },
       "auto_fixed": true
     },
     {
-      "issue_type": "missing_title",
-      "module_name": "security",
-      "module_path": "core_utilities/security",
-      "severity": "warning",
+      "issue_type": "missing_md_file",
+      "module_name": "agent_and_chain_orchestration",
+      "module_path": "agent_and_chain_orchestration",
+      "severity": "error",
       "details": {
-        "component_count": 6,
-        "has_children": false
+        "component_count": 0,
+        "depth": 1,
+        "has_title": true,
+        "has_description": true,
+        "has_children": true,
+        "parent": "root"
       },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "security",
-      "module_path": "core_utilities/security",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "callbacks_and_history",
-      "module_path": "core_utilities/callbacks_and_history",
-      "severity": "warning",
-      "details": {
-        "component_count": 9,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "callbacks_and_history",
-      "module_path": "core_utilities/callbacks_and_history",
-      "severity": "warning",
-      "details": {
-        "component_count": 9,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "base_utilities",
-      "module_path": "core_utilities/base_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 11,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "base_utilities",
-      "module_path": "core_utilities/base_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 11,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "llm_interfaces",
-      "module_path": "language_models_and_prompts/llm_interfaces",
-      "severity": "warning",
-      "details": {
-        "component_count": 9,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "llm_interfaces",
-      "module_path": "language_models_and_prompts/llm_interfaces",
-      "severity": "warning",
-      "details": {
-        "component_count": 9,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "message_handling",
-      "module_path": "language_models_and_prompts/message_handling",
-      "severity": "warning",
-      "details": {
-        "component_count": 27,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "message_handling",
-      "module_path": "language_models_and_prompts/message_handling",
-      "severity": "warning",
-      "details": {
-        "component_count": 27,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "prompt_templates",
-      "module_path": "language_models_and_prompts/prompt_templates",
-      "severity": "warning",
-      "details": {
-        "component_count": 13,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "prompt_templates",
-      "module_path": "language_models_and_prompts/prompt_templates",
-      "severity": "warning",
-      "details": {
-        "component_count": 13,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "embeddings",
-      "module_path": "language_models_and_prompts/embeddings",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "embeddings",
-      "module_path": "language_models_and_prompts/embeddings",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "partner_llms",
-      "module_path": "language_models_and_prompts/partner_llms",
-      "severity": "warning",
-      "details": {
-        "component_count": 15,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "partner_llms",
-      "module_path": "language_models_and_prompts/partner_llms",
-      "severity": "warning",
-      "details": {
-        "component_count": 15,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "agents",
-      "module_path": "agents_and_chains/agents",
-      "severity": "warning",
-      "details": {
-        "component_count": 43,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "agents",
-      "module_path": "agents_and_chains/agents",
-      "severity": "warning",
-      "details": {
-        "component_count": 43,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "runnables",
-      "module_path": "agents_and_chains/runnables",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "runnables",
-      "module_path": "agents_and_chains/runnables",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "tools_and_output_parsers",
-      "module_path": "agents_and_chains/tools_and_output_parsers",
-      "severity": "warning",
-      "details": {
-        "component_count": 24,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "tools_and_output_parsers",
-      "module_path": "agents_and_chains/tools_and_output_parsers",
-      "severity": "warning",
-      "details": {
-        "component_count": 24,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "memory_and_middleware",
-      "module_path": "agents_and_chains/memory_and_middleware",
-      "severity": "warning",
-      "details": {
-        "component_count": 41,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "memory_and_middleware",
-      "module_path": "agents_and_chains/memory_and_middleware",
-      "severity": "warning",
-      "details": {
-        "component_count": 41,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "document_loaders",
-      "module_path": "data_and_retrieval/document_loaders",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "document_loaders",
-      "module_path": "data_and_retrieval/document_loaders",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "text_splitters",
-      "module_path": "data_and_retrieval/text_splitters",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "text_splitters",
-      "module_path": "data_and_retrieval/text_splitters",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "vector_stores",
-      "module_path": "data_and_retrieval/vector_stores",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "vector_stores",
-      "module_path": "data_and_retrieval/vector_stores",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "retrievers",
-      "module_path": "data_and_retrieval/retrievers",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "retrievers",
-      "module_path": "data_and_retrieval/retrievers",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "indexing",
-      "module_path": "data_and_retrieval/indexing",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "indexing",
-      "module_path": "data_and_retrieval/indexing",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "eval_chains",
-      "module_path": "evaluation_and_testing/eval_chains",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "eval_chains",
-      "module_path": "evaluation_and_testing/eval_chains",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "evaluators",
-      "module_path": "evaluation_and_testing/evaluators",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "evaluators",
-      "module_path": "evaluation_and_testing/evaluators",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "evaluation_config_and_runners",
-      "module_path": "evaluation_and_testing/evaluation_config_and_runners",
-      "severity": "warning",
-      "details": {
-        "component_count": 14,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "evaluation_config_and_runners",
-      "module_path": "evaluation_and_testing/evaluation_config_and_runners",
-      "severity": "warning",
-      "details": {
-        "component_count": 14,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "tracing_and_monitoring",
-      "module_path": "evaluation_and_testing/tracing_and_monitoring",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "tracing_and_monitoring",
-      "module_path": "evaluation_and_testing/tracing_and_monitoring",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "model_laboratory",
-      "module_path": "evaluation_and_testing/model_laboratory",
-      "severity": "warning",
-      "details": {
-        "component_count": 15,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "model_laboratory",
-      "module_path": "evaluation_and_testing/model_laboratory",
-      "severity": "warning",
-      "details": {
-        "component_count": 15,
-        "has_children": false
-      },
-      "auto_fixed": true
+      "auto_fixed": false
     },
     {
       "issue_type": "diagram_ir_r4_node_id_collides_with_group",
-      "module_name": "language_models_and_prompts",
-      "module_path": "language_models_and_prompts",
+      "module_name": "language_model_interface",
+      "module_path": "language_model_interface",
       "severity": "warning",
       "details": {
         "code": "r4_node_id_collides_with_group",
@@ -810,104 +510,226 @@
     },
     {
       "issue_type": "diagram_ir_r4_node_id_collides_with_group",
-      "module_name": "language_models_and_prompts",
-      "module_path": "language_models_and_prompts",
+      "module_name": "language_model_interface",
+      "module_path": "language_model_interface",
       "severity": "warning",
       "details": {
         "code": "r4_node_id_collides_with_group",
-        "id": "prompt_templates"
+        "id": "prompt_engineering"
       },
       "auto_fixed": false
     },
     {
-      "issue_type": "diagram_ir_r4_edge_placement_violations",
-      "module_name": "language_models_and_prompts",
-      "module_path": "language_models_and_prompts",
+      "issue_type": "diagram_ir_r4_node_id_collides_with_group",
+      "module_name": "language_model_interface",
+      "module_path": "language_model_interface",
       "severity": "warning",
       "details": {
-        "code": "r4_edge_placement_violations",
-        "violations": [
-          {
-            "edgeId": "e_llm_interfaces_message_handling_0",
-            "placedIn": "root",
-            "expectedLca": null,
-            "source": "llm_interfaces",
-            "target": "message_handling"
-          },
-          {
-            "edgeId": "e_llm_interfaces_prompt_templates_1",
-            "placedIn": "root",
-            "expectedLca": null,
-            "source": "llm_interfaces",
-            "target": "prompt_templates"
-          },
-          {
-            "edgeId": "e_prompt_templates_llm_interfaces_2",
-            "placedIn": "root",
-            "expectedLca": null,
-            "source": "prompt_templates",
-            "target": "llm_interfaces"
-          },
-          {
-            "edgeId": "e_message_handling_partner_llms_5",
-            "placedIn": "root",
-            "expectedLca": null,
-            "source": "message_handling",
-            "target": "partner_llms"
-          }
-        ]
+        "code": "r4_node_id_collides_with_group",
+        "id": "output_parsing"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 60,
+        "source": "CreateTaggingChain",
+        "target": "JsonOutputFunctionsParser"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 78,
+        "source": "StructuredQueryOutputParser",
+        "target": "BaseOutputParser"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 96,
+        "source": "CreateStructuredOutputRunnable",
+        "target": "BaseOutputParser"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 104,
+        "source": "LoadGenericChain",
+        "target": "LLMCheckerChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 105,
+        "source": "LoadGenericChain",
+        "target": "LLMMathChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 106,
+        "source": "LoadGenericChain",
+        "target": "QAWithSourcesChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 107,
+        "source": "LoadGenericChain",
+        "target": "APIChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 108,
+        "source": "LoadGenericChain",
+        "target": "HypotheticalDocumentEmbedder"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 112,
+        "source": "LoadGenericChain",
+        "target": "VectorDBQA"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 114,
+        "source": "LoadGenericChain",
+        "target": "VectorDBQAWithSourcesChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 115,
+        "source": "LoadGenericChain",
+        "target": "RetrievalQAWithSourcesChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 116,
+        "source": "LoadGenericChain",
+        "target": "MapRerankDocumentsChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 117,
+        "source": "LoadGenericChain",
+        "target": "LLMRequestsChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 118,
+        "source": "LoadGenericChain",
+        "target": "GraphCypherQAChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 120,
+        "source": "LoadGenericChain",
+        "target": "BasePromptTemplate"
       },
       "auto_fixed": false
     }
   ],
   "files_created": [],
   "metadata_added": [
-    "api_management:title",
-    "api_management:description",
-    "security:title",
-    "security:description",
-    "callbacks_and_history:title",
-    "callbacks_and_history:description",
-    "base_utilities:title",
-    "base_utilities:description",
-    "llm_interfaces:title",
-    "llm_interfaces:description",
-    "message_handling:title",
-    "message_handling:description",
-    "prompt_templates:title",
-    "prompt_templates:description",
-    "embeddings:title",
-    "embeddings:description",
-    "partner_llms:title",
-    "partner_llms:description",
-    "agents:title",
-    "agents:description",
-    "runnables:title",
-    "runnables:description",
-    "tools_and_output_parsers:title",
-    "tools_and_output_parsers:description",
-    "memory_and_middleware:title",
-    "memory_and_middleware:description",
-    "document_loaders:title",
-    "document_loaders:description",
-    "text_splitters:title",
-    "text_splitters:description",
-    "vector_stores:title",
-    "vector_stores:description",
-    "retrievers:title",
-    "retrievers:description",
-    "indexing:title",
-    "indexing:description",
-    "eval_chains:title",
-    "eval_chains:description",
-    "evaluators:title",
-    "evaluators:description",
-    "evaluation_config_and_runners:title",
-    "evaluation_config_and_runners:description",
-    "tracing_and_monitoring:title",
-    "tracing_and_monitoring:description",
-    "model_laboratory:title",
-    "model_laboratory:description"
+    "agent_and_chain_orchestration:title",
+    "agent_and_chain_orchestration:description"
   ],
   "diagrams_added": []
 }

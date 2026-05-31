@@ -1,0 +1,120 @@
+{
+  "title": "General Core Utilities",
+  "summary": "This module provides a collection of fundamental utility functions and classes, including tools for managing data streams, parsing HTML, handling Pydantic models, validating arguments, reporting system information, and in-memory caching. It offers essential building blocks for various framework operations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "node_aiter_tee",
+        "label": "Split Async Iterator",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Iterator Tee",
+        "description": "Provides a mechanism to create multiple independent asynchronous iterators from a single source. It buffers items, ensuring all child iterators receive the same sequence of elements, suitable for concurrent processing of a single data stream."
+      },
+      {
+        "id": "node_html_links",
+        "label": "Extract & Filter HTML Links",
+        "type": "component",
+        "link": null,
+        "title": "HTML Link Extractor",
+        "description": "Parses HTML content to extract and normalize embedded links, converting them to absolute URLs. It includes filtering capabilities to restrict links to a base URL or exclude specific prefixes, useful for web content analysis."
+      },
+      {
+        "id": "node_iter_tee",
+        "label": "Split Synchronous Iterator",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Iterator Tee",
+        "description": "Generates multiple independent synchronous iterators from a single iterable source. It buffers elements to ensure consistent data delivery across all child iterators, enabling parallel or sequential processing of a single data stream."
+      },
+      {
+        "id": "node_pydantic_wrapper",
+        "label": "Pydantic Model Init Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Pydantic Init Wrapper",
+        "description": "A decorator that enhances Pydantic model initialization by handling default field values and enabling population of fields using their alias names, streamlining model creation."
+      },
+      {
+        "id": "node_pydantic_version",
+        "label": "Get Pydantic Version",
+        "type": "component",
+        "link": null,
+        "title": "Pydantic Version Getter",
+        "description": "Retrieves the major version number of the installed Pydantic library, primarily for compatibility checks. Note: This function is deprecated."
+      },
+      {
+        "id": "node_arg_validator",
+        "label": "Argument Validation Decorator",
+        "type": "component",
+        "link": null,
+        "title": "Exclusive Argument Validator",
+        "description": "A decorator that enforces a constraint where exactly one argument within specified groups must be provided (non-None) to a function, ensuring valid parameter combinations."
+      },
+      {
+        "id": "node_sys_info",
+        "label": "Print System Information",
+        "type": "component",
+        "link": null,
+        "title": "System Information Reporter",
+        "description": "Collects and displays comprehensive system and package details, including OS, Python version, and installed LangChain libraries, for debugging and environment assessment."
+      },
+      {
+        "id": "node_in_memory_cache",
+        "label": "In-Memory LLM Cache",
+        "type": "component",
+        "link": null,
+        "title": "LLM Response Cache",
+        "description": "An efficient in-memory cache for storing and retrieving Language Model (LLM) responses. It supports both synchronous and asynchronous operations and can be configured with a maximum size to manage memory usage."
+      }
+    ],
+    "edges": [],
+    "groups": [
+      {
+        "id": "group_surface_utils",
+        "label": "Surface Utilities",
+        "nodes": [
+          "node_pydantic_wrapper",
+          "node_pydantic_version",
+          "node_arg_validator"
+        ],
+        "title": "General Purpose Utilities",
+        "description": "Contains decorators and helper functions for common programming patterns and environment checks.",
+        "role": "surface"
+      },
+      {
+        "id": "group_analytical_tools",
+        "label": "Analytical Tools",
+        "nodes": [
+          "node_html_links",
+          "node_sys_info"
+        ],
+        "title": "Analysis and Reporting",
+        "description": "Provides tools for analyzing content (like HTML) and reporting on the system environment.",
+        "role": "analytical"
+      },
+      {
+        "id": "group_data_stream_management",
+        "label": "Data Stream Management",
+        "nodes": [
+          "node_aiter_tee",
+          "node_iter_tee"
+        ],
+        "title": "Iterator Management",
+        "description": "Components designed for splitting and managing both synchronous and asynchronous data streams.",
+        "role": "data"
+      },
+      {
+        "id": "group_data_storage",
+        "label": "Data Storage",
+        "nodes": [
+          "node_in_memory_cache"
+        ],
+        "title": "Caching Mechanisms",
+        "description": "Includes an in-memory caching solution for efficient storage and retrieval of LLM responses.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "title": "D&D Playground Logic",
+  "summary": "This module provides core logic for a D&D playground feature, enabling retrieval of specific configuration details like alpha values and best cell configurations based on a given corner identifier. It acts as a backend for user-facing playground interfaces.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "corner_alphas",
+        "label": "Get Corner Alphas",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Alpha Values for Corner",
+        "description": "Extracts and returns the 'alpha_a' and 'alpha_b' float values from the best cell configuration associated with a given corner ID."
+      },
+      {
+        "id": "best",
+        "label": "Get Best Cell Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Best Cell for Corner",
+        "description": "Fetches the complete best cell configuration dictionary for a specified corner ID, utilizing an internal helper function."
+      },
+      {
+        "id": "_best_cell_helper",
+        "label": "Determine Best Cell",
+        "type": "component",
+        "link": null,
+        "title": "Internal Best Cell Logic",
+        "description": "An internal utility function that processes a corner's data structure to identify and return the 'best' cell configuration based on internal criteria. It's called by public functions."
+      },
+      {
+        "id": "corners_data",
+        "label": "Corner Configurations Data",
+        "type": "external",
+        "link": null,
+        "title": "Predefined Corner Data",
+        "description": "A global or module-level dictionary (`corners`) storing predefined configurations for various 'corners', used as input for retrieving specific cell data."
+      },
+      {
+        "id": "dnd_playground_stream_api",
+        "label": "D&D Playground Stream API",
+        "type": "external",
+        "link": "playground_interfaces",
+        "title": "Stream D&D Playground Data",
+        "description": "User-facing API endpoint (`app.main.dnd_playground_stream`) responsible for streaming D&D playground data, likely consuming the logic provided by this module."
+      }
+    ],
+    "edges": [
+      {
+        "source": "corners_data",
+        "target": "corner_alphas",
+        "label": "Reads config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "corners_data",
+        "target": "best",
+        "label": "Reads config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "corner_alphas",
+        "target": "_best_cell_helper",
+        "label": "Calls helper",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "best",
+        "target": "_best_cell_helper",
+        "label": "Calls helper",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "corner_alphas",
+        "target": "dnd_playground_stream_api",
+        "label": "Provides alpha values",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "best",
+        "target": "dnd_playground_stream_api",
+        "label": "Provides cell data",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "dnd_playground_logic_group",
+        "label": "D&D Playground Logic",
+        "nodes": [
+          "corner_alphas",
+          "best",
+          "_best_cell_helper"
+        ],
+        "title": "Core D&D Playground Logic",
+        "description": "Encapsulates the core business logic for retrieving specific configurations and alpha values related to D&D playground corners.",
+        "role": "generative"
+      },
+      {
+        "id": "data_source_group",
+        "label": "Configuration Data",
+        "nodes": [
+          "corners_data"
+        ],
+        "title": "D&D Corner Configuration Data",
+        "description": "External or module-level data store containing predefined configurations for various D&D playground corners.",
+        "role": "data"
+      },
+      {
+        "id": "playground_interfaces_group",
+        "label": "Playground Interfaces",
+        "nodes": [
+          "dnd_playground_stream_api"
+        ],
+        "title": "User-Facing D&D Playground API",
+        "description": "Provides user-facing API endpoints for interacting with the D&D playground features, likely consuming the logic from this module.",
+        "role": "surface"
+      }
+    ]
+  }
+}

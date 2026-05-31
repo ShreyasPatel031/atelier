@@ -527,7 +527,6 @@ function ElkCustomNode({
     const semanticStyle = data && data.rfSemanticStyle ? data.rfSemanticStyle : null;
     const semanticBorder = semanticStyle && semanticStyle.border ? semanticStyle.border : '#475569';
     const semanticBackground = semanticStyle && semanticStyle.background ? semanticStyle.background : '#fff';
-    const semanticText = semanticStyle && semanticStyle.text ? semanticStyle.text : '#0f172a';
     const semanticNodeMode = data && data.rfSemanticNodeMode ? data.rfSemanticNodeMode : 'none';
     const colorNodeFill = semanticNodeMode === 'fill';
     const colorNodeBorder = semanticNodeMode === 'fill' || semanticNodeMode === 'border';
@@ -689,7 +688,7 @@ function ElkCustomNode({
                 height: '100%',
                 padding: '8px',
                 fontSize: 11,
-                color: colorNodeFill ? semanticText : '#0f172a',
+                color: '#0f172a',
                 lineHeight: 1.25,
                 wordBreak: 'break-word',
                 overflowWrap: 'break-word',
@@ -745,7 +744,7 @@ function ElkCustomNode({
     const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
 
     /** Hide “?” when the side hover snippet panel has text (avoid stacking two aids). */
-    const showHelpPill = hovered && pillLayer && detail.length === 0 && rfChatEnabled();
+    const showHelpPill = hovered && pillLayer && rfChatEnabled();
     const helpPillPortal =
         showHelpPill &&
         createPortal(
@@ -1199,7 +1198,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
 
     const showCollapsePill = hovered && pillLayer && !!(data && data.rfExpandedSubgraph);
-    const showHelpPill = hovered && pillLayer && detail.length === 0 && rfChatEnabled();
+    const showHelpPill = hovered && pillLayer && rfChatEnabled();
     const showControlPills = showCollapsePill || showHelpPill;
     const controlGapFlow = 4 / z;
     const controlPillStyle = {

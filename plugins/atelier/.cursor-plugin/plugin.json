@@ -1,0 +1,5 @@
+{
+  "name": "atelier",
+  "description": "Browse and query architecture diagrams for open-source repositories — powered by Atelier",
+  "mcpServers": "./mcp.json"
+}

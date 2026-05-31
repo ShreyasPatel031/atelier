@@ -1,0 +1,293 @@
+{
+  "title": "UI Framework Module",
+  "summary": "This module provides a flexible framework for integrating Pydantic AI agents with various user interfaces, handling request/response adaptation, event streaming, and message sanitization for different UI protocols like AG-UI and Vercel AI.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "frontend_request",
+        "label": "Frontend Request",
+        "type": "external",
+        "link": null,
+        "title": "User/Client Input",
+        "description": "Incoming HTTP requests from a UI client, containing chat messages, tool calls, and other interaction data."
+      },
+      {
+        "id": "ui_adapter",
+        "label": "UI Adapter (Base)",
+        "type": "component",
+        "link": null,
+        "title": "Abstract UI Protocol Adapter",
+        "description": "Base class for adapting UI-specific request formats into Pydantic AI agent inputs and transforming agent outputs back into UI-specific event streams. Handles message sanitization and system prompt management."
+      },
+      {
+        "id": "ag_ui_adapter",
+        "label": "AG-UI Adapter",
+        "type": "component",
+        "link": null,
+        "title": "AG-UI Protocol Adapter",
+        "description": "Concrete implementation of UIAdapter for the AG-UI protocol. Manages AG-UI specific run inputs and integrates AG-UI frontend tools."
+      },
+      {
+        "id": "vercel_ai_adapter",
+        "label": "Vercel AI Adapter",
+        "type": "component",
+        "link": null,
+        "title": "Vercel AI Protocol Adapter",
+        "description": "Concrete implementation of UIAdapter for the Vercel AI protocol. Handles Vercel AI specific message formats, tool approval workflows, and event streaming."
+      },
+      {
+        "id": "agent_core",
+        "label": "Pydantic AI Agent",
+        "type": "external",
+        "link": "agent_framework",
+        "title": "Agent Execution Core",
+        "description": "The core Pydantic AI agent responsible for processing messages, executing tools, and generating responses based on its configured model and capabilities."
+      },
+      {
+        "id": "ui_event_stream",
+        "label": "UI Event Stream",
+        "type": "component",
+        "link": null,
+        "title": "Protocol Event Transformer",
+        "description": "Abstract base class for transforming Pydantic AI's native event stream into a UI-specific event stream, handling event encoding and dispatching."
+      },
+      {
+        "id": "frontend_response",
+        "label": "Frontend Response",
+        "type": "external",
+        "link": null,
+        "title": "Streamed UI Output",
+        "description": "Outgoing HTTP responses streamed back to the UI client, containing protocol-specific events like text, tool calls, and status updates."
+      },
+      {
+        "id": "run_ag_ui_func",
+        "label": "Run AG-UI Endpoint",
+        "type": "component",
+        "link": null,
+        "title": "AG-UI Chat Endpoint",
+        "description": "Entry point for running an agent with AG-UI specific inputs and streaming events back to the AG-UI frontend."
+      },
+      {
+        "id": "post_chat_func",
+        "label": "Vercel AI Chat Endpoint",
+        "type": "component",
+        "link": null,
+        "title": "Vercel AI Chat Endpoint",
+        "description": "Entry point for handling chat requests conforming to the Vercel AI protocol, using the VercelAIAdapter."
+      },
+      {
+        "id": "configure_frontend_func",
+        "label": "Configure Frontend Endpoint",
+        "type": "component",
+        "link": null,
+        "title": "UI Configuration Endpoint",
+        "description": "Provides metadata about available models and built-in tools to the frontend for dynamic UI configuration."
+      },
+      {
+        "id": "vercel_ai_request_types",
+        "label": "Vercel AI Request Types",
+        "type": "component",
+        "link": null,
+        "title": "Vercel AI Input Structures",
+        "description": "Pydantic models defining the structure of incoming request data for the Vercel AI protocol, including various UI parts for text, files, and tool interactions."
+      },
+      {
+        "id": "vercel_ai_response_types",
+        "label": "Vercel AI Response Types",
+        "type": "component",
+        "link": null,
+        "title": "Vercel AI Output Structures",
+        "description": "Pydantic models defining the structure of outgoing streamed data chunks for the Vercel AI protocol, such as source URLs, documents, and data."
+      },
+      {
+        "id": "ag_ui_frontend_toolset",
+        "label": "AG-UI Toolset",
+        "type": "component",
+        "link": null,
+        "title": "AG-UI Frontend Tool Definitions",
+        "description": "A specialized toolset that encapsulates definitions for tools exposed by the AG-UI frontend, allowing the agent to interact with UI-specific functionalities."
+      },
+      {
+        "id": "pydantic_ai_messages",
+        "label": "Pydantic AI Messages",
+        "type": "external",
+        "link": null,
+        "title": "Internal Message Format",
+        "description": "Standardized internal message representations (e.g., ModelRequest, ModelResponse, SystemPromptPart) used by the Pydantic AI agent core."
+      },
+      {
+        "id": "pydantic_ai_native_events",
+        "label": "Pydantic AI Native Events",
+        "type": "external",
+        "link": null,
+        "title": "Internal Event Stream",
+        "description": "Raw, low-level events generated by the Pydantic AI agent during its execution, such as part starts, deltas, ends, and tool call/result events."
+      }
+    ],
+    "edges": [
+      {
+        "source": "frontend_request",
+        "target": "ui_adapter",
+        "label": "Receives & Parses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_adapter",
+        "target": "pydantic_ai_messages",
+        "label": "Transforms to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pydantic_ai_messages",
+        "target": "ui_adapter",
+        "label": "Sanitizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_adapter",
+        "target": "agent_core",
+        "label": "Submits to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_core",
+        "target": "pydantic_ai_native_events",
+        "label": "Emits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "pydantic_ai_native_events",
+        "target": "ui_event_stream",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_event_stream",
+        "target": "frontend_response",
+        "label": "Encodes & Streams",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_ag_ui_func",
+        "target": "ag_ui_adapter",
+        "label": "Initializes & Runs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "post_chat_func",
+        "target": "vercel_ai_adapter",
+        "label": "Initializes & Runs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ag_ui_adapter",
+        "target": "ui_adapter",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_ai_adapter",
+        "target": "ui_adapter",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ui_adapter",
+        "target": "ui_event_stream",
+        "label": "Instantiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_ai_request_types",
+        "target": "vercel_ai_adapter",
+        "label": "Defines Input Schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vercel_ai_response_types",
+        "target": "ui_event_stream",
+        "label": "Defines Output Schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ag_ui_frontend_toolset",
+        "target": "ag_ui_adapter",
+        "label": "Provides Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "configure_frontend_func",
+        "target": "frontend_response",
+        "label": "Returns UI Config",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_endpoints",
+        "label": "Surface Endpoints",
+        "nodes": [
+          "run_ag_ui_func",
+          "post_chat_func",
+          "configure_frontend_func"
+        ],
+        "title": "API Endpoints for UI Interaction",
+        "description": "These components expose the functionality of the UI framework as HTTP endpoints for client applications.",
+        "role": "surface"
+      },
+      {
+        "id": "protocol_adapters",
+        "label": "Protocol Adapters",
+        "nodes": [
+          "ui_adapter",
+          "ag_ui_adapter",
+          "vercel_ai_adapter"
+        ],
+        "title": "UI Protocol Adaptation Layer",
+        "description": "Components responsible for translating between generic Pydantic AI agent interactions and specific UI protocol formats.",
+        "role": "generative"
+      },
+      {
+        "id": "event_processing",
+        "label": "Event Processing",
+        "nodes": [
+          "ui_event_stream"
+        ],
+        "title": "Agent Event Transformation",
+        "description": "Handles the transformation and encoding of internal agent events into a format suitable for streaming to UI clients.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_structures",
+        "label": "Data Structures",
+        "nodes": [
+          "vercel_ai_request_types",
+          "vercel_ai_response_types",
+          "ag_ui_frontend_toolset",
+          "pydantic_ai_messages",
+          "pydantic_ai_native_events"
+        ],
+        "title": "UI-Specific Data Formats",
+        "description": "Defines the data models used for communication with specific UI frontends and internal message/event representations.",
+        "role": "data"
+      }
+    ]
+  }
+}

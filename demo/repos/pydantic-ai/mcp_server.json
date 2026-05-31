@@ -1,0 +1,258 @@
+{
+  "title": "MCP Server Module",
+  "summary": "This module provides components for implementing and interacting with Model Context Protocol (MCP) servers, including HTTP-based server implementations, configuration loading, and data models for MCP entities like resources and prompts.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "mcp_client",
+        "label": "MCP Client",
+        "type": "external",
+        "link": null,
+        "title": "External MCP Client",
+        "description": "An external client application that communicates with the MCP server to send requests and receive responses."
+      },
+      {
+        "id": "config_file",
+        "label": "Configuration File",
+        "type": "external",
+        "link": null,
+        "title": "MCP Configuration File",
+        "description": "A JSON configuration file specifying MCP server definitions and their properties, often including environment variable expansion."
+      },
+      {
+        "id": "llm_model",
+        "label": "LLM Model",
+        "type": "external",
+        "link": "model_abstraction",
+        "title": "Language Model",
+        "description": "The underlying Large Language Model used by the MCP server to generate responses to client requests."
+      },
+      {
+        "id": "agent_framework_module",
+        "label": "Agent Framework",
+        "type": "other_module",
+        "link": "agent_framework",
+        "title": "Agent Framework Module",
+        "description": "The module responsible for defining and managing agents, which can utilize MCP toolsets loaded by this module."
+      },
+      {
+        "id": "capabilities_and_tools_module",
+        "label": "Capabilities & Tools",
+        "type": "other_module",
+        "link": "capabilities_and_tools",
+        "title": "Capabilities and Tools Module",
+        "description": "Defines various capabilities and toolsets, including the MCPToolset which is instantiated by this module."
+      },
+      {
+        "id": "model_abstraction_module",
+        "label": "Model Abstraction",
+        "type": "other_module",
+        "link": "model_abstraction",
+        "title": "Model Abstraction Module",
+        "description": "Provides abstractions for interacting with LLMs, including model request functions and settings used by the MCP server handler."
+      },
+      {
+        "id": "mcp_server_http",
+        "label": "HTTP MCP Server",
+        "type": "component",
+        "link": null,
+        "title": "MCPServerHTTP",
+        "description": "Implements a Model Context Protocol (MCP) server over HTTP using Server-Sent Events (SSE). Note: This class is deprecated."
+      },
+      {
+        "id": "mcp_request_handler",
+        "label": "Handle MCP Request",
+        "type": "component",
+        "link": null,
+        "title": "MCP Request Handler",
+        "description": "Processes incoming MCP sampling messages, maps them to internal PydanticAI messages, applies model settings, and orchestrates LLM interaction to generate responses."
+      },
+      {
+        "id": "load_toolsets",
+        "label": "Load MCP Toolsets",
+        "type": "component",
+        "link": null,
+        "title": "load_mcp_toolsets",
+        "description": "Reads a configuration file to instantiate and return a list of MCPToolset objects, often wrapped with prefixes for disambiguation. Supports environment variable expansion."
+      },
+      {
+        "id": "load_servers",
+        "label": "Load MCP Server Configs",
+        "type": "component",
+        "link": null,
+        "title": "load_mcp_servers",
+        "description": "Parses a configuration file to load definitions for various MCP server types (Stdio, HTTP, Streamable HTTP), expanding environment variables as needed. Note: This function is deprecated."
+      },
+      {
+        "id": "resource_model",
+        "label": "MCP Resource Model",
+        "type": "component",
+        "link": null,
+        "title": "Resource",
+        "description": "Pydantic model representing a discoverable resource on an MCP server, including its URI, size, MIME type, and metadata."
+      },
+      {
+        "id": "resource_template_model",
+        "label": "MCP Resource Template Model",
+        "type": "component",
+        "link": null,
+        "title": "ResourceTemplate",
+        "description": "Pydantic model defining a template for parameterized resources on an MCP server, using a URI template for construction."
+      },
+      {
+        "id": "prompt_model",
+        "label": "MCP Prompt Model",
+        "type": "component",
+        "link": null,
+        "title": "Prompt",
+        "description": "Pydantic model representing a prompt or prompt template offered by an MCP server, including its name, title, description, arguments, and icons."
+      },
+      {
+        "id": "resource_link_model",
+        "label": "MCP Resource Link Model",
+        "type": "component",
+        "link": null,
+        "title": "ResourceLink",
+        "description": "Pydantic model representing a reference to a resource, typically used in prompt or tool call results, without embedding the content directly."
+      }
+    ],
+    "edges": [
+      {
+        "source": "mcp_client",
+        "target": "mcp_server_http",
+        "label": "Sends requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_server_http",
+        "target": "mcp_request_handler",
+        "label": "Routes requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_request_handler",
+        "target": "llm_model",
+        "label": "Queries LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_model",
+        "target": "mcp_request_handler",
+        "label": "Returns response",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_request_handler",
+        "target": "resource_model",
+        "label": "Formats output as",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_request_handler",
+        "target": "resource_template_model",
+        "label": "Formats output as",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_request_handler",
+        "target": "prompt_model",
+        "label": "Formats output as",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_request_handler",
+        "target": "resource_link_model",
+        "label": "Formats output as",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "config_file",
+        "target": "load_toolsets",
+        "label": "Provides configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "config_file",
+        "target": "load_servers",
+        "label": "Provides configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_toolsets",
+        "target": "capabilities_and_tools_module",
+        "label": "Instantiates MCPToolset",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_toolsets",
+        "target": "agent_framework_module",
+        "label": "Provides toolsets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_servers",
+        "target": "mcp_server_http",
+        "label": "Configures server instances",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_request_handler",
+        "target": "model_abstraction_module",
+        "label": "Uses model utilities",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "server_interface",
+        "label": "MCP Server Interface",
+        "nodes": [
+          "mcp_server_http",
+          "mcp_request_handler"
+        ],
+        "title": "MCP Server Interface Components",
+        "description": "Components responsible for exposing and handling the Model Context Protocol (MCP) server interface.",
+        "role": "surface"
+      },
+      {
+        "id": "config_management",
+        "label": "Configuration Management",
+        "nodes": [
+          "load_toolsets",
+          "load_servers"
+        ],
+        "title": "MCP Configuration Management",
+        "description": "Functions for loading and processing MCP server and toolset configurations from external files.",
+        "role": "data"
+      },
+      {
+        "id": "mcp_data_models",
+        "label": "MCP Data Structures",
+        "nodes": [
+          "resource_model",
+          "resource_template_model",
+          "prompt_model",
+          "resource_link_model"
+        ],
+        "title": "Model Context Protocol Data Structures",
+        "description": "Pydantic models defining the structure of various entities within the Model Context Protocol, such as resources, templates, prompts, and resource links.",
+        "role": "data"
+      }
+    ]
+  }
+}

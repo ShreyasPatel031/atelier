@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "buildCommand": null,
+  "buildCommand": "node demo/scripts/generate-repos-index.js",
   "outputDirectory": "demo",
   "functions": {
-    "api/**/*.py": {
+    "api/chat.py": {
       "maxDuration": 60,
-      "includeFiles": "demo/repos/**"
+      "includeFiles": "demo/repos/**",
+      "excludeFiles": "demo/repos/**/temp/**,demo/repos/transformers/**,demo/repos/crewai-src/**,demo/repos/**/architecture.png,demo/repos/**/architecture-legend.png,demo/repos/**/architecture.svg,demo/repos/**/architecture-legend.svg,demo/repos/**/sync_issues.json"
     }
   },
   "routes": [

@@ -12,8 +12,8 @@ tests/
 docker/
 docs/
 output/
-scripts/
-assets/
+/scripts/
+/assets/
 codewiki.egg-info/
 
 # Tooling / CI / IDE
@@ -40,3 +40,11 @@ demo/repos/**/temp/
 venv/
 .env*
 *.env
+
+# Codewiki areas not needed by api/chat.py
+codewiki/cli/
+codewiki/mcp/
+codewiki/run_web_app.py
+
+# Full local dev lockfile (Vercel uses pyproject.toml + api/requirements.txt)
+/requirements.txt

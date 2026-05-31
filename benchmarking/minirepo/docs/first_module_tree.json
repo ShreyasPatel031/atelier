@@ -1,0 +1,56 @@
+{
+    "api_interface": {
+        "path": "",
+        "components": [],
+        "children": {
+            "external_api": {
+                "path": "",
+                "components": [
+                    "run_api.run_api"
+                ]
+            }
+        }
+    },
+    "core_workflow": {
+        "path": "",
+        "components": [],
+        "children": {
+            "main_logic": {
+                "path": "",
+                "components": [
+                    "run_core.run_core"
+                ]
+            },
+            "data_processing": {
+                "path": "",
+                "components": [
+                    "run_processing.run_processing"
+                ]
+            }
+        }
+    },
+    "data_management": {
+        "path": "",
+        "components": [],
+        "children": {
+            "input_output": {
+                "path": "",
+                "components": [
+                    "run_io.run_io"
+                ]
+            }
+        }
+    },
+    "observability": {
+        "path": "",
+        "components": [],
+        "children": {
+            "system_metrics": {
+                "path": "",
+                "components": [
+                    "run_metrics.run_metrics"
+                ]
+            }
+        }
+    }
+}

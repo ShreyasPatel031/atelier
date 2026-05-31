@@ -1,0 +1,234 @@
+{
+    "title": "Core DSPy Primitives",
+    "summary": "This module defines the fundamental building blocks and data structures for constructing DSPy programs, managing language model interactions, and supporting REPL environments. It provides the core abstractions for modules, types, and serialization.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "base_module",
+                "label": "BaseModule",
+                "type": "component",
+                "link": "base_modules",
+                "title": "Base DSPy Module",
+                "description": "The foundational class for all DSPy modules, providing core functionalities like parameter management, sub-module discovery, and state serialization/deserialization."
+            },
+            {
+                "id": "dspy_module",
+                "label": "Module",
+                "type": "component",
+                "link": "base_modules",
+                "title": "DSPy Program Base Class",
+                "description": "The primary class for defining DSPy programs, extending BaseModule with program logic, callback handling, and management of prediction components."
+            },
+            {
+                "id": "sandbox_serializable",
+                "label": "SandboxSerializable",
+                "type": "component",
+                "link": "base_modules",
+                "title": "RLM Sandbox Interface",
+                "description": "An abstract base class for types that can be serialized and injected into an RLM (Reinforcement Learning Module) sandbox for dynamic execution."
+            },
+            {
+                "id": "lm_request",
+                "label": "LM Request Object",
+                "type": "component",
+                "link": "core_types",
+                "title": "Language Model Request",
+                "description": "A standardized object encapsulating all parameters for a Language Model call, including messages, tools, and configuration settings."
+            },
+            {
+                "id": "lm_message",
+                "label": "LM Message",
+                "type": "external",
+                "link": "core_types",
+                "title": "Language Model Message",
+                "description": "A fundamental data structure representing a single message in an LM conversation, with a role (e.g., system, user, assistant) and content parts."
+            },
+            {
+                "id": "lm_stream",
+                "label": "LM Stream Handler",
+                "type": "component",
+                "link": "core_types",
+                "title": "Language Model Stream",
+                "description": "Manages the synchronous or asynchronous streaming of Language Model responses, processing events and building the final LMResponse object."
+            },
+            {
+                "id": "lm_response",
+                "label": "LM Response Object",
+                "type": "external",
+                "link": "core_types",
+                "title": "Language Model Response",
+                "description": "Represents the complete output from a Language Model, including generated text, tool calls, usage statistics, and other metadata."
+            },
+            {
+                "id": "lm_history_entry",
+                "label": "LM History Entry",
+                "type": "component",
+                "link": "core_types",
+                "title": "LM Call History Record",
+                "description": "A typed record of an LM call, storing the request, response, and derived convenience fields for historical analysis and debugging."
+            },
+            {
+                "id": "repl_variable",
+                "label": "REPLVariable",
+                "type": "component",
+                "link": "repl_utilities",
+                "title": "REPL Sandbox Variable",
+                "description": "A Pydantic model that stores and formats metadata for a variable within a REPL session, including its name, type, description, and a preview of its value."
+            },
+            {
+                "id": "lm_client",
+                "label": "LM Client",
+                "type": "external",
+                "link": "lm_clients",
+                "title": "Language Model Integration",
+                "description": "An external service or client responsible for interacting with various Language Models to perform text generation or other LM tasks."
+            },
+            {
+                "id": "serialization_storage",
+                "label": "Serialization Storage",
+                "type": "external",
+                "link": null,
+                "title": "Persistent Storage",
+                "description": "File system or database used for persisting the state or entire program architecture of DSPy modules (e.g., JSON, PKL files)."
+            },
+            {
+                "id": "pydantic_base",
+                "label": "Pydantic BaseModel",
+                "type": "external",
+                "link": null,
+                "title": "Pydantic Data Model",
+                "description": "An external library's base class for creating data models with type hints and validation, used by DSPy for structured data definitions."
+            }
+        ],
+        "edges": [
+            {
+                "source": "dspy_module",
+                "target": "base_module",
+                "label": "Extends functionality of",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "base_module",
+                "target": "serialization_storage",
+                "label": "Saves/Loads state",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_module",
+                "target": "lm_client",
+                "label": "Interacts with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_request",
+                "target": "lm_message",
+                "label": "Comprises messages",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_stream",
+                "target": "lm_request",
+                "label": "Processes requests",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_stream",
+                "target": "lm_response",
+                "label": "Generates responses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_response",
+                "target": "lm_history_entry",
+                "label": "Recorded as",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sandbox_serializable",
+                "target": "repl_variable",
+                "label": "Can be converted to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "repl_variable",
+                "target": "pydantic_base",
+                "label": "Inherits from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_client",
+                "target": "lm_request",
+                "label": "Receives",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "lm_client",
+                "target": "lm_response",
+                "label": "Sends",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "program_foundations",
+                "label": "Program Building Blocks",
+                "nodes": [
+                    "base_module",
+                    "dspy_module",
+                    "sandbox_serializable"
+                ],
+                "title": "Core Program Building Blocks",
+                "description": "Foundational classes for defining DSPy modules, managing their lifecycle, and enabling serialization for advanced features like sandboxing.",
+                "role": null
+            },
+            {
+                "id": "lm_interaction_data_flow",
+                "label": "LM Interaction Data Flow",
+                "nodes": [
+                    "lm_request",
+                    "lm_message",
+                    "lm_stream",
+                    "lm_response",
+                    "lm_history_entry"
+                ],
+                "title": "Language Model Interaction Data",
+                "description": "Standardized data structures and processes for constructing LM requests, handling messages, streaming responses, and maintaining a history of LM calls.",
+                "role": null
+            },
+            {
+                "id": "serialization_utilities",
+                "label": "Serialization & REPL Utilities",
+                "nodes": [
+                    "repl_variable",
+                    "serialization_storage",
+                    "pydantic_base"
+                ],
+                "title": "Serialization & REPL Utilities",
+                "description": "Components facilitating the persistence of module states, representing variables in REPL environments, and leveraging Pydantic for structured data.",
+                "role": null
+            },
+            {
+                "id": "external_interfaces",
+                "label": "External LM Interface",
+                "nodes": [
+                    "lm_client"
+                ],
+                "title": "External LM Interface",
+                "description": "Represents the external Language Model services that DSPy's core primitives interact with to perform generative tasks.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,127 +1,1003 @@
 {
-    "title": "LLM Evaluation and Testing",
-    "summary": "This module provides core functionalities for evaluating the performance of language models and agents, including various evaluation chains, evaluators, configuration runners, and tracing tools. It supports comprehensive assessment of LLM applications.",
-    "diagram": {
-        "direction": "TD",
+  "title": "LLM Evaluation and Testing Framework",
+  "summary": "This module provides a comprehensive framework for evaluating Language Model (LLM) outputs and agent trajectories, including various evaluators, LangSmith integration for dataset-based testing, and base classes for integration and unit tests of chat models and vector stores.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "StringEvaluator_ABC",
+        "label": "String Evaluator Interface",
+        "type": "component",
+        "link": null,
+        "title": "StringEvaluator",
+        "description": "Abstract base class for evaluating string predictions against inputs and/or reference labels."
+      },
+      {
+        "id": "PairwiseStringEvaluator_ABC",
+        "label": "Pairwise String Evaluator Interface",
+        "type": "component",
+        "link": null,
+        "title": "PairwiseStringEvaluator",
+        "description": "Abstract base class for comparing the output of two models or two outputs of the same model."
+      },
+      {
+        "id": "AgentTrajectoryEvaluator_ABC",
+        "label": "Agent Trajectory Evaluator Interface",
+        "type": "component",
+        "link": null,
+        "title": "AgentTrajectoryEvaluator",
+        "description": "Abstract base class for evaluating the sequence of actions taken by an agent."
+      },
+      {
+        "id": "TrajectoryEvalChain",
+        "label": "Evaluate Agent Trajectories",
+        "type": "component",
+        "link": null,
+        "title": "TrajectoryEvalChain",
+        "description": "Evaluates ReAct-style agents by reasoning about the sequence of actions taken and their outcomes using an LLM."
+      },
+      {
+        "id": "LabeledPairwiseStringEvalChain",
+        "label": "Compare Labeled String Outputs",
+        "type": "component",
+        "link": null,
+        "title": "LabeledPairwiseStringEvalChain",
+        "description": "Compares two string outputs (e.g., from two models) with labeled preferences, requiring a reference."
+      },
+      {
+        "id": "LabeledCriteriaEvalChain",
+        "label": "Evaluate Against Labeled Criteria",
+        "type": "component",
+        "link": null,
+        "title": "LabeledCriteriaEvalChain",
+        "description": "Evaluates model outputs against specified criteria, requiring a reference for correctness."
+      },
+      {
+        "id": "JsonValidityEvaluator",
+        "label": "Check JSON Validity",
+        "type": "component",
+        "link": null,
+        "title": "JsonValidityEvaluator",
+        "description": "Evaluates whether a given string prediction is valid JSON, returning a score and reasoning if invalid."
+      },
+      {
+        "id": "JsonEqualityEvaluator",
+        "label": "Check JSON Equality",
+        "type": "component",
+        "link": null,
+        "title": "JsonEqualityEvaluator",
+        "description": "Evaluates whether a prediction is equal to a reference after parsing both as JSON."
+      },
+      {
+        "id": "JsonSchemaEvaluator",
+        "label": "Validate JSON against Schema",
+        "type": "component",
+        "link": null,
+        "title": "JsonSchemaEvaluator",
+        "description": "Validates a JSON prediction against a provided JSON schema, indicating conformance."
+      },
+      {
+        "id": "CotQAEvalChain",
+        "label": "QA Evaluation with Chain-of-Thought",
+        "type": "component",
+        "link": null,
+        "title": "CotQAEvalChain",
+        "description": "LLM Chain for evaluating Question Answering (QA) using chain of thought reasoning."
+      },
+      {
+        "id": "QAEvalChain",
+        "label": "Evaluate Question Answering",
+        "type": "component",
+        "link": null,
+        "title": "QAEvalChain",
+        "description": "LLM Chain for evaluating question answering tasks, requiring an input question and a reference answer."
+      },
+      {
+        "id": "LabeledScoreStringEvalChain",
+        "label": "Score String Output with Labels",
+        "type": "component",
+        "link": null,
+        "title": "LabeledScoreStringEvalChain",
+        "description": "Scores model outputs on a numerical scale (e.g., 1-10) against criteria, requiring a reference."
+      },
+      {
+        "id": "load_evaluators",
+        "label": "Load Evaluator Instances",
+        "type": "component",
+        "link": null,
+        "title": "load_evaluators",
+        "description": "Utility function to load multiple evaluator instances based on their types and configuration."
+      },
+      {
+        "id": "DatasetRunContainer",
+        "label": "Manage Dataset Evaluation Runs",
+        "type": "component",
+        "link": null,
+        "title": "_DatasetRunContainer",
+        "description": "Manages the state and execution of evaluation runs on a dataset, collecting metrics and feedback for LangSmith."
+      },
+      {
+        "id": "run_on_dataset",
+        "label": "Run Sync Evaluation on Dataset",
+        "type": "component",
+        "link": null,
+        "title": "run_on_dataset",
+        "description": "Synchronously runs a language model or chain on a dataset, performs evaluation, and logs traces to LangSmith."
+      },
+      {
+        "id": "arun_on_dataset",
+        "label": "Run Async Evaluation on Dataset",
+        "type": "component",
+        "link": null,
+        "title": "arun_on_dataset",
+        "description": "Asynchronously runs a language model or chain on a dataset, performs evaluation, and logs traces to LangSmith."
+      },
+      {
+        "id": "arun_llm_or_chain",
+        "label": "Asynchronously Run LLM or Chain",
+        "type": "component",
+        "link": null,
+        "title": "_arun_llm_or_chain",
+        "description": "Asynchronously executes a language model or chain for a single example within a dataset evaluation context."
+      },
+      {
+        "id": "StringRunEvaluatorChain",
+        "label": "Adapt String Evaluator for Runs",
+        "type": "component",
+        "link": null,
+        "title": "StringRunEvaluatorChain",
+        "description": "Adapts a StringEvaluator to evaluate LangSmith Run objects, mapping run data to string inputs for evaluation."
+      },
+      {
+        "id": "LabeledScoreString_Config",
+        "label": "Labeled Score String Config",
+        "type": "component",
+        "link": null,
+        "title": "LabeledScoreString",
+        "description": "Configuration for a labeled score string evaluator within the LangSmith evaluation framework."
+      },
+      {
+        "id": "LabeledCriteria_Config",
+        "label": "Labeled Criteria Config",
+        "type": "component",
+        "link": null,
+        "title": "LabeledCriteria",
+        "description": "Configuration for a labeled (with references) criteria evaluator within the LangSmith evaluation framework."
+      },
+      {
+        "id": "EmbeddingDistance_Config",
+        "label": "Embedding Distance Config",
+        "type": "component",
+        "link": null,
+        "title": "EmbeddingDistance",
+        "description": "Configuration for an embedding distance evaluator, specifying embeddings and distance metric for LangSmith."
+      },
+      {
+        "id": "StringDistance_Config",
+        "label": "String Distance Config",
+        "type": "component",
+        "link": null,
+        "title": "StringDistance",
+        "description": "Configuration for a string distance evaluator, specifying the metric and normalization for LangSmith."
+      },
+      {
+        "id": "QA_Config",
+        "label": "QA Evaluator Config",
+        "type": "component",
+        "link": null,
+        "title": "QA",
+        "description": "Configuration for a Question Answering (QA) evaluator, including prompt and LLM for LangSmith."
+      },
+      {
+        "id": "ContextQA_Config",
+        "label": "Context QA Evaluator Config",
+        "type": "component",
+        "link": null,
+        "title": "ContextQA",
+        "description": "Configuration for a context-based QA evaluator, including prompt and LLM for LangSmith."
+      },
+      {
+        "id": "CoTQA_Config",
+        "label": "CoT QA Evaluator Config",
+        "type": "component",
+        "link": null,
+        "title": "CoTQA",
+        "description": "Configuration for a Chain-of-Thought QA evaluator, including prompt and LLM for LangSmith."
+      },
+      {
+        "id": "JsonValidity_Config",
+        "label": "JSON Validity Evaluator Config",
+        "type": "component",
+        "link": null,
+        "title": "JsonValidity",
+        "description": "Configuration for a JSON validity evaluator within the LangSmith evaluation framework."
+      },
+      {
+        "id": "ExactMatch_Config",
+        "label": "Exact Match Evaluator Config",
+        "type": "component",
+        "link": null,
+        "title": "ExactMatch",
+        "description": "Configuration for an exact match string evaluator, with options for case, punctuation, and number ignoring."
+      },
+      {
+        "id": "RegexMatch_Config",
+        "label": "Regex Match Evaluator Config",
+        "type": "component",
+        "link": null,
+        "title": "RegexMatch",
+        "description": "Configuration for a regex match string evaluator, allowing specification of regex flags."
+      },
+      {
+        "id": "LangSmithCIContext",
+        "label": "LangSmith CI Context",
+        "type": "component",
+        "link": null,
+        "title": "_langsmith_ci_context",
+        "description": "Provides a context manager to apply LangSmith tags and metadata to traces during Continuous Integration (CI)."
+      },
+      {
+        "id": "BaseVCRConfig",
+        "label": "Base VCR Configuration",
+        "type": "component",
+        "link": null,
+        "title": "_base_vcr_config",
+        "description": "Returns a base VCR (cassette library for HTTP interactions) configuration dictionary for integration tests."
+      },
+      {
+        "id": "ChatModelIntegrationTests",
+        "label": "Chat Model Integration Tests",
+        "type": "component",
+        "link": null,
+        "title": "ChatModelIntegrationTests",
+        "description": "Base class for integration tests of chat models, providing common test methods and configuration properties for various model features."
+      },
+      {
+        "id": "VectorStoreIntegrationTests",
+        "label": "Vector Store Integration Tests",
+        "type": "component",
+        "link": null,
+        "title": "VectorStoreIntegrationTests",
+        "description": "Base class for integration tests of vector stores, providing common test methods for adding, deleting, and searching documents."
+      },
+      {
+        "id": "ChatModelUnitTests",
+        "label": "Chat Model Unit Tests",
+        "type": "component",
+        "link": null,
+        "title": "ChatModelUnitTests",
+        "description": "Base class for unit tests of chat models, covering initialization, serialization, and standard parameter handling."
+      },
+      {
+        "id": "test_anthropic_inputs",
+        "label": "Test Anthropic Inputs",
+        "type": "component",
+        "link": null,
+        "title": "test_anthropic_inputs",
+        "description": "Tests if a chat model can process Anthropic-style message histories, including tool use and tool result content blocks."
+      },
+      {
+        "id": "test_image_tool_message",
+        "label": "Test Image Tool Messages",
+        "type": "component",
+        "link": null,
+        "title": "test_image_tool_message",
+        "description": "Tests if a chat model can process ToolMessage objects containing image inputs in various formats (base64, URL)."
+      },
+      {
+        "id": "test_pdf_tool_message",
+        "label": "Test PDF Tool Messages",
+        "type": "component",
+        "link": null,
+        "title": "test_pdf_tool_message",
+        "description": "Tests if a chat model can process ToolMessage objects containing PDF inputs (base64 encoded)."
+      },
+      {
+        "id": "test_serdes",
+        "label": "Test Model Serialization/Deserialization",
+        "type": "component",
+        "link": null,
+        "title": "test_serdes",
+        "description": "Tests the serialization and deserialization capabilities of chat models, ensuring proper state preservation."
+      },
+      {
+        "id": "BaseLanguageModel",
+        "label": "Base Language Model",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "BaseLanguageModel",
+        "description": "Abstract base class for all language models, defining common interfaces."
+      },
+      {
+        "id": "LLMChain",
+        "label": "LLM Chain",
+        "type": "external",
+        "link": "agent_and_chain_orchestration",
+        "title": "LLMChain",
+        "description": "A chain that runs an LLM on a given prompt."
+      },
+      {
+        "id": "BaseTool",
+        "label": "Base Tool",
+        "type": "external",
+        "link": "agent_and_chain_orchestration",
+        "title": "BaseTool",
+        "description": "Abstract base class for tools that agents can use."
+      },
+      {
+        "id": "PromptTemplate",
+        "label": "Prompt Template",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "PromptTemplate",
+        "description": "A template for constructing prompts to language models."
+      },
+      {
+        "id": "BaseOutputParser",
+        "label": "Base Output Parser",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "BaseOutputParser",
+        "description": "Abstract base class for parsing the output of language models."
+      },
+      {
+        "id": "Client",
+        "label": "LangSmith Client",
+        "type": "external",
+        "link": null,
+        "title": "Client",
+        "description": "Client for interacting with the LangSmith platform for logging and tracing."
+      },
+      {
+        "id": "Run",
+        "label": "LangSmith Run",
+        "type": "external",
+        "link": null,
+        "title": "Run",
+        "description": "Represents a single execution trace or step within LangSmith."
+      },
+      {
+        "id": "Example",
+        "label": "LangSmith Example",
+        "type": "external",
+        "link": null,
+        "title": "Example",
+        "description": "Represents a single input/output pair in a LangSmith dataset."
+      },
+      {
+        "id": "RunnableConfig",
+        "label": "Runnable Configuration",
+        "type": "external",
+        "link": "agent_and_chain_orchestration",
+        "title": "RunnableConfig",
+        "description": "Configuration options for LangChain Runnables, including callbacks and tags."
+      },
+      {
+        "id": "EvaluationResult",
+        "label": "LangSmith Evaluation Result",
+        "type": "external",
+        "link": null,
+        "title": "EvaluationResult",
+        "description": "Represents the outcome of an evaluation in LangSmith, including score, reasoning, and metadata."
+      },
+      {
+        "id": "VectorStore",
+        "label": "Vector Store",
+        "type": "external",
+        "link": "data_management_and_retrieval",
+        "title": "VectorStore",
+        "description": "Abstract base class for vector databases, defining methods for document storage and retrieval."
+      },
+      {
+        "id": "Document",
+        "label": "Document",
+        "type": "external",
+        "link": "data_management_and_retrieval",
+        "title": "Document",
+        "description": "A piece of text and associated metadata, typically used in retrieval systems."
+      },
+      {
+        "id": "Embeddings",
+        "label": "Embeddings",
+        "type": "external",
+        "link": "miscellaneous_utilities",
+        "title": "Embeddings",
+        "description": "Abstract base class for text embedding models."
+      },
+      {
+        "id": "BaseChatModel",
+        "label": "Base Chat Model",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "BaseChatModel",
+        "description": "Abstract base class for chat-oriented language models."
+      },
+      {
+        "id": "AIMessage",
+        "label": "AI Message",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "AIMessage",
+        "description": "A message from an AI assistant in a conversation."
+      },
+      {
+        "id": "ToolMessage",
+        "label": "Tool Message",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "ToolMessage",
+        "description": "A message representing the output of a tool call."
+      },
+      {
+        "id": "HumanMessage",
+        "label": "Human Message",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "HumanMessage",
+        "description": "A message from a human user in a conversation."
+      },
+      {
+        "id": "SystemMessage",
+        "label": "System Message",
+        "type": "external",
+        "link": "language_model_interface",
+        "title": "SystemMessage",
+        "description": "A message providing context or instructions to the AI system."
+      },
+      {
+        "id": "SnapshotAssertion",
+        "label": "Pytest Snapshot Assertion",
+        "type": "external",
+        "link": null,
+        "title": "SnapshotAssertion",
+        "description": "A pytest fixture for asserting that a value matches a stored snapshot."
+      },
+      {
+        "id": "jsonschema",
+        "label": "JSON Schema Library",
+        "type": "external",
+        "link": null,
+        "title": "jsonschema",
+        "description": "External library for validating JSON data against a JSON schema."
+      }
+    ],
+    "edges": [
+      {
+        "source": "TrajectoryEvalChain",
+        "target": "AgentTrajectoryEvaluator_ABC",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledPairwiseStringEvalChain",
+        "target": "PairwiseStringEvaluator_ABC",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledCriteriaEvalChain",
+        "target": "StringEvaluator_ABC",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JsonValidityEvaluator",
+        "target": "StringEvaluator_ABC",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JsonEqualityEvaluator",
+        "target": "StringEvaluator_ABC",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JsonSchemaEvaluator",
+        "target": "StringEvaluator_ABC",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAEvalChain",
+        "target": "StringEvaluator_ABC",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledScoreStringEvalChain",
+        "target": "StringEvaluator_ABC",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TrajectoryEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TrajectoryEvalChain",
+        "target": "LLMChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TrajectoryEvalChain",
+        "target": "BaseTool",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledPairwiseStringEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledPairwiseStringEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledPairwiseStringEvalChain",
+        "target": "BaseOutputParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledCriteriaEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledCriteriaEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JsonSchemaEvaluator",
+        "target": "jsonschema",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CotQAEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CotQAEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledScoreStringEvalChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledScoreStringEvalChain",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledScoreStringEvalChain",
+        "target": "BaseOutputParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_evaluators",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_evaluators",
+        "target": "StringEvaluator_ABC",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_on_dataset",
+        "target": "DatasetRunContainer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "arun_on_dataset",
+        "target": "DatasetRunContainer",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatasetRunContainer",
+        "target": "Client",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatasetRunContainer",
+        "target": "Example",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatasetRunContainer",
+        "target": "RunnableConfig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatasetRunContainer",
+        "target": "EvaluationResult",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DatasetRunContainer",
+        "target": "Run",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "arun_llm_or_chain",
+        "target": "Example",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "arun_llm_or_chain",
+        "target": "RunnableConfig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "arun_llm_or_chain",
+        "target": "BaseLanguageModel",
+        "label": "runs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringRunEvaluatorChain",
+        "target": "StringEvaluator_ABC",
+        "label": "adapts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringRunEvaluatorChain",
+        "target": "Run",
+        "label": "evaluates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringRunEvaluatorChain",
+        "target": "Example",
+        "label": "evaluates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StringRunEvaluatorChain",
+        "target": "EvaluationResult",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledScoreString_Config",
+        "target": "LabeledScoreStringEvalChain",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LabeledCriteria_Config",
+        "target": "LabeledCriteriaEvalChain",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QA_Config",
+        "target": "QAEvalChain",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ContextQA_Config",
+        "target": "CotQAEvalChain",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CoTQA_Config",
+        "target": "CotQAEvalChain",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JsonValidity_Config",
+        "target": "JsonValidityEvaluator",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatModelIntegrationTests",
+        "target": "BaseChatModel",
+        "label": "tests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatModelIntegrationTests",
+        "target": "BaseTool",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatModelIntegrationTests",
+        "target": "AIMessage",
+        "label": "validates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatModelIntegrationTests",
+        "target": "ToolMessage",
+        "label": "validates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatModelIntegrationTests",
+        "target": "HumanMessage",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatModelIntegrationTests",
+        "target": "SystemMessage",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorStoreIntegrationTests",
+        "target": "VectorStore",
+        "label": "tests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorStoreIntegrationTests",
+        "target": "Document",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "VectorStoreIntegrationTests",
+        "target": "Embeddings",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatModelUnitTests",
+        "target": "BaseChatModel",
+        "label": "tests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatModelUnitTests",
+        "target": "BaseTool",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatModelUnitTests",
+        "target": "SnapshotAssertion",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_anthropic_inputs",
+        "target": "ChatModelIntegrationTests",
+        "label": "part of",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_image_tool_message",
+        "target": "ChatModelIntegrationTests",
+        "label": "part of",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_pdf_tool_message",
+        "target": "ChatModelIntegrationTests",
+        "label": "part of",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "test_serdes",
+        "target": "ChatModelUnitTests",
+        "label": "part of",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "EvaluationInterfaces",
+        "label": "Evaluation Interfaces",
         "nodes": [
-            {
-                "id": "eval_chains",
-                "label": "Evaluation Chains",
-                "type": "module",
-                "link": "eval_chains",
-                "title": "Evaluation Chains Module",
-                "description": "Provides various chains for evaluating the performance of language models and agents, including specialized chains for agent trajectories, QA, string comparisons, and criteria-based assessments."
-            },
-            {
-                "id": "evaluators",
-                "label": "LLM Output Evaluators",
-                "type": "module",
-                "link": "evaluators",
-                "title": "LLM Output Evaluators",
-                "description": "Provides various evaluators for assessing LLM outputs, including checks for JSON validity, JSON equality, and JSON schema compliance. It also defines base interfaces for different types of evaluators."
-            },
-            {
-                "id": "evaluation_config_and_runners",
-                "label": "Evaluation Config & Runners",
-                "type": "module",
-                "link": "evaluation_config_and_runners",
-                "title": "Evaluation Configuration and Runners",
-                "description": "Provides configurations for various evaluation types and functions to run LLMs or chains against datasets, logging results to LangSmith. Supports synchronous and asynchronous evaluation workflows."
-            },
-            {
-                "id": "tracing_and_monitoring",
-                "label": "Tracing & Monitoring",
-                "type": "module",
-                "link": "tracing_and_monitoring",
-                "title": "Tracing and Monitoring",
-                "description": "Provides core functionalities for tracing execution runs, managing their lifecycle, and integrating with logging and streaming mechanisms. Enables detailed observation and analysis of component interactions."
-            },
-            {
-                "id": "model_laboratory",
-                "label": "Model Comparison & Testing",
-                "type": "module",
-                "link": "model_laboratory",
-                "title": "Model Comparison & Testing Utilities",
-                "description": "Offers a `ModelLaboratory` for comparing language model chains and LLMs, complemented by utilities for object serialization, dynamic module imports, and base classes for comprehensive testing."
-            }
+          "StringEvaluator_ABC",
+          "PairwiseStringEvaluator_ABC",
+          "AgentTrajectoryEvaluator_ABC"
         ],
-        "edges": [
-            {
-                "source": "eval_chains",
-                "target": "evaluators",
-                "label": "Uses evaluators from",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "evaluation_config_and_runners",
-                "target": "eval_chains",
-                "label": "Configures & runs",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "evaluation_config_and_runners",
-                "target": "evaluators",
-                "label": "Configures & uses",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "tracing_and_monitoring",
-                "target": "evaluation_config_and_runners",
-                "label": "Provides run data to",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "model_laboratory",
-                "target": "eval_chains",
-                "label": "Can leverage",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "model_laboratory",
-                "target": "evaluators",
-                "label": "Can leverage",
-                "title": null,
-                "description": null
-            }
+        "title": "Evaluation Interfaces",
+        "description": "Abstract base classes defining common interfaces for different types of evaluators.",
+        "role": "generative"
+      },
+      {
+        "id": "LLMBasedEvaluators",
+        "label": "LLM-based Evaluators",
+        "nodes": [
+          "TrajectoryEvalChain",
+          "LabeledPairwiseStringEvalChain",
+          "LabeledCriteriaEvalChain",
+          "CotQAEvalChain",
+          "QAEvalChain",
+          "LabeledScoreStringEvalChain"
         ],
-        "groups": [
-            {
-                "id": "evaluation_core",
-                "label": "Evaluation Core",
-                "nodes": [
-                    "eval_chains",
-                    "evaluators"
-                ],
-                "title": "Core Evaluation Mechanisms",
-                "description": "Defines the fundamental chains and individual evaluators used to assess the performance and quality of LLM outputs and agent behaviors.",
-                "role": null
-            },
-            {
-                "id": "evaluation_orchestration",
-                "label": "Evaluation Orchestration",
-                "nodes": [
-                    "evaluation_config_and_runners"
-                ],
-                "title": "Evaluation Orchestration & Execution",
-                "description": "Manages the configuration and execution of evaluation runs against datasets, integrating with LangSmith for logging and reporting.",
-                "role": null
-            },
-            {
-                "id": "observability_and_testing",
-                "label": "Observability & Testing Utilities",
-                "nodes": [
-                    "tracing_and_monitoring",
-                    "model_laboratory"
-                ],
-                "title": "Observability and Testing Utilities",
-                "description": "Provides tools for monitoring execution traces, analyzing component interactions, and comparing different model implementations for development and debugging.",
-                "role": null
-            }
-        ]
-    }
+        "title": "LLM-based Evaluators",
+        "description": "Evaluator chains that leverage Language Models for their core evaluation logic.",
+        "role": "analytical"
+      },
+      {
+        "id": "ParsingSchemaEvaluators",
+        "label": "Parsing & Schema Evaluators",
+        "nodes": [
+          "JsonValidityEvaluator",
+          "JsonEqualityEvaluator",
+          "JsonSchemaEvaluator"
+        ],
+        "title": "Parsing & Schema Evaluators",
+        "description": "Evaluators focused on validating the structural integrity and format of model outputs.",
+        "role": "analytical"
+      },
+      {
+        "id": "LangSmithEvaluationFramework",
+        "label": "LangSmith Evaluation Framework",
+        "nodes": [
+          "DatasetRunContainer",
+          "run_on_dataset",
+          "arun_on_dataset",
+          "arun_llm_or_chain",
+          "StringRunEvaluatorChain",
+          "LabeledScoreString_Config",
+          "LabeledCriteria_Config",
+          "EmbeddingDistance_Config",
+          "StringDistance_Config",
+          "QA_Config",
+          "ContextQA_Config",
+          "CoTQA_Config",
+          "JsonValidity_Config",
+          "ExactMatch_Config",
+          "RegexMatch_Config"
+        ],
+        "title": "LangSmith Evaluation Framework",
+        "description": "Components for integrating and orchestrating evaluation processes with the LangSmith platform, including dataset management and configuration.",
+        "role": "surface"
+      },
+      {
+        "id": "TestingUtilities",
+        "label": "Testing Utilities",
+        "nodes": [
+          "load_evaluators",
+          "LangSmithCIContext",
+          "BaseVCRConfig"
+        ],
+        "title": "Testing Utilities",
+        "description": "General utility functions and helpers for setting up and running tests and evaluations.",
+        "role": "surface"
+      },
+      {
+        "id": "IntegrationTestSuites",
+        "label": "Integration Test Suites",
+        "nodes": [
+          "ChatModelIntegrationTests",
+          "VectorStoreIntegrationTests",
+          "test_anthropic_inputs",
+          "test_image_tool_message",
+          "test_pdf_tool_message"
+        ],
+        "title": "Integration Test Suites",
+        "description": "Base classes and specific tests for verifying the end-to-end functionality and interactions of LangChain components like chat models and vector stores.",
+        "role": "surface"
+      },
+      {
+        "id": "UnitTestSuites",
+        "label": "Unit Test Suites",
+        "nodes": [
+          "ChatModelUnitTests",
+          "test_serdes"
+        ],
+        "title": "Unit Test Suites",
+        "description": "Base classes and specific tests for verifying individual components of LangChain, such as chat model initialization and serialization.",
+        "role": "surface"
+      }
+    ]
+  }
 }

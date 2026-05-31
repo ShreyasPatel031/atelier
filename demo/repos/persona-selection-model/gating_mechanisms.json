@@ -1,0 +1,276 @@
+{
+  "title": "Dynamic Persona Gating",
+  "summary": "This module orchestrates multi-round agent interactions, dynamically applying and adjusting persona gates based on model output. It streams responses token-by-token, providing a detailed trace of the agent's decision-making process.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "run_gate_agent_turn_stream",
+        "label": "Orchestrate Gated Agent Turn",
+        "type": "component",
+        "link": null,
+        "title": "Gated Agent Turn Stream",
+        "description": "Manages multi-round agent interactions, dynamically applying and adjusting persona gates based on model output, streaming results and trace information to the client."
+      },
+      {
+        "id": "calc_contributions",
+        "label": "Calculate Gate Contributions",
+        "type": "external",
+        "link": "persona_activations",
+        "title": "Gate Contribution Calculation",
+        "description": "Determines the steering vectors (contributions) for active persona gates based on current settings, trait alphas, and the persona bundle, influencing model behavior."
+      },
+      {
+        "id": "gen_steered_stream",
+        "label": "Generate Steered Response Stream",
+        "type": "external",
+        "link": "steering_demonstrations",
+        "title": "Steered LLM Response Generation",
+        "description": "Generates a token-by-token stream of LLM responses, applying persona steering vectors derived from active gates to guide the model's output towards specific traits."
+      },
+      {
+        "id": "gen_plain_stream",
+        "label": "Generate Plain Response Stream",
+        "type": "external",
+        "link": "steering_demonstrations",
+        "title": "Plain LLM Response Generation",
+        "description": "Generates a token-by-token stream of LLM responses without any persona steering applied, serving as a baseline or when no gates are active."
+      },
+      {
+        "id": "parse_toggles",
+        "label": "Parse Gate Toggle Commands",
+        "type": "component",
+        "link": null,
+        "title": "Extract Gate Toggles",
+        "description": "Analyzes the LLM's generated text to identify and extract explicit commands for toggling persona gates, enabling dynamic adjustment of persona during interaction."
+      },
+      {
+        "id": "apply_toggles",
+        "label": "Apply Gate Toggles",
+        "type": "component",
+        "link": null,
+        "title": "Update Active Gates",
+        "description": "Modifies the list of active persona gates based on the parsed toggle commands from the model's output, changing the agent's persona for subsequent turns."
+      },
+      {
+        "id": "format_tool_msg",
+        "label": "Format Gate Tool Message",
+        "type": "component",
+        "link": null,
+        "title": "Prepare Tool Result Message",
+        "description": "Constructs a structured message summarizing the current state of persona gates, intended for the LLM as a tool result to inform its next generation."
+      },
+      {
+        "id": "llm_model",
+        "label": "Language Model",
+        "type": "external",
+        "link": null,
+        "title": "Pre-trained Language Model",
+        "description": "The underlying large language model (e.g., HuggingFace PreTrainedModel) used for generating text responses, central to the agent's conversational abilities."
+      },
+      {
+        "id": "tokenizer",
+        "label": "Model Tokenizer",
+        "type": "external",
+        "link": null,
+        "title": "AutoTokenizer",
+        "description": "The tokenizer responsible for converting text to token IDs and vice-versa for the language model, crucial for processing input and output."
+      },
+      {
+        "id": "device",
+        "label": "Compute Device",
+        "type": "external",
+        "link": null,
+        "title": "Torch Device",
+        "description": "Specifies the hardware device (CPU, GPU) where model computations are performed, optimizing performance for large language models."
+      },
+      {
+        "id": "dtype",
+        "label": "Data Type",
+        "type": "external",
+        "link": null,
+        "title": "Torch Data Type",
+        "description": "Defines the numerical precision (e.g., float32, bfloat16) for model tensors, impacting memory usage and computational speed."
+      },
+      {
+        "id": "stream_output",
+        "label": "Yield Streamed Output",
+        "type": "external",
+        "link": null,
+        "title": "Iterator Output Stream",
+        "description": "An iterator that yields dictionary chunks containing model responses, banners, and trace information, allowing clients to display real-time progress."
+      }
+    ],
+    "edges": [
+      {
+        "source": "run_gate_agent_turn_stream",
+        "target": "calc_contributions",
+        "label": "Get Steering Vectors",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "calc_contributions",
+        "target": "gen_steered_stream",
+        "label": "Provide Contributions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_gate_agent_turn_stream",
+        "target": "gen_steered_stream",
+        "label": "Generate Steered",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_gate_agent_turn_stream",
+        "target": "gen_plain_stream",
+        "label": "Generate Plain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gen_steered_stream",
+        "target": "llm_model",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gen_plain_stream",
+        "target": "llm_model",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gen_steered_stream",
+        "target": "tokenizer",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gen_plain_stream",
+        "target": "tokenizer",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gen_steered_stream",
+        "target": "device",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gen_plain_stream",
+        "target": "device",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gen_steered_stream",
+        "target": "dtype",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gen_plain_stream",
+        "target": "dtype",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_gate_agent_turn_stream",
+        "target": "parse_toggles",
+        "label": "Process Model Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "parse_toggles",
+        "target": "run_gate_agent_turn_stream",
+        "label": "Return Toggles",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_gate_agent_turn_stream",
+        "target": "apply_toggles",
+        "label": "Update Gates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_gate_agent_turn_stream",
+        "target": "format_tool_msg",
+        "label": "Prepare Tool Response",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_gate_agent_turn_stream",
+        "target": "stream_output",
+        "label": "Yields Chunks",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_api",
+        "label": "Surface API",
+        "nodes": [
+          "run_gate_agent_turn_stream"
+        ],
+        "title": "User-Facing Entry Point",
+        "description": "The primary function exposed by this module for initiating and managing dynamic persona-gated agent turns, streaming the interaction.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_components",
+        "label": "Generative Components",
+        "nodes": [
+          "gen_steered_stream",
+          "gen_plain_stream"
+        ],
+        "title": "LLM Interaction & Response Generation",
+        "description": "Components responsible for interacting with the underlying Large Language Model to generate responses, either with or without persona steering applied.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_logic",
+        "label": "Analytical Logic",
+        "nodes": [
+          "calc_contributions",
+          "parse_toggles",
+          "apply_toggles",
+          "format_tool_msg"
+        ],
+        "title": "Persona & Output Analysis",
+        "description": "Functions that analyze current persona states, process model outputs for gate changes, and prepare structured messages for internal communication or model input.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_resources",
+        "label": "Data & Resources",
+        "nodes": [
+          "llm_model",
+          "tokenizer",
+          "device",
+          "dtype",
+          "stream_output"
+        ],
+        "title": "Core Data Structures & External Resources",
+        "description": "Represents the essential external resources and data types required for the module's operation, including the LLM, tokenizer, and hardware configurations.",
+        "role": "data"
+      }
+    ]
+  }
+}

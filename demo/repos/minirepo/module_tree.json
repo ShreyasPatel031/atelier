@@ -1,0 +1,1820 @@
+{
+  "api_interface": {
+    "path": "",
+    "components": [],
+    "children": {
+      "external_api": {
+        "path": "",
+        "components": [
+          "run_api.run_api"
+        ],
+        "title": "External Api",
+        "_title_auto_generated": true,
+        "description": "Provides 1 component(s) for external api operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "run_api_main",
+              "label": "Orchestrate API Calls",
+              "type": "component",
+              "link": null,
+              "title": "Main API Execution Logic",
+              "description": "The primary function responsible for initializing the API client, performing health checks, and fetching data from the external application server."
+            },
+            {
+              "id": "load_configuration",
+              "label": "Load Configuration",
+              "type": "component",
+              "link": null,
+              "title": "Configuration Loader",
+              "description": "Retrieves necessary configuration parameters, such as server endpoints or credentials, from the environment for API interaction."
+            },
+            {
+              "id": "external_app_server",
+              "label": "External Application Server",
+              "type": "external",
+              "link": null,
+              "title": "Application Server Endpoint",
+              "description": "Represents the external service or application that the module communicates with to perform operations like health checks and data retrieval."
+            }
+          ],
+          "edges": [
+            {
+              "source": "load_configuration",
+              "target": "run_api_main",
+              "label": "Provides configuration",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_api_main",
+              "target": "external_app_server",
+              "label": "Initializes server client",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_api_main",
+              "target": "external_app_server",
+              "label": "Performs health check (GET /health)",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_api_main",
+              "target": "external_app_server",
+              "label": "Requests records (GET /records)",
+              "title": null,
+              "description": null
+            }
+          ],
+          "groups": [
+            {
+              "id": "api_interface_group",
+              "label": "API Interface",
+              "nodes": [
+                "run_api_main",
+                "load_configuration"
+              ],
+              "title": "External API Interaction Layer",
+              "description": "Encapsulates the logic for interacting with an external application server, including configuration loading and making specific API requests.",
+              "role": "surface"
+            }
+          ]
+        }
+      }
+    },
+    "title": "External API Integration",
+    "_title_auto_generated": true,
+    "description": "This module provides a unified interface for interacting with external application programming interfaces, abstracting communication details and ensuring reliable data exchange with remote services.",
+    "_description_auto_generated": true,
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "api_interface",
+          "label": "External API Integration",
+          "type": "module"
+        },
+        {
+          "id": "internal_caller",
+          "label": "Internal System Caller",
+          "type": "component",
+          "link": null,
+          "title": "Application Logic Initiator",
+          "description": "Represents the internal parts of the application that initiate requests to external services through the API interface."
+        },
+        {
+          "id": "external_api_module",
+          "label": "External API Module",
+          "type": "module",
+          "link": "external_api",
+          "title": "External API Sub-Module",
+          "description": "The core sub-module within `api_interface` responsible for handling the specifics of communicating with external application servers."
+        },
+        {
+          "id": "external_service",
+          "label": "External Application Service",
+          "type": "external",
+          "link": null,
+          "title": "Remote API Endpoint",
+          "description": "The actual external application or service that provides data and functionality, accessed via its API."
+        },
+        {
+          "id": "external_api",
+          "label": "External Api",
+          "type": "module",
+          "link": "external_api"
+        }
+      ],
+      "edges": [
+        {
+          "source": "internal_caller",
+          "target": "external_api_module",
+          "label": "Sends API Request",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "external_api_module",
+          "target": "external_service",
+          "label": "Forwards Request To",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "external_service",
+          "target": "external_api_module",
+          "label": "Returns API Response",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "external_api_module",
+          "target": "internal_caller",
+          "label": "Delivers Response To",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "api_interface",
+          "target": "external_api"
+        }
+      ],
+      "groups": [
+        {
+          "id": "internal_components",
+          "label": "Internal Application",
+          "nodes": [
+            "internal_caller"
+          ],
+          "title": "Application Internal Components",
+          "description": "Represents the parts of the application that consume the API interface to interact with external systems.",
+          "role": null
+        },
+        {
+          "id": "api_interface_layer",
+          "label": "API Interface Layer",
+          "nodes": [
+            "external_api_module"
+          ],
+          "title": "API Communication Abstraction",
+          "description": "This group encapsulates the `external_api` sub-module, which manages all direct interactions with external APIs, handling protocols and data formats.",
+          "role": null
+        },
+        {
+          "id": "external_dependencies",
+          "label": "External Dependencies",
+          "nodes": [
+            "external_service"
+          ],
+          "title": "External Service Providers",
+          "description": "External systems or third-party services that the application integrates with to extend its functionality or retrieve necessary data.",
+          "role": null
+        }
+      ]
+    },
+    "external_api": {
+      "title": "External API Interface",
+      "description": "This module provides the core functionality for interacting with an external application server, handling configuration loading, health checks, and data retrieval.",
+      "diagram": {
+        "direction": "TD",
+        "nodes": [
+          {
+            "id": "run_api_main",
+            "label": "Orchestrate API Calls",
+            "type": "component",
+            "link": null,
+            "title": "Main API Execution Logic",
+            "description": "The primary function responsible for initializing the API client, performing health checks, and fetching data from the external application server."
+          },
+          {
+            "id": "load_configuration",
+            "label": "Load Configuration",
+            "type": "component",
+            "link": null,
+            "title": "Configuration Loader",
+            "description": "Retrieves necessary configuration parameters, such as server endpoints or credentials, from the environment for API interaction."
+          },
+          {
+            "id": "external_app_server",
+            "label": "External Application Server",
+            "type": "external",
+            "link": null,
+            "title": "Application Server Endpoint",
+            "description": "Represents the external service or application that the module communicates with to perform operations like health checks and data retrieval."
+          }
+        ],
+        "edges": [
+          {
+            "source": "load_configuration",
+            "target": "run_api_main",
+            "label": "Provides configuration",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_api_main",
+            "target": "external_app_server",
+            "label": "Initializes server client",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_api_main",
+            "target": "external_app_server",
+            "label": "Performs health check (GET /health)",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_api_main",
+            "target": "external_app_server",
+            "label": "Requests records (GET /records)",
+            "title": null,
+            "description": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "api_interface_group",
+            "label": "API Interface",
+            "nodes": [
+              "run_api_main",
+              "load_configuration"
+            ],
+            "title": "External API Interaction Layer",
+            "description": "Encapsulates the logic for interacting with an external application server, including configuration loading and making specific API requests.",
+            "role": "surface"
+          }
+        ]
+      }
+    }
+  },
+  "core_workflow": {
+    "path": "",
+    "components": [],
+    "children": {
+      "main_logic": {
+        "path": "",
+        "components": [
+          "run_core.run_core"
+        ],
+        "title": "Main Logic",
+        "_title_auto_generated": true,
+        "description": "Provides 1 component(s) for main logic operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "start_core",
+              "label": "Start Core Workflow",
+              "type": "component",
+              "link": null,
+              "title": "Initiate Core Workflow",
+              "description": "Entry point for the main logic module, beginning the core processing sequence."
+            },
+            {
+              "id": "load_config",
+              "label": "Load Configuration",
+              "type": "component",
+              "link": null,
+              "title": "Load System Configuration",
+              "description": "Retrieves application configuration settings from environment variables or other defined sources."
+            },
+            {
+              "id": "validate_config",
+              "label": "Validate Configuration",
+              "type": "component",
+              "link": null,
+              "title": "Validate Configuration Settings",
+              "description": "Checks the loaded configuration for correctness and completeness, ensuring all required parameters are present and valid."
+            },
+            {
+              "id": "init_batch",
+              "label": "Initialize Data Batch",
+              "type": "component",
+              "link": null,
+              "title": "Create New Data Batch",
+              "description": "Instantiates a new batch object, assigning it a unique identifier for tracking and processing."
+            },
+            {
+              "id": "add_record",
+              "label": "Add Record to Batch",
+              "type": "component",
+              "link": null,
+              "title": "Populate Data Batch",
+              "description": "Adds a new data record with a specific ID and payload to the currently active processing batch."
+            },
+            {
+              "id": "env_config",
+              "label": "Environment Configuration",
+              "type": "external",
+              "link": null,
+              "title": "External Configuration Source",
+              "description": "Represents the external source (e.g., environment variables) from which the application's configuration is loaded."
+            }
+          ],
+          "edges": [
+            {
+              "source": "start_core",
+              "target": "load_config",
+              "label": "starts",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "load_config",
+              "target": "validate_config",
+              "label": "provides config",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "env_config",
+              "target": "load_config",
+              "label": "reads from",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "validate_config",
+              "target": "init_batch",
+              "label": "config valid",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "init_batch",
+              "target": "add_record",
+              "label": "adds to",
+              "title": null,
+              "description": null
+            }
+          ],
+          "groups": [
+            {
+              "id": "surface_ops",
+              "label": "Surface Operations",
+              "nodes": [
+                "start_core",
+                "load_config"
+              ],
+              "title": "Module Entry & Setup",
+              "description": "Components responsible for initiating the module's execution and performing initial setup tasks like configuration loading.",
+              "role": "surface"
+            },
+            {
+              "id": "analytical_ops",
+              "label": "Analytical Operations",
+              "nodes": [
+                "validate_config"
+              ],
+              "title": "Configuration Analysis",
+              "description": "Components focused on analyzing and validating input data or configurations to ensure operational integrity.",
+              "role": "analytical"
+            },
+            {
+              "id": "generative_ops",
+              "label": "Generative Operations",
+              "nodes": [
+                "init_batch",
+                "add_record"
+              ],
+              "title": "Data Batch Creation",
+              "description": "Components that create or populate data structures, such as initializing and adding records to a processing batch.",
+              "role": "generative"
+            },
+            {
+              "id": "data_sources",
+              "label": "Data Sources",
+              "nodes": [
+                "env_config"
+              ],
+              "title": "External Data Inputs",
+              "description": "External systems or sources that provide necessary data or configuration to the module.",
+              "role": "data"
+            }
+          ]
+        }
+      },
+      "data_processing": {
+        "path": "",
+        "components": [
+          "run_processing.run_processing"
+        ],
+        "title": "Data Processing",
+        "_title_auto_generated": true,
+        "description": "Provides 1 component(s) for data processing operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "run_processing_entry",
+              "label": "Execute Data Processing",
+              "type": "component",
+              "link": null,
+              "title": "Main Processing Entry Point",
+              "description": "The primary function that orchestrates the data processing workflow, from configuration loading to batch execution and result reporting."
+            },
+            {
+              "id": "load_config",
+              "label": "Load Configuration",
+              "type": "external",
+              "link": null,
+              "title": "Configuration Loader",
+              "description": "Retrieves essential configuration settings from the environment, crucial for initializing and operating the data processing pipeline effectively."
+            },
+            {
+              "id": "init_pipeline",
+              "label": "Initialize Pipeline",
+              "type": "component",
+              "link": null,
+              "title": "Pipeline Setup",
+              "description": "Sets up the data processing pipeline, configuring it with the loaded settings to prepare for subsequent data transformation and analysis tasks."
+            },
+            {
+              "id": "create_batch",
+              "label": "Create Data Batch",
+              "type": "component",
+              "link": null,
+              "title": "Batch Generation",
+              "description": "Constructs a new batch of data records, populating it with sample items ready to be fed into the processing pipeline for execution."
+            },
+            {
+              "id": "run_pipeline",
+              "label": "Run Pipeline on Batch",
+              "type": "component",
+              "link": null,
+              "title": "Batch Processing Execution",
+              "description": "Executes the configured data processing pipeline on the prepared batch of records, performing all defined transformations and operations."
+            },
+            {
+              "id": "return_status",
+              "label": "Return Processing Status",
+              "type": "component",
+              "link": null,
+              "title": "Processing Outcome Reporting",
+              "description": "Reports the final status of the batch processing operation, indicating whether it completed successfully or encountered any issues."
+            }
+          ],
+          "edges": [
+            {
+              "source": "run_processing_entry",
+              "target": "load_config",
+              "label": "Loads configuration",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_processing_entry",
+              "target": "init_pipeline",
+              "label": "Initializes pipeline",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_processing_entry",
+              "target": "create_batch",
+              "label": "Generates data batch",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_processing_entry",
+              "target": "run_pipeline",
+              "label": "Executes pipeline with batch",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_pipeline",
+              "target": "return_status",
+              "label": "Reports result",
+              "title": null,
+              "description": null
+            }
+          ],
+          "groups": [
+            {
+              "id": "surface_group",
+              "label": "Entry Point",
+              "nodes": [
+                "run_processing_entry"
+              ],
+              "title": "Module Entry Point",
+              "description": "The main function that serves as the entry point for initiating the data processing operations within this module.",
+              "role": "surface"
+            },
+            {
+              "id": "data_group",
+              "label": "Configuration",
+              "nodes": [
+                "load_config"
+              ],
+              "title": "Configuration Management",
+              "description": "Handles the loading of configuration settings required for the module's operation.",
+              "role": "data"
+            },
+            {
+              "id": "generative_group",
+              "label": "Data Generation",
+              "nodes": [
+                "create_batch"
+              ],
+              "title": "Batch Data Generation",
+              "description": "Responsible for creating and populating data batches that will be processed by the pipeline.",
+              "role": "generative"
+            },
+            {
+              "id": "analytical_group",
+              "label": "Processing Logic",
+              "nodes": [
+                "init_pipeline",
+                "run_pipeline",
+                "return_status"
+              ],
+              "title": "Core Processing Logic",
+              "description": "Components that define and execute the actual data transformation and analysis steps within the processing pipeline.",
+              "role": "analytical"
+            }
+          ]
+        }
+      }
+    },
+    "title": "Core Application Workflow",
+    "_title_auto_generated": true,
+    "description": "This module orchestrates the primary application flow, managing initial setup, configuration, and data batch preparation, then executing the main data processing pipeline.",
+    "_description_auto_generated": true,
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "core_workflow",
+          "label": "Core Application Workflow",
+          "type": "module"
+        },
+        {
+          "id": "start_workflow",
+          "label": "Initiate Core Workflow",
+          "type": "component",
+          "link": null,
+          "title": "Start Core Workflow",
+          "description": "The entry point that triggers the entire core application workflow, orchestrating subsequent steps."
+        },
+        {
+          "id": "config_batch_prep",
+          "label": "Prepare Configuration & Batch",
+          "type": "module",
+          "link": "main_logic",
+          "title": "Config & Batch Preparation",
+          "description": "This sub-module loads and validates application configuration, then initializes the data batch for processing."
+        },
+        {
+          "id": "process_data",
+          "label": "Execute Data Processing Pipeline",
+          "type": "module",
+          "link": "data_processing",
+          "title": "Data Processing Execution",
+          "description": "This sub-module initializes the processing pipeline, runs it on the prepared data batch, and reports the outcome."
+        },
+        {
+          "id": "workflow_result",
+          "label": "Workflow Completion Status",
+          "type": "external",
+          "link": null,
+          "title": "Final Workflow Status",
+          "description": "The ultimate outcome or status reported by the core workflow after all processing steps are completed."
+        },
+        {
+          "id": "main_logic",
+          "label": "Main Logic",
+          "type": "module",
+          "link": "main_logic"
+        },
+        {
+          "id": "data_processing",
+          "label": "Data Processing",
+          "type": "module",
+          "link": "data_processing"
+        }
+      ],
+      "edges": [
+        {
+          "source": "start_workflow",
+          "target": "config_batch_prep",
+          "label": "Triggers setup",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "config_batch_prep",
+          "target": "process_data",
+          "label": "Passes prepared batch & config",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "process_data",
+          "target": "workflow_result",
+          "label": "Reports final status",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "core_workflow",
+          "target": "main_logic"
+        },
+        {
+          "source": "core_workflow",
+          "target": "data_processing"
+        }
+      ],
+      "groups": [
+        {
+          "id": "entry_point_group",
+          "label": "Workflow Entry",
+          "nodes": [
+            "start_workflow"
+          ],
+          "title": "Workflow Entry Point",
+          "description": "The initial trigger or component that starts the core application workflow.",
+          "role": null
+        },
+        {
+          "id": "core_modules_group",
+          "label": "Core Sub-modules",
+          "nodes": [
+            "config_batch_prep",
+            "process_data"
+          ],
+          "title": "Main Processing Stages",
+          "description": "The primary sub-modules responsible for sequential steps in the core application workflow, from setup to execution.",
+          "role": null
+        },
+        {
+          "id": "output_group",
+          "label": "Workflow Output",
+          "nodes": [
+            "workflow_result"
+          ],
+          "title": "Workflow Output",
+          "description": "The final result or status generated upon the completion of the entire core workflow.",
+          "role": null
+        }
+      ]
+    },
+    "main_logic": {
+      "title": "Core Workflow Logic",
+      "description": "This module orchestrates the core application logic, including loading and validating configuration, and initializing a data batch with a sample record. It serves as the entry point for the main processing workflow.",
+      "diagram": {
+        "direction": "TD",
+        "nodes": [
+          {
+            "id": "start_core",
+            "label": "Start Core Workflow",
+            "type": "component",
+            "link": null,
+            "title": "Initiate Core Workflow",
+            "description": "Entry point for the main logic module, beginning the core processing sequence."
+          },
+          {
+            "id": "load_config",
+            "label": "Load Configuration",
+            "type": "component",
+            "link": null,
+            "title": "Load System Configuration",
+            "description": "Retrieves application configuration settings from environment variables or other defined sources."
+          },
+          {
+            "id": "validate_config",
+            "label": "Validate Configuration",
+            "type": "component",
+            "link": null,
+            "title": "Validate Configuration Settings",
+            "description": "Checks the loaded configuration for correctness and completeness, ensuring all required parameters are present and valid."
+          },
+          {
+            "id": "init_batch",
+            "label": "Initialize Data Batch",
+            "type": "component",
+            "link": null,
+            "title": "Create New Data Batch",
+            "description": "Instantiates a new batch object, assigning it a unique identifier for tracking and processing."
+          },
+          {
+            "id": "add_record",
+            "label": "Add Record to Batch",
+            "type": "component",
+            "link": null,
+            "title": "Populate Data Batch",
+            "description": "Adds a new data record with a specific ID and payload to the currently active processing batch."
+          },
+          {
+            "id": "env_config",
+            "label": "Environment Configuration",
+            "type": "external",
+            "link": null,
+            "title": "External Configuration Source",
+            "description": "Represents the external source (e.g., environment variables) from which the application's configuration is loaded."
+          }
+        ],
+        "edges": [
+          {
+            "source": "start_core",
+            "target": "load_config",
+            "label": "starts",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "load_config",
+            "target": "validate_config",
+            "label": "provides config",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "env_config",
+            "target": "load_config",
+            "label": "reads from",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "validate_config",
+            "target": "init_batch",
+            "label": "config valid",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "init_batch",
+            "target": "add_record",
+            "label": "adds to",
+            "title": null,
+            "description": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "surface_ops",
+            "label": "Surface Operations",
+            "nodes": [
+              "start_core",
+              "load_config"
+            ],
+            "title": "Module Entry & Setup",
+            "description": "Components responsible for initiating the module's execution and performing initial setup tasks like configuration loading.",
+            "role": "surface"
+          },
+          {
+            "id": "analytical_ops",
+            "label": "Analytical Operations",
+            "nodes": [
+              "validate_config"
+            ],
+            "title": "Configuration Analysis",
+            "description": "Components focused on analyzing and validating input data or configurations to ensure operational integrity.",
+            "role": "analytical"
+          },
+          {
+            "id": "generative_ops",
+            "label": "Generative Operations",
+            "nodes": [
+              "init_batch",
+              "add_record"
+            ],
+            "title": "Data Batch Creation",
+            "description": "Components that create or populate data structures, such as initializing and adding records to a processing batch.",
+            "role": "generative"
+          },
+          {
+            "id": "data_sources",
+            "label": "Data Sources",
+            "nodes": [
+              "env_config"
+            ],
+            "title": "External Data Inputs",
+            "description": "External systems or sources that provide necessary data or configuration to the module.",
+            "role": "data"
+          }
+        ]
+      }
+    },
+    "data_processing": {
+      "title": "Data Processing Module",
+      "description": "This module orchestrates data processing. It loads configuration, initializes a pipeline, generates a sample data batch, and executes the pipeline to process the batch, returning the operation's status.",
+      "diagram": {
+        "direction": "TD",
+        "nodes": [
+          {
+            "id": "run_processing_entry",
+            "label": "Execute Data Processing",
+            "type": "component",
+            "link": null,
+            "title": "Main Processing Entry Point",
+            "description": "The primary function that orchestrates the data processing workflow, from configuration loading to batch execution and result reporting."
+          },
+          {
+            "id": "load_config",
+            "label": "Load Configuration",
+            "type": "external",
+            "link": null,
+            "title": "Configuration Loader",
+            "description": "Retrieves essential configuration settings from the environment, crucial for initializing and operating the data processing pipeline effectively."
+          },
+          {
+            "id": "init_pipeline",
+            "label": "Initialize Pipeline",
+            "type": "component",
+            "link": null,
+            "title": "Pipeline Setup",
+            "description": "Sets up the data processing pipeline, configuring it with the loaded settings to prepare for subsequent data transformation and analysis tasks."
+          },
+          {
+            "id": "create_batch",
+            "label": "Create Data Batch",
+            "type": "component",
+            "link": null,
+            "title": "Batch Generation",
+            "description": "Constructs a new batch of data records, populating it with sample items ready to be fed into the processing pipeline for execution."
+          },
+          {
+            "id": "run_pipeline",
+            "label": "Run Pipeline on Batch",
+            "type": "component",
+            "link": null,
+            "title": "Batch Processing Execution",
+            "description": "Executes the configured data processing pipeline on the prepared batch of records, performing all defined transformations and operations."
+          },
+          {
+            "id": "return_status",
+            "label": "Return Processing Status",
+            "type": "component",
+            "link": null,
+            "title": "Processing Outcome Reporting",
+            "description": "Reports the final status of the batch processing operation, indicating whether it completed successfully or encountered any issues."
+          }
+        ],
+        "edges": [
+          {
+            "source": "run_processing_entry",
+            "target": "load_config",
+            "label": "Loads configuration",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_processing_entry",
+            "target": "init_pipeline",
+            "label": "Initializes pipeline",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_processing_entry",
+            "target": "create_batch",
+            "label": "Generates data batch",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_processing_entry",
+            "target": "run_pipeline",
+            "label": "Executes pipeline with batch",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_pipeline",
+            "target": "return_status",
+            "label": "Reports result",
+            "title": null,
+            "description": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "surface_group",
+            "label": "Entry Point",
+            "nodes": [
+              "run_processing_entry"
+            ],
+            "title": "Module Entry Point",
+            "description": "The main function that serves as the entry point for initiating the data processing operations within this module.",
+            "role": "surface"
+          },
+          {
+            "id": "data_group",
+            "label": "Configuration",
+            "nodes": [
+              "load_config"
+            ],
+            "title": "Configuration Management",
+            "description": "Handles the loading of configuration settings required for the module's operation.",
+            "role": "data"
+          },
+          {
+            "id": "generative_group",
+            "label": "Data Generation",
+            "nodes": [
+              "create_batch"
+            ],
+            "title": "Batch Data Generation",
+            "description": "Responsible for creating and populating data batches that will be processed by the pipeline.",
+            "role": "generative"
+          },
+          {
+            "id": "analytical_group",
+            "label": "Processing Logic",
+            "nodes": [
+              "init_pipeline",
+              "run_pipeline",
+              "return_status"
+            ],
+            "title": "Core Processing Logic",
+            "description": "Components that define and execute the actual data transformation and analysis steps within the processing pipeline.",
+            "role": "analytical"
+          }
+        ]
+      }
+    }
+  },
+  "data_management": {
+    "path": "",
+    "components": [],
+    "children": {
+      "input_output": {
+        "path": "",
+        "components": [
+          "run_io.run_io"
+        ],
+        "title": "Input Output",
+        "_title_auto_generated": true,
+        "description": "Provides 1 component(s) for input output operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "run_io_func",
+              "label": "Orchestrate File I/O",
+              "type": "component",
+              "link": null,
+              "title": "Main I/O Orchestrator",
+              "description": "The primary function that orchestrates the creation, writing, and reading of temporary JSON and CSV files to demonstrate I/O capabilities."
+            },
+            {
+              "id": "temp_dir_manager",
+              "label": "Manage Temporary Directory",
+              "type": "component",
+              "link": null,
+              "title": "Temporary Directory Manager",
+              "description": "Manages the lifecycle of a temporary directory, ensuring files are created and cleaned up within a controlled environment."
+            },
+            {
+              "id": "json_writer",
+              "label": "Write JSON Data",
+              "type": "component",
+              "link": null,
+              "title": "JSON File Writer",
+              "description": "Serializes Python dictionaries into JSON format and writes the structured data to a specified temporary file."
+            },
+            {
+              "id": "json_reader",
+              "label": "Read JSON Data",
+              "type": "component",
+              "link": null,
+              "title": "JSON File Reader",
+              "description": "Reads and deserializes JSON data from a specified temporary file back into Python dictionaries for processing."
+            },
+            {
+              "id": "csv_writer",
+              "label": "Write CSV Data",
+              "type": "component",
+              "link": null,
+              "title": "CSV File Writer",
+              "description": "Writes tabular data, represented as rows of dictionaries, into a CSV file with appropriate headers."
+            },
+            {
+              "id": "csv_reader",
+              "label": "Read CSV Data",
+              "type": "component",
+              "link": null,
+              "title": "CSV File Reader",
+              "description": "Reads tabular data from a CSV file, parsing each row into a structured format, typically a dictionary."
+            },
+            {
+              "id": "json_file",
+              "label": "JSON Output File",
+              "type": "external",
+              "link": null,
+              "title": "Temporary JSON File",
+              "description": "A temporary file used as an intermediary storage for JSON formatted data during I/O operations."
+            },
+            {
+              "id": "csv_file",
+              "label": "CSV Output File",
+              "type": "external",
+              "link": null,
+              "title": "Temporary CSV File",
+              "description": "A temporary file used as an intermediary storage for CSV formatted data during I/O operations."
+            }
+          ],
+          "edges": [
+            {
+              "source": "run_io_func",
+              "target": "temp_dir_manager",
+              "label": "Uses",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_io_func",
+              "target": "json_writer",
+              "label": "Initializes & Uses",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "json_writer",
+              "target": "json_file",
+              "label": "Writes Data To",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_io_func",
+              "target": "json_reader",
+              "label": "Initializes & Uses",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "json_file",
+              "target": "json_reader",
+              "label": "Reads Data From",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_io_func",
+              "target": "csv_writer",
+              "label": "Initializes & Uses",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "csv_writer",
+              "target": "csv_file",
+              "label": "Writes Data To",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_io_func",
+              "target": "csv_reader",
+              "label": "Initializes & Uses",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "csv_file",
+              "target": "csv_reader",
+              "label": "Reads Data From",
+              "title": null,
+              "description": null
+            }
+          ],
+          "groups": [
+            {
+              "id": "surface_group",
+              "label": "Surface",
+              "nodes": [
+                "run_io_func"
+              ],
+              "title": "Primary Entry Point",
+              "description": "The main function that orchestrates the module's core functionality.",
+              "role": "surface"
+            },
+            {
+              "id": "generative_group",
+              "label": "Generative",
+              "nodes": [
+                "json_writer",
+                "csv_writer"
+              ],
+              "title": "Data Generation Components",
+              "description": "Components responsible for creating and writing data to various formats.",
+              "role": "generative"
+            },
+            {
+              "id": "analytical_group",
+              "label": "Analytical",
+              "nodes": [
+                "json_reader",
+                "csv_reader"
+              ],
+              "title": "Data Analysis Components",
+              "description": "Components responsible for reading and parsing data from various formats.",
+              "role": "analytical"
+            },
+            {
+              "id": "data_group",
+              "label": "Data",
+              "nodes": [
+                "json_file",
+                "csv_file"
+              ],
+              "title": "Data Storage",
+              "description": "External or temporary storage locations for data processed by the module.",
+              "role": "data"
+            }
+          ]
+        }
+      }
+    },
+    "title": "Data Management Module",
+    "_title_auto_generated": true,
+    "description": "This module provides core functionalities for handling data, including reading from and writing to various file formats like JSON and CSV, ensuring data persistence and accessibility.",
+    "_description_auto_generated": true,
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "data_management",
+          "label": "Data Management Module",
+          "type": "module"
+        },
+        {
+          "id": "data_management_module",
+          "label": "Data Management Module",
+          "type": "module",
+          "link": "data_management",
+          "title": "Core Data Management",
+          "description": "This module provides essential services for handling data, including input/output operations, ensuring data persistence and accessibility across the system."
+        },
+        {
+          "id": "input_output_module",
+          "label": "File Input/Output",
+          "type": "module",
+          "link": "input_output",
+          "title": "File I/O Operations",
+          "description": "Manages reading and writing data to and from various file formats, such as JSON and CSV, facilitating data exchange and storage within the application."
+        },
+        {
+          "id": "input_output",
+          "label": "Input Output",
+          "type": "module",
+          "link": "input_output"
+        }
+      ],
+      "edges": [
+        {
+          "source": "data_management_module",
+          "target": "input_output_module",
+          "label": "Contains sub-module",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "data_management",
+          "target": "input_output"
+        }
+      ],
+      "groups": [
+        {
+          "id": "module_structure_group",
+          "label": "Module Structure",
+          "nodes": [
+            "data_management_module",
+            "input_output_module"
+          ],
+          "title": "Data Management Subsystems",
+          "description": "Overview of the main data management module and its primary sub-module responsible for file input and output operations.",
+          "role": null
+        }
+      ]
+    },
+    "input_output": {
+      "title": "File Input/Output Operations",
+      "description": "This module demonstrates basic file input and output capabilities by writing and reading data in both JSON and CSV formats to temporary files.",
+      "diagram": {
+        "direction": "TD",
+        "nodes": [
+          {
+            "id": "run_io_func",
+            "label": "Orchestrate File I/O",
+            "type": "component",
+            "link": null,
+            "title": "Main I/O Orchestrator",
+            "description": "The primary function that orchestrates the creation, writing, and reading of temporary JSON and CSV files to demonstrate I/O capabilities."
+          },
+          {
+            "id": "temp_dir_manager",
+            "label": "Manage Temporary Directory",
+            "type": "component",
+            "link": null,
+            "title": "Temporary Directory Manager",
+            "description": "Manages the lifecycle of a temporary directory, ensuring files are created and cleaned up within a controlled environment."
+          },
+          {
+            "id": "json_writer",
+            "label": "Write JSON Data",
+            "type": "component",
+            "link": null,
+            "title": "JSON File Writer",
+            "description": "Serializes Python dictionaries into JSON format and writes the structured data to a specified temporary file."
+          },
+          {
+            "id": "json_reader",
+            "label": "Read JSON Data",
+            "type": "component",
+            "link": null,
+            "title": "JSON File Reader",
+            "description": "Reads and deserializes JSON data from a specified temporary file back into Python dictionaries for processing."
+          },
+          {
+            "id": "csv_writer",
+            "label": "Write CSV Data",
+            "type": "component",
+            "link": null,
+            "title": "CSV File Writer",
+            "description": "Writes tabular data, represented as rows of dictionaries, into a CSV file with appropriate headers."
+          },
+          {
+            "id": "csv_reader",
+            "label": "Read CSV Data",
+            "type": "component",
+            "link": null,
+            "title": "CSV File Reader",
+            "description": "Reads tabular data from a CSV file, parsing each row into a structured format, typically a dictionary."
+          },
+          {
+            "id": "json_file",
+            "label": "JSON Output File",
+            "type": "external",
+            "link": null,
+            "title": "Temporary JSON File",
+            "description": "A temporary file used as an intermediary storage for JSON formatted data during I/O operations."
+          },
+          {
+            "id": "csv_file",
+            "label": "CSV Output File",
+            "type": "external",
+            "link": null,
+            "title": "Temporary CSV File",
+            "description": "A temporary file used as an intermediary storage for CSV formatted data during I/O operations."
+          }
+        ],
+        "edges": [
+          {
+            "source": "run_io_func",
+            "target": "temp_dir_manager",
+            "label": "Uses",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_io_func",
+            "target": "json_writer",
+            "label": "Initializes & Uses",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "json_writer",
+            "target": "json_file",
+            "label": "Writes Data To",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_io_func",
+            "target": "json_reader",
+            "label": "Initializes & Uses",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "json_file",
+            "target": "json_reader",
+            "label": "Reads Data From",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_io_func",
+            "target": "csv_writer",
+            "label": "Initializes & Uses",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "csv_writer",
+            "target": "csv_file",
+            "label": "Writes Data To",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_io_func",
+            "target": "csv_reader",
+            "label": "Initializes & Uses",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "csv_file",
+            "target": "csv_reader",
+            "label": "Reads Data From",
+            "title": null,
+            "description": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "surface_group",
+            "label": "Surface",
+            "nodes": [
+              "run_io_func"
+            ],
+            "title": "Primary Entry Point",
+            "description": "The main function that orchestrates the module's core functionality.",
+            "role": "surface"
+          },
+          {
+            "id": "generative_group",
+            "label": "Generative",
+            "nodes": [
+              "json_writer",
+              "csv_writer"
+            ],
+            "title": "Data Generation Components",
+            "description": "Components responsible for creating and writing data to various formats.",
+            "role": "generative"
+          },
+          {
+            "id": "analytical_group",
+            "label": "Analytical",
+            "nodes": [
+              "json_reader",
+              "csv_reader"
+            ],
+            "title": "Data Analysis Components",
+            "description": "Components responsible for reading and parsing data from various formats.",
+            "role": "analytical"
+          },
+          {
+            "id": "data_group",
+            "label": "Data",
+            "nodes": [
+              "json_file",
+              "csv_file"
+            ],
+            "title": "Data Storage",
+            "description": "External or temporary storage locations for data processed by the module.",
+            "role": "data"
+          }
+        ]
+      }
+    }
+  },
+  "observability": {
+    "path": "",
+    "components": [],
+    "children": {
+      "system_metrics": {
+        "path": "",
+        "components": [
+          "run_metrics.run_metrics"
+        ],
+        "title": "System Metrics",
+        "_title_auto_generated": true,
+        "description": "Provides 1 component(s) for system metrics operations.",
+        "_description_auto_generated": true,
+        "diagram": {
+          "direction": "TD",
+          "nodes": [
+            {
+              "id": "run_metrics_node",
+              "label": "Collect & Log System Metrics",
+              "type": "component",
+              "link": null,
+              "title": "System Metrics Runner",
+              "description": "Orchestrates the entire metrics collection process, including logging setup, metric value updates, snapshot generation, and logging the final metrics data for system monitoring."
+            },
+            {
+              "id": "logging_setup_node",
+              "label": "Configure Logging",
+              "type": "external",
+              "link": null,
+              "title": "Logging Configuration",
+              "description": "Sets up the logging environment, defining parameters such as the logging level and the destination for log messages, ensuring proper observability."
+            },
+            {
+              "id": "metrics_collector_node",
+              "label": "Manage Metrics Data",
+              "type": "component",
+              "link": null,
+              "title": "Metrics Collector",
+              "description": "An internal component that manages the lifecycle of various metrics, allowing for their creation, incremental updates, and the generation of a comprehensive snapshot."
+            },
+            {
+              "id": "metrics_snapshot_node",
+              "label": "Metrics Snapshot Data",
+              "type": "data",
+              "link": null,
+              "title": "Collected Metrics Snapshot",
+              "description": "A structured, immutable data object containing the current values of all collected system metrics, such as event counters and gauge readings, at a specific moment."
+            },
+            {
+              "id": "log_output_node",
+              "label": "Output Metrics Log",
+              "type": "external",
+              "link": null,
+              "title": "Metrics Log Destination",
+              "description": "Represents the external interface or destination where the processed metrics snapshot is written, typically for persistent storage, real-time dashboards, or debugging."
+            }
+          ],
+          "edges": [
+            {
+              "source": "run_metrics_node",
+              "target": "logging_setup_node",
+              "label": "configures",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_metrics_node",
+              "target": "metrics_collector_node",
+              "label": "uses to update",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "metrics_collector_node",
+              "target": "metrics_snapshot_node",
+              "label": "generates",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_metrics_node",
+              "target": "metrics_snapshot_node",
+              "label": "receives",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "run_metrics_node",
+              "target": "log_output_node",
+              "label": "sends data to",
+              "title": null,
+              "description": null
+            },
+            {
+              "source": "metrics_snapshot_node",
+              "target": "log_output_node",
+              "label": "is logged",
+              "title": null,
+              "description": null
+            }
+          ],
+          "groups": [
+            {
+              "id": "analytical_group",
+              "label": "Analytical Components",
+              "nodes": [
+                "run_metrics_node"
+              ],
+              "title": "Analytical Components",
+              "description": "Components responsible for processing, analyzing, or orchestrating data flows.",
+              "role": "analytical"
+            },
+            {
+              "id": "generative_group",
+              "label": "Generative Components",
+              "nodes": [
+                "metrics_collector_node"
+              ],
+              "title": "Generative Components",
+              "description": "Components that create or generate new data or structures.",
+              "role": "generative"
+            },
+            {
+              "id": "data_group",
+              "label": "Data Structures",
+              "nodes": [
+                "metrics_snapshot_node"
+              ],
+              "title": "Data Structures",
+              "description": "Nodes representing data entities or structures within the module.",
+              "role": "data"
+            },
+            {
+              "id": "surface_group",
+              "label": "Surface Interactions",
+              "nodes": [
+                "logging_setup_node",
+                "log_output_node"
+              ],
+              "title": "Surface Interactions",
+              "description": "Components that interact with the system's external boundaries or user interfaces.",
+              "role": "surface"
+            }
+          ]
+        }
+      }
+    },
+    "title": "Observability Module Overview",
+    "_title_auto_generated": true,
+    "description": "This module provides comprehensive tools for monitoring the application's internal state, collecting key metrics and logs. It ensures system health, performance, and facilitates rapid debugging by centralizing and routing critical operational data.",
+    "_description_auto_generated": true,
+    "diagram": {
+      "direction": "TD",
+      "nodes": [
+        {
+          "id": "observability",
+          "label": "Observability Module Overview",
+          "type": "module"
+        },
+        {
+          "id": "observability_orchestrator",
+          "label": "Orchestrate Monitoring & Logging",
+          "type": "component",
+          "link": null,
+          "title": "Observability Orchestrator",
+          "description": "Coordinates the collection, processing, and routing of all observability data, including metrics and logs, to their respective destinations for analysis and alerting."
+        },
+        {
+          "id": "system_metrics_collector",
+          "label": "Collect System Metrics",
+          "type": "module",
+          "link": "system_metrics",
+          "title": "System Metrics Sub-module",
+          "description": "Gathers performance and health metrics from various parts of the system, such as event counts and resource utilization, for analysis by the observability core."
+        },
+        {
+          "id": "application_logs",
+          "label": "Generate Application Logs",
+          "type": "external",
+          "link": null,
+          "title": "Application Log Sources",
+          "description": "Represents the various components within the application that generate log messages, providing detailed event information for debugging and monitoring."
+        },
+        {
+          "id": "external_monitoring_platform",
+          "label": "External Monitoring Platform",
+          "type": "external",
+          "link": null,
+          "title": "External Monitoring Platform",
+          "description": "An external system or service responsible for long-term storage, visualization, and advanced analysis of collected metrics and logs, often including dashboards and alerting."
+        },
+        {
+          "id": "alert_notification_service",
+          "label": "Alert & Notification Service",
+          "type": "external",
+          "link": null,
+          "title": "Alert Notification Service",
+          "description": "A dedicated service that receives alert triggers and dispatches notifications to relevant personnel or systems via various channels like email, SMS, or incident management tools."
+        },
+        {
+          "id": "system_metrics",
+          "label": "System Metrics",
+          "type": "module",
+          "link": "system_metrics"
+        }
+      ],
+      "edges": [
+        {
+          "source": "system_metrics_collector",
+          "target": "observability_orchestrator",
+          "label": "Forwards collected metrics",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "application_logs",
+          "target": "observability_orchestrator",
+          "label": "Sends raw log events",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "observability_orchestrator",
+          "target": "external_monitoring_platform",
+          "label": "Routes processed data",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "observability_orchestrator",
+          "target": "alert_notification_service",
+          "label": "Triggers alerts",
+          "title": null,
+          "description": null
+        },
+        {
+          "source": "observability",
+          "target": "system_metrics"
+        }
+      ],
+      "groups": [
+        {
+          "id": "core_processing_group",
+          "label": "Core Processing",
+          "nodes": [
+            "observability_orchestrator"
+          ],
+          "title": "Observability Core Processing",
+          "description": "The central component responsible for processing, transforming, and routing all incoming observability data to ensure it reaches the correct destinations.",
+          "role": null
+        },
+        {
+          "id": "data_sources_group",
+          "label": "Data Sources",
+          "nodes": [
+            "system_metrics_collector",
+            "application_logs"
+          ],
+          "title": "Observability Data Sources",
+          "description": "Components and modules that generate or collect raw observability data, such as system performance metrics and application-specific log events.",
+          "role": null
+        },
+        {
+          "id": "external_destinations_group",
+          "label": "External Destinations",
+          "nodes": [
+            "external_monitoring_platform",
+            "alert_notification_service"
+          ],
+          "title": "External Observability Destinations",
+          "description": "External systems and services that consume processed observability data for storage, visualization, analysis, and dispatching alerts.",
+          "role": null
+        }
+      ]
+    },
+    "system_metrics": {
+      "title": "System Metrics Collection and Logging",
+      "description": "This module is responsible for collecting system-level metrics such as event counters and queue depths. It initializes logging, updates metric values, generates a snapshot of current metrics, and logs this snapshot for monitoring.",
+      "diagram": {
+        "direction": "TD",
+        "nodes": [
+          {
+            "id": "run_metrics_node",
+            "label": "Collect & Log System Metrics",
+            "type": "component",
+            "link": null,
+            "title": "System Metrics Runner",
+            "description": "Orchestrates the entire metrics collection process, including logging setup, metric value updates, snapshot generation, and logging the final metrics data for system monitoring."
+          },
+          {
+            "id": "logging_setup_node",
+            "label": "Configure Logging",
+            "type": "external",
+            "link": null,
+            "title": "Logging Configuration",
+            "description": "Sets up the logging environment, defining parameters such as the logging level and the destination for log messages, ensuring proper observability."
+          },
+          {
+            "id": "metrics_collector_node",
+            "label": "Manage Metrics Data",
+            "type": "component",
+            "link": null,
+            "title": "Metrics Collector",
+            "description": "An internal component that manages the lifecycle of various metrics, allowing for their creation, incremental updates, and the generation of a comprehensive snapshot."
+          },
+          {
+            "id": "metrics_snapshot_node",
+            "label": "Metrics Snapshot Data",
+            "type": "data",
+            "link": null,
+            "title": "Collected Metrics Snapshot",
+            "description": "A structured, immutable data object containing the current values of all collected system metrics, such as event counters and gauge readings, at a specific moment."
+          },
+          {
+            "id": "log_output_node",
+            "label": "Output Metrics Log",
+            "type": "external",
+            "link": null,
+            "title": "Metrics Log Destination",
+            "description": "Represents the external interface or destination where the processed metrics snapshot is written, typically for persistent storage, real-time dashboards, or debugging."
+          }
+        ],
+        "edges": [
+          {
+            "source": "run_metrics_node",
+            "target": "logging_setup_node",
+            "label": "configures",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_metrics_node",
+            "target": "metrics_collector_node",
+            "label": "uses to update",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "metrics_collector_node",
+            "target": "metrics_snapshot_node",
+            "label": "generates",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_metrics_node",
+            "target": "metrics_snapshot_node",
+            "label": "receives",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "run_metrics_node",
+            "target": "log_output_node",
+            "label": "sends data to",
+            "title": null,
+            "description": null
+          },
+          {
+            "source": "metrics_snapshot_node",
+            "target": "log_output_node",
+            "label": "is logged",
+            "title": null,
+            "description": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "analytical_group",
+            "label": "Analytical Components",
+            "nodes": [
+              "run_metrics_node"
+            ],
+            "title": "Analytical Components",
+            "description": "Components responsible for processing, analyzing, or orchestrating data flows.",
+            "role": "analytical"
+          },
+          {
+            "id": "generative_group",
+            "label": "Generative Components",
+            "nodes": [
+              "metrics_collector_node"
+            ],
+            "title": "Generative Components",
+            "description": "Components that create or generate new data or structures.",
+            "role": "generative"
+          },
+          {
+            "id": "data_group",
+            "label": "Data Structures",
+            "nodes": [
+              "metrics_snapshot_node"
+            ],
+            "title": "Data Structures",
+            "description": "Nodes representing data entities or structures within the module.",
+            "role": "data"
+          },
+          {
+            "id": "surface_group",
+            "label": "Surface Interactions",
+            "nodes": [
+              "logging_setup_node",
+              "log_output_node"
+            ],
+            "title": "Surface Interactions",
+            "description": "Components that interact with the system's external boundaries or user interfaces.",
+            "role": "surface"
+          }
+        ]
+      }
+    }
+  }
+}

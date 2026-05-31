@@ -1,0 +1,126 @@
+{
+    "title": "Data Management & Retrieval",
+    "summary": "This module provides comprehensive functionalities for loading, indexing, storing, and retrieving documents. It encompasses tools for ingesting data from various sources, managing vector stores, and implementing advanced retrieval strategies to efficiently access relevant information.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "doc_loading",
+                "label": "Load Documents from Sources",
+                "type": "module",
+                "link": "document_loading",
+                "title": "Document Loading",
+                "description": "Handles the ingestion of raw data from various external sources, converting it into a standardized document format for further processing."
+            },
+            {
+                "id": "indexing_vectorstores",
+                "label": "Index & Store Documents",
+                "type": "module",
+                "link": "indexing_and_vectorstores",
+                "title": "Indexing & Vector Stores",
+                "description": "Manages the creation and maintenance of document indexes and vector stores, enabling efficient storage and semantic search capabilities."
+            },
+            {
+                "id": "retrieval_mechanisms",
+                "label": "Retrieve & Process Documents",
+                "type": "module",
+                "link": "retrieval_mechanisms",
+                "title": "Retrieval Mechanisms",
+                "description": "Implements diverse strategies for fetching, filtering, and re-ranking documents based on user queries and advanced algorithms."
+            },
+            {
+                "id": "raw_data",
+                "label": "Raw Data Sources",
+                "type": "external",
+                "link": null,
+                "title": "External Data Sources",
+                "description": "Represents various external data sources (e.g., files, databases, APIs) from which documents are loaded."
+            },
+            {
+                "id": "user_input",
+                "label": "User Query",
+                "type": "external",
+                "link": null,
+                "title": "User Input Query",
+                "description": "The natural language query or request provided by the user to initiate a document retrieval process."
+            },
+            {
+                "id": "final_docs",
+                "label": "Retrieved Documents",
+                "type": "external",
+                "link": null,
+                "title": "Final Retrieved Documents",
+                "description": "The set of relevant and processed documents returned after the retrieval and filtering stages."
+            }
+        ],
+        "edges": [
+            {
+                "source": "raw_data",
+                "target": "doc_loading",
+                "label": "Provides raw content",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "doc_loading",
+                "target": "indexing_vectorstores",
+                "label": "Feeds loaded documents",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "indexing_vectorstores",
+                "target": "retrieval_mechanisms",
+                "label": "Offers indexed data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "user_input",
+                "target": "retrieval_mechanisms",
+                "label": "Initiates search",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrieval_mechanisms",
+                "target": "final_docs",
+                "label": "Delivers relevant results",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "ingestion_group",
+                "label": "Document Ingestion",
+                "nodes": [
+                    "doc_loading"
+                ],
+                "title": "Document Ingestion Pipeline",
+                "description": "Focuses on bringing external data into the system and preparing it for indexing.",
+                "role": null
+            },
+            {
+                "id": "storage_indexing_group",
+                "label": "Data Storage & Indexing",
+                "nodes": [
+                    "indexing_vectorstores"
+                ],
+                "title": "Data Storage & Indexing Core",
+                "description": "Manages the persistent storage and efficient indexing of documents and their embeddings.",
+                "role": null
+            },
+            {
+                "id": "retrieval_processing_group",
+                "label": "Information Retrieval & Processing",
+                "nodes": [
+                    "retrieval_mechanisms"
+                ],
+                "title": "Information Retrieval & Processing",
+                "description": "Handles the intelligent fetching and refinement of documents based on user queries.",
+                "role": null
+            }
+        ]
+    }
+}

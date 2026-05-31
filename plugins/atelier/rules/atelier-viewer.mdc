@@ -1,0 +1,17 @@
+---
+description: How to use the Atelier diagram MCP tools and viewer
+alwaysApply: true
+---
+
+# Atelier Architecture Diagrams
+
+Tools: `list_repos`, `get_diagram`, `open_viewer`, `patch_diagram`, `write_module_doc`.
+
+**Any `repo_id` works dynamically:**
+- Hosted repos load from `ATELIER_DATA_ORIGIN` (default `https://app.atelier-inc.net`)
+- Local-only repos load from `ATELIER_LOCAL_REPO_ROOT` if set (folder of repo subdirs each with `overview.json`)
+- Cached repos reuse `~/.cache/atelier-mcp/repos/{repo_id}/` unless `open_viewer(..., refresh=true)`
+
+**Do not patch demo/production repos for testing.** Use local-only repos under `ATELIER_LOCAL_REPO_ROOT` (e.g. `minirepo`).
+
+Workflow: `open_viewer(repo_id)` → `patch_diagram(repo_id, operations)` → viewer hot-reloads via `viewer_epoch.json`.

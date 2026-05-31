@@ -1,0 +1,332 @@
+{
+  "title": "LLM Model Abstraction Layer",
+  "summary": "This module defines abstract interfaces and concrete implementations for interacting with Large Language Models (LLMs), including mechanisms for fallback, function-based models, structured generation, and concurrency control.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "Abstract LLM Interface",
+        "label": "Abstract LLM Interface",
+        "type": "component",
+        "link": null,
+        "title": "Model (Abstract Base Class)",
+        "description": "Defines the core contract and common functionalities for interacting with Large Language Models, including request handling, token counting, and message preparation."
+      },
+      {
+        "id": "Streamed Response Handler",
+        "label": "Streamed Response Handler",
+        "type": "component",
+        "link": null,
+        "title": "StreamedResponse (Abstract Base Class)",
+        "description": "Manages and processes real-time, chunked responses from LLMs, providing an asynchronous iterator for stream events and accumulating usage data."
+      },
+      {
+        "id": "Fallback Model Logic",
+        "label": "Fallback Model Logic",
+        "type": "component",
+        "link": null,
+        "title": "FallbackModel",
+        "description": "Provides resilience by chaining multiple LLMs and attempting them in sequence until a successful response is received or a configured fallback condition is met."
+      },
+      {
+        "id": "Function-Backed Model",
+        "label": "Function-Backed Model",
+        "type": "component",
+        "link": null,
+        "title": "FunctionModel",
+        "description": "Allows local Python functions to simulate LLM behavior, useful for testing, mocking, or integrating custom logic as an LLM."
+      },
+      {
+        "id": "MCP Sampling Integration",
+        "label": "MCP Sampling Integration",
+        "type": "component",
+        "link": null,
+        "title": "MCPSamplingModel",
+        "description": "Integrates with the Model Context Protocol (MCP) server to enable model sampling, where the MCP server makes requests back to the client."
+      },
+      {
+        "id": "Outlines Structured Generation",
+        "label": "Outlines Structured Generation",
+        "type": "component",
+        "link": null,
+        "title": "OutlinesModel",
+        "description": "Adapts local or offline LLMs for structured output generation by leveraging the Outlines library, supporting various local model backends."
+      },
+      {
+        "id": "Model Wrapper Base",
+        "label": "Model Wrapper Base",
+        "type": "component",
+        "link": null,
+        "title": "WrapperModel",
+        "description": "A foundational class for models that extend or modify the behavior of other models by wrapping an existing model instance."
+      },
+      {
+        "id": "Concurrency Limiter",
+        "label": "Concurrency Limiter",
+        "type": "component",
+        "link": null,
+        "title": "limit_model_concurrency",
+        "description": "A utility function to wrap an LLM with concurrency limiting, controlling the number of simultaneous requests to prevent overload."
+      },
+      {
+        "id": "HTTP Client Cache",
+        "label": "HTTP Client Cache",
+        "type": "component",
+        "link": null,
+        "title": "cached_async_http_client",
+        "description": "Provides a cached asynchronous HTTP client for efficient and reusable network requests to LLM providers."
+      },
+      {
+        "id": "Model Configuration",
+        "label": "Model Configuration",
+        "type": "data",
+        "link": null,
+        "title": "ModelSettings",
+        "description": "Data structure specifying various settings and parameters for LLM interactions, such as temperature, max tokens, and stop sequences."
+      },
+      {
+        "id": "Request Parameters",
+        "label": "Request Parameters",
+        "type": "data",
+        "link": null,
+        "title": "ModelRequestParameters",
+        "description": "Defines the specific parameters for a single LLM request, including function tools, output format, and instruction parts."
+      },
+      {
+        "id": "Conversation Messages",
+        "label": "Conversation Messages",
+        "type": "data",
+        "link": null,
+        "title": "ModelMessage",
+        "description": "Represents the history of messages exchanged with an LLM, including user prompts, system instructions, and model responses."
+      },
+      {
+        "id": "Token & Cost Usage",
+        "label": "Token & Cost Usage",
+        "type": "data",
+        "link": null,
+        "title": "RequestUsage",
+        "description": "Tracks the input and output token counts, as well as estimated costs, associated with LLM calls."
+      },
+      {
+        "id": "Model Capability Profile",
+        "label": "Model Capability Profile",
+        "type": "data",
+        "link": null,
+        "title": "ModelProfile",
+        "description": "Describes the features, limitations, and supported native tools of a specific LLM, guiding how requests are prepared and handled."
+      },
+      {
+        "id": "LLM Provider APIs",
+        "label": "LLM Provider APIs",
+        "type": "external",
+        "link": "llm_providers",
+        "title": "LLM Provider APIs",
+        "description": "External services or modules that provide access to various LLM APIs (e.g., OpenAI, Anthropic, Google Gemini)."
+      },
+      {
+        "id": "MCP Server",
+        "label": "MCP Server",
+        "type": "external",
+        "link": "mcp_server",
+        "title": "MCP Server",
+        "description": "The Model Context Protocol server, used for collaborative model interactions and sampling."
+      },
+      {
+        "id": "Outlines Library",
+        "label": "Outlines Library",
+        "type": "external",
+        "link": null,
+        "title": "Outlines Library",
+        "description": "An external Python library for constrained text generation with local LLMs, enabling structured outputs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "Fallback Model Logic",
+        "target": "Abstract LLM Interface",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Fallback Model Logic",
+        "target": "Abstract LLM Interface",
+        "label": "orchestrates calls to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Function-Backed Model",
+        "target": "Abstract LLM Interface",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MCP Sampling Integration",
+        "target": "Abstract LLM Interface",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Outlines Structured Generation",
+        "target": "Abstract LLM Interface",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Model Wrapper Base",
+        "target": "Abstract LLM Interface",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Model Wrapper Base",
+        "target": "Abstract LLM Interface",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Abstract LLM Interface",
+        "target": "Streamed Response Handler",
+        "label": "initiates/returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Abstract LLM Interface",
+        "target": "Model Configuration",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Abstract LLM Interface",
+        "target": "Request Parameters",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Abstract LLM Interface",
+        "target": "Conversation Messages",
+        "label": "takes as input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Abstract LLM Interface",
+        "target": "Token & Cost Usage",
+        "label": "reports",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Abstract LLM Interface",
+        "target": "Model Capability Profile",
+        "label": "consults",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Abstract LLM Interface",
+        "target": "LLM Provider APIs",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Streamed Response Handler",
+        "target": "Request Parameters",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Streamed Response Handler",
+        "target": "Token & Cost Usage",
+        "label": "accumulates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Concurrency Limiter",
+        "target": "Abstract LLM Interface",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MCP Sampling Integration",
+        "target": "MCP Server",
+        "label": "communicates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Outlines Structured Generation",
+        "target": "Outlines Library",
+        "label": "utilizes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "Core Abstractions",
+        "label": "Core Abstractions",
+        "nodes": [
+          "Abstract LLM Interface",
+          "Streamed Response Handler"
+        ],
+        "title": "Core Model Abstractions",
+        "description": "Fundamental interfaces for defining and handling LLM interactions and their streaming responses.",
+        "role": "surface"
+      },
+      {
+        "id": "Model Implementations",
+        "label": "Model Implementations",
+        "nodes": [
+          "Fallback Model Logic",
+          "Function-Backed Model",
+          "MCP Sampling Integration",
+          "Outlines Structured Generation",
+          "Model Wrapper Base"
+        ],
+        "title": "Concrete Model Implementations",
+        "description": "Various concrete implementations of the LLM interface, providing specialized behaviors like fallback, function-based logic, or integration with external libraries.",
+        "role": "generative"
+      },
+      {
+        "id": "Utilities",
+        "label": "Utilities",
+        "nodes": [
+          "Concurrency Limiter",
+          "HTTP Client Cache"
+        ],
+        "title": "Model Utilities",
+        "description": "Helper functions and components that enhance or support LLM interactions, such as concurrency control and HTTP client management.",
+        "role": "analytical"
+      },
+      {
+        "id": "Configuration & Data",
+        "label": "Configuration & Data",
+        "nodes": [
+          "Model Configuration",
+          "Request Parameters",
+          "Conversation Messages",
+          "Token & Cost Usage",
+          "Model Capability Profile"
+        ],
+        "title": "Model Configuration & Data Structures",
+        "description": "Data structures and settings used to configure LLM behavior, define request parameters, and represent conversational messages and usage metrics.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "title": "Evaluation Reporting & Telemetry",
+  "summary": "This module provides utilities for collecting OpenTelemetry spans for tracing and analysis, alongside functions for formatting numerical differences and durations into human-readable strings for evaluation reports.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "otel_context_subtree",
+        "label": "Collect OpenTelemetry Spans",
+        "type": "component",
+        "link": null,
+        "title": "OpenTelemetry Span Collector",
+        "description": "Context manager that captures and organizes OpenTelemetry spans generated during its execution into a `SpanTree` for detailed tracing and analysis. Handles cases where no TracerProvider is configured."
+      },
+      {
+        "id": "render_number_diff",
+        "label": "Render Number Differences",
+        "type": "component",
+        "link": null,
+        "title": "Numerical Difference Formatter",
+        "description": "Calculates and formats the difference between two numbers (integers or floats), providing both absolute and relative changes (percentages or multipliers) for clear reporting."
+      },
+      {
+        "id": "render_duration_diff",
+        "label": "Render Duration Differences",
+        "type": "component",
+        "link": null,
+        "title": "Duration Difference Formatter",
+        "description": "Formats the difference between two duration values (in seconds), presenting both the absolute time difference and a relative change for performance comparisons."
+      },
+      {
+        "id": "render_duration",
+        "label": "Render Duration",
+        "type": "component",
+        "link": null,
+        "title": "Duration Formatter",
+        "description": "Converts a duration in seconds into a human-readable string, automatically adjusting units (microseconds, milliseconds, seconds) based on the magnitude of the duration."
+      },
+      {
+        "id": "external_otel_system",
+        "label": "OpenTelemetry System",
+        "type": "external",
+        "link": null,
+        "title": "External OpenTelemetry",
+        "description": "An external system or framework that generates OpenTelemetry spans, which are then captured by this module for evaluation."
+      },
+      {
+        "id": "external_evaluation_data",
+        "label": "Evaluation Data",
+        "type": "external",
+        "link": null,
+        "title": "Raw Evaluation Metrics",
+        "description": "Raw numerical and duration data resulting from evaluations, which needs to be formatted for reporting purposes."
+      },
+      {
+        "id": "external_formatted_reports",
+        "label": "Formatted Reports",
+        "type": "external",
+        "link": null,
+        "title": "Human-Readable Reports",
+        "description": "The final output of the reporting process, consisting of clearly formatted numerical and duration differences suitable for human consumption."
+      }
+    ],
+    "edges": [
+      {
+        "source": "external_otel_system",
+        "target": "otel_context_subtree",
+        "label": "Generates Spans",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "otel_context_subtree",
+        "target": "external_evaluation_data",
+        "label": "Outputs Span Tree",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "external_evaluation_data",
+        "target": "render_number_diff",
+        "label": "Provides Numbers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "external_evaluation_data",
+        "target": "render_duration_diff",
+        "label": "Provides Durations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "external_evaluation_data",
+        "target": "render_duration",
+        "label": "Provides Durations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "render_number_diff",
+        "target": "external_formatted_reports",
+        "label": "Formats Numbers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "render_duration_diff",
+        "target": "external_formatted_reports",
+        "label": "Formats Durations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "render_duration",
+        "target": "external_formatted_reports",
+        "label": "Formats Durations",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "span_collection_group",
+        "label": "Span Collection",
+        "nodes": [
+          "otel_context_subtree"
+        ],
+        "title": "OpenTelemetry Span Collection",
+        "description": "Handles the collection and structuring of OpenTelemetry spans for tracing and analysis within evaluation contexts.",
+        "role": "generative"
+      },
+      {
+        "id": "reporting_format_group",
+        "label": "Reporting & Formatting",
+        "nodes": [
+          "render_number_diff",
+          "render_duration_diff",
+          "render_duration"
+        ],
+        "title": "Numerical & Duration Formatting",
+        "description": "Provides utilities for formatting numerical differences and durations into human-readable strings for evaluation reports.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

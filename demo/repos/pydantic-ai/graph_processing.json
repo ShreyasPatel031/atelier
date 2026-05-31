@@ -1,0 +1,232 @@
+{
+  "title": "Graph Processing Core",
+  "summary": "This module defines the core components for building, running, and managing directed acyclic graphs (DAGs) or state machines. It includes nodes, graph execution, state persistence, and tools for path construction and parallel processing.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "BaseNode",
+        "label": "Define Node Behavior",
+        "type": "component",
+        "link": null,
+        "title": "BaseNode",
+        "description": "Abstract base class for all nodes in the graph, defining the fundamental `run` method that dictates node execution and the possible next steps or termination of the graph."
+      },
+      {
+        "id": "Graph",
+        "label": "Define Graph Structure",
+        "type": "component",
+        "link": null,
+        "title": "Graph",
+        "description": "Represents the overall graph structure, composed of various nodes. It provides methods for running the graph, iterating through its execution, and generating visual diagrams."
+      },
+      {
+        "id": "GraphRun",
+        "label": "Execute Graph",
+        "type": "component",
+        "link": null,
+        "title": "GraphRun",
+        "description": "Manages the stateful execution of a graph, allowing for step-by-step iteration through nodes, access to the current state, and manual control over the graph's flow."
+      },
+      {
+        "id": "GraphRunResult",
+        "label": "Capture Run Result",
+        "type": "component",
+        "link": null,
+        "title": "GraphRunResult",
+        "description": "Holds the final output and the end state of a graph after its execution has completed, providing a comprehensive summary of the run."
+      },
+      {
+        "id": "Join",
+        "label": "Synchronize Parallel Paths",
+        "type": "component",
+        "link": null,
+        "title": "Join",
+        "description": "Defines how to combine outputs from multiple parallel execution paths using a reducer function, managing synchronization and aggregation of results."
+      },
+      {
+        "id": "ParentForkFinder",
+        "label": "Identify Parent Forks",
+        "type": "component",
+        "link": null,
+        "title": "ParentForkFinder",
+        "description": "Analyzes the graph's structure to identify dominating forks for join nodes, ensuring proper coordination of parallel execution and preventing deadlocks."
+      },
+      {
+        "id": "PathBuilder",
+        "label": "Construct Execution Paths",
+        "type": "component",
+        "link": null,
+        "title": "PathBuilder",
+        "description": "Offers a fluent API for building complex execution paths within the graph, supporting operations like transformations, mapping, and routing to destinations."
+      },
+      {
+        "id": "BaseStatePersistence",
+        "label": "Abstract State Persistence",
+        "type": "component",
+        "link": null,
+        "title": "BaseStatePersistence",
+        "description": "An abstract interface for defining how the state of a graph run is stored and retrieved, enabling durable and resumable graph executions."
+      },
+      {
+        "id": "FileStatePersistence",
+        "label": "Persist State to File",
+        "type": "component",
+        "link": "other_module",
+        "title": "FileStatePersistence",
+        "description": "A concrete implementation of state persistence that stores graph run snapshots in a JSON file, allowing for recovery and inspection of past runs."
+      },
+      {
+        "id": "FullStatePersistence",
+        "label": "Persist State In-Memory",
+        "type": "component",
+        "link": "other_module",
+        "title": "FullStatePersistence",
+        "description": "An in-memory implementation of state persistence that stores a complete history of graph snapshots, with an option for deep copying state to ensure immutability."
+      },
+      {
+        "id": "Step",
+        "label": "Define Graph Step",
+        "type": "component",
+        "link": null,
+        "title": "Step",
+        "description": "Represents a single, atomic unit of execution within the graph, encapsulating a step function and associated metadata like ID and an optional label."
+      }
+    ],
+    "edges": [
+      {
+        "source": "Graph",
+        "target": "BaseNode",
+        "label": "comprises",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Graph",
+        "target": "GraphRun",
+        "label": "initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GraphRun",
+        "target": "BaseNode",
+        "label": "executes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GraphRun",
+        "target": "BaseStatePersistence",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GraphRun",
+        "target": "GraphRunResult",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseStatePersistence",
+        "target": "FileStatePersistence",
+        "label": "implemented by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseStatePersistence",
+        "target": "FullStatePersistence",
+        "label": "implemented by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Join",
+        "target": "ParentForkFinder",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PathBuilder",
+        "target": "Step",
+        "label": "incorporates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PathBuilder",
+        "target": "Join",
+        "label": "incorporates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Step",
+        "target": "BaseNode",
+        "label": "becomes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Join",
+        "target": "BaseNode",
+        "label": "becomes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "graph_definition_group",
+        "label": "Graph Definition",
+        "nodes": [
+          "Graph",
+          "BaseNode",
+          "Step",
+          "Join",
+          "PathBuilder"
+        ],
+        "title": "Graph Definition",
+        "description": "Components for defining the structure and individual units of a graph.",
+        "role": "generative"
+      },
+      {
+        "id": "graph_execution_group",
+        "label": "Graph Execution",
+        "nodes": [
+          "GraphRun",
+          "GraphRunResult"
+        ],
+        "title": "Graph Execution",
+        "description": "Components responsible for running the graph and capturing its outcomes.",
+        "role": "surface"
+      },
+      {
+        "id": "persistence_group",
+        "label": "State Persistence",
+        "nodes": [
+          "BaseStatePersistence",
+          "FileStatePersistence",
+          "FullStatePersistence"
+        ],
+        "title": "State Persistence",
+        "description": "Mechanisms for storing and retrieving the graph's state for durability and recovery.",
+        "role": "data"
+      },
+      {
+        "id": "parallel_processing_group",
+        "label": "Parallel Processing Utilities",
+        "nodes": [
+          "ParentForkFinder"
+        ],
+        "title": "Parallel Processing Utilities",
+        "description": "Tools for analyzing graph structure to support parallel execution and synchronization.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

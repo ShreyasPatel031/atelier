@@ -1,0 +1,109 @@
+{
+  "title": "Persona Activations Management",
+  "summary": "This module processes model rollouts to extract and aggregate residual stream activations, quantifying the influence of specific personas. It provides tools for analyzing how personas manifest internally within the language model.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "model_rollout_data",
+        "label": "Model Rollout Data",
+        "type": "external",
+        "link": null,
+        "title": "Model Rollout Data",
+        "description": "Structured input containing system prompts, questions, and assistant responses from various model interactions, used to derive persona activations."
+      },
+      {
+        "id": "llm_inference_engine",
+        "label": "LLM Inference Engine",
+        "type": "external",
+        "link": null,
+        "title": "LLM Inference Engine",
+        "description": "The core components of the language model (model, tokenizer, device) required to perform forward passes and extract internal activations."
+      },
+      {
+        "id": "compute_residual_activations",
+        "label": "Compute Residual Activations",
+        "type": "external",
+        "link": null,
+        "title": "Compute Residual Activations",
+        "description": "An external utility that processes model outputs to calculate the mean residual stream activations for specific assistant turns, crucial for persona analysis."
+      },
+      {
+        "id": "calculate_persona_activations",
+        "label": "Calculate Persona Activations",
+        "type": "component",
+        "link": null,
+        "title": "Calculate Persona Activations",
+        "description": "Iterates through model rollouts, extracting and aggregating residual stream activations to quantify the influence of a specific persona."
+      },
+      {
+        "id": "persona_activation_vectors",
+        "label": "Persona Activation Vectors",
+        "type": "external",
+        "link": null,
+        "title": "Persona Activation Vectors",
+        "description": "The resulting mean and stacked PyTorch tensors representing the aggregated activation patterns associated with a persona across multiple model interactions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "model_rollout_data",
+        "target": "calculate_persona_activations",
+        "label": "Provides rollout details",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_inference_engine",
+        "target": "compute_residual_activations",
+        "label": "Uses LLM for forward pass",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "calculate_persona_activations",
+        "target": "compute_residual_activations",
+        "label": "Requests activation computation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "compute_residual_activations",
+        "target": "calculate_persona_activations",
+        "label": "Returns per-rollout activations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "calculate_persona_activations",
+        "target": "persona_activation_vectors",
+        "label": "Outputs aggregated activations",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "activation_processing_group",
+        "label": "Activation Processing",
+        "nodes": [
+          "calculate_persona_activations"
+        ],
+        "title": "Persona Activation Processing",
+        "description": "Encapsulates the core logic for iterating through model rollouts and orchestrating the extraction and aggregation of persona-specific activation vectors.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_flow_group",
+        "label": "Data Flow",
+        "nodes": [
+          "model_rollout_data",
+          "persona_activation_vectors"
+        ],
+        "title": "Activation Data Flow",
+        "description": "Manages the input data representing model interactions and the output data comprising the computed persona activation vectors.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "title": "DND Playground Streaming API",
+  "summary": "This module provides the primary API endpoint for interacting with the Dungeons and Dragons (DND) Playground. It exposes a streaming interface for real-time, interactive DND sessions, allowing clients to send requests and receive continuous event updates.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "client",
+        "label": "External Client",
+        "type": "external",
+        "link": null,
+        "title": "External User/System",
+        "description": "Represents an external user or system that interacts with the DND Playground API. It sends requests to initiate a DND playground session and receives a continuous stream of events as the session progresses, allowing for real-time interaction and updates."
+      },
+      {
+        "id": "dnd_playground_stream_endpoint",
+        "label": "Expose DND Playground Stream API",
+        "type": "component",
+        "link": null,
+        "title": "DND Playground Stream Endpoint",
+        "description": "This FastAPI endpoint serves as the primary entry point for DND Playground streaming requests. It receives incoming HTTP requests, validates the input, and orchestrates the generation and delivery of a Server-Sent Events (SSE) stream back to the client, ensuring a persistent connection for real-time updates."
+      },
+      {
+        "id": "chat_dnd_playground_request",
+        "label": "DND Playground Request Schema",
+        "type": "component",
+        "link": null,
+        "title": "Input Data Schema",
+        "description": "Defines the structured data format for requests made to the DND Playground API. This Pydantic model ensures that all incoming requests conform to expected parameters, including initial prompts, persona configurations, and other settings necessary to start or continue a DND playground session."
+      },
+      {
+        "id": "stream_events_dnd_playground_async",
+        "label": "Generate DND Playground Stream Events",
+        "type": "component",
+        "link": null,
+        "title": "Internal Stream Generator",
+        "description": "An internal asynchronous function responsible for generating the actual stream of events for the DND Playground. It processes the request, interacts with the core DND logic to get responses, and formats them into Server-Sent Events (SSE) messages, handling the continuous flow of data back to the client."
+      },
+      {
+        "id": "dnd_playground_logic_module",
+        "label": "Core DND Playground Logic",
+        "type": "component",
+        "link": "dnd_playground_logic",
+        "title": "Backend DND Logic",
+        "description": "This module encapsulates the core business logic for the DND Playground. It handles the complex interactions, persona steering, and content generation that drive the DND experience, providing the underlying intelligence that the streaming interface exposes to users."
+      }
+    ],
+    "edges": [
+      {
+        "source": "client",
+        "target": "dnd_playground_stream_endpoint",
+        "label": "Sends Request",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_playground_stream_endpoint",
+        "target": "chat_dnd_playground_request",
+        "label": "Validates Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_playground_stream_endpoint",
+        "target": "stream_events_dnd_playground_async",
+        "label": "Initiates Stream Generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "stream_events_dnd_playground_async",
+        "target": "dnd_playground_logic_module",
+        "label": "Interacts with Logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_playground_stream_endpoint",
+        "target": "client",
+        "label": "Streams Response",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "api_surface",
+        "label": "API Surface",
+        "nodes": [
+          "dnd_playground_stream_endpoint"
+        ],
+        "title": "User-Facing API Endpoint",
+        "description": "This group represents the public-facing API endpoint that clients interact with to access the DND Playground's streaming capabilities.",
+        "role": "surface"
+      },
+      {
+        "id": "data_structures",
+        "label": "Data Structures",
+        "nodes": [
+          "chat_dnd_playground_request"
+        ],
+        "title": "Request Data Definition",
+        "description": "This group includes the Pydantic model defining the structure and validation rules for incoming DND Playground requests.",
+        "role": "data"
+      },
+      {
+        "id": "stream_generation",
+        "label": "Stream Generation Logic",
+        "nodes": [
+          "stream_events_dnd_playground_async"
+        ],
+        "title": "Event Stream Handler",
+        "description": "This group encompasses the internal asynchronous function responsible for generating and formatting the continuous stream of events for the DND Playground.",
+        "role": "generative"
+      },
+      {
+        "id": "backend_logic",
+        "label": "Backend Logic",
+        "nodes": [
+          "dnd_playground_logic_module"
+        ],
+        "title": "Core DND Playground Functionality",
+        "description": "This group represents the module containing the fundamental business logic and intelligence that powers the DND Playground experience.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "title": "API Metadata Endpoints",
+  "summary": "This module provides API endpoints to retrieve essential metadata, default prompts, and configuration details for the gated chat and D&D playground user interfaces.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "incoming_request",
+        "label": "Incoming HTTP Request",
+        "type": "external",
+        "link": null,
+        "title": "HTTP Request",
+        "description": "An external HTTP request initiates the process of fetching metadata for a specific UI."
+      },
+      {
+        "id": "gate_chat_meta_node",
+        "label": "Generate Gated Chat UI Metadata",
+        "type": "component",
+        "link": null,
+        "title": "Gated Chat UI Metadata",
+        "description": "Retrieves and formats system prompts, steering explanations, and trait alpha configurations for the four-gate chat interface."
+      },
+      {
+        "id": "dnd_playground_meta_node",
+        "label": "Generate D&D Playground UI Metadata",
+        "type": "component",
+        "link": null,
+        "title": "D&D Playground UI Metadata",
+        "description": "Retrieves and formats default questions, system prompts, and alignment presets for the D&D playground interface."
+      },
+      {
+        "id": "load_playground_bundle_node",
+        "label": "Load Playground Configuration",
+        "type": "external",
+        "link": "dnd_playground_logic",
+        "title": "Load Playground Config",
+        "description": "Loads a bundle of configuration and data, including system prompts, questions, and trait definitions, from the D&D playground logic."
+      },
+      {
+        "id": "build_gate_agent_system_node",
+        "label": "Construct Gate Agent System Prompt",
+        "type": "external",
+        "link": "gating_mechanisms",
+        "title": "Build Gate Agent Prompt",
+        "description": "Constructs the specific system prompt used by the gate agent, integrating base system instructions from the gating mechanisms."
+      },
+      {
+        "id": "outgoing_response",
+        "label": "Outgoing HTTP Response",
+        "type": "external",
+        "link": null,
+        "title": "HTTP Response",
+        "description": "The generated metadata is returned to the client as a structured HTTP response."
+      }
+    ],
+    "edges": [
+      {
+        "source": "incoming_request",
+        "target": "gate_chat_meta_node",
+        "label": "Triggers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "incoming_request",
+        "target": "dnd_playground_meta_node",
+        "label": "Triggers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_meta_node",
+        "target": "load_playground_bundle_node",
+        "label": "Fetches Config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_meta_node",
+        "target": "build_gate_agent_system_node",
+        "label": "Builds Prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_playground_meta_node",
+        "target": "load_playground_bundle_node",
+        "label": "Fetches Config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gate_chat_meta_node",
+        "target": "outgoing_response",
+        "label": "Returns Metadata",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dnd_playground_meta_node",
+        "target": "outgoing_response",
+        "label": "Returns Metadata",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_endpoints",
+        "label": "Surface Endpoints",
+        "nodes": [
+          "gate_chat_meta_node",
+          "dnd_playground_meta_node"
+        ],
+        "title": "API Endpoints",
+        "description": "These components expose API endpoints for retrieving UI metadata.",
+        "role": "surface"
+      },
+      {
+        "id": "data_access",
+        "label": "Data Access",
+        "nodes": [
+          "load_playground_bundle_node"
+        ],
+        "title": "Data Loading",
+        "description": "Components responsible for loading configuration and data bundles.",
+        "role": "data"
+      },
+      {
+        "id": "prompt_generation",
+        "label": "Prompt Generation",
+        "nodes": [
+          "build_gate_agent_system_node"
+        ],
+        "title": "System Prompt Construction",
+        "description": "Components involved in dynamically constructing system prompts.",
+        "role": "generative"
+      }
+    ]
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "title": "File Input/Output Operations",
+  "summary": "This module demonstrates basic file input and output capabilities by writing and reading data in both JSON and CSV formats to temporary files.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "run_io_func",
+        "label": "Orchestrate File I/O",
+        "type": "component",
+        "link": null,
+        "title": "Main I/O Orchestrator",
+        "description": "The primary function that orchestrates the creation, writing, and reading of temporary JSON and CSV files to demonstrate I/O capabilities."
+      },
+      {
+        "id": "temp_dir_manager",
+        "label": "Manage Temporary Directory",
+        "type": "component",
+        "link": null,
+        "title": "Temporary Directory Manager",
+        "description": "Manages the lifecycle of a temporary directory, ensuring files are created and cleaned up within a controlled environment."
+      },
+      {
+        "id": "json_writer",
+        "label": "Write JSON Data",
+        "type": "component",
+        "link": null,
+        "title": "JSON File Writer",
+        "description": "Serializes Python dictionaries into JSON format and writes the structured data to a specified temporary file."
+      },
+      {
+        "id": "json_reader",
+        "label": "Read JSON Data",
+        "type": "component",
+        "link": null,
+        "title": "JSON File Reader",
+        "description": "Reads and deserializes JSON data from a specified temporary file back into Python dictionaries for processing."
+      },
+      {
+        "id": "csv_writer",
+        "label": "Write CSV Data",
+        "type": "component",
+        "link": null,
+        "title": "CSV File Writer",
+        "description": "Writes tabular data, represented as rows of dictionaries, into a CSV file with appropriate headers."
+      },
+      {
+        "id": "csv_reader",
+        "label": "Read CSV Data",
+        "type": "component",
+        "link": null,
+        "title": "CSV File Reader",
+        "description": "Reads tabular data from a CSV file, parsing each row into a structured format, typically a dictionary."
+      },
+      {
+        "id": "json_file",
+        "label": "JSON Output File",
+        "type": "external",
+        "link": null,
+        "title": "Temporary JSON File",
+        "description": "A temporary file used as an intermediary storage for JSON formatted data during I/O operations."
+      },
+      {
+        "id": "csv_file",
+        "label": "CSV Output File",
+        "type": "external",
+        "link": null,
+        "title": "Temporary CSV File",
+        "description": "A temporary file used as an intermediary storage for CSV formatted data during I/O operations."
+      }
+    ],
+    "edges": [
+      {
+        "source": "run_io_func",
+        "target": "temp_dir_manager",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_io_func",
+        "target": "json_writer",
+        "label": "Initializes & Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_writer",
+        "target": "json_file",
+        "label": "Writes Data To",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_io_func",
+        "target": "json_reader",
+        "label": "Initializes & Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "json_file",
+        "target": "json_reader",
+        "label": "Reads Data From",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_io_func",
+        "target": "csv_writer",
+        "label": "Initializes & Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "csv_writer",
+        "target": "csv_file",
+        "label": "Writes Data To",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_io_func",
+        "target": "csv_reader",
+        "label": "Initializes & Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "csv_file",
+        "target": "csv_reader",
+        "label": "Reads Data From",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_group",
+        "label": "Surface",
+        "nodes": [
+          "run_io_func"
+        ],
+        "title": "Primary Entry Point",
+        "description": "The main function that orchestrates the module's core functionality.",
+        "role": "surface"
+      },
+      {
+        "id": "generative_group",
+        "label": "Generative",
+        "nodes": [
+          "json_writer",
+          "csv_writer"
+        ],
+        "title": "Data Generation Components",
+        "description": "Components responsible for creating and writing data to various formats.",
+        "role": "generative"
+      },
+      {
+        "id": "analytical_group",
+        "label": "Analytical",
+        "nodes": [
+          "json_reader",
+          "csv_reader"
+        ],
+        "title": "Data Analysis Components",
+        "description": "Components responsible for reading and parsing data from various formats.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_group",
+        "label": "Data",
+        "nodes": [
+          "json_file",
+          "csv_file"
+        ],
+        "title": "Data Storage",
+        "description": "External or temporary storage locations for data processed by the module.",
+        "role": "data"
+      }
+    ]
+  }
+}

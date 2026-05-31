@@ -1,0 +1,182 @@
+{
+    "title": "Persona Development & Evaluation",
+    "summary": "This module provides a comprehensive suite of tools for developing, evaluating, and demonstrating persona steering vectors for large language models. It covers the entire lifecycle from artifact generation to validation and interactive demonstrations.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "experiment_runners_mod",
+                "label": "Persona Experiment Runners",
+                "type": "module",
+                "link": "experiment_runners",
+                "title": "Persona Experiment Runners",
+                "description": "Provides CLI tools for the full persona development pipeline, from artifact generation and data collection to vector extraction, steering demonstrations, and final validation."
+            },
+            {
+                "id": "steering_demonstrations_mod",
+                "label": "Steering Demonstrations",
+                "type": "module",
+                "link": "steering_demonstrations",
+                "title": "Persona Steering Demonstrations",
+                "description": "Offers tools to demonstrate and evaluate persona steering, including generating steered text, analyzing hidden states, and running grid-based experiments."
+            },
+            {
+                "id": "sae_analysis_mod",
+                "label": "SAE Analysis Tools",
+                "type": "module",
+                "link": "sae_analysis",
+                "title": "SAE Analysis Tools",
+                "description": "Provides API endpoints for analyzing Sparse Autoencoders (SAEs), comparing activations between prompts, and generating snapshots for specific messages."
+            },
+            {
+                "id": "data_generation_mod",
+                "label": "Data Generation & Rollouts",
+                "type": "module",
+                "link": "data_generation_and_rollouts",
+                "title": "Data Generation & Rollouts",
+                "description": "Generates conversational data through automated model rollouts and self-chat experiments, exploring persona vector influence and gate discovery."
+            },
+            {
+                "id": "llm_backend",
+                "label": "Language Model (LLM)",
+                "type": "external",
+                "link": null,
+                "title": "Underlying Language Model",
+                "description": "The core large language model (e.g., Gemma) used for text generation, activation extraction, and steered responses across all persona development stages."
+            },
+            {
+                "id": "external_eval_services",
+                "label": "External Evaluation Services",
+                "type": "external",
+                "link": null,
+                "title": "AI Evaluation & Judging Services",
+                "description": "External AI services (e.g., Vertex AI) used for generating artifacts, judging model responses, and evaluating coherence during persona development and validation."
+            },
+            {
+                "id": "persona_data_artifacts",
+                "label": "Persona Data Artifacts",
+                "type": "external",
+                "link": null,
+                "title": "Persona Configuration & Vectors",
+                "description": "Includes trait bundles, persona vectors, calibration data, and other structured data defining personas and their steering properties."
+            },
+            {
+                "id": "steering_api",
+                "label": "Steering API Endpoint",
+                "type": "external",
+                "link": null,
+                "title": "FastAPI Steering API",
+                "description": "An external API endpoint that provides real-time persona steering functionality, used for benchmarking and integration."
+            }
+        ],
+        "edges": [
+            {
+                "source": "experiment_runners_mod",
+                "target": "llm_backend",
+                "label": "Interacts for Generation & Activations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "experiment_runners_mod",
+                "target": "external_eval_services",
+                "label": "Utilizes for Judging & Artifact Creation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "experiment_runners_mod",
+                "target": "persona_data_artifacts",
+                "label": "Manages Persona Data",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "experiment_runners_mod",
+                "target": "steering_api",
+                "label": "Benchmarks Performance",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "steering_demonstrations_mod",
+                "target": "llm_backend",
+                "label": "Generates Steered Responses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "steering_demonstrations_mod",
+                "target": "persona_data_artifacts",
+                "label": "Consumes Persona Configs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "steering_demonstrations_mod",
+                "target": "external_eval_services",
+                "label": "Submits for Evaluation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sae_analysis_mod",
+                "target": "llm_backend",
+                "label": "Extracts & Compares Activations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_generation_mod",
+                "target": "llm_backend",
+                "label": "Simulates Conversations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_generation_mod",
+                "target": "persona_data_artifacts",
+                "label": "Applies Persona Settings",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "persona_lifecycle_stages",
+                "label": "Persona Lifecycle Stages",
+                "nodes": [
+                    "experiment_runners_mod",
+                    "data_generation_mod"
+                ],
+                "title": "Persona Lifecycle Stages",
+                "description": "Modules covering the end-to-end process of persona development, from data generation and experimentation to validation.",
+                "role": null
+            },
+            {
+                "id": "analysis_demonstration",
+                "label": "Analysis & Demonstration",
+                "nodes": [
+                    "steering_demonstrations_mod",
+                    "sae_analysis_mod"
+                ],
+                "title": "Analysis & Demonstration",
+                "description": "Modules focused on analyzing persona effects, demonstrating steering capabilities, and inspecting model internals.",
+                "role": null
+            },
+            {
+                "id": "core_dependencies",
+                "label": "Core External Dependencies",
+                "nodes": [
+                    "llm_backend",
+                    "external_eval_services",
+                    "persona_data_artifacts",
+                    "steering_api"
+                ],
+                "title": "Core External Dependencies",
+                "description": "Essential external systems and data assets that the persona development and evaluation process relies upon.",
+                "role": null
+            }
+        ]
+    }
+}
