@@ -1,37 +1,12 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-
-const execFileAsync = promisify(execFile);
-
-const AUTO_OPEN = process.env.ATELIER_AUTO_OPEN_BROWSER !== "0";
-
-export async function tryOpenInCursor(url: string): Promise<{
+/**
+ * No reliable way to open Cursor Simple Browser from an MCP subprocess.
+ * Return the URL and let the agent open it (e.g. via open_resource or browser_navigate).
+ */
+export async function tryOpenInCursor(_url: string): Promise<{
   attempted: boolean;
   method?: string;
   ok: boolean;
   error?: string;
 }> {
-  if (!AUTO_OPEN) {
-    return { attempted: false, ok: false };
-  }
-
-  const platform = process.platform;
-
-  try {
-    if (platform === "darwin") {
-      await execFileAsync("open", ["-g", "-a", "Cursor", url]);
-      return { attempted: true, method: "open -a Cursor", ok: true };
-    }
-
-    if (platform === "win32") {
-      await execFileAsync("cmd", ["/c", "start", "", url]);
-      return { attempted: true, method: "start", ok: true };
-    }
-
-    await execFileAsync("xdg-open", [url]);
-    return { attempted: true, method: "xdg-open", ok: true };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return { attempted: true, ok: false, error: message };
-  }
+  return { attempted: false, ok: false, error: "Agent should open the URL in Simple Browser" };
 }

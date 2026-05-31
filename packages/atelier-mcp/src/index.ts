@@ -40,7 +40,7 @@ server.registerTool(
   {
     description: [
       "Start local viewer server for a repo diagram.",
-      "Returns a localhost URL. After this call: try browser_navigate(url). If unavailable, reply with the URL on its own line.",
+      "Returns a localhost URL. After this call: browser_navigate(url). When done, reply with that URL on its own last line.",
       "Never use shell open or open -a Cursor.",
     ].join("\n"),
     inputSchema: {
@@ -61,7 +61,7 @@ server.registerTool(
             url: result.url,
             port: result.port,
             source: result.source,
-            hint: "browser_navigate " + result.url + " — if unavailable, reply with the URL on its own line.",
+            hint: "browser_navigate " + result.url + " — when done, put " + result.url + " on its own last line.",
           }),
         },
       ],
