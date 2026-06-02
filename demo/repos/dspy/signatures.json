@@ -1,109 +1,95 @@
 {
-  "title": "DSPy Signature Definition",
-  "summary": "This module defines the core structure and behavior of DSPy Signatures, including a metaclass for dynamic creation and validation, and utilities for handling legacy field definitions.",
+  "title": "DSPy Signature Definitions",
+  "summary": "This module defines the core mechanisms for creating and managing DSPy signatures, including a metaclass for dynamic signature generation and utilities for handling legacy field types.",
   "diagram": {
     "direction": "TD",
     "nodes": [
       {
-        "id": "signature_meta",
-        "label": "Manage DSPy Signatures",
-        "type": "component",
-        "link": null,
-        "title": "DSPy Signature Metaclass",
-        "description": "A metaclass that extends Pydantic's BaseModel metaclass to define DSPy Signatures. It handles dynamic signature creation, field validation, type inference, instruction generation, and ensures proper field metadata for input/output fields."
-      },
-      {
         "id": "new_to_old_field",
-        "label": "Convert Field to Old Format",
+        "label": "Convert Field to Legacy Type",
         "type": "component",
         "link": null,
-        "title": "Field Format Converter",
-        "description": "Converts a modern Pydantic FieldInfo object, which includes DSPy-specific metadata, into an older OldInputField or OldOutputField instance based on its type for backward compatibility."
+        "title": "Field Type Converter",
+        "description": "A utility function that transforms a modern DSPy field (based on Pydantic's FieldInfo) into an instance of either `OldInputField` or `OldOutputField`, preserving its properties for backward compatibility."
       },
       {
         "id": "old_input_field",
-        "label": "Old Input Field",
+        "label": "Legacy Input Field",
         "type": "component",
         "link": null,
-        "title": "Legacy Input Field Definition",
-        "description": "Represents a legacy input field definition within DSPy, inheriting from OldField and marking itself as an input field. Used for backward compatibility with older field representations."
+        "title": "Old Input Field Definition",
+        "description": "Represents a legacy input field within a DSPy signature. It defines properties like prefix, description, and format, specifically marking the field as an input type for older signature structures."
       },
       {
         "id": "old_output_field",
-        "label": "Old Output Field",
+        "label": "Legacy Output Field",
         "type": "component",
         "link": null,
-        "title": "Legacy Output Field Definition",
-        "description": "Represents a legacy output field definition within DSPy, inheriting from OldField and marking itself as an output field. Used for backward compatibility with older field representations."
+        "title": "Old Output Field Definition",
+        "description": "Represents a legacy output field within a DSPy signature. It defines properties like prefix, description, and format, specifically marking the field as an output type for older signature structures."
       },
       {
-        "id": "pydantic_basemodel",
+        "id": "signature_meta",
+        "label": "Define DSPy Signatures",
+        "type": "component",
+        "link": null,
+        "title": "DSPy Signature Metaclass",
+        "description": "The metaclass responsible for dynamically creating and validating DSPy `Signature` classes. It handles field ordering, type inference, default instructions, and ensures fields are correctly defined as input or output types, extending Pydantic's BaseModel capabilities."
+      },
+      {
+        "id": "pydantic_base_model",
         "label": "Pydantic BaseModel",
         "type": "external",
         "link": null,
-        "title": "Pydantic Base Model",
-        "description": "An external Pydantic class that provides the foundation for data validation and settings management, extended by DSPy's SignatureMeta."
-      },
-      {
-        "id": "pydantic_fieldinfo",
-        "label": "Pydantic FieldInfo",
-        "type": "external",
-        "link": null,
-        "title": "Pydantic Field Information",
-        "description": "An external Pydantic class that holds metadata about a model field, which DSPy's SignatureMeta processes to define input and output fields."
+        "title": "Pydantic's BaseModel",
+        "description": "The foundational class from Pydantic that provides data validation, settings management, and serialization. DSPy signatures are built upon its structure and validation capabilities."
       }
     ],
     "edges": [
       {
-        "source": "signature_meta",
-        "target": "pydantic_basemodel",
-        "label": "Extends Metaclass Of",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "signature_meta",
-        "target": "pydantic_fieldinfo",
-        "label": "Manages FieldInfo",
-        "title": null,
-        "description": null
-      },
-      {
         "source": "new_to_old_field",
         "target": "old_input_field",
-        "label": "Converts To",
+        "label": "creates",
         "title": null,
         "description": null
       },
       {
         "source": "new_to_old_field",
         "target": "old_output_field",
-        "label": "Converts To",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "signature_meta",
+        "target": "pydantic_base_model",
+        "label": "extends metaclass of",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "signature_core_definition",
-        "label": "Signature Core Definition",
+        "id": "signature_definition_group",
+        "label": "Signature Definition",
         "nodes": [
-          "signature_meta"
+          "signature_meta",
+          "pydantic_base_model"
         ],
         "title": "Core Signature Definition",
-        "description": "Components responsible for defining and managing the fundamental structure and behavior of DSPy Signatures.",
+        "description": "Components responsible for the dynamic creation and validation of DSPy Signature classes, leveraging Pydantic's data modeling capabilities.",
         "role": "generative"
       },
       {
-        "id": "legacy_field_handling",
+        "id": "legacy_field_handling_group",
         "label": "Legacy Field Handling",
         "nodes": [
           "new_to_old_field",
           "old_input_field",
           "old_output_field"
         ],
-        "title": "Legacy Field Compatibility",
-        "description": "Components that provide backward compatibility for older DSPy field definitions and conversion utilities.",
+        "title": "Legacy Field Conversion & Types",
+        "description": "Utilities and classes for converting and representing older DSPy field types, ensuring backward compatibility with previous signature definitions.",
         "role": "data"
       }
     ]

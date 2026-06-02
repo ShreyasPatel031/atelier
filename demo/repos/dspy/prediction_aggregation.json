@@ -1,0 +1,129 @@
+{
+  "title": "Prediction Aggregation Utilities",
+  "summary": "This module provides functions to aggregate multiple predictions, primarily by selecting the majority completion for a given field. It includes utilities for normalizing text to ensure robust comparison during the aggregation process.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "majority_func",
+        "label": "Aggregate Predictions by Majority",
+        "type": "component",
+        "link": null,
+        "title": "Majority Aggregation",
+        "description": "Selects the most common completion for a specified field across multiple predictions, handling ties by prioritizing earlier completions. It can operate on Prediction objects or raw lists of completions."
+      },
+      {
+        "id": "default_normalize_func",
+        "label": "Normalize Text for Comparison",
+        "type": "component",
+        "link": null,
+        "title": "Default Normalization",
+        "description": "Provides a default text normalization function, typically used to clean strings before comparison for aggregation. It wraps an external utility for actual normalization."
+      },
+      {
+        "id": "normalize_text_util",
+        "label": "Standard Text Normalization",
+        "type": "external",
+        "link": null,
+        "title": "Text Normalization Utility",
+        "description": "An external utility function (likely from `dspy.utils`) that performs general text cleaning and normalization, often used for robust string comparisons by removing inconsistencies."
+      },
+      {
+        "id": "prediction_input",
+        "label": "Input Prediction Object",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Prediction Object",
+        "description": "Represents a single prediction output from a DSPy module, potentially containing multiple completions that need to be aggregated."
+      },
+      {
+        "id": "completions_input",
+        "label": "Input Completions List",
+        "type": "external",
+        "link": "other_module",
+        "title": "DSPy Completions List",
+        "description": "A list of raw completions, often extracted from a Prediction object, used as an alternative input format for the aggregation function."
+      },
+      {
+        "id": "aggregated_prediction_output",
+        "label": "Aggregated Prediction Output",
+        "type": "external",
+        "link": "other_module",
+        "title": "Aggregated DSPy Prediction",
+        "description": "The final Prediction object containing the single, aggregated completion chosen by the majority voting mechanism after processing multiple inputs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "prediction_input",
+        "target": "majority_func",
+        "label": "provides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "completions_input",
+        "target": "majority_func",
+        "label": "provides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "majority_func",
+        "target": "default_normalize_func",
+        "label": "uses for normalization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "default_normalize_func",
+        "target": "normalize_text_util",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "majority_func",
+        "target": "aggregated_prediction_output",
+        "label": "produces",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "aggregation_logic",
+        "label": "Prediction Aggregation Logic",
+        "nodes": [
+          "majority_func"
+        ],
+        "title": "Core Aggregation",
+        "description": "Functions responsible for combining multiple predictions into a single, representative output based on a majority vote.",
+        "role": "generative"
+      },
+      {
+        "id": "normalization_helpers",
+        "label": "Normalization Utilities",
+        "nodes": [
+          "default_normalize_func",
+          "normalize_text_util"
+        ],
+        "title": "Text Preprocessing",
+        "description": "Helper functions for standardizing text data before comparison, ensuring consistent and robust aggregation results.",
+        "role": "data"
+      },
+      {
+        "id": "data_structures",
+        "label": "Data Structures",
+        "nodes": [
+          "prediction_input",
+          "completions_input",
+          "aggregated_prediction_output"
+        ],
+        "title": "Input/Output Data",
+        "description": "Represents the primary data types involved in the prediction aggregation process, serving as inputs and outputs.",
+        "role": "data"
+      }
+    ]
+  }
+}

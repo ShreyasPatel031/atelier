@@ -1,0 +1,264 @@
+{
+  "title": "LM Caching and Embeddings",
+  "summary": "This module provides caching mechanisms for Language Model (LM) calls and embedding computations, supporting both synchronous and asynchronous operations. It allows configuration of disk and in-memory caches to optimize performance and reduce external API calls.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "configure_cache",
+        "label": "Configure Global Cache",
+        "type": "component",
+        "link": null,
+        "title": "Configure DSPy Cache Settings",
+        "description": "Sets up the global DSPy cache with specified parameters for disk and memory caching, including directory, size limits, and pickle restrictions."
+      },
+      {
+        "id": "get_dspy_cache",
+        "label": "Initialize Default Cache",
+        "type": "component",
+        "link": null,
+        "title": "Initialize DSPy Cache (Default/Fallback)",
+        "description": "Initializes the DSPy cache, attempting disk and memory caching, with a fallback to memory-only if disk initialization fails (e.g., in restricted environments)."
+      },
+      {
+        "id": "sync_cache_wrapper",
+        "label": "Synchronous Cache Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Function Caching",
+        "description": "A decorator or utility function that wraps synchronous operations, checking the cache for results before executing the original function and storing new results."
+      },
+      {
+        "id": "async_cache_wrapper",
+        "label": "Asynchronous Cache Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Function Caching",
+        "description": "A decorator or utility function that wraps asynchronous operations, checking the cache for results before awaiting the original function and storing new results."
+      },
+      {
+        "id": "cached_compute_embeddings",
+        "label": "Cached Sync Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Cached Embedding Computation",
+        "description": "Computes embeddings synchronously, leveraging the DSPy cache to avoid re-computing identical embedding requests."
+      },
+      {
+        "id": "cached_acompute_embeddings",
+        "label": "Cached Async Embeddings",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Cached Embedding Computation",
+        "description": "Computes embeddings asynchronously, leveraging the DSPy cache to avoid re-computing identical embedding requests."
+      },
+      {
+        "id": "disk_cache",
+        "label": "Disk Cache Storage",
+        "type": "external",
+        "link": null,
+        "title": "Persistent Disk Cache",
+        "description": "Stores cached responses and embeddings persistently on disk, reducing API calls and improving performance across sessions."
+      },
+      {
+        "id": "memory_cache",
+        "label": "In-Memory Cache",
+        "type": "external",
+        "link": null,
+        "title": "Volatile In-Memory Cache",
+        "description": "Stores cached responses and embeddings in RAM for fast retrieval during the current session."
+      },
+      {
+        "id": "lm_client_sync",
+        "label": "Synchronous LM Client",
+        "type": "external",
+        "link": "lm_clients",
+        "title": "Synchronous Language Model Client",
+        "description": "Represents the underlying synchronous language model client that performs actual API calls when a result is not found in the cache."
+      },
+      {
+        "id": "lm_client_async",
+        "label": "Asynchronous LM Client",
+        "type": "external",
+        "link": "lm_clients",
+        "title": "Asynchronous Language Model Client",
+        "description": "Represents the underlying asynchronous language model client that performs actual API calls when a result is not found in the cache."
+      },
+      {
+        "id": "embedding_model_sync",
+        "label": "Synchronous Embedding Model",
+        "type": "external",
+        "link": null,
+        "title": "Synchronous Embedding Provider",
+        "description": "The external or internal component responsible for generating embeddings synchronously when not found in cache."
+      },
+      {
+        "id": "embedding_model_async",
+        "label": "Asynchronous Embedding Model",
+        "type": "external",
+        "link": null,
+        "title": "Asynchronous Embedding Provider",
+        "description": "The external or internal component responsible for generating embeddings asynchronously when not found in cache."
+      }
+    ],
+    "edges": [
+      {
+        "source": "configure_cache",
+        "target": "disk_cache",
+        "label": "Configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "configure_cache",
+        "target": "memory_cache",
+        "label": "Configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_dspy_cache",
+        "target": "disk_cache",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_dspy_cache",
+        "target": "memory_cache",
+        "label": "Initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_cache_wrapper",
+        "target": "disk_cache",
+        "label": "Reads/Writes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_cache_wrapper",
+        "target": "memory_cache",
+        "label": "Reads/Writes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sync_cache_wrapper",
+        "target": "lm_client_sync",
+        "label": "Calls if uncached",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_cache_wrapper",
+        "target": "disk_cache",
+        "label": "Reads/Writes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_cache_wrapper",
+        "target": "memory_cache",
+        "label": "Reads/Writes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_cache_wrapper",
+        "target": "lm_client_async",
+        "label": "Calls if uncached",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cached_compute_embeddings",
+        "target": "sync_cache_wrapper",
+        "label": "Uses caching logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cached_compute_embeddings",
+        "target": "embedding_model_sync",
+        "label": "Delegates computation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cached_acompute_embeddings",
+        "target": "async_cache_wrapper",
+        "label": "Uses caching logic",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cached_acompute_embeddings",
+        "target": "embedding_model_async",
+        "label": "Delegates computation",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cache_management",
+        "label": "Cache Management",
+        "nodes": [
+          "configure_cache",
+          "get_dspy_cache"
+        ],
+        "title": "Cache Configuration and Initialization",
+        "description": "Functions responsible for setting up and initializing the global DSPy caching system.",
+        "role": "surface"
+      },
+      {
+        "id": "caching_wrappers",
+        "label": "Core Caching Wrappers",
+        "nodes": [
+          "sync_cache_wrapper",
+          "async_cache_wrapper"
+        ],
+        "title": "Generic Caching Logic for Functions",
+        "description": "Wrappers that apply caching logic to arbitrary synchronous or asynchronous functions, checking for cached results before execution.",
+        "role": "generative"
+      },
+      {
+        "id": "embedding_caching",
+        "label": "Embedding Caching Functions",
+        "nodes": [
+          "cached_compute_embeddings",
+          "cached_acompute_embeddings"
+        ],
+        "title": "Cached Embedding Computation",
+        "description": "Specific functions designed to compute embeddings with integrated caching, reducing redundant calls to embedding models.",
+        "role": "generative"
+      },
+      {
+        "id": "cache_storage",
+        "label": "Cache Storage",
+        "nodes": [
+          "disk_cache",
+          "memory_cache"
+        ],
+        "title": "Persistent and In-Memory Cache Stores",
+        "description": "The underlying mechanisms for storing cached data, either persistently on disk or ephemerally in memory.",
+        "role": "data"
+      },
+      {
+        "id": "external_providers",
+        "label": "External LM/Embedding Services",
+        "nodes": [
+          "lm_client_sync",
+          "lm_client_async",
+          "embedding_model_sync",
+          "embedding_model_async"
+        ],
+        "title": "External Language Model and Embedding Providers",
+        "description": "Represents the external services or models that are called when a requested item is not found in the cache.",
+        "role": "data"
+      }
+    ]
+  }
+}

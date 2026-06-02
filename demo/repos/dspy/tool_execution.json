@@ -1,132 +1,142 @@
 {
-  "title": "Tool Execution & Sandboxing",
-  "summary": "This module provides core primitives for integrating and executing external tools within a sandboxed environment, enabling LLMs to interact with dynamic data and functions. It handles variable representation, code generation for tool wrappers, and cross-runtime tool call bridging.",
+  "title": "Tool Execution & Sandbox Primitives",
+  "summary": "This module provides core primitives for executing tools across different environments (e.g., Python in a JS sandbox) and for managing data serialization and representation within interactive REPL contexts for language models.",
   "diagram": {
     "direction": "LR",
     "nodes": [
       {
-        "id": "repl_var",
-        "label": "Represent REPL Variable Metadata",
-        "type": "component",
-        "link": null,
-        "title": "REPLVariable",
-        "description": "Defines a data structure to hold metadata (name, type, description, preview) for variables within a Read-Eval-Print Loop (REPL) environment, facilitating their display and use by LLMs."
-      },
-      {
-        "id": "sandbox_serializable",
-        "label": "Define Sandbox Object Interface",
-        "type": "component",
-        "link": null,
-        "title": "SandboxSerializable",
-        "description": "An abstract base class that specifies how Python objects should be serialized, injected, and reconstructed within a sandboxed execution environment for LLM interaction."
-      },
-      {
-        "id": "make_wrapper",
+        "id": "makeToolWrapper",
         "label": "Generate Python Tool Wrapper",
         "type": "component",
         "link": null,
-        "title": "makeToolWrapper",
-        "description": "A JavaScript function that dynamically creates Python code for a tool wrapper. This wrapper allows Python code to invoke JavaScript-based tool execution."
+        "title": "Python Tool Wrapper Generator",
+        "description": "Dynamically creates Python function code that acts as a wrapper for external tools. This generated code facilitates calling JavaScript-bridged tools from a Python sandbox, handling argument serialization and result deserialization."
       },
       {
-        "id": "tool_bridge",
-        "label": "Orchestrate Tool Execution (JS)",
+        "id": "toolCallBridge",
+        "label": "Execute Tools via JS Bridge",
         "type": "component",
         "link": null,
-        "title": "toolCallBridge",
-        "description": "A JavaScript function that handles the actual execution of tools by communicating with an external host, sending tool call requests, and processing responses, including error handling."
+        "title": "JavaScript Tool Call Bridge",
+        "description": "An asynchronous JavaScript function that serves as a bridge for executing tools. It sends JSON-RPC requests to a host environment and processes the responses, enabling cross-environment tool invocation from a Python sandbox."
       },
       {
-        "id": "python_env",
-        "label": "Python Execution Environment",
-        "type": "external",
+        "id": "SandboxSerializable",
+        "label": "Define Sandbox Object Serialization",
+        "type": "component",
         "link": null,
-        "title": "Python Environment",
-        "description": "The Python runtime where generated tool wrappers and SandboxSerializable objects are utilized for LLM-driven code execution."
+        "title": "Sandbox Object Serialization Interface",
+        "description": "An abstract base class for objects that need to be serialized and deserialized for use within a sandboxed execution environment. It defines methods for setup, byte serialization, sandbox reconstruction, and LLM-friendly previews."
       },
       {
-        "id": "js_runtime",
-        "label": "JavaScript Runtime",
-        "type": "external",
+        "id": "REPLVariable",
+        "label": "Represent REPL Variable Metadata",
+        "type": "component",
         "link": null,
-        "title": "JavaScript Runtime",
-        "description": "The JavaScript environment where tool wrapper generation and tool call bridging logic are executed."
+        "title": "REPL Variable Metadata Model",
+        "description": "A Pydantic model that encapsulates metadata about a variable available in a Read-Eval-Print Loop (REPL) environment. It can generate itself from a value and format its details for inclusion in prompts for language models."
       },
       {
-        "id": "external_host",
-        "label": "External Tool Provider",
+        "id": "PythonSandbox",
+        "label": "Python Sandbox Environment",
         "type": "external",
         "link": null,
-        "title": "External Tool Provider",
-        "description": "Represents the external system or service responsible for executing the actual tool logic requested by the tool call bridge."
+        "title": "Python Execution Sandbox",
+        "description": "Represents a sandboxed Python execution environment, such as Pyodide, where generated tool wrappers run and interact with the JavaScript bridge for external tool calls. It's where Python code is executed securely."
+      },
+      {
+        "id": "HostEnvironment",
+        "label": "External Tool Host",
+        "type": "external",
+        "link": null,
+        "title": "External Tool Execution Host",
+        "description": "The environment outside the Python sandbox where the actual tool functions are defined and executed. It receives tool call requests from the JavaScript bridge and returns their results."
+      },
+      {
+        "id": "LLM",
+        "label": "Language Model",
+        "type": "external",
+        "link": null,
+        "title": "Language Model for Interaction",
+        "description": "Represents a large language model that interacts with the REPL environment. It consumes formatted variable metadata to understand the state and available data, guiding its decision-making and code generation."
       }
     ],
     "edges": [
       {
-        "source": "sandbox_serializable",
-        "target": "repl_var",
-        "label": "Generates metadata for",
+        "source": "makeToolWrapper",
+        "target": "PythonSandbox",
+        "label": "Generates code for",
         "title": null,
         "description": null
       },
       {
-        "source": "make_wrapper",
-        "target": "python_env",
-        "label": "Injects generated Python code",
+        "source": "PythonSandbox",
+        "target": "toolCallBridge",
+        "label": "Invokes (via _js_tool_call)",
         "title": null,
         "description": null
       },
       {
-        "source": "python_env",
-        "target": "tool_bridge",
-        "label": "Invokes JS tool bridge",
+        "source": "toolCallBridge",
+        "target": "HostEnvironment",
+        "label": "Sends tool requests to",
         "title": null,
         "description": null
       },
       {
-        "source": "tool_bridge",
-        "target": "external_host",
-        "label": "Sends tool execution request",
+        "source": "HostEnvironment",
+        "target": "toolCallBridge",
+        "label": "Returns tool results to",
         "title": null,
         "description": null
       },
       {
-        "source": "external_host",
-        "target": "tool_bridge",
-        "label": "Returns execution result",
+        "source": "SandboxSerializable",
+        "target": "REPLVariable",
+        "label": "Converts object to metadata",
         "title": null,
         "description": null
       },
       {
-        "source": "tool_bridge",
-        "target": "python_env",
-        "label": "Returns result to Python",
+        "source": "REPLVariable",
+        "target": "LLM",
+        "label": "Provides formatted info to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SandboxSerializable",
+        "target": "PythonSandbox",
+        "label": "Serializes objects for",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "data_representation",
-        "label": "Data & Variable Representation",
+        "id": "tool_bridge_group",
+        "label": "Tool Bridging & Execution",
         "nodes": [
-          "repl_var",
-          "sandbox_serializable"
+          "makeToolWrapper",
+          "toolCallBridge",
+          "PythonSandbox",
+          "HostEnvironment"
         ],
-        "title": "Data & Variable Representation",
-        "description": "Components for defining how variables and complex objects are represented and serialized for use within sandboxed or interactive LLM environments.",
-        "role": "data"
+        "title": "Cross-Environment Tool Execution",
+        "description": "This group manages the process of defining, invoking, and executing tools across different runtime environments, specifically bridging Python sandbox execution with external host environments via a JavaScript intermediary.",
+        "role": "generative"
       },
       {
-        "id": "tool_integration",
-        "label": "Tool Integration & Execution",
+        "id": "sandbox_data_group",
+        "label": "Sandbox Data Management",
         "nodes": [
-          "make_wrapper",
-          "tool_bridge"
+          "SandboxSerializable",
+          "REPLVariable",
+          "LLM"
         ],
-        "title": "Tool Integration & Execution",
-        "description": "Mechanisms for generating Python wrappers for tools and bridging their execution between different runtime environments (e.g., Python and JavaScript) and external services.",
-        "role": "generative"
+        "title": "Data Serialization and REPL Representation",
+        "description": "This group focuses on how complex data types are prepared for and represented within a sandboxed execution environment and how their metadata is formatted for consumption by language models in a REPL context.",
+        "role": "data"
       }
     ]
   }

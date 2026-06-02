@@ -200,144 +200,6 @@ function rfHoverPanelMaxHeightFlow(zoom) {
     return maxScreen / z;
 }
 
-const RF_SEMANTIC_NODE_STYLES = {
-    stakeholder_surface: {
-        label: 'Stakeholder work surfaces',
-        background: '#eff6ff',
-        border: '#2563eb',
-        text: '#1e3a8a',
-    },
-    external_data_source: {
-        label: 'External data sources',
-        background: '#fff7ed',
-        border: '#ea580c',
-        text: '#7c2d12',
-    },
-    control_spine: {
-        label: 'Control spine / governance',
-        background: '#f5f3ff',
-        border: '#7c3aed',
-        text: '#4c1d95',
-    },
-    neutral: {
-        label: 'Functional domains / neutral modules',
-        background: '#f8fafc',
-        border: '#64748b',
-        text: '#334155',
-    },
-    user: {
-        label: 'Users / personas',
-        background: '#eff6ff',
-        border: '#2563eb',
-        text: '#1e3a8a',
-    },
-    entry: {
-        label: 'Entrypoints / data',
-        background: '#fff7ed',
-        border: '#f97316',
-        text: '#7c2d12',
-    },
-    module: {
-        label: 'Drill-down modules',
-        background: '#f5f3ff',
-        border: '#7c3aed',
-        text: '#3b0764',
-    },
-    external: {
-        label: 'External systems',
-        background: '#fef2f2',
-        border: '#dc2626',
-        text: '#7f1d1d',
-    },
-    agent: {
-        label: 'Agents / services',
-        background: '#ecfdf5',
-        border: '#059669',
-        text: '#064e3b',
-    },
-    component: {
-        label: 'Other components',
-        background: '#f8fafc',
-        border: '#64748b',
-        text: '#0f172a',
-    },
-};
-
-const RF_SEMANTIC_LEGEND_ORDER = [
-    'stakeholder_surface',
-    'external_data_source',
-    'control_spine',
-    'neutral',
-    'user',
-    'entry',
-    'module',
-    'external',
-    'agent',
-    'component',
-];
-
-const RF_GROUP_VARIATION_LABELS = {
-    'group-only': 'Group color only',
-    'node-border': 'Node borders only',
-    'group-node-border': 'Group + node borders',
-    'group-node-border-outline': 'No group fill + node borders',
-    'group-node-border-soft': 'Soft group tint + node borders',
-    'group-node-border-medium': 'Medium group tint + node borders',
-    'group-node-border-strong': 'Strong group tint + node borders',
-    all: 'Group + filled nodes',
-};
-
-const RF_GROUP_VARIATION_STYLES = {
-    'group-only': { groupFill: 0.14, groupBorder: true, node: 'none', borderStyle: 'solid', borderWidth: 2 },
-    'node-border': { groupFill: 0, groupBorder: false, node: 'border', borderStyle: 'dashed', borderWidth: 1 },
-    'group-node-border': { groupFill: 0.12, groupBorder: true, node: 'border', borderStyle: 'solid', borderWidth: 2 },
-    'group-node-border-outline': { groupFill: 0, groupBorder: true, node: 'border', borderStyle: 'solid', borderWidth: 2 },
-    'group-node-border-soft': { groupFill: 0.07, groupBorder: true, node: 'border', borderStyle: 'solid', borderWidth: 2 },
-    'group-node-border-medium': { groupFill: 0.14, groupBorder: true, node: 'border', borderStyle: 'solid', borderWidth: 2 },
-    'group-node-border-strong': { groupFill: 0.22, groupBorder: true, node: 'border', borderStyle: 'solid', borderWidth: 2 },
-    all: { groupFill: 0.14, groupBorder: true, node: 'fill', borderStyle: 'solid', borderWidth: 2 },
-};
-
-const NODE_HOVER_EDGE_STYLE = {
-    stroke: '#3b82f6',
-    strokeDasharray: '7 5',
-    animation: 'diagram-edge-dash-flow 0.8s linear infinite',
-};
-
-function rfColorWithAlpha(color, alpha) {
-    if (alpha <= 0) return 'transparent';
-    if (!color || typeof color !== 'string') return 'transparent';
-    var hex = color.trim();
-    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return color;
-    var r = parseInt(hex.slice(1, 3), 16);
-    var g = parseInt(hex.slice(3, 5), 16);
-    var b = parseInt(hex.slice(5, 7), 16);
-    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
-}
-
-function rfClampAlpha(value, fallback) {
-    var n = Number(value);
-    if (!Number.isFinite(n)) n = Number(fallback);
-    if (!Number.isFinite(n)) n = 0.14;
-    return Math.max(0, Math.min(0.45, Math.round(n * 1000) / 1000));
-}
-
-function rfHelpPillStopPropagation(e) {
-    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
-}
-
-/** Architectural Agent / Cursor paste — wired in demo/index.html */
-function rfChatEnabled() {
-    return !(typeof window !== 'undefined' && window.__atelierChatEnabled === false);
-}
-
-function rfTriggerBriefExplanation(nodeId, label, kind) {
-    if (!rfChatEnabled()) return;
-    const fn = typeof window !== 'undefined' ? window.atelierRfAskBriefExplanation : null;
-    if (typeof fn !== 'function') return;
-    fn({ nodeId: String(nodeId || ''), label: label || '', kind });
-}
-
 /**
  * Fixed screen width; height fits content up to viewport cap, then scrolls.
  * Dimensions scale with 1/zoom so the panel stays readable when zoomed out.
@@ -520,6 +382,30 @@ function rfCollectGroupIdsAtPoint(clientX, clientY) {
     return ids;
 }
 
+/** Group id when pointer is over portaled collapse/? controls (bridge, column, or pills). */
+function rfGroupControlIdAtPoint(clientX, clientY) {
+    if (typeof document === 'undefined' || typeof document.elementsFromPoint !== 'function') {
+        return null;
+    }
+    try {
+        const stack = document.elementsFromPoint(clientX, clientY);
+        for (let i = 0; i < stack.length; i++) {
+            const el = stack[i];
+            if (!el || typeof el.closest !== 'function') continue;
+            const ctl = el.closest(
+                '[data-group-id].atelier-rf-help-hover-bridge,[data-group-id].atelier-rf-control-column,[data-testid="atelier-rf-group-help"],[data-testid="atelier-rf-group-collapse"]'
+            );
+            if (ctl) {
+                const gid = ctl.getAttribute('data-group-id');
+                if (gid) return String(gid);
+            }
+        }
+    } catch (_) {
+        /* ignore */
+    }
+    return null;
+}
+
 function rfGroupDepthInRfTree(groupId, parentById) {
     let d = 0;
     let cur = groupId != null ? String(groupId) : '';
@@ -578,6 +464,11 @@ function rfEnsureGlobalGroupHover() {
         const cy = e && typeof e.clientY === 'number' ? e.clientY : null;
         if (cx == null || cy == null) {
             rfSetActiveGroupHoverId(null);
+            return;
+        }
+        const controlGroupId = rfGroupControlIdAtPoint(cx, cy);
+        if (controlGroupId) {
+            rfSetActiveGroupHoverId(controlGroupId);
             return;
         }
         if (rfPointerOverAnyLeafAtPoint(cx, cy)) {
@@ -882,7 +773,7 @@ function ElkCustomNode({
     const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
 
     /** Hide “?” when the side hover snippet panel has text (avoid stacking two aids). */
-    const showHelpPill = hovered && pillLayer && rfChatEnabled();
+    const showHelpPill = hovered && pillLayer && detail.length === 0 && rfChatEnabled();
     const helpPillPortal =
         showHelpPill &&
         createPortal(
@@ -1184,6 +1075,10 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
 
     const pointerInsideGroupControls = useCallback(
         function (clientX, clientY) {
+            const controlGroupId = rfGroupControlIdAtPoint(clientX, clientY);
+            if (controlGroupId && String(controlGroupId) === String(id)) {
+                return true;
+            }
             if (rfPointerOverForeignLeafNode(clientX, clientY, id)) {
                 return false;
             }
@@ -1336,7 +1231,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
 
     const showCollapsePill = hovered && pillLayer && !!(data && data.rfExpandedSubgraph);
-    const showHelpPill = hovered && pillLayer && rfChatEnabled();
+    const showHelpPill = hovered && pillLayer && detail.length === 0 && rfChatEnabled();
     const showControlPills = showCollapsePill || showHelpPill;
     const controlGapFlow = 4 / z;
     const controlPillStyle = {
@@ -1358,6 +1253,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                       ref: helpBridgeRef,
                       key: 'help-bridge-' + id,
                       className: 'atelier-rf-help-hover-bridge nodrag nopan',
+                      'data-group-id': id,
                       style: {
                           position: 'absolute',
                           left: helpBridgeLeft,
@@ -1402,6 +1298,8 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                               flexDirection: 'column',
                               alignItems: 'flex-start',
                               gap: controlGapFlow,
+                              pointerEvents: 'auto',
+                              cursor: 'default',
                           },
                           onPointerDown: rfHelpPillStopPropagation,
                           onMouseDown: rfHelpPillStopPropagation,

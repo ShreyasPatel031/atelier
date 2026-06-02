@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11.9.0/dist/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
     <script src="./viewer-debug.js"></script>
-    <script src="./viewer-config.js"></script>
+    <script src="./viewer-config.js?v=chat-on-local-v1"></script>
     <script src="./pipeline-overview-mermaid.js"></script>
     <script src="./elk-node-dimensions.js"></script>
     <script src="./pipeline-diagram-to-elk.js"></script>
@@ -298,6 +298,11 @@
         #reactflowRoot .atelier-rf-pill-layer .atelier-rf-help-pill {
             box-shadow: 0 1px 4px rgba(15, 23, 42, 0.22);
         }
+        /** Bridge + column keep hover while moving to × / ? (pill layer is pointer-events:none) */
+        #reactflowRoot .atelier-rf-pill-layer .atelier-rf-help-hover-bridge,
+        #reactflowRoot .atelier-rf-pill-layer .atelier-rf-control-column {
+            pointer-events: auto;
+        }
         /**
          * RF v12 renders all nodes flat as siblings under .react-flow__nodes (groups have no
          * .react-flow__node-wrapper child, so v11-style selectors no-op). Compound frames sit
@@ -475,6 +480,17 @@
          */
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__edges {
             z-index: 4500 !important;
+        }
+        /**
+         * xyflow’s invisible .react-flow__edge-interaction paths use a ~20px stroke and sit in the
+         * edges layer (z 4500), above the nodes container (z 1). That steals hover/click from
+         * group frames and portaled × / ? controls. Hit-test only the visible stroke instead.
+         */
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__edge-interaction {
+            pointer-events: none !important;
+        }
+        #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__edge-path {
+            pointer-events: visibleStroke;
         }
         #diagramViewport.diagram-viewport--reactflow #reactflowRoot .react-flow__nodes {
             z-index: 1 !important;
@@ -1381,7 +1397,15 @@
             }
             return defaultValue;
         }
-        const CHAT_ENABLED = viewerFlag('chat', 'chatEnabled', true);
+        let CHAT_ENABLED = viewerFlag('chat', 'chatEnabled', true);
+        /** Local static demo (:9891 / :8080): keep chat visible unless ?chat=0 (avoids stale viewer-config cache). */
+        if (
+            !urlParams.has('chat') &&
+            (window.location.port === '9891' || window.location.port === '8080') &&
+            /^localhost$|^127\.0\.0\.1$/.test(window.location.hostname)
+        ) {
+            CHAT_ENABLED = true;
+        }
         const REPO_SWITCHER_ENABLED = viewerFlag('repoSwitcher', 'repoSwitcherEnabled', true);
         window.__atelierChatEnabled = CHAT_ENABLED;
         document.body.classList.toggle('viewer-no-chat', !CHAT_ENABLED);
@@ -6890,12 +6914,14 @@
             var id = repoId || repoPath || 'crewai';
             var gitUrl = getRepoGitUrl(id);
             var parts = [
-                'Atelier context mapper · ' + id + ' · Keep replies short · No extra explanation',
-                '① Install MCP · npm install -g @atelier-inc/atelier-mcp · NODE=$(which node) · ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js · ~/.cursor/mcp.json {"mcpServers":{"atelier":{"command":"NODE","args":["ENTRY"]}}} · replace NODE/ENTRY · never npx · never test-run',
-                '② Open viewer · open_viewer(repo_id=' + id + ') · browser_navigate returned URL · when done put that http URL on its own last line so I can click it'
+                'Atelier · ' + id + ' · short replies',
+                '① MCP global @atelier-inc/atelier-mcp · ~/.cursor/mcp.json NODE+ENTRY paths · no npx',
+                '② open_viewer(repo_id=' + id + ') now · browser_navigate · last line = http URL only · do not wait for clone'
             ];
             if (gitUrl) {
-                parts.push('③ Clone · git clone ' + gitUrl);
+                parts.push(
+                    '③ if needed: nohup git clone ' + gitUrl + ' & in background · never block on clone'
+                );
             }
             return parts.join(' · ');
         }
@@ -6905,26 +6931,23 @@
             var id = repoId || repoPath || 'crewai';
             var gitUrl = getRepoGitUrl(id);
             var lines = [
-                'Atelier context mapper — ' + id,
-                'Keep replies short. No extra explanation.',
+                'Atelier — ' + id + ' · short replies',
                 '',
-                '1. Install MCP',
-                '  npm install -g @atelier-inc/atelier-mcp',
-                '  NODE=$(which node)',
-                '  ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js',
-                '  Write ~/.cursor/mcp.json:',
-                '  {"mcpServers":{"atelier":{"command":"NODE","args":["ENTRY"]}}}',
-                '  Replace NODE and ENTRY with the real paths.',
-                '  Never use npx. Never test-run the package.',
+                '1. MCP (global install, NODE/ENTRY in ~/.cursor/mcp.json, no npx)',
                 '',
-                '2. Open viewer',
+                '2. Open viewer now (do not wait for clone)',
                 '  open_viewer(repo_id=' + id + ')',
                 '  browser_navigate to the returned URL',
-                '  When done: last line of your reply must be that URL alone (clickable)',
+                '  Last line of reply = that URL alone',
                 ''
             ];
             if (gitUrl) {
-                lines.push('3. Clone', '  git clone ' + gitUrl, '');
+                lines.push(
+                    '3. Clone only if needed — background, non-blocking',
+                    '  nohup git clone ' + gitUrl + ' &',
+                    '  Never wait for clone before step 2.',
+                    ''
+                );
             }
             return lines.join('\n').replace(/\n$/, '');
         }
@@ -7574,135 +7597,6 @@
         }
 
         /**
-         * POST /api/arch-agent/chat (CodeWiki on 8001 for demo ports 8080/9891, or same-origin).
-         * @returns {Promise<{ ok: boolean, mode?: string }>}
-         */
-        async function sendArchAgentChatMessage(message, selectionOverride) {
-            if (!CHAT_ENABLED) return { ok: false, mode: 'disabled' };
-            const msg = String(message || '').trim();
-            if (!msg) return { ok: false, mode: 'empty' };
-
-            const archUrl = getArchAgentChatUrl();
-            const ui = !!(chatMessages && chatSend);
-            let loadingEl = null;
-
-            if (!archUrl) {
-                if (fromHelpPill && HELP_PILL_MCP_FALLBACK) {
-                    return helpPillMcpFallback();
-                }
-                if (ui) {
-                    addChatMessage(msg, 'user');
-                    addChatMessage(
-                        'No chat API is configured for this origin. Serve the demo on port **9891** (`npm run demo`) or **8080**, run CodeWiki web on **8001** (`python3 -m codewiki.run_web_app --port 8001`), or paste your question into Cursor chat.',
-                        'assistant'
-                    );
-                }
-                return { ok: false, mode: 'no_api' };
-            }
-
-            const body = buildArchAgentChatRequestBody(msg, selectionOverride);
-            let streamEl = null;
-            if (ui) {
-                addChatMessage(msg, 'user');
-                if (fromHelpPill) {
-                    streamEl = addChatMessage('', 'assistant');
-                    streamEl.classList.add('loading');
-                    window.__atelierHelpStreamingEl = streamEl;
-                } else {
-                    loadingEl = addChatMessage('Thinking...', 'loading');
-                }
-                chatSend.disabled = true;
-            }
-            try {
-                console.log(
-                    '[MODULE TRACKING] Sending chat request with opened modules:',
-                    Array.from(openedModules)
-                );
-                const res = await fetch(archUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body),
-                });
-                if (!res.ok) {
-                    let resDetail = '';
-                    try {
-                        const errBody = await res.json();
-                        if (errBody && errBody.detail != null) resDetail = String(errBody.detail);
-                        else if (errBody && errBody.error) resDetail = String(errBody.error);
-                    } catch (_) {
-                        /* ignore */
-                    }
-                    if (
-                        fromHelpPill &&
-                        HELP_PILL_MCP_FALLBACK &&
-                        (res.status === 501 || res.status === 404 || res.status === 405)
-                    ) {
-                        if (loadingEl) loadingEl.remove();
-                        loadingEl = null;
-                        if (streamEl && streamEl.parentNode) {
-                            streamEl.remove();
-                            window.__atelierHelpStreamingEl = null;
-                        }
-                        return helpPillMcpFallback();
-                    }
-                    if (loadingEl) loadingEl.remove();
-                    if (fromHelpPill && streamEl && streamEl.parentNode) {
-                        streamEl.remove();
-                        window.__atelierHelpStreamingEl = null;
-                    }
-                    if (res.status === 404 && ui) {
-                        addChatMessage(
-                            'No documentation bundle for **' +
-                                getChatJobId() +
-                                '**. Restart CodeWiki from the atelier repo root: `python3 -m codewiki.run_web_app --port 8001`.',
-                            'assistant'
-                        );
-                        return { ok: false, mode: 'not_found' };
-                    }
-                    throw new Error(
-                        resDetail ? `HTTP ${res.status}: ${resDetail}` : `HTTP ${res.status}`
-                    );
-                }
-                const data = await res.json();
-                chatHistory = data.history != null ? data.history : null;
-                if (loadingEl) loadingEl.remove();
-                if (ui) {
-                    const answer = data.response || 'No response.';
-                    if (fromHelpPill && streamEl && streamEl.parentNode) {
-                        window.__atelierHelpStreamingEl = null;
-                        streamTextIntoChatElement(streamEl, answer);
-                    } else {
-                        addChatMessage(answer, 'assistant');
-                    }
-                }
-                return { ok: true, mode: 'api' };
-            } catch (e) {
-                if (loadingEl) loadingEl.remove();
-                if (fromHelpPill && streamEl && streamEl.parentNode) {
-                    streamEl.remove();
-                    window.__atelierHelpStreamingEl = null;
-                }
-                if (
-                    fromHelpPill &&
-                    HELP_PILL_MCP_FALLBACK &&
-                    (e.message === 'Failed to fetch' || e.message === 'Load failed')
-                ) {
-                    return helpPillMcpFallback();
-                }
-                const isNetwork =
-                    e && (e.message === 'Failed to fetch' || e.message === 'Load failed');
-                const hint = formatArchAgentFetchError(e, isNetwork ? '' : e.message);
-                if (ui) addChatMessage('Error: ' + hint, 'assistant');
-                return { ok: false, mode: isNetwork ? 'network' : 'error' };
-            } finally {
-                if (ui && chatSend) {
-                    chatSend.disabled = false;
-                    if (chatInput) chatInput.focus();
-                }
-            }
-        }
-
-        /**
          * React Flow “?” pill → POST /api/arch-agent/chat on CodeWiki (:8001, Vertex ADC).
          * On failure shows an error in chat (no silent Cursor SDK fallback unless `?chatMcp=1`).
          */
@@ -7735,7 +7629,7 @@
                 diagram_selection: payload,
                 diagram_selections: [payload],
             };
-            await sendArchAgentChatMessage(message, selectionOverride);
+            await sendArchAgentChatMessage(message, selectionOverride, { fromHelpPill: true });
         };
         
         async function sendChatMessage() {
@@ -7800,7 +7694,7 @@
             window.__atelierSSE = es;
         })();
     </script>
-    <script type="module" src="./reactflow-r6.mjs?v=deepest-group-hover-v1"></script>
+    <script type="module" src="./reactflow-r6.mjs?v=hide-help-when-detail-v1"></script>
 </body>
 </html>
 

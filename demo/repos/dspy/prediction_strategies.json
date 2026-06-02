@@ -1,0 +1,433 @@
+{
+  "title": "Prediction Strategies Module",
+  "summary": "This module provides advanced prediction strategies for DSPy programs, including techniques for iterative refinement, agentic reasoning with tools, code execution, and multi-chain comparison to enhance output quality and robustness.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "best_of_n",
+        "label": "Select Best Prediction",
+        "type": "component",
+        "link": null,
+        "title": "BestOfN Strategy",
+        "description": "Executes a given module multiple times and selects the best output based on a reward function or a predefined threshold, improving prediction quality."
+      },
+      {
+        "id": "code_act",
+        "label": "Execute Code with Tools",
+        "type": "component",
+        "link": null,
+        "title": "CodeAct Strategy",
+        "description": "An agent that generates and executes Python code within an interpreter, leveraging predefined tools to iteratively solve complex problems."
+      },
+      {
+        "id": "multi_chain_comparison",
+        "label": "Compare Multiple Reasoning Chains",
+        "type": "component",
+        "link": null,
+        "title": "MultiChainComparison Strategy",
+        "description": "Takes multiple reasoning attempts as input, compares them, and synthesizes a refined, more accurate reasoning and answer."
+      },
+      {
+        "id": "program_of_thought",
+        "label": "Generate & Execute Python Programs",
+        "type": "component",
+        "link": null,
+        "title": "ProgramOfThought Strategy",
+        "description": "Generates Python code to solve problems, executes it in a sandboxed interpreter, and iteratively refines the code based on execution results or errors."
+      },
+      {
+        "id": "react",
+        "label": "Reason & Act with Tools",
+        "type": "component",
+        "link": null,
+        "title": "ReAct Strategy",
+        "description": "Enables an LLM to reason about a task, select and execute external tools, and iteratively refine its approach based on tool observations."
+      },
+      {
+        "id": "refine",
+        "label": "Refine Predictions with Feedback",
+        "type": "component",
+        "link": null,
+        "title": "Refine Strategy",
+        "description": "Executes a module multiple times, evaluates predictions with a reward function, and generates actionable feedback to improve subsequent runs if performance is below a threshold."
+      },
+      {
+        "id": "wrapper_adapter",
+        "label": "Inject Refinement Hints",
+        "type": "component",
+        "link": null,
+        "title": "WrapperAdapter (Refine)",
+        "description": "An internal adapter used by the Refine strategy to inject hints, derived from previous feedback, into the module's input during subsequent refinement attempts."
+      },
+      {
+        "id": "inspect_modules",
+        "label": "Inspect Module Definitions",
+        "type": "component",
+        "link": null,
+        "title": "inspect_modules Utility",
+        "description": "A utility function that extracts and formats detailed information about the input fields, output fields, and instructions of sub-modules within a given program."
+      },
+      {
+        "id": "offer_feedback",
+        "label": "Generate Module Feedback Signature",
+        "type": "component",
+        "link": null,
+        "title": "OfferFeedback Signature",
+        "description": "Defines the structure for generating concrete, actionable advice for individual modules within a program, based on their performance and contribution to overall task failure."
+      },
+      {
+        "id": "rlm",
+        "label": "Recursive Language Model (RLM)",
+        "type": "component",
+        "link": null,
+        "title": "RLM Strategy",
+        "description": "A powerful module that enables an LLM to programmatically explore and solve problems by generating and executing Python code in a sandboxed REPL, leveraging tools and sub-LLM calls."
+      },
+      {
+        "id": "base_module",
+        "label": "Base Module Abstraction",
+        "type": "external",
+        "link": "core_abstractions/base_modules",
+        "title": "dspy.primitives.base_module.Module",
+        "description": "Provides the fundamental `Module` class for all DSPy components."
+      },
+      {
+        "id": "signature_module",
+        "label": "Signature Definition",
+        "type": "external",
+        "link": "core_abstractions/signatures",
+        "title": "dspy.signatures.signature.Signature",
+        "description": "Defines the structure and fields for LLM prompts and responses."
+      },
+      {
+        "id": "tool_primitive",
+        "label": "Tool Definition",
+        "type": "external",
+        "link": "data_retrieval_and_evaluation/tool_execution",
+        "title": "dspy.primitives.runner.Tool",
+        "description": "Represents a callable function or external service that an LLM can use."
+      },
+      {
+        "id": "dspy_predict_cot",
+        "label": "DSPy Predict/CoT",
+        "type": "external",
+        "link": null,
+        "title": "dspy.Predict/ChainOfThought",
+        "description": "Core DSPy primitives for making predictions and generating chains of thought."
+      },
+      {
+        "id": "code_interpreter",
+        "label": "Code Interpreter",
+        "type": "external",
+        "link": null,
+        "title": "PythonInterpreter/CodeInterpreter",
+        "description": "Provides a sandboxed environment for executing Python code."
+      },
+      {
+        "id": "lm_client",
+        "label": "Language Model Client",
+        "type": "external",
+        "link": "language_model_integration/lm_clients",
+        "title": "dspy.LM",
+        "description": "Interface for interacting with various Language Models."
+      },
+      {
+        "id": "adapter_config",
+        "label": "Adapter Configuration",
+        "type": "external",
+        "link": "core_abstractions/external_adapters",
+        "title": "dspy.settings.adapter",
+        "description": "Manages how prompts are formatted and adapted for different LLM APIs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "best_of_n",
+        "target": "base_module",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "best_of_n",
+        "target": "dspy_predict_cot",
+        "label": "uses Predict",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act",
+        "target": "react",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act",
+        "target": "program_of_thought",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act",
+        "target": "signature_module",
+        "label": "uses Signature",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act",
+        "target": "tool_primitive",
+        "label": "uses Tool",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act",
+        "target": "code_interpreter",
+        "label": "uses PythonInterpreter",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "code_act",
+        "target": "dspy_predict_cot",
+        "label": "uses Predict/CoT",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_chain_comparison",
+        "target": "base_module",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_chain_comparison",
+        "target": "signature_module",
+        "label": "uses Signature",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "multi_chain_comparison",
+        "target": "dspy_predict_cot",
+        "label": "uses Predict",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_of_thought",
+        "target": "base_module",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_of_thought",
+        "target": "signature_module",
+        "label": "uses Signature",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_of_thought",
+        "target": "dspy_predict_cot",
+        "label": "uses ChainOfThought",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_of_thought",
+        "target": "code_interpreter",
+        "label": "uses PythonInterpreter",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react",
+        "target": "base_module",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react",
+        "target": "signature_module",
+        "label": "uses Signature",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react",
+        "target": "tool_primitive",
+        "label": "uses Tool",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "react",
+        "target": "dspy_predict_cot",
+        "label": "uses Predict/CoT",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine",
+        "target": "base_module",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine",
+        "target": "dspy_predict_cot",
+        "label": "uses Predict",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine",
+        "target": "offer_feedback",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine",
+        "target": "wrapper_adapter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "refine",
+        "target": "inspect_modules",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapper_adapter",
+        "target": "adapter_config",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapper_adapter",
+        "target": "signature_module",
+        "label": "uses InputField",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "inspect_modules",
+        "target": "signature_module",
+        "label": "inspects",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "offer_feedback",
+        "target": "signature_module",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm",
+        "target": "base_module",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm",
+        "target": "signature_module",
+        "label": "uses Signature",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm",
+        "target": "tool_primitive",
+        "label": "uses Tool",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm",
+        "target": "lm_client",
+        "label": "uses dspy.LM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm",
+        "target": "code_interpreter",
+        "label": "uses CodeInterpreter",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rlm",
+        "target": "dspy_predict_cot",
+        "label": "uses Predict",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "generative_strategies",
+        "label": "Generative Strategies",
+        "nodes": [
+          "program_of_thought",
+          "multi_chain_comparison"
+        ],
+        "title": "Generative Strategies",
+        "description": "Modules focused on generating initial predictions or multiple attempts for a task.",
+        "role": "generative"
+      },
+      {
+        "id": "agentic_tool_using_strategies",
+        "label": "Agentic/Tool-Using Strategies",
+        "nodes": [
+          "react",
+          "code_act",
+          "rlm"
+        ],
+        "title": "Agentic/Tool-Using Strategies",
+        "description": "Modules that implement agentic behavior by integrating external tools and code interpreters for problem-solving.",
+        "role": "surface"
+      },
+      {
+        "id": "refinement_selection_strategies",
+        "label": "Refinement & Selection Strategies",
+        "nodes": [
+          "best_of_n",
+          "refine"
+        ],
+        "title": "Refinement & Selection Strategies",
+        "description": "Modules designed to improve or select the best output from multiple attempts, often involving reward functions.",
+        "role": "analytical"
+      },
+      {
+        "id": "refinement_support_components",
+        "label": "Refinement Support Components",
+        "nodes": [
+          "offer_feedback",
+          "wrapper_adapter",
+          "inspect_modules"
+        ],
+        "title": "Refinement Support Components",
+        "description": "Internal components and utilities that facilitate the Refine strategy's operation, such as feedback generation and module inspection.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,528 +1,363 @@
 {
-  "title": "Language Model Clients Integration",
-  "summary": "This module provides core interfaces and implementations for interacting with various Language Models (LMs), including external providers like OpenAI and Databricks, and local models. It handles LM requests, responses, caching, finetuning, and deployment.",
+  "title": "Language Model Client Integrations",
+  "summary": "This module provides core abstractions for interacting with various language models, including LiteLLM-based clients for different completion types, and integrations for managing local and cloud-based (Databricks, OpenAI) finetuning and serving.",
   "diagram": {
     "direction": "TD",
     "nodes": [
       {
-        "id": "configure_cache_fn",
-        "label": "Configure DSPy Caching",
-        "type": "component",
-        "link": null,
-        "title": "configure_cache",
-        "description": "Sets up the global DSPy caching mechanism, allowing configuration of disk and memory caches, directory, size limits, and serialization restrictions."
-      },
-      {
-        "id": "get_dspy_cache_fn",
-        "label": "Initialize/Retrieve DSPy Cache",
-        "type": "component",
-        "link": null,
-        "title": "_get_dspy_cache",
-        "description": "Initializes or retrieves the DSPy cache instance, falling back to a memory-only cache if disk initialization fails."
-      },
-      {
-        "id": "enable_litellm_logging_fn",
-        "label": "Enable LiteLLM Debug Logging",
-        "type": "component",
-        "link": null,
-        "title": "enable_litellm_logging",
-        "description": "Activates detailed debug logging for the LiteLLM integration, useful for troubleshooting LM interactions."
-      },
-      {
-        "id": "disable_litellm_logging_fn",
-        "label": "Disable LiteLLM Debug Logging",
-        "type": "component",
-        "link": null,
-        "title": "disable_litellm_logging",
-        "description": "Deactivates detailed debug logging for the LiteLLM integration, reverting to error-only logging."
-      },
-      {
-        "id": "base_lm_class",
-        "label": "Define Base Language Model Interface",
+        "id": "base_lm",
+        "label": "Base Language Model Interface",
         "type": "component",
         "link": null,
         "title": "BaseLM",
-        "description": "An abstract base class that defines the common interface for all Language Models in DSPy, including methods for synchronous and asynchronous calls, history management, and response processing."
+        "description": "Defines the fundamental contract for all language models in DSPy, including request handling, response processing, and history management."
       },
       {
-        "id": "databricks_provider_class",
-        "label": "Manage Databricks LM Operations",
-        "type": "component",
-        "link": null,
-        "title": "DatabricksProvider",
-        "description": "Provides functionality for interacting with Databricks LMs, including finetuning models, deploying them as serving endpoints, and managing data uploads to Unity Catalog."
-      },
-      {
-        "id": "databricks_training_job_class",
-        "label": "Track Databricks Training Jobs",
-        "type": "component",
-        "link": null,
-        "title": "TrainingJobDatabricks",
-        "description": "Represents and tracks the status of a finetuning job initiated on the Databricks platform."
-      },
-      {
-        "id": "litellm_sync_completion_fn",
-        "label": "Perform Sync LiteLLM Completion",
+        "id": "litellm_sync_chat",
+        "label": "Synchronous Chat Completion",
         "type": "component",
         "link": null,
         "title": "litellm_completion",
-        "description": "Handles synchronous chat completion requests using LiteLLM, applying caching and retry logic."
+        "description": "Facilitates synchronous chat completion requests to various LLMs via LiteLLM, handling caching and retries."
       },
       {
-        "id": "litellm_async_completion_fn",
-        "label": "Perform Async LiteLLM Completion",
+        "id": "litellm_async_chat",
+        "label": "Asynchronous Chat Completion",
         "type": "component",
         "link": null,
         "title": "alitellm_completion",
-        "description": "Handles asynchronous chat completion requests using LiteLLM, applying caching and retry logic."
+        "description": "Enables asynchronous chat completion requests to various LLMs via LiteLLM, supporting non-blocking operations."
       },
       {
-        "id": "litellm_sync_responses_fn",
-        "label": "Perform Sync LiteLLM Responses",
+        "id": "litellm_sync_responses",
+        "label": "Synchronous Responses Completion",
         "type": "component",
         "link": null,
         "title": "litellm_responses_completion",
-        "description": "Handles synchronous requests to LiteLLM's Responses API, converting DSPy requests and applying caching/retry logic."
+        "description": "Manages synchronous requests to LiteLLM's 'responses' API, converting chat requests to the appropriate format."
       },
       {
-        "id": "litellm_async_responses_fn",
-        "label": "Perform Async LiteLLM Responses",
+        "id": "litellm_async_responses",
+        "label": "Asynchronous Responses Completion",
         "type": "component",
         "link": null,
         "title": "alitellm_responses_completion",
-        "description": "Handles asynchronous requests to LiteLLM's Responses API, converting DSPy requests and applying caching/retry logic."
+        "description": "Handles asynchronous requests to LiteLLM's 'responses' API, ensuring non-blocking interaction with LLMs."
       },
       {
-        "id": "litellm_sync_text_completion_fn",
-        "label": "Perform Sync LiteLLM Text Completion",
+        "id": "litellm_sync_text",
+        "label": "Synchronous Text Completion",
         "type": "component",
         "link": null,
         "title": "litellm_text_completion",
-        "description": "Handles synchronous text completion requests via LiteLLM, formatting messages into a text prompt and applying caching/retry logic."
+        "description": "Processes synchronous text completion requests through LiteLLM, including prompt construction and API key management."
       },
       {
-        "id": "litellm_async_text_completion_fn",
-        "label": "Perform Async LiteLLM Text Completion",
+        "id": "litellm_async_text",
+        "label": "Asynchronous Text Completion",
         "type": "component",
         "link": null,
         "title": "alitellm_text_completion",
-        "description": "Handles asynchronous text completion requests via LiteLLM, formatting messages into a text prompt and applying caching/retry logic."
+        "description": "Manages asynchronous text completion requests via LiteLLM, handling prompt formatting and API interactions."
       },
       {
-        "id": "local_provider_class",
-        "label": "Manage Local Model Serving/Finetuning",
+        "id": "async_stream_helper",
+        "label": "Asynchronous Stream Handler",
+        "type": "component",
+        "link": null,
+        "title": "async_stream_completion",
+        "description": "An internal utility for managing and processing asynchronous streaming responses from language models."
+      },
+      {
+        "id": "local_provider",
+        "label": "Local LLM Server & Finetuning",
         "type": "component",
         "link": null,
         "title": "LocalProvider",
-        "description": "Enables launching and managing local language models (e.g., via SGLang) and performing local finetuning of models."
+        "description": "Manages the lifecycle of local SGLang servers for LLMs and orchestrates local finetuning processes."
       },
       {
-        "id": "openai_training_job_class",
-        "label": "Track OpenAI Training Jobs",
+        "id": "local_tokenizer",
+        "label": "Local Finetuning Tokenizer",
+        "type": "component",
+        "link": null,
+        "title": "tokenize_function",
+        "description": "Provides tokenization logic specifically for preparing data for local finetuning of language models."
+      },
+      {
+        "id": "databricks_provider",
+        "label": "Databricks LLM Integration",
+        "type": "component",
+        "link": null,
+        "title": "DatabricksProvider",
+        "description": "Connects DSPy with Databricks for deploying finetuned models as serving endpoints and managing finetuning jobs."
+      },
+      {
+        "id": "databricks_training",
+        "label": "Databricks Finetuning Job Tracker",
+        "type": "component",
+        "link": null,
+        "title": "TrainingJobDatabricks",
+        "description": "Represents and tracks the status and details of a finetuning job executed on the Databricks platform."
+      },
+      {
+        "id": "openai_training",
+        "label": "OpenAI Finetuning Job Tracker",
         "type": "component",
         "link": null,
         "title": "TrainingJobOpenAI",
-        "description": "Represents and manages the lifecycle of a finetuning job on the OpenAI platform, including cancellation and status checks."
+        "description": "Manages the state and operations, including cancellation, for finetuning jobs submitted to OpenAI."
       },
       {
-        "id": "format_to_openai_responses_fn",
-        "label": "Convert to OpenAI Responses Request",
-        "type": "component",
-        "link": null,
-        "title": "to_openai_responses_request",
-        "description": "Transforms a normalized DSPy LM request into the specific format required by the OpenAI Responses API."
-      },
-      {
-        "id": "convert_completion_to_lm_response_fn",
-        "label": "Convert OpenAI Completion to LMResponse",
-        "type": "component",
-        "link": null,
-        "title": "completion_to_lm_response",
-        "description": "Parses an OpenAI chat or text completion response and converts it into a standardized DSPy LMResponse object."
-      },
-      {
-        "id": "convert_responses_to_lm_response_fn",
-        "label": "Convert OpenAI Responses to LMResponse",
-        "type": "component",
-        "link": null,
-        "title": "responses_to_lm_response",
-        "description": "Parses an OpenAI Responses API object, extracting various output items (messages, tool calls, reasoning) and converting them into a DSPy LMResponse."
-      },
-      {
-        "id": "extract_cost_fn",
-        "label": "Extract Cost from LM Response",
-        "type": "component",
-        "link": null,
-        "title": "cost_from_response",
-        "description": "Retrieves the cost information associated with a language model response, if available."
-      },
-      {
-        "id": "format_to_openai_text_fn",
-        "label": "Convert to OpenAI Text Request",
-        "type": "component",
-        "link": null,
-        "title": "to_openai_text_request",
-        "description": "Transforms a normalized DSPy LM request into the specific format required by the OpenAI text completion API."
-      },
-      {
-        "id": "dspy_cache_ext",
-        "label": "DSPy Caching System",
-        "type": "external",
-        "link": "caching_streaming",
-        "title": "DSPy Cache",
-        "description": "The internal caching system used by DSPy to store and retrieve language model responses, improving efficiency and reducing API calls."
-      },
-      {
-        "id": "litellm_ext",
-        "label": "LiteLLM Library",
+        "id": "litellm_api",
+        "label": "LiteLLM API",
         "type": "external",
         "link": null,
-        "title": "LiteLLM",
-        "description": "An external library used for abstracting interactions with various language model APIs, providing a unified interface for different providers."
+        "title": "LiteLLM API",
+        "description": "External API for interacting with various language models through the LiteLLM library."
       },
       {
-        "id": "databricks_api_ext",
+        "id": "sglang_server",
+        "label": "SGLang Local Server",
+        "type": "external",
+        "link": null,
+        "title": "SGLang Local Server",
+        "description": "A local server for serving language models, often used for development and testing."
+      },
+      {
+        "id": "databricks_api",
         "label": "Databricks API",
         "type": "external",
         "link": null,
         "title": "Databricks API",
-        "description": "The external API for Databricks services, used for managing models, finetuning jobs, and serving endpoints."
+        "description": "The external API for Databricks services, including model serving and finetuning."
       },
       {
-        "id": "openai_api_ext",
+        "id": "openai_api",
         "label": "OpenAI API",
         "type": "external",
         "link": null,
         "title": "OpenAI API",
-        "description": "The external API for OpenAI services, used for language model completions, chat, and finetuning."
-      },
-      {
-        "id": "sglang_server_ext",
-        "label": "SGLang Local Server",
-        "type": "external",
-        "link": null,
-        "title": "SGLang Server",
-        "description": "A local server for serving language models, launched and managed by DSPy for local model inference and development."
-      },
-      {
-        "id": "lm_request_type",
-        "label": "LM Request Data",
-        "type": "external",
-        "link": "core_types",
-        "title": "LMRequest",
-        "description": "A standardized data structure representing a request to a language model, containing prompt, messages, and configuration."
-      },
-      {
-        "id": "lm_response_type",
-        "label": "LM Response Data",
-        "type": "external",
-        "link": "core_types",
-        "title": "LMResponse",
-        "description": "A standardized data structure representing the response from a language model, containing outputs, usage information, and cache status."
+        "description": "The external API for OpenAI services, including finetuning jobs."
       }
     ],
     "edges": [
       {
-        "source": "configure_cache_fn",
-        "target": "dspy_cache_ext",
-        "label": "Configures",
+        "source": "base_lm",
+        "target": "litellm_sync_chat",
+        "label": "Processes sync chat",
         "title": null,
         "description": null
       },
       {
-        "source": "get_dspy_cache_fn",
-        "target": "dspy_cache_ext",
-        "label": "Initializes/Retrieves",
+        "source": "base_lm",
+        "target": "litellm_async_chat",
+        "label": "Processes async chat",
         "title": null,
         "description": null
       },
       {
-        "source": "enable_litellm_logging_fn",
-        "target": "litellm_ext",
-        "label": "Enables logging in",
+        "source": "base_lm",
+        "target": "litellm_sync_responses",
+        "label": "Processes sync responses",
         "title": null,
         "description": null
       },
       {
-        "source": "disable_litellm_logging_fn",
-        "target": "litellm_ext",
-        "label": "Disables logging in",
+        "source": "base_lm",
+        "target": "litellm_async_responses",
+        "label": "Processes async responses",
         "title": null,
         "description": null
       },
       {
-        "source": "base_lm_class",
-        "target": "lm_request_type",
-        "label": "Processes",
+        "source": "base_lm",
+        "target": "litellm_sync_text",
+        "label": "Processes sync text",
         "title": null,
         "description": null
       },
       {
-        "source": "base_lm_class",
-        "target": "lm_response_type",
-        "label": "Produces",
+        "source": "base_lm",
+        "target": "litellm_async_text",
+        "label": "Processes async text",
         "title": null,
         "description": null
       },
       {
-        "source": "base_lm_class",
-        "target": "dspy_cache_ext",
-        "label": "Utilizes",
+        "source": "litellm_sync_chat",
+        "target": "async_stream_helper",
+        "label": "Uses for streaming",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_sync_completion_fn",
-        "target": "litellm_ext",
-        "label": "Calls",
+        "source": "litellm_async_chat",
+        "target": "async_stream_helper",
+        "label": "Uses for streaming",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_async_completion_fn",
-        "target": "litellm_ext",
-        "label": "Calls",
+        "source": "litellm_sync_chat",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_sync_responses_fn",
-        "target": "litellm_ext",
-        "label": "Calls",
+        "source": "litellm_async_chat",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_async_responses_fn",
-        "target": "litellm_ext",
-        "label": "Calls",
+        "source": "litellm_sync_responses",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_sync_text_completion_fn",
-        "target": "litellm_ext",
-        "label": "Calls",
+        "source": "litellm_async_responses",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_async_text_completion_fn",
-        "target": "litellm_ext",
-        "label": "Calls",
+        "source": "litellm_sync_text",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_sync_completion_fn",
-        "target": "dspy_cache_ext",
-        "label": "Uses",
+        "source": "litellm_async_text",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_async_completion_fn",
-        "target": "dspy_cache_ext",
-        "label": "Uses",
+        "source": "local_provider",
+        "target": "sglang_server",
+        "label": "Launches & Manages",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_sync_responses_fn",
-        "target": "dspy_cache_ext",
-        "label": "Uses",
+        "source": "local_provider",
+        "target": "local_tokenizer",
+        "label": "Uses for finetuning data prep",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_async_responses_fn",
-        "target": "dspy_cache_ext",
-        "label": "Uses",
+        "source": "databricks_provider",
+        "target": "databricks_training",
+        "label": "Orchestrates finetuning",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_sync_text_completion_fn",
-        "target": "dspy_cache_ext",
-        "label": "Uses",
+        "source": "databricks_provider",
+        "target": "databricks_api",
+        "label": "Interacts with Databricks API",
         "title": null,
         "description": null
       },
       {
-        "source": "litellm_async_text_completion_fn",
-        "target": "dspy_cache_ext",
-        "label": "Uses",
+        "source": "databricks_training",
+        "target": "databricks_api",
+        "label": "Monitors Databricks API",
         "title": null,
         "description": null
       },
       {
-        "source": "databricks_provider_class",
-        "target": "databricks_api_ext",
-        "label": "Interacts with",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "databricks_provider_class",
-        "target": "databricks_training_job_class",
-        "label": "Manages",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "databricks_training_job_class",
-        "target": "databricks_api_ext",
-        "label": "Queries status from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "local_provider_class",
-        "target": "sglang_server_ext",
-        "label": "Launches/Manages",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "local_provider_class",
-        "target": "lm_request_type",
-        "label": "Processes for finetuning",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "openai_training_job_class",
-        "target": "openai_api_ext",
-        "label": "Manages",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "format_to_openai_responses_fn",
-        "target": "lm_request_type",
-        "label": "Consumes",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "format_to_openai_responses_fn",
-        "target": "openai_api_ext",
-        "label": "Formats for",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "convert_completion_to_lm_response_fn",
-        "target": "openai_api_ext",
-        "label": "Parses response from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "convert_completion_to_lm_response_fn",
-        "target": "lm_response_type",
-        "label": "Produces",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "convert_responses_to_lm_response_fn",
-        "target": "openai_api_ext",
-        "label": "Parses response from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "convert_responses_to_lm_response_fn",
-        "target": "lm_response_type",
-        "label": "Produces",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "extract_cost_fn",
-        "target": "lm_response_type",
-        "label": "Extracts from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "format_to_openai_text_fn",
-        "target": "lm_request_type",
-        "label": "Consumes",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "format_to_openai_text_fn",
-        "target": "openai_api_ext",
-        "label": "Formats for",
+        "source": "openai_training",
+        "target": "openai_api",
+        "label": "Monitors & Controls OpenAI API",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "surface_group",
-        "label": "User Configuration",
+        "id": "core_lm_abstraction_group",
+        "label": "Core LM Abstraction",
         "nodes": [
-          "configure_cache_fn",
-          "enable_litellm_logging_fn",
-          "disable_litellm_logging_fn"
+          "base_lm"
         ],
-        "title": "User Configuration",
-        "description": "Functions for configuring global settings like caching and logging.",
+        "title": "Core LM Abstraction",
+        "description": "The foundational interface for all language model interactions within DSPy.",
         "role": "surface"
       },
       {
-        "id": "generative_group",
-        "label": "LM Interaction & Providers",
+        "id": "litellm_chat_clients_group",
+        "label": "LiteLLM Chat Clients",
         "nodes": [
-          "base_lm_class",
-          "litellm_sync_completion_fn",
-          "litellm_async_completion_fn",
-          "litellm_sync_responses_fn",
-          "litellm_async_responses_fn",
-          "litellm_sync_text_completion_fn",
-          "litellm_async_text_completion_fn",
-          "databricks_provider_class",
-          "local_provider_class"
+          "litellm_sync_chat",
+          "litellm_async_chat",
+          "async_stream_helper"
         ],
-        "title": "LM Interaction & Providers",
-        "description": "Core components for interacting with various language models and managing different LM providers.",
+        "title": "LiteLLM Chat Clients",
+        "description": "Components for synchronous and asynchronous chat completions using LiteLLM, including streaming support.",
         "role": "generative"
       },
       {
-        "id": "analytical_group",
-        "label": "Data Processing & Management",
+        "id": "litellm_responses_clients_group",
+        "label": "LiteLLM Responses Clients",
         "nodes": [
-          "get_dspy_cache_fn",
-          "databricks_training_job_class",
-          "openai_training_job_class",
-          "format_to_openai_responses_fn",
-          "convert_completion_to_lm_response_fn",
-          "convert_responses_to_lm_response_fn",
-          "extract_cost_fn",
-          "format_to_openai_text_fn"
+          "litellm_sync_responses",
+          "litellm_async_responses"
         ],
-        "title": "Data Processing & Management",
-        "description": "Components responsible for data formatting, response parsing, and managing training jobs.",
-        "role": "analytical"
+        "title": "LiteLLM Responses Clients",
+        "description": "Components for synchronous and asynchronous structured responses completions via LiteLLM.",
+        "role": "generative"
       },
       {
-        "id": "data_group",
-        "label": "Data Structures & External Systems",
+        "id": "litellm_text_clients_group",
+        "label": "LiteLLM Text Clients",
         "nodes": [
-          "dspy_cache_ext",
-          "litellm_ext",
-          "databricks_api_ext",
-          "openai_api_ext",
-          "sglang_server_ext",
-          "lm_request_type",
-          "lm_response_type"
+          "litellm_sync_text",
+          "litellm_async_text"
         ],
-        "title": "Data Structures & External Systems",
-        "description": "Represents the key data structures and external systems that the module interacts with.",
+        "title": "LiteLLM Text Clients",
+        "description": "Components for synchronous and asynchronous raw text completions using LiteLLM.",
+        "role": "generative"
+      },
+      {
+        "id": "local_model_infrastructure_group",
+        "label": "Local Model Infrastructure",
+        "nodes": [
+          "local_provider",
+          "local_tokenizer"
+        ],
+        "title": "Local Model Infrastructure",
+        "description": "Manages local LLM serving environments and data preparation for local finetuning.",
+        "role": "generative"
+      },
+      {
+        "id": "databricks_integration_group",
+        "label": "Databricks Integration",
+        "nodes": [
+          "databricks_provider",
+          "databricks_training"
+        ],
+        "title": "Databricks Integration",
+        "description": "Provides capabilities for integrating with Databricks for LLM deployment and finetuning job management.",
+        "role": "data"
+      },
+      {
+        "id": "openai_finetuning_management_group",
+        "label": "OpenAI Finetuning Management",
+        "nodes": [
+          "openai_training"
+        ],
+        "title": "OpenAI Finetuning Management",
+        "description": "Handles the tracking and control of finetuning jobs submitted to OpenAI.",
         "role": "data"
       }
     ]

@@ -1,53 +1,45 @@
 {
   "docs_dir": "/Users/shreyaspatel/atelier/.tmp/demo_regen/dspy/docs",
-  "timestamp": "2026-05-24T18:31:41.976257",
+  "timestamp": "2026-05-31T19:10:26.247025",
   "summary": {
-    "total_modules": 20,
+    "total_modules": 28,
     "missing_files": 0,
     "failure_rate_pct": 0.0,
     "success_rate_pct": 100.0,
-    "total_issues": 30,
+    "total_issues": 0,
     "errors": 0,
-    "warnings": 30,
+    "warnings": 0,
     "files_created": 0,
-    "metadata_added": 30,
+    "metadata_added": 0,
     "diagrams_added": 0
   },
   "metrics": {
     "presync_audit": {
-      "modules_total": 20,
-      "missing_md": 20,
-      "missing_title": 15,
-      "missing_description": 15,
+      "modules_total": 28,
+      "missing_md": 0,
+      "missing_title": 0,
+      "missing_description": 0,
       "leaf_missing_diagram": 0,
       "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
       "diagram_edges_unknown_endpoint": 0,
-      "children_missing_from_diagram_nodes": 12,
-      "parent_diagram_gaps_to_inject": 12,
+      "children_missing_from_diagram_nodes": 22,
+      "parent_diagram_gaps_to_inject": 22,
       "mermaid_fence_blocks_total": 0,
+      "invalid_module_json_parse": 0,
       "placeholder_md_files": 0
     },
     "diagram_ir_audit": {
-      "module_diagrams_total": 20,
+      "module_diagrams_total": 28,
       "overview_has_diagram_json": true,
       "overview_mermaid_parse_ok": true,
       "overview_r1_reason": null,
       "by_code": {},
       "samples_by_code": {}
     },
-    "mermaid_validation": {
-      "blocks_checked": 0,
-      "blocks_invalid": 0,
-      "validation_ms": 0.0709,
-      "error_type_histogram": {},
-      "stage46_fixes_applied": 0,
-      "postfix_blocks_invalid": 0,
-      "postfix_error_type_histogram": {}
-    },
     "postsync_audit": {
-      "modules_total": 20,
-      "missing_md": 20,
+      "modules_total": 28,
+      "missing_md": 0,
       "missing_title": 0,
       "missing_description": 0,
       "leaf_missing_diagram": 0,
@@ -57,60 +49,63 @@
       "children_missing_from_diagram_nodes": 0,
       "parent_diagram_gaps_to_inject": 0,
       "mermaid_fence_blocks_total": 0,
+      "invalid_module_json_parse": 0,
       "placeholder_md_files": 0
     },
     "delta_presync_minus_postsync": {
-      "missing_title": 15.0,
-      "diagram_nodes_with_empty_label": 0.0,
-      "leaf_missing_diagram": 0.0,
-      "mermaid_fence_blocks_total": 0.0,
-      "diagram_edges_unknown_endpoint": 0.0,
-      "parent_diagram_gaps_to_inject": 12.0,
-      "parent_missing_diagram_with_children": 0.0,
-      "placeholder_md_files": 0.0,
+      "missing_description": 0.0,
       "modules_total": 0.0,
-      "missing_description": 15.0,
-      "children_missing_from_diagram_nodes": 12.0,
+      "children_missing_from_diagram_nodes": 22.0,
+      "leaf_missing_diagram": 0.0,
+      "diagram_nodes_with_empty_label": 0.0,
+      "missing_title": 0.0,
+      "parent_missing_diagram_with_children": 0.0,
+      "mermaid_fence_blocks_total": 0.0,
+      "placeholder_md_files": 0.0,
+      "diagram_edges_unknown_endpoint": 0.0,
+      "invalid_module_json_parse": 0.0,
+      "parent_diagram_gaps_to_inject": 22.0,
       "missing_md": 0.0
     },
     "fixes_applied_counts": {
-      "metadata_field_updates": 30,
+      "metadata_field_updates": 0,
       "placeholder_md_files_created": 0,
       "leaf_diagrams_added": 0,
-      "parent_diagram_child_nodes_injected": 12,
-      "overview_md_created": 0,
-      "mermaid_stage46_fixes": 0
+      "parent_diagram_child_nodes_injected": 22,
+      "diagram_ir_edges_dropped": 0,
+      "overview_md_created": 0
     },
     "measurement_summary": {
       "1_stage3_defects_before_stage45": {
         "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
         "presync_audit": {
-          "modules_total": 20,
-          "missing_md": 20,
-          "missing_title": 15,
-          "missing_description": 15,
+          "modules_total": 28,
+          "missing_md": 0,
+          "missing_title": 0,
+          "missing_description": 0,
           "leaf_missing_diagram": 0,
           "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
           "diagram_edges_unknown_endpoint": 0,
-          "children_missing_from_diagram_nodes": 12,
-          "parent_diagram_gaps_to_inject": 12,
+          "children_missing_from_diagram_nodes": 22,
+          "parent_diagram_gaps_to_inject": 22,
           "mermaid_fence_blocks_total": 0,
+          "invalid_module_json_parse": 0,
           "placeholder_md_files": 0
         }
       },
       "1b_stage45_fixes_applied_counters": {
-        "metadata_field_updates": 30,
+        "metadata_field_updates": 0,
         "placeholder_md_files_created": 0,
         "leaf_diagrams_added": 0,
-        "parent_diagram_child_nodes_injected": 12,
-        "overview_md_created": 0,
-        "mermaid_stage46_fixes": 0
+        "parent_diagram_child_nodes_injected": 22,
+        "diagram_ir_edges_dropped": 0,
+        "overview_md_created": 0
       },
       "1c_residual_after_stage45": {
         "postsync_audit": {
-          "modules_total": 20,
-          "missing_md": 20,
+          "modules_total": 28,
+          "missing_md": 0,
           "missing_title": 0,
           "missing_description": 0,
           "leaf_missing_diagram": 0,
@@ -120,45 +115,34 @@
           "children_missing_from_diagram_nodes": 0,
           "parent_diagram_gaps_to_inject": 0,
           "mermaid_fence_blocks_total": 0,
+          "invalid_module_json_parse": 0,
           "placeholder_md_files": 0
         }
       },
       "1d_reduction_delta_presync_minus_postsync": {
         "note": "Positive number = fewer problems after sync for that metric",
         "delta": {
-          "missing_title": 15.0,
-          "diagram_nodes_with_empty_label": 0.0,
-          "leaf_missing_diagram": 0.0,
-          "mermaid_fence_blocks_total": 0.0,
-          "diagram_edges_unknown_endpoint": 0.0,
-          "parent_diagram_gaps_to_inject": 12.0,
-          "parent_missing_diagram_with_children": 0.0,
-          "placeholder_md_files": 0.0,
+          "missing_description": 0.0,
           "modules_total": 0.0,
-          "missing_description": 15.0,
-          "children_missing_from_diagram_nodes": 12.0,
+          "children_missing_from_diagram_nodes": 22.0,
+          "leaf_missing_diagram": 0.0,
+          "diagram_nodes_with_empty_label": 0.0,
+          "missing_title": 0.0,
+          "parent_missing_diagram_with_children": 0.0,
+          "mermaid_fence_blocks_total": 0.0,
+          "placeholder_md_files": 0.0,
+          "diagram_edges_unknown_endpoint": 0.0,
+          "invalid_module_json_parse": 0.0,
+          "parent_diagram_gaps_to_inject": 22.0,
           "missing_md": 0.0
         }
       },
       "1e_issues_logged_this_run_by_type": {
-        "all": {
-          "missing_title": 15,
-          "missing_description": 15
-        }
+        "all": {}
       },
-      "2_mermaid": {
-        "blocks_checked": 0,
-        "blocks_invalid_before_stage46": 0,
-        "blocks_invalid_after_stage46": 0,
-        "validation_ms": 0.0709,
-        "error_type_histogram": {},
-        "error_type_histogram_after_stage46": {},
-        "stage46_fixes_applied": 0,
-        "validator": "mermaid_validator (Mermaid.js 11.9 via Node, same as viewer)"
-      },
-      "3_diagram_ir": {
+      "2_diagram_ir": {
         "audit": {
-          "module_diagrams_total": 20,
+          "module_diagrams_total": 28,
           "overview_has_diagram_json": true,
           "overview_mermaid_parse_ok": true,
           "overview_r1_reason": null,
@@ -169,374 +153,9 @@
       }
     }
   },
-  "issues_by_type": {
-    "missing_title": 15,
-    "missing_description": 15
-  },
-  "issues": [
-    {
-      "issue_type": "missing_title",
-      "module_name": "base_modules",
-      "module_path": "core_primitives/base_modules",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "base_modules",
-      "module_path": "core_primitives/base_modules",
-      "severity": "warning",
-      "details": {
-        "component_count": 3,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "core_types",
-      "module_path": "core_primitives/core_types",
-      "severity": "warning",
-      "details": {
-        "component_count": 24,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "core_types",
-      "module_path": "core_primitives/core_types",
-      "severity": "warning",
-      "details": {
-        "component_count": 24,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "repl_utilities",
-      "module_path": "core_primitives/repl_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 1,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "repl_utilities",
-      "module_path": "core_primitives/repl_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 1,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "lm_clients",
-      "module_path": "lm_integration/lm_clients",
-      "severity": "warning",
-      "details": {
-        "component_count": 22,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "lm_clients",
-      "module_path": "lm_integration/lm_clients",
-      "severity": "warning",
-      "details": {
-        "component_count": 22,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "data_adapters",
-      "module_path": "lm_integration/data_adapters",
-      "severity": "warning",
-      "details": {
-        "component_count": 16,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "data_adapters",
-      "module_path": "lm_integration/data_adapters",
-      "severity": "warning",
-      "details": {
-        "component_count": 16,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "caching_streaming",
-      "module_path": "lm_integration/caching_streaming",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "caching_streaming",
-      "module_path": "lm_integration/caching_streaming",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "prediction_modules",
-      "module_path": "program_execution/prediction_modules",
-      "severity": "warning",
-      "details": {
-        "component_count": 14,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "prediction_modules",
-      "module_path": "program_execution/prediction_modules",
-      "severity": "warning",
-      "details": {
-        "component_count": 14,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "retrieval_modules",
-      "module_path": "program_execution/retrieval_modules",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "retrieval_modules",
-      "module_path": "program_execution/retrieval_modules",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "signature_definition",
-      "module_path": "program_execution/signature_definition",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "signature_definition",
-      "module_path": "program_execution/signature_definition",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "teleprompters",
-      "module_path": "optimization_evaluation/teleprompters",
-      "severity": "warning",
-      "details": {
-        "component_count": 25,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "teleprompters",
-      "module_path": "optimization_evaluation/teleprompters",
-      "severity": "warning",
-      "details": {
-        "component_count": 25,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "program_proposers",
-      "module_path": "optimization_evaluation/program_proposers",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "program_proposers",
-      "module_path": "optimization_evaluation/program_proposers",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "evaluation_metrics",
-      "module_path": "optimization_evaluation/evaluation_metrics",
-      "severity": "warning",
-      "details": {
-        "component_count": 11,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "evaluation_metrics",
-      "module_path": "optimization_evaluation/evaluation_metrics",
-      "severity": "warning",
-      "details": {
-        "component_count": 11,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "datasets",
-      "module_path": "data_utilities/datasets",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "datasets",
-      "module_path": "data_utilities/datasets",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "dsp_utilities",
-      "module_path": "data_utilities/dsp_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "dsp_utilities",
-      "module_path": "data_utilities/dsp_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 4,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "general_utilities",
-      "module_path": "data_utilities/general_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "general_utilities",
-      "module_path": "data_utilities/general_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    }
-  ],
+  "issues_by_type": {},
+  "issues": [],
   "files_created": [],
-  "metadata_added": [
-    "base_modules:title",
-    "base_modules:description",
-    "core_types:title",
-    "core_types:description",
-    "repl_utilities:title",
-    "repl_utilities:description",
-    "lm_clients:title",
-    "lm_clients:description",
-    "data_adapters:title",
-    "data_adapters:description",
-    "caching_streaming:title",
-    "caching_streaming:description",
-    "prediction_modules:title",
-    "prediction_modules:description",
-    "retrieval_modules:title",
-    "retrieval_modules:description",
-    "signature_definition:title",
-    "signature_definition:description",
-    "teleprompters:title",
-    "teleprompters:description",
-    "program_proposers:title",
-    "program_proposers:description",
-    "evaluation_metrics:title",
-    "evaluation_metrics:description",
-    "datasets:title",
-    "datasets:description",
-    "dsp_utilities:title",
-    "dsp_utilities:description",
-    "general_utilities:title",
-    "general_utilities:description"
-  ],
+  "metadata_added": [],
   "diagrams_added": []
 }

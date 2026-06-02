@@ -1,207 +1,307 @@
 {
   "title": "DSPy Base Modules",
-  "summary": "This module defines the foundational building blocks for DSPy programs, including the base class for all modules, core parameter management, and an interface for sandbox serialization.",
+  "summary": "This module defines the foundational `BaseModule` for parameter management and state persistence, and the core `Module` class for building and executing DSPy programs with LM integration and lifecycle management.",
   "diagram": {
-    "direction": "LR",
+    "direction": "TD",
     "nodes": [
       {
-        "id": "base_module_node",
-        "label": "BaseModule",
+        "id": "base_module",
+        "label": "BaseModule Class",
         "type": "component",
         "link": null,
-        "title": "BaseModule",
-        "description": "Provides fundamental functionalities for DSPy modules, including parameter management, sub-module discovery, deep copying, and state serialization/deserialization."
+        "title": "BaseModule Class",
+        "description": "Defines the foundational structure and common utilities for all DSPy modules, including parameter handling and state management."
       },
       {
-        "id": "module_node",
-        "label": "Module",
+        "id": "dspy_module",
+        "label": "Module Class",
         "type": "component",
         "link": null,
-        "title": "DSPy Program Base Class",
-        "description": "The base class for all DSPy programs, extending BaseModule with core program logic, callback handling, LM usage tracking, and methods for managing Predict modules."
+        "title": "Module Class",
+        "description": "The primary base class for all DSPy programs, extending BaseModule with execution logic, LM interaction, and callback support."
       },
       {
-        "id": "sandbox_serializable_node",
-        "label": "SandboxSerializable",
+        "id": "manage_parameters",
+        "label": "Manage Module Parameters",
         "type": "component",
         "link": null,
-        "title": "RLM Sandbox Interface",
-        "description": "An abstract base class for types that can be injected into an RLM (Reinforcement Learning Module) sandbox, defining an interface for serialization and reconstruction."
+        "title": "Manage Module Parameters",
+        "description": "Provides methods to discover and iterate over all configurable parameters within a module, including nested structures."
       },
       {
-        "id": "parameter_node",
-        "label": "Parameter",
+        "id": "discover_submodules",
+        "label": "Discover Sub-Modules",
         "type": "component",
         "link": null,
-        "title": "Optimizable Parameter",
-        "description": "Represents an optimizable parameter within a DSPy module, managed by BaseModule for state and optimization."
+        "title": "Discover Sub-Modules",
+        "description": "Recursively identifies and lists all nested DSPy modules within a given module instance."
       },
       {
-        "id": "predict_node",
-        "label": "Predict",
-        "type": "component",
-        "link": "prediction_modules",
-        "title": "Language Model Predictor",
-        "description": "A core DSPy primitive that performs language model predictions based on a defined signature, managed by the Module class."
-      },
-      {
-        "id": "parallel_node",
-        "label": "Parallel",
+        "id": "state_persistence",
+        "label": "Serialize Module State",
         "type": "component",
         "link": null,
-        "title": "Parallel Execution Utility",
-        "description": "A utility for processing lists of examples in parallel, used by the Module class for batch execution of its forward method."
+        "title": "Serialize Module State",
+        "description": "Handles saving the module's internal state to various formats (JSON, Pickle) and loading it back."
       },
       {
-        "id": "repl_variable_node",
-        "label": "REPLVariable",
+        "id": "copy_modules",
+        "label": "Copy Module Instances",
         "type": "component",
-        "link": "repl_utilities",
-        "title": "REPL Sandbox Variable",
-        "description": "Represents a variable within the REPL sandbox environment, often created from SandboxSerializable objects."
+        "link": null,
+        "title": "Copy Module Instances",
+        "description": "Implements deep copying mechanisms for modules, specifically handling parameters and allowing for state resets."
       },
       {
-        "id": "signature_node",
-        "label": "dspy.Signature",
+        "id": "execute_program",
+        "label": "Execute Program Logic",
         "type": "component",
-        "link": "signature_definition",
-        "title": "LM Input/Output Definition",
-        "description": "Defines the input and output fields for language model interactions, capable of using SandboxSerializable types as annotations."
+        "link": null,
+        "title": "Execute Program Logic",
+        "description": "Orchestrates the synchronous and asynchronous execution of the module's forward method, integrating callbacks and usage tracking."
       },
       {
-        "id": "lm_client_node",
-        "label": "LM Client",
+        "id": "configure_lm",
+        "label": "Configure Language Models",
+        "type": "component",
+        "link": null,
+        "title": "Configure Language Models",
+        "description": "Manages the assignment and retrieval of Language Model clients for all Predict components within the module."
+      },
+      {
+        "id": "manage_predictors",
+        "label": "Manage Predictor Components",
+        "type": "component",
+        "link": null,
+        "title": "Manage Predictor Components",
+        "description": "Provides utilities to find, list, and apply functions to dspy.Predict instances embedded within the module."
+      },
+      {
+        "id": "batch_process",
+        "label": "Batch Process Examples",
+        "type": "component",
+        "link": null,
+        "title": "Batch Process Examples",
+        "description": "Enables parallel execution of the module's forward method across multiple input examples for efficiency."
+      },
+      {
+        "id": "handle_callbacks",
+        "label": "Handle Callbacks & Events",
+        "type": "component",
+        "link": null,
+        "title": "Handle Callbacks & Events",
+        "description": "Integrates a system for registering and invoking callback handlers during module execution for monitoring and instrumentation."
+      },
+      {
+        "id": "track_lm_usage",
+        "label": "Track LM Usage",
+        "type": "component",
+        "link": null,
+        "title": "Track LM Usage",
+        "description": "Monitors and records token usage and other metrics from Language Model calls made during module execution."
+      },
+      {
+        "id": "dspy_parameter_type",
+        "label": "DSPy Parameter",
+        "type": "external",
+        "link": null,
+        "title": "DSPy Parameter",
+        "description": "Represents a fundamental configurable unit within DSPy modules, managed by BaseModule."
+      },
+      {
+        "id": "dspy_predict_type",
+        "label": "DSPy Predict Module",
+        "type": "external",
+        "link": "prediction_strategies",
+        "title": "DSPy Predict Module",
+        "description": "A specialized DSPy module responsible for making predictions using a language model, managed by Module."
+      },
+      {
+        "id": "lm_client_external",
+        "label": "External LM Client",
         "type": "external",
         "link": "lm_clients",
-        "title": "Language Model Integration",
-        "description": "External service or client responsible for interacting with various Language Models to perform text generation or other LM tasks."
+        "title": "External LM Client",
+        "description": "Represents an external Language Model client that DSPy modules interact with for generating responses."
       },
       {
-        "id": "storage_node",
-        "label": "Serialization Storage",
+        "id": "dspy_parallel_executor",
+        "label": "DSPy Parallel Executor",
         "type": "external",
         "link": null,
-        "title": "Persistent Storage",
-        "description": "File system or database used for persisting the state or entire program architecture of DSPy modules (e.g., JSON, PKL files)."
+        "title": "DSPy Parallel Executor",
+        "description": "An external utility for executing multiple module calls concurrently, used for batch processing."
       }
     ],
     "edges": [
       {
-        "source": "module_node",
-        "target": "base_module_node",
-        "label": "Inherits from",
+        "source": "dspy_module",
+        "target": "base_module",
+        "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "base_module_node",
-        "target": "parameter_node",
-        "label": "Manages",
+        "source": "base_module",
+        "target": "manage_parameters",
+        "label": "implements",
         "title": null,
         "description": null
       },
       {
-        "source": "base_module_node",
-        "target": "module_node",
-        "label": "Manages sub-modules",
+        "source": "base_module",
+        "target": "discover_submodules",
+        "label": "implements",
         "title": null,
         "description": null
       },
       {
-        "source": "base_module_node",
-        "target": "storage_node",
-        "label": "Saves/Loads state",
+        "source": "base_module",
+        "target": "state_persistence",
+        "label": "implements",
         "title": null,
         "description": null
       },
       {
-        "source": "module_node",
-        "target": "predict_node",
-        "label": "Contains",
+        "source": "base_module",
+        "target": "copy_modules",
+        "label": "implements",
         "title": null,
         "description": null
       },
       {
-        "source": "module_node",
-        "target": "parallel_node",
-        "label": "Uses for batching",
+        "source": "manage_parameters",
+        "target": "dspy_parameter_type",
+        "label": "manages",
         "title": null,
         "description": null
       },
       {
-        "source": "predict_node",
-        "target": "lm_client_node",
-        "label": "Interacts with",
+        "source": "dspy_module",
+        "target": "execute_program",
+        "label": "implements",
         "title": null,
         "description": null
       },
       {
-        "source": "sandbox_serializable_node",
-        "target": "repl_variable_node",
-        "label": "Converts to",
+        "source": "dspy_module",
+        "target": "configure_lm",
+        "label": "implements",
         "title": null,
         "description": null
       },
       {
-        "source": "signature_node",
-        "target": "sandbox_serializable_node",
-        "label": "Uses as type annotation",
+        "source": "dspy_module",
+        "target": "manage_predictors",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_module",
+        "target": "batch_process",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_module",
+        "target": "handle_callbacks",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_module",
+        "target": "track_lm_usage",
+        "label": "integrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_predictors",
+        "target": "dspy_predict_type",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "configure_lm",
+        "target": "lm_client_external",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "batch_process",
+        "target": "dspy_parallel_executor",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_program",
+        "target": "handle_callbacks",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_program",
+        "target": "track_lm_usage",
+        "label": "uses",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "core_primitives_group",
-        "label": "Core Primitives",
+        "id": "core_definitions",
+        "label": "Core Module Definitions",
         "nodes": [
-          "base_module_node",
-          "sandbox_serializable_node"
+          "base_module",
+          "dspy_module"
         ],
-        "title": "Fundamental Building Blocks",
-        "description": "Essential classes that provide the basic structure and capabilities for DSPy modules and sandbox integration.",
-        "role": "generative"
-      },
-      {
-        "id": "surface_api_group",
-        "label": "Surface API",
-        "nodes": [
-          "module_node"
-        ],
-        "title": "User-Facing Program Interface",
-        "description": "The primary class that users inherit from to define their DSPy programs, orchestrating various components.",
+        "title": "Core Module Definitions",
+        "description": "Defines the fundamental building blocks for all DSPy programs and modules.",
         "role": "surface"
       },
       {
-        "id": "generative_components_group",
-        "label": "Generative Components",
+        "id": "module_introspection",
+        "label": "Module Structure & Introspection",
         "nodes": [
-          "predict_node"
+          "manage_parameters",
+          "discover_submodules",
+          "manage_predictors"
         ],
-        "title": "Language Model Interaction",
-        "description": "Components responsible for interacting with language models to generate outputs based on defined instructions.",
-        "role": "generative"
-      },
-      {
-        "id": "analytical_utilities_group",
-        "label": "Analytical Utilities",
-        "nodes": [
-          "parallel_node"
-        ],
-        "title": "Performance and Batch Processing",
-        "description": "Utilities that support efficient execution and analysis of DSPy programs, such as parallel processing.",
+        "title": "Module Structure & Introspection",
+        "description": "Capabilities for examining and navigating the internal structure and components of DSPy modules.",
         "role": "analytical"
       },
       {
-        "id": "data_structures_group",
-        "label": "Data Structures",
+        "id": "lifecycle_persistence",
+        "label": "Module Lifecycle & Persistence",
         "nodes": [
-          "parameter_node",
-          "repl_variable_node"
+          "state_persistence",
+          "copy_modules"
         ],
-        "title": "Internal Data Representation",
-        "description": "Classes representing data elements and structures used within DSPy modules and for sandbox interactions.",
+        "title": "Module Lifecycle & Persistence",
+        "description": "Handles the creation, copying, and serialization of module states for saving and loading.",
         "role": "data"
+      },
+      {
+        "id": "execution_observability",
+        "label": "Execution & Observability",
+        "nodes": [
+          "execute_program",
+          "configure_lm",
+          "batch_process",
+          "handle_callbacks",
+          "track_lm_usage"
+        ],
+        "title": "Execution & Observability",
+        "description": "Manages program execution flow, LM interactions, parallel processing, and monitoring features like callbacks and usage tracking.",
+        "role": "generative"
       }
     ]
   }

@@ -5,6 +5,7 @@
   "scripts": {
     "diagram:watch": "node scripts/run_with_cursor_env.mjs node scripts/diagram_ask_watcher.mjs",
     "demo": "python3 -m http.server 9891 --directory demo",
+    "demo:chat-api": "python3 -m codewiki.run_web_app --port 8001",
     "build:viewer": "node demo/scripts/generate-repos-index.js && node demo/scripts/generate-architecture-svgs.js",
     "preview:architecture": "node demo/scripts/generate-architecture-svgs.js --repo persona-selection-model --png",
     "deploy:prod": "vercel --prod --yes",

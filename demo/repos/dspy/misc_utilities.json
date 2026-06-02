@@ -1,0 +1,121 @@
+{
+  "title": "Miscellaneous Utilities",
+  "summary": "This module provides a collection of general-purpose utility functions, including file downloading, development decorators, and dummy implementations for testing language models and retrievers.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "download_file",
+        "label": "Download File",
+        "type": "component",
+        "link": null,
+        "title": "Download Files from URL",
+        "description": "Downloads a file from a given URL, checking if it already exists and its size to avoid re-downloading unnecessary data."
+      },
+      {
+        "id": "experimental_decorator",
+        "label": "Mark Experimental Features",
+        "type": "component",
+        "link": null,
+        "title": "Decorator for Experimental Code",
+        "description": "A decorator used to mark functions or classes as experimental, providing a mechanism for managing feature development and deprecation."
+      },
+      {
+        "id": "dummy_lm",
+        "label": "Dummy Language Model",
+        "type": "component",
+        "link": null,
+        "title": "Simulate LM for Testing",
+        "description": "Provides a mock language model for unit testing, supporting various response modes like predefined lists, dictionary lookups, or example following to simulate LM behavior without actual API calls."
+      },
+      {
+        "id": "dummy_retriever_logic",
+        "label": "Dummy Retriever Logic",
+        "type": "component",
+        "link": null,
+        "title": "Simulate Retrieval Logic",
+        "description": "An internal function within a dummy retriever (likely `DummyRM` not shown here) that simulates document retrieval based on vector similarity for testing purposes."
+      },
+      {
+        "id": "base_lm_interface",
+        "label": "Base LM Interface",
+        "type": "external",
+        "link": "lm_clients",
+        "title": "Base Language Model Interface",
+        "description": "The foundational abstract class for all language models in DSPy, defining the common interface for LM operations."
+      },
+      {
+        "id": "chat_adapter_component",
+        "label": "Chat Adapter",
+        "type": "external",
+        "link": "external_adapters",
+        "title": "Format Chat Messages",
+        "description": "Adapts messages and responses to and from a chat-based language model format, handling roles and content structuring."
+      },
+      {
+        "id": "requests_library",
+        "label": "Requests Library",
+        "type": "external",
+        "link": null,
+        "title": "HTTP Request Utility",
+        "description": "A popular Python library for making HTTP requests, used by the download utility for fetching files from the web."
+      }
+    ],
+    "edges": [
+      {
+        "source": "download_file",
+        "target": "requests_library",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dummy_lm",
+        "target": "base_lm_interface",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dummy_lm",
+        "target": "chat_adapter_component",
+        "label": "uses for formatting",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "testing_tools_group",
+        "label": "Testing Tools",
+        "nodes": [
+          "dummy_lm",
+          "dummy_retriever_logic"
+        ],
+        "title": "Testing and Mocking Utilities",
+        "description": "Contains components for simulating external systems like Language Models and Retrievers, crucial for unit testing and development without external dependencies.",
+        "role": "generative"
+      },
+      {
+        "id": "file_management_group",
+        "label": "File Management",
+        "nodes": [
+          "download_file"
+        ],
+        "title": "File Download Utility",
+        "description": "Provides a utility function for downloading files from URLs, with checks to prevent redundant downloads.",
+        "role": "data"
+      },
+      {
+        "id": "development_tools_group",
+        "label": "Development Tools",
+        "nodes": [
+          "experimental_decorator"
+        ],
+        "title": "Developer Annotation Tools",
+        "description": "Includes decorators for marking code components, such as indicating experimental features, aiding in code maintenance and communication.",
+        "role": "surface"
+      }
+    ]
+  }
+}

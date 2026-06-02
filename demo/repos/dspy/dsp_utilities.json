@@ -1,8 +1,8 @@
 {
   "title": "DSP Utilities Module",
-  "summary": "This module provides core utility functions for DSPy, including text tokenization, answer location within text, and a robust, thread-safe configuration management system. It also includes utilities for loading background data for queries.",
+  "summary": "This module provides essential utility functions for DSPy, including text tokenization, answer location within text, robust configuration management, and batch loading of background data for retrieval tasks.",
   "diagram": {
-    "direction": "TD",
+    "direction": "LR",
     "nodes": [
       {
         "id": "simple_tokenizer",
@@ -10,15 +10,15 @@
         "type": "component",
         "link": null,
         "title": "Simple Text Tokenizer",
-        "description": "A tokenizer that splits text into tokens based on alphanumeric characters and non-whitespace patterns, primarily used for preparing text for further processing."
+        "description": "A tokenizer that splits text into tokens based on alphanumeric characters and non-whitespace patterns, primarily used for text processing in retrieval tasks."
       },
       {
         "id": "locate_answers",
-        "label": "Find Answer Occurrences",
+        "label": "Locate Answers in Text",
         "type": "component",
         "link": null,
         "title": "Answer Location Utility",
-        "description": "Identifies and returns the character offsets of all occurrences of given tokenized answers within a larger body of text, leveraging tokenized representations."
+        "description": "Identifies and returns the character-based offset and end position of all occurrences of given tokenized answers within a larger body of text."
       },
       {
         "id": "dspy_settings",
@@ -26,67 +26,22 @@
         "type": "component",
         "link": null,
         "title": "DSPy Global Settings",
-        "description": "A singleton class providing thread-safe global and thread-local configuration management for DSPy, allowing for default settings and temporary overrides via context."
+        "description": "A singleton class providing thread-safe management of global DSPy configuration settings, including language models, adapters, and callbacks, with support for thread-local overrides via context managers."
       },
       {
         "id": "load_backgrounds",
-        "label": "Load Query Backgrounds",
+        "label": "Load Batch Backgrounds",
         "type": "component",
         "link": null,
         "title": "Batch Background Loader",
-        "description": "Retrieves and concatenates background passages for a batch of query IDs from a collection, supporting both integer and string-based passage IDs."
-      },
-      {
-        "id": "threading_module",
-        "label": "Threading Module",
-        "type": "external",
-        "link": null,
-        "title": "Python Threading",
-        "description": "Standard Python library for managing concurrent execution threads, used by Settings for thread-safety and context management."
-      },
-      {
-        "id": "asyncio_module",
-        "label": "Asyncio Module",
-        "type": "external",
-        "link": null,
-        "title": "Python Asyncio",
-        "description": "Standard Python library for writing concurrent code using the async/await syntax, used by Settings for async context management."
-      },
-      {
-        "id": "cloudpickle_lib",
-        "label": "Cloudpickle Library",
-        "type": "external",
-        "link": null,
-        "title": "Cloudpickle Serialization",
-        "description": "A library extending Python's pickle module to serialize more complex objects, used by Settings for saving and loading configurations."
+        "description": "Retrieves and concatenates background passages for a list of query IDs from a collection, supporting both integer and string-based passage identifiers."
       }
     ],
     "edges": [
       {
-        "source": "locate_answers",
-        "target": "simple_tokenizer",
-        "label": "uses tokenization",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "dspy_settings",
-        "target": "threading_module",
-        "label": "manages thread-safety",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "dspy_settings",
-        "target": "asyncio_module",
-        "label": "manages async context",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "dspy_settings",
-        "target": "cloudpickle_lib",
-        "label": "serializes/deserializes config",
+        "source": "simple_tokenizer",
+        "target": "locate_answers",
+        "label": "uses for tokenization",
         "title": null,
         "description": null
       }
@@ -99,28 +54,28 @@
           "simple_tokenizer",
           "locate_answers"
         ],
-        "title": "Text Tokenization and Answer Location",
-        "description": "Components responsible for breaking down text into tokens and identifying specific answer spans within tokenized content.",
+        "title": "Text Processing Utilities",
+        "description": "Components for tokenizing text and locating specific phrases within tokenized content.",
         "role": "analytical"
       },
       {
-        "id": "config_management_group",
+        "id": "configuration_group",
         "label": "Configuration Management",
         "nodes": [
           "dspy_settings"
         ],
-        "title": "DSPy Global and Contextual Settings",
-        "description": "Manages the global and thread-local configuration settings for DSPy, including language models, adapters, and other operational parameters.",
+        "title": "DSPy Configuration",
+        "description": "Manages global and thread-local settings for DSPy, ensuring consistent behavior across the application.",
         "role": "surface"
       },
       {
         "id": "data_loading_group",
-        "label": "Data Loading Utilities",
+        "label": "Data Loading",
         "nodes": [
           "load_backgrounds"
         ],
-        "title": "Background Data Retrieval",
-        "description": "Provides utilities for loading and preparing background information associated with queries from various data collections.",
+        "title": "Background Data Loading",
+        "description": "Utility for loading and preparing background passages associated with query IDs.",
         "role": "data"
       }
     ]

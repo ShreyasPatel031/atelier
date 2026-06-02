@@ -1,6 +1,6 @@
 {
     "title": "dspy",
-    "summary": "DSPy is a framework for algorithmically optimizing Language Model (LLM) programs. It enables developers to compose complex LLM workflows using declarative modules and signatures, then automatically improves their performance through advanced teleprompters. By separating program logic from prompting, DSPy makes LLM applications more robust, reliable, and easier to develop and evaluate.",
+    "summary": "DSPy is a framework for programming Large Language Models (LLMs) and Retrieval Models (RMs) by composing small, declarative modules. It enables developers to build complex LLM applications by defining program flow and optimizing prompts and weights automatically. DSPy streamlines the development, evaluation, and deployment of LLM-powered systems, making them more robust and efficient.",
     "diagram": {
         "direction": "LR",
         "nodes": [
@@ -10,138 +10,206 @@
                 "type": "external",
                 "link": null,
                 "title": "Human User",
-                "description": "The human actor who designs, builds, optimizes, and evaluates DSPy programs to solve complex tasks using Large Language Models."
+                "description": "The primary actor who designs, runs, and evaluates DSPy programs to build robust LLM applications."
             },
             {
-                "id": "core_primitives",
-                "label": "Core Building Blocks",
+                "id": "core_abstractions",
+                "label": "Core Program Abstractions",
                 "type": "module",
-                "link": "core_primitives",
-                "title": "Core DSPy Primitives",
-                "description": "Defines the foundational classes like `dspy.Module` and core data types, providing the basic structure for all DSPy programs and interactions."
+                "link": "core_abstractions",
+                "title": "DSPy Core Abstractions",
+                "description": "Defines the foundational building blocks for DSPy programs, including base modules, signature definitions, standardized data types, and adapters for LM communication."
+            },
+            {
+                "id": "language_model_integration",
+                "label": "Language Model Integration",
+                "type": "module",
+                "link": "language_model_integration",
+                "title": "DSPy LM Integration Layer",
+                "description": "Manages all interactions with Language Models, providing client integrations, caching for performance, API-specific data formatting, and essential utilities."
             },
             {
                 "id": "program_execution",
-                "label": "Define LLM Programs",
+                "label": "Program Execution & Control",
                 "type": "module",
                 "link": "program_execution",
                 "title": "DSPy Program Execution",
-                "description": "Enables users to compose complex LLM workflows using declarative signatures, advanced prediction modules (e.g., ReAct, CoT), and integrated retrieval mechanisms."
+                "description": "Orchestrates how DSPy programs run, encompassing advanced prediction strategies, agentic control flow, real-time output streaming, external tool integration, and robust prediction aggregation."
             },
             {
-                "id": "lm_integration",
-                "label": "Connect to Language Models",
+                "id": "optimization_and_tuning",
+                "label": "Optimization & Tuning",
                 "type": "module",
-                "link": "lm_integration",
-                "title": "Language Model Integration",
-                "description": "Manages all interactions with various Language Models, including client connections, data adaptation for structured I/O, caching, and streaming capabilities."
+                "link": "optimization_and_tuning",
+                "title": "DSPy Program Optimization",
+                "description": "Provides a suite of teleprompters and tools for automatically optimizing DSPy programs, enabling automated prompt engineering, few-shot example selection, and program refinement."
             },
             {
-                "id": "data_utilities",
-                "label": "Manage Data & Utilities",
+                "id": "data_retrieval_and_evaluation",
+                "label": "Data Retrieval & Evaluation",
                 "type": "module",
-                "link": "data_utilities",
-                "title": "DSPy Data & Utilities",
-                "description": "Provides tools for loading, managing, and splitting datasets, along with general-purpose utilities for text processing, configuration, and asynchronous operations."
+                "link": "data_retrieval_and_evaluation",
+                "title": "DSPy Data & Evaluation",
+                "description": "Offers comprehensive tools for managing datasets, integrating various retrieval systems to fetch relevant information, and providing metrics for evaluating DSPy program performance."
             },
             {
-                "id": "optimization_evaluation",
-                "label": "Optimize & Evaluate Programs",
+                "id": "general_utilities",
+                "label": "General Utilities",
                 "type": "module",
-                "link": "optimization_evaluation",
-                "title": "Optimization & Evaluation",
-                "description": "Offers a suite of teleprompters for automated prompt engineering and program refinement, coupled with metrics for rigorous performance assessment and debugging."
+                "link": "general_utilities",
+                "title": "DSPy General Utilities",
+                "description": "A collection of essential utility functions for DSPy, including tools for managing asynchronous/synchronous execution, callbacks, file downloading, and dummy implementations for testing."
             }
         ],
         "edges": [
             {
                 "source": "user",
-                "target": "program_execution",
-                "label": "Builds & Configures",
+                "target": "core_abstractions",
+                "label": "Defines & builds programs",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_primitives",
+                "source": "user",
+                "target": "optimization_and_tuning",
+                "label": "Initiates optimization",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_abstractions",
+                "target": "language_model_integration",
+                "label": "Configures & uses LMs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "core_abstractions",
                 "target": "program_execution",
-                "label": "Provides Base Classes",
+                "label": "Defines program structure",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "language_model_integration",
+                "target": "program_execution",
+                "label": "Provides LM services",
                 "title": null,
                 "description": null
             },
             {
                 "source": "program_execution",
-                "target": "lm_integration",
-                "label": "Executes LLM Steps",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "lm_integration",
-                "target": "program_execution",
-                "label": "Returns LM Results",
+                "target": "optimization_and_tuning",
+                "label": "Generates execution traces",
                 "title": null,
                 "description": null
             },
             {
                 "source": "program_execution",
-                "target": "optimization_evaluation",
-                "label": "Submits for Optimization",
+                "target": "data_retrieval_and_evaluation",
+                "label": "Uses data & evaluates outputs",
                 "title": null,
                 "description": null
             },
             {
-                "source": "optimization_evaluation",
+                "source": "optimization_and_tuning",
+                "target": "core_abstractions",
+                "label": "Refines program components",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "optimization_and_tuning",
+                "target": "language_model_integration",
+                "label": "Finetunes LMs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "data_retrieval_and_evaluation",
                 "target": "program_execution",
-                "label": "Deploys Refined Program",
+                "label": "Provides data & context",
                 "title": null,
                 "description": null
             },
             {
-                "source": "optimization_evaluation",
-                "target": "lm_integration",
-                "label": "Uses LMs for Teleprompting",
+                "source": "data_retrieval_and_evaluation",
+                "target": "optimization_and_tuning",
+                "label": "Supplies data & metrics",
                 "title": null,
                 "description": null
             },
             {
-                "source": "optimization_evaluation",
-                "target": "data_utilities",
-                "label": "Evaluates on Datasets",
+                "source": "general_utilities",
+                "target": "language_model_integration",
+                "label": "Supports LM clients",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "general_utilities",
+                "target": "program_execution",
+                "label": "Aids execution flow",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "general_utilities",
+                "target": "optimization_and_tuning",
+                "label": "Assists optimization",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "general_utilities",
+                "target": "data_retrieval_and_evaluation",
+                "label": "Provides data tools",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "program_construction",
-                "label": "Program Construction",
+                "id": "user_program_definition",
+                "label": "User & Program Definition",
                 "nodes": [
-                    "core_primitives",
+                    "user",
+                    "core_abstractions"
+                ],
+                "title": "Define & Structure LLM Programs",
+                "description": "This group encompasses how users interact with DSPy to define their LLM programs, including core abstractions like modules, signatures, and data types.",
+                "role": null
+            },
+            {
+                "id": "llm_interaction_execution",
+                "label": "LLM Interaction & Execution",
+                "nodes": [
+                    "language_model_integration",
                     "program_execution"
                 ],
-                "title": "Building DSPy Programs",
-                "description": "This group encompasses the foundational elements and core logic for defining and structuring DSPy programs, from basic modules to complex LLM workflows.",
+                "title": "Orchestrate LLM Calls & Program Flow",
+                "description": "This group manages all aspects of interacting with Language Models, from client integrations and caching to advanced program execution strategies, streaming, and tool use.",
                 "role": null
             },
             {
-                "id": "external_interactions_data",
-                "label": "External Interactions & Data",
+                "id": "optimization_data_evaluation",
+                "label": "Optimization, Data & Evaluation",
                 "nodes": [
-                    "lm_integration",
-                    "data_utilities"
+                    "optimization_and_tuning",
+                    "data_retrieval_and_evaluation"
                 ],
-                "title": "LM & Data Management",
-                "description": "This group handles all aspects of connecting DSPy programs to external Language Models and managing the flow and processing of data, including caching and streaming.",
+                "title": "Improve, Manage Data, & Assess Programs",
+                "description": "This group focuses on enhancing DSPy programs through automated optimization, managing datasets, integrating retrieval systems, and evaluating performance with various metrics.",
                 "role": null
             },
             {
-                "id": "performance_improvement_assessment",
-                "label": "Performance Improvement & Assessment",
+                "id": "core_system_utilities",
+                "label": "Core System Utilities",
                 "nodes": [
-                    "optimization_evaluation"
+                    "general_utilities"
                 ],
-                "title": "Optimization & Evaluation",
-                "description": "This group provides the tools and methodologies for automatically improving the performance of DSPy programs and rigorously evaluating their effectiveness.",
+                "title": "Foundational System Support",
+                "description": "This group provides essential helper functions for asynchronous/synchronous operations, callbacks, file management, and testing, supporting the entire DSPy ecosystem.",
                 "role": null
             }
         ]

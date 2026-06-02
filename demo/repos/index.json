@@ -1,8 +1,18 @@
 [
   {
+    "id": "agent-smoke",
+    "label": "A-B-C test (refreshed)",
+    "description": "Compact viewer test \u2014 nodes A, B, C after MCP update."
+  },
+  {
+    "id": "atelier-tdc8",
+    "label": "Atelier \u2014 CodeWiki workspace",
+    "description": "Layout of this repository: the codewiki Python package (CLI, backend pipeline, FastAPI app, MCP integration, templates), the static demo viewer, the Vercel serverless API, and supporting tests/scripts/docker/benchmarking."
+  },
+  {
     "id": "cortex-ops-architecture",
-    "label": "Cortex Ops Architecture",
-    "description": ""
+    "label": "Cortex Ops \u2014 users, agents, and data sources",
+    "description": "Architecture view derived from data/dummyData.ts: 41 systemAgents, UserRole personas, React + geminiService entry path, integrationConnectors, and agent\u2192external heuristics.\n\n## How To Read\n\n- **Root canvas** follows the app flow: select a **role**, see role-specific **tabs**, use **agents**, and read/write **data sources**.\n- **Legend colors only mean three things**: users/roles, agents, and data sources.\n- **Every diagram** stays capped: at most four sibling groups and at most four nodes per group. Open module tiles for deeper detail."
   },
   {
     "id": "crewai",
@@ -23,6 +33,11 @@
     "id": "langchain",
     "label": "LangChain",
     "description": "Building blocks and agents for LLM apps and RAG."
+  },
+  {
+    "id": "mcp-e2e-test",
+    "label": "MCP E2E Test",
+    "description": "4-tool MCP surface verified end-to-end"
   },
   {
     "id": "minirepo",
@@ -55,33 +70,8 @@
     "description": "State-of-the-art pretrained models for NLP, vision, and more."
   },
   {
-    "id": "agent-smoke",
-    "label": "A-B-C test (refreshed)",
-    "description": "Compact viewer test \u2014 nodes A, B, C after MCP update."
-  },
-  {
-    "id": "atelier-tdc8",
-    "label": "Atelier \u2014 CodeWiki workspace",
-    "description": "Layout of this repository: the codewiki Python package (CLI, backend pipeline, FastAPI app, MCP integration, templates), the static demo viewer, the Vercel serverless API, and supporting tests/scripts/docker/benchmarking."
-  },
-  {
-    "id": "mcp-e2e-test",
-    "label": "MCP E2E Test",
-    "description": "4-tool MCP surface verified end-to-end"
-  },
-  {
-    "id": "mcp-test-diagram",
-    "label": "MCP test \u2014 request flow",
-    "description": "Small diagram created from Cursor to verify codewiki-diagram MCP end-to-end."
-  },
-  {
-    "id": "cortex-ops-architecture",
-    "label": "Cortex Ops \u2014 users, agents, and data sources",
-    "description": "Architecture view derived from data/dummyData.ts: 41 systemAgents, UserRole personas, React + geminiService entry path, integrationConnectors, and agent\u2192external heuristics.\n\n## How To Read\n\n- **Root canvas** follows the app flow: select a **role**, see role-specific **tabs**, use **agents**, and read/write **data sources**.\n- **Legend colors only mean three things**: users/roles, agents, and data sources.\n- **Every diagram** stays capped: at most four sibling groups and at most four nodes per group. Open module tiles for deeper detail."
-  },
-  {
-    "id": "cortex-ops-architecture-legend",
-    "label": "Cortex Ops \u2014 legend sandbox",
-    "description": "Copy of cortex-ops-architecture for experimenting with ReactFlow legends and semantic node colors."
+    "id": "transformers-fast",
+    "label": "Transformers Fast",
+    "description": ""
   }
 ]
