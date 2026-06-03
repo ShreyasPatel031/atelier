@@ -40,6 +40,25 @@
             gap: 15px;
         }
 
+        .atelier-brand {
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            text-decoration: none;
+            line-height: 0;
+        }
+
+        .atelier-brand img {
+            width: 28px;
+            height: 28px;
+            display: block;
+            border-radius: 4px;
+        }
+
+        .atelier-brand:hover img {
+            opacity: 0.85;
+        }
+
         .title {
             font-size: 18px;
             font-weight: 600;
@@ -121,16 +140,6 @@
         }
         .pane-resizer.is-dragging {
             background: #94a3b8;
-        }
-        
-        .zoom-controls {
-            display: flex;
-            gap: 8px;
-            padding: 12px 16px;
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-            align-items: center;
-            flex-shrink: 0;
         }
         
         .zoom-btn {
@@ -552,12 +561,11 @@
             flex-direction: column;
         }
 
-        body.viewer-no-chat .doc-pane,
-        body.viewer-no-chat .pane-resizer {
+        body.viewer-no-chat .atelier-chat-card {
             display: none !important;
         }
 
-        body.viewer-no-chat .diagram-pane {
+        body:not(.viewer-no-chat) .diagram-pane {
             flex: 1 1 100%;
             width: 100%;
             max-width: none;
@@ -992,6 +1000,12 @@
             color: #1e293b;
             font-weight: 600;
         }
+
+        .breadcrumb-trace {
+            color: #475569;
+            font-weight: 500;
+            padding: 2px 6px;
+        }
         
         .breadcrumb-separator {
             color: #cbd5e1;
@@ -1009,28 +1023,68 @@
             cursor: pointer !important;
         }
 
-        /* Chat in right pane - now fills entire right panel */
+        /** Floating architecture chat — bottom-right by default, draggable header */
+        .atelier-chat-card {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            width: min(380px, calc(100vw - 32px));
+            height: 360px;
+            max-height: min(420px, calc(100vh - 72px));
+            z-index: 2147481000;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.2);
+            overflow: hidden;
+            pointer-events: auto;
+        }
+        .atelier-chat-card-header {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .atelier-chat-card-header.is-dragging {
+            cursor: grabbing;
+        }
+        .atelier-chat-card-header-hint {
+            font-size: 11px;
+            font-weight: 500;
+            color: #94a3b8;
+        }
         .chat-section {
             margin-top: 0;
-            padding: 12px 16px;
-            padding-top: 12px;
+            padding: 10px 14px 12px;
             display: flex;
             flex-direction: column;
             flex: 1;
-            background: #ffffff;
-            height: 100%;
-            overflow: hidden;
             min-height: 0;
+            overflow: hidden;
+            background: #ffffff;
         }
         .chat-messages {
-            flex: 0 1 auto;
+            flex: 1;
+            min-height: 0;
             overflow-y: auto;
-            padding: 8px 0;
+            overflow-x: hidden;
+            padding: 6px 0;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            min-height: 0;
-            max-height: min(160px, 28vh);
+            overscroll-behavior: contain;
         }
         .chat-message {
             padding: 8px 12px;
@@ -1184,30 +1238,21 @@
                 border-right: none;
                 border-bottom: 1px solid #e2e8f0;
             }
-            .doc-pane {
-                flex: 0 0 auto;
-                width: 100% !important;
-                max-width: none !important;
-                max-height: min(220px, 36vh);
-                min-height: 0;
-                border-top: 1px solid #e2e8f0;
-            }
-            .doc-pane.open {
-                flex: 0 0 auto;
-                max-height: min(220px, 36vh);
-                min-height: 100px;
-            }
-            .chat-section {
-                padding: 10px 12px;
-            }
-            .chat-messages {
-                max-height: min(100px, 20vh);
+            .atelier-chat-card {
+                right: 8px;
+                bottom: 8px;
+                width: calc(100vw - 16px);
+                height: min(320px, 42vh);
+                max-height: calc(100vh - 64px);
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
+        <a class="atelier-brand" id="atelierBrandLink" href="./" title="Atelier">
+            <img src="./assets/atelier-logo.png" alt="Atelier" width="28" height="28" />
+        </a>
         <div class="title" id="moduleTitle">Loading...</div>
         <select class="repo-dropdown" id="repoDropdown" onchange="switchRepo(this.value)">
             <option value="">Switch Repo...</option>
@@ -1274,13 +1319,6 @@
                 <span class="breadcrumb-item">
                     <span class="breadcrumb-current" id="breadcrumbRoot">Loading...</span>
                 </span>
-            </div>
-            <div class="zoom-controls">
-                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
-                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
-                <span class="zoom-level" id="zoomLevel">100%</span>
-                <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
-                <button class="zoom-btn" onclick="fitToView()" title="Fit to View">⊡</button>
             </div>
             <div class="diagram-viewport" id="diagramViewport">
                 <div class="diagram-canvas" id="diagramCanvas" style="display: none">
@@ -1354,24 +1392,28 @@
                 </details>
             </div>
         </div>
-        <div class="pane-resizer" id="paneResizer" role="separator" aria-orientation="vertical" aria-label="Resize chat panel" tabindex="0" title="Drag to resize chat"></div>
-        <div class="doc-pane open">
-            <div class="chat-section">
-                <div id="atelierDiagramHelpActivity" class="atelier-diagram-help-activity" aria-live="polite" hidden></div>
-                <div class="chat-messages" id="chatMessages">
-                    <div class="chat-message assistant">Ask about this codebase's architecture. Select nodes, subgraphs, or edges on the diagram for context.</div>
+    </div>
+
+    <div id="atelierChatCard" class="atelier-chat-card" role="complementary" aria-label="Architecture chat">
+        <div class="atelier-chat-card-header" id="atelierChatCardDrag" title="Drag to move">
+            <span>Architecture chat</span>
+            <span class="atelier-chat-card-header-hint">drag</span>
+        </div>
+        <div class="chat-section">
+            <div id="atelierDiagramHelpActivity" class="atelier-diagram-help-activity" aria-live="polite" hidden></div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message assistant">Ask about this codebase's architecture. Select nodes, subgraphs, or edges on the diagram for context.</div>
+            </div>
+            <div id="atelierSdkTraceWrap" class="atelier-sdk-trace-wrap" hidden>
+                <div class="atelier-sdk-trace-head">
+                    SDK trace
+                    <span id="atelierSdkSseStatus"></span>
                 </div>
-                <div id="atelierSdkTraceWrap" class="atelier-sdk-trace-wrap" hidden>
-                    <div class="atelier-sdk-trace-head">
-                        SDK trace
-                        <span id="atelierSdkSseStatus"></span>
-                    </div>
-                    <pre id="atelierSdkTraceLog" class="atelier-sdk-trace-log"></pre>
-                </div>
-                <div class="chat-input-row">
-                    <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="1"></textarea>
-                    <button class="chat-send" id="chatSend">Send</button>
-                </div>
+                <pre id="atelierSdkTraceLog" class="atelier-sdk-trace-log"></pre>
+            </div>
+            <div class="chat-input-row">
+                <textarea class="chat-input" id="chatInput" placeholder="Ask about the architecture..." rows="1"></textarea>
+                <button class="chat-send" id="chatSend">Send</button>
             </div>
         </div>
     </div>
@@ -1409,6 +1451,8 @@
         const REPO_SWITCHER_ENABLED = viewerFlag('repoSwitcher', 'repoSwitcherEnabled', true);
         window.__atelierChatEnabled = CHAT_ENABLED;
         document.body.classList.toggle('viewer-no-chat', !CHAT_ENABLED);
+        const chatCardEl = document.getElementById('atelierChatCard');
+        if (chatCardEl) chatCardEl.hidden = !CHAT_ENABLED;
         document.body.classList.toggle('viewer-no-repo-switcher', !REPO_SWITCHER_ENABLED);
         if (urlParams.get('rfDebug') === '1') {
             window.atelierRfDebugLayout = true;
@@ -1484,12 +1528,8 @@
         
         function toggleDocPanel(forceOpen = null) {
             if (!CHAT_ENABLED) return;
-            // Panel is always open now (chat-only view)
-            // This function is kept for compatibility but does nothing
-            const panel = document.querySelector('.doc-pane');
-            if (panel) {
-                panel.classList.add('open');
-            }
+            const card = document.getElementById('atelierChatCard');
+            if (card) card.hidden = false;
         }
         
         function showTooltip(event, metadata) {
@@ -1963,7 +2003,7 @@
                 
                 // Update UI
                 document.title = REPO_TITLE;
-                document.getElementById('moduleTitle').textContent = `📚 ${REPO_TITLE}`;
+                syncHeaderTitle();
                 
                 // Try to extract repo URL from overview or hide link
                 const repoLinkEl = document.getElementById('repoLink');
@@ -2536,6 +2576,129 @@
             };
         }
 
+        function escapeHtmlText(s) {
+            return String(s ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function getRfNodeParentById() {
+            return window.atelierRfLastNodeParentById || {};
+        }
+
+        function getRfNodeMetaById() {
+            const getNodes = window.__atelierR6GetNodes;
+            if (typeof getNodes !== 'function') return null;
+            const nodes = getNodes();
+            const byId = new Map();
+            for (let i = 0; i < nodes.length; i++) {
+                const n = nodes[i];
+                if (n && n.id != null) byId.set(String(n.id), n);
+            }
+            return byId;
+        }
+
+        /** Root → leaf ancestor ids for a React Flow node (excludes the node itself). */
+        function buildRfAncestorChain(logicalId) {
+            if (!logicalId) return [];
+            const parentById = getRfNodeParentById();
+            const ancestors = [];
+            const guard = new Set();
+            let pid = parentById[String(logicalId)];
+            while (pid && !guard.has(pid)) {
+                guard.add(pid);
+                ancestors.unshift(String(pid));
+                pid = parentById[pid];
+            }
+            return ancestors;
+        }
+
+        function diagramSelForRfNodeId(id, byId, moduleId) {
+            const n = byId && byId.get(String(id));
+            const kind = n && n.type === 'group' ? 'cluster' : 'node';
+            let label = null;
+            if (n && n.data && n.data.label != null) label = String(n.data.label);
+            return normalizeDiagramSel({
+                kind,
+                logicalId: String(id),
+                label,
+                moduleId: moduleId != null ? moduleId : selectedModuleId
+            });
+        }
+
+        /** Include every parent group between root and the selected node/cluster. */
+        function expandSingleSelectionWithAncestors(sel) {
+            if (!sel || sel.kind === 'none' || sel.kind === 'edge' || !sel.logicalId) {
+                return sel ? [sel] : [];
+            }
+            if (activeDiagramTab !== 'reactflow') return [sel];
+            const ancestors = buildRfAncestorChain(sel.logicalId);
+            if (!ancestors.length) return [sel];
+            const byId = getRfNodeMetaById();
+            const moduleId = sel.moduleId != null ? sel.moduleId : selectedModuleId;
+            const out = [];
+            const seen = new Set();
+            for (let i = 0; i < ancestors.length; i++) {
+                const item = diagramSelForRfNodeId(ancestors[i], byId, moduleId);
+                const k = diagramSelectionKey(item);
+                if (!k || seen.has(k)) continue;
+                seen.add(k);
+                out.push(item);
+            }
+            const selfKey = diagramSelectionKey(sel);
+            if (selfKey && !seen.has(selfKey)) out.push(sel);
+            return out.length ? out : [sel];
+        }
+
+        function expandDiagramSelectionsWithAncestors(list) {
+            if (!list || !list.length) return [];
+            if (activeDiagramTab !== 'reactflow') return list.slice();
+            const out = [];
+            const seen = new Set();
+            for (let i = 0; i < list.length; i++) {
+                const sel = list[i];
+                if (!sel || sel.kind === 'none') continue;
+                if (sel.kind === 'edge') {
+                    const ek = diagramSelectionKey(sel);
+                    if (ek && !seen.has(ek)) {
+                        seen.add(ek);
+                        out.push(sel);
+                    }
+                    continue;
+                }
+                const chain = expandSingleSelectionWithAncestors(sel);
+                for (let j = 0; j < chain.length; j++) {
+                    const item = chain[j];
+                    const k = diagramSelectionKey(item);
+                    if (!k || seen.has(k)) continue;
+                    seen.add(k);
+                    out.push(item);
+                }
+            }
+            return out;
+        }
+
+        function buildPrimarySelectionTraceItems() {
+            if (!diagramSelections.length) return [];
+            const primary = diagramSelections[diagramSelections.length - 1];
+            if (!primary || primary.kind === 'none') return [];
+            if (primary.kind === 'edge') {
+                return [
+                    {
+                        id: primary.logicalId || 'edge',
+                        name: primary.label || `${primary.edge?.source || ''} → ${primary.edge?.target || ''}`
+                    }
+                ];
+            }
+            const chain = expandSingleSelectionWithAncestors(primary);
+            return chain.map((s) => ({
+                id: s.logicalId,
+                name: s.label || s.logicalId
+            }));
+        }
+
         function syncLegacyDiagramSelection() {
             if (!diagramSelections.length) {
                 diagramSelection = {
@@ -2566,6 +2729,7 @@
             const idx = diagramSelections.findIndex((s) => diagramSelectionKey(s) === k);
             if (idx >= 0) diagramSelections.splice(idx, 1);
             else diagramSelections.push(n);
+            diagramSelections = expandDiagramSelectionsWithAncestors(diagramSelections);
             syncLegacyDiagramSelection();
             selectedDiagramNodeId = diagramSelections.length
                 ? diagramSelections[diagramSelections.length - 1].logicalId
@@ -2574,6 +2738,7 @@
             if (diagramSelections.length) {
                 refreshDiagramSelectionLabelFromDom();
             }
+            updateBreadcrumb();
             schedulePushViewerStateToMcp();
         }
 
@@ -2583,6 +2748,7 @@
             syncLegacyDiagramSelection();
             selectedDiagramNodeId = null;
             applyDiagramSelectionHighlight();
+            updateBreadcrumb();
             schedulePushViewerStateToMcp();
         }
 
@@ -2886,7 +3052,7 @@
                 };
             }
             if (!ds.logicalId) return null;
-            return {
+            const payload = {
                 kind: ds.kind,
                 logical_id: ds.logicalId,
                 label: ds.label || null,
@@ -2894,6 +3060,17 @@
                 dom_ref: ds.domRef || null,
                 edge: ds.edge || null
             };
+            if (activeDiagramTab === 'reactflow') {
+                const chain = expandSingleSelectionWithAncestors(ds);
+                if (chain.length > 1) {
+                    payload.ancestor_path = chain.slice(0, -1).map((s) => ({
+                        kind: s.kind,
+                        logical_id: s.logicalId,
+                        label: s.label || null
+                    }));
+                }
+            }
+            return payload;
         }
 
         function buildDiagramChatPayload() {
@@ -3039,6 +3216,7 @@
                 syncLegacyDiagramSelection();
                 selectedDiagramNodeId = null;
                 applyDiagramSelectionHighlight();
+                updateBreadcrumb();
                 return;
             }
             const normalized = normalizeDiagramSel(sel);
@@ -3046,13 +3224,14 @@
                 toggleDiagramSelection(normalized);
                 return;
             }
-            diagramSelections = [normalized];
+            diagramSelections = expandDiagramSelectionsWithAncestors([normalized]);
             syncLegacyDiagramSelection();
             selectedDiagramNodeId = sel.logicalId;
             applyDiagramSelectionHighlight();
             if (!diagramSelections[diagramSelections.length - 1].label) {
                 refreshDiagramSelectionLabelFromDom();
                 }
+            updateBreadcrumb();
             } finally {
                 schedulePushViewerStateToMcp();
             }
@@ -3816,17 +3995,19 @@
                     })
                 );
             }
-            const nextKeys = diagramSelectionKeySet(mapped);
+            const expandedMapped = expandDiagramSelectionsWithAncestors(mapped);
+            const nextKeys = diagramSelectionKeySet(expandedMapped);
             const curKeys = diagramSelectionKeySet(diagramSelections);
             if (diagramSelectionKeySetsEqual(nextKeys, curKeys)) return;
 
-            diagramSelections = mapped;
+            diagramSelections = expandedMapped;
             syncLegacyDiagramSelection();
             selectedDiagramNodeId = mapped.length ? mapped[mapped.length - 1].logicalId : null;
             applyDiagramSelectionHighlight();
             if (diagramSelections.length) {
                 refreshDiagramSelectionLabelFromDom();
             }
+            updateBreadcrumb();
             schedulePushViewerStateToMcp();
         };
 
@@ -4525,6 +4706,11 @@
         // ============================================================
         // SELECTION & BREADCRUMB
         // ============================================================
+
+        function syncHeaderTitle() {
+            const el = document.getElementById('moduleTitle');
+            if (el) el.textContent = REPO_TITLE || 'Repository';
+        }
         
         function updateSelection(moduleId, nodeId = null) {
             selectedModuleId = moduleId;
@@ -4558,29 +4744,38 @@
             // Update documentation
             if (moduleId && moduleData[moduleId]) {
                 renderDocumentation(moduleData[moduleId].documentation);
-                document.getElementById('moduleTitle').textContent = moduleData[moduleId].name;
             }
         }
         
         function updateBreadcrumb() {
             const breadcrumbEl = document.getElementById('breadcrumb');
             if (!breadcrumbEl) return;
-            
+
+            const traceItems = buildPrimarySelectionTraceItems();
+
             let html = '';
             selectionPath.forEach((item, index) => {
                 if (index > 0) {
                     html += '<span class="breadcrumb-separator">›</span>';
                 }
-                
-                if (index === selectionPath.length - 1) {
-                    // Current item (not clickable)
-                    html += `<span class="breadcrumb-item"><span class="breadcrumb-current">${item.name}</span></span>`;
+
+                if (index === selectionPath.length - 1 && !traceItems.length) {
+                    html += `<span class="breadcrumb-item"><span class="breadcrumb-current">${escapeHtmlText(item.name)}</span></span>`;
                 } else {
-                    // Clickable parent
-                    html += `<span class="breadcrumb-item"><a class="breadcrumb-link" onclick="navigateToBreadcrumb('${item.id}')">${item.name}</a></span>`;
+                    html += `<span class="breadcrumb-item"><a class="breadcrumb-link" onclick="navigateToBreadcrumb('${item.id}')">${escapeHtmlText(item.name)}</a></span>`;
                 }
             });
-            
+
+            traceItems.forEach((item, index) => {
+                html += '<span class="breadcrumb-separator">›</span>';
+                const isLast = index === traceItems.length - 1;
+                if (isLast) {
+                    html += `<span class="breadcrumb-item"><span class="breadcrumb-current">${escapeHtmlText(item.name)}</span></span>`;
+                } else {
+                    html += `<span class="breadcrumb-item"><span class="breadcrumb-trace">${escapeHtmlText(item.name)}</span></span>`;
+                }
+            });
+
             breadcrumbEl.innerHTML = html;
         }
         
@@ -5678,9 +5873,8 @@
                 }
             }
             
-            // Update the title and documentation back to overview if no expansions remain
+            // Update the documentation back to overview if no expansions remain
             if (expandedNodes.size === 0) {
-                document.getElementById('moduleTitle').textContent = moduleData['overview']?.name || REPO_TITLE + ' Overview';
                 renderDocumentation(moduleData['overview']?.documentation || '');
             }
             
@@ -5733,8 +5927,6 @@
             
             baseDiagramCode = moduleData[moduleId].diagram;
             currentDiagramCode = baseDiagramCode;
-            
-            document.getElementById('moduleTitle').textContent = moduleData[moduleId].name;
 
             expandDiagramSelectionEpoch += 1;
             setDiagramSelection({ kind: 'none', moduleId });
@@ -5919,7 +6111,8 @@
         window.viewTune = viewTune;
         
         function updateZoomDisplay() {
-            document.getElementById('zoomLevel').textContent = Math.round(zoomScale * 100) + '%';
+            const el = document.getElementById('zoomLevel');
+            if (el) el.textContent = Math.round(zoomScale * 100) + '%';
         }
         
         function applyTransform() {
@@ -6514,9 +6707,114 @@
             }, { passive: true });
         }
         
-        const DOC_PANE_WIDTH_KEY = 'atelier_doc_pane_width_px';
-        
+        const CHAT_CARD_POS_KEY = 'atelier_chat_card_pos_v1';
+
+        function initChatCardDrag() {
+            const card = document.getElementById('atelierChatCard');
+            const handle = document.getElementById('atelierChatCardDrag');
+            if (!card || !handle || !CHAT_ENABLED) return;
+
+            function clampPos(left, top) {
+                const rect = card.getBoundingClientRect();
+                const w = rect.width || card.offsetWidth;
+                const h = rect.height || card.offsetHeight;
+                const maxL = Math.max(8, window.innerWidth - w - 8);
+                const maxT = Math.max(8, window.innerHeight - h - 8);
+                return {
+                    left: Math.max(8, Math.min(left, maxL)),
+                    top: Math.max(8, Math.min(top, maxT)),
+                };
+            }
+
+            function applySavedPos() {
+                try {
+                    const raw = localStorage.getItem(CHAT_CARD_POS_KEY);
+                    if (!raw) return;
+                    const p = JSON.parse(raw);
+                    if (typeof p.left !== 'number' || typeof p.top !== 'number') return;
+                    const c = clampPos(p.left, p.top);
+                    card.style.left = c.left + 'px';
+                    card.style.top = c.top + 'px';
+                    card.style.right = 'auto';
+                    card.style.bottom = 'auto';
+                } catch (_) {
+                    /* ignore */
+                }
+            }
+
+            function savePos() {
+                const rect = card.getBoundingClientRect();
+                try {
+                    localStorage.setItem(
+                        CHAT_CARD_POS_KEY,
+                        JSON.stringify({ left: Math.round(rect.left), top: Math.round(rect.top) })
+                    );
+                } catch (_) {
+                    /* ignore */
+                }
+            }
+
+            applySavedPos();
+
+            let dragging = false;
+            let startX = 0;
+            let startY = 0;
+            let startLeft = 0;
+            let startTop = 0;
+
+            function onMove(e) {
+                if (!dragging) return;
+                const cx = e.clientX != null ? e.clientX : 0;
+                const cy = e.clientY != null ? e.clientY : 0;
+                const c = clampPos(startLeft + (cx - startX), startTop + (cy - startY));
+                card.style.left = c.left + 'px';
+                card.style.top = c.top + 'px';
+                card.style.right = 'auto';
+                card.style.bottom = 'auto';
+            }
+
+            function onEnd() {
+                if (!dragging) return;
+                dragging = false;
+                handle.classList.remove('is-dragging');
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onEnd);
+                savePos();
+            }
+
+            handle.addEventListener('mousedown', function (e) {
+                if (e.button !== 0) return;
+                e.preventDefault();
+                const rect = card.getBoundingClientRect();
+                card.style.left = rect.left + 'px';
+                card.style.top = rect.top + 'px';
+                card.style.right = 'auto';
+                card.style.bottom = 'auto';
+                dragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                startLeft = rect.left;
+                startTop = rect.top;
+                handle.classList.add('is-dragging');
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onEnd);
+            });
+
+            window.addEventListener('resize', function () {
+                const rect = card.getBoundingClientRect();
+                const c = clampPos(rect.left, rect.top);
+                if (c.left !== rect.left || c.top !== rect.top) {
+                    card.style.left = c.left + 'px';
+                    card.style.top = c.top + 'px';
+                    card.style.right = 'auto';
+                    card.style.bottom = 'auto';
+                    savePos();
+                }
+            });
+        }
+
         function initPaneResizer() {
+            if (document.getElementById('atelierChatCard')) return;
             const container = document.querySelector('.container');
             const docPane = document.querySelector('.doc-pane');
             const resizer = document.getElementById('paneResizer');
@@ -6661,6 +6959,14 @@
         
         async function init() {
             AVAILABLE_REPOS = await fetchAvailableRepos();
+
+            const brandLink = document.getElementById('atelierBrandLink');
+            if (brandLink) {
+                brandLink.href =
+                    window.location.pathname +
+                    '?repo=' +
+                    encodeURIComponent(repoPath || defaultRepoPath);
+            }
             
             // When no ?repo= in URL, redirect to first repo so something always loads
             if (!urlParams.get('repo') && !viewerConfig.defaultRepo) {
@@ -6737,6 +7043,7 @@
         
         initZoomPan();
         initViewTuneSliders();
+        initChatCardDrag();
         initPaneResizer();
         
         // Start
@@ -6776,7 +7083,11 @@
                 const lid = p.logical_id || '';
                 const lbl = p.label ? ` — ${p.label}` : '';
                 const mid = p.module_id ? ` (module: ${p.module_id})` : '';
-                return `${i + 1}. [${kind}] ${lid}${lbl}${mid}`;
+                const trace =
+                    Array.isArray(p.ancestor_path) && p.ancestor_path.length
+                        ? ` ← ${p.ancestor_path.map((a) => a.label || a.logical_id).join(' › ')}`
+                        : '';
+                return `${i + 1}. [${kind}] ${lid}${lbl}${mid}${trace}`;
             });
             const header = repoLabel ? `Diagram selection (repo: ${repoLabel})` : 'Diagram selection';
             return `${header}\n${lines.join('\n')}\n\nStructured (JSON):\n${JSON.stringify(payloads, null, 2)}`;
