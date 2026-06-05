@@ -6,7 +6,8 @@
       "command": "npx",
       "args": ["-y", "@atelier-inc/atelier-mcp"],
       "env": {
-        "ATELIER_DATA_ORIGIN": "https://app.atelier-inc.net"
+        "ATELIER_DATA_ORIGIN": "http://127.0.0.1:9891",
+        "ATELIER_LOCAL_REPO_ROOT": "${workspaceFolder}/demo/repos"
       },
       "description": "Read architecture diagrams from Atelier — overview, modules, and drill-down views for any indexed repository"
     }

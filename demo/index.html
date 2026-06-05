@@ -1040,6 +1040,22 @@
             box-shadow: 0 16px 48px rgba(15, 23, 42, 0.2);
             overflow: hidden;
             pointer-events: auto;
+            transition: height 0.2s ease, max-height 0.2s ease, box-shadow 0.2s ease;
+        }
+        .atelier-chat-card.is-expanded {
+            height: min(560px, calc(100vh - 48px));
+            max-height: min(560px, calc(100vh - 48px));
+        }
+        .atelier-chat-card.is-minimized {
+            height: auto;
+            max-height: none;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+        }
+        .atelier-chat-card.is-minimized .chat-section {
+            display: none;
+        }
+        .atelier-chat-card.is-minimized .atelier-chat-card-header {
+            border-bottom: none;
         }
         .atelier-chat-card-header {
             flex-shrink: 0;
@@ -1047,7 +1063,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
-            padding: 10px 14px;
+            padding: 10px 10px 10px 14px;
             font-size: 13px;
             font-weight: 600;
             color: #334155;
@@ -1057,13 +1073,47 @@
             user-select: none;
             touch-action: none;
         }
+        .atelier-chat-card-title {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .atelier-chat-card-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        .atelier-chat-card-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            line-height: 1;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        .atelier-chat-card-btn:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        .atelier-chat-card-btn:active {
+            transform: scale(0.94);
+        }
         .atelier-chat-card-header.is-dragging {
             cursor: grabbing;
         }
         .atelier-chat-card-header-hint {
-            font-size: 11px;
-            font-weight: 500;
-            color: #94a3b8;
+            display: none;
         }
         .chat-section {
             margin-top: 0;
@@ -1245,6 +1295,10 @@
                 height: min(320px, 42vh);
                 max-height: calc(100vh - 64px);
             }
+            .atelier-chat-card.is-expanded {
+                height: min(480px, calc(100vh - 56px));
+                max-height: calc(100vh - 56px);
+            }
         }
     </style>
 </head>
@@ -1253,7 +1307,7 @@
         <a class="atelier-brand" id="atelierBrandLink" href="./" title="Atelier">
             <img src="./assets/atelier-logo.png" alt="Atelier" width="28" height="28" />
         </a>
-        <div class="title" id="moduleTitle">Loading...</div>
+        <div class="title" id="moduleTitle">Atelier</div>
         <select class="repo-dropdown" id="repoDropdown" onchange="switchRepo(this.value)">
             <option value="">Switch Repo...</option>
         </select>
@@ -1394,10 +1448,26 @@
         </div>
     </div>
 
-    <div id="atelierChatCard" class="atelier-chat-card" role="complementary" aria-label="Architecture chat">
+    <div id="atelierChatCard" class="atelier-chat-card" role="complementary" aria-label="Chat">
         <div class="atelier-chat-card-header" id="atelierChatCardDrag" title="Drag to move">
-            <span>Architecture chat</span>
-            <span class="atelier-chat-card-header-hint">drag</span>
+            <span class="atelier-chat-card-title">Chat</span>
+            <div class="atelier-chat-card-header-actions">
+                <button
+                    type="button"
+                    class="atelier-chat-card-btn"
+                    id="atelierChatExpandBtn"
+                    title="Expand chat"
+                    aria-label="Expand chat"
+                    aria-pressed="false"
+                >⤢</button>
+                <button
+                    type="button"
+                    class="atelier-chat-card-btn"
+                    id="atelierChatMinimizeBtn"
+                    title="Minimize chat"
+                    aria-label="Minimize chat"
+                >−</button>
+            </div>
         </div>
         <div class="chat-section">
             <div id="atelierDiagramHelpActivity" class="atelier-diagram-help-activity" aria-live="polite" hidden></div>
@@ -2002,7 +2072,7 @@
                 }
                 
                 // Update UI
-                document.title = REPO_TITLE;
+                document.title = REPO_TITLE ? `Atelier · ${REPO_TITLE}` : 'Atelier';
                 syncHeaderTitle();
                 
                 // Try to extract repo URL from overview or hide link
@@ -4709,7 +4779,7 @@
 
         function syncHeaderTitle() {
             const el = document.getElementById('moduleTitle');
-            if (el) el.textContent = REPO_TITLE || 'Repository';
+            if (el) el.textContent = 'Atelier';
         }
         
         function updateSelection(moduleId, nodeId = null) {
@@ -6708,11 +6778,71 @@
         }
         
         const CHAT_CARD_POS_KEY = 'atelier_chat_card_pos_v1';
+        const CHAT_CARD_STATE_KEY = 'atelier_chat_card_state_v1';
+
+        function loadChatCardState() {
+            try {
+                const raw = localStorage.getItem(CHAT_CARD_STATE_KEY);
+                if (!raw) return { minimized: false, expanded: false };
+                const p = JSON.parse(raw);
+                return {
+                    minimized: !!p.minimized,
+                    expanded: !!p.expanded && !p.minimized,
+                };
+            } catch (_) {
+                return { minimized: false, expanded: false };
+            }
+        }
+
+        function saveChatCardState(state) {
+            try {
+                localStorage.setItem(
+                    CHAT_CARD_STATE_KEY,
+                    JSON.stringify({
+                        minimized: !!state.minimized,
+                        expanded: !!state.expanded,
+                    })
+                );
+            } catch (_) {
+                /* ignore */
+            }
+        }
+
+        function applyChatCardState(card, state) {
+            if (!card) return;
+            card.classList.toggle('is-minimized', !!state.minimized);
+            card.classList.toggle('is-expanded', !!state.expanded && !state.minimized);
+            const expandBtn = document.getElementById('atelierChatExpandBtn');
+            const minBtn = document.getElementById('atelierChatMinimizeBtn');
+            if (expandBtn) {
+                expandBtn.hidden = !!state.minimized;
+                expandBtn.setAttribute('aria-pressed', state.expanded ? 'true' : 'false');
+                expandBtn.title = state.expanded ? 'Default size' : 'Expand chat';
+                expandBtn.setAttribute(
+                    'aria-label',
+                    state.expanded ? 'Default chat size' : 'Expand chat'
+                );
+                expandBtn.textContent = state.expanded ? '⤡' : '⤢';
+            }
+            if (minBtn) {
+                minBtn.textContent = state.minimized ? '+' : '−';
+                minBtn.title = state.minimized ? 'Restore chat' : 'Minimize chat';
+                minBtn.setAttribute(
+                    'aria-label',
+                    state.minimized ? 'Restore chat' : 'Minimize chat'
+                );
+            }
+        }
 
         function initChatCardDrag() {
             const card = document.getElementById('atelierChatCard');
             const handle = document.getElementById('atelierChatCardDrag');
+            const expandBtn = document.getElementById('atelierChatExpandBtn');
+            const minBtn = document.getElementById('atelierChatMinimizeBtn');
             if (!card || !handle || !CHAT_ENABLED) return;
+
+            let chatCardState = loadChatCardState();
+            applyChatCardState(card, chatCardState);
 
             function clampPos(left, top) {
                 const rect = card.getBoundingClientRect();
@@ -6756,6 +6886,49 @@
 
             applySavedPos();
 
+            function reclampCardPosition() {
+                const rect = card.getBoundingClientRect();
+                const c = clampPos(rect.left, rect.top);
+                if (c.left !== rect.left || c.top !== rect.top) {
+                    card.style.left = c.left + 'px';
+                    card.style.top = c.top + 'px';
+                    card.style.right = 'auto';
+                    card.style.bottom = 'auto';
+                    savePos();
+                }
+            }
+
+            if (expandBtn) {
+                expandBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    if (chatCardState.minimized) return;
+                    chatCardState.expanded = !chatCardState.expanded;
+                    saveChatCardState(chatCardState);
+                    applyChatCardState(card, chatCardState);
+                    requestAnimationFrame(reclampCardPosition);
+                });
+            }
+
+            if (minBtn) {
+                minBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    chatCardState.minimized = !chatCardState.minimized;
+                    if (chatCardState.minimized) chatCardState.expanded = false;
+                    saveChatCardState(chatCardState);
+                    applyChatCardState(card, chatCardState);
+                    requestAnimationFrame(reclampCardPosition);
+                });
+            }
+
+            handle.addEventListener('dblclick', function (e) {
+                if (e.target.closest('button')) return;
+                chatCardState.minimized = !chatCardState.minimized;
+                if (chatCardState.minimized) chatCardState.expanded = false;
+                saveChatCardState(chatCardState);
+                applyChatCardState(card, chatCardState);
+                requestAnimationFrame(reclampCardPosition);
+            });
+
             let dragging = false;
             let startX = 0;
             let startY = 0;
@@ -6784,6 +6957,7 @@
 
             handle.addEventListener('mousedown', function (e) {
                 if (e.button !== 0) return;
+                if (e.target.closest('button')) return;
                 e.preventDefault();
                 const rect = card.getBoundingClientRect();
                 card.style.left = rect.left + 'px';
@@ -6801,15 +6975,7 @@
             });
 
             window.addEventListener('resize', function () {
-                const rect = card.getBoundingClientRect();
-                const c = clampPos(rect.left, rect.top);
-                if (c.left !== rect.left || c.top !== rect.top) {
-                    card.style.left = c.left + 'px';
-                    card.style.top = c.top + 'px';
-                    card.style.right = 'auto';
-                    card.style.bottom = 'auto';
-                    savePos();
-                }
+                reclampCardPosition();
             });
         }
 
