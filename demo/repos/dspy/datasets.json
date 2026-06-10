@@ -1,104 +1,88 @@
 {
-  "title": "Dataset Management and Loading",
-  "summary": "This module provides utilities for loading, managing, and splitting various datasets, including specialized loaders for AlfWorld, GSM8K, and MATH. It supports data ingestion from Hugging Face, local files, Pandas DataFrames, and DSPy's Retrieval Module, converting them into DSPy Example objects for use in language model programs.",
+  "title": "DSPy Datasets Module",
+  "summary": "This module provides tools for loading, managing, and splitting datasets for DSPy programs. It includes utilities for importing data from various sources and specialized datasets like AlfWorld, GSM8K, and MATH.",
   "diagram": {
-    "direction": "TD",
+    "direction": "LR",
     "nodes": [
       {
         "id": "DataLoader",
-        "label": "Load & Prepare Datasets",
+        "label": "Load Data from Various Sources",
         "type": "component",
         "link": null,
-        "title": "DataLoader",
-        "description": "A utility class for loading datasets from various sources (Hugging Face, CSV, JSON, Parquet, Pandas, DSPy RM) and preparing them as dspy.Example objects. Includes methods for sampling and train-test splitting."
+        "title": "Data Loader",
+        "description": "Provides methods to load datasets from Hugging Face, CSV, JSON, Parquet, pandas DataFrames, and DSPy Retrieval Modules, converting them into DSPy Example objects."
       },
       {
-        "id": "BaseDataset",
-        "label": "Manage Dataset Splits",
+        "id": "Dataset",
+        "label": "Manage Dataset Splits & Sampling",
         "type": "component",
         "link": null,
-        "title": "Dataset Base Class",
-        "description": "The base class for dataset management, providing functionality to define train, dev, and test splits, handle shuffling, and convert raw data into dspy.Example objects with input keys."
+        "title": "Base Dataset Manager",
+        "description": "Base class for DSPy datasets, offering functionalities for shuffling, sampling, and splitting data into train, dev, and test sets based on configurable seeds and sizes."
       },
       {
-        "id": "AlfWorldLoader",
-        "label": "Load AlfWorld Data",
+        "id": "AlfWorld",
+        "label": "AlfWorld Environment Dataset",
         "type": "component",
         "link": null,
         "title": "AlfWorld Dataset",
-        "description": "Initializes and manages the AlfWorld dataset, creating train and dev splits from a pool of environment tasks. It uses worker processes to interact with the AlfWorld environment."
+        "description": "Manages the AlfWorld interactive environment dataset, providing access to training and development examples for agent interaction tasks."
       },
       {
-        "id": "EnvWorker",
-        "label": "Control AlfWorld Environment",
+        "id": "env_worker",
+        "label": "AlfWorld Environment Worker",
         "type": "component",
         "link": null,
-        "title": "AlfWorld Environment Worker",
-        "description": "A worker process responsible for creating and managing a single AlfredTWEnv instance, handling initialization and step commands for interacting with the AlfWorld environment."
+        "title": "AlfWorld Worker",
+        "description": "A worker process that manages a single AlfredTWEnv instance for AlfWorld, handling environment initialization and step actions."
       },
       {
-        "id": "GSM8KLoader",
-        "label": "Load GSM8K Data",
+        "id": "GSM8K",
+        "label": "GSM8K Math Word Problems",
         "type": "component",
         "link": null,
         "title": "GSM8K Dataset",
-        "description": "Loads the GSM8K mathematical reasoning dataset from Hugging Face, parses its structure, extracts questions, gold reasoning, and answers, and formats them into dspy.Example objects for train, dev, and test splits."
+        "description": "Loads and preprocesses the GSM8K dataset, extracting questions, gold reasoning, and answers into DSPy Example objects for mathematical reasoning tasks."
       },
       {
-        "id": "GSM8KMetric",
-        "label": "Evaluate GSM8K Answer",
-        "type": "component",
-        "link": null,
-        "title": "GSM8K Metric",
-        "description": "A metric function specifically designed for the GSM8K dataset, comparing the integer answer from a gold example with a predicted answer for exact match."
-      },
-      {
-        "id": "MATHLoader",
-        "label": "Load MATH Data",
+        "id": "MATH",
+        "label": "MATH Reasoning Dataset",
         "type": "component",
         "link": null,
         "title": "MATH Dataset",
-        "description": "Loads a specified subset of the MATH dataset from Hugging Face, extracts problems, solutions, and answers, and formats them into dspy.Example objects, creating train, dev, and test splits."
-      },
-      {
-        "id": "MATHMetric",
-        "label": "Evaluate MATH Answer",
-        "type": "component",
-        "link": null,
-        "title": "MATH Metric",
-        "description": "A metric function for the MATH dataset that uses the external `math_equivalence` library to compare the equivalence of gold and predicted mathematical answers."
+        "description": "Loads and preprocesses the MATH dataset for mathematical reasoning, extracting problems, solutions, and answers into DSPy Example objects."
       },
       {
         "id": "HuggingFaceDatasets",
-        "label": "Hugging Face Datasets",
+        "label": "Hugging Face Datasets Hub",
         "type": "external",
         "link": null,
-        "title": "Hugging Face Datasets Library",
-        "description": "An external library providing access to a vast collection of datasets, used by DataLoader, GSM8K, and MATH for data ingestion."
+        "title": "Hugging Face Datasets",
+        "description": "An external platform providing a vast collection of datasets, used as a source for `DataLoader`, `GSM8K`, and `MATH`."
       },
       {
         "id": "CSVFile",
-        "label": "CSV File",
+        "label": "CSV Data File",
         "type": "external",
         "link": null,
-        "title": "CSV Data Source",
-        "description": "Local CSV files serving as a data source for the DataLoader component."
+        "title": "CSV File",
+        "description": "An external CSV file used as a data source by the `DataLoader`."
       },
       {
         "id": "JSONFile",
-        "label": "JSON File",
+        "label": "JSON Data File",
         "type": "external",
         "link": null,
-        "title": "JSON Data Source",
-        "description": "Local JSON files serving as a data source for the DataLoader component."
+        "title": "JSON File",
+        "description": "An external JSON file used as a data source by the `DataLoader`."
       },
       {
         "id": "ParquetFile",
-        "label": "Parquet File",
+        "label": "Parquet Data File",
         "type": "external",
         "link": null,
-        "title": "Parquet Data Source",
-        "description": "Local Parquet files serving as a data source for the DataLoader component."
+        "title": "Parquet File",
+        "description": "An external Parquet file used as a data source by the `DataLoader`."
       },
       {
         "id": "PandasDataFrame",
@@ -106,220 +90,190 @@
         "type": "external",
         "link": null,
         "title": "Pandas DataFrame",
-        "description": "In-memory Pandas DataFrames serving as a data source for the DataLoader component."
+        "description": "An in-memory pandas DataFrame used as a data source by the `DataLoader`."
       },
       {
         "id": "DSPyRetrievalModule",
         "label": "DSPy Retrieval Module",
-        "type": "component",
-        "link": "retrievers",
+        "type": "external",
+        "link": "data_retrieval_and_evaluation/retrievers",
         "title": "DSPy Retrieval Module",
-        "description": "An external DSPy component responsible for retrieving information, which can also serve as a data source for the DataLoader."
+        "description": "An external DSPy Retrieval Module configured via `dspy.settings.rm`, used by `DataLoader` to fetch examples."
       },
       {
         "id": "DSPyExample",
         "label": "DSPy Example Object",
-        "type": "component",
-        "link": "base_modules_and_signatures",
+        "type": "external",
+        "link": "core_abstractions/data_types",
         "title": "DSPy Example",
-        "description": "The fundamental data structure in DSPy, representing a single input-output example, used across all dataset loaders."
-      },
-      {
-        "id": "AlfWorldEnvironment",
-        "label": "AlfWorld Environment",
-        "type": "external",
-        "link": null,
-        "title": "AlfWorld Environment",
-        "description": "The interactive text-based environment provided by the AlfWorld library, managed by the EnvWorker."
-      },
-      {
-        "id": "MathEquivalenceLibrary",
-        "label": "Math Equivalence Library",
-        "type": "external",
-        "link": null,
-        "title": "Math Equivalence Library",
-        "description": "An external Python library used by the MATHMetric for robust comparison of mathematical expressions."
+        "description": "The standard data structure in DSPy for representing individual data points, typically containing inputs and labels."
       }
     ],
     "edges": [
       {
+        "source": "HuggingFaceDatasets",
+        "target": "DataLoader",
+        "label": "loads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CSVFile",
+        "target": "DataLoader",
+        "label": "loads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JSONFile",
+        "target": "DataLoader",
+        "label": "loads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ParquetFile",
+        "target": "DataLoader",
+        "label": "loads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PandasDataFrame",
+        "target": "DataLoader",
+        "label": "loads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DSPyRetrievalModule",
+        "target": "DataLoader",
+        "label": "loads from",
+        "title": null,
+        "description": null
+      },
+      {
         "source": "DataLoader",
-        "target": "BaseDataset",
+        "target": "DSPyExample",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DataLoader",
+        "target": "Dataset",
         "label": "inherits from",
         "title": null,
         "description": null
       },
       {
-        "source": "DataLoader",
-        "target": "HuggingFaceDatasets",
-        "label": "loads from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "DataLoader",
-        "target": "CSVFile",
-        "label": "loads from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "DataLoader",
-        "target": "JSONFile",
-        "label": "loads from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "DataLoader",
-        "target": "ParquetFile",
-        "label": "loads from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "DataLoader",
-        "target": "PandasDataFrame",
-        "label": "loads from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "DataLoader",
-        "target": "DSPyRetrievalModule",
-        "label": "loads from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "DataLoader",
-        "target": "DSPyExample",
-        "label": "creates",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "BaseDataset",
-        "target": "DSPyExample",
-        "label": "creates",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "AlfWorldLoader",
-        "target": "EnvWorker",
+        "source": "AlfWorld",
+        "target": "env_worker",
         "label": "uses",
         "title": null,
         "description": null
       },
       {
-        "source": "AlfWorldLoader",
+        "source": "AlfWorld",
         "target": "DSPyExample",
-        "label": "creates",
+        "label": "produces",
         "title": null,
         "description": null
       },
       {
-        "source": "EnvWorker",
-        "target": "AlfWorldEnvironment",
-        "label": "manages",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "GSM8KLoader",
-        "target": "HuggingFaceDatasets",
+        "source": "HuggingFaceDatasets",
+        "target": "GSM8K",
         "label": "loads from",
         "title": null,
         "description": null
       },
       {
-        "source": "GSM8KLoader",
+        "source": "GSM8K",
         "target": "DSPyExample",
-        "label": "creates",
+        "label": "produces",
         "title": null,
         "description": null
       },
       {
-        "source": "GSM8KMetric",
-        "target": "GSM8KLoader",
-        "label": "evaluates data from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "MATHLoader",
-        "target": "HuggingFaceDatasets",
+        "source": "HuggingFaceDatasets",
+        "target": "MATH",
         "label": "loads from",
         "title": null,
         "description": null
       },
       {
-        "source": "MATHLoader",
+        "source": "MATH",
         "target": "DSPyExample",
-        "label": "creates",
+        "label": "produces",
         "title": null,
         "description": null
       },
       {
-        "source": "MATHMetric",
-        "target": "MATHLoader",
-        "label": "evaluates data from",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "MATHMetric",
-        "target": "MathEquivalenceLibrary",
-        "label": "uses",
+        "source": "Dataset",
+        "target": "DSPyExample",
+        "label": "manages splits of",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "DataIngestionManagement",
-        "label": "Data Ingestion & Management",
+        "id": "file_sources",
+        "label": "File-based Data Sources",
         "nodes": [
-          "DataLoader",
-          "BaseDataset"
+          "CSVFile",
+          "JSONFile",
+          "ParquetFile"
         ],
-        "title": "Core Data Handling",
-        "description": "Components responsible for loading, structuring, and splitting datasets from various sources into DSPy's Example format.",
-        "role": "surface"
-      },
-      {
-        "id": "SpecificDatasets",
-        "label": "Specific Dataset Implementations",
-        "nodes": [
-          "AlfWorldLoader",
-          "GSM8KLoader",
-          "MATHLoader"
-        ],
-        "title": "Specialized Dataset Loaders",
-        "description": "Classes tailored to load and preprocess specific benchmark datasets like AlfWorld, GSM8K, and MATH.",
+        "title": "File-based Data Sources",
+        "description": "External file formats from which data can be loaded into DSPy.",
         "role": "data"
       },
       {
-        "id": "EnvironmentInteraction",
-        "label": "Environment Interaction",
+        "id": "programmatic_sources",
+        "label": "Programmatic Data Sources",
         "nodes": [
-          "EnvWorker"
+          "HuggingFaceDatasets",
+          "PandasDataFrame",
+          "DSPyRetrievalModule"
         ],
-        "title": "AlfWorld Environment Control",
-        "description": "A dedicated worker process for managing and interacting with the external AlfWorld environment.",
+        "title": "Programmatic Data Sources",
+        "description": "External or in-memory data sources accessed programmatically by DSPy components.",
+        "role": "data"
+      },
+      {
+        "id": "dataset_loaders",
+        "label": "Dataset Loaders",
+        "nodes": [
+          "DataLoader",
+          "AlfWorld",
+          "GSM8K",
+          "MATH"
+        ],
+        "title": "Dataset Loaders",
+        "description": "Components responsible for loading and initial processing of various datasets into DSPy's internal format.",
         "role": "generative"
       },
       {
-        "id": "DatasetEvaluation",
-        "label": "Dataset Evaluation Metrics",
+        "id": "dataset_management",
+        "label": "Dataset Management & Utilities",
         "nodes": [
-          "GSM8KMetric",
-          "MATHMetric"
+          "Dataset",
+          "env_worker"
         ],
-        "title": "Metrics for Dataset Evaluation",
-        "description": "Functions providing specific evaluation metrics for the GSM8K and MATH datasets.",
-        "role": "analytical"
+        "title": "Dataset Management & Utilities",
+        "description": "Core components for managing dataset properties, splits, and specific environment interactions.",
+        "role": "surface"
+      },
+      {
+        "id": "dspy_data_structure",
+        "label": "DSPy Data Structure",
+        "nodes": [
+          "DSPyExample"
+        ],
+        "title": "DSPy Data Structure",
+        "description": "The fundamental data unit used across DSPy programs for representing individual data points.",
+        "role": "data"
       }
     ]
   }

@@ -1,0 +1,173 @@
+{
+  "title": "GGUF File Format Management",
+  "summary": "This module provides core functionalities for managing GGUF (GGML Universal Format) files, including reading and writing metadata, defining and manipulating tensor information, and persisting the data to disk.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "set_kv",
+        "label": "Copy Key-Value Metadata",
+        "type": "component",
+        "link": null,
+        "title": "Copy Key-Value Metadata",
+        "description": "Iterates through key-value pairs from a source GGUF context and sets them in a target context, handling various scalar and array types."
+      },
+      {
+        "id": "get_scalar_kv",
+        "label": "Retrieve Scalar Key-Value",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Scalar Key-Value",
+        "description": "Provides functions to retrieve single scalar values (uint8, int8, uint16, int16, uint32, int32, float32, uint64, int64, float64, bool) by key ID from the GGUF context."
+      },
+      {
+        "id": "get_meta_size",
+        "label": "Calculate Metadata Size",
+        "type": "component",
+        "link": null,
+        "title": "Calculate Metadata Size",
+        "description": "Determines the total byte size required to serialize the metadata section of a GGUF context."
+      },
+      {
+        "id": "get_meta_data",
+        "label": "Extract Metadata Bytes",
+        "type": "component",
+        "link": null,
+        "title": "Extract Metadata Bytes",
+        "description": "Serializes and retrieves the raw byte data representing the metadata section of a GGUF context."
+      },
+      {
+        "id": "write_to_file",
+        "label": "Save GGUF to File",
+        "type": "component",
+        "link": null,
+        "title": "Save GGUF to File",
+        "description": "Writes the entire GGUF context, including metadata and optionally tensor data, to a specified file path."
+      },
+      {
+        "id": "add_tensor",
+        "label": "Define New Tensor",
+        "type": "component",
+        "link": null,
+        "title": "Define New Tensor",
+        "description": "Adds the structural metadata (name, dimensions, offset) for a new tensor to the GGUF context, ensuring unique names."
+      },
+      {
+        "id": "set_tensor_type",
+        "label": "Update Tensor Data Type",
+        "type": "component",
+        "link": null,
+        "title": "Update Tensor Data Type",
+        "description": "Modifies the data type of an existing tensor, recalculating byte offsets for subsequent tensors to maintain file integrity."
+      },
+      {
+        "id": "set_tensor_data",
+        "label": "Link Tensor Raw Data",
+        "type": "component",
+        "link": null,
+        "title": "Link Tensor Raw Data",
+        "description": "Assigns a pointer to the raw data buffer for a previously defined tensor within the GGUF context, preparing it for serialization."
+      },
+      {
+        "id": "gguf_write_to_buf",
+        "label": "Serialize to Buffer",
+        "type": "external",
+        "link": null,
+        "title": "GGUF Buffer Serialization",
+        "description": "An internal utility function used to serialize GGUF context data (or just metadata) into a byte buffer for size calculation or data extraction."
+      },
+      {
+        "id": "gguf_writer_file",
+        "label": "GGUF File Writer",
+        "type": "external",
+        "link": null,
+        "title": "GGUF File Stream Writer",
+        "description": "An internal helper class that provides an interface for writing GGUF data to a file stream, abstracting file I/O details."
+      },
+      {
+        "id": "gguf_write_out",
+        "label": "GGUF Serialization Core",
+        "type": "external",
+        "link": null,
+        "title": "GGUF Data Serialization Logic",
+        "description": "The central logic responsible for serializing the GGUF context's metadata and tensor information to a given writer interface, used for file or buffer output."
+      }
+    ],
+    "edges": [
+      {
+        "source": "get_meta_size",
+        "target": "gguf_write_to_buf",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_meta_data",
+        "target": "gguf_write_to_buf",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "write_to_file",
+        "target": "gguf_writer_file",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "write_to_file",
+        "target": "gguf_write_out",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "metadata_read_ops",
+        "label": "Metadata Read Operations",
+        "nodes": [
+          "get_scalar_kv",
+          "get_meta_size",
+          "get_meta_data"
+        ],
+        "title": "Metadata Read Operations",
+        "description": "Functions for retrieving metadata values and properties from a GGUF context.",
+        "role": "analytical"
+      },
+      {
+        "id": "metadata_write_ops",
+        "label": "Metadata Write Operations",
+        "nodes": [
+          "set_kv"
+        ],
+        "title": "Metadata Write Operations",
+        "description": "Functionality for copying and setting key-value metadata within GGUF contexts.",
+        "role": "generative"
+      },
+      {
+        "id": "tensor_management",
+        "label": "Tensor Management",
+        "nodes": [
+          "add_tensor",
+          "set_tensor_type",
+          "set_tensor_data"
+        ],
+        "title": "Tensor Definition and Data Management",
+        "description": "Components responsible for defining tensor structures, updating their types, and linking them to actual data buffers.",
+        "role": "data"
+      },
+      {
+        "id": "file_persistence",
+        "label": "File Persistence",
+        "nodes": [
+          "write_to_file"
+        ],
+        "title": "GGUF File Persistence",
+        "description": "Handles the serialization and writing of the complete GGUF context to a file on disk.",
+        "role": "surface"
+      }
+    ]
+  }
+}

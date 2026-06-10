@@ -1,150 +1,175 @@
 {
-    "title": "crewai",
-    "summary": "CrewAI is a framework for building, orchestrating, and managing autonomous AI agent teams. It enables developers to define agents with specific roles, goals, and tools, allowing them to collaborate on complex tasks. The system provides robust integrations with various Large Language Models and external tools, alongside features for project management, deployment, and advanced inter-agent communication.",
+    "title": "CrewAI",
+    "summary": "CrewAI is a framework for building, orchestrating, and managing autonomous AI agent teams. It empowers developers to define collaborative agents, assign them tasks, and integrate diverse tools and knowledge sources to solve complex problems. The framework provides robust capabilities for workflow automation, LLM integration, state management, and seamless deployment of intelligent systems.",
     "diagram": {
         "direction": "LR",
         "nodes": [
             {
-                "id": "user",
-                "label": "Developer / User",
+                "id": "user_developer",
+                "label": "Developer / AI Engineer",
                 "type": "external",
                 "link": null,
-                "title": "Developer / User",
-                "description": "The human user who interacts with the CrewAI system to define, run, and manage AI agent teams and their workflows."
+                "title": "Human User",
+                "description": "Designs, builds, runs, and manages AI agent systems using CrewAI, interacting with the framework and its tools."
             },
             {
-                "id": "cli_dev_tools",
-                "label": "CLI & Developer Tools",
-                "type": "module",
-                "link": "cli_and_dev_tools",
-                "title": "CLI & Developer Tools",
-                "description": "Provides command-line interface and utilities for project setup, execution, deployment, and development tasks, streamlining the management of CrewAI projects."
-            },
-            {
-                "id": "core_ai_orchestration",
-                "label": "Core AI Orchestration",
+                "id": "core_framework_module",
+                "label": "Core Agent Framework",
                 "type": "module",
                 "link": "core_framework",
-                "title": "Core AI Orchestration",
-                "description": "The central engine for defining agents, tasks, and crews, managing their collaboration, and executing complex AI workflows. It integrates LLMs and handles task execution."
+                "title": "CrewAI Core Framework",
+                "description": "Defines the foundational architecture for creating, orchestrating, and managing intelligent agents and their collaborative workflows, including tasks and state management."
             },
             {
-                "id": "agent_capabilities",
-                "label": "Agent Tools & Integrations",
+                "id": "agent_tools_rag_module",
+                "label": "Agent Tools & RAG",
                 "type": "module",
-                "link": "agent_tools_and_integrations",
-                "title": "Agent Tools & Integrations",
-                "description": "A comprehensive suite of tools that equip agents with abilities like web search, data scraping, RAG, and specialized API interactions, extending their capabilities to interact with the external world."
+                "link": "agent_tools_and_rag",
+                "title": "Agent Tools & Knowledge",
+                "description": "Provides agents with diverse external tools and Retrieval-Augmented Generation (RAG) capabilities for accessing, processing, and utilizing information from various sources."
             },
             {
-                "id": "data_rag_management",
-                "label": "Data & RAG Management",
+                "id": "cli_dev_tools_module",
+                "label": "CLI & Dev Tools",
                 "type": "module",
-                "link": "data_and_rag_management",
-                "title": "Data & RAG Management",
-                "description": "Manages data ingestion, processing, caching, and Retrieval Augmented Generation (RAG) workflows, including vector store integrations, to provide agents with relevant knowledge."
+                "link": "cli_and_developer_tools",
+                "title": "CLI & Developer Utilities",
+                "description": "Offers command-line interfaces and developer tools for project scaffolding, running, testing, deploying, and managing CrewAI projects throughout their lifecycle."
             },
             {
-                "id": "a2a_enterprise",
-                "label": "A2A & Enterprise Features",
+                "id": "a2a_comm_module",
+                "label": "Agent-to-Agent Communication",
                 "type": "module",
-                "link": "a2a_and_enterprise",
-                "title": "A2A & Enterprise Features",
-                "description": "Enables secure Agent-to-Agent communication, advanced authentication, and enterprise-grade features like evaluation and security controls for robust, scalable deployments."
+                "link": "agent_to_agent_communication",
+                "title": "Inter-Agent Collaboration",
+                "description": "Enables secure and structured delegation of tasks and information exchange between different AI agents, facilitating complex collaborative workflows."
+            },
+            {
+                "id": "external_llms",
+                "label": "External LLM Providers",
+                "type": "external",
+                "link": null,
+                "title": "Large Language Models",
+                "description": "Third-party AI models (e.g., OpenAI, Anthropic, Gemini) that power agent reasoning, generation, and understanding capabilities within CrewAI."
+            },
+            {
+                "id": "external_data",
+                "label": "External Data Sources",
+                "type": "external",
+                "link": null,
+                "title": "Information Repositories",
+                "description": "Databases, APIs, documents, and web content that agents can access and process using integrated tools and Retrieval-Augmented Generation (RAG)."
+            },
+            {
+                "id": "deployment_platform",
+                "label": "Deployment Platform",
+                "type": "external",
+                "link": null,
+                "title": "CrewAI Deployment Environment",
+                "description": "The environment or service where CrewAI projects are deployed, managed, and executed in production, often providing scaling and monitoring."
             }
         ],
         "edges": [
             {
-                "source": "user",
-                "target": "cli_dev_tools",
-                "label": "Manages projects via",
+                "source": "user_developer",
+                "target": "core_framework_module",
+                "label": "defines agents & tasks",
                 "title": null,
                 "description": null
             },
             {
-                "source": "cli_dev_tools",
-                "target": "core_ai_orchestration",
-                "label": "Executes / Deploys crews to",
+                "source": "user_developer",
+                "target": "cli_dev_tools_module",
+                "label": "manages projects & runs",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_ai_orchestration",
-                "target": "agent_capabilities",
-                "label": "Utilizes tools from",
+                "source": "core_framework_module",
+                "target": "agent_tools_rag_module",
+                "label": "equips agents with tools & RAG",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_ai_orchestration",
-                "target": "data_rag_management",
-                "label": "Accesses knowledge from",
+                "source": "core_framework_module",
+                "target": "a2a_comm_module",
+                "label": "enables agent delegation",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_ai_orchestration",
-                "target": "a2a_enterprise",
-                "label": "Leverages advanced features from",
+                "source": "core_framework_module",
+                "target": "external_llms",
+                "label": "powers agent intelligence",
                 "title": null,
                 "description": null
             },
             {
-                "source": "agent_capabilities",
-                "target": "data_rag_management",
-                "label": "Processes / Stores data in",
+                "source": "agent_tools_rag_module",
+                "target": "external_data",
+                "label": "accesses external knowledge",
                 "title": null,
                 "description": null
             },
             {
-                "source": "a2a_enterprise",
-                "target": "core_ai_orchestration",
-                "label": "Extends core agent behavior",
+                "source": "cli_dev_tools_module",
+                "target": "core_framework_module",
+                "label": "executes crews defined in",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cli_dev_tools_module",
+                "target": "deployment_platform",
+                "label": "deploys projects to",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "user_interface_group",
-                "label": "User Interface & Project Management",
+                "id": "user_interface",
+                "label": "User & Development Interface",
                 "nodes": [
-                    "user",
-                    "cli_dev_tools"
+                    "user_developer"
                 ],
-                "title": "User Interface & Project Management",
-                "description": "This group encompasses how users interact with the CrewAI system, including command-line tools for project setup, execution, deployment, and general development workflows.",
+                "title": "User & Dev Interface",
+                "description": "The human actor interacting with the CrewAI system for development, configuration, and management of AI agent solutions.",
                 "role": null
             },
             {
-                "id": "core_system_group",
-                "label": "Core AI System",
+                "id": "crewai_core_system",
+                "label": "CrewAI Core System",
                 "nodes": [
-                    "core_ai_orchestration"
+                    "core_framework_module",
+                    "agent_tools_rag_module",
+                    "a2a_comm_module"
                 ],
-                "title": "Core AI System",
-                "description": "The foundational layer of CrewAI, responsible for defining, orchestrating, and managing the collaborative execution of AI agents and their complex workflows.",
+                "title": "CrewAI Core System",
+                "description": "The central components for defining agents, orchestrating workflows, providing tools, and enabling secure inter-agent communication within the framework.",
                 "role": null
             },
             {
-                "id": "agent_resources_group",
-                "label": "Agent Intelligence & Resources",
+                "id": "dev_ops_management",
+                "label": "Development & Operations",
                 "nodes": [
-                    "agent_capabilities",
-                    "data_rag_management"
+                    "cli_dev_tools_module"
                 ],
-                "title": "Agent Intelligence & Resources",
-                "description": "Provides agents with the necessary tools and knowledge to perform their tasks, including external integrations for data acquisition, web interaction, and Retrieval Augmented Generation (RAG).",
+                "title": "Dev & Ops Management",
+                "description": "Tools and utilities for building, testing, deploying, and managing CrewAI projects throughout their development and operational lifecycle.",
                 "role": null
             },
             {
-                "id": "advanced_capabilities_group",
-                "label": "Advanced System Capabilities",
+                "id": "external_integrations",
+                "label": "External Integrations",
                 "nodes": [
-                    "a2a_enterprise"
+                    "external_llms",
+                    "external_data",
+                    "deployment_platform"
                 ],
-                "title": "Advanced System Capabilities",
-                "description": "Offers features for secure, scalable, and production-ready AI systems, including Agent-to-Agent communication, robust authentication, and tools for enterprise integration and AI model evaluation.",
+                "title": "External Systems & Services",
+                "description": "Third-party services and data sources that CrewAI interacts with to power its agents, retrieve information, and deploy solutions.",
                 "role": null
             }
         ]

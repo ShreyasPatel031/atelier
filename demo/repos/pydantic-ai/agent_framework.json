@@ -1,0 +1,261 @@
+{
+  "title": "Agent Framework Core",
+  "summary": "This module defines the foundational components for building and running AI agents, including their abstract interface, configuration, and the graph-based execution flow for processing user prompts and tool calls.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "AbstractAgent",
+        "label": "Define Agent Interface",
+        "type": "component",
+        "link": null,
+        "title": "AbstractAgent",
+        "description": "Abstract base class defining the core interface and common methods for all agents, including running, streaming, and configuration overrides."
+      },
+      {
+        "id": "WrapperAgent",
+        "label": "Wrap Another Agent",
+        "type": "component",
+        "link": null,
+        "title": "WrapperAgent",
+        "description": "An agent implementation that delegates all its functionality to an underlying wrapped AbstractAgent, useful for extending or modifying agent behavior."
+      },
+      {
+        "id": "UserPromptNode",
+        "label": "Process User Input & Instructions",
+        "type": "component",
+        "link": null,
+        "title": "UserPromptNode",
+        "description": "Manages the initial user prompt, instructions, and system prompts, preparing messages for the model or handling deferred tool results."
+      },
+      {
+        "id": "_call_tool",
+        "label": "Execute Agent Tool",
+        "type": "component",
+        "link": null,
+        "title": "_call_tool",
+        "description": "Executes a specific tool call, processing its arguments and handling various result types, including retries and denials."
+      },
+      {
+        "id": "handle_call_or_result",
+        "label": "Process Tool Call Outcome",
+        "type": "component",
+        "link": null,
+        "title": "handle_call_or_result",
+        "description": "Handles the asynchronous result of a tool call, capturing successful returns, deferred calls, or approval requirements."
+      },
+      {
+        "id": "capture_run_messages",
+        "label": "Manage Run Message History",
+        "type": "component",
+        "link": null,
+        "title": "capture_run_messages",
+        "description": "Provides a context manager to access and manage the message history exchanged during an agent's run, useful for debugging and error handling."
+      },
+      {
+        "id": "_instantiate_cap",
+        "label": "Instantiate Agent Capability",
+        "type": "component",
+        "link": null,
+        "title": "_instantiate_cap",
+        "description": "Validates and instantiates an agent capability class from provided arguments and keyword arguments."
+      },
+      {
+        "id": "AgentSpec",
+        "label": "Define Agent Configuration",
+        "type": "component",
+        "link": null,
+        "title": "AgentSpec",
+        "description": "Pydantic model for defining an agent's configuration from external sources like YAML or JSON, including model, instructions, and capabilities."
+      },
+      {
+        "id": "_save_schema",
+        "label": "Save Agent Spec Schema",
+        "type": "component",
+        "link": null,
+        "title": "_save_schema",
+        "description": "Saves the JSON schema for an AgentSpec to a file, including details about custom capability types."
+      },
+      {
+        "id": "_get_schema_target",
+        "label": "Resolve Capability Schema Target",
+        "type": "component",
+        "link": null,
+        "title": "_get_schema_target",
+        "description": "Determines the appropriate method (__init__ or from_spec) to use for resolving type hints when building schemas for capabilities."
+      },
+      {
+        "id": "ModelAbstraction",
+        "label": "LLM Model Abstraction",
+        "type": "external",
+        "link": "model_abstraction",
+        "title": "Model Abstraction",
+        "description": "Provides an abstract interface for interacting with various Large Language Models."
+      },
+      {
+        "id": "CapabilitiesAndTools",
+        "label": "Agent Capabilities & Tools",
+        "type": "external",
+        "link": "capabilities_and_tools",
+        "title": "Capabilities & Tools",
+        "description": "Defines the framework for agent capabilities, tool management, and tool execution."
+      },
+      {
+        "id": "CoreUtilities",
+        "label": "Core Utility Functions",
+        "type": "external",
+        "link": "core_utilities",
+        "title": "Core Utilities",
+        "description": "Contains general utility functions like event loop management and context handling."
+      }
+    ],
+    "edges": [
+      {
+        "source": "AbstractAgent",
+        "target": "UserPromptNode",
+        "label": "initiates run with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractAgent",
+        "target": "capture_run_messages",
+        "label": "manages history via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractAgent",
+        "target": "ModelAbstraction",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractAgent",
+        "target": "CapabilitiesAndTools",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AbstractAgent",
+        "target": "CoreUtilities",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "WrapperAgent",
+        "target": "AbstractAgent",
+        "label": "wraps and delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UserPromptNode",
+        "target": "_call_tool",
+        "label": "can trigger",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UserPromptNode",
+        "target": "CoreUtilities",
+        "label": "uses RunContext from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_call_tool",
+        "target": "handle_call_or_result",
+        "label": "produces results for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_call_tool",
+        "target": "CapabilitiesAndTools",
+        "label": "uses ToolManager from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_instantiate_cap",
+        "target": "CapabilitiesAndTools",
+        "label": "instantiates AbstractCapability from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AgentSpec",
+        "target": "_save_schema",
+        "label": "saves schema via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AgentSpec",
+        "target": "_get_schema_target",
+        "label": "uses for schema generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AgentSpec",
+        "target": "CapabilitiesAndTools",
+        "label": "defines CapabilitySpec from",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "AgentCore",
+        "label": "Agent Core",
+        "nodes": [
+          "AbstractAgent",
+          "WrapperAgent"
+        ],
+        "title": "Agent Core Components",
+        "description": "Fundamental classes that define what an AI agent is and how it can be extended or wrapped.",
+        "role": "surface"
+      },
+      {
+        "id": "AgentGraphProcessing",
+        "label": "Agent Graph Processing",
+        "nodes": [
+          "UserPromptNode",
+          "_call_tool",
+          "handle_call_or_result"
+        ],
+        "title": "Agent Graph Execution Flow",
+        "description": "Components responsible for processing user input, managing the agent's conversational flow, and executing tools within the agent's operational graph.",
+        "role": "generative"
+      },
+      {
+        "id": "AgentConfiguration",
+        "label": "Agent Configuration",
+        "nodes": [
+          "AgentSpec",
+          "_save_schema",
+          "_get_schema_target"
+        ],
+        "title": "Agent Specification and Schema",
+        "description": "Components related to defining, loading, and validating agent configurations from structured formats.",
+        "role": "data"
+      },
+      {
+        "id": "InternalUtilities",
+        "label": "Internal Utilities",
+        "nodes": [
+          "capture_run_messages",
+          "_instantiate_cap"
+        ],
+        "title": "Internal Helper Functions",
+        "description": "Helper functions that support various aspects of agent operation, such as message history management and capability instantiation.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

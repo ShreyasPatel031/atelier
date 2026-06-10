@@ -1,0 +1,56 @@
+{
+    "title": "Documentation and Dev Ops",
+    "summary": "This module provides tools and processes for generating documentation, managing development operations, and ensuring code quality and consistency. It includes sub-modules for documentation generation and CLI/utility scripts.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "doc_gen",
+                "label": "Documentation Generation",
+                "type": "module",
+                "link": "documentation_generation",
+                "title": "Documentation Generation Sub-module",
+                "description": "Handles the creation, processing, and publishing of project documentation. This includes dynamic content, code snippet integration, and search indexing preparation."
+            },
+            {
+                "id": "cli_scripts",
+                "label": "CLI & Utility Scripts",
+                "type": "module",
+                "link": "cli_and_utility_scripts",
+                "title": "CLI & Utility Scripts Sub-module",
+                "description": "Provides command-line tools and various utility scripts for testing, maintenance, and cloud integration verification within the AI framework."
+            }
+        ],
+        "edges": [
+            {
+                "source": "cli_scripts",
+                "target": "doc_gen",
+                "label": "validates/updates docs",
+                "title": "CLI Validates/Updates Documentation",
+                "description": "Utility scripts, such as `update_readme`, interact with and validate aspects of the generated documentation, ensuring consistency."
+            }
+        ],
+        "groups": [
+            {
+                "id": "doc_pipeline",
+                "label": "Documentation Pipeline",
+                "nodes": [
+                    "doc_gen"
+                ],
+                "title": "Documentation Build & Content",
+                "description": "Manages the entire lifecycle of documentation content, from raw source files to the final published site, incorporating dynamic elements.",
+                "role": null
+            },
+            {
+                "id": "dev_ops_utilities",
+                "label": "DevOps Utilities",
+                "nodes": [
+                    "cli_scripts"
+                ],
+                "title": "Development & Operations Tools",
+                "description": "Collection of scripts and CLI tools supporting development, testing, and operational tasks, including cloud integration and code quality checks.",
+                "role": null
+            }
+        ]
+    }
+}

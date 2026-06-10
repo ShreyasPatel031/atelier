@@ -1,0 +1,799 @@
+{
+  "title": "Core Utilities and Configuration",
+  "summary": "This module provides a collection of core utilities for various functionalities like console output, experimental evaluation, hook management, knowledge source handling, project annotations, security configuration, telemetry, streaming, and task output storage. It centralizes common helper functions and configuration patterns used across the CrewAI framework.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "printer",
+        "label": "Printer",
+        "type": "component",
+        "link": null,
+        "title": "Console Output Handler",
+        "description": "Handles formatted console output, including colored text, while respecting suppression contexts."
+      },
+      {
+        "id": "shim_finder",
+        "label": "_ShimFinder",
+        "type": "component",
+        "link": null,
+        "title": "CLI Import Shim",
+        "description": "Maps 'crewai.cli' imports to 'crewai_cli' to ensure proper module resolution and compatibility."
+      },
+      {
+        "id": "base_evaluator",
+        "label": "BaseEvaluator",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Evaluation Base",
+        "description": "Provides an abstract base class for defining and implementing experimental evaluation metrics for agents and tasks."
+      },
+      {
+        "id": "run_experiment",
+        "label": "Run Experiment",
+        "type": "component",
+        "link": null,
+        "title": "Experiment Execution",
+        "description": "Executes a defined experiment using a dataset, crew, and agents, returning detailed results."
+      },
+      {
+        "id": "assert_experiment_successfully",
+        "label": "Assert Experiment Success",
+        "type": "component",
+        "link": null,
+        "title": "Experiment Result Validation",
+        "description": "Validates experiment results against a baseline, raising an assertion error if regressions or failures are detected."
+      },
+      {
+        "id": "clear_all_global_hooks",
+        "label": "Clear All Global Hooks",
+        "type": "component",
+        "link": null,
+        "title": "Global Hook Reset",
+        "description": "Clears all globally registered LLM and tool call hooks, useful for testing or resetting application state."
+      },
+      {
+        "id": "decorator_factory",
+        "label": "Hook Decorator Factory",
+        "type": "component",
+        "link": null,
+        "title": "Decorator Generator for Hooks",
+        "description": "A factory function that generates decorators for creating and registering various types of hooks, with optional filtering by agents or tools."
+      },
+      {
+        "id": "before_llm_call",
+        "label": "Before LLM Call Hook",
+        "type": "component",
+        "link": null,
+        "title": "Pre-LLM Call Decorator",
+        "description": "Decorator to register a function that executes before an LLM call, allowing for pre-processing or logging."
+      },
+      {
+        "id": "after_llm_call",
+        "label": "After LLM Call Hook",
+        "type": "component",
+        "link": null,
+        "title": "Post-LLM Call Decorator",
+        "description": "Decorator to register a function that executes after an LLM call, enabling post-processing or response modification."
+      },
+      {
+        "id": "before_tool_call",
+        "label": "Before Tool Call Hook",
+        "type": "component",
+        "link": null,
+        "title": "Pre-Tool Call Decorator",
+        "description": "Decorator to register a function that executes before a tool call, useful for validation or human approval."
+      },
+      {
+        "id": "after_tool_call",
+        "label": "After Tool Call Hook",
+        "type": "component",
+        "link": null,
+        "title": "Post-Tool Call Decorator",
+        "description": "Decorator to register a function that executes after a tool call, allowing for result logging or sanitization."
+      },
+      {
+        "id": "before_llm_hook_method",
+        "label": "Before LLM Hook Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "LLM Pre-Call Method Wrapper",
+        "description": "Wraps methods marked as 'before_llm_call' hooks within CrewBase classes, enabling crew-scoped hook registration."
+      },
+      {
+        "id": "after_llm_hook_method",
+        "label": "After LLM Hook Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "LLM Post-Call Method Wrapper",
+        "description": "Wraps methods marked as 'after_llm_call' hooks within CrewBase classes, enabling crew-scoped hook registration."
+      },
+      {
+        "id": "before_tool_hook_method",
+        "label": "Before Tool Hook Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Tool Pre-Call Method Wrapper",
+        "description": "Wraps methods marked as 'before_tool_call' hooks within CrewBase classes, enabling crew-scoped hook registration."
+      },
+      {
+        "id": "after_tool_hook_method",
+        "label": "After Tool Hook Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Tool Post-Call Method Wrapper",
+        "description": "Wraps methods marked as 'after_tool_call' hooks within CrewBase classes, enabling crew-scoped hook registration."
+      },
+      {
+        "id": "base_file_knowledge_source",
+        "label": "BaseFileKnowledgeSource",
+        "type": "component",
+        "link": null,
+        "title": "Base for File Knowledge",
+        "description": "An abstract base class for knowledge sources that load and process content from various file types."
+      },
+      {
+        "id": "crew_docling_source",
+        "label": "CrewDoclingSource",
+        "type": "component",
+        "link": null,
+        "title": "Docling Document Source",
+        "description": "A knowledge source that converts and processes documents (PDF, DOCX, TXT, etc.) using the Docling library for content extraction and chunking."
+      },
+      {
+        "id": "excel_knowledge_source",
+        "label": "ExcelKnowledgeSource",
+        "type": "component",
+        "link": null,
+        "title": "Excel Data Source",
+        "description": "A knowledge source that loads and processes content from Excel files, converting sheets to CSV format for embedding and querying."
+      },
+      {
+        "id": "task_annotation",
+        "label": "@task",
+        "type": "component",
+        "link": null,
+        "title": "Task Method Annotation",
+        "description": "Decorator to mark a class method as a CrewAI task, enabling its integration into a crew's workflow with memoization."
+      },
+      {
+        "id": "wrapper_annotation",
+        "label": "@wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Crew Setup Method Wrapper",
+        "description": "A decorator that wraps a method to set up and instantiate crew components (agents, tasks) before the wrapped method is called."
+      },
+      {
+        "id": "agent_annotation",
+        "label": "@agent",
+        "type": "component",
+        "link": null,
+        "title": "Agent Method Annotation",
+        "description": "Decorator to mark a class method as a CrewAI agent, facilitating its definition and integration into a crew."
+      },
+      {
+        "id": "llm_annotation",
+        "label": "@llm",
+        "type": "component",
+        "link": null,
+        "title": "LLM Provider Annotation",
+        "description": "Decorator to mark a class method as an LLM provider, allowing for dynamic LLM configuration within a crew."
+      },
+      {
+        "id": "tool_annotation",
+        "label": "@tool",
+        "type": "component",
+        "link": null,
+        "title": "Tool Method Annotation",
+        "description": "Decorator to mark a class method as a CrewAI tool, making it available for agents to use."
+      },
+      {
+        "id": "cache_handler_annotation",
+        "label": "@cache_handler",
+        "type": "component",
+        "link": null,
+        "title": "Cache Handler Annotation",
+        "description": "Decorator to mark a class method as a cache handler, enabling custom caching logic for crew components."
+      },
+      {
+        "id": "before_kickoff_annotation",
+        "label": "@before_kickoff",
+        "type": "component",
+        "link": null,
+        "title": "Pre-Kickoff Hook Annotation",
+        "description": "Decorator to mark a method for execution before the crew's kickoff process begins."
+      },
+      {
+        "id": "after_kickoff_annotation",
+        "label": "@after_kickoff",
+        "type": "component",
+        "link": null,
+        "title": "Post-Kickoff Hook Annotation",
+        "description": "Decorator to mark a method for execution after the crew's kickoff process has completed."
+      },
+      {
+        "id": "output_json_annotation",
+        "label": "@output_json",
+        "type": "component",
+        "link": null,
+        "title": "JSON Output Annotation",
+        "description": "Decorator to mark a class, indicating that its output should be formatted as JSON."
+      },
+      {
+        "id": "output_pydantic_annotation",
+        "label": "@output_pydantic",
+        "type": "component",
+        "link": null,
+        "title": "Pydantic Output Annotation",
+        "description": "Decorator to mark a class, indicating that its output should conform to a Pydantic model."
+      },
+      {
+        "id": "crew_base_type",
+        "label": "_CrewBaseType",
+        "type": "component",
+        "link": null,
+        "title": "CrewBase Metaclass",
+        "description": "A metaclass for CrewBase that allows it to be used as a decorator, transforming classes into CrewAI crew definitions."
+      },
+      {
+        "id": "wrapper_util",
+        "label": "Memoization Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Memoization Utility",
+        "description": "An asynchronous wrapper utility that provides caching and memoization for function calls, improving performance by storing and reusing results."
+      },
+      {
+        "id": "decorated_method",
+        "label": "DecoratedMethod",
+        "type": "component",
+        "link": null,
+        "title": "Base Method Wrapper",
+        "description": "A generic base wrapper for methods that have been decorated, preserving their signature and adding metadata."
+      },
+      {
+        "id": "security_config",
+        "label": "SecurityConfig",
+        "type": "component",
+        "link": null,
+        "title": "Security Configuration Manager",
+        "description": "Manages security settings for CrewAI agents, including unique fingerprints for component identification."
+      },
+      {
+        "id": "load_resources",
+        "label": "Load Skill Resources",
+        "type": "component",
+        "link": null,
+        "title": "Skill Resource Loader",
+        "description": "Promotes a skill to a 'RESOURCES' disclosure level, making its associated resources available."
+      },
+      {
+        "id": "telemetry",
+        "label": "Telemetry System",
+        "type": "component",
+        "link": null,
+        "title": "Anonymous Usage Telemetry",
+        "description": "Handles anonymous telemetry for the CrewAI package, collecting usage data for various operations like crew creation, task execution, and tool usage."
+      },
+      {
+        "id": "string_to_callable",
+        "label": "String to Callable Converter",
+        "type": "component",
+        "link": null,
+        "title": "Dotted-Path Resolver",
+        "description": "Converts a dotted-path string (e.g., 'module.function') into the corresponding callable object, with warnings for non-serializable callables."
+      },
+      {
+        "id": "streaming_output_base",
+        "label": "StreamingOutputBase",
+        "type": "component",
+        "link": null,
+        "title": "Base for Streaming Output",
+        "description": "Provides a base class for handling streaming output, allowing iteration over chunks and access to the final result after completion."
+      },
+      {
+        "id": "summarize_one",
+        "label": "Summarize LLM Messages",
+        "type": "component",
+        "link": null,
+        "title": "LLM Conversation Summarizer",
+        "description": "Asynchronously summarizes a chunk of LLM conversation messages into a concise summary."
+      },
+      {
+        "id": "show_agent_logs",
+        "label": "Display Agent Logs",
+        "type": "component",
+        "link": null,
+        "title": "Agent Execution Logger",
+        "description": "Formats and displays agent execution logs, including thoughts, tool usage, and final answers, with optional verbosity."
+      },
+      {
+        "id": "run_crew_tool_with_messages",
+        "label": "Run Crew Tool with Messages",
+        "type": "component",
+        "link": null,
+        "title": "Crew Tool Execution",
+        "description": "Executes a specified crew tool, passing along messages and other keyword arguments."
+      },
+      {
+        "id": "get_files",
+        "label": "Retrieve Execution Files",
+        "type": "component",
+        "link": null,
+        "title": "Crew Execution File Access",
+        "description": "Retrieves files associated with a specific crew execution ID from storage."
+      },
+      {
+        "id": "get_task_files",
+        "label": "Retrieve Task Files",
+        "type": "component",
+        "link": null,
+        "title": "Task File Access",
+        "description": "Retrieves files associated with a specific task ID from storage."
+      },
+      {
+        "id": "serialize_guardrails_for_json",
+        "label": "Serialize Guardrails",
+        "type": "component",
+        "link": null,
+        "title": "Guardrail JSON Serialization",
+        "description": "Serializes guardrail configurations into a JSON-compatible format, filtering out non-serializable callables."
+      },
+      {
+        "id": "sanitize_tool_params_for_bedrock_strict",
+        "label": "Sanitize Bedrock Tool Params",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Tool Parameter Sanitizer",
+        "description": "Adjusts and sanitizes JSON schema for tool parameters to comply with Bedrock Converse strict tool use requirements."
+      },
+      {
+        "id": "to_string",
+        "label": "Object to JSON String",
+        "type": "component",
+        "link": null,
+        "title": "JSON String Conversion",
+        "description": "Serializes a given Python object into a JSON-formatted string, returning None if the object is empty or not serializable."
+      },
+      {
+        "id": "stream_handler",
+        "label": "Streaming Event Handler",
+        "type": "component",
+        "link": null,
+        "title": "LLM Stream Processor",
+        "description": "Handles and processes incoming LLM stream chunk events, directing them to appropriate queues for synchronous or asynchronous consumption."
+      },
+      {
+        "id": "slugify",
+        "label": "Text Slugifier",
+        "type": "component",
+        "link": null,
+        "title": "URL-Safe Slug Generator",
+        "description": "Converts a given text string into a URL-safe slug by normalizing Unicode, removing special characters, and replacing spaces."
+      },
+      {
+        "id": "task_output_storage_handler",
+        "label": "Task Output Storage",
+        "type": "component",
+        "link": null,
+        "title": "Task Output Persistence Manager",
+        "description": "Manages the storage and retrieval of task execution outputs, supporting features like replay and audit trails using an SQLite backend."
+      },
+      {
+        "id": "external_llm",
+        "label": "LLM",
+        "type": "external",
+        "link": null,
+        "title": "External Large Language Model",
+        "description": "An external Large Language Model used for generating summaries or other text-based tasks."
+      },
+      {
+        "id": "external_run_crew_tool",
+        "label": "Run Crew Tool",
+        "type": "external",
+        "link": null,
+        "title": "Core Crew Tool Execution",
+        "description": "A core function responsible for the actual execution of a crew's defined tools."
+      },
+      {
+        "id": "external_file_storage",
+        "label": "File Storage System",
+        "type": "external",
+        "link": null,
+        "title": "Persistent File Storage",
+        "description": "An underlying system for persistent storage and retrieval of files associated with crew executions and tasks."
+      },
+      {
+        "id": "external_anthropic_sanitize",
+        "label": "Anthropic Tool Param Sanitizer",
+        "type": "external",
+        "link": null,
+        "title": "Anthropic Tool Parameter Utility",
+        "description": "An external utility specifically designed to sanitize tool parameters for Anthropic's LLM models."
+      },
+      {
+        "id": "external_to_serializable",
+        "label": "Serialization Utility",
+        "type": "external",
+        "link": null,
+        "title": "Object Serialization Helper",
+        "description": "A utility function that converts complex Python objects into a basic, serializable format."
+      },
+      {
+        "id": "external_llm_stream_event",
+        "label": "LLM Stream Chunk Event",
+        "type": "external",
+        "link": null,
+        "title": "LLM Streaming Data Event",
+        "description": "An event object representing a single chunk of data received from an LLM in a streaming context."
+      },
+      {
+        "id": "external_sqlite_storage",
+        "label": "SQLite Storage",
+        "type": "external",
+        "link": null,
+        "title": "SQLite Database Backend",
+        "description": "An SQLite database implementation used as the backend for storing task outputs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "decorator_factory",
+        "target": "before_llm_call",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decorator_factory",
+        "target": "after_llm_call",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decorator_factory",
+        "target": "before_tool_call",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "decorator_factory",
+        "target": "after_tool_call",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "before_llm_call",
+        "target": "before_llm_hook_method",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "after_llm_call",
+        "target": "after_llm_hook_method",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "before_tool_call",
+        "target": "before_tool_hook_method",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "after_tool_call",
+        "target": "after_tool_hook_method",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_file_knowledge_source",
+        "target": "crew_docling_source",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_file_knowledge_source",
+        "target": "excel_knowledge_source",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "task_annotation",
+        "target": "decorated_method",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_annotation",
+        "target": "decorated_method",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_annotation",
+        "target": "decorated_method",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_annotation",
+        "target": "decorated_method",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cache_handler_annotation",
+        "target": "decorated_method",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "before_kickoff_annotation",
+        "target": "decorated_method",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "after_kickoff_annotation",
+        "target": "decorated_method",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapper_annotation",
+        "target": "task_annotation",
+        "label": "instantiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapper_annotation",
+        "target": "agent_annotation",
+        "label": "instantiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_base_type",
+        "target": "wrapper_annotation",
+        "label": "applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "wrapper_util",
+        "target": "decorated_method",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "show_agent_logs",
+        "target": "printer",
+        "label": "outputs via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "summarize_one",
+        "target": "external_llm",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_crew_tool_with_messages",
+        "target": "external_run_crew_tool",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_files",
+        "target": "external_file_storage",
+        "label": "accesses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_task_files",
+        "target": "external_file_storage",
+        "label": "accesses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serialize_guardrails_for_json",
+        "target": "string_to_callable",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sanitize_tool_params_for_bedrock_strict",
+        "target": "external_anthropic_sanitize",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "to_string",
+        "target": "external_to_serializable",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "stream_handler",
+        "target": "external_llm_stream_event",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "task_output_storage_handler",
+        "target": "external_sqlite_storage",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_system_utilities",
+        "label": "Core System Utilities",
+        "nodes": [
+          "printer",
+          "shim_finder",
+          "slugify",
+          "string_to_callable",
+          "to_string"
+        ],
+        "title": "Foundational System Helpers",
+        "description": "Provides fundamental utilities for console interaction, CLI import management, text processing, and object serialization.",
+        "role": "surface"
+      },
+      {
+        "id": "agent_task_output_handling",
+        "label": "Agent & Task Output Handling",
+        "nodes": [
+          "show_agent_logs",
+          "summarize_one",
+          "run_crew_tool_with_messages",
+          "get_files",
+          "get_task_files",
+          "task_output_storage_handler"
+        ],
+        "title": "Agent and Task Result Management",
+        "description": "Manages the display, summarization, execution, and storage of agent and task outputs and associated files.",
+        "role": "data"
+      },
+      {
+        "id": "global_hook_management",
+        "label": "Global Hook Management",
+        "nodes": [
+          "clear_all_global_hooks",
+          "decorator_factory",
+          "before_llm_call",
+          "after_llm_call",
+          "before_tool_call",
+          "after_tool_call"
+        ],
+        "title": "Centralized Hook Configuration",
+        "description": "Handles the registration, creation, and clearing of global hooks for LLM and tool calls.",
+        "role": "generative"
+      },
+      {
+        "id": "hook_method_wrappers_streaming",
+        "label": "Hook Method Wrappers & Streaming",
+        "nodes": [
+          "before_llm_hook_method",
+          "after_llm_hook_method",
+          "before_tool_hook_method",
+          "after_tool_hook_method",
+          "stream_handler"
+        ],
+        "title": "Method Wrapping and Event Streaming",
+        "description": "Provides wrappers for specific hook methods and handles the processing of streaming events from LLMs.",
+        "role": "generative"
+      },
+      {
+        "id": "knowledge_data_sources",
+        "label": "Knowledge & Data Sources",
+        "nodes": [
+          "base_file_knowledge_source",
+          "crew_docling_source",
+          "excel_knowledge_source",
+          "load_resources"
+        ],
+        "title": "Data Ingestion and Resource Loading",
+        "description": "Defines base classes and specific implementations for loading knowledge from various file types and managing skill resources.",
+        "role": "data"
+      },
+      {
+        "id": "project_component_annotations",
+        "label": "Project Component Annotations",
+        "nodes": [
+          "task_annotation",
+          "agent_annotation",
+          "llm_annotation",
+          "tool_annotation",
+          "cache_handler_annotation"
+        ],
+        "title": "Declarative Component Definition",
+        "description": "Decorators for marking class methods as core CrewAI components like tasks, agents, LLMs, tools, and cache handlers.",
+        "role": "generative"
+      },
+      {
+        "id": "project_lifecycle_output_annotations",
+        "label": "Project Lifecycle & Output Annotations",
+        "nodes": [
+          "before_kickoff_annotation",
+          "after_kickoff_annotation",
+          "output_json_annotation",
+          "output_pydantic_annotation"
+        ],
+        "title": "Crew Lifecycle and Output Formatting",
+        "description": "Decorators for defining methods to run at specific points in the crew's lifecycle and for specifying output formats.",
+        "role": "generative"
+      },
+      {
+        "id": "project_annotation_infrastructure",
+        "label": "Project Annotation Infrastructure",
+        "nodes": [
+          "crew_base_type",
+          "wrapper_annotation",
+          "wrapper_util",
+          "decorated_method"
+        ],
+        "title": "Underlying Annotation Framework",
+        "description": "Provides the foundational metaclass and generic wrappers that enable the declarative annotation system for CrewAI projects.",
+        "role": "generative"
+      },
+      {
+        "id": "security_compliance_evaluation",
+        "label": "Security, Compliance & Evaluation",
+        "nodes": [
+          "security_config",
+          "serialize_guardrails_for_json",
+          "sanitize_tool_params_for_bedrock_strict",
+          "base_evaluator",
+          "run_experiment",
+          "assert_experiment_successfully"
+        ],
+        "title": "Security, Guardrails, and Experiment Evaluation",
+        "description": "Manages security configurations, serializes guardrails, sanitizes tool parameters, and provides tools for experimental evaluation.",
+        "role": "analytical"
+      },
+      {
+        "id": "telemetry_streaming_base",
+        "label": "Telemetry & Streaming Base",
+        "nodes": [
+          "telemetry",
+          "streaming_output_base"
+        ],
+        "title": "Usage Monitoring and Streaming Foundation",
+        "description": "Handles anonymous usage telemetry for the framework and provides a base for managing streaming output.",
+        "role": "surface"
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+    "title": "Audio Model Conversions",
+    "summary": "This module provides utilities to convert various audio, speech, and music generation model checkpoints from their original formats to Hugging Face Transformers format, ensuring compatibility and ease of use.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "audio_model_conversion", "label": "Convert Audio Models", "type": "module", "link": "audio_model_conversion", "title": "Audio Model Conversion", "description": "Converts general audio processing models from various frameworks to Hugging Face Transformers format, handling diverse architectures and weights."},
+            {"id": "speech_to_text_conversion", "label": "Convert Speech-to-Text Models", "type": "module", "link": "speech_to_text_conversion", "title": "Speech-to-Text Conversion", "description": "Facilitates the conversion of speech-to-text and speech processing models, including sequence-to-sequence and CTC architectures, into the Hugging Face ecosystem."},
+            {"id": "music_generation_conversion", "label": "Convert Music Generation Models", "type": "module", "link": "music_generation_conversion", "title": "Music Generation Conversion", "description": "Handles the specialized conversion process for music generation models, integrating their unique components and configurations into the Hugging Face format."},
+            {"id": "seamless_m4t_conversion", "label": "Convert SeamlessM4T Models", "type": "module", "link": "seamless_m4t_conversion", "title": "SeamlessM4T Model Conversion", "description": "Dedicated conversion utilities for SeamlessM4T and SeamlessM4Tv2 models, managing their complex multi-modal architectures and distinct components."},
+            {"id": "nemo_framework_conversion", "label": "Convert NeMo Framework Models", "type": "module", "link": "nemo_framework_conversion", "title": "NeMo Framework Conversion", "description": "Converts models originally developed within the NVIDIA NeMo framework to be compatible with Hugging Face Transformers."}
+        ],
+        "edges": [],
+        "groups": [
+            {"id": "general_audio", "label": "General Audio Models", "title": "General Audio Model Converters", "description": "Tools for converting a wide array of general-purpose audio models and their associated processing components.", "role": "analytical", "nodes": ["audio_model_conversion", "music_generation_conversion"]},
+            {"id": "speech_specific", "label": "Speech-Specific Models", "title": "Speech-Specific Model Converters", "description": "Specialized converters for models designed for speech recognition, synthesis, and translation tasks.", "role": "analytical", "nodes": ["speech_to_text_conversion", "seamless_m4t_conversion", "nemo_framework_conversion"]}
+        ]
+    }
+}

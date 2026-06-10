@@ -1,0 +1,175 @@
+{
+  "title": "Multi-Component Platform (MCP)",
+  "summary": "This module provides core functionalities for implementing and interacting with the Model Context Protocol (MCP). It includes components for serving MCP requests, loading MCP-based toolsets and servers from configurations, and defining MCP resources.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "mcp_server_http",
+        "label": "MCP HTTP Server",
+        "type": "component",
+        "link": null,
+        "title": "MCP HTTP Server (SSE)",
+        "description": "Implements the Model Context Protocol (MCP) server using Server-Sent Events (SSE) over HTTP, enabling communication with external MCP clients. It handles incoming requests and dispatches them for processing."
+      },
+      {
+        "id": "request_handler",
+        "label": "Handle MCP Requests",
+        "type": "component",
+        "link": null,
+        "title": "MCP Request Handler",
+        "description": "Processes incoming MCP sampling messages and parameters, constructs model settings, and orchestrates calls to underlying AI models to generate responses. It maps between MCP and internal AI model formats."
+      },
+      {
+        "id": "load_toolsets",
+        "label": "Load MCP Toolsets",
+        "type": "component",
+        "link": null,
+        "title": "Load Toolsets from Config",
+        "description": "Parses a configuration file to load and instantiate MCP toolsets. Each server entry in the config generates a prefixed toolset, allowing integration of external MCP services as tools within the AI framework."
+      },
+      {
+        "id": "load_servers",
+        "label": "Load MCP Servers",
+        "type": "component",
+        "link": null,
+        "title": "Load Servers from Config",
+        "description": "Reads a configuration file to define and load MCP server instances, including HTTP and standard I/O servers. It handles environment variable expansion and validates the configuration against the MCP schema."
+      },
+      {
+        "id": "mcp_resource",
+        "label": "Define MCP Resource",
+        "type": "component",
+        "link": null,
+        "title": "MCP Resource Definition",
+        "description": "Represents a concrete resource available on an MCP server, including its URI, size, MIME type, and metadata. It facilitates structured access and description of data assets for AI models."
+      },
+      {
+        "id": "resource_template",
+        "label": "Define Resource Template",
+        "type": "component",
+        "link": null,
+        "title": "MCP Resource Template",
+        "description": "Defines a template for parameterized resources on an MCP server, using URI templates (RFC 6570). This allows for dynamic generation of resource URIs based on specific parameters, enhancing flexibility."
+      },
+      {
+        "id": "ai_models",
+        "label": "AI Models",
+        "type": "other_module",
+        "link": "model_providers_and_wrappers",
+        "title": "AI Model Providers",
+        "description": "External module providing various AI model implementations and wrappers, used by the MCP request handler to generate responses based on processed inputs."
+      },
+      {
+        "id": "config_file",
+        "label": "Configuration File",
+        "type": "external",
+        "link": null,
+        "title": "MCP Configuration",
+        "description": "JSON configuration file specifying MCP server details, including transport types (HTTP, Stdio) and associated parameters. Used to dynamically set up MCP servers and toolsets."
+      }
+    ],
+    "edges": [
+      {
+        "source": "config_file",
+        "target": "load_toolsets",
+        "label": "Defines toolsets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "config_file",
+        "target": "load_servers",
+        "label": "Defines servers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_servers",
+        "target": "mcp_server_http",
+        "label": "Instantiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_toolsets",
+        "target": "mcp_server_http",
+        "label": "Integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_server_http",
+        "target": "request_handler",
+        "label": "Routes requests to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "request_handler",
+        "target": "ai_models",
+        "label": "Uses for responses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "resource_template",
+        "target": "mcp_resource",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mcp_server_http",
+        "target": "mcp_resource",
+        "label": "Exposes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "server_infrastructure",
+        "label": "MCP Server Infrastructure",
+        "nodes": [
+          "mcp_server_http",
+          "load_servers"
+        ],
+        "title": "MCP Server Infrastructure",
+        "description": "Components responsible for setting up and managing MCP servers and their communication protocols.",
+        "role": "surface"
+      },
+      {
+        "id": "toolset_management",
+        "label": "MCP Toolset Management",
+        "nodes": [
+          "load_toolsets"
+        ],
+        "title": "MCP Toolset Management",
+        "description": "Handles the dynamic loading and integration of external MCP services as callable toolsets within the AI framework.",
+        "role": "generative"
+      },
+      {
+        "id": "request_processing",
+        "label": "MCP Request Processing",
+        "nodes": [
+          "request_handler"
+        ],
+        "title": "MCP Request Processing",
+        "description": "Manages the parsing of incoming MCP messages and orchestrates the generation of AI model responses.",
+        "role": "generative"
+      },
+      {
+        "id": "resource_definitions",
+        "label": "MCP Resource Definitions",
+        "nodes": [
+          "mcp_resource",
+          "resource_template"
+        ],
+        "title": "MCP Resource Definitions",
+        "description": "Defines the structure and templating mechanisms for resources exposed or consumed by MCP servers.",
+        "role": "data"
+      }
+    ]
+  }
+}

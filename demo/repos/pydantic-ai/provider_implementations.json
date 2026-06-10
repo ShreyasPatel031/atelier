@@ -1,0 +1,84 @@
+{
+    "title": "AI Provider Implementations",
+    "summary": "This module provides abstractions for integrating with various AI model APIs, encompassing OpenAI-compatible services, native SDKs, and specialized offerings, along with utilities for managing model configurations.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "openai_compatible_providers",
+                "label": "OpenAI-Compatible Providers",
+                "type": "module",
+                "link": "openai_compatible_providers",
+                "title": "OpenAI API Compatible Providers",
+                "description": "Manages connections and interactions with a wide range of AI services that offer an OpenAI-compatible API surface."
+            },
+            {
+                "id": "native_sdk_providers",
+                "label": "Native SDK Providers",
+                "type": "module",
+                "link": "native_sdk_providers",
+                "title": "Native SDK AI Providers",
+                "description": "Integrates with AI services using their specific Python SDKs for deeper or unique functionalities."
+            },
+            {
+                "id": "gateway_and_specialized_providers",
+                "label": "Gateway & Specialized Providers",
+                "type": "module",
+                "link": "gateway_and_specialized_providers",
+                "title": "AI Gateways and Specialized Services",
+                "description": "Handles routing to multiple AI models, provides structured output capabilities, and integrates with AI gateways like Vercel and LiteLLM."
+            },
+            {
+                "id": "model_profile_helpers",
+                "label": "Model Profile Helpers",
+                "type": "module",
+                "link": "model_profile_helpers",
+                "title": "Model Configuration Profiles",
+                "description": "Contains utility functions and profiles for defining the capabilities and characteristics of various AI models across different providers."
+            }
+        ],
+        "edges": [
+            {
+                "source": "openai_compatible_providers",
+                "target": "model_profile_helpers",
+                "label": "uses model profiles"
+            },
+            {
+                "source": "native_sdk_providers",
+                "target": "model_profile_helpers",
+                "label": "uses model profiles"
+            },
+            {
+                "source": "gateway_and_specialized_providers",
+                "target": "model_profile_helpers",
+                "label": "uses model profiles"
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_llm_providers_group",
+                "label": "Core LLM Providers",
+                "title": "Core LLM Providers",
+                "description": "The fundamental components for interacting with various large language models, either through OpenAI-compatible interfaces or native SDKs.",
+                "role": "generative",
+                "nodes": ["openai_compatible_providers", "native_sdk_providers"]
+            },
+            {
+                "id": "advanced_and_specialized_group",
+                "label": "Advanced & Specialized",
+                "title": "Advanced and Specialized AI Services",
+                "description": "Modules that provide enhanced capabilities such as multi-model routing, structured generation, or specific gateway integrations.",
+                "role": "analytical",
+                "nodes": ["gateway_and_specialized_providers"]
+            },
+            {
+                "id": "configuration_utilities_group",
+                "label": "Configuration Utilities",
+                "title": "Model Configuration Utilities",
+                "description": "Helper functions and data structures for defining and managing the operational characteristics and capabilities of different AI models.",
+                "role": "data",
+                "nodes": ["model_profile_helpers"]
+            }
+        ]
+    }
+}

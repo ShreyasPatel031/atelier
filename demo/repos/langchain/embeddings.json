@@ -1,0 +1,234 @@
+{
+  "title": "Embedding Module Overview",
+  "summary": "This module provides functionalities for generating text embeddings, including a factory for initializing various provider-specific embedding models and a caching mechanism to optimize embedding generation.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "init_embed_classic",
+        "label": "Initialize Embedding Model (Classic)",
+        "type": "component",
+        "link": null,
+        "title": "Classic Embedding Initializer",
+        "description": "Dynamically initializes an embedding model from a specified model name and optional provider, supporting various third-party integrations. It handles package checks and instantiates the correct embedding class."
+      },
+      {
+        "id": "init_embed_v1",
+        "label": "Initialize Embedding Model (V1)",
+        "type": "component",
+        "link": null,
+        "title": "V1 Embedding Initializer",
+        "description": "Initializes an embedding model from a model name and provider, similar to the classic version but potentially with updated internal logic or provider support. It acts as a factory for embedding instances."
+      },
+      {
+        "id": "cache_embedder",
+        "label": "Cache Embedding Results",
+        "type": "component",
+        "link": null,
+        "title": "Cache-Backed Embeddings",
+        "description": "Provides a caching layer for any underlying embedding model. It checks a persistent store for existing embeddings before computing new ones, significantly improving performance for repeated requests."
+      },
+      {
+        "id": "serialize_vectors",
+        "label": "Serialize Embedding Vectors",
+        "type": "component",
+        "link": null,
+        "title": "Embedding Vector Serializer",
+        "description": "Converts a list of floating-point numbers (an embedding vector) into a byte string for storage in a cache. This ensures that embedding data can be efficiently stored and retrieved."
+      },
+      {
+        "id": "deserialize_vectors",
+        "label": "Deserialize Embedding Vectors",
+        "type": "component",
+        "link": null,
+        "title": "Embedding Vector Deserializer",
+        "description": "Reconstructs a list of floating-point numbers (an embedding vector) from a byte string retrieved from a cache. This is the inverse operation of serialization."
+      },
+      {
+        "id": "fireworks_impl",
+        "label": "Fireworks.ai Embedding Provider",
+        "type": "component",
+        "link": null,
+        "title": "FireworksEmbeddings Implementation",
+        "description": "A concrete implementation of the embedding interface specifically for Fireworks.ai models. It handles communication with the Fireworks API to generate embeddings for text inputs."
+      },
+      {
+        "id": "base_embed_api",
+        "label": "Base Embeddings API",
+        "type": "external",
+        "link": null,
+        "title": "Embeddings Interface",
+        "description": "The fundamental interface that all embedding models must implement. It defines methods for embedding single queries and lists of documents, ensuring a consistent API across different providers."
+      },
+      {
+        "id": "cache_store_api",
+        "label": "Generic Cache Store API",
+        "type": "external",
+        "link": null,
+        "title": "BaseStore Interface",
+        "description": "A generic interface for any key-value store used by the caching mechanism. It defines methods for storing, retrieving, and managing embedding data, abstracting the underlying storage technology."
+      },
+      {
+        "id": "byte_store_api",
+        "label": "Byte-based Cache Store API",
+        "type": "external",
+        "link": null,
+        "title": "ByteStore Interface",
+        "description": "A specialized interface for cache stores that operate with byte arrays. It's used by the cache-backed embedder to store serialized embedding vectors, allowing flexibility in storage backends."
+      },
+      {
+        "id": "openai_api_client",
+        "label": "OpenAI Compatible API Client",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI Client",
+        "description": "An external client library used to interact with OpenAI-compatible APIs. It handles authentication, request formatting, and response parsing for embedding generation."
+      },
+      {
+        "id": "other_providers",
+        "label": "Other Embedding Providers",
+        "type": "external",
+        "link": null,
+        "title": "Various Third-Party Embedders",
+        "description": "Represents a collection of various third-party embedding service providers (e.g., OpenAI, Bedrock, Cohere, HuggingFace). These are instantiated by the initialization functions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "init_embed_classic",
+        "target": "base_embed_api",
+        "label": "Returns instance implementing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_embed_v1",
+        "target": "base_embed_api",
+        "label": "Returns instance implementing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_embed_classic",
+        "target": "other_providers",
+        "label": "Instantiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_embed_v1",
+        "target": "other_providers",
+        "label": "Instantiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cache_embedder",
+        "target": "base_embed_api",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cache_embedder",
+        "target": "cache_store_api",
+        "label": "Uses for document/query cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cache_embedder",
+        "target": "serialize_vectors",
+        "label": "Uses for data serialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cache_embedder",
+        "target": "deserialize_vectors",
+        "label": "Uses for data deserialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cache_embedder",
+        "target": "byte_store_api",
+        "label": "Configured with (from_bytes_store)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_impl",
+        "target": "base_embed_api",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fireworks_impl",
+        "target": "openai_api_client",
+        "label": "Communicates via",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "grp_init",
+        "label": "Model Initialization",
+        "nodes": [
+          "init_embed_classic",
+          "init_embed_v1"
+        ],
+        "title": "Embedding Model Initialization",
+        "description": "Functions responsible for dynamically initializing various embedding models based on specified provider and model names, handling package imports and configuration.",
+        "role": "generative"
+      },
+      {
+        "id": "grp_cache",
+        "label": "Caching Mechanism",
+        "nodes": [
+          "cache_embedder",
+          "serialize_vectors",
+          "deserialize_vectors"
+        ],
+        "title": "Embedding Caching Mechanism",
+        "description": "Components that provide a caching layer for embedding models, reducing redundant computations by storing and retrieving embedding vectors from a persistent store.",
+        "role": "data"
+      },
+      {
+        "id": "grp_providers",
+        "label": "Provider Implementations",
+        "nodes": [
+          "fireworks_impl"
+        ],
+        "title": "Specific Embedding Provider Implementations",
+        "description": "Concrete implementations of the embedding interface for specific third-party providers, handling their unique API calls and data formats.",
+        "role": "generative"
+      },
+      {
+        "id": "grp_interfaces",
+        "label": "Core Interfaces",
+        "nodes": [
+          "base_embed_api",
+          "cache_store_api",
+          "byte_store_api"
+        ],
+        "title": "Fundamental Embedding Interfaces",
+        "description": "Abstract interfaces that define the contract for embedding models and caching stores, enabling interchangeable implementations across different providers and caching strategies.",
+        "role": "surface"
+      },
+      {
+        "id": "grp_external",
+        "label": "External Integrations",
+        "nodes": [
+          "openai_api_client",
+          "other_providers"
+        ],
+        "title": "External API Clients and Providers",
+        "description": "Represents external services or libraries that the embedding module interacts with, such as specific API clients or a generic representation of other embedding providers.",
+        "role": "generative"
+      }
+    ]
+  }
+}

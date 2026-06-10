@@ -18,6 +18,7 @@ import {
     MarkerType,
     useStore,
     useReactFlow,
+    getViewportForBounds,
 } from 'https://esm.sh/@xyflow/react@12.4.2?deps=react@18.3.1,react-dom@18.3.1';
 import { timer } from 'https://esm.sh/d3-timer@3';
 
@@ -324,6 +325,165 @@ function rfPointerOverForeignLeafNode(clientX, clientY, selfId) {
     }
 }
 
+/** Any custom (leaf) RF node under the pointer — suppress group hover when over a leaf. */
+function rfPointerOverAnyLeafAtPoint(clientX, clientY) {
+    if (typeof document === 'undefined' || typeof document.elementsFromPoint !== 'function') return false;
+    try {
+        const stack = document.elementsFromPoint(clientX, clientY);
+        if (!stack || !stack.length) return false;
+        const seen = new WeakSet();
+        for (let i = 0; i < stack.length; i++) {
+            const el = stack[i];
+            if (!el || typeof el.closest !== 'function') continue;
+            const wrap = el.closest('.react-flow__node[data-id]');
+            if (!wrap || seen.has(wrap)) continue;
+            seen.add(wrap);
+            if (!wrap.classList.contains('react-flow__node-group')) {
+                return true;
+            }
+        }
+        return false;
+    } catch (_) {
+        return false;
+    }
+}
+
+/** Collect every RF group id under the pointer (paint order + portaled pills/bridges). */
+function rfCollectGroupIdsAtPoint(clientX, clientY) {
+    const ids = [];
+    const seen = new Set();
+    if (typeof document === 'undefined' || typeof document.elementsFromPoint !== 'function') return ids;
+    try {
+        const stack = document.elementsFromPoint(clientX, clientY);
+        for (let i = 0; i < stack.length; i++) {
+            const el = stack[i];
+            if (!el || typeof el.closest !== 'function') continue;
+            const ctl = el.closest(
+                '[data-group-id].atelier-rf-help-hover-bridge,[data-group-id].atelier-rf-control-column,[data-testid="atelier-rf-group-help"],[data-testid="atelier-rf-group-collapse"]'
+            );
+            if (ctl) {
+                const cid = ctl.getAttribute('data-group-id');
+                if (cid && !seen.has(cid)) {
+                    seen.add(cid);
+                    ids.push(cid);
+                }
+            }
+            const wrap = el.closest('.react-flow__node-group[data-id]');
+            if (wrap) {
+                const nid = wrap.getAttribute('data-id');
+                if (nid && !seen.has(nid)) {
+                    seen.add(nid);
+                    ids.push(nid);
+                }
+            }
+        }
+    } catch (_) {
+        /* ignore */
+    }
+    return ids;
+}
+
+/** Group id when pointer is over portaled collapse/? controls (bridge, column, or pills). */
+function rfGroupControlIdAtPoint(clientX, clientY) {
+    if (typeof document === 'undefined' || typeof document.elementsFromPoint !== 'function') {
+        return null;
+    }
+    try {
+        const stack = document.elementsFromPoint(clientX, clientY);
+        for (let i = 0; i < stack.length; i++) {
+            const el = stack[i];
+            if (!el || typeof el.closest !== 'function') continue;
+            const ctl = el.closest(
+                '[data-group-id].atelier-rf-help-hover-bridge,[data-group-id].atelier-rf-control-column,[data-testid="atelier-rf-group-help"],[data-testid="atelier-rf-group-collapse"]'
+            );
+            if (ctl) {
+                const gid = ctl.getAttribute('data-group-id');
+                if (gid) return String(gid);
+            }
+        }
+    } catch (_) {
+        /* ignore */
+    }
+    return null;
+}
+
+function rfGroupDepthInRfTree(groupId, parentById) {
+    let d = 0;
+    let cur = groupId != null ? String(groupId) : '';
+    const guard = new Set();
+    while (cur && parentById && parentById[cur] && !guard.has(cur)) {
+        guard.add(cur);
+        d += 1;
+        cur = String(parentById[cur]);
+    }
+    return d;
+}
+
+/**
+ * Deepest (innermost) RF group under the pointer. Parent groups can stack above
+ * children in paint order; picking the first hit wrongly hovers every ancestor.
+ */
+function rfDeepestGroupIdAtPoint(clientX, clientY) {
+    const ids = rfCollectGroupIdsAtPoint(clientX, clientY);
+    if (!ids.length) return null;
+    const parentById =
+        typeof window !== 'undefined' && window.atelierRfLastNodeParentById
+            ? window.atelierRfLastNodeParentById
+            : {};
+    let best = ids[0];
+    let bestD = rfGroupDepthInRfTree(best, parentById);
+    for (let i = 1; i < ids.length; i++) {
+        const gid = ids[i];
+        const dep = rfGroupDepthInRfTree(gid, parentById);
+        if (dep > bestD) {
+            bestD = dep;
+            best = gid;
+        }
+    }
+    return best;
+}
+
+function rfNotifyGroupHoverChange() {
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('atelier-rf-group-hover-sync'));
+    }
+}
+
+function rfSetActiveGroupHoverId(groupId) {
+    if (typeof window === 'undefined') return;
+    const next = groupId != null ? String(groupId) : null;
+    if (window.__atelierRfActiveGroupHoverId === next) return;
+    window.__atelierRfActiveGroupHoverId = next;
+    rfNotifyGroupHoverChange();
+}
+
+function rfEnsureGlobalGroupHover() {
+    if (typeof window === 'undefined' || window.__atelierRfGlobalGroupHoverInstalled) return;
+    window.__atelierRfGlobalGroupHoverInstalled = true;
+    function updateFromPointer(e) {
+        const cx = e && typeof e.clientX === 'number' ? e.clientX : null;
+        const cy = e && typeof e.clientY === 'number' ? e.clientY : null;
+        if (cx == null || cy == null) {
+            rfSetActiveGroupHoverId(null);
+            return;
+        }
+        const controlGroupId = rfGroupControlIdAtPoint(cx, cy);
+        if (controlGroupId) {
+            rfSetActiveGroupHoverId(controlGroupId);
+            return;
+        }
+        if (rfPointerOverAnyLeafAtPoint(cx, cy)) {
+            rfSetActiveGroupHoverId(null);
+            return;
+        }
+        rfSetActiveGroupHoverId(rfDeepestGroupIdAtPoint(cx, cy));
+    }
+    document.addEventListener('pointermove', updateFromPointer, true);
+    window.addEventListener('blur', function () {
+        rfSetActiveGroupHoverId(null);
+    });
+}
+
 /**
  * Portaled “?” sits outside the node DOM; moving across the gap fires mouseleave on the root with
  * relatedTarget not yet on the button. A transparent bridge keeps hover until the pointer hits the pill or leaves both.
@@ -558,7 +718,7 @@ function ElkCustomNode({
                 height: '100%',
                 padding: '8px',
                 fontSize: 11,
-                color: '#0f172a',
+                color: colorNodeFill ? semanticText : '#0f172a',
                 lineHeight: 1.25,
                 wordBreak: 'break-word',
                 overflowWrap: 'break-word',
@@ -614,7 +774,7 @@ function ElkCustomNode({
     const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
 
     /** Hide “?” when the side hover snippet panel has text (avoid stacking two aids). */
-    const showHelpPill = hovered && pillLayer && rfChatEnabled();
+    const showHelpPill = hovered && pillLayer && detail.length === 0 && rfChatEnabled();
     const helpPillPortal =
         showHelpPill &&
         createPortal(
@@ -792,11 +952,30 @@ function usePillLayer() {
 
 /** Compound: handles on frame (GroupNode-style). RF sizes the wrapper via node.width / node.height. */
 function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, positionAbsoluteY }) {
+    rfEnsureGlobalGroupHover();
     const [hovered, setHovered] = useState(false);
     const rootRef = useRef(null);
     const panelRef = useRef(null);
     const helpBridgeRef = useRef(null);
     const helpPillRef = useRef(null);
+
+    useEffect(
+        function () {
+            function sync() {
+                const active =
+                    typeof window !== 'undefined' && window.__atelierRfActiveGroupHoverId != null
+                        ? String(window.__atelierRfActiveGroupHoverId)
+                        : '';
+                setHovered(active === String(id));
+            }
+            sync();
+            window.addEventListener('atelier-rf-group-hover-sync', sync);
+            return function () {
+                window.removeEventListener('atelier-rf-group-hover-sync', sync);
+            };
+        },
+        [id]
+    );
 
     const gw = rw ?? data.width ?? 160;
     const gh = rh ?? data.height ?? 120;
@@ -897,34 +1076,28 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
 
     const pointerInsideGroupControls = useCallback(
         function (clientX, clientY) {
+            const controlGroupId = rfGroupControlIdAtPoint(clientX, clientY);
+            if (controlGroupId && String(controlGroupId) === String(id)) {
+                return true;
+            }
             if (rfPointerOverForeignLeafNode(clientX, clientY, id)) {
                 return false;
             }
-            return (
-                rfClientPointInElement(rootRef, clientX, clientY) ||
+            if (
                 rfClientPointInElement(panelRef, clientX, clientY) ||
                 rfClientPointInElement(helpPillRef, clientX, clientY) ||
                 rfClientPointInElement(helpBridgeRef, clientX, clientY)
-            );
+            ) {
+                return true;
+            }
+            const deepestGroupId = rfDeepestGroupIdAtPoint(clientX, clientY);
+            if (deepestGroupId != null && String(deepestGroupId) !== String(id)) {
+                return false;
+            }
+            return rfClientPointInElement(rootRef, clientX, clientY);
         },
         [id]
     );
-
-    useEffect(() => {
-        if (!(data && data.rfExpandedSubgraph)) return;
-        function onPointerMove(e) {
-            setHovered(pointerInsideGroupControls(e.clientX, e.clientY));
-        }
-        function onWindowBlur() {
-            setHovered(false);
-        }
-        document.addEventListener('pointermove', onPointerMove, true);
-        window.addEventListener('blur', onWindowBlur);
-        return () => {
-            document.removeEventListener('pointermove', onPointerMove, true);
-            window.removeEventListener('blur', onWindowBlur);
-        };
-    }, [data, pointerInsideGroupControls]);
 
     /** Exact ELK connection point → handle center (translate -50/-50 centers on top/left). */
     function gHandleStyle(cp) {
@@ -1038,7 +1211,9 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         if (containsNode(panelRef.current, rel)) return;
         if (containsNode(helpPillRef.current, rel)) return;
         if (containsNode(helpBridgeRef.current, rel)) return;
-        setHovered(false);
+        if (String(window.__atelierRfActiveGroupHoverId || '') === String(id)) {
+            rfSetActiveGroupHoverId(null);
+        }
     };
     const onPanelLeave = function (e) {
         if (typeof e.clientX === 'number' && pointerInsideGroupControls(e.clientX, e.clientY)) return;
@@ -1046,7 +1221,9 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         if (containsNode(rootRef.current, rel)) return;
         if (containsNode(helpPillRef.current, rel)) return;
         if (containsNode(helpBridgeRef.current, rel)) return;
-        setHovered(false);
+        if (String(window.__atelierRfActiveGroupHoverId || '') === String(id)) {
+            rfSetActiveGroupHoverId(null);
+        }
     };
 
     const helpBridgeOverlap = 4 / z;
@@ -1055,7 +1232,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
     const helpBridgeWidth = helpBridgeOverlap + helpSideGapFlow + helpPillHitW + helpBridgeOverlap;
 
     const showCollapsePill = hovered && pillLayer && !!(data && data.rfExpandedSubgraph);
-    const showHelpPill = hovered && pillLayer && rfChatEnabled();
+    const showHelpPill = hovered && pillLayer && detail.length === 0 && rfChatEnabled();
     const showControlPills = showCollapsePill || showHelpPill;
     const controlGapFlow = 4 / z;
     const controlPillStyle = {
@@ -1077,6 +1254,7 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                       ref: helpBridgeRef,
                       key: 'help-bridge-' + id,
                       className: 'atelier-rf-help-hover-bridge nodrag nopan',
+                      'data-group-id': id,
                       style: {
                           position: 'absolute',
                           left: helpBridgeLeft,
@@ -1090,10 +1268,19 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                       onPointerDown: rfHelpPillStopPropagation,
                       onMouseDown: rfHelpPillStopPropagation,
                       onMouseEnter: function () {
-                          setHovered(true);
+                          rfSetActiveGroupHoverId(id);
                       },
                       onMouseLeave: function (e) {
-                          rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                          rfHelpHoverLeaveOutside(
+                              function (v) {
+                                  if (!v) rfSetActiveGroupHoverId(null);
+                              },
+                              rootRef,
+                              panelRef,
+                              helpPillRef,
+                              helpBridgeRef,
+                              e
+                          );
                       },
                   }),
                   React.createElement(
@@ -1112,14 +1299,25 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
                               flexDirection: 'column',
                               alignItems: 'flex-start',
                               gap: controlGapFlow,
+                              pointerEvents: 'auto',
+                              cursor: 'default',
                           },
                           onPointerDown: rfHelpPillStopPropagation,
                           onMouseDown: rfHelpPillStopPropagation,
                           onMouseEnter: function () {
-                              setHovered(true);
+                              rfSetActiveGroupHoverId(id);
                           },
                           onMouseLeave: function (e) {
-                              rfHelpHoverLeaveOutside(setHovered, rootRef, panelRef, helpPillRef, helpBridgeRef, e);
+                              rfHelpHoverLeaveOutside(
+                                  function (v) {
+                                      if (!v) rfSetActiveGroupHoverId(null);
+                                  },
+                                  rootRef,
+                                  panelRef,
+                                  helpPillRef,
+                                  helpBridgeRef,
+                                  e
+                              );
                           },
                       },
                       showCollapsePill
@@ -1178,8 +1376,10 @@ function ElkGroupNode({ id, data, width: rw, height: rh, positionAbsoluteX, posi
         'div',
         {
             ref: rootRef,
-            onMouseEnter: function () {
-                setHovered(true);
+            onMouseEnter: function (e) {
+                if (pointerInsideGroupControls(e.clientX, e.clientY)) {
+                    rfSetActiveGroupHoverId(id);
+                }
             },
             onMouseLeave: onRootLeave,
             style: {
@@ -1368,6 +1568,178 @@ function rfCubicInOut(t) {
 
 var RF_LAYOUT_ANIM_MS = 350;
 var RF_LAYOUT_EXIT_MS = 200;
+var RF_FITVIEW_PADDING_RATIO = 0.16;
+var RF_FITVIEW_EDGE_PAD_PX = 48;
+
+function rfPaneDimensions() {
+    var root = document.getElementById('reactflowRoot');
+    var paneEl = root ? root.querySelector('.react-flow') : null;
+    if (!paneEl) return null;
+    var w = paneEl.clientWidth;
+    var h = paneEl.clientHeight;
+    if (!(w > 0 && h > 0)) {
+        var rect = paneEl.getBoundingClientRect();
+        w = rect.width;
+        h = rect.height;
+    }
+    if (!(w > 0 && h > 0)) return null;
+    return { width: w, height: h };
+}
+
+function rfWaitForPaneLayout() {
+    return new Promise(function (resolve) {
+        requestAnimationFrame(function () {
+            requestAnimationFrame(resolve);
+        });
+    });
+}
+
+/** Bounds for fitView: node boxes plus ELK orthogonal edge route points (labels/arrows). */
+function rfAbsoluteNodeBounds(nodes) {
+    var list = Array.isArray(nodes) ? nodes : [];
+    if (!list.length) return null;
+    var byId = new Map();
+    for (var i = 0; i < list.length; i++) {
+        byId.set(String(list[i].id), list[i]);
+    }
+    function absPos(n) {
+        var x = n.position.x;
+        var y = n.position.y;
+        var cur = n.parentId ? String(n.parentId) : null;
+        while (cur) {
+            var p = byId.get(cur);
+            if (!p) break;
+            x += p.position.x;
+            y += p.position.y;
+            cur = p.parentId ? String(p.parentId) : null;
+        }
+        return { x: x, y: y };
+    }
+    var minX = Infinity;
+    var minY = Infinity;
+    var maxX = -Infinity;
+    var maxY = -Infinity;
+    for (var j = 0; j < list.length; j++) {
+        var nd = list[j];
+        var ap = absPos(nd);
+        var w = nd.width || 0;
+        var h = nd.height || 0;
+        minX = Math.min(minX, ap.x);
+        minY = Math.min(minY, ap.y);
+        maxX = Math.max(maxX, ap.x + w);
+        maxY = Math.max(maxY, ap.y + h);
+    }
+    if (!Number.isFinite(minX)) return null;
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
+
+function rfComputeBoundsFromLayout(nodes, edges) {
+    var api = window.__atelierR6ViewportApi;
+    var nodeBounds =
+        api && typeof api.getNodesBounds === 'function' && nodes === api.getNodes()
+            ? api.getNodesBounds(nodes)
+            : rfAbsoluteNodeBounds(nodes);
+    if (!nodeBounds || nodeBounds.width <= 0 || nodeBounds.height <= 0) return null;
+    var minX = nodeBounds.x;
+    var minY = nodeBounds.y;
+    var maxX = nodeBounds.x + nodeBounds.width;
+    var maxY = nodeBounds.y + nodeBounds.height;
+    var pad = RF_FITVIEW_EDGE_PAD_PX;
+    if (Array.isArray(edges)) {
+        for (var i = 0; i < edges.length; i++) {
+            var pts = edges[i] && edges[i].data && edges[i].data.routePoints;
+            if (!Array.isArray(pts)) continue;
+            for (var j = 0; j < pts.length; j++) {
+                var x = Number(pts[j].x);
+                var y = Number(pts[j].y);
+                if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x);
+                maxY = Math.max(maxY, y);
+            }
+        }
+    }
+    return {
+        x: minX - pad,
+        y: minY - pad,
+        width: maxX - minX + pad * 2,
+        height: maxY - minY + pad * 2,
+    };
+}
+
+function rfViewportForLayout(nodes, edges) {
+    var dims = rfPaneDimensions();
+    if (!dims) return null;
+    var bounds = rfComputeBoundsFromLayout(nodes, edges);
+    if (!bounds) return null;
+    /** xyflow 12.4: numeric padding is a legacy ratio (not px) — use RF_FITVIEW_PADDING_RATIO. */
+    return getViewportForBounds(
+        bounds,
+        dims.width,
+        dims.height,
+        0.08,
+        1.15,
+        RF_FITVIEW_PADDING_RATIO
+    );
+}
+
+/** Smooth center/zoom — one 350ms tween, includes edge routes in bounds. */
+window.atelierRfFitViewCenterImpl = async function atelierRfFitViewCenterImpl() {
+    var api = window.__atelierR6ViewportApi;
+    if (!api || typeof api.getViewport !== 'function' || typeof api.setViewport !== 'function') {
+        return;
+    }
+    await rfWaitForPaneLayout();
+    for (var i = 0; i < 80; i++) {
+        var nodes = typeof api.getNodes === 'function' ? api.getNodes() : [];
+        var edges = typeof api.getEdges === 'function' ? api.getEdges() : [];
+        var sized = nodes.filter(function (n) {
+            return n.width && n.height;
+        });
+        if (nodes.length && sized.length < nodes.length) {
+            await new Promise(function (r) {
+                setTimeout(r, 40);
+            });
+            continue;
+        }
+        var target = rfViewportForLayout(nodes, edges);
+        if (!target) return;
+        var current = api.getViewport();
+        if (
+            current &&
+            Math.abs(current.x - target.x) < 2 &&
+            Math.abs(current.y - target.y) < 2 &&
+            Math.abs(current.zoom - target.zoom) < 0.02
+        ) {
+            return;
+        }
+        try {
+            var r = api.setViewport(target, { duration: RF_LAYOUT_ANIM_MS });
+            if (r && typeof r.then === 'function') await r;
+            else {
+                await new Promise(function (res) {
+                    setTimeout(res, RF_LAYOUT_ANIM_MS + 40);
+                });
+            }
+        } catch (_) {
+            /* ignore */
+        }
+        return;
+    }
+};
+
+/** Ensure edges are fully visible after layout tween (avoids stuck style.opacity from fade-in). */
+function rfFinalizeLayoutEdges(edges) {
+    if (!Array.isArray(edges)) return [];
+    return edges.map(function (e) {
+        var es = Object.assign({}, e && e.style ? e.style : {});
+        es.opacity = 1;
+        return Object.assign({}, e, { style: es });
+    });
+}
+
+var rfLayoutAnimPendingFinal = null;
 
 function rfSemanticLegendEnabled(diagram) {
     if (!diagram || typeof diagram !== 'object') return false;
@@ -1660,6 +2032,18 @@ window.atelierRfStopLayoutAnimation = function () {
         } catch (_) {}
         rfLayoutAnimTimer = null;
     }
+    var pending = rfLayoutAnimPendingFinal;
+    rfLayoutAnimPendingFinal = null;
+    if (!pending) return;
+    var setNodes = window.__atelierR6SetNodes;
+    var setEdges = window.__atelierR6SetEdges;
+    if (typeof setNodes !== 'function' || typeof setEdges !== 'function') return;
+    setNodes(clampElkCustomNodeDimensions(pending.targetNodes));
+    setEdges(rfFinalizeLayoutEdges(pending.targetEdges));
+    if (pending.parentDbg) window.atelierRfLastNodeParentById = pending.parentDbg;
+    if (pending.epoch != null) {
+        rfAssignRfSnapshot(pending.epoch, pending.targetNodes, pending.targetEdges);
+    }
 };
 
 /**
@@ -1863,19 +2247,66 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
 
     var duration = RF_LAYOUT_ANIM_MS;
     var exitMs = RF_LAYOUT_EXIT_MS;
+    /** Collapse: show new edge routes immediately so cross-group links stay visible. */
+    var isCollapseTransition = enteringIsCollapse.size > 0;
 
-    rfLayoutAnimTimer = timer(function (elapsed) {
+    var shouldFitViewport = !!window.__atelierRfShouldFitView;
+    var vpStart = null;
+    var vpTarget = null;
+    var vpApi = window.__atelierR6ViewportApi;
+
+    rfLayoutAnimPendingFinal = {
+        targetNodes: targetNodes,
+        targetEdges: targetEdges,
+        parentDbg: parentDbg,
+        epoch: epoch,
+    };
+
+    function startLayoutAnimTimer() {
+        if (
+            shouldFitViewport &&
+            vpApi &&
+            typeof vpApi.getViewport === 'function' &&
+            typeof vpApi.setViewport === 'function' &&
+            !vpTarget
+        ) {
+            vpStart = vpApi.getViewport();
+            vpTarget = rfViewportForLayout(targetNodes, targetEdges);
+        }
+
+        rfLayoutAnimTimer = timer(function (elapsed) {
         function staleAnim() {
             return epoch != null && epoch !== window.__atelierRfLayoutEpoch;
         }
         if (staleAnim()) {
-            window.atelierRfStopLayoutAnimation();
+            rfLayoutAnimPendingFinal = null;
+            if (rfLayoutAnimTimer) {
+                try {
+                    rfLayoutAnimTimer.stop();
+                } catch (_) {}
+                rfLayoutAnimTimer = null;
+            }
             return;
         }
 
         var tPos = Math.min(1, elapsed / duration);
         var easedPos = rfCubicInOut(tPos);
         var exitAlpha = elapsed >= exitMs ? 0 : 1 - elapsed / exitMs;
+
+        if (vpStart && vpTarget && vpApi) {
+            try {
+                vpApi.setViewport(
+                    {
+                        x: vpStart.x + (vpTarget.x - vpStart.x) * easedPos,
+                        y: vpStart.y + (vpTarget.y - vpStart.y) * easedPos,
+                        zoom: vpStart.zoom + (vpTarget.zoom - vpStart.zoom) * easedPos,
+                    },
+                    { duration: 0 }
+                );
+            } catch (_) {
+                /* ignore */
+            }
+        }
 
         /** Target nodes first — preserves ELK parent-before-child order for xyflow. */
         var frameNodes = [];
@@ -1998,7 +2429,9 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
 
         setNodes(clampElkCustomNodeDimensions(frameNodes));
 
-        var edgeOp = rfCubicInOut(Math.min(1, elapsed / duration));
+        var edgeOp = isCollapseTransition
+            ? 1
+            : rfCubicInOut(Math.min(1, elapsed / duration));
         var edgeFrame = targetEdges.map(function (e) {
             var es = Object.assign({}, e.style || {}, { opacity: edgeOp });
             return Object.assign({}, e, { style: es });
@@ -2006,9 +2439,10 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
         setEdges(edgeFrame);
 
         if (tPos >= 1) {
+            rfLayoutAnimPendingFinal = null;
             window.atelierRfStopLayoutAnimation();
             setNodes(clampElkCustomNodeDimensions(targetNodes));
-            setEdges(targetEdges);
+            setEdges(rfFinalizeLayoutEdges(targetEdges));
             if (parentDbg) window.atelierRfLastNodeParentById = parentDbg;
             rfAssignRfSnapshot(epoch, targetNodes, targetEdges);
             queueMicrotask(function () {
@@ -2019,6 +2453,15 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
             });
         }
     });
+    }
+
+    if (shouldFitViewport && vpApi) {
+        void rfWaitForPaneLayout().then(function () {
+            startLayoutAnimTimer();
+        });
+    } else {
+        startLayoutAnimTimer();
+    }
 
     return rfLayoutAnimTimer;
 };
@@ -2260,8 +2703,7 @@ function Inner(props) {
             onSelectionChange,
             nodeTypes,
             edgeTypes,
-            fitView: true,
-            fitViewOptions: { padding: 0.15 },
+            fitView: false,
             nodesDraggable: false,
             nodesConnectable: false,
             elementsSelectable: true,
@@ -2405,6 +2847,7 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
             key,
             initialNodes: nodes,
             initialEdges: edges,
+            skipInitialFitView: !!window.__atelierRfShouldFitView,
         })
     );
     queueMicrotask(function () {
@@ -2413,6 +2856,9 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
         }
         if (window.atelierRfDebugLayout && typeof window.atelierRfLogLayoutDebug === 'function') {
             window.atelierRfLogLayoutDebug('rf-mount epoch=' + String(epoch));
+        }
+        if (typeof window.atelierRfFitViewCenterImpl === 'function') {
+            void window.atelierRfFitViewCenterImpl();
         }
     });
 };

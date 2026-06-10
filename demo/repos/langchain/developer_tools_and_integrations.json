@@ -1,0 +1,133 @@
+{
+    "title": "Developer Tools & Integrations",
+    "summary": "This module provides a comprehensive suite of tools and integrations for developers to build, test, and extend LangChain applications, encompassing evaluation frameworks, external partner connections, agent enhancements, and general utilities.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "langchain_app",
+                "label": "LangChain Application",
+                "type": "external",
+                "link": null,
+                "title": "User's LangChain Application",
+                "description": "The primary application built by developers using the LangChain framework, which consumes the functionalities provided by this module."
+            },
+            {
+                "id": "evaluation_testing",
+                "label": "Evaluation & Testing Framework",
+                "type": "module",
+                "link": "evaluation_and_testing",
+                "title": "LLM Evaluation & Testing",
+                "description": "Provides tools and methodologies for assessing the performance, correctness, and robustness of LLMs, agents, and chains."
+            },
+            {
+                "id": "partner_integrations",
+                "label": "External Partner Integrations",
+                "type": "module",
+                "link": "partner_integrations",
+                "title": "Third-Party Service Connectivity",
+                "description": "Enables seamless connection and interaction with a wide array of external AI services, including LLMs, embedding models, and vector stores from various providers."
+            },
+            {
+                "id": "agent_middleware",
+                "label": "Agent Middleware & Control",
+                "type": "module",
+                "link": "agent_middleware_v1",
+                "title": "Agent Behavior Enhancement",
+                "description": "Offers a collection of middleware components to modify, enhance, and control the behavior of agents, including features like PII handling, call limiting, and human-in-the-loop capabilities."
+            },
+            {
+                "id": "misc_utilities",
+                "label": "General Developer Utilities",
+                "type": "module",
+                "link": "miscellaneous_utilities",
+                "title": "Common Helper Functions",
+                "description": "Contains a diverse set of general-purpose utilities such as text splitting, output parsing, serialization, and dynamic module loading, supporting various development tasks."
+            }
+        ],
+        "edges": [
+            {
+                "source": "langchain_app",
+                "target": "evaluation_testing",
+                "label": "Uses for Quality Assurance",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "langchain_app",
+                "target": "partner_integrations",
+                "label": "Leverages External Services",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "langchain_app",
+                "target": "agent_middleware",
+                "label": "Applies to Agent Logic",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "langchain_app",
+                "target": "misc_utilities",
+                "label": "Utilizes Helper Functions",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "partner_integrations",
+                "target": "evaluation_testing",
+                "label": "Provides Models/Services for Testing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_middleware",
+                "target": "misc_utilities",
+                "label": "May Use Utilities",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "misc_utilities",
+                "target": "evaluation_testing",
+                "label": "Supports Test Setup/Analysis",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "dev_lifecycle",
+                "label": "Core Development Lifecycle",
+                "nodes": [
+                    "evaluation_testing",
+                    "misc_utilities"
+                ],
+                "title": "Core Development Lifecycle Tools",
+                "description": "Tools essential for the development, testing, and maintenance phases of building LangChain applications, including evaluation and general-purpose utilities.",
+                "role": null
+            },
+            {
+                "id": "agent_enhancement",
+                "label": "Agent Behavior Enhancement",
+                "nodes": [
+                    "agent_middleware"
+                ],
+                "title": "Agent Behavior Enhancement",
+                "description": "Components specifically designed to extend and control the operational aspects and interactions of AI agents within the framework.",
+                "role": null
+            },
+            {
+                "id": "external_ecosystem",
+                "label": "External Ecosystem Access",
+                "nodes": [
+                    "partner_integrations"
+                ],
+                "title": "External Ecosystem Access",
+                "description": "Integrations facilitating connectivity and interoperability with a broad range of third-party AI services and platforms.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,118 @@
+{
+    "title": "DSPy Program Execution",
+    "summary": "This module orchestrates how DSPy programs run, encompassing advanced prediction strategies, agentic control flow, real-time output streaming, external tool integration, and robust prediction aggregation.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "pred_strategies",
+                "label": "Advanced Prediction Strategies",
+                "type": "module",
+                "link": "prediction_strategies",
+                "title": "DSPy Prediction Strategies",
+                "description": "Implements sophisticated prediction techniques like ReAct, Program-of-Thought, and BestOfN to enhance the quality and robustness of DSPy program outputs."
+            },
+            {
+                "id": "control_flow",
+                "label": "Agentic Control Flow",
+                "type": "module",
+                "link": "program_control_flow",
+                "title": "Program Control Flow (Avatar)",
+                "description": "Manages iterative, agentic execution loops, allowing programs to dynamically decide actions, execute tools, and adapt their strategy until a task is complete."
+            },
+            {
+                "id": "streaming_output",
+                "label": "Output Streaming",
+                "type": "module",
+                "link": "streaming",
+                "title": "DSPy Streaming Capabilities",
+                "description": "Enables real-time, incremental output generation from DSPy programs, providing immediate feedback and supporting integration with streaming APIs."
+            },
+            {
+                "id": "tool_exec",
+                "label": "Tool Execution & Sandboxing",
+                "type": "module",
+                "link": "tool_execution",
+                "title": "Tool Execution Primitives",
+                "description": "Provides core mechanisms for executing external tools, managing sandboxed environments, and handling data serialization for interactive REPL contexts within DSPy programs."
+            },
+            {
+                "id": "pred_agg",
+                "label": "Prediction Aggregation",
+                "type": "module",
+                "link": "prediction_aggregation",
+                "title": "Prediction Aggregation Utilities",
+                "description": "Offers utilities for combining multiple predictions, typically using majority voting, to produce a single, robust output from a set of generated completions."
+            }
+        ],
+        "edges": [
+            {
+                "source": "control_flow",
+                "target": "pred_strategies",
+                "label": "Orchestrates prediction steps",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "control_flow",
+                "target": "tool_exec",
+                "label": "Invokes external tools",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "pred_strategies",
+                "target": "pred_agg",
+                "label": "Generates multiple predictions for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "streaming_output",
+                "target": "pred_strategies",
+                "label": "Provides incremental output for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "streaming_output",
+                "target": "control_flow",
+                "label": "Provides incremental output for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tool_exec",
+                "target": "pred_strategies",
+                "label": "Supports agentic reasoning in",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_execution",
+                "label": "Core Execution Flow",
+                "nodes": [
+                    "control_flow",
+                    "pred_strategies"
+                ],
+                "title": "Core Execution Flow",
+                "description": "The central components that define how DSPy programs execute, make predictions, and manage their overall flow.",
+                "role": null
+            },
+            {
+                "id": "auxiliary_features",
+                "label": "Auxiliary Execution Features",
+                "nodes": [
+                    "streaming_output",
+                    "tool_exec",
+                    "pred_agg"
+                ],
+                "title": "Auxiliary Execution Features",
+                "description": "Supporting functionalities that enhance program execution, including real-time output, external tool integration, and result consolidation.",
+                "role": null
+            }
+        ]
+    }
+}

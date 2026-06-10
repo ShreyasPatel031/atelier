@@ -1,0 +1,232 @@
+{
+  "title": "External Adapters Module",
+  "summary": "This module provides various adapter implementations that bridge DSPy modules and signatures with Language Models (LMs), handling prompt formatting, response parsing, and specialized LM interactions.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "adapter_base",
+        "label": "Base Adapter",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.base.Adapter",
+        "description": "Defines the core interface for transforming DSPy inputs and signatures into LM calls and parsing LM outputs, including native LM feature integration."
+      },
+      {
+        "id": "adapter_baml",
+        "label": "BAML Adapter",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.baml_adapter.BAMLAdapter",
+        "description": "Specializes in rendering complex Pydantic models into a compact, human-readable schema for LMs, improving structured output generation and token efficiency."
+      },
+      {
+        "id": "adapter_two_step",
+        "label": "Two-Step Adapter",
+        "type": "component",
+        "link": null,
+        "title": "dspy.adapters.two_step_adapter.TwoStepAdapter",
+        "description": "Orchestrates a two-stage process: a main LM generates a response, then a smaller LM extracts structured data from the raw output using a ChatAdapter."
+      },
+      {
+        "id": "lm_base",
+        "label": "Language Model (LM)",
+        "type": "external",
+        "link": "lm_clients",
+        "title": "dspy.clients.base_lm.BaseLM",
+        "description": "External language model providing text generation capabilities, used by adapters for processing requests."
+      },
+      {
+        "id": "dspy_signature",
+        "label": "DSPy Signature",
+        "type": "external",
+        "link": "signatures",
+        "title": "dspy.signatures.signature.Signature",
+        "description": "Defines the input and output fields, instructions, and constraints for an LM call, guiding adapter behavior."
+      },
+      {
+        "id": "lm_request",
+        "label": "LM Request",
+        "type": "external",
+        "link": "data_types",
+        "title": "dspy.core.types.LMRequest",
+        "description": "Standardized request object containing messages and parameters sent to a Language Model."
+      },
+      {
+        "id": "lm_response",
+        "label": "LM Response",
+        "type": "external",
+        "link": "data_types",
+        "title": "dspy.core.types.LMResponse",
+        "description": "Standardized response object received from a Language Model, containing generated text and metadata."
+      },
+      {
+        "id": "chat_adapter",
+        "label": "Chat Adapter",
+        "type": "external",
+        "link": "external_adapters",
+        "title": "dspy.adapters.chat.ChatAdapter",
+        "description": "A specialized adapter for chat-based interactions, used internally by TwoStepAdapter for structured data extraction."
+      },
+      {
+        "id": "pydantic_model",
+        "label": "Pydantic BaseModel",
+        "type": "external",
+        "link": null,
+        "title": "pydantic.BaseModel",
+        "description": "External data models used for defining structured data, particularly leveraged by BAMLAdapter for schema generation."
+      },
+      {
+        "id": "dspy_input",
+        "label": "DSPy Input Data",
+        "type": "external",
+        "link": null,
+        "title": "DSPy Input",
+        "description": "The initial structured input data provided to a DSPy module, which is then processed by an adapter."
+      },
+      {
+        "id": "parsed_output",
+        "label": "Parsed Output Data",
+        "type": "external",
+        "link": null,
+        "title": "Parsed Output",
+        "description": "The structured output data produced by the adapter after successfully parsing the Language Model's response."
+      }
+    ],
+    "edges": [
+      {
+        "source": "adapter_baml",
+        "target": "adapter_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "adapter_two_step",
+        "target": "adapter_base",
+        "label": "Extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_input",
+        "target": "adapter_base",
+        "label": "Processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "adapter_base",
+        "target": "dspy_signature",
+        "label": "Uses for formatting/parsing",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "adapter_base",
+        "target": "lm_request",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lm_request",
+        "target": "lm_base",
+        "label": "Sends to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lm_base",
+        "target": "lm_response",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lm_response",
+        "target": "adapter_base",
+        "label": "Parses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "adapter_base",
+        "target": "parsed_output",
+        "label": "Produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "adapter_two_step",
+        "target": "chat_adapter",
+        "label": "Uses for extraction",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chat_adapter",
+        "target": "lm_base",
+        "label": "Calls (extraction LM)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "adapter_baml",
+        "target": "pydantic_model",
+        "label": "Specializes for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_adapters",
+        "label": "Core Adapters",
+        "nodes": [
+          "adapter_base",
+          "adapter_baml",
+          "adapter_two_step"
+        ],
+        "title": "Core Adapter Implementations",
+        "description": "The primary adapter classes defining how DSPy interacts with Language Models.",
+        "role": "generative"
+      },
+      {
+        "id": "lm_integration",
+        "label": "LM Integration",
+        "nodes": [
+          "lm_base",
+          "chat_adapter"
+        ],
+        "title": "Language Model Integration",
+        "description": "Components related to interacting with external Language Models.",
+        "role": "external"
+      },
+      {
+        "id": "data_structures",
+        "label": "Data Structures",
+        "nodes": [
+          "dspy_signature",
+          "pydantic_model",
+          "lm_request",
+          "lm_response"
+        ],
+        "title": "Key Data Structures",
+        "description": "Important data formats and definitions used across the adapter layer.",
+        "role": "data"
+      },
+      {
+        "id": "io_flow",
+        "label": "Input/Output Flow",
+        "nodes": [
+          "dspy_input",
+          "parsed_output"
+        ],
+        "title": "Adapter Input and Output",
+        "description": "Represents the flow of data into and out of the adapter system.",
+        "role": "data"
+      }
+    ]
+  }
+}

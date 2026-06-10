@@ -1,0 +1,342 @@
+{
+  "title": "UI Logic and Hooks",
+  "summary": "This module provides a collection of React hooks and context definitions that encapsulate complex UI logic, state management, and interactions with chat and model-related functionalities. It handles streaming updates, chat lifecycle operations, model capabilities, and UI autoscrolling.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "streaming_context_type",
+        "label": "Manage Streaming State",
+        "type": "component",
+        "link": null,
+        "title": "StreamingContextType",
+        "description": "Defines the structure for managing real-time streaming state, including active chat IDs, loading statuses, abort controllers, and download progress."
+      },
+      {
+        "id": "use_is_waiting_for_load",
+        "label": "Determine Chat Load Status",
+        "type": "component",
+        "link": null,
+        "title": "useIsWaitingForLoad Hook",
+        "description": "Hook to check if a chat is waiting for its initial content load, considering streaming and recent activity to refine UI feedback."
+      },
+      {
+        "id": "use_dismiss_stale_model",
+        "label": "Dismiss Stale Model",
+        "type": "component",
+        "link": null,
+        "title": "useDismissStaleModel Hook",
+        "description": "Provides a function to mark a model as dismissed, preventing repeated stale warnings and triggering model list updates."
+      },
+      {
+        "id": "use_should_show_stale_display",
+        "label": "Check Stale Model Display",
+        "type": "component",
+        "link": null,
+        "title": "useShouldShowStaleDisplay Hook",
+        "description": "Determines if a warning for a stale model should be shown, based on model status, user dismissals, and cloud settings."
+      },
+      {
+        "id": "use_download_progress",
+        "label": "Track Download Progress",
+        "type": "component",
+        "link": null,
+        "title": "useDownloadProgress Hook",
+        "description": "Retrieves the current download progress for a specific chat from the streaming context."
+      },
+      {
+        "id": "use_cancel_message",
+        "label": "Cancel Message Generation",
+        "type": "component",
+        "link": null,
+        "title": "useCancelMessage Hook",
+        "description": "Provides a function to abort an ongoing message generation or model download, clearing associated UI states."
+      },
+      {
+        "id": "use_delete_chat",
+        "label": "Delete Chat",
+        "type": "component",
+        "link": null,
+        "title": "useDeleteChat Hook",
+        "description": "Handles the deletion of a chat, updating the UI and navigating away if the deleted chat was active."
+      },
+      {
+        "id": "use_message_autoscroll",
+        "label": "Manage Chat Autoscroll",
+        "type": "component",
+        "link": null,
+        "title": "useMessageAutoscroll Hook",
+        "description": "Controls automatic scrolling behavior in chat interfaces, adjusting view based on new messages, streaming, and user interaction."
+      },
+      {
+        "id": "use_has_vision_capability",
+        "label": "Check Vision Capability",
+        "type": "component",
+        "link": null,
+        "title": "useHasVisionCapability Hook",
+        "description": "Determines if a given model supports vision-related functionalities."
+      },
+      {
+        "id": "use_has_tools_capability",
+        "label": "Check Tools Capability",
+        "type": "component",
+        "link": null,
+        "title": "useHasToolsCapability Hook",
+        "description": "Determines if a given model supports tool-use functionalities."
+      },
+      {
+        "id": "use_query_batcher",
+        "label": "Batch Query Updates",
+        "type": "component",
+        "link": null,
+        "title": "useQueryBatcher Hook",
+        "description": "Batches multiple updates to a React Query cache key, optimizing performance by reducing frequent re-renders."
+      },
+      {
+        "id": "use_rename_chat",
+        "label": "Rename Chat",
+        "type": "component",
+        "link": null,
+        "title": "useRenameChat Hook",
+        "description": "Handles renaming a chat, updating the backend and invalidating UI caches to reflect the change."
+      },
+      {
+        "id": "api_client",
+        "label": "API Client",
+        "type": "external",
+        "link": "api_client",
+        "title": "api_client module",
+        "description": "Handles all communication with the backend API for data fetching and mutations, including chat, model, and settings operations."
+      },
+      {
+        "id": "data_models_and_routing",
+        "label": "Data Models & Routing",
+        "type": "external",
+        "link": "data_models_and_routing",
+        "title": "data_models_and_routing module",
+        "description": "Provides data structures (e.g., Chat, Model) and handles UI navigation logic within the application."
+      },
+      {
+        "id": "react_query",
+        "label": "React Query",
+        "type": "external",
+        "link": null,
+        "title": "React Query Library",
+        "description": "A library for data fetching, caching, synchronization, and state management in React applications."
+      },
+      {
+        "id": "browser_apis",
+        "label": "Browser APIs",
+        "type": "external",
+        "link": null,
+        "title": "Browser APIs",
+        "description": "Standard browser functionalities like timers (setTimeout), DOM manipulation, and event observers (ResizeObserver, MutationObserver)."
+      },
+      {
+        "id": "react_core",
+        "label": "React Core",
+        "type": "external",
+        "link": null,
+        "title": "React Core Hooks",
+        "description": "Fundamental React hooks (e.g., useRef, useState, useEffect) and context mechanisms for component logic."
+      }
+    ],
+    "edges": [
+      {
+        "source": "use_is_waiting_for_load",
+        "target": "streaming_context_type",
+        "label": "reads streaming state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_is_waiting_for_load",
+        "target": "data_models_and_routing",
+        "label": "uses chat/model data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_is_waiting_for_load",
+        "target": "react_query",
+        "label": "accesses query cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_dismiss_stale_model",
+        "target": "react_query",
+        "label": "updates query cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_dismiss_stale_model",
+        "target": "api_client",
+        "label": "refetches models",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_should_show_stale_display",
+        "target": "react_query",
+        "label": "reads dismissed models",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_should_show_stale_display",
+        "target": "api_client",
+        "label": "reads cloud status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_download_progress",
+        "target": "streaming_context_type",
+        "label": "reads download progress",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_cancel_message",
+        "target": "streaming_context_type",
+        "label": "modifies streaming state",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_cancel_message",
+        "target": "browser_apis",
+        "label": "uses AbortController",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_delete_chat",
+        "target": "react_query",
+        "label": "invalidates cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_delete_chat",
+        "target": "api_client",
+        "label": "calls deleteChat API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_delete_chat",
+        "target": "data_models_and_routing",
+        "label": "uses navigation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_message_autoscroll",
+        "target": "react_core",
+        "label": "uses core React hooks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_message_autoscroll",
+        "target": "browser_apis",
+        "label": "observes DOM changes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_has_vision_capability",
+        "target": "api_client",
+        "label": "reads model capabilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_has_tools_capability",
+        "target": "api_client",
+        "label": "reads model capabilities",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_query_batcher",
+        "target": "react_query",
+        "label": "batches query updates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_query_batcher",
+        "target": "react_core",
+        "label": "uses core React hooks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_query_batcher",
+        "target": "browser_apis",
+        "label": "uses timers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_rename_chat",
+        "target": "react_query",
+        "label": "invalidates cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "use_rename_chat",
+        "target": "api_client",
+        "label": "calls renameChat API",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "ui_state_context_group",
+        "label": "UI State & Context",
+        "nodes": [
+          "streaming_context_type",
+          "use_query_batcher"
+        ],
+        "title": "Manages Global UI State and Context",
+        "description": "This group defines and manages global UI state, particularly for real-time streaming and optimized React Query updates.",
+        "role": "data"
+      },
+      {
+        "id": "chat_management_hooks_group",
+        "label": "Chat Management Hooks",
+        "nodes": [
+          "use_delete_chat",
+          "use_rename_chat",
+          "use_cancel_message",
+          "use_message_autoscroll"
+        ],
+        "title": "Handles Chat Lifecycle and Content Operations",
+        "description": "This group provides hooks for managing the lifecycle of chats, including deletion, renaming, message cancellation, and UI scrolling behavior.",
+        "role": "generative"
+      },
+      {
+        "id": "model_status_capabilities_group",
+        "label": "Model Status & Capabilities Hooks",
+        "nodes": [
+          "use_is_waiting_for_load",
+          "use_dismiss_stale_model",
+          "use_should_show_stale_display",
+          "use_download_progress",
+          "use_has_vision_capability",
+          "use_has_tools_capability"
+        ],
+        "title": "Provides Logic for Model-Specific Features",
+        "description": "This group contains hooks that analyze and provide information about model status, capabilities, and related UI display logic, such as stale model warnings and download progress.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

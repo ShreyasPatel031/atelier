@@ -1,6 +1,6 @@
 {
-    "title": "transformers",
-    "summary": "Hugging Face Transformers is a state-of-the-art library providing pre-trained models, data processing tools, and high-level APIs for various machine learning tasks across modalities. It enables researchers and developers to easily access, fine-tune, and deploy powerful models for natural language processing, computer vision, and audio applications. The library focuses on ease of use, performance optimization, and broad compatibility with popular deep learning frameworks.",
+    "title": "Hugging Face Transformers",
+    "summary": "Hugging Face Transformers is a state-of-the-art library providing pre-trained models for various modalities like text, vision, and audio. It offers a unified API to easily download, fine-tune, and deploy models for tasks such as text generation, image classification, and speech recognition. The library empowers developers and researchers to build and experiment with advanced AI applications efficiently.",
     "diagram": {
         "direction": "LR",
         "nodes": [
@@ -9,146 +9,117 @@
                 "label": "Developer / User",
                 "type": "external",
                 "link": null,
-                "title": "Developer / User",
-                "description": "Interacts with the Transformers library to build, train, and deploy AI models for various tasks."
-            },
-            {
-                "id": "model_architectures",
-                "label": "Model Architectures",
-                "type": "module",
-                "link": "model_architectures",
-                "title": "Model Architectures",
-                "description": "Provides a vast collection of pre-trained deep learning models for NLP, vision, and audio tasks, along with utilities for model management and conversion."
-            },
-            {
-                "id": "data_processing",
-                "label": "Data Processing",
-                "type": "module",
-                "link": "data_processing",
-                "title": "Data Processing",
-                "description": "Offers tools for preparing raw data (text, images, audio) into model-ready formats, including tokenization, feature extraction, and specialized preprocessing."
+                "title": "Human User",
+                "description": "Interacts with the library to leverage pre-trained models, fine-tune them, or deploy AI applications."
             },
             {
                 "id": "pipelines_and_generation",
-                "label": "Pipelines & Generation",
+                "label": "High-Level Tasks & Generation",
                 "type": "module",
                 "link": "pipelines_and_generation",
-                "title": "Pipelines & Generation",
-                "description": "High-level, task-specific APIs for common ML tasks and core logic for efficient text generation, abstracting complex model interactions for ease of use."
+                "title": "Pipelines & Generation Module",
+                "description": "Provides user-friendly, task-specific pipelines for common ML tasks and the core logic for text generation, simplifying model inference and creative text output."
+            },
+            {
+                "id": "model_architectures",
+                "label": "Model Architectures & Utilities",
+                "type": "module",
+                "link": "model_architectures",
+                "title": "Model Architectures Module",
+                "description": "Defines the vast collection of pre-trained model architectures for NLP, computer vision, and audio, along with utilities for model conversion and management."
+            },
+            {
+                "id": "data_processing",
+                "label": "Data Preprocessing",
+                "type": "module",
+                "link": "data_processing",
+                "title": "Data Processing Module",
+                "description": "Handles the preparation of raw data (text, images, audio) into model-compatible formats, including tokenization, feature extraction, and image transformations."
             },
             {
                 "id": "quantization_and_integrations",
-                "label": "Optimization & Deployment",
+                "label": "Model Optimization & Deployment",
                 "type": "module",
                 "link": "quantization_and_integrations",
-                "title": "Optimization & Deployment",
-                "description": "Includes tools for model quantization to improve efficiency, integrations with external ML platforms, and CLI utilities for serving models."
+                "title": "Quantization & Integrations Module",
+                "description": "Offers tools for optimizing model size and speed through quantization, integrates with external ML tools for experiment tracking and fine-tuning, and provides CLI for model serving."
             }
         ],
         "edges": [
             {
                 "source": "user",
                 "target": "pipelines_and_generation",
-                "label": "Uses high-level APIs",
+                "label": "uses for tasks/generation",
                 "title": null,
                 "description": null
             },
             {
                 "source": "user",
-                "target": "model_architectures",
-                "label": "Loads models directly",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "user",
-                "target": "data_processing",
-                "label": "Prepares custom data for",
+                "target": "quantization_and_integrations",
+                "label": "optimizes/deploys models",
                 "title": null,
                 "description": null
             },
             {
                 "source": "pipelines_and_generation",
                 "target": "model_architectures",
-                "label": "Utilizes models from",
+                "label": "utilizes models from",
                 "title": null,
                 "description": null
             },
             {
                 "source": "pipelines_and_generation",
                 "target": "data_processing",
-                "label": "Consumes processed data from",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "data_processing",
-                "target": "model_architectures",
-                "label": "Prepares inputs for",
+                "label": "uses for input preparation",
                 "title": null,
                 "description": null
             },
             {
                 "source": "model_architectures",
                 "target": "quantization_and_integrations",
-                "label": "Provides models for optimization",
+                "label": "provides models for optimization",
                 "title": null,
                 "description": null
             },
             {
-                "source": "quantization_and_integrations",
-                "target": "pipelines_and_generation",
-                "label": "Enhances serving of",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "quantization_and_integrations",
-                "target": "user",
-                "label": "Enables optimized deployment for",
+                "source": "data_processing",
+                "target": "quantization_and_integrations",
+                "label": "provides processors for serving",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "core_models_group",
-                "label": "Core Models",
+                "id": "user_application_layer",
+                "label": "User & Application Layer",
                 "nodes": [
-                    "model_architectures"
-                ],
-                "title": "Core Model Architectures",
-                "description": "Houses a vast collection of pre-trained deep learning models for NLP, vision, and audio tasks, along with utilities for model management and conversion.",
-                "role": null
-            },
-            {
-                "id": "data_prep_group",
-                "label": "Data Preparation",
-                "nodes": [
-                    "data_processing"
-                ],
-                "title": "Data Processing Tools",
-                "description": "Provides essential tools for preparing raw data (text, images, audio) into model-ready formats, including tokenization, feature extraction, and specialized preprocessing.",
-                "role": null
-            },
-            {
-                "id": "task_execution_group",
-                "label": "Task Execution & Generation",
-                "nodes": [
+                    "user",
                     "pipelines_and_generation"
                 ],
-                "title": "Pipelines & Generation",
-                "description": "Offers high-level, task-specific APIs for common ML tasks and core logic for efficient text generation, abstracting complex model interactions for ease of use.",
+                "title": "User Interaction & High-Level Tasks",
+                "description": "This layer represents how users interact with the library, primarily through high-level pipelines for common machine learning tasks and direct generation capabilities.",
                 "role": null
             },
             {
-                "id": "deployment_optim_group",
-                "label": "Deployment & Optimization",
+                "id": "core_ml_foundation",
+                "label": "Core ML Foundation",
+                "nodes": [
+                    "model_architectures",
+                    "data_processing"
+                ],
+                "title": "Core Machine Learning Components",
+                "description": "This group encompasses the fundamental building blocks of the library: the diverse model architectures and the essential data preprocessing utilities.",
+                "role": null
+            },
+            {
+                "id": "model_lifecycle_management",
+                "label": "Model Lifecycle Management",
                 "nodes": [
                     "quantization_and_integrations"
                 ],
-                "title": "Optimization & Deployment",
-                "description": "Includes tools for model quantization to improve efficiency, integrations with external ML platforms, and CLI utilities for serving models.",
+                "title": "Optimization, Integration & Deployment",
+                "description": "Focuses on optimizing models for efficiency, integrating with external MLOps tools, and providing mechanisms for serving models in production environments.",
                 "role": null
             }
         ]

@@ -1,0 +1,161 @@
+{
+  "title": "Base Chain Abstraction",
+  "summary": "This module defines the abstract base class for all chains, providing a foundational structure for sequential operations, input/output handling, state management, and observability within the LangChain framework.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "chain_base",
+        "label": "Define Base Chain Structure",
+        "type": "component",
+        "link": null,
+        "title": "Base Chain",
+        "description": "Abstract base class for creating structured sequences of operations, providing core execution logic, input/output handling, and integration points for memory and callbacks."
+      },
+      {
+        "id": "memory_base",
+        "label": "Manage Chain State",
+        "type": "component",
+        "link": "memory_and_middleware",
+        "title": "Base Memory",
+        "description": "Handles loading and saving conversational context and other stateful information for the chain, enabling persistent interactions."
+      },
+      {
+        "id": "callbacks_manager",
+        "label": "Handle Callbacks & Events",
+        "type": "component",
+        "link": "callbacks_and_history",
+        "title": "Callback Manager",
+        "description": "Manages and dispatches events to registered callback handlers during chain execution for logging, tracing, and monitoring purposes."
+      },
+      {
+        "id": "runnable_serializable",
+        "label": "Enable Runnable Serialization",
+        "type": "component",
+        "link": "runnables",
+        "title": "Runnable Serializable",
+        "description": "Provides serialization capabilities and defines the runnable interface for the chain, allowing it to be part of the LangChain Expression Language (LCEL)."
+      },
+      {
+        "id": "pydantic_model",
+        "label": "Validate Data Schemas",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic BaseModel",
+        "description": "Used for defining and validating input and output schemas for the chain, ensuring data consistency and type safety."
+      },
+      {
+        "id": "external_input",
+        "label": "Receive External Input",
+        "type": "external",
+        "link": null,
+        "title": "External Input",
+        "description": "Represents the initial data provided to the chain for processing, typically a dictionary of parameters."
+      },
+      {
+        "id": "external_output",
+        "label": "Produce Final Output",
+        "type": "external",
+        "link": null,
+        "title": "Final Output",
+        "description": "Represents the processed data returned by the chain after its execution, also typically a dictionary."
+      }
+    ],
+    "edges": [
+      {
+        "source": "external_input",
+        "target": "chain_base",
+        "label": "Provides Input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chain_base",
+        "target": "memory_base",
+        "label": "Loads/Saves Context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "memory_base",
+        "target": "chain_base",
+        "label": "Supplies Context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chain_base",
+        "target": "callbacks_manager",
+        "label": "Triggers Events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "runnable_serializable",
+        "target": "chain_base",
+        "label": "Inherits Interface",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chain_base",
+        "target": "pydantic_model",
+        "label": "Defines/Validates Schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "chain_base",
+        "target": "external_output",
+        "label": "Generates Output",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_logic",
+        "label": "Core Chain Logic",
+        "nodes": [
+          "chain_base"
+        ],
+        "title": "Core Chain Logic",
+        "description": "Encapsulates the fundamental execution flow and structure of a chain.",
+        "role": "generative"
+      },
+      {
+        "id": "state_observability",
+        "label": "State & Observability",
+        "nodes": [
+          "memory_base",
+          "callbacks_manager"
+        ],
+        "title": "State & Observability",
+        "description": "Components responsible for managing the chain's state and providing monitoring capabilities.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_interface",
+        "label": "Data Interface & Validation",
+        "nodes": [
+          "external_input",
+          "external_output",
+          "pydantic_model"
+        ],
+        "title": "Data Interface & Validation",
+        "description": "Handles the input and output data flow, including schema definition and validation.",
+        "role": "data"
+      },
+      {
+        "id": "framework_integration",
+        "label": "Framework Integration",
+        "nodes": [
+          "runnable_serializable"
+        ],
+        "title": "Framework Integration",
+        "description": "Provides the necessary interfaces for the chain to integrate with the broader LangChain framework.",
+        "role": "surface"
+      }
+    ]
+  }
+}

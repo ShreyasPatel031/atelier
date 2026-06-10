@@ -1,0 +1,343 @@
+{
+  "title": "Document Retrieval Systems",
+  "summary": "This module provides various strategies for retrieving relevant documents, ranging from abstract base classes to specialized implementations for query generation, document compression, and external search integrations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "BaseRetriever",
+        "label": "Base Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Base Retriever Interface",
+        "description": "Abstract base class for all document retrieval systems, defining the core interface for fetching relevant documents based on a query. All concrete retrievers implement or extend this class."
+      },
+      {
+        "id": "BaseDocumentCompressor",
+        "label": "Base Document Compressor",
+        "type": "component",
+        "link": null,
+        "title": "Base Document Compressor Interface",
+        "description": "Abstract base class for components designed to refine or compress retrieved documents, often used as a post-processing step after initial retrieval."
+      },
+      {
+        "id": "LLMChainExtractor",
+        "label": "Extract Relevant Content",
+        "type": "component",
+        "link": null,
+        "title": "LLM Chain Extractor",
+        "description": "Uses an LLM chain to extract and compress relevant sections from documents, focusing on key information related to a given query."
+      },
+      {
+        "id": "LLMChainFilter",
+        "label": "Filter Documents by Relevance",
+        "type": "component",
+        "link": null,
+        "title": "LLM Chain Filter",
+        "description": "Filters documents based on their relevance to a query, employing an LLM chain to determine which documents should be included or excluded from the results."
+      },
+      {
+        "id": "CohereRerank",
+        "label": "Rerank Documents with Cohere",
+        "type": "component",
+        "link": null,
+        "title": "Cohere Rerank Compressor",
+        "description": "Reranks retrieved documents using the Cohere Rerank API, enhancing the relevance of search results by scoring documents against the query."
+      },
+      {
+        "id": "EnsembleRetriever",
+        "label": "Combine Multiple Retrievers",
+        "type": "component",
+        "link": null,
+        "title": "Ensemble Retriever",
+        "description": "Combines results from multiple underlying retrievers using a rank fusion algorithm to produce a more comprehensive and robust set of relevant documents."
+      },
+      {
+        "id": "MultiQueryRetriever",
+        "label": "Generate & Retrieve with Multiple Queries",
+        "type": "component",
+        "link": null,
+        "title": "Multi-Query Retriever",
+        "description": "Generates multiple diverse queries from a single input using an LLM, then retrieves and combines documents from all generated queries to broaden search coverage."
+      },
+      {
+        "id": "MultiVectorRetriever",
+        "label": "Retrieve Parent Documents from Chunks",
+        "type": "component",
+        "link": null,
+        "title": "Multi-Vector Retriever",
+        "description": "Retrieves full parent documents by performing similarity searches over smaller, embedded child chunks, ensuring that complete document context is returned for relevant sections."
+      },
+      {
+        "id": "SelfQueryRetriever",
+        "label": "Generate Structured Queries for Vector Store",
+        "type": "component",
+        "link": null,
+        "title": "Self-Query Retriever",
+        "description": "Uses an LLM to parse a natural language query into a structured query, which is then executed against a vector store for more precise and filtered document retrieval."
+      },
+      {
+        "id": "ExaSearchRetriever",
+        "label": "Search Web with Exa",
+        "type": "component",
+        "link": null,
+        "title": "Exa Search Retriever",
+        "description": "Integrates with the Exa Search API to perform targeted web searches and retrieve relevant documents directly from the internet, enhancing real-time information access."
+      },
+      {
+        "id": "PerplexitySearchRetriever",
+        "label": "Search Web with Perplexity",
+        "type": "component",
+        "link": null,
+        "title": "Perplexity Search Retriever",
+        "description": "Integrates with the Perplexity Search API to perform web searches and retrieve relevant documents, leveraging Perplexity's search capabilities for comprehensive results."
+      },
+      {
+        "id": "LLM",
+        "label": "Language Model (LLM)",
+        "type": "external",
+        "link": "llm_interfaces",
+        "title": "Language Model",
+        "description": "A large language model used for various tasks such as generating queries, filtering documents, or extracting information."
+      },
+      {
+        "id": "PromptTemplate",
+        "label": "Prompt Template",
+        "type": "external",
+        "link": "prompt_templates",
+        "title": "Prompt Template Definition",
+        "description": "Defines the structure and content for prompts that are sent to language models, guiding their output for specific tasks."
+      },
+      {
+        "id": "VectorStore",
+        "label": "Vector Store",
+        "type": "external",
+        "link": "vector_stores",
+        "title": "Vector Embedding Database",
+        "description": "A database optimized for storing and querying vector embeddings, enabling efficient similarity search for documents or document chunks."
+      },
+      {
+        "id": "ExternalSearchAPI",
+        "label": "External Search API",
+        "type": "external",
+        "link": null,
+        "title": "Third-Party Search Service",
+        "description": "Represents external web search services (e.g., Exa, Perplexity) used to fetch real-time or indexed information from the internet."
+      }
+    ],
+    "edges": [
+      {
+        "source": "LLMChainExtractor",
+        "target": "BaseDocumentCompressor",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainFilter",
+        "target": "BaseDocumentCompressor",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CohereRerank",
+        "target": "BaseDocumentCompressor",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EnsembleRetriever",
+        "target": "BaseRetriever",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiQueryRetriever",
+        "target": "BaseRetriever",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiVectorRetriever",
+        "target": "BaseRetriever",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfQueryRetriever",
+        "target": "BaseRetriever",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaSearchRetriever",
+        "target": "BaseRetriever",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PerplexitySearchRetriever",
+        "target": "BaseRetriever",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainExtractor",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainExtractor",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainFilter",
+        "target": "LLM",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMChainFilter",
+        "target": "PromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiQueryRetriever",
+        "target": "LLM",
+        "label": "generates queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiQueryRetriever",
+        "target": "PromptTemplate",
+        "label": "formats queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiQueryRetriever",
+        "target": "BaseRetriever",
+        "label": "delegates retrieval",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfQueryRetriever",
+        "target": "LLM",
+        "label": "generates structured queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SelfQueryRetriever",
+        "target": "VectorStore",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiVectorRetriever",
+        "target": "VectorStore",
+        "label": "searches",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ExaSearchRetriever",
+        "target": "ExternalSearchAPI",
+        "label": "integrates with Exa",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PerplexitySearchRetriever",
+        "target": "ExternalSearchAPI",
+        "label": "integrates with Perplexity",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EnsembleRetriever",
+        "target": "BaseRetriever",
+        "label": "orchestrates multiple",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "CoreAbstraction",
+        "label": "Core Abstraction",
+        "nodes": [
+          "BaseRetriever"
+        ],
+        "title": "Core Retriever Interface",
+        "description": "Defines the fundamental interface and behavior for all document retrieval components.",
+        "role": "surface"
+      },
+      {
+        "id": "DocumentPostProcessing",
+        "label": "Document Post-processing",
+        "nodes": [
+          "BaseDocumentCompressor",
+          "LLMChainExtractor",
+          "LLMChainFilter",
+          "CohereRerank"
+        ],
+        "title": "Document Compression and Filtering",
+        "description": "Components responsible for refining, compressing, or filtering documents after initial retrieval to enhance relevance or reduce verbosity.",
+        "role": "data"
+      },
+      {
+        "id": "QueryTransformation",
+        "label": "Query Transformation",
+        "nodes": [
+          "MultiQueryRetriever",
+          "SelfQueryRetriever"
+        ],
+        "title": "Advanced Query Generation",
+        "description": "Retrievers that leverage Language Models to transform or generate queries, enabling more sophisticated and targeted document searches.",
+        "role": "generative"
+      },
+      {
+        "id": "RetrievalOrchestration",
+        "label": "Retrieval Orchestration",
+        "nodes": [
+          "EnsembleRetriever",
+          "MultiVectorRetriever"
+        ],
+        "title": "Combining Retrieval Strategies",
+        "description": "Components that combine or manage multiple retrieval mechanisms to achieve more robust or context-aware document fetching.",
+        "role": "analytical"
+      },
+      {
+        "id": "ExternalSearch",
+        "label": "External Search Integrations",
+        "nodes": [
+          "ExaSearchRetriever",
+          "PerplexitySearchRetriever"
+        ],
+        "title": "Web Search and External Data",
+        "description": "Retrievers designed to integrate with and fetch information from external web search APIs and services.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,73 +1,1529 @@
 {
-    "title": "Chains Module Overview",
-    "summary": "Provides a framework for linking LLM calls and other components into structured sequences, enabling complex workflows for various AI applications.",
-    "diagram": {
-        "direction": "LR",
+  "title": "Chains Module Overview",
+  "summary": "This module provides a comprehensive set of 'Chain' implementations, which are structured sequences of calls to components like language models, retrievers, and other chains. It includes functionalities for conversational AI, document processing, structured output extraction, routing, and specialized tasks like moderation and browser automation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "Chain",
+        "label": "Base Chain Abstraction",
+        "type": "component",
+        "link": null,
+        "title": "Base Chain Abstraction",
+        "description": "Abstract base class for creating structured sequences of calls to components, providing a unified interface for execution, state management (memory), and observability (callbacks)."
+      },
+      {
+        "id": "ConstitutionalChain",
+        "label": "Constitutional AI Chain",
+        "type": "component",
+        "link": null,
+        "title": "Constitutional AI Chain",
+        "description": "Applies constitutional principles to refine LLM responses through iterative critique and revision, using an initial LLMChain for response generation and subsequent LLMChains for critique and revision."
+      },
+      {
+        "id": "ConversationalRetrievalChain",
+        "label": "Conversational Retrieval Chain",
+        "type": "component",
+        "link": null,
+        "title": "Conversational Retrieval Chain",
+        "description": "Facilitates conversational Q&A over retrieved documents by reformulating user questions based on chat history, retrieving relevant documents, and then using an LLM to answer."
+      },
+      {
+        "id": "ChatVectorDBChain",
+        "label": "Chat Vector DB Chain (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "Chat Vector DB Chain (Deprecated)",
+        "description": "A deprecated chain for conversational interaction with a vector database, performing similarity search to retrieve documents and using an LLM for Q&A."
+      },
+      {
+        "id": "GenerateExample",
+        "label": "Generate Few-Shot Example",
+        "type": "component",
+        "link": null,
+        "title": "Generate Few-Shot Example",
+        "description": "Generates a new example based on a list of existing examples and a prompt template, leveraging an LLM for few-shot prompting."
+      },
+      {
+        "id": "FlareChain",
+        "label": "FLARE Chain (Active RAG)",
+        "type": "component",
+        "link": null,
+        "title": "FLARE Chain (Active RAG)",
+        "description": "Implements the FLARE (Forward-Looking Active Retrieval) approach for RAG, iteratively generating responses, identifying low-confidence spans, generating questions, retrieving documents, and refining the response."
+      },
+      {
+        "id": "CreateHistoryAwareRetriever",
+        "label": "Create History-Aware Retriever",
+        "type": "component",
+        "link": null,
+        "title": "Create History-Aware Retriever",
+        "description": "Creates a runnable that generates a standalone question from chat history and a new query, then uses a retriever to fetch relevant documents. If no chat history, it passes the query directly."
+      },
+      {
+        "id": "LLMSummarizationCheckerChain",
+        "label": "LLM Summarization Checker Chain",
+        "type": "component",
+        "link": null,
+        "title": "LLM Summarization Checker Chain",
+        "description": "Performs question-answering with self-verification, iteratively generating a summary, creating assertions, checking them, and revising the summary until assertions are met or max checks are reached."
+      },
+      {
+        "id": "MapReduceChain",
+        "label": "Map-Reduce Chain",
+        "type": "component",
+        "link": null,
+        "title": "Map-Reduce Chain",
+        "description": "Processes large texts by splitting them into chunks, applying a 'map' operation (e.g., summarization) to each chunk, and then combining the results with a 'reduce' operation."
+      },
+      {
+        "id": "OpenAIModerationChain",
+        "label": "OpenAI Moderation Chain",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Moderation Chain",
+        "description": "Passes input text through OpenAI's moderation endpoint to check for content policy violations, configurable to raise an error or return a warning message."
+      },
+      {
+        "id": "NatBotChain",
+        "label": "NatBot Chain (Browser Automation)",
+        "type": "component",
+        "link": null,
+        "title": "NatBot Chain (Browser Automation)",
+        "description": "An LLM-driven chain for browser automation, allowing the LLM to generate commands to interact with web pages based on an objective."
+      },
+      {
+        "id": "Crawler",
+        "label": "Web Crawler (Playwright)",
+        "type": "component",
+        "link": null,
+        "title": "Web Crawler (Playwright)",
+        "description": "A web crawler utility that uses Playwright to navigate web pages, scroll, click, type, and extract visible elements, designed for browser automation chains."
+      },
+      {
+        "id": "CreateStructuredOutputChain",
+        "label": "Create Structured Output Chain (Legacy)",
+        "type": "component",
+        "link": null,
+        "title": "Create Structured Output Chain (Legacy)",
+        "description": "[Legacy] Creates an LLMChain that uses OpenAI's function-calling API to extract structured output based on a given schema (dict or Pydantic model)."
+      },
+      {
+        "id": "CreateCitationFuzzyMatchChain",
+        "label": "Create Citation Fuzzy Match Chain",
+        "type": "component",
+        "link": null,
+        "title": "Create Citation Fuzzy Match Chain",
+        "description": "Creates an LLMChain designed to answer questions with citations, ensuring the answer uses exact words from the provided context."
+      },
+      {
+        "id": "CreateCitationFuzzyMatchRunnable",
+        "label": "Create Citation Fuzzy Match Runnable",
+        "type": "component",
+        "link": null,
+        "title": "Create Citation Fuzzy Match Runnable",
+        "description": "Creates a runnable that answers questions with citations, leveraging LLM's bind_tools for structured output."
+      },
+      {
+        "id": "CreateExtractionChain",
+        "label": "Create Extraction Chain",
+        "type": "component",
+        "link": null,
+        "title": "Create Extraction Chain",
+        "description": "Creates an LLMChain that extracts information from text based on a provided JSON schema, using OpenAI function calling."
+      },
+      {
+        "id": "CreateExtractionChainPydantic",
+        "label": "Create Pydantic Extraction Chain",
+        "type": "component",
+        "link": null,
+        "title": "Create Pydantic Extraction Chain",
+        "description": "Creates an LLMChain that extracts information from text based on a provided Pydantic schema, using OpenAI function calling."
+      },
+      {
+        "id": "GetOpenAPIChain",
+        "label": "Get OpenAPI Chain (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "Get OpenAPI Chain (Deprecated)",
+        "description": "[Deprecated] Creates a SequentialChain for querying an API defined by an OpenAPI specification, using an LLM to generate API calls and a request chain to execute them."
+      },
+      {
+        "id": "DefaultCallAPI",
+        "label": "Default API Call Function",
+        "type": "component",
+        "link": null,
+        "title": "Default API Call Function",
+        "description": "A utility function to make HTTP requests based on parsed OpenAPI function calls, handling method, URL, parameters, and headers."
+      },
+      {
+        "id": "CreateQAWithSourcesChain",
+        "label": "Create QA with Sources Chain",
+        "type": "component",
+        "link": null,
+        "title": "Create QA with Sources Chain",
+        "description": "Creates a question-answering chain that returns an answer along with its sources, leveraging structured output."
+      },
+      {
+        "id": "CreateTaggingChain",
+        "label": "Create Tagging Chain (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "Create Tagging Chain (Deprecated)",
+        "description": "[Deprecated] Creates an LLMChain that extracts and tags information from text based on a provided JSON schema, using OpenAI function calling."
+      },
+      {
+        "id": "CreateTaggingChainPydantic",
+        "label": "Create Pydantic Tagging Chain (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "Create Pydantic Tagging Chain (Deprecated)",
+        "description": "[Deprecated] Creates an LLMChain that extracts and tags information from text based on a provided Pydantic schema, using OpenAI function calling."
+      },
+      {
+        "id": "CreateOpenAIToolsExtractionChainPydantic",
+        "label": "Create OpenAI Tools Pydantic Extraction Chain",
+        "type": "component",
+        "link": null,
+        "title": "Create OpenAI Tools Pydantic Extraction Chain",
+        "description": "Creates a runnable for extracting information from text based on one or more Pydantic schemas, leveraging OpenAI's tool-calling API."
+      },
+      {
+        "id": "QAGenerationChain",
+        "label": "QA Generation Chain (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "QA Generation Chain (Deprecated)",
+        "description": "[Deprecated] Generates question-answer pairs from a given text by splitting it into chunks and using an LLM to create Q&A for each chunk."
+      },
+      {
+        "id": "LoadQADocumentsChain",
+        "label": "Load QA Document Processing Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load QA Document Processing Chain",
+        "description": "Generic loader for various document processing chains (Map Rerank, Stuff, Map Reduce, Refine) used in Question Answering contexts, handling both general QA and QA with sources."
+      },
+      {
+        "id": "LoadQueryConstructorChain",
+        "label": "Load Query Constructor Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load Query Constructor Chain",
+        "description": "Creates an LLMChain that constructs structured queries (e.g., for filtering documents) based on natural language input, document contents, and attribute information."
+      },
+      {
+        "id": "StructuredQueryOutputParser",
+        "label": "Structured Query Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Structured Query Output Parser",
+        "description": "Parses LLM output into a StructuredQuery object, validating against allowed comparators, operators, and attributes for structured data querying."
+      },
+      {
+        "id": "EmbeddingRouterChain",
+        "label": "Embedding Router Chain",
+        "type": "component",
+        "link": null,
+        "title": "Embedding Router Chain",
+        "description": "Routes inputs to different downstream chains based on semantic similarity, using a vector store to find the most relevant destination based on the input's embedding."
+      },
+      {
+        "id": "LLMRouterChain",
+        "label": "LLM Router Chain (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "LLM Router Chain (Deprecated)",
+        "description": "[Deprecated] Routes inputs to different downstream chains using an LLM to decide the destination and prepare the next input."
+      },
+      {
+        "id": "MultiPromptChain",
+        "label": "Multi-Prompt Chain (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "Multi-Prompt Chain (Deprecated)",
+        "description": "[Deprecated] A multi-route chain that uses an LLMRouterChain to select among different prompts and their corresponding LLM chains."
+      },
+      {
+        "id": "MultiRetrievalQAChain",
+        "label": "Multi-Retrieval QA Chain",
+        "type": "component",
+        "link": null,
+        "title": "Multi-Retrieval QA Chain",
+        "description": "A multi-route chain that uses an LLMRouterChain to select among different retrieval QA chains, each potentially using a different retriever or prompt."
+      },
+      {
+        "id": "CreateStructuredOutputRunnable",
+        "label": "Create Structured Output Runnable",
+        "type": "component",
+        "link": null,
+        "title": "Create Structured Output Runnable",
+        "description": "Creates a runnable for extracting structured outputs from an LLM, supporting various OpenAI modes (functions, tools, JSON response format) and Pydantic schemas."
+      },
+      {
+        "id": "LoadSummarizationChain",
+        "label": "Load Summarization Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load Summarization Chain",
+        "description": "Generic loader for various summarization chains (Stuff, Map Reduce, Refine), configuring them with LLMs and prompts for document summarization."
+      },
+      {
+        "id": "LoadGenericChain",
+        "label": "Load Generic Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load Generic Chain",
+        "description": "Utility functions for loading various chain types (LLM, LLM Checker, LLM Math, QA with Sources, API, Hypothetical Document Embedder, Stuff Documents, Refine Documents, Map Reduce Documents, Vector DB QA, Retrieval QA, Vector DB QA with Sources, Retrieval QA with Sources, Map Rerank Documents, LLM Requests, Graph Cypher QA) from configuration dictionaries."
+      },
+      {
+        "id": "RunnableSerializable",
+        "label": "Runnable Serializable",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Runnable Serializable",
+        "description": "Base class for runnables that can be serialized."
+      },
+      {
+        "id": "BaseMemory",
+        "label": "Base Memory",
+        "type": "external",
+        "link": "memory_management",
+        "title": "Base Memory",
+        "description": "Abstract base class for memory systems that store and retrieve conversation history or other state."
+      },
+      {
+        "id": "Callbacks",
+        "label": "Callback Handlers",
+        "type": "external",
+        "link": "callbacks_and_tracing",
+        "title": "Callback Handlers",
+        "description": "Interface for handling events during chain execution, enabling logging, tracing, and custom actions."
+      },
+      {
+        "id": "BaseLanguageModel",
+        "label": "Base Language Model",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Base Language Model",
+        "description": "Abstract base class for all language models, defining the core interface for text generation."
+      },
+      {
+        "id": "LLMChain",
+        "label": "LLM Chain",
+        "type": "external",
+        "link": null,
+        "title": "LLM Chain",
+        "description": "A chain that takes a prompt template and an LLM, formats the prompt, and passes it to the LLM for generation."
+      },
+      {
+        "id": "ConstitutionalPrinciple",
+        "label": "Constitutional Principle",
+        "type": "external",
+        "link": null,
+        "title": "Constitutional Principle",
+        "description": "Defines a critique request and a revision request for guiding LLM behavior in constitutional AI."
+      },
+      {
+        "id": "BaseRetriever",
+        "label": "Base Retriever",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Base Retriever",
+        "description": "Abstract base class for document retrieval systems, fetching relevant documents based on a query."
+      },
+      {
+        "id": "StuffDocumentsChain",
+        "label": "Stuff Documents Chain",
+        "type": "external",
+        "link": null,
+        "title": "Stuff Documents Chain",
+        "description": "A chain that combines all documents into a single prompt for the LLM, suitable for smaller contexts."
+      },
+      {
+        "id": "VectorStore",
+        "label": "Vector Store",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Vector Store",
+        "description": "Abstract base class for vector databases, enabling storage and similarity search of document embeddings."
+      },
+      {
+        "id": "Runnable",
+        "label": "Runnable",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Runnable",
+        "description": "The core interface for composable components in LangChain, supporting invoke, batch, and stream operations."
+      },
+      {
+        "id": "FinishedOutputParser",
+        "label": "Finished Output Parser",
+        "type": "external",
+        "link": null,
+        "title": "Finished Output Parser",
+        "description": "A parser that determines whether a chain's output indicates completion."
+      },
+      {
+        "id": "StrOutputParser",
+        "label": "String Output Parser",
+        "type": "external",
+        "link": "output_parsing",
+        "title": "String Output Parser",
+        "description": "Parses LLM output into a simple string."
+      },
+      {
+        "id": "Document",
+        "label": "Document Object",
+        "type": "external",
+        "link": "document_loading",
+        "title": "Document Object",
+        "description": "Represents a piece of text content and associated metadata."
+      },
+      {
+        "id": "RunnableBranch",
+        "label": "Conditional Runnable",
+        "type": "external",
+        "link": "runnable_composition",
+        "title": "Conditional Runnable",
+        "description": "A runnable that executes different branches based on a condition."
+      },
+      {
+        "id": "SequentialChain",
+        "label": "Sequential Chain",
+        "type": "external",
+        "link": null,
+        "title": "Sequential Chain",
+        "description": "A chain that executes a sequence of other chains, passing the output of one as input to the next."
+      },
+      {
+        "id": "TextSplitter",
+        "label": "Text Splitter",
+        "type": "external",
+        "link": "miscellaneous_utilities",
+        "title": "Text Splitter",
+        "description": "Utility for splitting large texts into smaller, manageable chunks."
+      },
+      {
+        "id": "ReduceDocumentsChain",
+        "label": "Reduce Documents Chain",
+        "type": "external",
+        "link": null,
+        "title": "Reduce Documents Chain",
+        "description": "A chain that combines a list of documents into a single output, often used in map-reduce patterns."
+      },
+      {
+        "id": "MapReduceDocumentsChain",
+        "label": "Map Reduce Documents Chain",
+        "type": "external",
+        "link": null,
+        "title": "Map Reduce Documents Chain",
+        "description": "A chain that applies a map function to each document and then a reduce function to combine the results."
+      },
+      {
+        "id": "openai",
+        "label": "OpenAI API Client",
+        "type": "external",
+        "link": "partner_integrations",
+        "title": "OpenAI API Client",
+        "description": "Python client for interacting with OpenAI's various APIs, including moderation."
+      },
+      {
+        "id": "playwright",
+        "label": "Playwright Library",
+        "type": "external",
+        "link": null,
+        "title": "Playwright Library",
+        "description": "A Python library for browser automation, enabling control of Chromium, Firefox, and WebKit browsers."
+      },
+      {
+        "id": "PydanticBaseModel",
+        "label": "Pydantic Base Model",
+        "type": "external",
+        "link": null,
+        "title": "Pydantic Base Model",
+        "description": "Base class for data models, providing data validation and settings management using Python type hints."
+      },
+      {
+        "id": "PydanticOutputFunctionsParser",
+        "label": "Pydantic Output Functions Parser",
+        "type": "external",
+        "link": "output_parsing",
+        "title": "Pydantic Output Functions Parser",
+        "description": "Parses LLM function call output into a Pydantic object."
+      },
+      {
+        "id": "PydanticAttrOutputFunctionsParser",
+        "label": "Pydantic Attr Output Functions Parser",
+        "type": "external",
+        "link": "output_parsing",
+        "title": "Pydantic Attr Output Functions Parser",
+        "description": "Parses LLM function call output into a specific attribute of a Pydantic object."
+      },
+      {
+        "id": "JsonKeyOutputFunctionsParser",
+        "label": "JSON Key Output Functions Parser",
+        "type": "external",
+        "link": "output_parsing",
+        "title": "JSON Key Output Functions Parser",
+        "description": "Parses LLM function call output, extracting a specific key from the JSON result."
+      },
+      {
+        "id": "requests",
+        "label": "HTTP Requests Library",
+        "type": "external",
+        "link": null,
+        "title": "HTTP Requests Library",
+        "description": "A popular Python library for making HTTP requests."
+      },
+      {
+        "id": "OpenAPISpec",
+        "label": "OpenAPI Specification",
+        "type": "external",
+        "link": null,
+        "title": "OpenAPI Specification",
+        "description": "A standard, language-agnostic interface for describing REST APIs, allowing both humans and computers to discover and understand the capabilities of a service."
+      },
+      {
+        "id": "PydanticToolsParser",
+        "label": "Pydantic Tools Parser",
+        "type": "external",
+        "link": "output_parsing",
+        "title": "Pydantic Tools Parser",
+        "description": "Parses LLM tool call output into Pydantic objects."
+      },
+      {
+        "id": "RefineDocumentsChain",
+        "label": "Refine Documents Chain",
+        "type": "external",
+        "link": null,
+        "title": "Refine Documents Chain",
+        "description": "A chain that iteratively refines an answer by processing documents one by one, updating the answer with each document."
+      },
+      {
+        "id": "RouterChain",
+        "label": "Router Chain",
+        "type": "external",
+        "link": null,
+        "title": "Router Chain",
+        "description": "Base class for chains that route inputs to different downstream chains based on some logic."
+      },
+      {
+        "id": "MultiRouteChain",
+        "label": "Multi-Route Chain",
+        "type": "external",
+        "link": null,
+        "title": "Multi-Route Chain",
+        "description": "A chain that uses a router to select and execute one of several candidate chains."
+      },
+      {
+        "id": "RouterOutputParser",
+        "label": "Router Output Parser",
+        "type": "external",
+        "link": "output_parsing",
+        "title": "Router Output Parser",
+        "description": "Parses LLM output to determine the destination chain and the input for that chain."
+      },
+      {
+        "id": "RetrievalQA",
+        "label": "Retrieval QA Chain",
+        "type": "external",
+        "link": null,
+        "title": "Retrieval QA Chain",
+        "description": "A chain for question answering over documents retrieved by a retriever."
+      },
+      {
+        "id": "ConversationChain",
+        "label": "Conversation Chain",
+        "type": "external",
+        "link": null,
+        "title": "Conversation Chain",
+        "description": "A simple chain for managing conversational turns and memory."
+      },
+      {
+        "id": "Embeddings",
+        "label": "Embeddings Interface",
+        "type": "external",
+        "link": "miscellaneous_utilities",
+        "title": "Embeddings Interface",
+        "description": "Abstract base class for text embedding models, converting text into numerical vectors."
+      }
+    ],
+    "edges": [
+      {
+        "source": "Chain",
+        "target": "RunnableSerializable",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Chain",
+        "target": "BaseMemory",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Chain",
+        "target": "Callbacks",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConstitutionalChain",
+        "target": "Chain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConstitutionalChain",
+        "target": "LLMChain",
+        "label": "uses for generation, critique, revision",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConstitutionalChain",
+        "target": "ConstitutionalPrinciple",
+        "label": "guided by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationalRetrievalChain",
+        "target": "Chain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationalRetrievalChain",
+        "target": "BaseRetriever",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationalRetrievalChain",
+        "target": "LLMChain",
+        "label": "uses for question generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConversationalRetrievalChain",
+        "target": "StuffDocumentsChain",
+        "label": "uses for document combination",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatVectorDBChain",
+        "target": "Chain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatVectorDBChain",
+        "target": "VectorStore",
+        "label": "uses for retrieval",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ChatVectorDBChain",
+        "target": "LLMChain",
+        "label": "uses for Q&A",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GenerateExample",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GenerateExample",
+        "target": "StrOutputParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FlareChain",
+        "target": "Chain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FlareChain",
+        "target": "Runnable",
+        "label": "uses for Q&A generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FlareChain",
+        "target": "BaseRetriever",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FlareChain",
+        "target": "FinishedOutputParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateHistoryAwareRetriever",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateHistoryAwareRetriever",
+        "target": "BaseRetriever",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateHistoryAwareRetriever",
+        "target": "RunnableBranch",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateHistoryAwareRetriever",
+        "target": "StrOutputParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMSummarizationCheckerChain",
+        "target": "Chain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMSummarizationCheckerChain",
+        "target": "SequentialChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MapReduceChain",
+        "target": "Chain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MapReduceChain",
+        "target": "TextSplitter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MapReduceChain",
+        "target": "MapReduceDocumentsChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MapReduceChain",
+        "target": "Document",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIModerationChain",
+        "target": "Chain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIModerationChain",
+        "target": "openai",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "NatBotChain",
+        "target": "Chain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "NatBotChain",
+        "target": "Runnable",
+        "label": "uses for command generation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "NatBotChain",
+        "target": "StrOutputParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "Crawler",
+        "target": "playwright",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputChain",
+        "target": "LLMChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputChain",
+        "target": "PydanticBaseModel",
+        "label": "uses schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputChain",
+        "target": "PydanticAttrOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateCitationFuzzyMatchChain",
+        "target": "LLMChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateCitationFuzzyMatchChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateCitationFuzzyMatchChain",
+        "target": "PydanticOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateCitationFuzzyMatchRunnable",
+        "target": "Runnable",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateCitationFuzzyMatchRunnable",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateExtractionChain",
+        "target": "LLMChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateExtractionChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateExtractionChain",
+        "target": "JsonKeyOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateExtractionChainPydantic",
+        "target": "LLMChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateExtractionChainPydantic",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateExtractionChainPydantic",
+        "target": "PydanticAttrOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GetOpenAPIChain",
+        "target": "SequentialChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GetOpenAPIChain",
+        "target": "OpenAPISpec",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GetOpenAPIChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GetOpenAPIChain",
+        "target": "LLMChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GetOpenAPIChain",
+        "target": "requests",
+        "label": "uses via DefaultCallAPI",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DefaultCallAPI",
+        "target": "requests",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateQAWithSourcesChain",
+        "target": "LLMChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateQAWithSourcesChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateTaggingChain",
+        "target": "LLMChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateTaggingChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateTaggingChain",
+        "target": "JsonOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateTaggingChainPydantic",
+        "target": "LLMChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateTaggingChainPydantic",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateTaggingChainPydantic",
+        "target": "PydanticOutputFunctionsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateOpenAIToolsExtractionChainPydantic",
+        "target": "Runnable",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateOpenAIToolsExtractionChainPydantic",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateOpenAIToolsExtractionChainPydantic",
+        "target": "PydanticToolsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAGenerationChain",
+        "target": "Chain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAGenerationChain",
+        "target": "LLMChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "QAGenerationChain",
+        "target": "TextSplitter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadQADocumentsChain",
+        "target": "MapReduceDocumentsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadQADocumentsChain",
+        "target": "StuffDocumentsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadQADocumentsChain",
+        "target": "RefineDocumentsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadQADocumentsChain",
+        "target": "LLMChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadQADocumentsChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadQueryConstructorChain",
+        "target": "LLMChain",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadQueryConstructorChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadQueryConstructorChain",
+        "target": "StructuredQueryOutputParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StructuredQueryOutputParser",
+        "target": "BaseOutputParser",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EmbeddingRouterChain",
+        "target": "RouterChain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EmbeddingRouterChain",
+        "target": "VectorStore",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "EmbeddingRouterChain",
+        "target": "Embeddings",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMRouterChain",
+        "target": "RouterChain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMRouterChain",
+        "target": "LLMChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMRouterChain",
+        "target": "RouterOutputParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiPromptChain",
+        "target": "MultiRouteChain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiPromptChain",
+        "target": "LLMRouterChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiPromptChain",
+        "target": "LLMChain",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiPromptChain",
+        "target": "ConversationChain",
+        "label": "uses as default",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "MultiRouteChain",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "LLMRouterChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "RetrievalQA",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MultiRetrievalQAChain",
+        "target": "ConversationChain",
+        "label": "uses as default",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputRunnable",
+        "target": "Runnable",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputRunnable",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputRunnable",
+        "target": "PydanticBaseModel",
+        "label": "uses schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputRunnable",
+        "target": "BaseOutputParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateStructuredOutputRunnable",
+        "target": "PydanticToolsParser",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadSummarizationChain",
+        "target": "StuffDocumentsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadSummarizationChain",
+        "target": "MapReduceDocumentsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadSummarizationChain",
+        "target": "RefineDocumentsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadSummarizationChain",
+        "target": "LLMChain",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadSummarizationChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "LLMChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "LLMCheckerChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "LLMMathChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "QAWithSourcesChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "APIChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "HypotheticalDocumentEmbedder",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "StuffDocumentsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "RefineDocumentsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "MapReduceDocumentsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "VectorDBQA",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "RetrievalQA",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "VectorDBQAWithSourcesChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "RetrievalQAWithSourcesChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "MapRerankDocumentsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "LLMRequestsChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "GraphCypherQAChain",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "BaseLanguageModel",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "BasePromptTemplate",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "BaseRetriever",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "VectorStore",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "Embeddings",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadGenericChain",
+        "target": "requests",
+        "label": "uses",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "BaseChainAbstractions",
+        "label": "Base Chain Abstractions",
         "nodes": [
-            {"id": "core_chain_components", "label": "Core Chains", "type": "module", "link": "core_chain_components", "title": "Core Chain Components", "description": "Defines the foundational Chain abstraction for creating structured sequences of operations."},
-            {"id": "conversational_retrieval", "label": "Conversational Retrieval", "type": "module", "link": "conversational_retrieval", "title": "Conversational Retrieval Chains", "description": "Handles document retrieval and context management within conversational flows."},
-            {"id": "web_automation_chains", "label": "Web Automation", "type": "module", "link": "web_automation_chains", "title": "Web Automation Chains", "description": "Enables LLMs to interact with and automate web browsing tasks."},
-            {"id": "openai_function_integrations", "label": "OpenAI Function Integrations", "type": "module", "link": "openai_function_integrations", "title": "OpenAI Function/Tool Integrations", "description": "Facilitates structured output extraction, function calling, and API integration using OpenAI models."},
-            {"id": "chain_loading_utilities", "label": "Chain Loading Utilities", "type": "module", "link": "chain_loading_utilities", "title": "Chain Loading Utilities", "description": "Provides functions to load and configure various chain types from predefined configurations."},
-            {"id": "qa_generation_chains", "label": "QA Generation", "type": "module", "link": "qa_generation_chains", "title": "QA Generation Chains", "description": "Focuses on generating questions and answers, often from provided text."},
-            {"id": "routing_chains", "label": "Routing Chains", "type": "module", "link": "routing_chains", "title": "Routing Chains", "description": "Directs inputs to appropriate sub-chains or tools based on embedding or LLM-based decisions."},
-            {"id": "query_construction", "label": "Query Construction", "type": "module", "link": "query_construction", "title": "Query Construction and Parsing", "description": "Handles the creation and parsing of structured queries for information retrieval."},
-            {"id": "specialized_chains", "label": "Specialized Chains", "type": "module", "link": "specialized_chains", "title": "Specialized Chains", "description": "Implements unique chain types for specific advanced use cases like constitutional AI or FLARE."},
-            {"id": "map_reduce_chains", "label": "Map-Reduce Chains", "type": "module", "link": "map_reduce_chains", "title": "Map-Reduce Chains", "description": "Applies map-reduce pattern for processing large documents or complex data."},
-            {"id": "moderation_chains", "label": "Moderation Chains", "type": "module", "link": "moderation_chains", "title": "Moderation Chains", "description": "Provides functionality for content moderation using external services."}
+          "Chain"
         ],
-        "edges": [
-            {"source": "core_chain_components", "target": "conversational_retrieval", "label": "extends"},
-            {"source": "core_chain_components", "target": "web_automation_chains", "label": "extends"},
-            {"source": "core_chain_components", "target": "qa_generation_chains", "label": "extends"},
-            {"source": "core_chain_components", "target": "routing_chains", "label": "extends"},
-            {"source": "core_chain_components", "target": "specialized_chains", "label": "extends"},
-            {"source": "core_chain_components", "target": "map_reduce_chains", "label": "extends"},
-            {"source": "core_chain_components", "target": "moderation_chains", "label": "extends"},
-
-            {"source": "chain_loading_utilities", "target": "conversational_retrieval", "label": "loads/configures"},
-            {"source": "chain_loading_utilities", "target": "qa_generation_chains", "label": "loads/configures"},
-            {"source": "chain_loading_utilities", "target": "map_reduce_chains", "label": "loads/configures"},
-            {"source": "chain_loading_utilities", "target": "specialized_chains", "label": "loads/configures"},
-
-            {"source": "openai_function_integrations", "target": "qa_generation_chains", "label": "provides structured output for"},
-
-            {"source": "query_construction", "target": "routing_chains", "label": "informs"},
-            {"source": "conversational_retrieval", "target": "qa_generation_chains", "label": "uses"}
+        "title": "Base Chain Abstractions",
+        "description": "Core abstract classes and fundamental operations for building chains.",
+        "role": "surface"
+      },
+      {
+        "id": "ConversationalRetrieval",
+        "label": "Conversational & Retrieval Chains",
+        "nodes": [
+          "ConstitutionalChain",
+          "ConversationalRetrievalChain",
+          "ChatVectorDBChain",
+          "CreateHistoryAwareRetriever"
         ],
-        "groups": [
-            {
-                "id": "core_framework",
-                "label": "Core Framework",
-                "title": "Core Framework",
-                "description": "Fundamental abstractions and loading mechanisms for building chains.",
-                "role": "analytical",
-                "nodes": ["core_chain_components", "chain_loading_utilities"]
-            },
-            {
-                "id": "interaction_patterns",
-                "label": "Interaction Patterns",
-                "title": "Common Interaction Patterns",
-                "description": "Chains designed for common LLM interaction patterns like conversational AI, QA, and content generation.",
-                "role": "generative",
-                "nodes": ["conversational_retrieval", "qa_generation_chains", "map_reduce_chains", "routing_chains", "query_construction"]
-            },
-            {
-                "id": "integrations",
-                "label": "External Integrations",
-                "title": "External Tool & API Integrations",
-                "description": "Chains that integrate with external services and specialized APIs, such as OpenAI functions or web browsers.",
-                "role": "surface",
-                "nodes": ["openai_function_integrations", "web_automation_chains", "moderation_chains"]
-            },
-            {
-                "id": "advanced_techniques",
-                "label": "Advanced Techniques",
-                "title": "Advanced AI Techniques",
-                "description": "Specialized chains implementing more advanced or experimental AI patterns.",
-                "role": "analytical",
-                "nodes": ["specialized_chains"]
-            }
-        ]
-    }
+        "title": "Conversational & Retrieval Chains",
+        "description": "Chains designed for interactive conversations, question answering, and document retrieval.",
+        "role": "generative"
+      },
+      {
+        "id": "DocumentProcessing",
+        "label": "Document Processing Chains",
+        "nodes": [
+          "LLMSummarizationCheckerChain",
+          "MapReduceChain",
+          "QAGenerationChain",
+          "LoadQADocumentsChain",
+          "LoadSummarizationChain"
+        ],
+        "title": "Document Processing Chains",
+        "description": "Chains for summarizing, mapping, reducing, and refining documents to extract or condense information.",
+        "role": "data"
+      },
+      {
+        "id": "StructuredOutputFunctionCalling",
+        "label": "Structured Output & Function Calling Chains",
+        "nodes": [
+          "CreateStructuredOutputChain",
+          "CreateCitationFuzzyMatchChain",
+          "CreateCitationFuzzyMatchRunnable",
+          "CreateExtractionChain",
+          "CreateExtractionChainPydantic",
+          "GetOpenAPIChain",
+          "DefaultCallAPI",
+          "CreateQAWithSourcesChain",
+          "CreateTaggingChain",
+          "CreateTaggingChainPydantic",
+          "CreateOpenAIToolsExtractionChainPydantic",
+          "CreateStructuredOutputRunnable"
+        ],
+        "title": "Structured Output & Function Calling Chains",
+        "description": "Chains leveraging LLM function/tool calling capabilities for structured data extraction, tagging, and API interaction.",
+        "role": "generative"
+      },
+      {
+        "id": "RoutingOrchestration",
+        "label": "Routing & Orchestration Chains",
+        "nodes": [
+          "EmbeddingRouterChain",
+          "LLMRouterChain",
+          "MultiPromptChain",
+          "MultiRetrievalQAChain"
+        ],
+        "title": "Routing & Orchestration Chains",
+        "description": "Chains that intelligently direct queries to appropriate sub-chains or components based on content or embeddings.",
+        "role": "analytical"
+      },
+      {
+        "id": "SpecializedTasks",
+        "label": "Specialized Task Chains",
+        "nodes": [
+          "GenerateExample",
+          "FlareChain",
+          "OpenAIModerationChain",
+          "NatBotChain",
+          "Crawler",
+          "LoadQueryConstructorChain",
+          "StructuredQueryOutputParser"
+        ],
+        "title": "Specialized Task Chains",
+        "description": "Chains designed for specific, niche applications such as moderation, browser automation, or example generation.",
+        "role": "generative"
+      },
+      {
+        "id": "ChainLoadingUtilities",
+        "label": "Chain Loading Utilities",
+        "nodes": [
+          "LoadGenericChain"
+        ],
+        "title": "Chain Loading Utilities",
+        "description": "Functions responsible for deserializing and loading various chain types from configuration files or dictionaries.",
+        "role": "surface"
+      }
+    ]
+  }
 }

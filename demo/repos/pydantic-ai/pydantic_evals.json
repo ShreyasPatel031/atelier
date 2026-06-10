@@ -1,0 +1,168 @@
+{
+    "title": "Pydantic Evals Framework",
+    "summary": "This module provides a comprehensive framework for evaluating AI systems, offering tools for defining, configuring, and executing both online and dataset-based evaluations. It includes various evaluator types, LLM-driven dataset generation, and utilities for reporting and telemetry.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "eval_core",
+                "label": "Core Evaluation Orchestration",
+                "type": "module",
+                "link": "pydantic_evals.evaluation_core",
+                "title": "Core Evaluation Orchestration",
+                "description": "Manages the overall evaluation process, including online evaluations, dataset execution, and LLM-driven dataset generation."
+            },
+            {
+                "id": "eval_types",
+                "label": "Specific Evaluator Implementations",
+                "type": "module",
+                "link": "pydantic_evals.evaluator_types",
+                "title": "Evaluator Type Definitions",
+                "description": "Defines various types of evaluators, from simple content checks to LLM-based judges and statistical report generators."
+            },
+            {
+                "id": "reporting_telemetry",
+                "label": "Evaluation Reporting & Telemetry",
+                "type": "module",
+                "link": "pydantic_evals.reporting_and_telemetry",
+                "title": "Reporting & Telemetry Utilities",
+                "description": "Provides tools for collecting OpenTelemetry spans, formatting numerical differences, and rendering durations for comprehensive evaluation reports."
+            },
+            {
+                "id": "agent_sys",
+                "label": "Agent Framework",
+                "type": "external",
+                "link": "pydantic_ai_core.agent_framework",
+                "title": "Pydantic AI Agent Framework",
+                "description": "The core framework for building and running AI agents, which can integrate online evaluations as capabilities."
+            },
+            {
+                "id": "llm_models",
+                "label": "LLM Model Abstraction",
+                "type": "external",
+                "link": "pydantic_ai_core.model_abstraction",
+                "title": "LLM Model Abstraction Layer",
+                "description": "Provides a unified interface for interacting with various Large Language Models, used by evaluators and dataset generation."
+            },
+            {
+                "id": "data_sinks",
+                "label": "Evaluation Data Sinks",
+                "type": "external",
+                "link": null,
+                "title": "External Data Sinks",
+                "description": "External systems or services where evaluation results are stored, analyzed, or reported (e.g., databases, dashboards)."
+            },
+            {
+                "id": "observability",
+                "label": "OpenTelemetry System",
+                "type": "external",
+                "link": null,
+                "title": "OpenTelemetry Observability",
+                "description": "An external observability framework for emitting traces, metrics, and logs related to evaluation events and function executions."
+            }
+        ],
+        "edges": [
+            {
+                "source": "eval_core",
+                "target": "eval_types",
+                "label": "uses evaluator definitions",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "eval_core",
+                "target": "reporting_telemetry",
+                "label": "integrates for reporting",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "eval_core",
+                "target": "agent_sys",
+                "label": "integrates as capability",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "eval_core",
+                "target": "llm_models",
+                "label": "generates datasets with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "eval_core",
+                "target": "data_sinks",
+                "label": "sends results to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "eval_core",
+                "target": "observability",
+                "label": "emits traces to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "eval_types",
+                "target": "llm_models",
+                "label": "implements LLM-based evaluators with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "reporting_telemetry",
+                "target": "observability",
+                "label": "collects spans from",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "orchestration_group",
+                "label": "Evaluation Orchestration",
+                "nodes": [
+                    "eval_core"
+                ],
+                "title": "Core Evaluation Orchestration",
+                "description": "Manages the overall flow of evaluations, from configuration to execution and result dispatch.",
+                "role": "surface"
+            },
+            {
+                "id": "evaluator_definitions_group",
+                "label": "Evaluator Definitions",
+                "nodes": [
+                    "eval_types"
+                ],
+                "title": "Defining Evaluation Logic",
+                "description": "Houses the abstract and concrete implementations of various evaluators for different assessment needs.",
+                "role": "generative"
+            },
+            {
+                "id": "reporting_observability_group",
+                "label": "Reporting & Observability",
+                "nodes": [
+                    "reporting_telemetry"
+                ],
+                "title": "Evaluation Reporting & Observability",
+                "description": "Provides utilities for collecting telemetry data and formatting evaluation results for clear reporting.",
+                "role": "analytical"
+            },
+            {
+                "id": "external_integrations_group",
+                "label": "External Integrations",
+                "nodes": [
+                    "agent_sys",
+                    "llm_models",
+                    "data_sinks",
+                    "observability"
+                ],
+                "title": "External System Integrations",
+                "description": "Represents the external systems and frameworks that interact with or are utilized by the evaluation module.",
+                "role": "data"
+            }
+        ]
+    }
+}

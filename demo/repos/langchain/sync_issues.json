@@ -1,138 +1,265 @@
 {
-  "docs_dir": "/Users/shreyaspatel/.cursor/worktrees/atelier/ttp/.tmp/demo_regen/langchain/docs",
-  "timestamp": "2026-05-15T19:55:41.026237",
+  "docs_dir": "/Users/shreyaspatel/atelier/.tmp/demo_regen/langchain/docs",
+  "timestamp": "2026-05-26T14:41:50.136238",
   "summary": {
-    "total_modules": 37,
-    "missing_files": 0,
-    "failure_rate_pct": 0.0,
-    "success_rate_pct": 100.0,
-    "total_issues": 41,
-    "errors": 0,
-    "warnings": 41,
+    "total_modules": 24,
+    "missing_files": 1,
+    "failure_rate_pct": 4.17,
+    "success_rate_pct": 95.83,
+    "total_issues": 21,
+    "errors": 1,
+    "warnings": 20,
     "files_created": 0,
-    "metadata_added": 40,
+    "metadata_added": 2,
     "diagrams_added": 0
   },
   "metrics": {
     "presync_audit": {
-      "modules_total": 37,
-      "missing_md": 37,
-      "missing_title": 20,
-      "missing_description": 20,
+      "modules_total": 24,
+      "missing_md": 1,
+      "missing_title": 1,
+      "missing_description": 1,
       "leaf_missing_diagram": 0,
-      "parent_missing_diagram_with_children": 0,
+      "parent_missing_diagram_with_children": 1,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 24,
-      "children_missing_from_diagram_nodes": 16,
+      "diagram_edges_unknown_endpoint": 15,
+      "children_missing_from_diagram_nodes": 12,
       "parent_diagram_gaps_to_inject": 16,
       "mermaid_fence_blocks_total": 0,
+      "invalid_module_json_parse": 0,
       "placeholder_md_files": 0
     },
     "diagram_ir_audit": {
-      "module_diagrams_total": 37,
+      "module_diagrams_total": 24,
       "overview_has_diagram_json": true,
       "overview_mermaid_parse_ok": true,
       "overview_r1_reason": null,
       "by_code": {
-        "r4_edge_unknown_target": 1
+        "r4_node_id_collides_with_group": 3,
+        "r4_edge_unknown_target": 15
       },
       "samples_by_code": {
+        "r4_node_id_collides_with_group": [
+          {
+            "code": "r4_node_id_collides_with_group",
+            "id": "message_handling",
+            "module": "language_model_interface",
+            "path": "language_model_interface"
+          },
+          {
+            "code": "r4_node_id_collides_with_group",
+            "id": "prompt_engineering",
+            "module": "language_model_interface",
+            "path": "language_model_interface"
+          },
+          {
+            "code": "r4_node_id_collides_with_group",
+            "id": "output_parsing",
+            "module": "language_model_interface",
+            "path": "language_model_interface"
+          }
+        ],
         "r4_edge_unknown_target": [
           {
             "code": "r4_edge_unknown_target",
+            "index": 60,
+            "source": "CreateTaggingChain",
+            "target": "JsonOutputFunctionsParser",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 78,
+            "source": "StructuredQueryOutputParser",
+            "target": "BaseOutputParser",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 96,
+            "source": "CreateStructuredOutputRunnable",
+            "target": "BaseOutputParser",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 104,
+            "source": "LoadGenericChain",
+            "target": "LLMCheckerChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 105,
+            "source": "LoadGenericChain",
+            "target": "LLMMathChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 106,
+            "source": "LoadGenericChain",
+            "target": "QAWithSourcesChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 107,
+            "source": "LoadGenericChain",
+            "target": "APIChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 108,
+            "source": "LoadGenericChain",
+            "target": "HypotheticalDocumentEmbedder",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 112,
+            "source": "LoadGenericChain",
+            "target": "VectorDBQA",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 114,
+            "source": "LoadGenericChain",
+            "target": "VectorDBQAWithSourcesChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 115,
+            "source": "LoadGenericChain",
+            "target": "RetrievalQAWithSourcesChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
             "index": 116,
-            "source": "xml_agent",
-            "target": "ai_message_prompt_template",
-            "module": "agent_definitions",
-            "path": "agent_and_workflow_orchestration/agent_definitions"
+            "source": "LoadGenericChain",
+            "target": "MapRerankDocumentsChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 117,
+            "source": "LoadGenericChain",
+            "target": "LLMRequestsChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 118,
+            "source": "LoadGenericChain",
+            "target": "GraphCypherQAChain",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
+          },
+          {
+            "code": "r4_edge_unknown_target",
+            "index": 120,
+            "source": "LoadGenericChain",
+            "target": "BasePromptTemplate",
+            "module": "chains",
+            "path": "agent_and_chain_orchestration/chains"
           }
         ]
       }
     },
-    "mermaid_validation": {
-      "blocks_checked": 0,
-      "blocks_invalid": 0,
-      "validation_ms": 0.0502,
-      "error_type_histogram": {},
-      "stage46_fixes_applied": 0,
-      "postfix_blocks_invalid": 0,
-      "postfix_error_type_histogram": {}
-    },
     "postsync_audit": {
-      "modules_total": 37,
-      "missing_md": 37,
+      "modules_total": 24,
+      "missing_md": 1,
       "missing_title": 0,
       "missing_description": 0,
       "leaf_missing_diagram": 0,
       "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 24,
+      "diagram_edges_unknown_endpoint": 15,
       "children_missing_from_diagram_nodes": 0,
       "parent_diagram_gaps_to_inject": 0,
       "mermaid_fence_blocks_total": 0,
+      "invalid_module_json_parse": 0,
       "placeholder_md_files": 0
     },
     "delta_presync_minus_postsync": {
       "leaf_missing_diagram": 0.0,
+      "missing_description": 1.0,
       "missing_md": 0.0,
-      "parent_missing_diagram_with_children": 0.0,
-      "missing_title": 20.0,
-      "children_missing_from_diagram_nodes": 16.0,
-      "missing_description": 20.0,
+      "invalid_module_json_parse": 0.0,
+      "missing_title": 1.0,
       "diagram_nodes_with_empty_label": 0.0,
-      "parent_diagram_gaps_to_inject": 16.0,
+      "parent_missing_diagram_with_children": 1.0,
       "diagram_edges_unknown_endpoint": 0.0,
+      "parent_diagram_gaps_to_inject": 16.0,
+      "mermaid_fence_blocks_total": 0.0,
       "placeholder_md_files": 0.0,
-      "modules_total": 0.0,
-      "mermaid_fence_blocks_total": 0.0
+      "children_missing_from_diagram_nodes": 12.0,
+      "modules_total": 0.0
     },
     "fixes_applied_counts": {
-      "metadata_field_updates": 40,
+      "metadata_field_updates": 2,
       "placeholder_md_files_created": 0,
       "leaf_diagrams_added": 0,
       "parent_diagram_child_nodes_injected": 16,
-      "overview_md_created": 0,
-      "mermaid_stage46_fixes": 0
+      "overview_md_created": 0
     },
     "measurement_summary": {
       "1_stage3_defects_before_stage45": {
         "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
         "presync_audit": {
-          "modules_total": 37,
-          "missing_md": 37,
-          "missing_title": 20,
-          "missing_description": 20,
+          "modules_total": 24,
+          "missing_md": 1,
+          "missing_title": 1,
+          "missing_description": 1,
           "leaf_missing_diagram": 0,
-          "parent_missing_diagram_with_children": 0,
+          "parent_missing_diagram_with_children": 1,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 24,
-          "children_missing_from_diagram_nodes": 16,
+          "diagram_edges_unknown_endpoint": 15,
+          "children_missing_from_diagram_nodes": 12,
           "parent_diagram_gaps_to_inject": 16,
           "mermaid_fence_blocks_total": 0,
+          "invalid_module_json_parse": 0,
           "placeholder_md_files": 0
         }
       },
       "1b_stage45_fixes_applied_counters": {
-        "metadata_field_updates": 40,
+        "metadata_field_updates": 2,
         "placeholder_md_files_created": 0,
         "leaf_diagrams_added": 0,
         "parent_diagram_child_nodes_injected": 16,
-        "overview_md_created": 0,
-        "mermaid_stage46_fixes": 0
+        "overview_md_created": 0
       },
       "1c_residual_after_stage45": {
         "postsync_audit": {
-          "modules_total": 37,
-          "missing_md": 37,
+          "modules_total": 24,
+          "missing_md": 1,
           "missing_title": 0,
           "missing_description": 0,
           "leaf_missing_diagram": 0,
           "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 24,
+          "diagram_edges_unknown_endpoint": 15,
           "children_missing_from_diagram_nodes": 0,
           "parent_diagram_gaps_to_inject": 0,
           "mermaid_fence_blocks_total": 0,
+          "invalid_module_json_parse": 0,
           "placeholder_md_files": 0
         }
       },
@@ -140,566 +267,469 @@
         "note": "Positive number = fewer problems after sync for that metric",
         "delta": {
           "leaf_missing_diagram": 0.0,
+          "missing_description": 1.0,
           "missing_md": 0.0,
-          "parent_missing_diagram_with_children": 0.0,
-          "missing_title": 20.0,
-          "children_missing_from_diagram_nodes": 16.0,
-          "missing_description": 20.0,
+          "invalid_module_json_parse": 0.0,
+          "missing_title": 1.0,
           "diagram_nodes_with_empty_label": 0.0,
-          "parent_diagram_gaps_to_inject": 16.0,
+          "parent_missing_diagram_with_children": 1.0,
           "diagram_edges_unknown_endpoint": 0.0,
+          "parent_diagram_gaps_to_inject": 16.0,
+          "mermaid_fence_blocks_total": 0.0,
           "placeholder_md_files": 0.0,
-          "modules_total": 0.0,
-          "mermaid_fence_blocks_total": 0.0
+          "children_missing_from_diagram_nodes": 12.0,
+          "modules_total": 0.0
         }
       },
       "1e_issues_logged_this_run_by_type": {
         "all": {
-          "missing_title": 20,
-          "missing_description": 20,
-          "diagram_ir_r4_edge_unknown_target": 1
+          "missing_title": 1,
+          "missing_description": 1,
+          "missing_md_file": 1,
+          "diagram_ir_r4_node_id_collides_with_group": 3,
+          "diagram_ir_r4_edge_unknown_target": 15
         }
       },
-      "2_mermaid": {
-        "blocks_checked": 0,
-        "blocks_invalid_before_stage46": 0,
-        "blocks_invalid_after_stage46": 0,
-        "validation_ms": 0.0502,
-        "error_type_histogram": {},
-        "error_type_histogram_after_stage46": {},
-        "stage46_fixes_applied": 0,
-        "validator": "mermaid_validator (Mermaid.js 11.9 via Node, same as viewer)"
-      },
-      "3_diagram_ir": {
+      "2_diagram_ir": {
         "audit": {
-          "module_diagrams_total": 37,
+          "module_diagrams_total": 24,
           "overview_has_diagram_json": true,
           "overview_mermaid_parse_ok": true,
           "overview_r1_reason": null,
           "by_code": {
-            "r4_edge_unknown_target": 1
+            "r4_node_id_collides_with_group": 3,
+            "r4_edge_unknown_target": 15
           },
           "samples_by_code": {
+            "r4_node_id_collides_with_group": [
+              {
+                "code": "r4_node_id_collides_with_group",
+                "id": "message_handling",
+                "module": "language_model_interface",
+                "path": "language_model_interface"
+              },
+              {
+                "code": "r4_node_id_collides_with_group",
+                "id": "prompt_engineering",
+                "module": "language_model_interface",
+                "path": "language_model_interface"
+              },
+              {
+                "code": "r4_node_id_collides_with_group",
+                "id": "output_parsing",
+                "module": "language_model_interface",
+                "path": "language_model_interface"
+              }
+            ],
             "r4_edge_unknown_target": [
               {
                 "code": "r4_edge_unknown_target",
+                "index": 60,
+                "source": "CreateTaggingChain",
+                "target": "JsonOutputFunctionsParser",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 78,
+                "source": "StructuredQueryOutputParser",
+                "target": "BaseOutputParser",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 96,
+                "source": "CreateStructuredOutputRunnable",
+                "target": "BaseOutputParser",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 104,
+                "source": "LoadGenericChain",
+                "target": "LLMCheckerChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 105,
+                "source": "LoadGenericChain",
+                "target": "LLMMathChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 106,
+                "source": "LoadGenericChain",
+                "target": "QAWithSourcesChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 107,
+                "source": "LoadGenericChain",
+                "target": "APIChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 108,
+                "source": "LoadGenericChain",
+                "target": "HypotheticalDocumentEmbedder",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 112,
+                "source": "LoadGenericChain",
+                "target": "VectorDBQA",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 114,
+                "source": "LoadGenericChain",
+                "target": "VectorDBQAWithSourcesChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 115,
+                "source": "LoadGenericChain",
+                "target": "RetrievalQAWithSourcesChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
                 "index": 116,
-                "source": "xml_agent",
-                "target": "ai_message_prompt_template",
-                "module": "agent_definitions",
-                "path": "agent_and_workflow_orchestration/agent_definitions"
+                "source": "LoadGenericChain",
+                "target": "MapRerankDocumentsChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 117,
+                "source": "LoadGenericChain",
+                "target": "LLMRequestsChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 118,
+                "source": "LoadGenericChain",
+                "target": "GraphCypherQAChain",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
+              },
+              {
+                "code": "r4_edge_unknown_target",
+                "index": 120,
+                "source": "LoadGenericChain",
+                "target": "BasePromptTemplate",
+                "module": "chains",
+                "path": "agent_and_chain_orchestration/chains"
               }
             ]
           }
         },
         "by_code": {
-          "r4_edge_unknown_target": 1
+          "r4_node_id_collides_with_group": 3,
+          "r4_edge_unknown_target": 15
         }
       }
     }
   },
   "issues_by_type": {
-    "missing_title": 20,
-    "missing_description": 20,
-    "diagram_ir_r4_edge_unknown_target": 1
+    "missing_title": 1,
+    "missing_description": 1,
+    "missing_md_file": 1,
+    "diagram_ir_r4_node_id_collides_with_group": 3,
+    "diagram_ir_r4_edge_unknown_target": 15
   },
   "issues": [
     {
       "issue_type": "missing_title",
-      "module_name": "base_components",
-      "module_path": "core_abstractions_and_utilities/base_components",
+      "module_name": "agent_and_chain_orchestration",
+      "module_path": "agent_and_chain_orchestration",
       "severity": "warning",
       "details": {
-        "component_count": 17,
-        "has_children": false
+        "component_count": 0,
+        "has_children": true
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "base_components",
-      "module_path": "core_abstractions_and_utilities/base_components",
+      "module_name": "agent_and_chain_orchestration",
+      "module_path": "agent_and_chain_orchestration",
       "severity": "warning",
       "details": {
-        "component_count": 17,
-        "has_children": false
+        "component_count": 0,
+        "has_children": true
       },
       "auto_fixed": true
     },
     {
-      "issue_type": "missing_title",
-      "module_name": "security_and_api",
-      "module_path": "core_abstractions_and_utilities/security_and_api",
-      "severity": "warning",
+      "issue_type": "missing_md_file",
+      "module_name": "agent_and_chain_orchestration",
+      "module_path": "agent_and_chain_orchestration",
+      "severity": "error",
       "details": {
-        "component_count": 15,
-        "has_children": false
+        "component_count": 0,
+        "depth": 1,
+        "has_title": true,
+        "has_description": true,
+        "has_children": true,
+        "parent": "root"
       },
-      "auto_fixed": true
+      "auto_fixed": false
     },
     {
-      "issue_type": "missing_description",
-      "module_name": "security_and_api",
-      "module_path": "core_abstractions_and_utilities/security_and_api",
+      "issue_type": "diagram_ir_r4_node_id_collides_with_group",
+      "module_name": "language_model_interface",
+      "module_path": "language_model_interface",
       "severity": "warning",
       "details": {
-        "component_count": 15,
-        "has_children": false
+        "code": "r4_node_id_collides_with_group",
+        "id": "message_handling"
       },
-      "auto_fixed": true
+      "auto_fixed": false
     },
     {
-      "issue_type": "missing_title",
-      "module_name": "general_utilities",
-      "module_path": "core_abstractions_and_utilities/general_utilities",
+      "issue_type": "diagram_ir_r4_node_id_collides_with_group",
+      "module_name": "language_model_interface",
+      "module_path": "language_model_interface",
       "severity": "warning",
       "details": {
-        "component_count": 19,
-        "has_children": false
+        "code": "r4_node_id_collides_with_group",
+        "id": "prompt_engineering"
       },
-      "auto_fixed": true
+      "auto_fixed": false
     },
     {
-      "issue_type": "missing_description",
-      "module_name": "general_utilities",
-      "module_path": "core_abstractions_and_utilities/general_utilities",
+      "issue_type": "diagram_ir_r4_node_id_collides_with_group",
+      "module_name": "language_model_interface",
+      "module_path": "language_model_interface",
       "severity": "warning",
       "details": {
-        "component_count": 19,
-        "has_children": false
+        "code": "r4_node_id_collides_with_group",
+        "id": "output_parsing"
       },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "caching_and_history",
-      "module_path": "core_abstractions_and_utilities/caching_and_history",
-      "severity": "warning",
-      "details": {
-        "component_count": 2,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "caching_and_history",
-      "module_path": "core_abstractions_and_utilities/caching_and_history",
-      "severity": "warning",
-      "details": {
-        "component_count": 2,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "prompts_and_messages",
-      "module_path": "llm_interaction_and_data_handling/prompts_and_messages",
-      "severity": "warning",
-      "details": {
-        "component_count": 39,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "prompts_and_messages",
-      "module_path": "llm_interaction_and_data_handling/prompts_and_messages",
-      "severity": "warning",
-      "details": {
-        "component_count": 39,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "output_parsing",
-      "module_path": "llm_interaction_and_data_handling/output_parsing",
-      "severity": "warning",
-      "details": {
-        "component_count": 14,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "output_parsing",
-      "module_path": "llm_interaction_and_data_handling/output_parsing",
-      "severity": "warning",
-      "details": {
-        "component_count": 14,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "llm_providers",
-      "module_path": "llm_interaction_and_data_handling/llm_providers",
-      "severity": "warning",
-      "details": {
-        "component_count": 18,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "llm_providers",
-      "module_path": "llm_interaction_and_data_handling/llm_providers",
-      "severity": "warning",
-      "details": {
-        "component_count": 18,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "data_loading_and_storage",
-      "module_path": "llm_interaction_and_data_handling/data_loading_and_storage",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "data_loading_and_storage",
-      "module_path": "llm_interaction_and_data_handling/data_loading_and_storage",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "text_processing",
-      "module_path": "llm_interaction_and_data_handling/text_processing",
-      "severity": "warning",
-      "details": {
-        "component_count": 9,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "text_processing",
-      "module_path": "llm_interaction_and_data_handling/text_processing",
-      "severity": "warning",
-      "details": {
-        "component_count": 9,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "agent_definitions",
-      "module_path": "agent_and_workflow_orchestration/agent_definitions",
-      "severity": "warning",
-      "details": {
-        "component_count": 43,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "agent_definitions",
-      "module_path": "agent_and_workflow_orchestration/agent_definitions",
-      "severity": "warning",
-      "details": {
-        "component_count": 43,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "runnables",
-      "module_path": "agent_and_workflow_orchestration/runnables",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "runnables",
-      "module_path": "agent_and_workflow_orchestration/runnables",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "tools_and_retrievers",
-      "module_path": "agent_and_workflow_orchestration/tools_and_retrievers",
-      "severity": "warning",
-      "details": {
-        "component_count": 18,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "tools_and_retrievers",
-      "module_path": "agent_and_workflow_orchestration/tools_and_retrievers",
-      "severity": "warning",
-      "details": {
-        "component_count": 18,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "agent_middleware",
-      "module_path": "agent_and_workflow_orchestration/agent_middleware",
-      "severity": "warning",
-      "details": {
-        "component_count": 28,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "agent_middleware",
-      "module_path": "agent_and_workflow_orchestration/agent_middleware",
-      "severity": "warning",
-      "details": {
-        "component_count": 28,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "callbacks_and_tracing",
-      "module_path": "observability_and_evaluation/callbacks_and_tracing",
-      "severity": "warning",
-      "details": {
-        "component_count": 11,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "callbacks_and_tracing",
-      "module_path": "observability_and_evaluation/callbacks_and_tracing",
-      "severity": "warning",
-      "details": {
-        "component_count": 11,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "evaluation_framework",
-      "module_path": "observability_and_evaluation/evaluation_framework",
-      "severity": "warning",
-      "details": {
-        "component_count": 13,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "evaluation_framework",
-      "module_path": "observability_and_evaluation/evaluation_framework",
-      "severity": "warning",
-      "details": {
-        "component_count": 13,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "langsmith_integration",
-      "module_path": "observability_and_evaluation/langsmith_integration",
-      "severity": "warning",
-      "details": {
-        "component_count": 15,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "langsmith_integration",
-      "module_path": "observability_and_evaluation/langsmith_integration",
-      "severity": "warning",
-      "details": {
-        "component_count": 15,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "testing_utilities",
-      "module_path": "observability_and_evaluation/testing_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 8,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "testing_utilities",
-      "module_path": "observability_and_evaluation/testing_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 8,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "conversational_memory",
-      "module_path": "memory_and_state/conversational_memory",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "conversational_memory",
-      "module_path": "memory_and_state/conversational_memory",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "entity_memory",
-      "module_path": "memory_and_state/entity_memory",
-      "severity": "warning",
-      "details": {
-        "component_count": 5,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "entity_memory",
-      "module_path": "memory_and_state/entity_memory",
-      "severity": "warning",
-      "details": {
-        "component_count": 5,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "model_laboratory",
-      "module_path": "memory_and_state/model_laboratory",
-      "severity": "warning",
-      "details": {
-        "component_count": 1,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "model_laboratory",
-      "module_path": "memory_and_state/model_laboratory",
-      "severity": "warning",
-      "details": {
-        "component_count": 1,
-        "has_children": false
-      },
-      "auto_fixed": true
+      "auto_fixed": false
     },
     {
       "issue_type": "diagram_ir_r4_edge_unknown_target",
-      "module_name": "agent_definitions",
-      "module_path": "agent_and_workflow_orchestration/agent_definitions",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 60,
+        "source": "CreateTaggingChain",
+        "target": "JsonOutputFunctionsParser"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 78,
+        "source": "StructuredQueryOutputParser",
+        "target": "BaseOutputParser"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 96,
+        "source": "CreateStructuredOutputRunnable",
+        "target": "BaseOutputParser"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 104,
+        "source": "LoadGenericChain",
+        "target": "LLMCheckerChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 105,
+        "source": "LoadGenericChain",
+        "target": "LLMMathChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 106,
+        "source": "LoadGenericChain",
+        "target": "QAWithSourcesChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 107,
+        "source": "LoadGenericChain",
+        "target": "APIChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 108,
+        "source": "LoadGenericChain",
+        "target": "HypotheticalDocumentEmbedder"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 112,
+        "source": "LoadGenericChain",
+        "target": "VectorDBQA"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 114,
+        "source": "LoadGenericChain",
+        "target": "VectorDBQAWithSourcesChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 115,
+        "source": "LoadGenericChain",
+        "target": "RetrievalQAWithSourcesChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
       "severity": "warning",
       "details": {
         "code": "r4_edge_unknown_target",
         "index": 116,
-        "source": "xml_agent",
-        "target": "ai_message_prompt_template"
+        "source": "LoadGenericChain",
+        "target": "MapRerankDocumentsChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 117,
+        "source": "LoadGenericChain",
+        "target": "LLMRequestsChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 118,
+        "source": "LoadGenericChain",
+        "target": "GraphCypherQAChain"
+      },
+      "auto_fixed": false
+    },
+    {
+      "issue_type": "diagram_ir_r4_edge_unknown_target",
+      "module_name": "chains",
+      "module_path": "agent_and_chain_orchestration/chains",
+      "severity": "warning",
+      "details": {
+        "code": "r4_edge_unknown_target",
+        "index": 120,
+        "source": "LoadGenericChain",
+        "target": "BasePromptTemplate"
       },
       "auto_fixed": false
     }
   ],
   "files_created": [],
   "metadata_added": [
-    "base_components:title",
-    "base_components:description",
-    "security_and_api:title",
-    "security_and_api:description",
-    "general_utilities:title",
-    "general_utilities:description",
-    "caching_and_history:title",
-    "caching_and_history:description",
-    "prompts_and_messages:title",
-    "prompts_and_messages:description",
-    "output_parsing:title",
-    "output_parsing:description",
-    "llm_providers:title",
-    "llm_providers:description",
-    "data_loading_and_storage:title",
-    "data_loading_and_storage:description",
-    "text_processing:title",
-    "text_processing:description",
-    "agent_definitions:title",
-    "agent_definitions:description",
-    "runnables:title",
-    "runnables:description",
-    "tools_and_retrievers:title",
-    "tools_and_retrievers:description",
-    "agent_middleware:title",
-    "agent_middleware:description",
-    "callbacks_and_tracing:title",
-    "callbacks_and_tracing:description",
-    "evaluation_framework:title",
-    "evaluation_framework:description",
-    "langsmith_integration:title",
-    "langsmith_integration:description",
-    "testing_utilities:title",
-    "testing_utilities:description",
-    "conversational_memory:title",
-    "conversational_memory:description",
-    "entity_memory:title",
-    "entity_memory:description",
-    "model_laboratory:title",
-    "model_laboratory:description"
+    "agent_and_chain_orchestration:title",
+    "agent_and_chain_orchestration:description"
   ],
   "diagrams_added": []
 }

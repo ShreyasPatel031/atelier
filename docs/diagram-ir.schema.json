@@ -1,0 +1,148 @@
+{
+  "$defs": {
+    "DiagramEdgeModel": {
+      "properties": {
+        "source": {
+          "description": "Source node id.",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "description": "Target node id.",
+          "title": "Target",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional edge label.",
+          "title": "Label"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "DiagramEdgeModel",
+      "type": "object"
+    },
+    "DiagramGroupModel": {
+      "properties": {
+        "id": {
+          "description": "Unique group id.",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "Human-readable group label.",
+          "title": "Label",
+          "type": "string"
+        },
+        "nodes": {
+          "description": "Node ids contained in this group.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Nodes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "DiagramGroupModel",
+      "type": "object"
+    },
+    "DiagramNodeModel": {
+      "description": "A node in a diagram. ``type=module`` makes it clickable in the viewer.",
+      "properties": {
+        "id": {
+          "description": "Unique node id (lowercase_with_underscores).",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "Human-readable label shown on the node.",
+          "title": "Label",
+          "type": "string"
+        },
+        "type": {
+          "default": "component",
+          "description": "'module' = clickable drill-down, 'component' = leaf, 'external' = external dep.",
+          "enum": [
+            "module",
+            "component",
+            "external"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "link": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Relative .md filename to open on click (only used when type='module').",
+          "title": "Link"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "DiagramNodeModel",
+      "type": "object"
+    }
+  },
+  "description": "Renderer-agnostic diagram. Matches the IR consumed by the ReactFlow viewer.",
+  "properties": {
+    "direction": {
+      "default": "TD",
+      "description": "Layout direction (TD = top-down, LR = left-right).",
+      "enum": [
+        "TD",
+        "LR",
+        "BT",
+        "RL"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/DiagramNodeModel"
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/DiagramEdgeModel"
+      },
+      "title": "Edges",
+      "type": "array"
+    },
+    "groups": {
+      "items": {
+        "$ref": "#/$defs/DiagramGroupModel"
+      },
+      "title": "Groups",
+      "type": "array"
+    }
+  },
+  "title": "DiagramModel",
+  "type": "object"
+}

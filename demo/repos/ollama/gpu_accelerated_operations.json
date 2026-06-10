@@ -1,0 +1,613 @@
+{
+  "title": "GPU Accelerated Operations",
+  "summary": "This module provides core functionalities for accelerating machine learning operations using various GPU backends, including BLAS, Apple Metal, and Vulkan. It handles device initialization, graph computation, data transfer, and optimization specific to each GPU architecture.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "blas_init_backend",
+        "label": "Initialize BLAS Backend",
+        "type": "component",
+        "link": null,
+        "title": "BLAS Backend Init",
+        "description": "Initializes the BLAS backend for a specific device, preparing it for linear algebra operations."
+      },
+      {
+        "id": "blas_compute_graph",
+        "label": "Compute BLAS Graph",
+        "type": "component",
+        "link": null,
+        "title": "BLAS Graph Computation",
+        "description": "Executes a computation graph using BLAS-accelerated operations like matrix multiplication and outer products."
+      },
+      {
+        "id": "blas_set_threads",
+        "label": "Set BLAS Thread Count",
+        "type": "component",
+        "link": null,
+        "title": "Configure BLAS Threads",
+        "description": "Configures the number of threads used by the BLAS backend for parallel execution."
+      },
+      {
+        "id": "blas_get_props",
+        "label": "Get BLAS Device Properties",
+        "type": "component",
+        "link": null,
+        "title": "Query BLAS Device Info",
+        "description": "Retrieves properties and capabilities of a BLAS-enabled device."
+      },
+      {
+        "id": "metal_optimize_graph",
+        "label": "Optimize Metal Graph",
+        "type": "component",
+        "link": null,
+        "title": "Metal Graph Optimization",
+        "description": "Optimizes a computation graph for efficient execution on Apple's Metal GPU, including node fusion and reordering."
+      },
+      {
+        "id": "metal_encode_op",
+        "label": "Encode Metal Operation",
+        "type": "component",
+        "link": null,
+        "title": "Metal Op Encoding",
+        "description": "Encodes a specific operation for execution on the Metal backend, potentially with debug group information."
+      },
+      {
+        "id": "metal_init_backend",
+        "label": "Initialize Metal Backend",
+        "type": "component",
+        "link": null,
+        "title": "Metal Backend Init",
+        "description": "Initializes the overall Metal backend context for GPU operations."
+      },
+      {
+        "id": "metal_device_init",
+        "label": "Initialize Metal Device",
+        "type": "component",
+        "link": null,
+        "title": "Metal Device Init",
+        "description": "Initializes the Metal backend for a specific GPU device."
+      },
+      {
+        "id": "metal_set_abort_cb",
+        "label": "Set Metal Abort Callback",
+        "type": "component",
+        "link": null,
+        "title": "Metal Abort Handler",
+        "description": "Registers a callback function to be invoked if a Metal operation aborts."
+      },
+      {
+        "id": "metal_check_family_support",
+        "label": "Check Metal Family Support",
+        "type": "component",
+        "link": null,
+        "title": "Metal Device Family Check",
+        "description": "Determines if the Metal backend supports a particular device family."
+      },
+      {
+        "id": "metal_capture_compute",
+        "label": "Capture Metal Compute",
+        "type": "component",
+        "link": null,
+        "title": "Metal Compute Capture",
+        "description": "Enables capturing of the next Metal compute command for debugging or profiling purposes."
+      },
+      {
+        "id": "metal_get_props",
+        "label": "Get Metal Device Properties",
+        "type": "component",
+        "link": null,
+        "title": "Query Metal Device Info",
+        "description": "Retrieves detailed properties and capabilities of a Metal GPU device."
+      },
+      {
+        "id": "metal_get_buffer_type",
+        "label": "Get Metal Buffer Type",
+        "type": "component",
+        "link": null,
+        "title": "Metal Buffer Type Query",
+        "description": "Determines the optimal buffer type (e.g., shared or private memory) for a Metal device."
+      },
+      {
+        "id": "vk_compute_graph",
+        "label": "Compute Vulkan Graph",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Graph Computation",
+        "description": "Executes a computation graph on a Vulkan-enabled GPU, managing command buffers and submissions."
+      },
+      {
+        "id": "vk_get_tensor_async",
+        "label": "Get Tensor (Async, Vulkan)",
+        "type": "component",
+        "link": null,
+        "title": "Async Vulkan Tensor Read",
+        "description": "Asynchronously retrieves tensor data from Vulkan device memory to host memory."
+      },
+      {
+        "id": "vk_set_tensor_async",
+        "label": "Set Tensor (Async, Vulkan)",
+        "type": "component",
+        "link": null,
+        "title": "Async Vulkan Tensor Write",
+        "description": "Asynchronously transfers tensor data from host memory to Vulkan device memory."
+      },
+      {
+        "id": "vk_buffer_cpy_tensor",
+        "label": "Copy Tensor (Vulkan Buffer)",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Buffer Tensor Copy",
+        "description": "Performs a synchronous copy of tensor data between two Vulkan buffers."
+      },
+      {
+        "id": "vk_cpy_tensor_async",
+        "label": "Copy Tensor (Async, Vulkan)",
+        "type": "component",
+        "link": null,
+        "title": "Async Vulkan Tensor Copy",
+        "description": "Asynchronously copies tensor data between Vulkan buffers."
+      },
+      {
+        "id": "vk_buffer_set_tensor",
+        "label": "Set Tensor (Vulkan Buffer)",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Buffer Tensor Write",
+        "description": "Synchronously writes tensor data to a specific offset within a Vulkan buffer."
+      },
+      {
+        "id": "vk_buffer_get_tensor",
+        "label": "Get Tensor (Vulkan Buffer)",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Buffer Tensor Read",
+        "description": "Synchronously reads tensor data from a specific offset within a Vulkan buffer."
+      },
+      {
+        "id": "vk_device_init",
+        "label": "Initialize Vulkan Device",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Device Init",
+        "description": "Initializes the Vulkan backend for a specific GPU device, setting up contexts and queues."
+      },
+      {
+        "id": "vk_device_get_buffer_type",
+        "label": "Get Vulkan Buffer Type",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Buffer Type Query",
+        "description": "Determines the default buffer type for a given Vulkan device."
+      },
+      {
+        "id": "vk_device_get_host_buffer_type",
+        "label": "Get Vulkan Host Buffer Type",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Host Buffer Type Query",
+        "description": "Determines the buffer type suitable for host-visible memory on a Vulkan device."
+      },
+      {
+        "id": "vk_device_supports_op",
+        "label": "Check Vulkan Op Support",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Operation Support",
+        "description": "Checks if a specific GGML operation is supported for execution on the Vulkan device."
+      },
+      {
+        "id": "vk_reg_get_device",
+        "label": "Get Registered Vulkan Device",
+        "type": "component",
+        "link": null,
+        "title": "Retrieve Vulkan Device",
+        "description": "Retrieves a specific registered Vulkan device by index."
+      },
+      {
+        "id": "vk_free_backend",
+        "label": "Free Vulkan Backend",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Backend Cleanup",
+        "description": "Frees all resources associated with a Vulkan backend context."
+      },
+      {
+        "id": "vk_buffer_memset_tensor",
+        "label": "Memset Vulkan Tensor",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Tensor Memory Set",
+        "description": "Sets a region of a Vulkan tensor's memory to a specified byte value."
+      },
+      {
+        "id": "vk_buffer_write_nc_async",
+        "label": "Write Non-Contiguous (Async, Vulkan)",
+        "type": "component",
+        "link": null,
+        "title": "Async Non-Contiguous Write",
+        "description": "Asynchronously writes non-contiguous tensor data from host to a Vulkan buffer, optimizing for slices."
+      },
+      {
+        "id": "vk_buffer_clear",
+        "label": "Clear Vulkan Buffer",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Buffer Clear",
+        "description": "Clears the entire content of a Vulkan buffer with a specified byte value."
+      },
+      {
+        "id": "vk_reg_get_device_count",
+        "label": "Get Vulkan Device Count",
+        "type": "component",
+        "link": null,
+        "title": "Query Vulkan Device Count",
+        "description": "Returns the total number of available Vulkan-compatible GPU devices."
+      },
+      {
+        "id": "vk_synchronize",
+        "label": "Synchronize Vulkan Operations",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Synchronization",
+        "description": "Waits for all pending Vulkan commands and operations to complete on the GPU."
+      },
+      {
+        "id": "vk_buffer_type_alloc",
+        "label": "Allocate Vulkan Buffer",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Buffer Allocation",
+        "description": "Allocates a new buffer on the Vulkan device with a specified size."
+      },
+      {
+        "id": "vk_device_get_props",
+        "label": "Get Vulkan Device Properties",
+        "type": "component",
+        "link": null,
+        "title": "Query Vulkan Device Info",
+        "description": "Retrieves detailed properties and capabilities of a Vulkan GPU device."
+      },
+      {
+        "id": "vk_host_buffer_free",
+        "label": "Free Vulkan Host Buffer",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Host Buffer Cleanup",
+        "description": "Frees a host-allocated buffer associated with the Vulkan backend."
+      },
+      {
+        "id": "vk_wait_events",
+        "label": "Wait for Vulkan Events",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Event Wait",
+        "description": "Waits for a set of Vulkan events to be signaled before proceeding."
+      },
+      {
+        "id": "vk_buffer_free",
+        "label": "Free Vulkan Buffer",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Buffer Cleanup",
+        "description": "Frees a buffer allocated on the Vulkan device."
+      },
+      {
+        "id": "vk_optimize_graph",
+        "label": "Optimize Vulkan Graph",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Graph Optimization",
+        "description": "Optimizes a computation graph for Vulkan execution, including node reordering and fusion patterns."
+      },
+      {
+        "id": "vk_test_matmul",
+        "label": "Test Vulkan Matmul",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Matmul Test",
+        "description": "Performs performance and correctness tests for matrix multiplication on the Vulkan backend."
+      },
+      {
+        "id": "vk_test_dequant",
+        "label": "Test Vulkan Dequantization",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Dequantization Test",
+        "description": "Performs performance and correctness tests for dequantization operations on the Vulkan backend."
+      },
+      {
+        "id": "shader_gen_main",
+        "label": "Shader Generator Entry",
+        "type": "component",
+        "link": null,
+        "title": "Vulkan Shader Generator",
+        "description": "The main entry point for the Vulkan shader generation utility, parsing arguments and orchestrating compilation."
+      },
+      {
+        "id": "shader_gen_compile_spv",
+        "label": "Compile GLSL to SPIR-V",
+        "type": "component",
+        "link": null,
+        "title": "SPIR-V Shader Compilation",
+        "description": "Compiles a GLSL shader source file into a SPIR-V binary format for Vulkan execution."
+      }
+    ],
+    "edges": [
+      {
+        "source": "blas_init_backend",
+        "target": "blas_get_props",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "blas_compute_graph",
+        "target": "blas_set_threads",
+        "label": "uses config from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "metal_init_backend",
+        "target": "metal_device_init",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "metal_device_init",
+        "target": "metal_get_props",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "metal_device_init",
+        "target": "metal_get_buffer_type",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "metal_optimize_graph",
+        "target": "metal_encode_op",
+        "label": "prepares for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "metal_encode_op",
+        "target": "metal_capture_compute",
+        "label": "can be captured by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_reg_get_device_count",
+        "target": "vk_reg_get_device",
+        "label": "informs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_reg_get_device",
+        "target": "vk_device_init",
+        "label": "initializes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_device_init",
+        "target": "vk_device_get_props",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_device_init",
+        "target": "vk_device_get_buffer_type",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_device_init",
+        "target": "vk_device_get_host_buffer_type",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_optimize_graph",
+        "target": "vk_compute_graph",
+        "label": "optimizes for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_compute_graph",
+        "target": "vk_synchronize",
+        "label": "may require",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_get_tensor_async",
+        "target": "vk_synchronize",
+        "label": "requires eventual",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_set_tensor_async",
+        "target": "vk_synchronize",
+        "label": "requires eventual",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_cpy_tensor_async",
+        "target": "vk_synchronize",
+        "label": "requires eventual",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_buffer_type_alloc",
+        "target": "vk_buffer_free",
+        "label": "paired with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_buffer_type_alloc",
+        "target": "vk_host_buffer_free",
+        "label": "paired with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_buffer_set_tensor",
+        "target": "vk_buffer_get_tensor",
+        "label": "complements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_buffer_memset_tensor",
+        "target": "vk_buffer_clear",
+        "label": "related to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_test_matmul",
+        "target": "vk_compute_graph",
+        "label": "tests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vk_test_dequant",
+        "target": "vk_compute_graph",
+        "label": "tests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "shader_gen_main",
+        "target": "shader_gen_compile_spv",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "blas_backend_group",
+        "label": "BLAS Backend Management",
+        "nodes": [
+          "blas_init_backend",
+          "blas_compute_graph",
+          "blas_set_threads",
+          "blas_get_props"
+        ],
+        "title": "BLAS Backend",
+        "description": "Manages GPU operations accelerated by Basic Linear Algebra Subprograms (BLAS).",
+        "role": "generative"
+      },
+      {
+        "id": "metal_backend_group",
+        "label": "Metal Backend Management",
+        "nodes": [
+          "metal_optimize_graph",
+          "metal_encode_op",
+          "metal_init_backend",
+          "metal_device_init",
+          "metal_set_abort_cb",
+          "metal_check_family_support",
+          "metal_capture_compute",
+          "metal_get_props",
+          "metal_get_buffer_type"
+        ],
+        "title": "Metal Backend",
+        "description": "Handles GPU acceleration using Apple's Metal API, including graph optimization and device interaction.",
+        "role": "generative"
+      },
+      {
+        "id": "vulkan_core_group",
+        "label": "Vulkan Core Operations",
+        "nodes": [
+          "vk_compute_graph",
+          "vk_optimize_graph",
+          "vk_device_init",
+          "vk_free_backend",
+          "vk_synchronize",
+          "vk_device_supports_op"
+        ],
+        "title": "Vulkan Core",
+        "description": "Core functionalities for managing Vulkan devices and executing computation graphs.",
+        "role": "generative"
+      },
+      {
+        "id": "vulkan_data_group",
+        "label": "Vulkan Data & Buffer Management",
+        "nodes": [
+          "vk_get_tensor_async",
+          "vk_set_tensor_async",
+          "vk_buffer_cpy_tensor",
+          "vk_cpy_tensor_async",
+          "vk_buffer_set_tensor",
+          "vk_buffer_get_tensor",
+          "vk_buffer_memset_tensor",
+          "vk_buffer_write_nc_async",
+          "vk_buffer_clear",
+          "vk_buffer_type_alloc",
+          "vk_buffer_free",
+          "vk_host_buffer_free"
+        ],
+        "title": "Vulkan Data",
+        "description": "Manages the transfer and manipulation of tensor data within Vulkan buffers.",
+        "role": "data"
+      },
+      {
+        "id": "vulkan_device_query_group",
+        "label": "Vulkan Device & Property Query",
+        "nodes": [
+          "vk_device_get_buffer_type",
+          "vk_device_get_host_buffer_type",
+          "vk_reg_get_device",
+          "vk_reg_get_device_count",
+          "vk_device_get_props",
+          "vk_wait_events"
+        ],
+        "title": "Vulkan Device Info",
+        "description": "Functions for querying Vulkan device capabilities, properties, and managing device registration.",
+        "role": "analytical"
+      },
+      {
+        "id": "vulkan_shader_gen_group",
+        "label": "Vulkan Shader Compilation",
+        "nodes": [
+          "shader_gen_main",
+          "shader_gen_compile_spv"
+        ],
+        "title": "Vulkan Shader Gen",
+        "description": "Tools and processes for compiling GLSL shaders into SPIR-V format for Vulkan.",
+        "role": "generative"
+      },
+      {
+        "id": "vulkan_test_utils_group",
+        "label": "Vulkan Test Utilities",
+        "nodes": [
+          "vk_test_matmul",
+          "vk_test_dequant"
+        ],
+        "title": "Vulkan Tests",
+        "description": "Utility functions for testing specific Vulkan operations like matrix multiplication and dequantization.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

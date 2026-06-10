@@ -1,0 +1,84 @@
+{
+  "title": "External Integrations Module",
+  "summary": "This module provides integrations with external toolsets like ACI.dev and LangChain, along with model-specific profiles for Groq and OpenAI Harmony, and a JSON schema transformer for OpenAI's strict mode.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "aci_toolset",
+        "label": "Wrap ACI.dev Tools",
+        "type": "component",
+        "link": null,
+        "title": "ACI Toolset Wrapper",
+        "description": "Provides a toolset that wraps ACI.dev functions, converting them into a compatible format for use within the Pydantic AI framework."
+      },
+      {
+        "id": "langchain_toolset",
+        "label": "Wrap LangChain Tools",
+        "type": "component",
+        "link": null,
+        "title": "LangChain Toolset Wrapper",
+        "description": "Offers a toolset that integrates LangChain tools, adapting them for seamless operation within the Pydantic AI ecosystem."
+      },
+      {
+        "id": "groq_model_profile",
+        "label": "Define Groq Model Profile",
+        "type": "component",
+        "link": null,
+        "title": "Groq Model Profiler",
+        "description": "Determines and returns the specific model profile for a given Groq model, including support for thinking capabilities and web search integration."
+      },
+      {
+        "id": "harmony_model_profile",
+        "label": "Define OpenAI Harmony Profile",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Harmony Profile",
+        "description": "Generates a model profile tailored for the OpenAI Harmony Response format, adjusting settings like tool choice support and whitespace handling."
+      },
+      {
+        "id": "openai_json_schema_transformer",
+        "label": "Transform OpenAI JSON Schema",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Schema Transformer",
+        "description": "Recursively transforms JSON schemas to ensure compatibility with OpenAI's strict mode requirements, handling properties, required fields, and incompatible keywords."
+      }
+    ],
+    "edges": [],
+    "groups": [
+      {
+        "id": "external_tool_wrappers",
+        "label": "External Tool Wrappers",
+        "nodes": [
+          "aci_toolset",
+          "langchain_toolset"
+        ],
+        "title": "External Tool Integrations",
+        "description": "Components responsible for integrating and adapting external tool frameworks into the Pydantic AI system.",
+        "role": "surface"
+      },
+      {
+        "id": "model_profiles",
+        "label": "Model Profiles",
+        "nodes": [
+          "groq_model_profile",
+          "harmony_model_profile"
+        ],
+        "title": "LLM Model Configuration Profiles",
+        "description": "Functions that define and retrieve specific configuration profiles for various Large Language Models, optimizing their behavior within the framework.",
+        "role": "generative"
+      },
+      {
+        "id": "schema_adapters",
+        "label": "Schema Adapters",
+        "nodes": [
+          "openai_json_schema_transformer"
+        ],
+        "title": "JSON Schema Adaptation",
+        "description": "Utilities for transforming and validating JSON schemas to meet specific external API requirements, such as OpenAI's strict mode.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

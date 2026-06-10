@@ -1,0 +1,110 @@
+{
+  "title": "CLI and Utility Scripts",
+  "summary": "This module provides command-line interface tools and various utility scripts for testing, maintenance, and cloud integration verification within the AI framework.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "cli_run",
+        "label": "Run CLAI CLI",
+        "type": "component",
+        "link": null,
+        "title": "Execute CLAI CLI",
+        "description": "Initializes and runs the main command-line interface for the CLAI application, handling program exit."
+      },
+      {
+        "id": "cli_help_test",
+        "label": "Validate CLI Help Output",
+        "type": "component",
+        "link": null,
+        "title": "Verify CLI Help in README",
+        "description": "Compares the `clai --help` output with the content in `README.md` to ensure consistency and updates the README if discrepancies are found, failing the test if changes are detected."
+      },
+      {
+        "id": "check_cassettes",
+        "label": "Check VCR Cassettes",
+        "type": "component",
+        "link": null,
+        "title": "Identify Orphaned VCR Cassettes",
+        "description": "Scans test modules to find VCR cassettes and their corresponding tests. Reports any 'orphaned' cassettes that do not have a matching test, helping to identify dead code or missing tests."
+      },
+      {
+        "id": "upload_files",
+        "label": "Upload Test Files to Providers",
+        "type": "component",
+        "link": null,
+        "title": "Upload Files for Provider Tests",
+        "description": "Asynchronously uploads test files to various AI model providers (e.g., OpenAI, Anthropic, Google, Bedrock) to prepare for integration testing. Supports a configurable list of providers."
+      },
+      {
+        "id": "verify_gcs",
+        "label": "Verify Vertex GCS URIs",
+        "type": "component",
+        "link": null,
+        "title": "Test Vertex AI with GCS URIs",
+        "description": "Verifies the functionality of Vertex AI models when provided with Google Cloud Storage (GCS) URIs for different file types, printing project and location details."
+      },
+      {
+        "id": "verify_gcs_all_types",
+        "label": "Verify Vertex GCS All Types",
+        "type": "component",
+        "link": null,
+        "title": "Test Vertex AI Tool Results with GCS",
+        "description": "Extends GCS URI verification to cover various file types within Vertex AI tool results, ensuring robust integration with Google Cloud Storage."
+      },
+      {
+        "id": "verify_gcs_tool_result",
+        "label": "Test Vertex GCS Tool Result",
+        "type": "component",
+        "link": null,
+        "title": "Validate Vertex AI Tool Results with GCS",
+        "description": "Tests Vertex AI's ability to handle tool results that include Google Cloud Storage (GCS) URIs, both embedded in function responses and as separate file data parts, using the `google.genai` client."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_help_test",
+        "target": "cli_run",
+        "label": "calls",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cli_tools",
+        "label": "CLI Tools",
+        "nodes": [
+          "cli_run",
+          "cli_help_test"
+        ],
+        "title": "Command-Line Interface Tools",
+        "description": "Components related to the main command-line interface and its validation.",
+        "role": "surface"
+      },
+      {
+        "id": "testing_utilities",
+        "label": "Testing Utilities",
+        "nodes": [
+          "check_cassettes"
+        ],
+        "title": "General Testing and Maintenance Utilities",
+        "description": "Scripts for maintaining test integrity, such as checking for orphaned test assets.",
+        "role": "analytical"
+      },
+      {
+        "id": "cloud_integration_verification",
+        "label": "Cloud Integration Verification",
+        "nodes": [
+          "upload_files",
+          "verify_gcs",
+          "verify_gcs_all_types",
+          "verify_gcs_tool_result"
+        ],
+        "title": "Cloud Provider Integration and Verification",
+        "description": "Scripts dedicated to uploading test data and verifying AI model interactions with cloud storage and services, particularly Google Cloud Vertex AI.",
+        "role": "data"
+      }
+    ]
+  }
+}

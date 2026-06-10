@@ -1,0 +1,157 @@
+{
+    "title": "Pydantic AI Core Framework",
+    "summary": "This module encapsulates the foundational components for building, running, and extending AI agents. It provides core abstractions for LLM interaction, agent capabilities, tool management, and essential utilities, forming the backbone of the Pydantic AI ecosystem.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "agent_framework",
+                "label": "Agent Definition & Execution",
+                "type": "module",
+                "link": "agent_framework",
+                "title": "Agent Framework Core",
+                "description": "Defines the abstract interface, configuration, and execution flow for AI agents, enabling structured interaction with LLMs and tools."
+            },
+            {
+                "id": "capabilities_and_tools",
+                "label": "Agent Capabilities & Tools",
+                "type": "module",
+                "link": "capabilities_and_tools",
+                "title": "Agent Capabilities and Tools",
+                "description": "Manages agent functionalities, tool discovery, execution, and structured output mechanisms, extending agent behavior and interaction."
+            },
+            {
+                "id": "model_abstraction",
+                "label": "LLM Model Abstraction",
+                "type": "module",
+                "link": "model_abstraction",
+                "title": "LLM Model Abstraction Layer",
+                "description": "Provides a unified interface for interacting with various Large Language Models, handling requests, responses, and streaming data efficiently."
+            },
+            {
+                "id": "core_utilities",
+                "label": "Core System Utilities",
+                "type": "module",
+                "link": "core_utilities",
+                "title": "Pydantic AI Core Utilities",
+                "description": "Offers fundamental helper functions, concurrency management, and contextual data for agent operations, supporting the entire framework's infrastructure."
+            },
+            {
+                "id": "durable_execution",
+                "label": "Durable Execution Integrations",
+                "type": "module",
+                "link": "durable_execution",
+                "title": "Durable Execution Integrations",
+                "description": "Enables fault-tolerant and persistent agent execution through integration with external workflow systems like Temporal and Prefect, ensuring reliability."
+            }
+        ],
+        "edges": [
+            {
+                "source": "agent_framework",
+                "target": "model_abstraction",
+                "label": "interacts with LLMs via",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_framework",
+                "target": "capabilities_and_tools",
+                "label": "utilizes",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "agent_framework",
+                "target": "core_utilities",
+                "label": "uses for context & helpers",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "capabilities_and_tools",
+                "target": "model_abstraction",
+                "label": "leverages for structured output",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "capabilities_and_tools",
+                "target": "core_utilities",
+                "label": "uses for concurrency & context",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_execution",
+                "target": "agent_framework",
+                "label": "wraps for persistence",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_execution",
+                "target": "model_abstraction",
+                "label": "wraps for durable calls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_execution",
+                "target": "capabilities_and_tools",
+                "label": "wraps toolsets for durability",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "durable_execution",
+                "target": "core_utilities",
+                "label": "extends RunContext for durability",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "agent_core_components",
+                "label": "Agent Core Components",
+                "nodes": [
+                    "agent_framework",
+                    "capabilities_and_tools"
+                ],
+                "title": "Agent Core Components",
+                "description": "These modules define the fundamental structure and extensible behaviors of AI agents, including their execution logic and available functionalities.",
+                "role": null
+            },
+            {
+                "id": "llm_integration_layer",
+                "label": "LLM Integration Layer",
+                "nodes": [
+                    "model_abstraction"
+                ],
+                "title": "LLM Integration Layer",
+                "description": "This module provides the essential abstraction for seamless interaction with various Large Language Models, centralizing model communication and data handling.",
+                "role": null
+            },
+            {
+                "id": "foundational_utilities",
+                "label": "Foundational Utilities",
+                "nodes": [
+                    "core_utilities"
+                ],
+                "title": "Foundational Utilities",
+                "description": "This module offers core helper functions, concurrency management, and contextual data structures that underpin the entire Pydantic AI framework's operations.",
+                "role": null
+            },
+            {
+                "id": "operational_enhancements",
+                "label": "Operational Enhancements",
+                "nodes": [
+                    "durable_execution"
+                ],
+                "title": "Operational Enhancements",
+                "description": "This module integrates with external systems to provide durable and fault-tolerant execution for agents, ensuring state persistence and reliability across runs.",
+                "role": null
+            }
+        ]
+    }
+}

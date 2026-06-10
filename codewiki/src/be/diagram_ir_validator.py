@@ -310,6 +310,90 @@ def validate_diagram_ir(diagram: Optional[Dict[str, Any]]) -> List[Dict[str, Any
     return issues
 
 
+def drop_invalid_diagram_edges(diagram: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Remove edges whose source/target are not node ids (or use a group id).
+
+    Mutates *diagram* in place. Stage 4.5 safety net for LLM diagrams that reference
+    class names in edges without adding matching nodes[] entries.
+
+    Returns:
+        {"dropped": int, "dropped_edges": [{"index", "source", "target", "reason"}, ...]}
+    """
+    result: Dict[str, Any] = {"dropped": 0, "dropped_edges": []}
+    if not diagram or not isinstance(diagram, dict):
+        return result
+
+    nodes = diagram.get("nodes")
+    edges = diagram.get("edges")
+    groups = diagram.get("groups")
+    if not isinstance(nodes, list) or not isinstance(edges, list):
+        return result
+    if groups is None:
+        groups = []
+    elif not isinstance(groups, list):
+        groups = []
+
+    node_id_set = {
+        str(n["id"])
+        for n in nodes
+        if isinstance(n, dict) and n.get("id") is not None and str(n.get("id")).strip()
+    }
+    group_id_set = {
+        str(g["id"])
+        for g in groups
+        if isinstance(g, dict) and g.get("id") is not None and str(g.get("id")).strip()
+    }
+
+    kept: List[Dict[str, Any]] = []
+    for ei, e in enumerate(edges):
+        if not isinstance(e, dict):
+            result["dropped"] += 1
+            result["dropped_edges"].append(
+                {"index": ei, "source": None, "target": None, "reason": "edge_not_object"}
+            )
+            continue
+        src = e.get("source")
+        tgt = e.get("target")
+        s_src = str(src).strip() if src is not None else ""
+        s_tgt = str(tgt).strip() if tgt is not None else ""
+        if not s_src or not s_tgt:
+            result["dropped"] += 1
+            result["dropped_edges"].append(
+                {"index": ei, "source": src, "target": tgt, "reason": "missing_endpoint"}
+            )
+            continue
+        if s_src in group_id_set:
+            result["dropped"] += 1
+            result["dropped_edges"].append(
+                {"index": ei, "source": s_src, "target": s_tgt, "reason": "source_is_group_id"}
+            )
+            continue
+        if s_tgt in group_id_set:
+            result["dropped"] += 1
+            result["dropped_edges"].append(
+                {"index": ei, "source": s_src, "target": s_tgt, "reason": "target_is_group_id"}
+            )
+            continue
+        if s_src not in node_id_set:
+            result["dropped"] += 1
+            result["dropped_edges"].append(
+                {"index": ei, "source": s_src, "target": s_tgt, "reason": "unknown_source"}
+            )
+            continue
+        if s_tgt not in node_id_set:
+            result["dropped"] += 1
+            result["dropped_edges"].append(
+                {"index": ei, "source": s_src, "target": s_tgt, "reason": "unknown_target"}
+            )
+            continue
+        kept.append(e)
+
+    if result["dropped"]:
+        diagram["edges"] = kept
+    return result
+
+
 def extract_diagram_json_from_markdown(content: str) -> Optional[Dict[str, Any]]:
     m = _DIAGRAM_JSON_BLOCK_RE.search(content or "")
     if not m:

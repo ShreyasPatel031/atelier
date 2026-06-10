@@ -1,178 +1,202 @@
 {
   "title": "DSPy Streaming Module",
-  "summary": "This module provides core functionalities for streaming outputs from DSPy programs, allowing incremental results and status updates. It includes tools to wrap programs for streaming, listen for specific output fields, and format streams for external APIs.",
+  "summary": "This module provides functionalities to enable incremental streaming of DSPy program outputs, allowing for real-time feedback and processing. It includes tools to wrap programs for streaming, listen for specific field updates, and format streams for external APIs.",
   "diagram": {
     "direction": "TD",
     "nodes": [
       {
-        "id": "streamify_program",
+        "id": "streamify_func",
         "label": "Wrap DSPy Program for Streaming",
         "type": "component",
         "link": null,
-        "title": "Wrap DSPy Program for Streaming",
-        "description": "This component transforms a standard DSPy program into a streaming version, enabling it to yield incremental outputs and status messages. It supports both asynchronous and synchronous execution modes, providing flexibility for various application needs. Users can configure custom status message providers and stream listeners to tailor the streaming behavior."
+        "title": "Streamify DSPy Program",
+        "description": "Transforms a DSPy program into an asynchronous generator that yields outputs incrementally, enabling real-time feedback and processing. It orchestrates stream listeners and handles async/sync conversion."
       },
       {
-        "id": "sync_streamer_func",
-        "label": "Provide Synchronous Stream Interface",
+        "id": "stream_listener",
+        "label": "Monitor & Extract Field Streams",
         "type": "component",
         "link": null,
-        "title": "Provide Synchronous Stream Interface",
-        "description": "This utility function converts an asynchronous DSPy program stream into a synchronous generator. It allows users to consume streaming outputs in environments that do not natively support async iterators, simplifying integration into existing synchronous codebases."
+        "title": "Stream Listener",
+        "description": "Captures and processes incremental tokens from the underlying language model stream, extracting content for specific output fields based on adapter configurations (Chat, JSON, XML)."
+      },
+      {
+        "id": "sync_stream_converter",
+        "label": "Convert Async to Sync Stream",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Stream Converter",
+        "description": "Adapts an asynchronous streaming generator to a synchronous one, allowing DSPy programs to be used in synchronous contexts while retaining streaming capabilities."
       },
       {
         "id": "openai_stream_formatter",
         "label": "Format Stream for OpenAI API",
         "type": "component",
         "link": null,
-        "title": "Format Stream for OpenAI API",
-        "description": "This component takes DSPy's internal streaming output and converts it into an OpenAI-compatible Server-Sent Events (SSE) format. It's designed for use in API responses, allowing DSPy programs to serve streaming results that adhere to common industry standards."
+        "title": "OpenAI Stream Formatter",
+        "description": "Converts DSPy's internal streaming output into an OpenAI-compatible server-sent events (SSE) format, suitable for external API responses from a DSPy application."
       },
       {
-        "id": "stream_listener",
-        "label": "Extract Specific Field from Stream",
+        "id": "new_loop_executor",
+        "label": "Execute Async in New Event Loop",
         "type": "component",
         "link": null,
-        "title": "Extract Specific Field from Stream",
-        "description": "This class acts as an observer for streaming outputs, specifically designed to identify and extract content related to a designated signature field from a predictor's output. It intelligently handles various adapter types like Chat, JSON, and XML for accurate parsing and buffering of stream chunks."
-      },
-      {
-        "id": "run_new_loop",
-        "label": "Execute Function in New Async Loop",
-        "type": "component",
-        "link": null,
-        "title": "Execute Function in New Async Loop",
-        "description": "This utility creates and manages a new asyncio event loop to run a given asynchronous function in an isolated environment. It ensures that async operations can proceed independently, preventing conflicts with existing event loops and providing a clean execution context."
+        "title": "New Event Loop Executor",
+        "description": "A utility to run an asynchronous coroutine within a newly created and managed asyncio event loop, useful for isolating async operations or running them from synchronous contexts."
       },
       {
         "id": "dspy_program",
-        "label": "Original DSPy Program",
+        "label": "DSPy Program (Module)",
         "type": "external",
-        "link": "other_module",
-        "title": "Original DSPy Program",
-        "description": "Represents the core DSPy program or module that is being enhanced with streaming capabilities. This is the input to the streamification process, which then produces incremental outputs."
+        "link": "base_modules",
+        "title": "DSPy Program",
+        "description": "The core DSPy program or module (e.g., dspy.Predict, dspy.Chain) that is being wrapped to enable streaming functionality."
       },
       {
-        "id": "async_gen_output",
-        "label": "DSPy Asynchronous Stream",
+        "id": "lm_stream",
+        "label": "Language Model Stream",
         "type": "external",
         "link": null,
-        "title": "DSPy Asynchronous Stream",
-        "description": "The incremental output stream generated by a streamified DSPy program. This is typically an async generator that yields `StreamResponse` objects or `Prediction` instances as the program executes."
+        "title": "LM Stream",
+        "description": "Raw, incremental output stream received from an integrated Language Model client, containing token chunks."
       },
       {
-        "id": "openai_sse_output",
-        "label": "OpenAI-Compatible SSE Stream",
+        "id": "openai_api_output",
+        "label": "OpenAI-Compatible API Output",
         "type": "external",
         "link": null,
-        "title": "OpenAI-Compatible SSE Stream",
-        "description": "The final output stream formatted as Server-Sent Events (SSE), designed to be compatible with OpenAI's API streaming response format. This stream can be directly served as an API response."
+        "title": "OpenAI API Output",
+        "description": "The final output stream formatted as server-sent events (SSE) for consumption by clients expecting OpenAI-style streaming responses."
       },
       {
-        "id": "lm_stream_chunks",
-        "label": "Language Model Stream Chunks",
+        "id": "asyncify_util",
+        "label": "Asyncify Utility",
         "type": "external",
-        "link": null,
-        "title": "Language Model Stream Chunks",
-        "description": "Raw, incremental text or data chunks received directly from a Language Model during a streaming completion. These chunks are processed by stream listeners to extract relevant information."
+        "link": "async_sync_wrappers",
+        "title": "Asyncify Utility",
+        "description": "A utility from the general_utilities module that converts synchronous functions into asynchronous coroutines for seamless integration into async workflows."
+      },
+      {
+        "id": "prediction_obj",
+        "label": "DSPy Prediction Object",
+        "type": "external",
+        "link": "data_types",
+        "title": "Prediction Object",
+        "description": "The final, complete prediction object generated by the DSPy program after all streaming chunks have been processed and aggregated."
+      },
+      {
+        "id": "adapter_config",
+        "label": "Adapter Configuration",
+        "type": "external",
+        "link": "external_adapters",
+        "title": "Adapter Config",
+        "description": "Configuration details for different language model adapters (e.g., Chat, JSON, XML) used by StreamListener to interpret stream formats and extract fields."
       }
     ],
     "edges": [
       {
         "source": "dspy_program",
-        "target": "streamify_program",
-        "label": "Is wrapped by",
+        "target": "streamify_func",
+        "label": "is wrapped by",
         "title": null,
         "description": null
       },
       {
-        "source": "streamify_program",
-        "target": "async_gen_output",
-        "label": "Generates",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "streamify_program",
+        "source": "streamify_func",
         "target": "stream_listener",
-        "label": "Configures & uses",
+        "label": "configures and uses",
         "title": null,
         "description": null
       },
       {
-        "source": "lm_stream_chunks",
+        "source": "lm_stream",
         "target": "stream_listener",
-        "label": "Provides data to",
+        "label": "provides chunks to",
         "title": null,
         "description": null
       },
       {
-        "source": "async_gen_output",
-        "target": "sync_streamer_func",
-        "label": "Is adapted by",
+        "source": "stream_listener",
+        "target": "streamify_func",
+        "label": "returns extracted tokens",
         "title": null,
         "description": null
       },
       {
-        "source": "async_gen_output",
+        "source": "streamify_func",
+        "target": "sync_stream_converter",
+        "label": "can return (for sync)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "streamify_func",
         "target": "openai_stream_formatter",
-        "label": "Is formatted by",
+        "label": "provides stream to",
         "title": null,
         "description": null
       },
       {
         "source": "openai_stream_formatter",
-        "target": "openai_sse_output",
-        "label": "Produces",
+        "target": "openai_api_output",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "streamify_func",
+        "target": "asyncify_util",
+        "label": "leverages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "streamify_func",
+        "target": "prediction_obj",
+        "label": "produces final",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "stream_listener",
+        "target": "adapter_config",
+        "label": "interprets format via",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "surface_components",
-        "label": "Surface Components",
+        "id": "surface_api",
+        "label": "User-Facing API",
         "nodes": [
-          "streamify_program",
-          "sync_streamer_func",
+          "streamify_func",
           "openai_stream_formatter"
         ],
-        "title": "User-Facing Streaming Interfaces",
-        "description": "These components provide the primary interfaces for users to enable and manage streaming functionalities within DSPy programs.",
+        "title": "User-Facing API",
+        "description": "Components that provide the primary interface for enabling and consuming streaming functionality in DSPy programs.",
         "role": "surface"
       },
       {
-        "id": "generative_components",
-        "label": "Generative Components",
+        "id": "stream_processing_logic",
+        "label": "Stream Processing Logic",
         "nodes": [
-          "run_new_loop"
+          "stream_listener",
+          "sync_stream_converter"
         ],
-        "title": "Stream Generation & Execution",
-        "description": "Components responsible for orchestrating the generation of streaming outputs or managing the execution context for such operations.",
+        "title": "Stream Processing Logic",
+        "description": "Core components responsible for handling the incremental processing, extraction, and adaptation of data within the streaming pipeline.",
         "role": "generative"
       },
       {
-        "id": "analytical_components",
-        "label": "Analytical Components",
+        "id": "internal_utilities",
+        "label": "Internal Utilities",
         "nodes": [
-          "stream_listener"
+          "new_loop_executor"
         ],
-        "title": "Stream Content Analysis",
-        "description": "Components that analyze and process the content of incoming data streams to extract specific information or apply transformations.",
-        "role": "analytical"
-      },
-      {
-        "id": "data_entities",
-        "label": "Data Entities",
-        "nodes": [
-          "dspy_program",
-          "async_gen_output",
-          "openai_sse_output",
-          "lm_stream_chunks"
-        ],
-        "title": "Data Flow & External Interactions",
-        "description": "Represents the various data inputs, outputs, and external systems involved in the streaming process.",
-        "role": "data"
+        "title": "Internal Utilities",
+        "description": "Helper functions that support the underlying asynchronous operations and execution environment for streaming.",
+        "role": "generative"
       }
     ]
   }

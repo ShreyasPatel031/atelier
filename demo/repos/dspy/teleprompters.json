@@ -1,0 +1,596 @@
+{
+  "title": "DSPy Teleprompters Module",
+  "summary": "This module provides various teleprompters (optimizers) for DSPy programs, enabling automated prompt engineering, few-shot example selection, and program refinement through techniques like evolutionary search, Bayesian optimization, and reinforcement learning.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "avatar_optimizer",
+        "label": "Refine Instructions via Feedback",
+        "type": "component",
+        "link": null,
+        "title": "Avatar Optimizer",
+        "description": "Iteratively refines program instructions by analyzing positive and negative execution examples and incorporating feedback."
+      },
+      {
+        "id": "better_together",
+        "label": "Orchestrate Optimization Sequence",
+        "type": "component",
+        "link": null,
+        "title": "BetterTogether Meta-Optimizer",
+        "description": "A meta-optimizer that combines and sequences various prompt and weight optimization strategies to enhance DSPy programs."
+      },
+      {
+        "id": "copro_optimizer",
+        "label": "Iteratively Optimize Signatures",
+        "type": "component",
+        "link": null,
+        "title": "COPRO Optimizer",
+        "description": "Optimizes program signatures, including instructions and output field prefixes, through an iterative search process guided by a metric."
+      },
+      {
+        "id": "gepa_optimizer",
+        "label": "Evolve Prompts with Reflection",
+        "type": "component",
+        "link": null,
+        "title": "GEPA Evolutionary Optimizer",
+        "description": "An evolutionary optimizer that uses reflection on execution traces to propose and evolve improved instructions for program components."
+      },
+      {
+        "id": "grpo_optimizer",
+        "label": "Finetune LM via RL",
+        "type": "component",
+        "link": null,
+        "title": "GRPO Finetune Teleprompter",
+        "description": "Applies Grouped Reinforcement Learning with Policy Optimization to finetune language models based on program execution traces and associated rewards."
+      },
+      {
+        "id": "infer_rules",
+        "label": "Induce & Apply Natural Rules",
+        "type": "component",
+        "link": null,
+        "title": "InferRules Teleprompter",
+        "description": "Induces natural language rules from successful program executions and integrates them into predictor instructions."
+      },
+      {
+        "id": "knn_fewshot",
+        "label": "Dynamically Select Demos",
+        "type": "component",
+        "link": null,
+        "title": "KNN Few-Shot Selector",
+        "description": "Selects the k-nearest neighbor examples from a training set at inference time to dynamically provide few-shot demonstrations."
+      },
+      {
+        "id": "mipro_v2_optimizer",
+        "label": "Optimize Prompts with Bayesian Search",
+        "type": "component",
+        "link": null,
+        "title": "MIPROv2 Optimizer",
+        "description": "Optimizes program prompt parameters (instructions and few-shot examples) using Bayesian optimization (Optuna) across multiple stages."
+      },
+      {
+        "id": "bootstrap_fewshot_optuna",
+        "label": "Select Demos with Optuna",
+        "type": "component",
+        "link": null,
+        "title": "Bootstrap Few-Shot with Optuna",
+        "description": "Utilizes Optuna to systematically select the most effective few-shot examples for a program from a bootstrapped pool."
+      },
+      {
+        "id": "dspy_program",
+        "label": "DSPy Program",
+        "type": "external",
+        "link": "core_abstractions",
+        "title": "DSPy Program Module",
+        "description": "The core DSPy program or module that needs to be optimized."
+      },
+      {
+        "id": "training_data",
+        "label": "Training Data",
+        "type": "external",
+        "link": "data_retrieval_and_evaluation",
+        "title": "Training Dataset",
+        "description": "A collection of input-output examples used to guide the optimization process."
+      },
+      {
+        "id": "evaluation_metric",
+        "label": "Evaluation Metric",
+        "type": "external",
+        "link": "data_retrieval_and_evaluation",
+        "title": "Program Evaluation Metric",
+        "description": "A function used to score the performance of a DSPy program on given examples."
+      },
+      {
+        "id": "language_model",
+        "label": "Language Model",
+        "type": "external",
+        "link": "language_model_integration",
+        "title": "Language Model",
+        "description": "The underlying large language model used by DSPy predictors."
+      },
+      {
+        "id": "prediction_strategies",
+        "label": "Prediction Strategies",
+        "type": "external",
+        "link": "program_execution",
+        "title": "DSPy Prediction Strategies",
+        "description": "Various strategies (e.g., CoT, ReAct) that define how a DSPy program generates outputs."
+      },
+      {
+        "id": "instruction_generation",
+        "label": "Instruction Generation",
+        "type": "external",
+        "link": "optimization_and_tuning",
+        "title": "Instruction Generation Components",
+        "description": "Components responsible for proposing new or refined instructions for predictors."
+      },
+      {
+        "id": "program_analysis_feedback",
+        "label": "Program Analysis & Feedback",
+        "type": "external",
+        "link": "optimization_and_tuning",
+        "title": "Program Analysis & Feedback Components",
+        "description": "Components that analyze program execution traces and generate feedback for optimization."
+      },
+      {
+        "id": "embedder",
+        "label": "Embed Input Data",
+        "type": "external",
+        "link": "data_retrieval_and_evaluation",
+        "title": "Embedder for KNN",
+        "description": "A component that converts text into numerical vector representations for similarity search."
+      }
+    ],
+    "edges": [
+      {
+        "source": "dspy_program",
+        "target": "avatar_optimizer",
+        "label": "is optimized by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "training_data",
+        "target": "avatar_optimizer",
+        "label": "provides examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluation_metric",
+        "target": "avatar_optimizer",
+        "label": "guides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "avatar_optimizer",
+        "target": "dspy_program",
+        "label": "refines",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_analysis_feedback",
+        "target": "avatar_optimizer",
+        "label": "provides feedback",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "instruction_generation",
+        "target": "avatar_optimizer",
+        "label": "proposes instructions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_program",
+        "target": "better_together",
+        "label": "is optimized by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "training_data",
+        "target": "better_together",
+        "label": "provides examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluation_metric",
+        "target": "better_together",
+        "label": "guides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "dspy_program",
+        "label": "refines",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "avatar_optimizer",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "copro_optimizer",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "gepa_optimizer",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "grpo_optimizer",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "infer_rules",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "knn_fewshot",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "mipro_v2_optimizer",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "better_together",
+        "target": "bootstrap_fewshot_optuna",
+        "label": "orchestrates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_program",
+        "target": "copro_optimizer",
+        "label": "is optimized by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "training_data",
+        "target": "copro_optimizer",
+        "label": "provides examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluation_metric",
+        "target": "copro_optimizer",
+        "label": "guides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "copro_optimizer",
+        "target": "dspy_program",
+        "label": "refines signatures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "instruction_generation",
+        "target": "copro_optimizer",
+        "label": "proposes instructions/prefixes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_program",
+        "target": "gepa_optimizer",
+        "label": "is optimized by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "training_data",
+        "target": "gepa_optimizer",
+        "label": "provides examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluation_metric",
+        "target": "gepa_optimizer",
+        "label": "guides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "language_model",
+        "target": "gepa_optimizer",
+        "label": "uses for reflection",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gepa_optimizer",
+        "target": "dspy_program",
+        "label": "evolves instructions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_analysis_feedback",
+        "target": "gepa_optimizer",
+        "label": "provides feedback",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "instruction_generation",
+        "target": "gepa_optimizer",
+        "label": "proposes instructions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_program",
+        "target": "grpo_optimizer",
+        "label": "is optimized by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "training_data",
+        "target": "grpo_optimizer",
+        "label": "provides examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluation_metric",
+        "target": "grpo_optimizer",
+        "label": "guides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "language_model",
+        "target": "grpo_optimizer",
+        "label": "finetunes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "grpo_optimizer",
+        "target": "language_model",
+        "label": "updates parameters",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prediction_strategies",
+        "target": "grpo_optimizer",
+        "label": "generates traces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_program",
+        "target": "infer_rules",
+        "label": "is optimized by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "training_data",
+        "target": "infer_rules",
+        "label": "provides examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluation_metric",
+        "target": "infer_rules",
+        "label": "guides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "infer_rules",
+        "target": "dspy_program",
+        "label": "adds rules to instructions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "instruction_generation",
+        "target": "infer_rules",
+        "label": "induces rules",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_program",
+        "target": "knn_fewshot",
+        "label": "is optimized by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "training_data",
+        "target": "knn_fewshot",
+        "label": "provides demos",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "embedder",
+        "target": "knn_fewshot",
+        "label": "vectorizes inputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "knn_fewshot",
+        "target": "dspy_program",
+        "label": "injects demos into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_program",
+        "target": "mipro_v2_optimizer",
+        "label": "is optimized by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "training_data",
+        "target": "mipro_v2_optimizer",
+        "label": "provides examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluation_metric",
+        "target": "mipro_v2_optimizer",
+        "label": "guides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "language_model",
+        "target": "mipro_v2_optimizer",
+        "label": "uses for prompting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mipro_v2_optimizer",
+        "target": "dspy_program",
+        "label": "refines",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "instruction_generation",
+        "target": "mipro_v2_optimizer",
+        "label": "proposes instructions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "program_analysis_feedback",
+        "target": "mipro_v2_optimizer",
+        "label": "summarizes data/program",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_program",
+        "target": "bootstrap_fewshot_optuna",
+        "label": "is optimized by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "training_data",
+        "target": "bootstrap_fewshot_optuna",
+        "label": "provides examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "evaluation_metric",
+        "target": "bootstrap_fewshot_optuna",
+        "label": "guides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bootstrap_fewshot_optuna",
+        "target": "dspy_program",
+        "label": "selects demos for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "evolutionary_optimizers",
+        "label": "Evolutionary & Iterative Optimizers",
+        "nodes": [
+          "avatar_optimizer",
+          "copro_optimizer",
+          "gepa_optimizer",
+          "simba"
+        ],
+        "title": "Evolutionary & Iterative Optimizers",
+        "description": "Optimizers that iteratively evolve program components (like instructions or demonstrations) based on feedback and performance metrics.",
+        "role": "generative"
+      },
+      {
+        "id": "search_based_optimizers",
+        "label": "Search-Based Optimizers",
+        "nodes": [
+          "mipro_v2_optimizer",
+          "bootstrap_fewshot_optuna"
+        ],
+        "title": "Search-Based Optimizers",
+        "description": "Optimizers that use systematic search strategies, often guided by Bayesian optimization (like Optuna), to find optimal program configurations.",
+        "role": "analytical"
+      },
+      {
+        "id": "finetuning_rl_optimizers",
+        "label": "Finetuning & RL Optimizers",
+        "nodes": [
+          "grpo_optimizer"
+        ],
+        "title": "Finetuning & RL Optimizers",
+        "description": "Optimizers that directly finetune the underlying language model parameters using reinforcement learning or similar techniques.",
+        "role": "generative"
+      },
+      {
+        "id": "demo_rule_optimizers",
+        "label": "Demonstration & Rule Induction",
+        "nodes": [
+          "knn_fewshot",
+          "infer_rules"
+        ],
+        "title": "Demonstration & Rule Induction",
+        "description": "Optimizers focused on selecting effective few-shot demonstrations or inducing explicit rules to guide program behavior.",
+        "role": "data"
+      },
+      {
+        "id": "meta_optimizers",
+        "label": "Meta-Optimizers",
+        "nodes": [
+          "better_together"
+        ],
+        "title": "Meta-Optimizers",
+        "description": "Optimizers that orchestrate and combine multiple other optimization strategies in a configurable sequence.",
+        "role": "surface"
+      }
+    ]
+  }
+}

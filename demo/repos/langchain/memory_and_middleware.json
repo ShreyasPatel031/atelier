@@ -1,0 +1,821 @@
+{
+  "title": "Agent Memory and Middleware",
+  "summary": "This module provides various memory implementations for conversational AI agents to manage chat history and entities, alongside a suite of middleware components to control and enhance agent behavior, including execution policies, PII handling, summarization, and tool interaction.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "BaseMemory",
+        "label": "Define Core Memory Interface",
+        "type": "component",
+        "link": null,
+        "title": "BaseMemory",
+        "description": "Abstract base class for managing conversational state and context within AI agents."
+      },
+      {
+        "id": "BaseChatMemory",
+        "label": "Manage Chat Memory Interface",
+        "type": "component",
+        "link": null,
+        "title": "BaseChatMemory",
+        "description": "Abstract base for chat-specific memory, handling message storage and retrieval, though not recommended for new code with native tool calling."
+      },
+      {
+        "id": "ConvBufferMemory",
+        "label": "Store Full Conversation History",
+        "type": "component",
+        "link": null,
+        "title": "ConversationBufferMemory",
+        "description": "Retains the entire conversation history as messages or a single string, without additional processing."
+      },
+      {
+        "id": "ConvStringBufferMemory",
+        "label": "Store String Conversation History",
+        "type": "component",
+        "link": null,
+        "title": "ConversationStringBufferMemory",
+        "description": "Stores the entire conversation history as a string, tailored for string-based conversation history."
+      },
+      {
+        "id": "ConvBufferWindowMemory",
+        "label": "Store Recent Conversation Turns",
+        "type": "component",
+        "link": null,
+        "title": "ConversationBufferWindowMemory",
+        "description": "Keeps track of the last 'k' turns of a conversation, dropping older messages to manage context size."
+      },
+      {
+        "id": "ConvSummaryMemory",
+        "label": "Summarize Conversation History",
+        "type": "component",
+        "link": null,
+        "title": "ConversationSummaryMemory",
+        "description": "Continuously summarizes the conversation history, updating the summary after each conversation turn."
+      },
+      {
+        "id": "ConvSummaryBufferMemory",
+        "label": "Summarize & Buffer Conversation",
+        "type": "component",
+        "link": null,
+        "title": "ConversationSummaryBufferMemory",
+        "description": "Maintains a running summary and recent messages, pruning older content to respect token limits."
+      },
+      {
+        "id": "ConvVectorStoreMemory",
+        "label": "Buffer & Vector Store Memory",
+        "type": "component",
+        "link": null,
+        "title": "ConversationVectorStoreTokenBufferMemory",
+        "description": "Combines token-buffered chat history with a vector store for long-term memory and retrieval of relevant past interactions."
+      },
+      {
+        "id": "ConvEntityMemory",
+        "label": "Extract & Summarize Entities",
+        "type": "component",
+        "link": null,
+        "title": "ConversationEntityMemory",
+        "description": "Identifies and summarizes named entities from chat history, using a swappable entity store for persistence."
+      },
+      {
+        "id": "InMemoryEntityStore",
+        "label": "In-Memory Entity Storage",
+        "type": "component",
+        "link": null,
+        "title": "InMemoryEntityStore",
+        "description": "Provides a simple, volatile in-memory storage for conversational entities, suitable for short-lived contexts."
+      },
+      {
+        "id": "RedisEntityStore",
+        "label": "Redis Entity Storage",
+        "type": "component",
+        "link": null,
+        "title": "RedisEntityStore",
+        "description": "Persists conversational entities using a Redis database with configurable time-to-live (TTL) for entries."
+      },
+      {
+        "id": "UpstashRedisEntityStore",
+        "label": "Upstash Redis Entity Storage",
+        "type": "component",
+        "link": null,
+        "title": "UpstashRedisEntityStore",
+        "description": "Persists conversational entities using an Upstash Redis database with configurable time-to-live (TTL) for entries."
+      },
+      {
+        "id": "SQLiteEntityStore",
+        "label": "SQLite Entity Storage",
+        "type": "component",
+        "link": null,
+        "title": "SQLiteEntityStore",
+        "description": "Persists conversational entities using a local SQLite database, ensuring safe query construction."
+      },
+      {
+        "id": "ContextEditingMiddleware",
+        "label": "Prune Tool Results for Context",
+        "type": "component",
+        "link": null,
+        "title": "ContextEditingMiddleware",
+        "description": "Automatically prunes tool results to manage context size, applying various edit strategies like clearing tool uses."
+      },
+      {
+        "id": "FilesystemFileSearchMiddleware",
+        "label": "Search Local Filesystem",
+        "type": "component",
+        "link": null,
+        "title": "FilesystemFileSearchMiddleware",
+        "description": "Adds tools for glob and grep search operations on the local filesystem, supporting pattern matching and content search."
+      },
+      {
+        "id": "HumanInTheLoopMiddleware",
+        "label": "Enable Human Intervention",
+        "type": "component",
+        "link": null,
+        "title": "HumanInTheLoopMiddleware",
+        "description": "Allows human approval, editing, or rejection of agent actions and tool calls, enabling oversight and control."
+      },
+      {
+        "id": "ModelCallLimitMiddleware",
+        "label": "Enforce Model Call Limits",
+        "type": "component",
+        "link": null,
+        "title": "ModelCallLimitMiddleware",
+        "description": "Tracks and enforces limits on the number of model calls per thread or run, with configurable exit behaviors."
+      },
+      {
+        "id": "ModelFallbackMiddleware",
+        "label": "Fallback on Model Failure",
+        "type": "component",
+        "link": null,
+        "title": "ModelFallbackMiddleware",
+        "description": "Automatically retries failed model calls with alternative models in sequence until success or exhaustion."
+      },
+      {
+        "id": "ModelRetryMiddleware",
+        "label": "Retry Failed Model Calls",
+        "type": "component",
+        "link": null,
+        "title": "ModelRetryMiddleware",
+        "description": "Automatically retries failed model calls with configurable backoff and exception handling for robustness."
+      },
+      {
+        "id": "PIIMiddleware",
+        "label": "Detect & Handle PII",
+        "type": "component",
+        "link": null,
+        "title": "PIIMiddleware",
+        "description": "Detects common Personally Identifiable Information (PII) and applies strategies like redaction, masking, or hashing."
+      },
+      {
+        "id": "detect_credit_card",
+        "label": "Detect Credit Card Numbers",
+        "type": "component",
+        "link": null,
+        "title": "detect_credit_card",
+        "description": "Utility function to detect credit card numbers in text content using Luhn validation."
+      },
+      {
+        "id": "ShellToolMiddleware",
+        "label": "Provide Persistent Shell Tool",
+        "type": "component",
+        "link": null,
+        "title": "ShellToolMiddleware",
+        "description": "Registers a persistent shell tool for agents, with configurable execution policies and output redaction."
+      },
+      {
+        "id": "SummarizationMiddleware",
+        "label": "Summarize Conversation for Context",
+        "type": "component",
+        "link": null,
+        "title": "SummarizationMiddleware",
+        "description": "Monitors message token counts and automatically summarizes older messages when limits are approached."
+      },
+      {
+        "id": "TodoListMiddleware",
+        "label": "Manage Agent Todo Lists",
+        "type": "component",
+        "link": null,
+        "title": "TodoListMiddleware",
+        "description": "Adds a 'write_todos' tool for agents to create and manage structured task lists for complex operations."
+      },
+      {
+        "id": "write_todos",
+        "label": "Update Agent Todo List",
+        "type": "component",
+        "link": null,
+        "title": "write_todos",
+        "description": "Function for agents to update their structured task list within the TodoListMiddleware."
+      },
+      {
+        "id": "_awrite_todos",
+        "label": "Async Update Agent Todo List",
+        "type": "component",
+        "link": null,
+        "title": "_awrite_todos",
+        "description": "Asynchronous function for agents to update their structured task list within the TodoListMiddleware."
+      },
+      {
+        "id": "ToolCallLimitMiddleware",
+        "label": "Enforce Tool Call Limits",
+        "type": "component",
+        "link": null,
+        "title": "ToolCallLimitMiddleware",
+        "description": "Tracks and enforces limits on the number of tool calls per thread or run, with various exit behaviors."
+      },
+      {
+        "id": "LLMToolEmulator",
+        "label": "Emulate Tool Execution with LLM",
+        "type": "component",
+        "link": null,
+        "title": "LLMToolEmulator",
+        "description": "Emulates specified tools using an LLM instead of actual execution, primarily for testing purposes."
+      },
+      {
+        "id": "ToolRetryMiddleware",
+        "label": "Retry Failed Tool Calls",
+        "type": "component",
+        "link": null,
+        "title": "ToolRetryMiddleware",
+        "description": "Automatically retries failed tool calls with configurable backoff and exception handling for robustness."
+      },
+      {
+        "id": "LLMToolSelectorMiddleware",
+        "label": "Select Tools with LLM",
+        "type": "component",
+        "link": null,
+        "title": "LLMToolSelectorMiddleware",
+        "description": "Uses an LLM to select the most relevant tools from a larger set before calling the main model."
+      },
+      {
+        "id": "CodexSandboxExecutionPolicy",
+        "label": "Execute in Codex Sandbox",
+        "type": "component",
+        "link": null,
+        "title": "CodexSandboxExecutionPolicy",
+        "description": "Launches shell commands within a Codex CLI sandbox for enhanced security and syscall restrictions."
+      },
+      {
+        "id": "DockerExecutionPolicy",
+        "label": "Execute in Docker Container",
+        "type": "component",
+        "link": null,
+        "title": "DockerExecutionPolicy",
+        "description": "Runs shell commands inside a dedicated Docker container for strong isolation between sessions."
+      },
+      {
+        "id": "StateClaudeTextEditorMiddleware",
+        "label": "Anthropic State Text Editor",
+        "type": "component",
+        "link": null,
+        "title": "StateClaudeTextEditorMiddleware",
+        "description": "Provides Anthropic's `text_editor` tool using LangGraph state for file storage, persisting for the conversation thread."
+      },
+      {
+        "id": "StateClaudeMemoryMiddleware",
+        "label": "Anthropic State Memory Tool",
+        "type": "component",
+        "link": null,
+        "title": "StateClaudeMemoryMiddleware",
+        "description": "Provides Anthropic's memory tool using LangGraph state for file storage, persisting for the conversation thread."
+      },
+      {
+        "id": "FilesystemClaudeTextEditorMiddleware",
+        "label": "Anthropic Filesystem Text Editor",
+        "type": "component",
+        "link": null,
+        "title": "FilesystemClaudeTextEditorMiddleware",
+        "description": "Provides Anthropic's `text_editor` tool using the local filesystem for storage, allowing user-managed persistence."
+      },
+      {
+        "id": "FilesystemClaudeMemoryMiddleware",
+        "label": "Anthropic Filesystem Memory Tool",
+        "type": "component",
+        "link": null,
+        "title": "FilesystemClaudeMemoryMiddleware",
+        "description": "Provides Anthropic's memory tool using the local filesystem for storage, allowing user-managed persistence."
+      },
+      {
+        "id": "StateFileSearchMiddleware",
+        "label": "Anthropic State File Search",
+        "type": "component",
+        "link": null,
+        "title": "StateFileSearchMiddleware",
+        "description": "Provides glob and grep search over state-based virtual files for Anthropic agents."
+      },
+      {
+        "id": "AnthropicPromptCachingMiddleware",
+        "label": "Cache Anthropic Prompts",
+        "type": "component",
+        "link": null,
+        "title": "AnthropicPromptCachingMiddleware",
+        "description": "Optimizes Anthropic API usage by caching conversation prefixes, system messages, and tool definitions."
+      },
+      {
+        "id": "OpenAIModerationMiddleware",
+        "label": "Moderate OpenAI Agent Traffic",
+        "type": "component",
+        "link": null,
+        "title": "OpenAIModerationMiddleware",
+        "description": "Moderates agent input and output using OpenAI's moderation endpoint for safety and policy compliance."
+      },
+      {
+        "id": "LLM",
+        "label": "Language Model",
+        "type": "external",
+        "link": "language_models_and_prompts",
+        "title": "Language Model",
+        "description": "An external Language Model (LLM) used for generating text, summaries, entity extraction, or making decisions."
+      },
+      {
+        "id": "RedisDB",
+        "label": "Redis Database",
+        "type": "external",
+        "link": null,
+        "title": "Redis Database",
+        "description": "An external key-value store used for persistent storage of conversational entities."
+      },
+      {
+        "id": "UpstashRedis",
+        "label": "Upstash Redis Database",
+        "type": "external",
+        "link": null,
+        "title": "Upstash Redis Database",
+        "description": "A cloud-based Redis service used for persistent storage of conversational entities."
+      },
+      {
+        "id": "SQLiteDB",
+        "label": "SQLite Database",
+        "type": "external",
+        "link": null,
+        "title": "SQLite Database",
+        "description": "A local file-based database used for persistent storage of conversational entities."
+      },
+      {
+        "id": "Filesystem",
+        "label": "Local Filesystem",
+        "type": "external",
+        "link": null,
+        "title": "Local Filesystem",
+        "description": "The local file system used for file search, text editing, and shell tool operations."
+      },
+      {
+        "id": "CodexSandbox",
+        "label": "Codex CLI Sandbox",
+        "type": "external",
+        "link": null,
+        "title": "Codex CLI Sandbox",
+        "description": "A secure execution environment provided by the Codex CLI for running shell commands with syscall and filesystem restrictions."
+      },
+      {
+        "id": "DockerContainer",
+        "label": "Docker Container",
+        "type": "external",
+        "link": null,
+        "title": "Docker Container",
+        "description": "An isolated containerized environment used for executing shell commands, providing strong process isolation."
+      },
+      {
+        "id": "OpenAIModerationAPI",
+        "label": "OpenAI Moderation API",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI Moderation API",
+        "description": "An external API service from OpenAI used for content moderation of agent inputs and outputs."
+      },
+      {
+        "id": "AnthropicAPI",
+        "label": "Anthropic API",
+        "type": "external",
+        "link": null,
+        "title": "Anthropic API",
+        "description": "The external API service from Anthropic used for LLM interactions and prompt caching features."
+      },
+      {
+        "id": "VectorStore",
+        "label": "Vector Store",
+        "type": "external",
+        "link": "data_and_retrieval",
+        "title": "Vector Store",
+        "description": "An external vector database used for storing and retrieving embeddings, often for long-term memory."
+      }
+    ],
+    "edges": [
+      {
+        "source": "BaseChatMemory",
+        "target": "BaseMemory",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvBufferMemory",
+        "target": "BaseChatMemory",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvStringBufferMemory",
+        "target": "BaseMemory",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvBufferWindowMemory",
+        "target": "BaseChatMemory",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvSummaryMemory",
+        "target": "BaseChatMemory",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvSummaryBufferMemory",
+        "target": "BaseChatMemory",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvVectorStoreMemory",
+        "target": "BaseChatMemory",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvEntityMemory",
+        "target": "BaseChatMemory",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvSummaryMemory",
+        "target": "LLM",
+        "label": "uses for summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvSummaryBufferMemory",
+        "target": "LLM",
+        "label": "uses for summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvVectorStoreMemory",
+        "target": "LLM",
+        "label": "uses for token counting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvVectorStoreMemory",
+        "target": "VectorStore",
+        "label": "uses for retrieval",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvEntityMemory",
+        "target": "LLM",
+        "label": "uses for extraction/summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvEntityMemory",
+        "target": "InMemoryEntityStore",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvEntityMemory",
+        "target": "RedisEntityStore",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvEntityMemory",
+        "target": "UpstashRedisEntityStore",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ConvEntityMemory",
+        "target": "SQLiteEntityStore",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RedisEntityStore",
+        "target": "RedisDB",
+        "label": "connects to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UpstashRedisEntityStore",
+        "target": "UpstashRedis",
+        "label": "connects to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SQLiteEntityStore",
+        "target": "SQLiteDB",
+        "label": "connects to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PIIMiddleware",
+        "target": "detect_credit_card",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ShellToolMiddleware",
+        "target": "CodexSandboxExecutionPolicy",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ShellToolMiddleware",
+        "target": "DockerExecutionPolicy",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ShellToolMiddleware",
+        "target": "Filesystem",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FilesystemFileSearchMiddleware",
+        "target": "Filesystem",
+        "label": "searches",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CodexSandboxExecutionPolicy",
+        "target": "CodexSandbox",
+        "label": "executes in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DockerExecutionPolicy",
+        "target": "DockerContainer",
+        "label": "executes in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ModelFallbackMiddleware",
+        "target": "LLM",
+        "label": "uses alternative",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ModelRetryMiddleware",
+        "target": "LLM",
+        "label": "retries calls to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMToolEmulator",
+        "target": "LLM",
+        "label": "uses for emulation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LLMToolSelectorMiddleware",
+        "target": "LLM",
+        "label": "uses for selection",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SummarizationMiddleware",
+        "target": "LLM",
+        "label": "uses for summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TodoListMiddleware",
+        "target": "write_todos",
+        "label": "exposes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TodoListMiddleware",
+        "target": "_awrite_todos",
+        "label": "exposes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StateClaudeTextEditorMiddleware",
+        "target": "Filesystem",
+        "label": "simulates on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StateClaudeMemoryMiddleware",
+        "target": "Filesystem",
+        "label": "simulates on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FilesystemClaudeTextEditorMiddleware",
+        "target": "Filesystem",
+        "label": "operates on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FilesystemClaudeMemoryMiddleware",
+        "target": "Filesystem",
+        "label": "operates on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "StateFileSearchMiddleware",
+        "target": "Filesystem",
+        "label": "searches simulated on",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AnthropicPromptCachingMiddleware",
+        "target": "AnthropicAPI",
+        "label": "optimizes calls to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "OpenAIModerationMiddleware",
+        "target": "OpenAIModerationAPI",
+        "label": "sends requests to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "MemoryCore",
+        "label": "Memory Core",
+        "nodes": [
+          "BaseMemory",
+          "BaseChatMemory"
+        ],
+        "title": "Core Memory Interfaces",
+        "description": "Defines the foundational interfaces for managing conversational state and chat history within AI agents.",
+        "role": "data"
+      },
+      {
+        "id": "ConversationHistoryMemory",
+        "label": "Conversation History Memory",
+        "nodes": [
+          "ConvBufferMemory",
+          "ConvStringBufferMemory",
+          "ConvBufferWindowMemory",
+          "ConvSummaryMemory",
+          "ConvSummaryBufferMemory",
+          "ConvVectorStoreMemory"
+        ],
+        "title": "Conversation History Memory Implementations",
+        "description": "Concrete implementations for storing and managing the flow of conversation history, from simple buffers to summarized and windowed views.",
+        "role": "data"
+      },
+      {
+        "id": "EntityMemory",
+        "label": "Entity Memory & Storage",
+        "nodes": [
+          "ConvEntityMemory",
+          "InMemoryEntityStore",
+          "RedisEntityStore",
+          "UpstashRedisEntityStore",
+          "SQLiteEntityStore"
+        ],
+        "title": "Entity Memory and Persistence",
+        "description": "Components for extracting, summarizing, and persistently storing named entities from conversational contexts.",
+        "role": "data"
+      },
+      {
+        "id": "ExecutionPolicies",
+        "label": "Execution Policies",
+        "nodes": [
+          "CodexSandboxExecutionPolicy",
+          "DockerExecutionPolicy"
+        ],
+        "title": "Agent Execution Policies",
+        "description": "Defines various policies for how external commands and tools are executed, offering different levels of security and isolation.",
+        "role": "security"
+      },
+      {
+        "id": "AgentControlMiddleware",
+        "label": "Agent Control & Resilience",
+        "nodes": [
+          "ModelCallLimitMiddleware",
+          "ModelFallbackMiddleware",
+          "ModelRetryMiddleware",
+          "HumanInTheLoopMiddleware"
+        ],
+        "title": "Agent Control and Resilience Middleware",
+        "description": "Middleware components that manage the overall flow and robustness of agent operations, including call limits, fallbacks, and retries.",
+        "role": "surface"
+      },
+      {
+        "id": "ContentProcessingMiddleware",
+        "label": "Content Processing & Security",
+        "nodes": [
+          "PIIMiddleware",
+          "detect_credit_card",
+          "SummarizationMiddleware",
+          "ContextEditingMiddleware"
+        ],
+        "title": "Content Processing and Security Middleware",
+        "description": "Middleware focused on processing and securing conversational content, including PII detection, summarization, and context management.",
+        "role": "security"
+      },
+      {
+        "id": "ToolOrchestrationMiddleware",
+        "label": "Tool Orchestration",
+        "nodes": [
+          "LLMToolSelectorMiddleware",
+          "LLMToolEmulator",
+          "ToolCallLimitMiddleware",
+          "ToolRetryMiddleware"
+        ],
+        "title": "Tool Orchestration Middleware",
+        "description": "Middleware components that manage the selection, emulation, and control of tool calls within agent workflows.",
+        "role": "surface"
+      },
+      {
+        "id": "AgentUtilityToolsMiddleware",
+        "label": "Agent Utility Tools",
+        "nodes": [
+          "ShellToolMiddleware",
+          "TodoListMiddleware",
+          "write_todos",
+          "_awrite_todos",
+          "FilesystemFileSearchMiddleware"
+        ],
+        "title": "Agent Utility Tools Middleware",
+        "description": "Middleware providing agents with built-in utility tools such as shell access, file search, and todo list management.",
+        "role": "surface"
+      },
+      {
+        "id": "AnthropicToolsMiddleware",
+        "label": "Anthropic Tools",
+        "nodes": [
+          "StateClaudeTextEditorMiddleware",
+          "StateClaudeMemoryMiddleware",
+          "FilesystemClaudeTextEditorMiddleware",
+          "FilesystemClaudeMemoryMiddleware",
+          "StateFileSearchMiddleware"
+        ],
+        "title": "Anthropic-Specific Tool Middleware",
+        "description": "Middleware components providing specialized tool integrations for Anthropic models, such as text editing and memory management.",
+        "role": "surface"
+      },
+      {
+        "id": "PartnerIntegrationMiddleware",
+        "label": "Partner Integration",
+        "nodes": [
+          "AnthropicPromptCachingMiddleware",
+          "OpenAIModerationMiddleware"
+        ],
+        "title": "LLM Partner Integration Middleware",
+        "description": "Middleware for integrating with and optimizing specific LLM provider APIs, including prompt caching and content moderation.",
+        "role": "surface"
+      }
+    ]
+  }
+}

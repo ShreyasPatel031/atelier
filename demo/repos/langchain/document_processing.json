@@ -1,0 +1,320 @@
+{
+  "title": "Document Processing Chains",
+  "summary": "This module provides chains for processing documents, including a Map-Reduce chain for handling large texts and a FLARE chain for iterative, retrieval-augmented generation to refine responses based on uncertainty.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "user_input_external",
+        "label": "User Input",
+        "type": "external",
+        "link": null,
+        "title": "Initial User Input",
+        "description": "The original text or query provided by the user for processing by the chains."
+      },
+      {
+        "id": "final_output_external",
+        "label": "Final Output",
+        "type": "external",
+        "link": null,
+        "title": "Processed Result",
+        "description": "The final generated or processed output from the document processing module."
+      },
+      {
+        "id": "llm_external",
+        "label": "Language Model (LLM)",
+        "type": "external",
+        "link": null,
+        "title": "External Language Model",
+        "description": "Provides text generation and understanding capabilities, essential for various chain operations."
+      },
+      {
+        "id": "map_reduce_chain_comp",
+        "label": "MapReduceChain",
+        "type": "component",
+        "link": null,
+        "title": "Orchestrates Map-Reduce Document Processing",
+        "description": "Splits large documents into chunks, processes them with an LLM (map), and then combines the results (reduce)."
+      },
+      {
+        "id": "text_splitter_comp",
+        "label": "Text Splitter",
+        "type": "component",
+        "link": null,
+        "title": "Splits Documents into Chunks",
+        "description": "Breaks down large input texts into smaller, manageable segments for parallel or sequential processing."
+      },
+      {
+        "id": "map_reduce_docs_chain_comp",
+        "label": "MapReduceDocumentsChain",
+        "type": "component",
+        "link": null,
+        "title": "Manages Map and Reduce Steps",
+        "description": "An internal component that orchestrates the mapping of document chunks and their subsequent reduction."
+      },
+      {
+        "id": "llm_chain_comp",
+        "label": "LLMChain",
+        "type": "component",
+        "link": null,
+        "title": "Applies LLM to Document Chunks",
+        "description": "Uses a Language Model to process individual document chunks or combine intermediate results during map and reduce phases."
+      },
+      {
+        "id": "reduce_docs_chain_comp",
+        "label": "ReduceDocumentsChain",
+        "type": "component",
+        "link": null,
+        "title": "Reduces Document Chunks",
+        "description": "Combines processed document chunks into a single, coherent output, often after an initial mapping step."
+      },
+      {
+        "id": "flare_chain_comp",
+        "label": "FlareChain",
+        "type": "component",
+        "link": null,
+        "title": "Iterative RAG for Uncertain Responses",
+        "description": "Implements FLARE (Active Retrieval Augmented Generation) to iteratively refine responses by identifying uncertainty, generating questions, and retrieving context."
+      },
+      {
+        "id": "response_chain_comp",
+        "label": "Response Generator",
+        "type": "component",
+        "link": null,
+        "title": "Generates & Refines Responses",
+        "description": "Produces initial responses and iteratively refines them using retrieved context and user input, often leveraging LLM log probabilities."
+      },
+      {
+        "id": "question_gen_chain_comp",
+        "label": "Question Generator",
+        "type": "component",
+        "link": null,
+        "title": "Generates Clarifying Questions",
+        "description": "Creates targeted questions based on low-confidence spans in the current response to guide further information retrieval."
+      },
+      {
+        "id": "retriever_comp",
+        "label": "Retriever",
+        "type": "component",
+        "link": "retrievers",
+        "title": "Fetches Relevant Documents",
+        "description": "Retrieves documents from a knowledge base or external source based on generated questions or user queries."
+      },
+      {
+        "id": "output_parser_comp",
+        "label": "Finished Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Determines Response Completion",
+        "description": "Analyzes the generated response to decide if the iterative process is complete or if further refinement/retrieval is needed."
+      }
+    ],
+    "edges": [
+      {
+        "source": "user_input_external",
+        "target": "map_reduce_chain_comp",
+        "label": "Document Text",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "map_reduce_chain_comp",
+        "target": "text_splitter_comp",
+        "label": "Splits Document",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "text_splitter_comp",
+        "target": "map_reduce_docs_chain_comp",
+        "label": "Document Chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "map_reduce_docs_chain_comp",
+        "target": "llm_chain_comp",
+        "label": "Map Chunks",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_chain_comp",
+        "target": "map_reduce_docs_chain_comp",
+        "label": "Mapped Results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "map_reduce_docs_chain_comp",
+        "target": "reduce_docs_chain_comp",
+        "label": "Reduce Results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "reduce_docs_chain_comp",
+        "target": "llm_chain_comp",
+        "label": "Apply LLM for Reduction",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "reduce_docs_chain_comp",
+        "target": "map_reduce_docs_chain_comp",
+        "label": "Reduced Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "map_reduce_docs_chain_comp",
+        "target": "map_reduce_chain_comp",
+        "label": "Combined Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "map_reduce_chain_comp",
+        "target": "final_output_external",
+        "label": "Processed Document",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_external",
+        "target": "llm_chain_comp",
+        "label": "Uses LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "user_input_external",
+        "target": "flare_chain_comp",
+        "label": "User Query",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flare_chain_comp",
+        "target": "response_chain_comp",
+        "label": "Generate Initial Response",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "response_chain_comp",
+        "target": "flare_chain_comp",
+        "label": "Response & Logprobs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flare_chain_comp",
+        "target": "question_gen_chain_comp",
+        "label": "Low Confidence Spans",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "question_gen_chain_comp",
+        "target": "retriever_comp",
+        "label": "Generated Questions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "retriever_comp",
+        "target": "response_chain_comp",
+        "label": "Retrieved Context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "response_chain_comp",
+        "target": "output_parser_comp",
+        "label": "Check Response",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "output_parser_comp",
+        "target": "flare_chain_comp",
+        "label": "Completion Status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "flare_chain_comp",
+        "target": "final_output_external",
+        "label": "Refined Response",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_external",
+        "target": "response_chain_comp",
+        "label": "Uses LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_external",
+        "target": "question_gen_chain_comp",
+        "label": "Uses LLM",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "document_transformation_group",
+        "label": "Document Transformation",
+        "nodes": [
+          "map_reduce_chain_comp",
+          "text_splitter_comp",
+          "map_reduce_docs_chain_comp",
+          "llm_chain_comp",
+          "reduce_docs_chain_comp"
+        ],
+        "title": "Map-Reduce Document Processing",
+        "description": "Components involved in splitting, mapping, and reducing large documents using language models.",
+        "role": "generative"
+      },
+      {
+        "id": "flare_iterative_rag_group",
+        "label": "FLARE Iterative RAG",
+        "nodes": [
+          "flare_chain_comp",
+          "response_chain_comp",
+          "question_gen_chain_comp",
+          "output_parser_comp"
+        ],
+        "title": "Iterative Retrieval-Augmented Generation",
+        "description": "Components implementing the FLARE technique for refining responses through iterative question generation and retrieval.",
+        "role": "generative"
+      },
+      {
+        "id": "information_retrieval_group",
+        "label": "Information Retrieval",
+        "nodes": [
+          "retriever_comp"
+        ],
+        "title": "Contextual Information Retrieval",
+        "description": "Component responsible for fetching relevant documents based on queries or generated questions.",
+        "role": "data"
+      },
+      {
+        "id": "external_interfaces_group",
+        "label": "External Interfaces",
+        "nodes": [
+          "user_input_external",
+          "final_output_external",
+          "llm_external"
+        ],
+        "title": "External Systems and Data",
+        "description": "Represents external inputs, outputs, and dependencies like Language Models.",
+        "role": "external"
+      }
+    ]
+  }
+}

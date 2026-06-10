@@ -1,0 +1,163 @@
+{
+  "title": "Graph State Persistence",
+  "summary": "This module defines abstract and concrete mechanisms for persisting the state of graph runs. It includes an abstract base class for state management, along with file-based and in-memory implementations to track graph execution progress and enable recovery.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "BasePersistence",
+        "label": "Define Persistence Interface",
+        "type": "component",
+        "link": null,
+        "title": "BaseStatePersistence",
+        "description": "Abstract base class specifying methods for storing and retrieving graph run states and node execution details, including snapshots and run recording."
+      },
+      {
+        "id": "FilePersistence",
+        "label": "Persist to JSON File",
+        "type": "component",
+        "link": null,
+        "title": "FileStatePersistence",
+        "description": "Concrete implementation that stores graph run snapshots as JSON in a specified file. It uses Pydantic TypeAdapters for serialization and includes a file-based locking mechanism for concurrency."
+      },
+      {
+        "id": "InMemoryPersistence",
+        "label": "Persist In-Memory",
+        "type": "component",
+        "link": null,
+        "title": "FullStatePersistence",
+        "description": "Concrete implementation that stores graph run snapshots in a Python list in memory. It offers an option for deep copying state and nodes to ensure immutability of historical records."
+      },
+      {
+        "id": "GraphState",
+        "label": "Graph Run State",
+        "type": "component",
+        "link": null,
+        "title": "StateT",
+        "description": "Represents the current data and context of the graph execution at a specific point in time, captured during snapshots."
+      },
+      {
+        "id": "GraphNode",
+        "label": "Graph Node Execution",
+        "type": "component",
+        "link": null,
+        "title": "BaseNode",
+        "description": "Represents a single step or operation within the graph. Its execution status, start time, and duration are tracked by persistence mechanisms."
+      },
+      {
+        "id": "JSONStorage",
+        "label": "JSON File Storage",
+        "type": "external",
+        "link": null,
+        "title": "Persistence JSON File",
+        "description": "An external JSON file used by FileStatePersistence to store serialized graph snapshots, enabling durable storage across application restarts."
+      },
+      {
+        "id": "GraphEngine",
+        "label": "Graph Execution Engine",
+        "type": "component",
+        "link": "graph_core",
+        "title": "Graph",
+        "description": "The core engine responsible for executing graph nodes. It utilizes persistence mechanisms to manage run state, track progress, and support recovery or iteration from saved states."
+      }
+    ],
+    "edges": [
+      {
+        "source": "FilePersistence",
+        "target": "BasePersistence",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InMemoryPersistence",
+        "target": "BasePersistence",
+        "label": "Implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BasePersistence",
+        "target": "GraphState",
+        "label": "Manages State",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BasePersistence",
+        "target": "GraphNode",
+        "label": "Tracks Node Status",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FilePersistence",
+        "target": "JSONStorage",
+        "label": "Reads/Writes Snapshots",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "GraphEngine",
+        "target": "BasePersistence",
+        "label": "Uses Persistence",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "PersistenceInterfaces",
+        "label": "Persistence Interfaces",
+        "nodes": [
+          "BasePersistence"
+        ],
+        "title": "Core Persistence Interfaces",
+        "description": "Defines the abstract contract for how graph run states are managed and persisted.",
+        "role": "surface"
+      },
+      {
+        "id": "PersistenceImplementations",
+        "label": "Persistence Implementations",
+        "nodes": [
+          "FilePersistence",
+          "InMemoryPersistence"
+        ],
+        "title": "Concrete Persistence Strategies",
+        "description": "Provides different strategies for storing and retrieving graph execution snapshots.",
+        "role": "data"
+      },
+      {
+        "id": "ManagedData",
+        "label": "Managed Data",
+        "nodes": [
+          "GraphState",
+          "GraphNode"
+        ],
+        "title": "Graph Execution Data",
+        "description": "The core data structures whose states and execution details are managed by the persistence layer.",
+        "role": "data"
+      },
+      {
+        "id": "ExternalStorage",
+        "label": "External Storage",
+        "nodes": [
+          "JSONStorage"
+        ],
+        "title": "External Data Storage",
+        "description": "External resources used by persistence mechanisms for durable storage.",
+        "role": "data"
+      },
+      {
+        "id": "Consumers",
+        "label": "Consumers",
+        "nodes": [
+          "GraphEngine"
+        ],
+        "title": "Persistence Consumers",
+        "description": "Modules or components that interact with and rely on the persistence mechanisms.",
+        "role": "generative"
+      }
+    ]
+  }
+}

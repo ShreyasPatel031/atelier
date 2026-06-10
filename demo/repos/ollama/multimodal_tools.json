@@ -1,0 +1,270 @@
+{
+  "title": "Multimodal Tooling for LLMs",
+  "summary": "This module provides core functionalities for processing and encoding multimodal data, specifically images and audio, for use with Large Language Models. It includes image preprocessing, audio feature extraction, and integration with GGUF models.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "node_1",
+        "label": "Convert GGUF Key-Value to String",
+        "type": "component",
+        "link": null,
+        "title": "GGUF Key-Value to String",
+        "description": "Converts a GGUF key-value pair from a GGUF context into its string representation, handling various data types including arrays and nested structures for display or serialization."
+      },
+      {
+        "id": "node_2",
+        "label": "Map Projector Type String",
+        "type": "component",
+        "link": null,
+        "title": "Map Projector Type String",
+        "description": "Maps a string identifier to its corresponding internal projector type enum, used for configuring image processing pipelines based on model architecture."
+      },
+      {
+        "id": "node_3",
+        "label": "Encode Float Image Data",
+        "type": "component",
+        "link": null,
+        "title": "Encode Float Image Data",
+        "description": "Encodes a raw float-based image buffer (height, width, 3 channels) into a feature vector using the configured CLIP model, preparing it for multimodal LLM input."
+      },
+      {
+        "id": "node_4",
+        "label": "Debug Image Encoding",
+        "type": "component",
+        "link": null,
+        "title": "Debug Image Encoding",
+        "description": "A debugging utility that encodes a synthetic image filled with a specified value, allowing for testing and inspection of the image encoding pipeline without real image data."
+      },
+      {
+        "id": "node_5",
+        "label": "Preprocess Raw Image",
+        "type": "component",
+        "link": null,
+        "title": "Preprocess Raw Image",
+        "description": "Preprocesses a raw 8-bit unsigned integer image (RGB) into a batch of normalized float images, applying resizing, padding, and slicing strategies based on the specific projector type (e.g., MiniCPM-V, Qwen, LLaVA)."
+      },
+      {
+        "id": "node_6",
+        "label": "Add Mel Spectrogram to Batch",
+        "type": "component",
+        "link": null,
+        "title": "Add Mel Spectrogram to Batch",
+        "description": "Adds a mel spectrogram, represented as a float array with specified dimensions (n_mel, n_frames), to a batch of float images, treating it as an audio input for multimodal processing."
+      },
+      {
+        "id": "node_7",
+        "label": "Convert Float Image to U8",
+        "type": "component",
+        "link": null,
+        "title": "Convert Float Image to U8",
+        "description": "Converts a float-based image representation back into an 8-bit unsigned integer RGB format, scaling and clamping pixel values for display or saving."
+      },
+      {
+        "id": "node_8",
+        "label": "Initialize CLIP Contexts",
+        "type": "component",
+        "link": null,
+        "title": "Initialize CLIP Contexts",
+        "description": "Initializes the CLIP context for both vision and audio modalities by loading model parameters and tensors from a GGUF file, optionally performing a warmup run for performance."
+      },
+      {
+        "id": "node_9",
+        "label": "Build Image from Pixels",
+        "type": "component",
+        "link": null,
+        "title": "Build Image from Pixels",
+        "description": "Constructs an 8-bit unsigned integer image structure from raw RGB pixel data, specifying its width and height, making it ready for further image processing operations."
+      },
+      {
+        "id": "node_10",
+        "label": "Calculate Embedding Size",
+        "type": "component",
+        "link": null,
+        "title": "Calculate Embedding Size",
+        "description": "Calculates the expected byte size of the embedding output for a given CLIP context, typically based on the model's image size parameters."
+      },
+      {
+        "id": "node_11",
+        "label": "Write Image to PPM",
+        "type": "component",
+        "link": null,
+        "title": "Write Image to PPM",
+        "description": "Writes an 8-bit unsigned integer image to a PPM (Portable Pixmap) file, a simple image format often used for debugging or basic image output."
+      },
+      {
+        "id": "node_12",
+        "label": "Save Image to BMP",
+        "type": "component",
+        "link": null,
+        "title": "Save Image to BMP",
+        "description": "Saves an 8-bit unsigned integer image to a BMP (Bitmap) file, including handling file headers, info headers, and pixel data with appropriate padding and BGR conversion."
+      },
+      {
+        "id": "node_13",
+        "label": "Get Batch Image Count",
+        "type": "component",
+        "link": null,
+        "title": "Get Batch Image Count",
+        "description": "Returns the total number of individual images or audio spectrograms contained within a batch of float-based multimodal inputs."
+      },
+      {
+        "id": "node_14",
+        "label": "Get Batch Image Width",
+        "type": "component",
+        "link": null,
+        "title": "Get Batch Image Width",
+        "description": "Retrieves the width (or number of frames for audio) of a specific image or spectrogram entry within a float-based multimodal input batch, given its index."
+      },
+      {
+        "id": "node_15",
+        "label": "Get Batch Image Height",
+        "type": "component",
+        "link": null,
+        "title": "Get Batch Image Height",
+        "description": "Retrieves the height (or number of mel bins for audio) of a specific image or spectrogram entry within a float-based multimodal input batch, given its index."
+      },
+      {
+        "id": "node_16",
+        "label": "Compute Log Mel Spectrogram",
+        "type": "component",
+        "link": null,
+        "title": "Compute Log Mel Spectrogram",
+        "description": "Computes the log mel spectrogram from raw audio samples, applying windowing, padding, pre-emphasis, and normalization to extract frequency-domain features suitable for audio models."
+      },
+      {
+        "id": "node_17",
+        "label": "Evaluate Multimodal Chunks",
+        "type": "component",
+        "link": null,
+        "title": "Evaluate Multimodal Chunks",
+        "description": "Orchestrates the evaluation of a sequence of multimodal input chunks (text, image, audio) by an LLM, managing the context and updating the 'n_past' position for subsequent evaluations."
+      },
+      {
+        "id": "node_18",
+        "label": "Encode Multimodal Chunk",
+        "type": "component",
+        "link": null,
+        "title": "Encode Multimodal Chunk",
+        "description": "Encodes a single multimodal input chunk, dispatching to the appropriate vision or audio encoding function based on the chunk's type (image or audio), or skipping for text chunks."
+      },
+      {
+        "id": "node_19",
+        "label": "Get Chunk Token Count",
+        "type": "component",
+        "link": null,
+        "title": "Get Chunk Token Count",
+        "description": "Determines the number of tokens associated with a given multimodal input chunk, whether it's a text sequence, an encoded image, or an audio spectrogram."
+      },
+      {
+        "id": "node_20",
+        "label": "Get Chunk Position Count",
+        "type": "component",
+        "link": null,
+        "title": "Get Chunk Position Count",
+        "description": "Retrieves the number of positions (similar to tokens) that a multimodal input chunk will occupy in the LLM's context, accounting for different modalities."
+      },
+      {
+        "id": "node_21",
+        "label": "Get Bitmap Byte Size",
+        "type": "component",
+        "link": null,
+        "title": "Get Bitmap Byte Size",
+        "description": "Returns the total byte size of a multimodal bitmap object, providing information about its memory footprint."
+      }
+    ],
+    "edges": [
+      {
+        "source": "node_8",
+        "target": "node_4",
+        "label": "Calls for warmup/debug",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_5",
+        "target": "node_12",
+        "label": "Debug output",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "group_1",
+        "label": "Image Preprocessing",
+        "nodes": [
+          "node_3",
+          "node_4",
+          "node_5",
+          "node_7",
+          "node_9"
+        ],
+        "title": "Image Preprocessing",
+        "description": "Handles the conversion, resizing, normalization, and slicing of raw image data into a format suitable for multimodal models, supporting various projector types.",
+        "role": "data"
+      },
+      {
+        "id": "group_2",
+        "label": "Audio Feature Extraction",
+        "nodes": [
+          "node_6",
+          "node_16"
+        ],
+        "title": "Audio Feature Extraction",
+        "description": "Processes raw audio samples to derive mel spectrograms, which are frequency-domain representations used as input for audio-aware multimodal models.",
+        "role": "data"
+      },
+      {
+        "id": "group_3",
+        "label": "Multimodal Data Handling",
+        "nodes": [
+          "node_17",
+          "node_18",
+          "node_19",
+          "node_20"
+        ],
+        "title": "Multimodal Data Handling",
+        "description": "Manages the encoding and evaluation of diverse input chunks (text, image, audio) for integration with large language models, abstracting modality-specific processing.",
+        "role": "generative"
+      },
+      {
+        "id": "group_4",
+        "label": "CLIP Context Management",
+        "nodes": [
+          "node_2",
+          "node_8",
+          "node_10"
+        ],
+        "title": "CLIP Context Management",
+        "description": "Provides functions for initializing and managing the CLIP model's vision and audio contexts, including loading model parameters and calculating embedding sizes.",
+        "role": "analytical"
+      },
+      {
+        "id": "group_5",
+        "label": "Image Output & Batch Utilities",
+        "nodes": [
+          "node_11",
+          "node_12",
+          "node_13",
+          "node_14",
+          "node_15"
+        ],
+        "title": "Image Output & Batch Utilities",
+        "description": "Offers utilities for saving processed images to standard formats (PPM, BMP) and for querying properties of batched float-based image/audio data.",
+        "role": "data"
+      },
+      {
+        "id": "group_6",
+        "label": "GGUF & General Utilities",
+        "nodes": [
+          "node_1",
+          "node_21"
+        ],
+        "title": "GGUF & General Utilities",
+        "description": "Contains general utility functions, including GGUF metadata conversion to string and basic byte size calculation for internal data structures.",
+        "role": "data"
+      }
+    ]
+  }
+}

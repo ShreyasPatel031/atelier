@@ -1,0 +1,145 @@
+{
+  "title": "Content Moderation Chain",
+  "summary": "This module provides a chain for moderating text content using OpenAI's moderation API, detecting and handling policy violations based on configured rules.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "input_text",
+        "label": "Input Text",
+        "type": "external",
+        "link": null,
+        "title": "Input Text for Moderation",
+        "description": "The text content provided by the user or another system to be checked for policy violations."
+      },
+      {
+        "id": "openai_moderation_chain",
+        "label": "OpenAI Moderation Chain",
+        "type": "component",
+        "link": null,
+        "title": "OpenAIModerationChain",
+        "description": "The core chain responsible for orchestrating the content moderation process using OpenAI's API. It initializes the OpenAI client and manages the moderation flow."
+      },
+      {
+        "id": "api_config",
+        "label": "API Configuration",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI API Key & Client Setup",
+        "description": "Handles the validation and setup of the OpenAI API key, organization, and client instances (sync/async), ensuring compatibility with different OpenAI package versions."
+      },
+      {
+        "id": "openai_api",
+        "label": "OpenAI Moderation API",
+        "type": "external",
+        "link": null,
+        "title": "External OpenAI Service",
+        "description": "The external service provided by OpenAI that performs the actual content moderation checks on the input text."
+      },
+      {
+        "id": "process_results",
+        "label": "Evaluate Moderation Results",
+        "type": "component",
+        "link": null,
+        "title": "Moderation Result Processing",
+        "description": "Analyzes the moderation response from the OpenAI API to determine if the content is flagged. Raises an error or returns a warning based on configuration."
+      },
+      {
+        "id": "moderated_output",
+        "label": "Moderated Output Text",
+        "type": "external",
+        "link": null,
+        "title": "Final Moderated Output",
+        "description": "The final text after moderation, which is either the original text (if safe) or an error/warning message (if flagged and configured to return one)."
+      }
+    ],
+    "edges": [
+      {
+        "source": "input_text",
+        "target": "openai_moderation_chain",
+        "label": "Submits text for moderation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_config",
+        "target": "openai_moderation_chain",
+        "label": "Provides API credentials & client",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_moderation_chain",
+        "target": "openai_api",
+        "label": "Sends text to API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_api",
+        "target": "process_results",
+        "label": "Returns moderation flags",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "process_results",
+        "target": "moderated_output",
+        "label": "Generates final output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_moderation_chain",
+        "target": "process_results",
+        "label": "Invokes moderation logic",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_io",
+        "label": "Surface I/O",
+        "nodes": [
+          "input_text",
+          "moderated_output"
+        ],
+        "title": "User-Facing Input/Output",
+        "description": "Represents the entry and exit points for text content within the moderation process.",
+        "role": "surface"
+      },
+      {
+        "id": "core_moderation_logic",
+        "label": "Core Moderation Logic",
+        "nodes": [
+          "openai_moderation_chain",
+          "process_results"
+        ],
+        "title": "Central Processing Unit",
+        "description": "Encapsulates the main chain and the logic for evaluating moderation results.",
+        "role": "generative"
+      },
+      {
+        "id": "external_integration",
+        "label": "External Integration",
+        "nodes": [
+          "openai_api"
+        ],
+        "title": "OpenAI Service Interaction",
+        "description": "Handles communication with the external OpenAI Moderation API.",
+        "role": "external"
+      },
+      {
+        "id": "configuration",
+        "label": "Configuration",
+        "nodes": [
+          "api_config"
+        ],
+        "title": "API Setup and Parameters",
+        "description": "Manages the necessary API keys and client initialization for secure and functional operation.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,159 @@
+{
+    "title": "Data and Retrieval Module",
+    "summary": "This module provides core functionalities for loading, splitting, indexing, and retrieving documents from various sources, along with managing vector stores and implementing diverse retrieval strategies.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "document_loaders",
+                "label": "Load Documents",
+                "type": "module",
+                "link": "document_loaders",
+                "title": "Document Loaders",
+                "description": "Handles ingesting data from various sources (e.g., files, web pages, databases) into a standardized Document format."
+            },
+            {
+                "id": "text_splitters",
+                "label": "Split Text",
+                "type": "module",
+                "link": "text_splitters",
+                "title": "Text Splitters",
+                "description": "Breaks down large text documents into smaller, manageable chunks suitable for processing by language models or vector stores."
+            },
+            {
+                "id": "vector_stores",
+                "label": "Store Vector Embeddings",
+                "type": "module",
+                "link": "vector_stores",
+                "title": "Vector Stores",
+                "description": "Manages the storage and retrieval of vector embeddings, enabling efficient similarity search for documents."
+            },
+            {
+                "id": "retrievers",
+                "label": "Retrieve Relevant Docs",
+                "type": "module",
+                "link": "retrievers",
+                "title": "Retrievers",
+                "description": "Implements various strategies to fetch the most relevant documents or information based on a given query, often leveraging vector stores."
+            },
+            {
+                "id": "indexing",
+                "label": "Index Documents",
+                "type": "module",
+                "link": "indexing",
+                "title": "Document Indexing",
+                "description": "Provides functionalities for indexing documents into vector stores or document indexes, including asynchronous indexing and document lifecycle management."
+            },
+            {
+                "id": "embeddings",
+                "label": "Generate Embeddings",
+                "type": "external",
+                "link": "language_models_and_prompts.embeddings",
+                "title": "Embeddings Module",
+                "description": "Converts text into numerical vector representations (embeddings) that capture semantic meaning, crucial for vector store operations."
+            },
+            {
+                "id": "llm",
+                "label": "Language Model",
+                "type": "external",
+                "link": "language_models_and_prompts.llm_interfaces",
+                "title": "Language Model (LLM)",
+                "description": "A large language model used for various tasks, including query transformation and document summarization within retrieval processes."
+            }
+        ],
+        "edges": [
+            {
+                "source": "document_loaders",
+                "target": "text_splitters",
+                "label": "Provides raw text to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "text_splitters",
+                "target": "indexing",
+                "label": "Provides chunks to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "indexing",
+                "target": "embeddings",
+                "label": "Uses to create vectors",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "embeddings",
+                "target": "vector_stores",
+                "label": "Stores vectors in",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "vector_stores",
+                "target": "retrievers",
+                "label": "Searches for relevant docs",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "retrievers",
+                "target": "llm",
+                "label": "Provides context to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "llm",
+                "target": "retrievers",
+                "label": "Generates queries for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "document_loaders",
+                "target": "indexing",
+                "label": "Directly indexes documents",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "document_ingestion",
+                "label": "Document Ingestion",
+                "nodes": [
+                    "document_loaders",
+                    "text_splitters"
+                ],
+                "title": "Document Ingestion & Preparation",
+                "description": "Components responsible for loading raw data from various sources and preparing it by splitting into manageable chunks for further processing.",
+                "role": null
+            },
+            {
+                "id": "vector_data_management",
+                "label": "Vector Data Management",
+                "nodes": [
+                    "indexing",
+                    "embeddings",
+                    "vector_stores"
+                ],
+                "title": "Vector Data Management & Storage",
+                "description": "Handles the conversion of text into numerical embeddings, indexing these embeddings, and storing them in specialized databases for efficient search.",
+                "role": null
+            },
+            {
+                "id": "information_retrieval",
+                "label": "Information Retrieval",
+                "nodes": [
+                    "retrievers",
+                    "llm"
+                ],
+                "title": "Information Retrieval & Querying",
+                "description": "Focuses on fetching relevant documents based on user queries, often involving advanced strategies and interaction with language models for query refinement.",
+                "role": null
+            }
+        ]
+    }
+}

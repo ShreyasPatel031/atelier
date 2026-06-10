@@ -1,0 +1,173 @@
+{
+  "title": "Runnable Composition",
+  "summary": "This module provides core components for composing and orchestrating runnables, enabling dynamic configuration, chat history management, input/output manipulation, and integration with external runnable sources or function-based routing.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "dynamic_config_runnable",
+        "label": "Dynamically Configure Runnable",
+        "type": "component",
+        "link": null,
+        "title": "DynamicRunnable",
+        "description": "Enables a Runnable to be dynamically configured at runtime, allowing for flexible execution paths or component swapping based on input or environment."
+      },
+      {
+        "id": "manage_chat_history",
+        "label": "Manage Chat Message History",
+        "type": "component",
+        "link": null,
+        "title": "RunnableWithMessageHistory",
+        "description": "Wraps another Runnable to automatically load, update, and persist chat message history, maintaining conversational context across interactions."
+      },
+      {
+        "id": "passthrough_input",
+        "label": "Pass Through or Augment Input",
+        "type": "component",
+        "link": null,
+        "title": "RunnablePassthrough",
+        "description": "Allows inputs to pass through a chain unchanged, or to be augmented with additional keys, useful for structuring data flow and intermediate results."
+      },
+      {
+        "id": "load_hub_runnable",
+        "label": "Load Runnable from LangChain Hub",
+        "type": "component",
+        "link": null,
+        "title": "HubRunnable",
+        "description": "Fetches and executes a Runnable definition from the LangChain Hub, enabling dynamic integration of community or privately shared components."
+      },
+      {
+        "id": "route_openai_functions",
+        "label": "Route Based on OpenAI Functions",
+        "type": "component",
+        "link": null,
+        "title": "OpenAIFunctionsRouter",
+        "description": "Directs execution to different sub-runnables based on the output of an OpenAI function call, facilitating tool use and conditional logic."
+      },
+      {
+        "id": "base_runnable_abstraction",
+        "label": "Base Runnable Abstraction",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "Runnable / RunnableSerializable",
+        "description": "The fundamental interface for all executable components in LangChain, defining methods for invocation, streaming, batching, and configuration."
+      },
+      {
+        "id": "chat_message_history_store",
+        "label": "Chat Message History Store",
+        "type": "external",
+        "link": "base_abstractions",
+        "title": "BaseChatMessageHistory",
+        "description": "An interface for storing and retrieving conversational messages, used to maintain context across turns in a dialogue."
+      },
+      {
+        "id": "langchain_hub_service",
+        "label": "LangChain Hub Service",
+        "type": "external",
+        "link": null,
+        "title": "LangChain Hub",
+        "description": "An external service for sharing and discovering LangChain components and runnables."
+      },
+      {
+        "id": "openai_function_output",
+        "label": "OpenAI Function Call Output",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI Function Call",
+        "description": "Structured output from an OpenAI model indicating a function to be called, including its name and arguments."
+      }
+    ],
+    "edges": [
+      {
+        "source": "dynamic_config_runnable",
+        "target": "base_runnable_abstraction",
+        "label": "Prepares & Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_chat_history",
+        "target": "base_runnable_abstraction",
+        "label": "Wraps & Manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "manage_chat_history",
+        "target": "chat_message_history_store",
+        "label": "Reads/Writes History",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "passthrough_input",
+        "target": "base_runnable_abstraction",
+        "label": "Modifies Data Flow",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_hub_runnable",
+        "target": "langchain_hub_service",
+        "label": "Pulls Runnable Definition",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_hub_runnable",
+        "target": "base_runnable_abstraction",
+        "label": "Executes Pulled Runnable",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_function_output",
+        "target": "route_openai_functions",
+        "label": "Receives Function Call",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "route_openai_functions",
+        "target": "base_runnable_abstraction",
+        "label": "Dispatches to Runnable",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "generative_composition",
+        "label": "Generative Composition",
+        "nodes": [
+          "dynamic_config_runnable",
+          "load_hub_runnable",
+          "route_openai_functions"
+        ],
+        "title": "Generative Composition",
+        "description": "Components that dynamically select or generate the execution path or component based on configuration or external signals.",
+        "role": "generative"
+      },
+      {
+        "id": "data_management",
+        "label": "Data Management",
+        "nodes": [
+          "manage_chat_history"
+        ],
+        "title": "Data Management",
+        "description": "Components focused on managing and integrating specific types of data within runnable chains, such as conversational history.",
+        "role": "data"
+      },
+      {
+        "id": "surface_level_manipulation",
+        "label": "Surface-Level Manipulation",
+        "nodes": [
+          "passthrough_input"
+        ],
+        "title": "Surface-Level Manipulation",
+        "description": "Components that directly influence the flow and structure of inputs and outputs within a runnable chain without altering core logic.",
+        "role": "surface"
+      }
+    ]
+  }
+}

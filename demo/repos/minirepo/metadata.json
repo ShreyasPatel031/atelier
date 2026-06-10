@@ -1,0 +1,31 @@
+{
+    "generation_info": {
+        "timestamp": "2026-05-24T18:15:51.391599",
+        "main_model": "gemini-2.5-flash",
+        "generator_version": "1.0.0",
+        "repo_path": "/Users/shreyaspatel/atelier/benchmarking/minirepo",
+        "commit_id": null
+    },
+    "statistics": {
+        "total_components": 33,
+        "leaf_nodes": 5,
+        "max_depth": 2
+    },
+    "files_generated": [
+        "overview.json",
+        "module_tree.json",
+        "first_module_tree.json",
+        "metrics.json",
+        "external_api.json",
+        "main_logic.json",
+        "system_metrics.json",
+        "metadata.json",
+        "observability.json",
+        "api_interface.json",
+        "sync_issues.json",
+        "core_workflow.json",
+        "data_processing.json",
+        "input_output.json",
+        "data_management.json"
+    ]
+}

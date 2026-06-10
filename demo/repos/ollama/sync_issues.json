@@ -1,35 +1,35 @@
 {
-  "docs_dir": "/Users/shreyaspatel/atelier/.tmp/demo_regen/ollama/docs",
-  "timestamp": "2026-05-15T21:12:01.840390",
+  "docs_dir": "/Users/shreyaspatel/.cursor/worktrees/atelier/7y0n/.tmp/demo_regen/ollama/docs",
+  "timestamp": "2026-05-17T03:53:47.902320",
   "summary": {
-    "total_modules": 21,
-    "missing_files": 1,
-    "failure_rate_pct": 4.76,
-    "success_rate_pct": 95.24,
-    "total_issues": 35,
-    "errors": 3,
-    "warnings": 32,
+    "total_modules": 24,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "total_issues": 36,
+    "errors": 0,
+    "warnings": 36,
     "files_created": 0,
-    "metadata_added": 32,
-    "diagrams_added": 2
+    "metadata_added": 36,
+    "diagrams_added": 0
   },
   "metrics": {
     "presync_audit": {
-      "modules_total": 21,
-      "missing_md": 21,
-      "missing_title": 16,
-      "missing_description": 16,
-      "leaf_missing_diagram": 2,
+      "modules_total": 24,
+      "missing_md": 24,
+      "missing_title": 18,
+      "missing_description": 18,
+      "leaf_missing_diagram": 0,
       "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 0,
-      "children_missing_from_diagram_nodes": 16,
-      "parent_diagram_gaps_to_inject": 16,
+      "diagram_edges_unknown_endpoint": 16,
+      "children_missing_from_diagram_nodes": 17,
+      "parent_diagram_gaps_to_inject": 17,
       "mermaid_fence_blocks_total": 0,
       "placeholder_md_files": 0
     },
     "diagram_ir_audit": {
-      "module_diagrams_total": 21,
+      "module_diagrams_total": 24,
       "overview_has_diagram_json": true,
       "overview_mermaid_parse_ok": true,
       "overview_r1_reason": null,
@@ -39,45 +39,45 @@
     "mermaid_validation": {
       "blocks_checked": 0,
       "blocks_invalid": 0,
-      "validation_ms": 0.0728,
+      "validation_ms": 0.078,
       "error_type_histogram": {},
       "stage46_fixes_applied": 0,
       "postfix_blocks_invalid": 0,
       "postfix_error_type_histogram": {}
     },
     "postsync_audit": {
-      "modules_total": 21,
-      "missing_md": 21,
+      "modules_total": 24,
+      "missing_md": 24,
       "missing_title": 0,
       "missing_description": 0,
       "leaf_missing_diagram": 0,
       "parent_missing_diagram_with_children": 0,
       "diagram_nodes_with_empty_label": 0,
-      "diagram_edges_unknown_endpoint": 0,
+      "diagram_edges_unknown_endpoint": 16,
       "children_missing_from_diagram_nodes": 0,
       "parent_diagram_gaps_to_inject": 0,
       "mermaid_fence_blocks_total": 0,
       "placeholder_md_files": 0
     },
     "delta_presync_minus_postsync": {
-      "modules_total": 0.0,
-      "diagram_edges_unknown_endpoint": 0.0,
-      "placeholder_md_files": 0.0,
-      "missing_md": 0.0,
-      "parent_diagram_gaps_to_inject": 16.0,
-      "mermaid_fence_blocks_total": 0.0,
+      "missing_description": 18.0,
       "parent_missing_diagram_with_children": 0.0,
-      "missing_description": 16.0,
-      "missing_title": 16.0,
-      "leaf_missing_diagram": 2.0,
-      "children_missing_from_diagram_nodes": 16.0,
+      "parent_diagram_gaps_to_inject": 17.0,
+      "diagram_edges_unknown_endpoint": 0.0,
+      "missing_md": 0.0,
+      "children_missing_from_diagram_nodes": 17.0,
+      "placeholder_md_files": 0.0,
+      "leaf_missing_diagram": 0.0,
+      "modules_total": 0.0,
+      "missing_title": 18.0,
+      "mermaid_fence_blocks_total": 0.0,
       "diagram_nodes_with_empty_label": 0.0
     },
     "fixes_applied_counts": {
-      "metadata_field_updates": 32,
+      "metadata_field_updates": 36,
       "placeholder_md_files_created": 0,
-      "leaf_diagrams_added": 2,
-      "parent_diagram_child_nodes_injected": 16,
+      "leaf_diagrams_added": 0,
+      "parent_diagram_child_nodes_injected": 17,
       "overview_md_created": 0,
       "mermaid_stage46_fixes": 0
     },
@@ -85,38 +85,38 @@
       "1_stage3_defects_before_stage45": {
         "note": "Read-only audit (audit_docs_state) on tree + *.md before sync mutates files",
         "presync_audit": {
-          "modules_total": 21,
-          "missing_md": 21,
-          "missing_title": 16,
-          "missing_description": 16,
-          "leaf_missing_diagram": 2,
+          "modules_total": 24,
+          "missing_md": 24,
+          "missing_title": 18,
+          "missing_description": 18,
+          "leaf_missing_diagram": 0,
           "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 0,
-          "children_missing_from_diagram_nodes": 16,
-          "parent_diagram_gaps_to_inject": 16,
+          "diagram_edges_unknown_endpoint": 16,
+          "children_missing_from_diagram_nodes": 17,
+          "parent_diagram_gaps_to_inject": 17,
           "mermaid_fence_blocks_total": 0,
           "placeholder_md_files": 0
         }
       },
       "1b_stage45_fixes_applied_counters": {
-        "metadata_field_updates": 32,
+        "metadata_field_updates": 36,
         "placeholder_md_files_created": 0,
-        "leaf_diagrams_added": 2,
-        "parent_diagram_child_nodes_injected": 16,
+        "leaf_diagrams_added": 0,
+        "parent_diagram_child_nodes_injected": 17,
         "overview_md_created": 0,
         "mermaid_stage46_fixes": 0
       },
       "1c_residual_after_stage45": {
         "postsync_audit": {
-          "modules_total": 21,
-          "missing_md": 21,
+          "modules_total": 24,
+          "missing_md": 24,
           "missing_title": 0,
           "missing_description": 0,
           "leaf_missing_diagram": 0,
           "parent_missing_diagram_with_children": 0,
           "diagram_nodes_with_empty_label": 0,
-          "diagram_edges_unknown_endpoint": 0,
+          "diagram_edges_unknown_endpoint": 16,
           "children_missing_from_diagram_nodes": 0,
           "parent_diagram_gaps_to_inject": 0,
           "mermaid_fence_blocks_total": 0,
@@ -126,33 +126,31 @@
       "1d_reduction_delta_presync_minus_postsync": {
         "note": "Positive number = fewer problems after sync for that metric",
         "delta": {
-          "modules_total": 0.0,
-          "diagram_edges_unknown_endpoint": 0.0,
-          "placeholder_md_files": 0.0,
-          "missing_md": 0.0,
-          "parent_diagram_gaps_to_inject": 16.0,
-          "mermaid_fence_blocks_total": 0.0,
+          "missing_description": 18.0,
           "parent_missing_diagram_with_children": 0.0,
-          "missing_description": 16.0,
-          "missing_title": 16.0,
-          "leaf_missing_diagram": 2.0,
-          "children_missing_from_diagram_nodes": 16.0,
+          "parent_diagram_gaps_to_inject": 17.0,
+          "diagram_edges_unknown_endpoint": 0.0,
+          "missing_md": 0.0,
+          "children_missing_from_diagram_nodes": 17.0,
+          "placeholder_md_files": 0.0,
+          "leaf_missing_diagram": 0.0,
+          "modules_total": 0.0,
+          "missing_title": 18.0,
+          "mermaid_fence_blocks_total": 0.0,
           "diagram_nodes_with_empty_label": 0.0
         }
       },
       "1e_issues_logged_this_run_by_type": {
         "all": {
-          "missing_title": 16,
-          "missing_description": 16,
-          "missing_md_file": 1,
-          "missing_diagram": 2
+          "missing_title": 18,
+          "missing_description": 18
         }
       },
       "2_mermaid": {
         "blocks_checked": 0,
         "blocks_invalid_before_stage46": 0,
         "blocks_invalid_after_stage46": 0,
-        "validation_ms": 0.0728,
+        "validation_ms": 0.078,
         "error_type_histogram": {},
         "error_type_histogram_after_stage46": {},
         "stage46_fixes_applied": 0,
@@ -160,7 +158,7 @@
       },
       "3_diagram_ir": {
         "audit": {
-          "module_diagrams_total": 21,
+          "module_diagrams_total": 24,
           "overview_has_diagram_json": true,
           "overview_mermaid_parse_ok": true,
           "overview_r1_reason": null,
@@ -172,324 +170,14 @@
     }
   },
   "issues_by_type": {
-    "missing_title": 16,
-    "missing_description": 16,
-    "missing_md_file": 1,
-    "missing_diagram": 2
+    "missing_title": 18,
+    "missing_description": 18
   },
   "issues": [
     {
       "issue_type": "missing_title",
-      "module_name": "entry_points",
-      "module_path": "core_application/entry_points",
-      "severity": "warning",
-      "details": {
-        "component_count": 5,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "entry_points",
-      "module_path": "core_application/entry_points",
-      "severity": "warning",
-      "details": {
-        "component_count": 5,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "server_infrastructure",
-      "module_path": "core_application/server_infrastructure",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "server_infrastructure",
-      "module_path": "core_application/server_infrastructure",
-      "severity": "warning",
-      "details": {
-        "component_count": 7,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "configuration_and_utilities",
-      "module_path": "core_application/configuration_and_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "configuration_and_utilities",
-      "module_path": "core_application/configuration_and_utilities",
-      "severity": "warning",
-      "details": {
-        "component_count": 6,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "data_and_storage",
-      "module_path": "core_application/data_and_storage",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "data_and_storage",
-      "module_path": "core_application/data_and_storage",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "model_creation_and_conversion",
-      "module_path": "model_management/model_creation_and_conversion",
-      "severity": "warning",
-      "details": {
-        "component_count": 35,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "model_creation_and_conversion",
-      "module_path": "model_management/model_creation_and_conversion",
-      "severity": "warning",
-      "details": {
-        "component_count": 35,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "model_launch_and_integrations",
-      "module_path": "model_management/model_launch_and_integrations",
-      "severity": "warning",
-      "details": {
-        "component_count": 126,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "model_launch_and_integrations",
-      "module_path": "model_management/model_launch_and_integrations",
-      "severity": "warning",
-      "details": {
-        "component_count": 126,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "model_serving_and_scheduling",
-      "module_path": "model_management/model_serving_and_scheduling",
-      "severity": "warning",
-      "details": {
-        "component_count": 14,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "model_serving_and_scheduling",
-      "module_path": "model_management/model_serving_and_scheduling",
-      "severity": "warning",
-      "details": {
-        "component_count": 14,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "api_handlers",
-      "module_path": "api_and_middleware/api_handlers",
-      "severity": "warning",
-      "details": {
-        "component_count": 29,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "api_handlers",
-      "module_path": "api_and_middleware/api_handlers",
-      "severity": "warning",
-      "details": {
-        "component_count": 29,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "api_middleware",
-      "module_path": "api_and_middleware/api_middleware",
-      "severity": "warning",
-      "details": {
-        "component_count": 26,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "api_middleware",
-      "module_path": "api_and_middleware/api_middleware",
-      "severity": "warning",
-      "details": {
-        "component_count": 26,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "prompt_and_template_engine",
-      "module_path": "api_and_middleware/prompt_and_template_engine",
-      "severity": "warning",
-      "details": {
-        "component_count": 16,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "prompt_and_template_engine",
-      "module_path": "api_and_middleware/prompt_and_template_engine",
-      "severity": "warning",
-      "details": {
-        "component_count": 16,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "model_backends_and_ml_ops",
-      "module_path": "model_runtime_and_tools/model_backends_and_ml_ops",
-      "severity": "warning",
-      "details": {
-        "component_count": 22,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "model_backends_and_ml_ops",
-      "module_path": "model_runtime_and_tools/model_backends_and_ml_ops",
-      "severity": "warning",
-      "details": {
-        "component_count": 22,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "external_tools_and_web_integration",
-      "module_path": "model_runtime_and_tools/external_tools_and_web_integration",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "external_tools_and_web_integration",
-      "module_path": "model_runtime_and_tools/external_tools_and_web_integration",
-      "severity": "warning",
-      "details": {
-        "component_count": 10,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "api_and_basic_functionality_tests",
-      "module_path": "integration_testing/api_and_basic_functionality_tests",
-      "severity": "warning",
-      "details": {
-        "component_count": 19,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "api_and_basic_functionality_tests",
-      "module_path": "integration_testing/api_and_basic_functionality_tests",
-      "severity": "warning",
-      "details": {
-        "component_count": 19,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "advanced_model_capability_tests",
-      "module_path": "integration_testing/advanced_model_capability_tests",
-      "severity": "warning",
-      "details": {
-        "component_count": 24,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_description",
-      "module_name": "advanced_model_capability_tests",
-      "module_path": "integration_testing/advanced_model_capability_tests",
-      "severity": "warning",
-      "details": {
-        "component_count": 24,
-        "has_children": false
-      },
-      "auto_fixed": true
-    },
-    {
-      "issue_type": "missing_title",
-      "module_name": "concurrency_and_context_tests",
-      "module_path": "integration_testing/concurrency_and_context_tests",
+      "module_name": "api_client",
+      "module_path": "user_interface/api_client",
       "severity": "warning",
       "details": {
         "component_count": 9,
@@ -499,8 +187,8 @@
     },
     {
       "issue_type": "missing_description",
-      "module_name": "concurrency_and_context_tests",
-      "module_path": "integration_testing/concurrency_and_context_tests",
+      "module_name": "api_client",
+      "module_path": "user_interface/api_client",
       "severity": "warning",
       "details": {
         "component_count": 9,
@@ -510,101 +198,417 @@
     },
     {
       "issue_type": "missing_title",
-      "module_name": "tool_calling_tests",
-      "module_path": "integration_testing/tool_calling_tests",
+      "module_name": "ui_components",
+      "module_path": "user_interface/ui_components",
       "severity": "warning",
       "details": {
-        "component_count": 2,
+        "component_count": 7,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
       "issue_type": "missing_description",
-      "module_name": "tool_calling_tests",
-      "module_path": "integration_testing/tool_calling_tests",
+      "module_name": "ui_components",
+      "module_path": "user_interface/ui_components",
       "severity": "warning",
       "details": {
-        "component_count": 2,
+        "component_count": 7,
         "has_children": false
       },
       "auto_fixed": true
     },
     {
-      "issue_type": "missing_md_file",
-      "module_name": "entry_points",
-      "module_path": "core_application/entry_points",
-      "severity": "error",
+      "issue_type": "missing_title",
+      "module_name": "ui_logic_and_hooks",
+      "module_path": "user_interface/ui_logic_and_hooks",
+      "severity": "warning",
       "details": {
-        "component_count": 5,
-        "depth": 2,
-        "has_title": true,
-        "has_description": true,
-        "has_children": false,
-        "parent": "core_application"
-      },
-      "auto_fixed": false
-    },
-    {
-      "issue_type": "missing_diagram",
-      "module_name": "entry_points",
-      "module_path": "core_application/entry_points",
-      "severity": "error",
-      "details": {
-        "component_count": 5,
-        "is_leaf": true
+        "component_count": 12,
+        "has_children": false
       },
       "auto_fixed": true
     },
     {
-      "issue_type": "missing_diagram",
-      "module_name": "model_launch_and_integrations",
-      "module_path": "model_management/model_launch_and_integrations",
-      "severity": "error",
+      "issue_type": "missing_description",
+      "module_name": "ui_logic_and_hooks",
+      "module_path": "user_interface/ui_logic_and_hooks",
+      "severity": "warning",
       "details": {
-        "component_count": 126,
-        "is_leaf": true
+        "component_count": 12,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "data_models_and_routing",
+      "module_path": "user_interface/data_models_and_routing",
+      "severity": "warning",
+      "details": {
+        "component_count": 9,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "data_models_and_routing",
+      "module_path": "user_interface/data_models_and_routing",
+      "severity": "warning",
+      "details": {
+        "component_count": 9,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "webview_core_api",
+      "module_path": "webview_host_integration/webview_core_api",
+      "severity": "warning",
+      "details": {
+        "component_count": 16,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "webview_core_api",
+      "module_path": "webview_host_integration/webview_core_api",
+      "severity": "warning",
+      "details": {
+        "component_count": 16,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "platform_specific_engines",
+      "module_path": "webview_host_integration/platform_specific_engines",
+      "severity": "warning",
+      "details": {
+        "component_count": 3,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "platform_specific_engines",
+      "module_path": "webview_host_integration/platform_specific_engines",
+      "severity": "warning",
+      "details": {
+        "component_count": 3,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "cgo_bindings",
+      "module_path": "webview_host_integration/cgo_bindings",
+      "severity": "warning",
+      "details": {
+        "component_count": 3,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "cgo_bindings",
+      "module_path": "webview_host_integration/cgo_bindings",
+      "severity": "warning",
+      "details": {
+        "component_count": 3,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "model_context_and_state",
+      "module_path": "llm_runtime_core/model_context_and_state",
+      "severity": "warning",
+      "details": {
+        "component_count": 13,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "model_context_and_state",
+      "module_path": "llm_runtime_core/model_context_and_state",
+      "severity": "warning",
+      "details": {
+        "component_count": 13,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "text_processing_and_sampling",
+      "module_path": "llm_runtime_core/text_processing_and_sampling",
+      "severity": "warning",
+      "details": {
+        "component_count": 47,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "text_processing_and_sampling",
+      "module_path": "llm_runtime_core/text_processing_and_sampling",
+      "severity": "warning",
+      "details": {
+        "component_count": 47,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "model_quantization_and_io",
+      "module_path": "llm_runtime_core/model_quantization_and_io",
+      "severity": "warning",
+      "details": {
+        "component_count": 7,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "model_quantization_and_io",
+      "module_path": "llm_runtime_core/model_quantization_and_io",
+      "severity": "warning",
+      "details": {
+        "component_count": 7,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "common_utilities",
+      "module_path": "llm_runtime_core/common_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 14,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "common_utilities",
+      "module_path": "llm_runtime_core/common_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 14,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "multimodal_tools",
+      "module_path": "llm_runtime_core/multimodal_tools",
+      "severity": "warning",
+      "details": {
+        "component_count": 21,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "multimodal_tools",
+      "module_path": "llm_runtime_core/multimodal_tools",
+      "severity": "warning",
+      "details": {
+        "component_count": 21,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "backend_management",
+      "module_path": "ml_backend_ggml/backend_management",
+      "severity": "warning",
+      "details": {
+        "component_count": 25,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "backend_management",
+      "module_path": "ml_backend_ggml/backend_management",
+      "severity": "warning",
+      "details": {
+        "component_count": 25,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "gpu_accelerated_operations",
+      "module_path": "ml_backend_ggml/gpu_accelerated_operations",
+      "severity": "warning",
+      "details": {
+        "component_count": 41,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "gpu_accelerated_operations",
+      "module_path": "ml_backend_ggml/gpu_accelerated_operations",
+      "severity": "warning",
+      "details": {
+        "component_count": 41,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "quantization_and_graph_ops",
+      "module_path": "ml_backend_ggml/quantization_and_graph_ops",
+      "severity": "warning",
+      "details": {
+        "component_count": 27,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "quantization_and_graph_ops",
+      "module_path": "ml_backend_ggml/quantization_and_graph_ops",
+      "severity": "warning",
+      "details": {
+        "component_count": 27,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "gguf_file_format",
+      "module_path": "ml_backend_ggml/gguf_file_format",
+      "severity": "warning",
+      "details": {
+        "component_count": 18,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "gguf_file_format",
+      "module_path": "ml_backend_ggml/gguf_file_format",
+      "severity": "warning",
+      "details": {
+        "component_count": 18,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "system_utilities",
+      "module_path": "ml_backend_ggml/system_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "system_utilities",
+      "module_path": "ml_backend_ggml/system_utilities",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_title",
+      "module_name": "mlx_dynamic_loading",
+      "module_path": "image_generation/mlx_dynamic_loading",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
+      },
+      "auto_fixed": true
+    },
+    {
+      "issue_type": "missing_description",
+      "module_name": "mlx_dynamic_loading",
+      "module_path": "image_generation/mlx_dynamic_loading",
+      "severity": "warning",
+      "details": {
+        "component_count": 1,
+        "has_children": false
       },
       "auto_fixed": true
     }
   ],
   "files_created": [],
   "metadata_added": [
-    "entry_points:title",
-    "entry_points:description",
-    "server_infrastructure:title",
-    "server_infrastructure:description",
-    "configuration_and_utilities:title",
-    "configuration_and_utilities:description",
-    "data_and_storage:title",
-    "data_and_storage:description",
-    "model_creation_and_conversion:title",
-    "model_creation_and_conversion:description",
-    "model_launch_and_integrations:title",
-    "model_launch_and_integrations:description",
-    "model_serving_and_scheduling:title",
-    "model_serving_and_scheduling:description",
-    "api_handlers:title",
-    "api_handlers:description",
-    "api_middleware:title",
-    "api_middleware:description",
-    "prompt_and_template_engine:title",
-    "prompt_and_template_engine:description",
-    "model_backends_and_ml_ops:title",
-    "model_backends_and_ml_ops:description",
-    "external_tools_and_web_integration:title",
-    "external_tools_and_web_integration:description",
-    "api_and_basic_functionality_tests:title",
-    "api_and_basic_functionality_tests:description",
-    "advanced_model_capability_tests:title",
-    "advanced_model_capability_tests:description",
-    "concurrency_and_context_tests:title",
-    "concurrency_and_context_tests:description",
-    "tool_calling_tests:title",
-    "tool_calling_tests:description"
+    "api_client:title",
+    "api_client:description",
+    "ui_components:title",
+    "ui_components:description",
+    "ui_logic_and_hooks:title",
+    "ui_logic_and_hooks:description",
+    "data_models_and_routing:title",
+    "data_models_and_routing:description",
+    "webview_core_api:title",
+    "webview_core_api:description",
+    "platform_specific_engines:title",
+    "platform_specific_engines:description",
+    "cgo_bindings:title",
+    "cgo_bindings:description",
+    "model_context_and_state:title",
+    "model_context_and_state:description",
+    "text_processing_and_sampling:title",
+    "text_processing_and_sampling:description",
+    "model_quantization_and_io:title",
+    "model_quantization_and_io:description",
+    "common_utilities:title",
+    "common_utilities:description",
+    "multimodal_tools:title",
+    "multimodal_tools:description",
+    "backend_management:title",
+    "backend_management:description",
+    "gpu_accelerated_operations:title",
+    "gpu_accelerated_operations:description",
+    "quantization_and_graph_ops:title",
+    "quantization_and_graph_ops:description",
+    "gguf_file_format:title",
+    "gguf_file_format:description",
+    "system_utilities:title",
+    "system_utilities:description",
+    "mlx_dynamic_loading:title",
+    "mlx_dynamic_loading:description"
   ],
-  "diagrams_added": [
-    "entry_points",
-    "model_launch_and_integrations"
-  ]
+  "diagrams_added": []
 }

@@ -1,0 +1,194 @@
+{
+  "repos": [
+    {
+      "repo": "crewai",
+      "docs_exist": true,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 3,
+      "sync_total_issues": 42,
+      "sync_errors": 0,
+      "sync_warnings": 42,
+      "metadata_added": 42,
+      "files_created": 0,
+      "presync_missing_title": 21,
+      "presync_missing_description": 21,
+      "presync_invalid_json": 0,
+      "diagram_ir_by_code": {},
+      "issues_by_type": {
+        "missing_title": 21,
+        "missing_description": 21
+      },
+      "issues_auto_fixed": 42,
+      "issues_not_auto_fixed": 0,
+      "status": "ok"
+    },
+    {
+      "repo": "dspy",
+      "docs_exist": true,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 4,
+      "sync_total_issues": 30,
+      "sync_errors": 0,
+      "sync_warnings": 30,
+      "metadata_added": 30,
+      "files_created": 0,
+      "presync_missing_title": 15,
+      "presync_missing_description": 15,
+      "presync_invalid_json": 0,
+      "diagram_ir_by_code": {},
+      "issues_by_type": {
+        "missing_title": 15,
+        "missing_description": 15
+      },
+      "issues_auto_fixed": 30,
+      "issues_not_auto_fixed": 0,
+      "status": "ok"
+    },
+    {
+      "repo": "langchain",
+      "docs_exist": true,
+      "validation_passed": false,
+      "validation_errors": 1,
+      "validation_warnings": 21,
+      "sync_total_issues": 21,
+      "sync_errors": 1,
+      "sync_warnings": 20,
+      "metadata_added": 2,
+      "files_created": 0,
+      "presync_missing_title": 1,
+      "presync_missing_description": 1,
+      "presync_invalid_json": 0,
+      "diagram_ir_by_code": {
+        "r4_node_id_collides_with_group": 3,
+        "r4_edge_unknown_target": 15
+      },
+      "issues_by_type": {
+        "diagram_ir_r4_edge_unknown_target": 15,
+        "diagram_ir_r4_node_id_collides_with_group": 3,
+        "missing_title": 1,
+        "missing_description": 1,
+        "missing_md_file": 1
+      },
+      "issues_auto_fixed": 2,
+      "issues_not_auto_fixed": 19,
+      "status": "problems"
+    },
+    {
+      "repo": "minirepo",
+      "docs_exist": true,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 1,
+      "sync_total_issues": 10,
+      "sync_errors": 0,
+      "sync_warnings": 10,
+      "metadata_added": 10,
+      "files_created": 0,
+      "presync_missing_title": 5,
+      "presync_missing_description": 5,
+      "presync_invalid_json": 0,
+      "diagram_ir_by_code": {},
+      "issues_by_type": {
+        "missing_title": 5,
+        "missing_description": 5
+      },
+      "issues_auto_fixed": 10,
+      "issues_not_auto_fixed": 0,
+      "status": "ok"
+    },
+    {
+      "repo": "ollama",
+      "docs_exist": true,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 2,
+      "sync_total_issues": 34,
+      "sync_errors": 0,
+      "sync_warnings": 34,
+      "metadata_added": 34,
+      "files_created": 0,
+      "presync_missing_title": 17,
+      "presync_missing_description": 17,
+      "presync_invalid_json": 0,
+      "diagram_ir_by_code": {},
+      "issues_by_type": {
+        "missing_title": 17,
+        "missing_description": 17
+      },
+      "issues_auto_fixed": 34,
+      "issues_not_auto_fixed": 0,
+      "status": "ok"
+    },
+    {
+      "repo": "persona-selection-model",
+      "docs_exist": true,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 4,
+      "sync_total_issues": 28,
+      "sync_errors": 0,
+      "sync_warnings": 28,
+      "metadata_added": 28,
+      "files_created": 0,
+      "presync_missing_title": 14,
+      "presync_missing_description": 14,
+      "presync_invalid_json": 0,
+      "diagram_ir_by_code": {},
+      "issues_by_type": {
+        "missing_title": 14,
+        "missing_description": 14
+      },
+      "issues_auto_fixed": 28,
+      "issues_not_auto_fixed": 0,
+      "status": "ok"
+    },
+    {
+      "repo": "pydantic-ai",
+      "docs_exist": true,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 3,
+      "sync_total_issues": 38,
+      "sync_errors": 0,
+      "sync_warnings": 38,
+      "metadata_added": 38,
+      "files_created": 0,
+      "presync_missing_title": 19,
+      "presync_missing_description": 19,
+      "presync_invalid_json": 0,
+      "diagram_ir_by_code": {},
+      "issues_by_type": {
+        "missing_title": 19,
+        "missing_description": 19
+      },
+      "issues_auto_fixed": 38,
+      "issues_not_auto_fixed": 0,
+      "status": "ok"
+    },
+    {
+      "repo": "transformers",
+      "docs_exist": true,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 4,
+      "sync_total_issues": 20,
+      "sync_errors": 0,
+      "sync_warnings": 20,
+      "metadata_added": 20,
+      "files_created": 0,
+      "presync_missing_title": 10,
+      "presync_missing_description": 10,
+      "presync_invalid_json": 0,
+      "diagram_ir_by_code": {},
+      "issues_by_type": {
+        "missing_title": 10,
+        "missing_description": 10
+      },
+      "issues_auto_fixed": 20,
+      "issues_not_auto_fixed": 0,
+      "status": "ok"
+    }
+  ]
+}

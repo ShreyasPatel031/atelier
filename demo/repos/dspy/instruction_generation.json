@@ -1,0 +1,165 @@
+{
+  "title": "Instruction Generation & Optimization",
+  "summary": "This module provides tools and signatures for generating, optimizing, and refining instructions for language models. It covers basic instruction proposals, feedback-driven multimodal instruction generation, and program-grounded instruction creation for specific modules.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "feedback_instruction",
+        "label": "Refine Instruction with Feedback",
+        "type": "component",
+        "link": null,
+        "title": "Feedback-Based Instruction Refinement",
+        "description": "Generates a new instruction for a group to improve task performance based on previous instructions and specific feedback, especially for effective tool usage."
+      },
+      {
+        "id": "basic_instruction_gen",
+        "label": "Propose Initial Instruction",
+        "type": "component",
+        "link": null,
+        "title": "Basic Instruction Generation",
+        "description": "Optimizes instructions for language models by proposing an initial instruction and a prefix for the output field based on a given signature."
+      },
+      {
+        "id": "instruction_from_attempts",
+        "label": "Improve Instruction from Attempts",
+        "type": "component",
+        "link": null,
+        "title": "Instruction Improvement from Attempts",
+        "description": "Proposes an improved instruction for a language model given a history of attempted instructions and their validation scores, aiming for better performance."
+      },
+      {
+        "id": "multimodal_proposer",
+        "label": "Propose Multimodal Instructions",
+        "type": "component",
+        "link": null,
+        "title": "Multimodal Instruction Proposer",
+        "description": "Handles GEPA-compatible multimodal instruction proposals by iterating through components and using a single-component proposer for updates."
+      },
+      {
+        "id": "enhanced_multimodal_instruction",
+        "label": "Enhance Multimodal Instruction",
+        "type": "component",
+        "link": null,
+        "title": "Enhanced Multimodal Instruction from Feedback",
+        "description": "Creates a better instruction for an assistant performing multimodal tasks, addressing visual analysis issues and integrating visual and textual information based on feedback."
+      },
+      {
+        "id": "custom_rules_induction",
+        "label": "Induce Natural Language Rules",
+        "type": "component",
+        "link": null,
+        "title": "Custom Rules Induction",
+        "description": "Extracts concise and non-redundant natural language rules from a set of examples to provide clear guidance for performing a task."
+      },
+      {
+        "id": "describe_program",
+        "label": "Describe Program Task",
+        "type": "component",
+        "link": null,
+        "title": "Program Task Description",
+        "description": "Analyzes pseudocode and an example of a language model program to describe its intended task and how it operates."
+      },
+      {
+        "id": "describe_module",
+        "label": "Describe Module Role",
+        "type": "component",
+        "link": null,
+        "title": "Module Role Description",
+        "description": "Explains the purpose of a specific module within a larger language model program, given the program's code, example, and overall description."
+      },
+      {
+        "id": "single_module_instruction",
+        "label": "Generate Module Instruction",
+        "type": "component",
+        "link": null,
+        "title": "Single Module Instruction Generation",
+        "description": "Generates a new instruction for a specific language model module, leveraging program context, dataset summaries, and previous instruction attempts."
+      }
+    ],
+    "edges": [
+      {
+        "source": "multimodal_proposer",
+        "target": "enhanced_multimodal_instruction",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "basic_instruction_gen",
+        "target": "instruction_from_attempts",
+        "label": "evolves to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "describe_program",
+        "target": "describe_module",
+        "label": "informs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "describe_program",
+        "target": "single_module_instruction",
+        "label": "informs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "describe_module",
+        "target": "single_module_instruction",
+        "label": "informs",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "general_instruction_optimization",
+        "label": "General Instruction Optimization",
+        "nodes": [
+          "feedback_instruction",
+          "basic_instruction_gen",
+          "instruction_from_attempts"
+        ],
+        "title": "General Instruction Optimization",
+        "description": "Focuses on improving or generating general instructions for language models, often iteratively or based on feedback.",
+        "role": "generative"
+      },
+      {
+        "id": "multimodal_instruction_generation",
+        "label": "Multimodal Instruction Generation",
+        "nodes": [
+          "multimodal_proposer",
+          "enhanced_multimodal_instruction"
+        ],
+        "title": "Multimodal Instruction Generation",
+        "description": "Specializes in creating and refining instructions for tasks involving multimodal inputs, particularly visual and textual data.",
+        "role": "generative"
+      },
+      {
+        "id": "program_grounded_instruction_generation",
+        "label": "Program-Grounded Instruction Generation",
+        "nodes": [
+          "describe_program",
+          "describe_module",
+          "single_module_instruction"
+        ],
+        "title": "Program-Grounded Instruction Generation",
+        "description": "Generates instructions for specific modules within a larger program by first understanding the program's overall structure and individual module roles.",
+        "role": "generative"
+      },
+      {
+        "id": "rule_induction",
+        "label": "Rule Induction",
+        "nodes": [
+          "custom_rules_induction"
+        ],
+        "title": "Rule Induction",
+        "description": "Derives actionable natural language rules from provided examples to guide task execution.",
+        "role": "generative"
+      }
+    ]
+  }
+}

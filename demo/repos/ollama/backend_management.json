@@ -1,0 +1,416 @@
+{
+  "title": "GGML Backend Management",
+  "summary": "This module provides core functionalities for managing GGML backends, including discovery, initialization, memory allocation for computation graphs and tensors, scheduling graph execution, and facilitating data transfer and comparison across different hardware backends.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "alloc_graph",
+        "label": "Allocate Graph Tensors",
+        "type": "component",
+        "link": null,
+        "title": "Allocate Graph Tensors",
+        "description": "Allocates memory for all tensors within a computation graph using a graph allocator, handling reallocations if needed."
+      },
+      {
+        "id": "reserve_graph_size",
+        "label": "Reserve Graph Memory Size",
+        "type": "component",
+        "link": null,
+        "title": "Reserve Graph Memory Size",
+        "description": "Calculates and reserves the necessary memory sizes for a computation graph across multiple buffers without actual allocation."
+      },
+      {
+        "id": "alloc_ctx_tensors",
+        "label": "Allocate Context Tensors",
+        "type": "component",
+        "link": null,
+        "title": "Allocate Context Tensors",
+        "description": "Allocates tensors for a given GGML context on a specified backend using its default buffer type."
+      },
+      {
+        "id": "get_ctx_tensors_size",
+        "label": "Get Context Tensors Size",
+        "type": "component",
+        "link": null,
+        "title": "Get Context Tensors Size",
+        "description": "Determines the total memory size required to allocate tensors for a GGML context using a specific buffer type."
+      },
+      {
+        "id": "free_gallocr",
+        "label": "Free Graph Allocator",
+        "type": "component",
+        "link": null,
+        "title": "Free Graph Allocator",
+        "description": "Releases all resources and memory associated with a graph allocator, including its internal buffers and data structures."
+      },
+      {
+        "id": "new_gallocr",
+        "label": "Create Graph Allocator",
+        "type": "component",
+        "link": null,
+        "title": "Create Graph Allocator",
+        "description": "Initializes and returns a new graph allocator instance, configured for a specified backend buffer type."
+      },
+      {
+        "id": "get_gallocr_buffer_size",
+        "label": "Get Allocator Buffer Size",
+        "type": "component",
+        "link": null,
+        "title": "Get Allocator Buffer Size",
+        "description": "Retrieves the allocated size of a specific buffer managed by the graph allocator, avoiding double-counting shared buffers."
+      },
+      {
+        "id": "load_all_backends",
+        "label": "Load All Backends",
+        "type": "component",
+        "link": null,
+        "title": "Load All Backends",
+        "description": "Discovers and loads all available GGML backend implementations from predefined paths or system configurations."
+      },
+      {
+        "id": "init_backend_by_name",
+        "label": "Initialize Backend by Name",
+        "type": "component",
+        "link": null,
+        "title": "Initialize Backend by Name",
+        "description": "Initializes a specific GGML backend by its registered name, optionally with custom parameters."
+      },
+      {
+        "id": "get_backend_reg_by_name",
+        "label": "Get Backend Registration by Name",
+        "type": "component",
+        "link": null,
+        "title": "Get Backend Registration by Name",
+        "description": "Searches for and returns the registration entry for a GGML backend based on its unique name."
+      },
+      {
+        "id": "init_backend_by_type",
+        "label": "Initialize Backend by Type",
+        "type": "component",
+        "link": null,
+        "title": "Initialize Backend by Type",
+        "description": "Initializes a GGML backend based on its device type (e.g., CPU, GPU), with optional configuration parameters."
+      },
+      {
+        "id": "init_best_backend",
+        "label": "Initialize Best Backend",
+        "type": "component",
+        "link": null,
+        "title": "Initialize Best Backend",
+        "description": "Automatically initializes the most performant available backend, prioritizing GPU, then iGPU, then CPU."
+      },
+      {
+        "id": "sched_graph_compute",
+        "label": "Compute Graph with Scheduler",
+        "type": "component",
+        "link": null,
+        "title": "Compute Graph with Scheduler",
+        "description": "Executes a computation graph using a backend scheduler, synchronizing after asynchronous computation."
+      },
+      {
+        "id": "sched_reserve_size",
+        "label": "Reserve Scheduler Memory Size",
+        "type": "component",
+        "link": null,
+        "title": "Reserve Scheduler Memory Size",
+        "description": "Calculates and reserves the total memory required by a computation graph for a backend scheduler, splitting the graph as needed."
+      },
+      {
+        "id": "sched_reserve_alloc",
+        "label": "Reserve & Allocate Scheduler Memory",
+        "type": "component",
+        "link": null,
+        "title": "Reserve & Allocate Scheduler Memory",
+        "description": "Reserves and allocates memory for a computation graph within a backend scheduler, preparing it for execution."
+      },
+      {
+        "id": "compare_backends",
+        "label": "Compare Backend Computations",
+        "type": "component",
+        "link": null,
+        "title": "Compare Backend Computations",
+        "description": "Compares the results of a computation graph executed on two different backends, using a provided callback for verification."
+      },
+      {
+        "id": "new_sched",
+        "label": "Create Backend Scheduler",
+        "type": "component",
+        "link": null,
+        "title": "Create Backend Scheduler",
+        "description": "Constructs a new backend scheduler instance, configuring it with multiple backends, buffer types, and parallelization options."
+      },
+      {
+        "id": "copy_tensor_async",
+        "label": "Asynchronously Copy Tensor",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronously Copy Tensor",
+        "description": "Initiates an asynchronous copy of tensor data from a source backend to a destination backend, synchronizing if async copy is not supported."
+      },
+      {
+        "id": "alloc_backend_buffer",
+        "label": "Allocate Backend Buffer",
+        "type": "component",
+        "link": null,
+        "title": "Allocate Backend Buffer",
+        "description": "Allocates a generic memory buffer of a specified size using the default buffer type of a given backend."
+      },
+      {
+        "id": "get_backend_alignment",
+        "label": "Get Backend Alignment",
+        "type": "component",
+        "link": null,
+        "title": "Get Backend Alignment",
+        "description": "Retrieves the required memory alignment for buffers allocated by a specific GGML backend."
+      },
+      {
+        "id": "get_backend_max_size",
+        "label": "Get Backend Max Buffer Size",
+        "type": "component",
+        "link": null,
+        "title": "Get Backend Max Buffer Size",
+        "description": "Returns the maximum size of a single memory buffer that can be allocated by a given GGML backend."
+      },
+      {
+        "id": "cpu_buffer_copy_tensor",
+        "label": "Copy Tensor to CPU Buffer",
+        "type": "component",
+        "link": null,
+        "title": "Copy Tensor to CPU Buffer",
+        "description": "Copies tensor data directly into a CPU-managed backend buffer, assuming the source is also host-accessible."
+      },
+      {
+        "id": "get_buffer_max_size",
+        "label": "Get Buffer Max Size",
+        "type": "component",
+        "link": null,
+        "title": "Get Buffer Max Size",
+        "description": "Retrieves the maximum size supported by a specific backend buffer instance."
+      },
+      {
+        "id": "set_buffer_usage",
+        "label": "Set Buffer Usage",
+        "type": "component",
+        "link": null,
+        "title": "Set Buffer Usage",
+        "description": "Assigns a usage type (e.g., for weights, activations) to a backend buffer, potentially affecting its allocation strategy."
+      },
+      {
+        "id": "cpu_buffer_from_ptr",
+        "label": "Create CPU Buffer from Pointer",
+        "type": "component",
+        "link": null,
+        "title": "Create CPU Buffer from Pointer",
+        "description": "Constructs a CPU backend buffer object from an existing memory pointer and size, ensuring proper alignment."
+      }
+    ],
+    "edges": [
+      {
+        "source": "load_all_backends",
+        "target": "get_backend_reg_by_name",
+        "label": "discovers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_backend_reg_by_name",
+        "target": "init_backend_by_name",
+        "label": "enables initialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_backend_by_name",
+        "target": "alloc_ctx_tensors",
+        "label": "uses backend for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_backend_by_type",
+        "target": "alloc_ctx_tensors",
+        "label": "uses backend for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "init_best_backend",
+        "target": "alloc_ctx_tensors",
+        "label": "uses backend for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "new_gallocr",
+        "target": "alloc_graph",
+        "label": "creates allocator for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alloc_graph",
+        "target": "reserve_graph_size",
+        "label": "may involve",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "reserve_graph_size",
+        "target": "get_gallocr_buffer_size",
+        "label": "queries sizes after",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alloc_ctx_tensors",
+        "target": "get_ctx_tensors_size",
+        "label": "may query size before",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alloc_backend_buffer",
+        "target": "get_backend_alignment",
+        "label": "respects",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alloc_backend_buffer",
+        "target": "get_backend_max_size",
+        "label": "respects",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "new_sched",
+        "target": "sched_reserve_size",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "new_sched",
+        "target": "sched_reserve_alloc",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sched_reserve_alloc",
+        "target": "alloc_graph",
+        "label": "uses graph allocator",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sched_graph_compute",
+        "target": "sched_reserve_alloc",
+        "label": "requires prior",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "copy_tensor_async",
+        "target": "cpu_buffer_copy_tensor",
+        "label": "falls back to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "compare_backends",
+        "target": "sched_graph_compute",
+        "label": "performs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "alloc_ctx_tensors",
+        "target": "set_buffer_usage",
+        "label": "may set usage for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cpu_buffer_from_ptr",
+        "target": "cpu_buffer_copy_tensor",
+        "label": "can be target for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "backend_discovery_init",
+        "label": "Backend Discovery & Initialization",
+        "nodes": [
+          "load_all_backends",
+          "init_backend_by_name",
+          "get_backend_reg_by_name",
+          "init_backend_by_type",
+          "init_best_backend"
+        ],
+        "title": "Backend Discovery & Initialization",
+        "description": "Handles the process of finding, registering, and initializing different GGML hardware backends (CPU, GPU, etc.) for use.",
+        "role": "surface"
+      },
+      {
+        "id": "graph_allocator_mgmt",
+        "label": "Graph Allocator Management",
+        "nodes": [
+          "new_gallocr",
+          "alloc_graph",
+          "reserve_graph_size",
+          "get_gallocr_buffer_size",
+          "free_gallocr"
+        ],
+        "title": "Graph Allocator Management",
+        "description": "Manages the lifecycle of graph allocators, including creation, memory reservation, allocation of graph-specific tensors, and freeing resources.",
+        "role": "data"
+      },
+      {
+        "id": "buffer_allocation",
+        "label": "Context & Backend Buffer Allocation",
+        "nodes": [
+          "alloc_ctx_tensors",
+          "get_ctx_tensors_size",
+          "alloc_backend_buffer",
+          "get_backend_alignment",
+          "get_backend_max_size",
+          "get_buffer_max_size",
+          "set_buffer_usage",
+          "cpu_buffer_from_ptr"
+        ],
+        "title": "Context & Backend Buffer Allocation",
+        "description": "Provides functions for allocating memory buffers for GGML contexts and general backend use, including querying size, alignment, and setting usage.",
+        "role": "data"
+      },
+      {
+        "id": "graph_scheduling_compute",
+        "label": "Graph Scheduling & Computation",
+        "nodes": [
+          "new_sched",
+          "sched_reserve_size",
+          "sched_reserve_alloc",
+          "sched_graph_compute"
+        ],
+        "title": "Graph Scheduling & Computation",
+        "description": "Orchestrates the execution of computation graphs across backends, including creating schedulers, reserving memory, and performing graph computations.",
+        "role": "generative"
+      },
+      {
+        "id": "cross_backend_ops",
+        "label": "Cross-Backend Data & Verification",
+        "nodes": [
+          "copy_tensor_async",
+          "cpu_buffer_copy_tensor",
+          "compare_backends"
+        ],
+        "title": "Cross-Backend Data & Verification",
+        "description": "Facilitates the transfer of tensor data between different backends and provides utilities for comparing computation results for verification.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

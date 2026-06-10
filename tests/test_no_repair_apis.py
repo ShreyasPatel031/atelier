@@ -22,7 +22,7 @@ FORBIDDEN = [
     r"\bpipeline-ir-repair\b",
 ]
 
-SKIP_SCAN_DIRS = {"node_modules", ".git", "__pycache__", ".venv", "venv"}
+SKIP_SCAN_DIRS = {"node_modules", ".git", "__pycache__", ".venv", "venv", "docs"}
 
 
 def _iter_scan_files() -> list[Path]:

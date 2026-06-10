@@ -1,0 +1,169 @@
+{
+  "title": "Security URL Validation & Transport",
+  "summary": "This module provides functionalities for validating URLs against Server-Side Request Forgery (SSRF) policies and creating SSRF-safe HTTP clients. It ensures that network requests do not target unauthorized internal resources.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "validate_url_async",
+        "label": "Validate URL (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous URL Validation",
+        "description": "Performs comprehensive URL validation, including DNS resolution, against SSRF policies to prevent unauthorized access to internal resources."
+      },
+      {
+        "id": "is_safe_url_check",
+        "label": "Check URL Safety",
+        "type": "component",
+        "link": null,
+        "title": "Boolean URL Safety Check",
+        "description": "Provides a non-throwing method to determine if a given URL is safe according to the configured SSRF policy, returning true or false."
+      },
+      {
+        "id": "strict_ssrf_validator",
+        "label": "Strict SSRF Validation",
+        "type": "component",
+        "link": null,
+        "title": "Pydantic Strict SSRF Policy",
+        "description": "A Pydantic validator enforcing strict SSRF protection, disallowing private IP addresses while permitting both HTTP and HTTPS schemes."
+      },
+      {
+        "id": "https_only_ssrf_validator",
+        "label": "HTTPS-Only SSRF Validation",
+        "type": "component",
+        "link": null,
+        "title": "Pydantic HTTPS-Only SSRF Policy",
+        "description": "A Pydantic validator enforcing SSRF protection that requires HTTPS and disallows private IP addresses."
+      },
+      {
+        "id": "relaxed_ssrf_validator",
+        "label": "Relaxed SSRF Validation",
+        "type": "component",
+        "link": null,
+        "title": "Pydantic Relaxed SSRF Policy",
+        "description": "A Pydantic validator for SSRF protection that allows private IP addresses and both HTTP/HTTPS schemes."
+      },
+      {
+        "id": "ssrf_safe_client_factory",
+        "label": "Create SSRF-Safe HTTP Client",
+        "type": "component",
+        "link": null,
+        "title": "SSRF-Protected HTTP Client",
+        "description": "Constructs an `httpx.AsyncClient` instance pre-configured with an SSRF-safe transport layer to enforce security policies on outgoing requests."
+      },
+      {
+        "id": "ssrf_policy_config",
+        "label": "SSRF Policy Definition",
+        "type": "external",
+        "link": null,
+        "title": "SSRF Policy Configuration",
+        "description": "Defines the rules and constraints (e.g., allowed hosts, private IP restrictions) that govern URL validation and SSRF protection."
+      },
+      {
+        "id": "httpx_async_client",
+        "label": "Async HTTP Client",
+        "type": "external",
+        "link": null,
+        "title": "External Async HTTP Client",
+        "description": "The underlying asynchronous HTTP client library (`httpx`) used for making network requests, integrated with SSRF protection."
+      }
+    ],
+    "edges": [
+      {
+        "source": "validate_url_async",
+        "target": "ssrf_policy_config",
+        "label": "Enforces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "is_safe_url_check",
+        "target": "ssrf_policy_config",
+        "label": "Checks against",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "strict_ssrf_validator",
+        "target": "ssrf_policy_config",
+        "label": "Enforces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "https_only_ssrf_validator",
+        "target": "ssrf_policy_config",
+        "label": "Enforces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "relaxed_ssrf_validator",
+        "target": "ssrf_policy_config",
+        "label": "Enforces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ssrf_safe_client_factory",
+        "target": "ssrf_policy_config",
+        "label": "Applies",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ssrf_safe_client_factory",
+        "target": "httpx_async_client",
+        "label": "Configures",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "grp_url_validation_core",
+        "label": "URL Validation Core",
+        "nodes": [
+          "validate_url_async",
+          "is_safe_url_check"
+        ],
+        "title": "Core URL Validation Functions",
+        "description": "Primary functions for directly validating URLs against SSRF policies, including asynchronous checks and simple safety checks.",
+        "role": "analytical"
+      },
+      {
+        "id": "grp_pydantic_integration",
+        "label": "Pydantic Validators",
+        "nodes": [
+          "strict_ssrf_validator",
+          "https_only_ssrf_validator",
+          "relaxed_ssrf_validator"
+        ],
+        "title": "Pydantic Model Integration for SSRF",
+        "description": "Pydantic-compatible validators that apply different levels of SSRF protection (strict, HTTPS-only, relaxed) to URL fields in data models.",
+        "role": "analytical"
+      },
+      {
+        "id": "grp_http_client_integration",
+        "label": "HTTP Client Integration",
+        "nodes": [
+          "ssrf_safe_client_factory"
+        ],
+        "title": "SSRF-Safe HTTP Client Creation",
+        "description": "Functionality to create an asynchronous HTTP client (`httpx`) that automatically enforces SSRF policies on all outgoing requests.",
+        "role": "generative"
+      },
+      {
+        "id": "grp_policy_config",
+        "label": "Policy Configuration",
+        "nodes": [
+          "ssrf_policy_config"
+        ],
+        "title": "SSRF Policy Definition",
+        "description": "Represents the configuration object that dictates the rules and parameters for Server-Side Request Forgery protection.",
+        "role": "data"
+      }
+    ]
+  }
+}

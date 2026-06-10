@@ -1,0 +1,444 @@
+{
+  "title": "Memory Management Strategies",
+  "summary": "This module provides various memory implementations for conversational AI, ranging from simple buffer storage to advanced entity extraction, summarization, and vector-backed long-term memory. It enables AI systems to retain and utilize past conversational context effectively.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_memory",
+        "label": "Base Memory",
+        "type": "component",
+        "link": null,
+        "title": "BaseMemory",
+        "description": "Defines the fundamental interface for memory management in chains, allowing storage and retrieval of conversational context."
+      },
+      {
+        "id": "base_chat_memory",
+        "label": "Base Chat Memory",
+        "type": "component",
+        "link": null,
+        "title": "BaseChatMemory",
+        "description": "Provides a foundational abstraction for chat-based memory, handling message storage and context saving for conversational agents."
+      },
+      {
+        "id": "conv_buffer_memory",
+        "label": "Conversation Buffer Memory",
+        "type": "component",
+        "link": null,
+        "title": "ConversationBufferMemory",
+        "description": "Stores the complete conversation history as messages or a string, providing a straightforward way to retain context."
+      },
+      {
+        "id": "conv_string_buffer_memory",
+        "label": "Conversation String Buffer Memory",
+        "type": "component",
+        "link": null,
+        "title": "ConversationStringBufferMemory",
+        "description": "Manages conversation history as a single string buffer, suitable for simpler, string-based conversational flows."
+      },
+      {
+        "id": "conv_buffer_window_memory",
+        "label": "Conversation Buffer Window Memory",
+        "type": "component",
+        "link": null,
+        "title": "ConversationBufferWindowMemory",
+        "description": "Retains a fixed number of the most recent conversation turns, preventing memory overflow for long dialogues."
+      },
+      {
+        "id": "conv_summary_memory",
+        "label": "Conversation Summary Memory",
+        "type": "component",
+        "link": null,
+        "title": "ConversationSummaryMemory",
+        "description": "Maintains a concise summary of the ongoing conversation, updating it after each turn to provide a high-level context."
+      },
+      {
+        "id": "conv_summary_buffer_memory",
+        "label": "Conversation Summary Buffer Memory",
+        "type": "component",
+        "link": null,
+        "title": "ConversationSummaryBufferMemory",
+        "description": "Balances detailed recent messages with a running summary, ensuring conversation history stays within a token limit."
+      },
+      {
+        "id": "conv_entity_memory",
+        "label": "Conversation Entity Memory",
+        "type": "component",
+        "link": null,
+        "title": "ConversationEntityMemory",
+        "description": "Identifies and summarizes key entities from conversation history, enhancing context by focusing on important subjects."
+      },
+      {
+        "id": "in_memory_entity_store",
+        "label": "In-Memory Entity Store",
+        "type": "component",
+        "link": null,
+        "title": "InMemoryEntityStore",
+        "description": "Stores extracted entities and their summaries in a temporary, in-memory dictionary for quick access during a session."
+      },
+      {
+        "id": "redis_entity_store",
+        "label": "Redis Entity Store",
+        "type": "component",
+        "link": null,
+        "title": "RedisEntityStore",
+        "description": "Persists extracted entities and their summaries in a Redis database, offering scalable and durable storage."
+      },
+      {
+        "id": "upstash_redis_entity_store",
+        "label": "Upstash Redis Entity Store",
+        "type": "component",
+        "link": null,
+        "title": "UpstashRedisEntityStore",
+        "description": "Utilizes Upstash Redis for storing and retrieving entity data, providing a serverless and managed Redis solution."
+      },
+      {
+        "id": "sqlite_entity_store",
+        "label": "SQLite Entity Store",
+        "type": "component",
+        "link": null,
+        "title": "SQLiteEntityStore",
+        "description": "Stores entity information in a local SQLite database, suitable for persistent storage without external dependencies."
+      },
+      {
+        "id": "conv_vector_store_token_buffer_memory",
+        "label": "Vector Store Token Buffer Memory",
+        "type": "component",
+        "link": null,
+        "title": "ConversationVectorStoreTokenBufferMemory",
+        "description": "Integrates a vector store for long-term memory retrieval with a token-buffered short-term memory, managing conversation context efficiently."
+      },
+      {
+        "id": "base_chat_message_history",
+        "label": "Base Chat Message History",
+        "type": "external",
+        "link": "language_model_interface.message_handling",
+        "title": "BaseChatMessageHistory",
+        "description": "Manages the storage and retrieval of chat messages, forming the core of conversational memory."
+      },
+      {
+        "id": "base_language_model",
+        "label": "Base Language Model",
+        "type": "external",
+        "link": "core_framework.base_abstractions",
+        "title": "BaseLanguageModel",
+        "description": "Represents a generic language model, used for summarization and entity extraction."
+      },
+      {
+        "id": "base_prompt_template",
+        "label": "Base Prompt Template",
+        "type": "external",
+        "link": "core_framework.base_abstractions",
+        "title": "BasePromptTemplate",
+        "description": "Defines templates for generating prompts, used in summarization and entity extraction."
+      },
+      {
+        "id": "llm_chain",
+        "label": "LLM Chain",
+        "type": "external",
+        "link": "agent_and_chain_orchestration.chains",
+        "title": "LLMChain",
+        "description": "A chain that uses a language model to generate responses, employed for entity extraction and summarization."
+      },
+      {
+        "id": "vector_store_retriever",
+        "label": "Vector Store Retriever",
+        "type": "external",
+        "link": "data_management_and_retrieval.retrieval_mechanisms",
+        "title": "VectorStoreRetriever",
+        "description": "Retrieves relevant documents or information from a vector store, used for long-term memory in vector-backed systems."
+      },
+      {
+        "id": "recursive_char_text_splitter",
+        "label": "Recursive Character Text Splitter",
+        "type": "external",
+        "link": "developer_tools_and_integrations.miscellaneous_utilities",
+        "title": "RecursiveCharacterTextSplitter",
+        "description": "Splits text into smaller, semantically meaningful chunks, used for processing AI output before storing in a vector store."
+      },
+      {
+        "id": "vector_store_retriever_memory",
+        "label": "Vector Store Retriever Memory",
+        "type": "external",
+        "link": null,
+        "title": "VectorStoreRetrieverMemory",
+        "description": "Adapts a VectorStoreRetriever to function as a memory component, storing and retrieving conversational context."
+      },
+      {
+        "id": "redis_client",
+        "label": "Redis Client",
+        "type": "external",
+        "link": null,
+        "title": "Redis Client",
+        "description": "An external client for interacting with a Redis database, used by RedisEntityStore."
+      },
+      {
+        "id": "upstash_redis_client",
+        "label": "Upstash Redis Client",
+        "type": "external",
+        "link": null,
+        "title": "Upstash Redis Client",
+        "description": "An external client for interacting with an Upstash Redis database, used by UpstashRedisEntityStore."
+      },
+      {
+        "id": "sqlite_db",
+        "label": "SQLite Database",
+        "type": "external",
+        "link": null,
+        "title": "SQLite Database",
+        "description": "A local file-based database, used by SQLiteEntityStore for persistent storage."
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_chat_memory",
+        "target": "base_memory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_buffer_memory",
+        "target": "base_chat_memory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_string_buffer_memory",
+        "target": "base_memory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_buffer_window_memory",
+        "target": "base_chat_memory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_summary_memory",
+        "target": "base_chat_memory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_summary_buffer_memory",
+        "target": "base_chat_memory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_entity_memory",
+        "target": "base_chat_memory",
+        "label": "inherits",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_vector_store_token_buffer_memory",
+        "target": "base_chat_memory",
+        "label": "inherits (via parent)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_chat_memory",
+        "target": "base_chat_message_history",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_entity_memory",
+        "target": "base_language_model",
+        "label": "uses for extraction/summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_entity_memory",
+        "target": "base_prompt_template",
+        "label": "uses for extraction/summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_entity_memory",
+        "target": "llm_chain",
+        "label": "uses for extraction/summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_entity_memory",
+        "target": "in_memory_entity_store",
+        "label": "uses as default store",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_entity_memory",
+        "target": "redis_entity_store",
+        "label": "can use as store",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_entity_memory",
+        "target": "upstash_redis_entity_store",
+        "label": "can use as store",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_entity_memory",
+        "target": "sqlite_entity_store",
+        "label": "can use as store",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_summary_memory",
+        "target": "base_language_model",
+        "label": "uses for summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_summary_memory",
+        "target": "base_prompt_template",
+        "label": "uses for summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_summary_buffer_memory",
+        "target": "base_language_model",
+        "label": "uses for summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_summary_buffer_memory",
+        "target": "base_prompt_template",
+        "label": "uses for summarization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_vector_store_token_buffer_memory",
+        "target": "vector_store_retriever",
+        "label": "uses for retrieval",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_vector_store_token_buffer_memory",
+        "target": "base_language_model",
+        "label": "uses for token counting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_vector_store_token_buffer_memory",
+        "target": "recursive_char_text_splitter",
+        "label": "uses for splitting AI output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "conv_vector_store_token_buffer_memory",
+        "target": "vector_store_retriever_memory",
+        "label": "wraps retriever",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "redis_entity_store",
+        "target": "redis_client",
+        "label": "connects to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "upstash_redis_entity_store",
+        "target": "upstash_redis_client",
+        "label": "connects to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "sqlite_entity_store",
+        "target": "sqlite_db",
+        "label": "connects to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_interfaces",
+        "label": "Core Memory Interfaces",
+        "nodes": [
+          "base_memory",
+          "base_chat_memory"
+        ],
+        "title": "Core Memory Interfaces",
+        "description": "Abstract base classes defining the fundamental contracts for memory components.",
+        "role": "surface"
+      },
+      {
+        "id": "simple_buffer_memories",
+        "label": "Simple Buffer Memories",
+        "nodes": [
+          "conv_buffer_memory",
+          "conv_string_buffer_memory",
+          "conv_buffer_window_memory"
+        ],
+        "title": "Simple Buffer Memories",
+        "description": "Memory implementations that store conversation history directly, either fully or within a window.",
+        "role": "data"
+      },
+      {
+        "id": "summarizing_memories",
+        "label": "Summarizing Memories",
+        "nodes": [
+          "conv_summary_memory",
+          "conv_summary_buffer_memory"
+        ],
+        "title": "Summarizing Memories",
+        "description": "Memory components that generate and maintain summaries of the conversation history.",
+        "role": "generative"
+      },
+      {
+        "id": "entity_aware_memories",
+        "label": "Entity-Aware Memories",
+        "nodes": [
+          "conv_entity_memory",
+          "in_memory_entity_store",
+          "redis_entity_store",
+          "upstash_redis_entity_store",
+          "sqlite_entity_store"
+        ],
+        "title": "Entity-Aware Memories",
+        "description": "Memory implementations focused on extracting, summarizing, and storing named entities from conversations.",
+        "role": "analytical"
+      },
+      {
+        "id": "vector_store_memories",
+        "label": "Vector Store Memories",
+        "nodes": [
+          "conv_vector_store_token_buffer_memory"
+        ],
+        "title": "Vector Store Memories",
+        "description": "Memory components that leverage vector stores for long-term context retrieval, combined with short-term buffering.",
+        "role": "data"
+      }
+    ]
+  }
+}

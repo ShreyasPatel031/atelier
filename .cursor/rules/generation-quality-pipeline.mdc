@@ -1,0 +1,36 @@
+---
+description: CodeWiki generation error pipeline — Stage 3 → Stage 4 catch → prompt → tests
+globs:
+  - codewiki/src/be/doc_file_sync.py
+  - codewiki/src/be/documentation_generator.py
+  - codewiki/src/be/agent_orchestrator.py
+  - codewiki/src/be/prompt_template.py
+  - codewiki/src/be/diagram_ir_validator.py
+  - codewiki/src/be/validation.py
+  - codewiki/src/be/direct_module_doc.py
+  - tests/test_*repair*
+  - tests/test_diagram*
+  - tests/STAGE3_TEST_GAPS.md
+  - codewiki/docs/generation-quality-pipeline.md
+---
+
+# Generation quality pipeline
+
+Read [codewiki/docs/generation-quality-pipeline.md](codewiki/docs/generation-quality-pipeline.md) before changing generation or sync behavior.
+
+## Do
+
+- **New LLM output failure** → add Stage 4 catch in `doc_file_sync.py` first (log + `sync_issues.json` + presync metric).
+- **Measure** with `audit_docs_state` / `run_full_sync` before changing prompts.
+- **Prompt fixes** in Stage 3 only after metrics show a recurring error class.
+- **Graduate** fixed error classes to pytest; then remove the Stage 4 catch.
+
+## Do not
+
+- Ask the user “want me to fix/regenerate X?” for generation errors — follow the pipeline.
+- One-off patch a broken `{module}.json` without adding/updating the Stage 4 catch for that error class.
+- Reintroduce diagram IR **repair** APIs (forbidden by `tests/test_no_repair_apis.py`).
+
+## Stage 4 home
+
+Primary catch-all: `run_full_sync()` in `codewiki/src/be/doc_file_sync.py`.

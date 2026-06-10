@@ -1,0 +1,145 @@
+{
+  "title": "GitHub Search Tool Integration",
+  "summary": "This module provides a tool for performing semantic searches within GitHub repository content, leveraging RAG capabilities to retrieve relevant information. It allows specifying repositories and content types for targeted searches.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "github_search_tool",
+        "label": "GithubSearchTool",
+        "type": "component",
+        "link": null,
+        "title": "GitHub Search Tool",
+        "description": "Enables semantic search within specified GitHub repositories, using a GitHub token for access and filtering by content types like code, issues, or pull requests. It leverages RAG for intelligent retrieval."
+      },
+      {
+        "id": "rag_tool_base",
+        "label": "Base RAG Tool",
+        "type": "component",
+        "link": null,
+        "title": "Base RAG Tool",
+        "description": "Provides the foundational Retrieval Augmented Generation (RAG) capabilities, handling data ingestion, indexing, and semantic similarity searches for various data sources."
+      },
+      {
+        "id": "github_api",
+        "label": "GitHub Repository",
+        "type": "external",
+        "link": null,
+        "title": "GitHub API/Repository",
+        "description": "Represents the external GitHub platform, providing access to repository content, code, issues, and pull requests, which are then ingested for semantic search."
+      },
+      {
+        "id": "rag_data_processing",
+        "label": "RAG Data Processing",
+        "type": "component",
+        "link": null,
+        "title": "RAG Data Processing",
+        "description": "Manages the indexing, vectorization, and retrieval logic for the RAG system. It processes ingested data to enable efficient semantic search queries."
+      },
+      {
+        "id": "user_query",
+        "label": "User Search Query",
+        "type": "external",
+        "link": null,
+        "title": "User Search Query",
+        "description": "The natural language query provided by a user or agent to search for information within the configured GitHub repositories."
+      },
+      {
+        "id": "search_output",
+        "label": "Semantic Search Results",
+        "type": "external",
+        "link": null,
+        "title": "Semantic Search Results",
+        "description": "The relevant information retrieved from the GitHub repository content based on the semantic search query, presented as structured or summarized text."
+      }
+    ],
+    "edges": [
+      {
+        "source": "user_query",
+        "target": "github_search_tool",
+        "label": "Initiates search",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_search_tool",
+        "target": "rag_tool_base",
+        "label": "Extends functionality",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_search_tool",
+        "target": "github_api",
+        "label": "Configures access to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_api",
+        "target": "rag_data_processing",
+        "label": "Provides content to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "rag_data_processing",
+        "target": "github_search_tool",
+        "label": "Returns processed results",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_search_tool",
+        "target": "search_output",
+        "label": "Delivers results",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "tool_interface_group",
+        "label": "Tool Interface",
+        "nodes": [
+          "github_search_tool"
+        ],
+        "title": "GitHub Search Tool Interface",
+        "description": "Encapsulates the primary tool for interacting with GitHub content search.",
+        "role": "surface"
+      },
+      {
+        "id": "rag_core_group",
+        "label": "RAG Core",
+        "nodes": [
+          "rag_tool_base",
+          "rag_data_processing"
+        ],
+        "title": "Retrieval Augmented Generation Core",
+        "description": "Handles the underlying RAG mechanisms for data management and semantic retrieval.",
+        "role": "generative"
+      },
+      {
+        "id": "external_data_source_group",
+        "label": "External Data Source",
+        "nodes": [
+          "github_api"
+        ],
+        "title": "GitHub Repository Data",
+        "description": "Represents the external source of data (GitHub) that is queried and processed.",
+        "role": "data"
+      },
+      {
+        "id": "interaction_group",
+        "label": "User Interaction",
+        "nodes": [
+          "user_query",
+          "search_output"
+        ],
+        "title": "User Input and Output",
+        "description": "Defines the entry point for user queries and the format of the returned search results.",
+        "role": "surface"
+      }
+    ]
+  }
+}

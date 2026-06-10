@@ -1,0 +1,201 @@
+{
+  "title": "API & Security Utilities",
+  "summary": "This module provides core utilities for managing API lifecycle warnings (beta features, deprecations) and robust security features, primarily focusing on Server-Side Request Forgery (SSRF) protection for URL validation and HTTP client creation.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "beta_func_warn",
+        "label": "Warn on Beta Function Use",
+        "type": "component",
+        "link": null,
+        "title": "Beta Function Warning",
+        "description": "Emits a warning when a function or async function marked as beta is called, ensuring users are aware of experimental features."
+      },
+      {
+        "id": "beta_instance_warn",
+        "label": "Warn on Beta Class Instance",
+        "type": "component",
+        "link": null,
+        "title": "Beta Class Instance Warning",
+        "description": "Emits a warning when a class marked as beta is directly instantiated, indicating its experimental status."
+      },
+      {
+        "id": "beta_prop_warn",
+        "label": "Warn on Beta Property Access",
+        "type": "component",
+        "link": null,
+        "title": "Beta Property Access Warning",
+        "description": "Emits a warning when a property marked as beta is accessed (get, set, or delete), informing users of its experimental nature."
+      },
+      {
+        "id": "deprec_func_warn",
+        "label": "Warn on Deprecated Function Use",
+        "type": "component",
+        "link": null,
+        "title": "Deprecated Function Warning",
+        "description": "Emits a warning when a function or async function marked as deprecated is called, guiding users to newer alternatives."
+      },
+      {
+        "id": "deprec_instance_warn",
+        "label": "Warn on Deprecated Class Instance",
+        "type": "component",
+        "link": null,
+        "title": "Deprecated Class Instance Warning",
+        "description": "Emits a warning when a class marked as deprecated is directly instantiated, advising against its continued use."
+      },
+      {
+        "id": "validate_url_async",
+        "label": "Validate URL with DNS & Policy",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous URL Validation",
+        "description": "Asynchronously validates a URL against SSRF policies, including DNS resolution to prevent server-side request forgery."
+      },
+      {
+        "id": "check_url_safety",
+        "label": "Check URL Safety (Non-throwing)",
+        "type": "component",
+        "link": null,
+        "title": "Safe URL Check",
+        "description": "Determines if a URL is safe according to SSRF policies without raising exceptions, returning a boolean result."
+      },
+      {
+        "id": "ssrf_strict_validation",
+        "label": "Strict SSRF URL Validation",
+        "type": "component",
+        "link": null,
+        "title": "Strict SSRF Validation",
+        "description": "Applies strict SSRF protection rules to a URL, disallowing private IP addresses and ensuring public access."
+      },
+      {
+        "id": "ssrf_https_validation",
+        "label": "HTTPS-Only SSRF URL Validation",
+        "type": "component",
+        "link": null,
+        "title": "HTTPS-Only Validation",
+        "description": "Validates URLs for SSRF protection, specifically enforcing the use of HTTPS protocol."
+      },
+      {
+        "id": "ssrf_relaxed_validation",
+        "label": "Relaxed SSRF URL Validation",
+        "type": "component",
+        "link": null,
+        "title": "Relaxed SSRF Validation",
+        "description": "Applies relaxed SSRF protection rules, allowing private IP addresses while still preventing other common SSRF vectors."
+      },
+      {
+        "id": "ssrf_async_client",
+        "label": "Create SSRF-Safe Async HTTP Client",
+        "type": "component",
+        "link": null,
+        "title": "SSRF-Safe HTTP Client",
+        "description": "Provides a factory function to create an asynchronous HTTP client (httpx.AsyncClient) with built-in SSRF protection policies."
+      },
+      {
+        "id": "external_http_client",
+        "label": "External HTTP Client Library",
+        "type": "external",
+        "link": null,
+        "title": "HTTPX Library",
+        "description": "Represents the external `httpx` library used for making asynchronous HTTP requests, integrated with SSRF protection."
+      }
+    ],
+    "edges": [
+      {
+        "source": "beta_func_warn",
+        "target": "beta_instance_warn",
+        "label": "Applies to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "beta_instance_warn",
+        "target": "beta_prop_warn",
+        "label": "Applies to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "deprec_func_warn",
+        "target": "deprec_instance_warn",
+        "label": "Applies to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ssrf_strict_validation",
+        "target": "check_url_safety",
+        "label": "Utilizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ssrf_https_validation",
+        "target": "check_url_safety",
+        "label": "Utilizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ssrf_relaxed_validation",
+        "target": "check_url_safety",
+        "label": "Utilizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_url_async",
+        "target": "check_url_safety",
+        "label": "Performs initial check",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ssrf_async_client",
+        "target": "validate_url_async",
+        "label": "Integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ssrf_async_client",
+        "target": "external_http_client",
+        "label": "Wraps",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "api_lifecycle",
+        "label": "API Lifecycle Management",
+        "nodes": [
+          "beta_func_warn",
+          "beta_instance_warn",
+          "beta_prop_warn",
+          "deprec_func_warn",
+          "deprec_instance_warn"
+        ],
+        "title": "API Lifecycle Management",
+        "description": "Handles warnings for beta features and deprecated components to guide developers on API evolution and usage.",
+        "role": "surface"
+      },
+      {
+        "id": "security_validation",
+        "label": "Security Validation & Protection",
+        "nodes": [
+          "validate_url_async",
+          "check_url_safety",
+          "ssrf_strict_validation",
+          "ssrf_https_validation",
+          "ssrf_relaxed_validation",
+          "ssrf_async_client"
+        ],
+        "title": "Security Validation & Protection",
+        "description": "Provides mechanisms for validating URLs and creating secure HTTP clients to prevent Server-Side Request Forgery (SSRF) attacks.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

@@ -1,0 +1,331 @@
+{
+  "title": "Model-Specific Adapters",
+  "summary": "This module provides specialized adapters and integration logic for various LLM providers, including Anthropic, Bedrock, Cohere, Gemini, Google, Groq, HuggingFace, Mistral, OpenAI, and OpenRouter. It handles model-specific behaviors like tool forcing, usage mapping, streaming responses, and conversation compaction.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "anthropic_tool_forcing",
+        "label": "Handle Anthropic Tool Forcing",
+        "type": "component",
+        "link": null,
+        "title": "Anthropic Tool Forcing Logic",
+        "description": "Determines if Anthropic models support tool forcing in conjunction with thinking mode, raising an error if an unsupported explicit choice is made."
+      },
+      {
+        "id": "bedrock_tool_forcing",
+        "label": "Handle Bedrock Tool Forcing",
+        "type": "component",
+        "link": null,
+        "title": "Bedrock Tool Forcing Logic",
+        "description": "Checks Bedrock model compatibility with tool forcing and thinking mode, preventing unsupported configurations."
+      },
+      {
+        "id": "cohere_map_usage",
+        "label": "Map Cohere Usage",
+        "type": "component",
+        "link": null,
+        "title": "Cohere Usage Mapping",
+        "description": "Translates Cohere API response usage statistics into a standardized internal RequestUsage format."
+      },
+      {
+        "id": "gemini_model",
+        "label": "Gemini Model Integration",
+        "type": "component",
+        "link": null,
+        "title": "Gemini Model API Wrapper",
+        "description": "Provides a comprehensive wrapper for interacting with Google Gemini models, managing requests, streaming, message conversion, and tool handling."
+      },
+      {
+        "id": "gemini_process_response",
+        "label": "Process Gemini Response Parts",
+        "type": "component",
+        "link": null,
+        "title": "Gemini Response Part Processor",
+        "description": "Parses individual content parts from Gemini API responses, converting them into structured internal model response items like text and tool calls."
+      },
+      {
+        "id": "gemini_streamed_response",
+        "label": "Gemini Streamed Response Handler",
+        "type": "component",
+        "link": null,
+        "title": "Gemini Stream Processor",
+        "description": "Manages the asynchronous processing of streamed responses from the Gemini API, reconstructing full messages from partial chunks."
+      },
+      {
+        "id": "gemini_content_model_response",
+        "label": "Convert Model Response to Gemini Content",
+        "type": "component",
+        "link": null,
+        "title": "Gemini Content Converter",
+        "description": "Transforms internal ModelResponse objects into the specific content format required by the Gemini API, including tool calls and thinking."
+      },
+      {
+        "id": "gemini_metadata_as_usage",
+        "label": "Extract Gemini Usage from Metadata",
+        "type": "component",
+        "link": null,
+        "title": "Gemini Usage Extractor",
+        "description": "Extracts detailed token usage and other metrics from Gemini API response metadata, populating a RequestUsage object."
+      },
+      {
+        "id": "gemini_inline_data",
+        "label": "Gemini Inline Data Structure",
+        "type": "component",
+        "link": null,
+        "title": "Gemini Inline Data Pydantic Model",
+        "description": "Pydantic model defining the structure for inline data parts within Gemini API requests, such as base64 encoded content."
+      },
+      {
+        "id": "gemini_file_data",
+        "label": "Gemini File Data Structure",
+        "type": "component",
+        "link": null,
+        "title": "Gemini File Data Pydantic Model",
+        "description": "Pydantic model defining the structure for file data parts in Gemini API requests, typically referencing files by URI."
+      },
+      {
+        "id": "google_map_tool_call",
+        "label": "Map Google Tool Call",
+        "type": "component",
+        "link": null,
+        "title": "Google Tool Call Mapper",
+        "description": "Converts generic tool call objects from Google's SDK into the internal NativeToolCallPart format for consistent handling."
+      },
+      {
+        "id": "groq_map_usage",
+        "label": "Map Groq Usage",
+        "type": "component",
+        "link": null,
+        "title": "Groq Usage Mapping",
+        "description": "Translates Groq API response usage statistics from chat completions into a standardized internal RequestUsage format."
+      },
+      {
+        "id": "huggingface_map_usage",
+        "label": "Map HuggingFace Usage",
+        "type": "component",
+        "link": null,
+        "title": "HuggingFace Usage Mapping",
+        "description": "Converts HuggingFace API response usage data into the internal RequestUsage format for consistent reporting."
+      },
+      {
+        "id": "mistral_map_usage",
+        "label": "Map Mistral Usage",
+        "type": "component",
+        "link": null,
+        "title": "Mistral Usage Mapping",
+        "description": "Translates Mistral API response usage statistics into a standardized internal RequestUsage format."
+      },
+      {
+        "id": "openai_model",
+        "label": "OpenAI Model (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Model Alias (Deprecated)",
+        "description": "A deprecated alias for OpenAIChatModel, maintained for backward compatibility in the OpenAI integration."
+      },
+      {
+        "id": "openai_streamed_response",
+        "label": "OpenAI Streamed Response Handler",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Stream Processor",
+        "description": "Manages the asynchronous processing of streamed responses from OpenAI models, handling usage, finish reasons, and extracting content deltas."
+      },
+      {
+        "id": "openai_map_binary_content",
+        "label": "Map OpenAI Binary Content",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Binary Content Mapper",
+        "description": "Converts internal BinaryContent objects (images, audio, documents) into OpenAI-specific chat completion content parts for API requests."
+      },
+      {
+        "id": "openai_compaction",
+        "label": "OpenAI Conversation Compaction",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Responses API Compaction",
+        "description": "A capability for automatically compacting conversation history using OpenAI's Responses API, supporting both stateful and stateless modes to manage context limits."
+      },
+      {
+        "id": "openai_model_settings",
+        "label": "OpenAI Model Settings (Deprecated)",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Model Settings Alias (Deprecated)",
+        "description": "A deprecated alias for OpenAIChatModelSettings, used to define model-specific configurations for OpenAI models."
+      },
+      {
+        "id": "openai_responses_model_settings",
+        "label": "OpenAI Responses Model Settings",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Responses API Configuration",
+        "description": "Defines advanced settings for OpenAI Responses API models, including native tools, reasoning control, truncation strategies, and conversation state management."
+      },
+      {
+        "id": "openai_map_model_response_context",
+        "label": "Map OpenAI Model Response Context",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Response Context Mapper",
+        "description": "Internal class for converting ModelResponse objects into OpenAI chat completion assistant message parameters, handling various message parts."
+      },
+      {
+        "id": "openrouter_streamed_response",
+        "label": "OpenRouter Streamed Response Handler",
+        "type": "component",
+        "link": null,
+        "title": "OpenRouter Stream Processor",
+        "description": "Extends the OpenAI streamed response handler to support OpenRouter-specific features, including custom error handling and detailed reasoning extraction."
+      },
+      {
+        "id": "openrouter_nested_completion",
+        "label": "OpenRouter Nested Completion Model",
+        "type": "component",
+        "link": null,
+        "title": "OpenRouter Completion Pydantic Model",
+        "description": "Pydantic model for OpenRouter chat completions, specifically designed to handle cases where the provider name might be missing or null."
+      }
+    ],
+    "edges": [
+      {
+        "source": "gemini_streamed_response",
+        "target": "gemini_metadata_as_usage",
+        "label": "uses for usage extraction",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_responses_model_settings",
+        "target": "openai_compaction",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openrouter_streamed_response",
+        "target": "openai_streamed_response",
+        "label": "extends",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "anthropic_adapters",
+        "label": "Anthropic Adapters",
+        "nodes": [
+          "anthropic_tool_forcing"
+        ],
+        "title": "Anthropic Model Integrations",
+        "description": "Components for integrating with Anthropic models, handling specific API behaviors.",
+        "role": "generative"
+      },
+      {
+        "id": "bedrock_adapters",
+        "label": "Bedrock Adapters",
+        "nodes": [
+          "bedrock_tool_forcing"
+        ],
+        "title": "Bedrock Model Integrations",
+        "description": "Components for integrating with AWS Bedrock models, handling specific API behaviors.",
+        "role": "generative"
+      },
+      {
+        "id": "cohere_adapters",
+        "label": "Cohere Adapters",
+        "nodes": [
+          "cohere_map_usage"
+        ],
+        "title": "Cohere Model Integrations",
+        "description": "Components for integrating with Cohere models, primarily for usage mapping.",
+        "role": "analytical"
+      },
+      {
+        "id": "gemini_adapters",
+        "label": "Gemini Adapters",
+        "nodes": [
+          "gemini_model",
+          "gemini_process_response",
+          "gemini_streamed_response",
+          "gemini_content_model_response",
+          "gemini_metadata_as_usage",
+          "gemini_inline_data",
+          "gemini_file_data"
+        ],
+        "title": "Google Gemini Model Integrations",
+        "description": "Comprehensive components for interacting with Google Gemini models, including core model wrapper, streaming, response processing, and data structures.",
+        "role": "generative"
+      },
+      {
+        "id": "google_adapters",
+        "label": "Google Adapters",
+        "nodes": [
+          "google_map_tool_call"
+        ],
+        "title": "Google Model Integrations",
+        "description": "Components for integrating with Google models, specifically for tool call mapping.",
+        "role": "generative"
+      },
+      {
+        "id": "groq_adapters",
+        "label": "Groq Adapters",
+        "nodes": [
+          "groq_map_usage"
+        ],
+        "title": "Groq Model Integrations",
+        "description": "Components for integrating with Groq models, primarily for usage mapping.",
+        "role": "analytical"
+      },
+      {
+        "id": "huggingface_adapters",
+        "label": "HuggingFace Adapters",
+        "nodes": [
+          "huggingface_map_usage"
+        ],
+        "title": "HuggingFace Model Integrations",
+        "description": "Components for integrating with HuggingFace models, primarily for usage mapping.",
+        "role": "analytical"
+      },
+      {
+        "id": "mistral_adapters",
+        "label": "Mistral Adapters",
+        "nodes": [
+          "mistral_map_usage"
+        ],
+        "title": "Mistral Model Integrations",
+        "description": "Components for integrating with Mistral models, primarily for usage mapping.",
+        "role": "analytical"
+      },
+      {
+        "id": "openai_adapters",
+        "label": "OpenAI Adapters",
+        "nodes": [
+          "openai_model",
+          "openai_streamed_response",
+          "openai_map_binary_content",
+          "openai_compaction",
+          "openai_model_settings",
+          "openai_responses_model_settings",
+          "openai_map_model_response_context"
+        ],
+        "title": "OpenAI Model Integrations",
+        "description": "Extensive components for integrating with OpenAI models, covering streaming, binary content handling, conversation compaction, and model settings.",
+        "role": "generative"
+      },
+      {
+        "id": "openrouter_adapters",
+        "label": "OpenRouter Adapters",
+        "nodes": [
+          "openrouter_streamed_response",
+          "openrouter_nested_completion"
+        ],
+        "title": "OpenRouter Model Integrations",
+        "description": "Components for integrating with OpenRouter models, extending OpenAI functionality with OpenRouter-specific streaming and data handling.",
+        "role": "generative"
+      }
+    ]
+  }
+}

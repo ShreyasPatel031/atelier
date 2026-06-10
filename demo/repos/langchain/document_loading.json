@@ -1,0 +1,126 @@
+{
+  "title": "Document Loading Module",
+  "summary": "This module provides foundational interfaces and concrete implementations for loading documents from various sources. It includes an abstract base class for document loaders and a specific loader for fetching examples from LangSmith datasets.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "BaseLoader",
+        "label": "Define Document Loading Interface",
+        "type": "component",
+        "link": null,
+        "title": "Base Document Loader",
+        "description": "An abstract base class that defines the standard interface for all document loaders, including methods for loading documents, lazy loading, and splitting documents into chunks."
+      },
+      {
+        "id": "LangSmithLoader",
+        "label": "Load LangSmith Dataset Examples",
+        "type": "component",
+        "link": null,
+        "title": "LangSmith Dataset Loader",
+        "description": "Loads examples from LangSmith datasets as Document objects, mapping example inputs to page content and storing full examples in metadata. Supports filtering and content formatting."
+      },
+      {
+        "id": "_stringify",
+        "label": "Convert Data to String",
+        "type": "component",
+        "link": null,
+        "title": "Data Stringifier Utility",
+        "description": "A utility function that converts input data (string or dictionary) into a string representation, primarily used for formatting document content within the LangSmithLoader."
+      },
+      {
+        "id": "Document",
+        "label": "Document Object",
+        "type": "external",
+        "link": "other_module",
+        "title": "LangChain Document",
+        "description": "A fundamental data structure in LangChain representing a piece of text content along with associated metadata. Document loaders produce these objects as their primary output."
+      },
+      {
+        "id": "TextSplitter",
+        "label": "Text Splitter",
+        "type": "external",
+        "link": "other_module",
+        "title": "Document Text Splitter",
+        "description": "An external component responsible for splitting large text documents into smaller, manageable chunks, often used to prepare documents for processing by language models or vector stores."
+      },
+      {
+        "id": "LangSmithClient",
+        "label": "LangSmith API Client",
+        "type": "external",
+        "link": null,
+        "title": "LangSmith Client",
+        "description": "An external client used to interact with the LangSmith platform API, enabling retrieval of dataset examples and other data for the LangSmithLoader."
+      }
+    ],
+    "edges": [
+      {
+        "source": "LangSmithLoader",
+        "target": "BaseLoader",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "Document",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "TextSplitter",
+        "label": "uses for splitting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LangSmithLoader",
+        "target": "LangSmithClient",
+        "label": "fetches data via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LangSmithLoader",
+        "target": "_stringify",
+        "label": "formats content with",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_interfaces",
+        "label": "Core Interfaces",
+        "nodes": [
+          "BaseLoader"
+        ],
+        "title": "Core Document Loading Interfaces",
+        "description": "Defines the foundational abstract classes for document loaders, establishing the contract for how documents are loaded and processed.",
+        "role": "surface"
+      },
+      {
+        "id": "concrete_loaders",
+        "label": "Concrete Loaders",
+        "nodes": [
+          "LangSmithLoader"
+        ],
+        "title": "Specific Document Loaders",
+        "description": "Implementations of the BaseLoader interface for loading documents from various sources, such as LangSmith datasets.",
+        "role": "data"
+      },
+      {
+        "id": "internal_utilities",
+        "label": "Internal Utilities",
+        "nodes": [
+          "_stringify"
+        ],
+        "title": "Module-Specific Utilities",
+        "description": "Helper functions and internal components that support the functionality of the document loaders within this module.",
+        "role": "generative"
+      }
+    ]
+  }
+}

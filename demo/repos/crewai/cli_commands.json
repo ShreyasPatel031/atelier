@@ -1,1203 +1,954 @@
 {
   "title": "CrewAI CLI Commands",
-  "summary": "This module provides a comprehensive set of command-line interface (CLI) commands for managing CrewAI projects, including operations for checkpoints, deployments, tools, flows, configurations, and tracing. It serves as the primary interface for interacting with CrewAI functionalities.",
+  "summary": "This module provides a comprehensive set of command-line interface (CLI) commands for managing CrewAI projects, including crew execution, deployment, tool management, configuration, and tracing.",
   "diagram": {
-    "direction": "TD",
+    "direction": "LR",
     "nodes": [
       {
-        "id": "crewai_cli_main",
-        "label": "CrewAI CLI Main Entry",
+        "id": "crewai",
+        "label": "crewai",
         "type": "component",
         "link": null,
-        "title": "CrewAI CLI Main Entry",
-        "description": "The main entry point for all CrewAI command-line interface operations, providing access to various subcommands for managing projects, deployments, tools, and configurations."
+        "title": "Main CLI Entry Point",
+        "description": "The main command-line interface entry point for all CrewAI operations."
       },
       {
-        "id": "checkpoint_resume_cmd",
-        "label": "Resume CrewAI Checkpoint",
+        "id": "uv_wrapper",
+        "label": "UV Package Manager",
         "type": "component",
         "link": null,
-        "title": "Resume CrewAI Checkpoint",
-        "description": "Resumes a CrewAI execution from a specified checkpoint ID, or the most recent one if not specified, allowing continuation of previous work."
+        "title": "UV Package Manager Wrapper",
+        "description": "Wraps `uv` commands, injecting custom tool authentication credentials for package management."
       },
       {
-        "id": "checkpoint_diff_cmd",
-        "label": "Compare Checkpoints",
+        "id": "log_outputs",
+        "label": "Log Task Outputs",
         "type": "component",
         "link": null,
-        "title": "Compare Checkpoints",
-        "description": "Compares the state and content of two CrewAI checkpoints, highlighting differences for analysis and debugging."
+        "title": "Log Task Outputs",
+        "description": "Retrieves and displays the outputs from the latest `crew.kickoff()` tasks for review."
       },
       {
-        "id": "checkpoint_info_cmd",
-        "label": "Display Checkpoint Details",
-        "type": "component",
-        "link": null,
-        "title": "Display Checkpoint Details",
-        "description": "Displays detailed information about a specific CrewAI checkpoint, including its path, ID, and metadata."
-      },
-      {
-        "id": "checkpoint_list_cmd",
-        "label": "List All Checkpoints",
-        "type": "component",
-        "link": null,
-        "title": "List All Checkpoints",
-        "description": "Lists all available checkpoints within a specified directory, providing an overview of saved execution states."
-      },
-      {
-        "id": "checkpoint_prune_cmd",
-        "label": "Remove Old Checkpoints",
-        "type": "component",
-        "link": null,
-        "title": "Remove Old Checkpoints",
-        "description": "Removes older or unwanted checkpoints based on criteria like age or number to keep, helping manage storage."
-      },
-      {
-        "id": "log_tasks_outputs_cmd",
-        "label": "Retrieve Latest Task Outputs",
-        "type": "component",
-        "link": null,
-        "title": "Retrieve Latest Task Outputs",
-        "description": "Retrieves and displays the outputs of the latest tasks from a CrewAI kickoff, useful for reviewing recent execution results."
-      },
-      {
-        "id": "chat_cmd",
+        "id": "chat_interface",
         "label": "Start Interactive Chat",
         "type": "component",
         "link": null,
         "title": "Start Interactive Chat",
-        "description": "Initiates an interactive chat session with the Crew, enabling real-time communication and response generation using the Chat LLM."
+        "description": "Starts an interactive conversation with the Crew, enabling dynamic input and LLM-generated responses."
       },
       {
-        "id": "tool_create_cmd",
-        "label": "Create New Tool",
+        "id": "run_crew",
+        "label": "Run Crew",
         "type": "component",
         "link": null,
-        "title": "Create New Tool",
-        "description": "Generates the boilerplate for a new custom tool, facilitating the development of specialized functionalities for agents."
+        "title": "Run Crew",
+        "description": "Executes the defined Crew, orchestrating agents and tasks to achieve a specified goal."
       },
       {
-        "id": "tool_install_cmd",
-        "label": "Install Custom Tool",
+        "id": "train_crew",
+        "label": "Train Crew",
         "type": "component",
         "link": null,
-        "title": "Install Custom Tool",
-        "description": "Installs a specified custom tool, making it available for use within CrewAI projects."
+        "title": "Train Crew",
+        "description": "Trains the Crew for a given number of iterations, potentially enhancing its performance and capabilities."
       },
       {
-        "id": "tool_publish_cmd",
-        "label": "Publish Custom Tool",
+        "id": "test_crew",
+        "label": "Test Crew",
         "type": "component",
         "link": null,
-        "title": "Publish Custom Tool",
-        "description": "Publishes a custom tool, making it accessible for sharing and wider adoption within the CrewAI ecosystem."
+        "title": "Test Crew",
+        "description": "Tests the Crew's functionality and evaluates its results over multiple iterations against defined criteria."
       },
       {
-        "id": "deploy_push_cmd",
-        "label": "Deploy CrewAI Project",
+        "id": "create_tool",
+        "label": "Create Tool",
         "type": "component",
         "link": null,
-        "title": "Deploy CrewAI Project",
-        "description": "Deploys the current CrewAI project to a remote platform, pushing the latest changes for execution."
+        "title": "Create Tool",
+        "description": "Generates a new tool project structure, facilitating the development of custom tools for CrewAI."
       },
       {
-        "id": "deploy_create_cmd",
-        "label": "Create New Deployment",
+        "id": "install_tool",
+        "label": "Install Tool",
         "type": "component",
         "link": null,
-        "title": "Create New Deployment",
-        "description": "Initializes a new deployment for a CrewAI project, setting up the necessary infrastructure on a remote platform."
+        "title": "Install Tool",
+        "description": "Installs a specified tool, making it available for immediate use within CrewAI projects."
       },
       {
-        "id": "deploy_list_cmd",
-        "label": "List All Deployments",
+        "id": "publish_tool",
+        "label": "Publish Tool",
         "type": "component",
         "link": null,
-        "title": "List All Deployments",
-        "description": "Lists all active deployments associated with the user's CrewAI account, providing an overview of running projects."
+        "title": "Publish Tool",
+        "description": "Publishes a developed tool to the CrewAI platform, with an option to make it publicly accessible."
       },
       {
-        "id": "deploy_status_cmd",
+        "id": "create_deploy",
+        "label": "Create Deployment",
+        "type": "component",
+        "link": null,
+        "title": "Create Deployment",
+        "description": "Initializes a new deployment for a CrewAI project on the platform, setting up its infrastructure."
+      },
+      {
+        "id": "push_deploy",
+        "label": "Push Deployment",
+        "type": "component",
+        "link": null,
+        "title": "Push Deployment",
+        "description": "Deploys the current CrewAI project to the platform or updates an existing deployment with new changes."
+      },
+      {
+        "id": "list_deploy",
+        "label": "List Deployments",
+        "type": "component",
+        "link": null,
+        "title": "List Deployments",
+        "description": "Retrieves and displays a comprehensive list of all active CrewAI project deployments."
+      },
+      {
+        "id": "status_deploy",
         "label": "Get Deployment Status",
         "type": "component",
         "link": null,
         "title": "Get Deployment Status",
-        "description": "Retrieves and displays the current operational status of a specific CrewAI deployment, indicating its health and activity."
+        "description": "Fetches and presents the current operational status of a specific CrewAI deployment."
       },
       {
-        "id": "deploy_logs_cmd",
-        "label": "Retrieve Deployment Logs",
+        "id": "logs_deploy",
+        "label": "Get Deployment Logs",
         "type": "component",
         "link": null,
-        "title": "Retrieve Deployment Logs",
-        "description": "Fetches and displays the execution logs for a specified CrewAI deployment, aiding in debugging and monitoring."
+        "title": "Get Deployment Logs",
+        "description": "Retrieves and displays the execution logs for a specified CrewAI deployment for debugging and monitoring."
       },
       {
-        "id": "deploy_remove_cmd",
+        "id": "remove_deploy",
         "label": "Remove Deployment",
         "type": "component",
         "link": null,
         "title": "Remove Deployment",
-        "description": "Deactivates and removes an existing CrewAI deployment from the remote platform, cleaning up resources."
+        "description": "Deletes a specified CrewAI project deployment from the platform, cleaning up resources."
       },
       {
-        "id": "run_cmd",
-        "label": "Execute CrewAI Project",
+        "id": "validate_deploy",
+        "label": "Validate Deployment",
         "type": "component",
         "link": null,
-        "title": "Execute CrewAI Project",
-        "description": "Executes the CrewAI project, optionally using a file containing trained agents for enhanced performance."
+        "title": "Validate Deployment",
+        "description": "Performs pre-deployment checks on the current project to identify potential issues before actual deployment."
       },
       {
-        "id": "enterprise_configure_cmd",
-        "label": "Configure Enterprise Settings",
+        "id": "enterprise_config",
+        "label": "Configure Enterprise",
         "type": "component",
         "link": null,
-        "title": "Configure Enterprise Settings",
-        "description": "Configures the CrewAI AMP OAuth2 settings using a provided enterprise URL, integrating with corporate authentication systems."
+        "title": "Configure Enterprise",
+        "description": "Configures CrewAI AMP OAuth2 settings using a provided Enterprise URL for secure access."
       },
       {
-        "id": "test_cmd",
-        "label": "Test & Evaluate Crew",
+        "id": "list_config",
+        "label": "List CLI Config",
         "type": "component",
         "link": null,
-        "title": "Test & Evaluate Crew",
-        "description": "Runs a series of tests on the CrewAI project and evaluates the results, ensuring functionality and performance."
+        "title": "List CLI Config",
+        "description": "Displays all current CLI configuration parameters, providing an overview of settings."
       },
       {
-        "id": "deploy_validate_cmd",
-        "label": "Validate Project for Deployment",
+        "id": "set_config",
+        "label": "Set CLI Config",
         "type": "component",
         "link": null,
-        "title": "Validate Project for Deployment",
-        "description": "Performs pre-deployment checks on the current project to identify potential issues before actual deployment, without contacting the platform."
+        "title": "Set CLI Config",
+        "description": "Sets a specific CLI configuration parameter to a new value, allowing customization."
       },
       {
-        "id": "uv_cmd",
-        "label": "Run UV Package Manager",
+        "id": "reset_config",
+        "label": "Reset CLI Config",
         "type": "component",
         "link": null,
-        "title": "Run UV Package Manager",
-        "description": "A wrapper around `uv` package manager commands, enhancing them with custom tool authentication through environment variables."
+        "title": "Reset CLI Config",
+        "description": "Resets all CLI configuration parameters to their default values, restoring initial settings."
       },
       {
-        "id": "config_list_cmd",
-        "label": "List CLI Configurations",
-        "type": "component",
-        "link": null,
-        "title": "List CLI Configurations",
-        "description": "Displays all current configuration parameters for the CrewAI CLI, providing transparency into settings."
-      },
-      {
-        "id": "config_set_cmd",
-        "label": "Set CLI Configuration",
-        "type": "component",
-        "link": null,
-        "title": "Set CLI Configuration",
-        "description": "Sets a specific configuration parameter for the CrewAI CLI, allowing customization of behavior."
-      },
-      {
-        "id": "config_reset_cmd",
-        "label": "Reset CLI Configurations",
-        "type": "component",
-        "link": null,
-        "title": "Reset CLI Configurations",
-        "description": "Resets all CrewAI CLI configuration parameters to their default values, restoring initial settings."
-      },
-      {
-        "id": "org_list_cmd",
+        "id": "list_orgs",
         "label": "List Organizations",
         "type": "component",
         "link": null,
         "title": "List Organizations",
-        "description": "Lists all organizations associated with the user's CrewAI account, facilitating multi-organizational management."
+        "description": "Lists all organizations the authenticated user has access to within the CrewAI platform."
       },
       {
-        "id": "logout_cmd",
-        "label": "Log Out from CrewAI AMP",
+        "id": "logout_cli",
+        "label": "Logout",
         "type": "component",
         "link": null,
-        "title": "Log Out from CrewAI AMP",
-        "description": "Logs the user out from CrewAI AMP, optionally resetting all CLI configuration settings."
+        "title": "Logout",
+        "description": "Logs out the user from CrewAI AMP, clearing authentication tokens and optionally resetting CLI configuration."
       },
       {
-        "id": "traces_enable_cmd",
-        "label": "Enable Trace Collection",
+        "id": "enable_traces",
+        "label": "Enable Tracing",
         "type": "component",
         "link": null,
-        "title": "Enable Trace Collection",
-        "description": "Activates the collection of execution traces for CrewAI projects, sending data to CrewAI+ for monitoring and analysis."
+        "title": "Enable Tracing",
+        "description": "Activates the collection of execution traces for CrewAI projects, sending them to CrewAI+ for analysis."
       },
       {
-        "id": "traces_disable_cmd",
-        "label": "Disable Trace Collection",
+        "id": "disable_traces",
+        "label": "Disable Tracing",
         "type": "component",
         "link": null,
-        "title": "Disable Trace Collection",
-        "description": "Deactivates the collection of execution traces for CrewAI projects, stopping data transmission to CrewAI+."
+        "title": "Disable Tracing",
+        "description": "Deactivates the collection of execution traces for CrewAI projects, stopping data transmission."
       },
       {
-        "id": "train_cmd",
-        "label": "Train CrewAI Project",
+        "id": "status_traces",
+        "label": "Tracing Status",
         "type": "component",
         "link": null,
-        "title": "Train CrewAI Project",
-        "description": "Initiates the training process for the CrewAI project over a specified number of iterations, improving agent performance."
+        "title": "Tracing Status",
+        "description": "Displays the current status of trace collection, including environment variable overrides and user consent."
       },
       {
-        "id": "flow_run_cmd",
-        "label": "Execute CrewAI Flow",
+        "id": "run_flow",
+        "label": "Run Flow",
         "type": "component",
         "link": null,
-        "title": "Execute CrewAI Flow",
-        "description": "Executes a defined CrewAI Flow, orchestrating tasks and agents according to the flow's logic."
+        "title": "Run Flow",
+        "description": "Initiates the execution of a defined CrewAI Flow, guiding agents through a sequence of tasks."
       },
       {
-        "id": "flow_plot_cmd",
-        "label": "Plot CrewAI Flow",
+        "id": "plot_flow",
+        "label": "Plot Flow",
         "type": "component",
         "link": null,
-        "title": "Plot CrewAI Flow",
-        "description": "Generates a visual representation or diagram of the CrewAI Flow, aiding in understanding its structure and execution path."
+        "title": "Plot Flow",
+        "description": "Generates a visual representation or diagram of the CrewAI Flow structure for better understanding."
       },
       {
-        "id": "triggers_list_cmd",
-        "label": "List Available Triggers",
-        "type": "component",
-        "link": null,
-        "title": "List Available Triggers",
-        "description": "Lists all available triggers from integrated services, allowing users to see potential automation entry points."
-      },
-      {
-        "id": "triggers_run_cmd",
-        "label": "Execute with Trigger Payload",
-        "type": "component",
-        "link": null,
-        "title": "Execute with Trigger Payload",
-        "description": "Executes a CrewAI project using a specific trigger payload, enabling automated workflows based on external events."
-      },
-      {
-        "id": "reset_memories_cmd",
-        "label": "Reset Crew Memories",
-        "type": "component",
-        "link": null,
-        "title": "Reset Crew Memories",
-        "description": "Clears various types of stored memories for the crew, including long-term, short-term, entities, knowledge, and kickoff outputs."
-      },
-      {
-        "id": "traces_status_cmd",
-        "label": "Show Trace Collection Status",
-        "type": "component",
-        "link": null,
-        "title": "Show Trace Collection Status",
-        "description": "Displays the current status of trace collection, indicating whether it's enabled or disabled and why."
-      },
-      {
-        "id": "flow_add_crew_cmd",
+        "id": "add_crew_to_flow",
         "label": "Add Crew to Flow",
         "type": "component",
         "link": null,
         "title": "Add Crew to Flow",
-        "description": "Integrates an existing crew into a defined flow, expanding the flow's capabilities with additional agents and tasks."
+        "description": "Integrates an existing crew into a specified flow, expanding its capabilities and task handling."
       },
       {
-        "id": "template_list_cmd",
-        "label": "List Project Templates",
+        "id": "list_triggers",
+        "label": "List Triggers",
         "type": "component",
         "link": null,
-        "title": "List Project Templates",
-        "description": "Lists available project templates and allows selection for installation, streamlining new project creation."
+        "title": "List Triggers",
+        "description": "Lists all available triggers from integrated platforms that can initiate CrewAI workflows."
       },
       {
-        "id": "template_add_cmd",
-        "label": "Add Project Template",
+        "id": "run_trigger",
+        "label": "Run with Trigger",
         "type": "component",
         "link": null,
-        "title": "Add Project Template",
-        "description": "Adds a specified project template to the current working directory, providing a starting structure for new crews."
+        "title": "Run with Trigger",
+        "description": "Executes a crew using a specified trigger payload, simulating an external event."
+      },
+      {
+        "id": "reset_memories_cmd",
+        "label": "Reset Memories",
+        "type": "component",
+        "link": null,
+        "title": "Reset Memories",
+        "description": "Deletes various types of stored crew memories, including long-term, short-term, entities, knowledge, and kickoff outputs."
+      },
+      {
+        "id": "list_templates",
+        "label": "List Templates",
+        "type": "component",
+        "link": null,
+        "title": "List Templates",
+        "description": "Displays a list of available project templates, aiding in the quick setup of new CrewAI projects."
+      },
+      {
+        "id": "add_template",
+        "label": "Add Template",
+        "type": "component",
+        "link": null,
+        "title": "Add Template",
+        "description": "Adds a selected project template to the current directory, providing a starting point for development."
+      },
+      {
+        "id": "resume_checkpoint",
+        "label": "Resume Checkpoint",
+        "type": "component",
+        "link": null,
+        "title": "Resume Checkpoint",
+        "description": "Resumes a CrewAI execution from a specified checkpoint, or the most recent one, to continue work."
+      },
+      {
+        "id": "diff_checkpoint",
+        "label": "Diff Checkpoints",
+        "type": "component",
+        "link": null,
+        "title": "Diff Checkpoints",
+        "description": "Compares the state and content of two different CrewAI checkpoints, highlighting changes."
+      },
+      {
+        "id": "info_checkpoint",
+        "label": "Checkpoint Info",
+        "type": "component",
+        "link": null,
+        "title": "Checkpoint Info",
+        "description": "Displays detailed information about a specific CrewAI checkpoint, including its metadata."
+      },
+      {
+        "id": "list_checkpoint",
+        "label": "List Checkpoints",
+        "type": "component",
+        "link": null,
+        "title": "List Checkpoints",
+        "description": "Lists all available checkpoints within a specified directory, showing their IDs and creation times."
+      },
+      {
+        "id": "prune_checkpoint",
+        "label": "Prune Checkpoints",
+        "type": "component",
+        "link": null,
+        "title": "Prune Checkpoints",
+        "description": "Removes old or unwanted checkpoints based on criteria like age or quantity, managing storage."
+      },
+      {
+        "id": "cli_core_auth",
+        "label": "CLI Core Authentication",
+        "type": "external",
+        "link": "cli_core",
+        "title": "CLI Core Authentication",
+        "description": "Handles user authentication, token management, and provides base command functionalities for the CLI."
       },
       {
         "id": "checkpoint_cli_module",
-        "label": "Checkpoint CLI Module",
+        "label": "Checkpoint CLI Logic",
         "type": "external",
-        "link": "other_module",
-        "title": "Checkpoint CLI Module",
-        "description": "Manages the underlying logic for CrewAI checkpoint operations, including saving, loading, and comparing states."
+        "link": "cli_core",
+        "title": "Checkpoint CLI Logic",
+        "description": "Provides core logic for managing CrewAI checkpoints, including listing, diffing, and pruning."
       },
       {
-        "id": "ToolCommand_obj",
-        "label": "Tool Command Handler",
+        "id": "deploy_validate_module",
+        "label": "Deployment Validation",
         "type": "external",
-        "link": "other_module",
-        "title": "Tool Command Handler",
-        "description": "Provides core functionalities for managing custom tools, such as creation, installation, and publishing."
+        "link": "cli_core",
+        "title": "Deployment Validation",
+        "description": "Contains logic for validating CrewAI project configurations against deployment requirements."
       },
       {
-        "id": "DeployCommand_obj",
-        "label": "Deployment Command Handler",
+        "id": "tasks_and_flow_module",
+        "label": "Tasks and Flow Core",
         "type": "external",
-        "link": "other_module",
-        "title": "Deployment Command Handler",
-        "description": "Encapsulates the logic for deploying, managing, and monitoring CrewAI projects on remote platforms."
+        "link": "tasks_and_flow",
+        "title": "Tasks and Flow Core",
+        "description": "Manages the execution, plotting, and modification of CrewAI Flows."
       },
       {
-        "id": "run_crew_func",
-        "label": "Crew Execution Function",
+        "id": "events_and_state_module",
+        "label": "Events and State Core",
         "type": "external",
-        "link": "other_module",
-        "title": "Crew Execution Function",
-        "description": "Executes the main logic of a CrewAI project, orchestrating agents and tasks."
+        "link": "events_and_state",
+        "title": "Events and State Core",
+        "description": "Manages event handling, state, and memory persistence for CrewAI operations."
       },
       {
-        "id": "EnterpriseConfigureCommand_obj",
-        "label": "Enterprise Config Handler",
+        "id": "utilities_and_config_module",
+        "label": "Utilities and Config Core",
         "type": "external",
-        "link": "other_module",
-        "title": "Enterprise Config Handler",
-        "description": "Handles the configuration of enterprise-level authentication and integration settings for CrewAI AMP."
-      },
-      {
-        "id": "evaluate_crew_func",
-        "label": "Crew Evaluation Function",
-        "type": "external",
-        "link": "other_module",
-        "title": "Crew Evaluation Function",
-        "description": "Performs evaluation of a CrewAI project's performance and results against defined metrics."
-      },
-      {
-        "id": "run_validate_command_func",
-        "label": "Deployment Validation Function",
-        "type": "external",
-        "link": "other_module",
-        "title": "Deployment Validation Function",
-        "description": "Executes a series of validation checks to ensure a CrewAI project is ready for deployment."
-      },
-      {
-        "id": "subprocess_module",
-        "label": "Subprocess Execution Module",
-        "type": "external",
-        "link": "other_module",
-        "title": "Subprocess Execution Module",
-        "description": "A standard Python module used to spawn new processes, connect to their input/output/error pipes, and obtain their return codes."
-      },
-      {
-        "id": "SettingsCommand_obj",
-        "label": "CLI Settings Handler",
-        "type": "external",
-        "link": "other_module",
-        "title": "CLI Settings Handler",
-        "description": "Manages the persistent configuration settings for the CrewAI CLI, allowing users to customize their environment."
-      },
-      {
-        "id": "OrganizationCommand_obj",
-        "label": "Organization Command Handler",
-        "type": "external",
-        "link": "other_module",
-        "title": "Organization Command Handler",
-        "description": "Handles operations related to managing organizations within the CrewAI platform, such as listing available organizations."
-      },
-      {
-        "id": "Settings_obj",
-        "label": "Application Settings Manager",
-        "type": "external",
-        "link": "other_module",
-        "title": "Application Settings Manager",
-        "description": "Manages application-wide settings and configurations, including user preferences and authentication details."
-      },
-      {
-        "id": "TokenManager_obj",
-        "label": "Authentication Token Manager",
-        "type": "external",
-        "link": "other_module",
-        "title": "Authentication Token Manager",
-        "description": "Manages authentication tokens for secure access to CrewAI services, handling storage, retrieval, and clearing."
-      },
-      {
-        "id": "update_user_data_func",
-        "label": "User Data Update Function",
-        "type": "external",
-        "link": "other_module",
-        "title": "User Data Update Function",
-        "description": "Updates user-specific data, often related to telemetry consent or feature flags."
-      },
-      {
-        "id": "train_crew_func",
-        "label": "Crew Training Function",
-        "type": "external",
-        "link": "other_module",
-        "title": "Crew Training Function",
-        "description": "Implements the training loop for a CrewAI project, iteratively improving agent behavior."
-      },
-      {
-        "id": "kickoff_flow_func",
-        "label": "Flow Kickoff Function",
-        "type": "external",
-        "link": "other_module",
-        "title": "Flow Kickoff Function",
-        "description": "Initiates the execution of a CrewAI Flow, starting the sequence of tasks and agent interactions."
-      },
-      {
-        "id": "plot_flow_func",
-        "label": "Flow Plotting Function",
-        "type": "external",
-        "link": "other_module",
-        "title": "Flow Plotting Function",
-        "description": "Generates a visual diagram or graph of a CrewAI Flow's structure and dependencies."
-      },
-      {
-        "id": "TriggersCommand_obj",
-        "label": "Triggers Command Handler",
-        "type": "external",
-        "link": "other_module",
-        "title": "Triggers Command Handler",
-        "description": "Manages the integration and execution of external triggers for CrewAI projects, enabling event-driven workflows."
-      },
-      {
-        "id": "reset_memories_command_func",
-        "label": "Memory Reset Function",
-        "type": "external",
-        "link": "other_module",
-        "title": "Memory Reset Function",
-        "description": "Performs the actual deletion or clearing of various memory types stored by the crew."
-      },
-      {
-        "id": "_load_user_data_func",
-        "label": "User Data Loading Function",
-        "type": "external",
-        "link": "other_module",
-        "title": "User Data Loading Function",
-        "description": "Loads persistent user data and preferences from storage."
-      },
-      {
-        "id": "is_tracing_enabled_func",
-        "label": "Tracing Status Check Function",
-        "type": "external",
-        "link": "other_module",
-        "title": "Tracing Status Check Function",
-        "description": "Checks the current status of tracing, considering both user settings and environment variables."
-      },
-      {
-        "id": "add_crew_to_flow_func",
-        "label": "Add Crew to Flow Function",
-        "type": "external",
-        "link": "other_module",
-        "title": "Add Crew to Flow Function",
-        "description": "Integrates a specified crew into an existing flow definition."
-      },
-      {
-        "id": "TemplateCommand_obj",
-        "label": "Template Command Handler",
-        "type": "external",
-        "link": "other_module",
-        "title": "Template Command Handler",
-        "description": "Manages operations related to project templates, including listing and adding them to projects."
-      },
-      {
-        "id": "load_task_outputs_func",
-        "label": "Task Outputs Loader",
-        "type": "external",
-        "link": "other_module",
-        "title": "Task Outputs Loader",
-        "description": "Loads and retrieves the stored outputs from previous CrewAI task executions."
-      },
-      {
-        "id": "run_chat_func",
-        "label": "Chat Interface Runner",
-        "type": "external",
-        "link": "other_module",
-        "title": "Chat Interface Runner",
-        "description": "Manages the interactive chat interface for communicating with a CrewAI project."
-      },
-      {
-        "id": "read_toml_func",
-        "label": "TOML File Reader",
-        "type": "external",
-        "link": "other_module",
-        "title": "TOML File Reader",
-        "description": "Parses and reads data from a `pyproject.toml` file, typically for project configuration."
-      },
-      {
-        "id": "build_env_with_all_tool_credentials_func",
-        "label": "Tool Credentials Environment Builder",
-        "type": "external",
-        "link": "other_module",
-        "title": "Tool Credentials Environment Builder",
-        "description": "Constructs an environment variable dictionary including all necessary tool credentials for execution."
+        "link": "utilities_and_config",
+        "title": "Utilities and Config Core",
+        "description": "Provides various utility functions and configuration management for the CrewAI framework."
       }
     ],
     "edges": [
       {
-        "source": "crewai_cli_main",
-        "target": "checkpoint_resume_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "uv_wrapper",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "checkpoint_diff_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "log_outputs",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "checkpoint_info_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "chat_interface",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "checkpoint_list_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "run_crew",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "checkpoint_prune_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "train_crew",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "log_tasks_outputs_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "test_crew",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "chat_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "create_tool",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "tool_create_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "install_tool",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "tool_install_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "publish_tool",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "tool_publish_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "create_deploy",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "deploy_push_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "push_deploy",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "deploy_create_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "list_deploy",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "deploy_list_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "status_deploy",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "deploy_status_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "logs_deploy",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "deploy_logs_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "remove_deploy",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "deploy_remove_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "validate_deploy",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "run_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "enterprise_config",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "enterprise_configure_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "list_config",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "test_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "set_config",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "deploy_validate_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "reset_config",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "uv_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "list_orgs",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "config_list_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "logout_cli",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "config_set_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "enable_traces",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "config_reset_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "disable_traces",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "org_list_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "status_traces",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "logout_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "run_flow",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "traces_enable_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "plot_flow",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "traces_disable_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "add_crew_to_flow",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "train_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "list_triggers",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "flow_run_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "run_trigger",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "flow_plot_cmd",
-        "label": "Manages",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "crewai_cli_main",
-        "target": "triggers_list_cmd",
-        "label": "Manages",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "crewai_cli_main",
-        "target": "triggers_run_cmd",
-        "label": "Manages",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "crewai_cli_main",
+        "source": "crewai",
         "target": "reset_memories_cmd",
-        "label": "Manages",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "traces_status_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "list_templates",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "flow_add_crew_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "add_template",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "template_list_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "resume_checkpoint",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "crewai_cli_main",
-        "target": "template_add_cmd",
-        "label": "Manages",
+        "source": "crewai",
+        "target": "diff_checkpoint",
+        "label": "Invokes",
         "title": null,
         "description": null
       },
       {
-        "source": "checkpoint_resume_cmd",
+        "source": "crewai",
+        "target": "info_checkpoint",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crewai",
+        "target": "list_checkpoint",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crewai",
+        "target": "prune_checkpoint",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "uv_wrapper",
+        "target": "cli_core_auth",
+        "label": "Uses authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tool",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "install_tool",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "publish_tool",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_deploy",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "push_deploy",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "list_deploy",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "status_deploy",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "logs_deploy",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "remove_deploy",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "enterprise_config",
+        "target": "cli_core_auth",
+        "label": "Manages authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "list_orgs",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "logout_cli",
+        "target": "cli_core_auth",
+        "label": "Clears authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "list_triggers",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_trigger",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "list_templates",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "add_template",
+        "target": "cli_core_auth",
+        "label": "Requires authentication",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "resume_checkpoint",
         "target": "checkpoint_cli_module",
         "label": "Uses",
         "title": null,
         "description": null
       },
       {
-        "source": "checkpoint_diff_cmd",
+        "source": "diff_checkpoint",
         "target": "checkpoint_cli_module",
         "label": "Uses",
         "title": null,
         "description": null
       },
       {
-        "source": "checkpoint_info_cmd",
+        "source": "info_checkpoint",
         "target": "checkpoint_cli_module",
         "label": "Uses",
         "title": null,
         "description": null
       },
       {
-        "source": "checkpoint_list_cmd",
+        "source": "list_checkpoint",
         "target": "checkpoint_cli_module",
         "label": "Uses",
         "title": null,
         "description": null
       },
       {
-        "source": "checkpoint_prune_cmd",
+        "source": "prune_checkpoint",
         "target": "checkpoint_cli_module",
         "label": "Uses",
         "title": null,
         "description": null
       },
       {
-        "source": "log_tasks_outputs_cmd",
-        "target": "load_task_outputs_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "chat_cmd",
-        "target": "run_chat_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "tool_create_cmd",
-        "target": "ToolCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "tool_install_cmd",
-        "target": "ToolCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "tool_publish_cmd",
-        "target": "ToolCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "deploy_push_cmd",
-        "target": "DeployCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "deploy_create_cmd",
-        "target": "DeployCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "deploy_list_cmd",
-        "target": "DeployCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "deploy_status_cmd",
-        "target": "DeployCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "deploy_logs_cmd",
-        "target": "DeployCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "deploy_remove_cmd",
-        "target": "DeployCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "run_cmd",
-        "target": "run_crew_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "enterprise_configure_cmd",
-        "target": "EnterpriseConfigureCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "test_cmd",
-        "target": "evaluate_crew_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "deploy_validate_cmd",
-        "target": "run_validate_command_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "uv_cmd",
-        "target": "read_toml_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "uv_cmd",
-        "target": "build_env_with_all_tool_credentials_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "uv_cmd",
-        "target": "subprocess_module",
-        "label": "Executes",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "config_list_cmd",
-        "target": "SettingsCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "config_set_cmd",
-        "target": "SettingsCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "config_reset_cmd",
-        "target": "SettingsCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "org_list_cmd",
-        "target": "OrganizationCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "logout_cmd",
-        "target": "Settings_obj",
+        "source": "validate_deploy",
+        "target": "deploy_validate_module",
         "label": "Uses",
         "title": null,
         "description": null
       },
       {
-        "source": "logout_cmd",
-        "target": "TokenManager_obj",
-        "label": "Uses",
+        "source": "run_flow",
+        "target": "tasks_and_flow_module",
+        "label": "Executes flow logic",
         "title": null,
         "description": null
       },
       {
-        "source": "traces_enable_cmd",
-        "target": "update_user_data_func",
-        "label": "Calls",
+        "source": "plot_flow",
+        "target": "tasks_and_flow_module",
+        "label": "Visualizes flow logic",
         "title": null,
         "description": null
       },
       {
-        "source": "traces_disable_cmd",
-        "target": "update_user_data_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "train_cmd",
-        "target": "train_crew_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "flow_run_cmd",
-        "target": "kickoff_flow_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "flow_plot_cmd",
-        "target": "plot_flow_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "triggers_list_cmd",
-        "target": "TriggersCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "triggers_run_cmd",
-        "target": "TriggersCommand_obj",
-        "label": "Instantiates & Uses",
+        "source": "add_crew_to_flow",
+        "target": "tasks_and_flow_module",
+        "label": "Modifies flow logic",
         "title": null,
         "description": null
       },
       {
         "source": "reset_memories_cmd",
-        "target": "reset_memories_command_func",
-        "label": "Calls",
+        "target": "events_and_state_module",
+        "label": "Manages memories",
         "title": null,
         "description": null
       },
       {
-        "source": "traces_status_cmd",
-        "target": "_load_user_data_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "traces_status_cmd",
-        "target": "is_tracing_enabled_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "flow_add_crew_cmd",
-        "target": "add_crew_to_flow_func",
-        "label": "Calls",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "template_list_cmd",
-        "target": "TemplateCommand_obj",
-        "label": "Instantiates & Uses",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "template_add_cmd",
-        "target": "TemplateCommand_obj",
-        "label": "Instantiates & Uses",
+        "source": "log_outputs",
+        "target": "utilities_and_config_module",
+        "label": "Reads outputs from",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "cli_entry_point",
-        "label": "Core CLI Entry Point",
+        "id": "cli_core_group",
+        "label": "CLI Core & Utilities",
         "nodes": [
-          "crewai_cli_main"
+          "crewai",
+          "uv_wrapper"
         ],
-        "title": "Core CLI Entry Point",
-        "description": "The main entry point for all CrewAI command-line operations.",
+        "title": "Core CLI Functionality",
+        "description": "Commands for the main CLI entry point and utility functions like package management.",
         "role": "surface"
       },
       {
-        "id": "checkpoint_management",
+        "id": "crew_execution_group",
+        "label": "Crew Execution & Evaluation",
+        "nodes": [
+          "run_crew",
+          "train_crew",
+          "test_crew",
+          "chat_interface",
+          "log_outputs"
+        ],
+        "title": "Manage Crew Runs",
+        "description": "Commands for running, training, testing, and interacting with CrewAI agents and their outputs.",
+        "role": "generative"
+      },
+      {
+        "id": "flow_management_group",
+        "label": "Flow Management",
+        "nodes": [
+          "run_flow",
+          "plot_flow",
+          "add_crew_to_flow"
+        ],
+        "title": "Manage CrewAI Flows",
+        "description": "Commands for executing, visualizing, and modifying CrewAI Flows.",
+        "role": "generative"
+      },
+      {
+        "id": "deployment_lifecycle_group",
+        "label": "Deployment Lifecycle",
+        "nodes": [
+          "create_deploy",
+          "push_deploy",
+          "list_deploy",
+          "status_deploy",
+          "logs_deploy",
+          "remove_deploy",
+          "validate_deploy"
+        ],
+        "title": "Manage Deployments",
+        "description": "Commands for creating, pushing, listing, monitoring, and removing CrewAI project deployments.",
+        "role": "surface"
+      },
+      {
+        "id": "checkpoint_management_group",
         "label": "Checkpoint Management",
         "nodes": [
-          "checkpoint_resume_cmd",
-          "checkpoint_diff_cmd",
-          "checkpoint_info_cmd",
-          "checkpoint_list_cmd",
-          "checkpoint_prune_cmd"
+          "resume_checkpoint",
+          "diff_checkpoint",
+          "info_checkpoint",
+          "list_checkpoint",
+          "prune_checkpoint"
         ],
-        "title": "Checkpoint Management",
-        "description": "Commands for managing CrewAI execution checkpoints, including resuming, comparing, listing, and pruning.",
-        "role": "analytical"
-      },
-      {
-        "id": "deployment_lifecycle",
-        "label": "Deployment & Lifecycle",
-        "nodes": [
-          "deploy_push_cmd",
-          "deploy_create_cmd",
-          "deploy_list_cmd",
-          "deploy_status_cmd",
-          "deploy_logs_cmd",
-          "deploy_remove_cmd",
-          "deploy_validate_cmd",
-          "run_cmd",
-          "train_cmd"
-        ],
-        "title": "Deployment & Lifecycle",
-        "description": "Commands related to deploying, running, training, and managing the lifecycle of CrewAI projects.",
-        "role": "generative"
-      },
-      {
-        "id": "tool_template_management",
-        "label": "Tool & Template Management",
-        "nodes": [
-          "tool_create_cmd",
-          "tool_install_cmd",
-          "tool_publish_cmd",
-          "template_list_cmd",
-          "template_add_cmd"
-        ],
-        "title": "Tool & Template Management",
-        "description": "Commands for creating, installing, publishing tools, and managing project templates.",
-        "role": "generative"
-      },
-      {
-        "id": "flow_trigger_management",
-        "label": "Flow & Trigger Management",
-        "nodes": [
-          "flow_run_cmd",
-          "flow_plot_cmd",
-          "flow_add_crew_cmd",
-          "triggers_list_cmd",
-          "triggers_run_cmd"
-        ],
-        "title": "Flow & Trigger Management",
-        "description": "Commands for executing, plotting, and managing CrewAI flows and external triggers.",
-        "role": "generative"
-      },
-      {
-        "id": "configuration_authentication",
-        "label": "Configuration & Authentication",
-        "nodes": [
-          "config_list_cmd",
-          "config_set_cmd",
-          "config_reset_cmd",
-          "org_list_cmd",
-          "logout_cmd",
-          "enterprise_configure_cmd"
-        ],
-        "title": "Configuration & Authentication",
-        "description": "Commands for listing, setting, resetting CLI configurations, managing organizations, and handling user authentication.",
+        "title": "Manage Checkpoints",
+        "description": "Commands for resuming, comparing, inspecting, listing, and pruning CrewAI execution checkpoints.",
         "role": "data"
       },
       {
-        "id": "monitoring_tracing",
-        "label": "Monitoring & Tracing",
+        "id": "tool_template_management_group",
+        "label": "Tool & Template Management",
         "nodes": [
-          "log_tasks_outputs_cmd",
-          "test_cmd",
-          "traces_enable_cmd",
-          "traces_disable_cmd",
-          "traces_status_cmd"
+          "create_tool",
+          "install_tool",
+          "publish_tool",
+          "list_templates",
+          "add_template"
         ],
-        "title": "Monitoring & Tracing",
-        "description": "Commands for retrieving task outputs, testing, and managing trace collection status for CrewAI executions.",
+        "title": "Manage Tools and Templates",
+        "description": "Commands for creating, installing, publishing tools, and managing project templates.",
+        "role": "surface"
+      },
+      {
+        "id": "config_auth_group",
+        "label": "Configuration & Authentication",
+        "nodes": [
+          "enterprise_config",
+          "list_config",
+          "set_config",
+          "reset_config",
+          "list_orgs",
+          "logout_cli"
+        ],
+        "title": "Manage CLI Settings and Auth",
+        "description": "Commands for configuring enterprise settings, managing CLI parameters, and user authentication.",
+        "role": "surface"
+      },
+      {
+        "id": "tracing_monitoring_group",
+        "label": "Tracing & Monitoring",
+        "nodes": [
+          "enable_traces",
+          "disable_traces",
+          "status_traces"
+        ],
+        "title": "Control Trace Collection",
+        "description": "Commands for enabling, disabling, and checking the status of trace collection for CrewAI executions.",
         "role": "analytical"
       },
       {
-        "id": "interactive_system_utilities",
-        "label": "Interactive & System Utilities",
+        "id": "trigger_memory_group",
+        "label": "Trigger & Memory Management",
         "nodes": [
-          "chat_cmd",
-          "uv_cmd",
+          "list_triggers",
+          "run_trigger",
           "reset_memories_cmd"
         ],
-        "title": "Interactive & System Utilities",
-        "description": "Commands for interactive chat, managing package dependencies with 'uv', and resetting crew memories.",
-        "role": "generative"
+        "title": "Manage Triggers and Memories",
+        "description": "Commands for listing and running triggers, and resetting various types of crew memories.",
+        "role": "data"
       }
     ]
   }

@@ -1,0 +1,88 @@
+{
+    "title": "AI Evaluation Framework",
+    "summary": "This module offers a comprehensive framework for evaluating AI models and agents, encompassing dataset generation, diverse evaluator implementations, and online evaluation with robust reporting features.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "eval_core",
+                "label": "Evaluation Core",
+                "type": "module",
+                "link": "evaluation_core",
+                "title": "Evaluation Core Components",
+                "description": "Provides foundational components for defining, generating, and executing evaluation datasets. It includes data models for datasets, utilities for asynchronous task execution, and logic for AI-driven dataset generation."
+            },
+            {
+                "id": "eval_impl",
+                "label": "Evaluator Implementations",
+                "type": "module",
+                "link": "evaluator_implementations",
+                "title": "Evaluator Implementations",
+                "description": "Offers a variety of evaluator types, ranging from base classes for individual case assessment to specialized evaluators for comprehensive report analysis. Includes LLM-based judging and statistical evaluators."
+            },
+            {
+                "id": "online_eval",
+                "label": "Online Evaluation & Reporting",
+                "type": "module",
+                "link": "online_evaluation_and_reporting",
+                "title": "Online Evaluation & Reporting",
+                "description": "Provides tools for online evaluation of AI agent runs and function calls, dispatching evaluators asynchronously, and reporting results to various sinks including OpenTelemetry. Includes metric rendering utilities."
+            }
+        ],
+        "edges": [
+            {
+                "source": "eval_core",
+                "target": "eval_impl",
+                "label": "references evaluators",
+                "title": "Dataset Evaluator References",
+                "description": "Evaluation datasets defined in the core module can specify which evaluators from the implementations module should be used for assessment."
+            },
+            {
+                "source": "online_eval",
+                "target": "eval_impl",
+                "label": "uses evaluators from",
+                "title": "Online Evaluator Dispatch",
+                "description": "The online evaluation system dispatches and runs evaluators provided by the implementations module to assess agent outputs in real-time."
+            },
+            {
+                "source": "online_eval",
+                "target": "eval_core",
+                "label": "leverages core logic",
+                "title": "Runtime Logic Dependency",
+                "description": "Online evaluation relies on the core module's utilities for task execution, dataset structures, and asynchronous operations to manage evaluation runs."
+            }
+        ],
+        "groups": [
+            {
+                "id": "data_and_generation",
+                "label": "Data & Generation",
+                "nodes": [
+                    "eval_core"
+                ],
+                "title": "Evaluation Data & Generation",
+                "description": "Focuses on defining the structure of evaluation datasets and generating synthetic test cases, often leveraging AI models for automated data creation.",
+                "role": null
+            },
+            {
+                "id": "evaluator_library",
+                "label": "Evaluator Library",
+                "nodes": [
+                    "eval_impl"
+                ],
+                "title": "Evaluator Implementations",
+                "description": "Contains a diverse set of evaluators for assessing AI outputs, from simple content checks to complex statistical analyses and LLM-based judgments.",
+                "role": null
+            },
+            {
+                "id": "runtime_and_reporting",
+                "label": "Runtime & Reporting",
+                "nodes": [
+                    "online_eval"
+                ],
+                "title": "Online Evaluation & Reporting",
+                "description": "Manages the execution of evaluations in real-time, dispatches evaluators, and handles the reporting of results to various observability and storage systems.",
+                "role": null
+            }
+        ]
+    }
+}

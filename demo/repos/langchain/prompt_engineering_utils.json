@@ -1,0 +1,186 @@
+{
+  "title": "Prompt Engineering Utilities",
+  "summary": "This module provides utilities for advanced prompt engineering, including generating few-shot examples and constructing structured queries from natural language. It also features a dedicated output parser for structured query formats.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "generate_example_func",
+        "label": "Generate Few-Shot Example",
+        "type": "component",
+        "link": null,
+        "title": "Generate Few-Shot Example",
+        "description": "Creates a new example string for few-shot prompting by combining existing examples with a prompt template and an LLM to produce relevant output."
+      },
+      {
+        "id": "load_query_chain_func",
+        "label": "Load Query Constructor Chain",
+        "type": "component",
+        "link": null,
+        "title": "Load Query Constructor Chain",
+        "description": "Initializes an LLMChain designed to translate natural language into structured queries, considering document attributes, allowed operations, and an optional schema prompt."
+      },
+      {
+        "id": "structured_query_parser_class",
+        "label": "Structured Query Output Parser",
+        "type": "component",
+        "link": null,
+        "title": "Structured Query Output Parser",
+        "description": "Parses raw text output, typically in JSON markdown, into a structured query object, validating against defined comparators, operators, and attributes for robust query construction."
+      },
+      {
+        "id": "llm_external",
+        "label": "Large Language Model",
+        "type": "external",
+        "link": "llm_interfaces",
+        "title": "Large Language Model (LLM)",
+        "description": "Provides the core AI capabilities for text generation, understanding, and prompt completion, essential for both example generation and query construction."
+      },
+      {
+        "id": "prompt_template_external",
+        "label": "Prompt Template",
+        "type": "external",
+        "link": "prompt_templates",
+        "title": "Prompt Template Definition",
+        "description": "Defines the structure and content for prompts, guiding the LLM's output format and context for various tasks like example generation or query schema definition."
+      },
+      {
+        "id": "few_shot_examples_external",
+        "label": "Few-Shot Examples Data",
+        "type": "external",
+        "link": null,
+        "title": "Few-Shot Examples Data",
+        "description": "A collection of input-output pairs that serve as demonstrations to guide the LLM in generating new, similar examples for improved prompt performance."
+      },
+      {
+        "id": "document_attribute_info_external",
+        "label": "Document Attribute Information",
+        "type": "external",
+        "link": null,
+        "title": "Document Attribute Information",
+        "description": "Metadata describing the fields, types, and constraints of attributes within documents, used to inform and validate structured query generation."
+      },
+      {
+        "id": "structured_query_output",
+        "label": "Structured Query Object",
+        "type": "external",
+        "link": null,
+        "title": "Structured Query Object",
+        "description": "The final, parsed representation of a query, typically including a query string, filter directives, and optional limits, ready for execution against a data source."
+      }
+    ],
+    "edges": [
+      {
+        "source": "few_shot_examples_external",
+        "target": "generate_example_func",
+        "label": "Provides examples",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prompt_template_external",
+        "target": "generate_example_func",
+        "label": "Uses template",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_external",
+        "target": "generate_example_func",
+        "label": "Invokes LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "llm_external",
+        "target": "load_query_chain_func",
+        "label": "Powers chain",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "document_attribute_info_external",
+        "target": "load_query_chain_func",
+        "label": "Defines query schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prompt_template_external",
+        "target": "load_query_chain_func",
+        "label": "Configures prompt",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_query_chain_func",
+        "target": "structured_query_parser_class",
+        "label": "Configures with parser",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_query_parser_class",
+        "target": "structured_query_output",
+        "label": "Parses to object",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "prompt_engineering_tools",
+        "label": "Prompt Engineering Tools",
+        "nodes": [
+          "generate_example_func",
+          "load_query_chain_func"
+        ],
+        "title": "Core Prompt Engineering Tools",
+        "description": "Components responsible for generating prompts, examples, or entire chains to facilitate advanced prompt engineering techniques.",
+        "role": "generative"
+      },
+      {
+        "id": "output_processing",
+        "label": "Output Processing",
+        "nodes": [
+          "structured_query_parser_class"
+        ],
+        "title": "Structured Output Processing",
+        "description": "Handles the parsing and validation of LLM-generated text into structured data formats, ensuring correctness and usability.",
+        "role": "analytical"
+      },
+      {
+        "id": "inputs_configuration",
+        "label": "Inputs & Configuration",
+        "nodes": [
+          "few_shot_examples_external",
+          "prompt_template_external",
+          "document_attribute_info_external"
+        ],
+        "title": "Data Inputs and Configuration",
+        "description": "External data sources and configuration elements that drive the behavior and content of the prompt engineering components.",
+        "role": "data"
+      },
+      {
+        "id": "external_systems",
+        "label": "External Systems",
+        "nodes": [
+          "llm_external"
+        ],
+        "title": "External AI Systems",
+        "description": "Represents external Large Language Models that provide the underlying intelligence for text generation and understanding.",
+        "role": "external"
+      },
+      {
+        "id": "outputs",
+        "label": "Outputs",
+        "nodes": [
+          "structured_query_output"
+        ],
+        "title": "Module Outputs",
+        "description": "The primary structured data output generated by the module's components.",
+        "role": "data"
+      }
+    ]
+  }
+}

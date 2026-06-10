@@ -1,0 +1,391 @@
+{
+  "title": "Documentation Generation",
+  "summary": "This module handles the generation and processing of documentation, including dynamic content like changelogs, code snippet integration, and preparing content for search indexing. It integrates with MkDocs hooks to transform markdown and HTML.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "mkdocs_framework",
+        "label": "MkDocs Build Process",
+        "type": "external",
+        "link": null,
+        "title": "MkDocs Build Process",
+        "description": "The static site generator framework that orchestrates documentation generation by invoking various hooks."
+      },
+      {
+        "id": "markdown_source",
+        "label": "Read Markdown Source",
+        "type": "component",
+        "link": null,
+        "title": "Read Markdown Source",
+        "description": "Ingests raw Markdown files from the documentation repository, which may contain special directives for dynamic content."
+      },
+      {
+        "id": "process_markdown_hooks",
+        "label": "Apply Markdown Hooks",
+        "type": "component",
+        "link": null,
+        "title": "Apply Markdown Hooks",
+        "description": "Executes pre-processing steps on Markdown content before its conversion to HTML, such as injecting code snippets and rendering examples."
+      },
+      {
+        "id": "parse_snippet_directives",
+        "label": "Parse Snippet Directives",
+        "type": "component",
+        "link": null,
+        "title": "Parse Snippet Directives",
+        "description": "Identifies and extracts parameters (e.g., file path, fragments, highlights) from `snippet` directives embedded in Markdown."
+      },
+      {
+        "id": "read_code_files",
+        "label": "Read Code Snippet Files",
+        "type": "component",
+        "link": null,
+        "title": "Read Code Snippet Files",
+        "description": "Accesses local source code files specified by snippet directives to retrieve their content."
+      },
+      {
+        "id": "extract_code_sections",
+        "label": "Extract Code Sections",
+        "type": "component",
+        "link": null,
+        "title": "Extract Code Sections",
+        "description": "Parses code files to identify and extract specific named sections or line ranges based on directive parameters."
+      },
+      {
+        "id": "format_code_snippets",
+        "label": "Format Code Snippets",
+        "type": "component",
+        "link": null,
+        "title": "Format Code Snippets",
+        "description": "Applies syntax highlighting, adds titles, and formats line highlights to extracted code for embedding into Markdown."
+      },
+      {
+        "id": "generate_html",
+        "label": "Generate HTML Output",
+        "type": "component",
+        "link": null,
+        "title": "Generate HTML Output",
+        "description": "Converts the processed Markdown content into final HTML pages, forming the core of the documentation site."
+      },
+      {
+        "id": "process_html_for_algolia",
+        "label": "Prepare HTML for Search",
+        "type": "component",
+        "link": null,
+        "title": "Prepare HTML for Search",
+        "description": "Cleans and structures generated HTML content, removing UI elements and extracting relevant text for Algolia search indexing."
+      },
+      {
+        "id": "write_algolia_records",
+        "label": "Write Algolia Index File",
+        "type": "component",
+        "link": null,
+        "title": "Write Algolia Index File",
+        "description": "Serializes and saves the collected Algolia search records into a JSON file, ready for upload to the Algolia service."
+      },
+      {
+        "id": "fetch_github_releases",
+        "label": "Fetch GitHub Releases",
+        "type": "component",
+        "link": null,
+        "title": "Fetch GitHub Releases",
+        "description": "Retrieves release and changelog data from the GitHub API to dynamically generate release notes within the documentation."
+      },
+      {
+        "id": "cache_changelog",
+        "label": "Cache Changelog Data",
+        "type": "component",
+        "link": null,
+        "title": "Cache Changelog Data",
+        "description": "Stores and retrieves processed changelog data using a Key-Value store to reduce API calls and improve load times."
+      },
+      {
+        "id": "format_changelog_entries",
+        "label": "Format Changelog Entries",
+        "type": "component",
+        "link": null,
+        "title": "Format Changelog Entries",
+        "description": "Transforms raw GitHub release data into a human-readable and Markdown-compatible changelog format for display."
+      },
+      {
+        "id": "serve_text_assets",
+        "label": "Serve Raw Text Assets",
+        "type": "component",
+        "link": null,
+        "title": "Serve Raw Text Assets",
+        "description": "Handles requests for documentation assets, serving them as plain text if the client prefers or requests it."
+      },
+      {
+        "id": "github_api_external",
+        "label": "GitHub API",
+        "type": "external",
+        "link": null,
+        "title": "GitHub API",
+        "description": "External service providing release and repository information for changelog generation."
+      },
+      {
+        "id": "algolia_service_external",
+        "label": "Algolia Search Service",
+        "type": "external",
+        "link": null,
+        "title": "Algolia Search Service",
+        "description": "External search service that consumes the generated index file to provide search functionality for the documentation."
+      },
+      {
+        "id": "kv_store_external",
+        "label": "Key-Value Store",
+        "type": "external",
+        "link": null,
+        "title": "Key-Value Store",
+        "description": "External persistent storage used for caching dynamic content like changelog data."
+      },
+      {
+        "id": "file_system_external",
+        "label": "Local File System",
+        "type": "external",
+        "link": null,
+        "title": "Local File System",
+        "description": "Provides access to local files for reading code snippets and writing generated outputs like Algolia records."
+      },
+      {
+        "id": "web_asset_storage",
+        "label": "Web Asset Storage",
+        "type": "external",
+        "link": null,
+        "title": "Web Asset Storage",
+        "description": "Storage for documentation assets (e.g., images, raw text files) that can be served directly by the web server."
+      }
+    ],
+    "edges": [
+      {
+        "source": "mkdocs_framework",
+        "target": "markdown_source",
+        "label": "Provides",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "markdown_source",
+        "target": "process_markdown_hooks",
+        "label": "Feeds into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "process_markdown_hooks",
+        "target": "parse_snippet_directives",
+        "label": "Invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "parse_snippet_directives",
+        "target": "read_code_files",
+        "label": "Requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "read_code_files",
+        "target": "file_system_external",
+        "label": "Reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "file_system_external",
+        "target": "read_code_files",
+        "label": "Returns content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "read_code_files",
+        "target": "extract_code_sections",
+        "label": "Provides content",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extract_code_sections",
+        "target": "format_code_snippets",
+        "label": "Provides extracted code",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "format_code_snippets",
+        "target": "process_markdown_hooks",
+        "label": "Inserts formatted code",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "process_markdown_hooks",
+        "target": "generate_html",
+        "label": "Passes processed Markdown",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "generate_html",
+        "target": "process_html_for_algolia",
+        "label": "Provides HTML",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "process_html_for_algolia",
+        "target": "write_algolia_records",
+        "label": "Generates records",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "write_algolia_records",
+        "target": "file_system_external",
+        "label": "Writes index file",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "write_algolia_records",
+        "target": "algolia_service_external",
+        "label": "Consumed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mkdocs_framework",
+        "target": "fetch_github_releases",
+        "label": "Triggers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fetch_github_releases",
+        "target": "kv_store_external",
+        "label": "Checks/Stores cache",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kv_store_external",
+        "target": "fetch_github_releases",
+        "label": "Returns cached data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fetch_github_releases",
+        "target": "github_api_external",
+        "label": "Requests data from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "github_api_external",
+        "target": "fetch_github_releases",
+        "label": "Returns release data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fetch_github_releases",
+        "target": "format_changelog_entries",
+        "label": "Provides raw data",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "format_changelog_entries",
+        "target": "generate_html",
+        "label": "Integrates changelog",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "mkdocs_framework",
+        "target": "serve_text_assets",
+        "label": "Handles asset requests",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "serve_text_assets",
+        "target": "web_asset_storage",
+        "label": "Fetches from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "web_asset_storage",
+        "target": "serve_text_assets",
+        "label": "Returns asset",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "content_transformation",
+        "label": "Content Transformation",
+        "nodes": [
+          "markdown_source",
+          "process_markdown_hooks",
+          "generate_html"
+        ],
+        "title": "Content Transformation Pipeline",
+        "description": "Manages the flow from raw Markdown to final HTML, applying various processing steps and hooks.",
+        "role": "surface"
+      },
+      {
+        "id": "code_snippet_management",
+        "label": "Code Snippet Management",
+        "nodes": [
+          "parse_snippet_directives",
+          "read_code_files",
+          "extract_code_sections",
+          "format_code_snippets"
+        ],
+        "title": "Code Snippet Integration",
+        "description": "Handles the parsing, extraction, and formatting of code snippets from source files for embedding into documentation.",
+        "role": "generative"
+      },
+      {
+        "id": "search_indexing",
+        "label": "Search Indexing",
+        "nodes": [
+          "process_html_for_algolia",
+          "write_algolia_records"
+        ],
+        "title": "Algolia Search Indexing",
+        "description": "Processes generated HTML content to create structured records for Algolia, enabling efficient search functionality.",
+        "role": "analytical"
+      },
+      {
+        "id": "changelog_generation",
+        "label": "Changelog Generation",
+        "nodes": [
+          "fetch_github_releases",
+          "cache_changelog",
+          "format_changelog_entries"
+        ],
+        "title": "Dynamic Changelog Generation",
+        "description": "Fetches release information from GitHub, caches it, and formats it into a changelog for inclusion in the documentation.",
+        "role": "generative"
+      },
+      {
+        "id": "asset_delivery",
+        "label": "Asset Delivery",
+        "nodes": [
+          "serve_text_assets"
+        ],
+        "title": "Raw Text Asset Delivery",
+        "description": "Manages the serving of raw text assets directly from storage, bypassing standard HTML rendering.",
+        "role": "surface"
+      }
+    ]
+  }
+}

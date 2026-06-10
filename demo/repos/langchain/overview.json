@@ -1,6 +1,6 @@
 {
     "title": "LangChain Repository Overview",
-    "summary": "LangChain is a framework for developing applications powered by large language models (LLMs). It simplifies the process of integrating LLMs with external data sources, computation, and agents, enabling developers to build complex, context-aware, and reasoning-capable AI systems. The framework provides modular components for prompt management, LLM integrations, data handling, agent orchestration, and comprehensive observability tools.",
+    "summary": "LangChain is a framework for developing applications powered by large language models (LLMs). It simplifies the orchestration of LLMs with external components like data sources, tools, and memory, enabling the creation of complex, context-aware, and agentic AI systems. Developers use it to build, deploy, and evaluate intelligent applications that go beyond simple LLM calls.",
     "diagram": {
         "direction": "LR",
         "nodes": [
@@ -9,190 +9,190 @@
                 "label": "Developer / User",
                 "type": "external",
                 "link": null,
-                "title": "Developer / User",
-                "description": "Interacts with LangChain to build, run, and monitor LLM-powered applications, defining prompts, orchestrating agents, and evaluating performance."
+                "title": "Human User",
+                "description": "A developer or end-user interacting with or building applications using the LangChain framework, designing and running AI systems."
             },
             {
-                "id": "core_abstractions_and_utilities",
-                "label": "Core Abstractions & Utilities",
+                "id": "core_framework",
+                "label": "Core Framework & Utilities",
                 "type": "module",
-                "link": "core_abstractions_and_utilities",
-                "title": "Core Abstractions & Utilities",
-                "description": "Provides foundational interfaces, base classes, and essential utilities that underpin the entire LangChain ecosystem, enabling core functionalities, API management, security, and performance enhancements."
+                "link": "core_framework",
+                "title": "LangChain Core Framework",
+                "description": "Provides the foundational interfaces, base abstractions, and essential utilities for building all LangChain components and applications, ensuring consistency and extensibility."
             },
             {
-                "id": "llm_interaction_and_data_handling",
-                "label": "LLM Interaction & Data Handling",
+                "id": "language_model_interface",
+                "label": "Language Model Interaction",
                 "type": "module",
-                "link": "llm_interaction_and_data_handling",
-                "title": "LLM Interaction & Data Handling",
-                "description": "This module encompasses all components for interacting with Large Language Models, from crafting prompts and integrating various providers to parsing their outputs. It also includes utilities for text processing, data loading, and storage to support LLM applications."
+                "link": "language_model_interface",
+                "title": "LLM & Chat Model Interfaces",
+                "description": "Defines how to interact with various language models, including standardized message formats, prompt engineering techniques, and structured output parsing for diverse LLM providers."
             },
             {
-                "id": "agent_and_workflow_orchestration",
-                "label": "Agent & Workflow Orchestration",
+                "id": "agent_and_chain_orchestration",
+                "label": "Agent & Chain Orchestration",
                 "type": "module",
-                "link": "agent_and_workflow_orchestration",
-                "title": "Agent & Workflow Orchestration",
-                "description": "This module provides the core components for building intelligent agents and orchestrating complex workflows. It includes various agent types, chains for structured tasks, runnables for flexible composition, and middleware for enhancing agent behavior, security, and context management."
+                "link": "agent_and_chain_orchestration",
+                "title": "Complex Workflow Orchestration",
+                "description": "Enables building sophisticated multi-step applications by composing LLMs, tools, and data sources into intelligent agents and sequential chains, managing conversational memory and execution flow."
             },
             {
-                "id": "observability_and_evaluation",
-                "label": "Observability & Evaluation",
+                "id": "data_management_and_retrieval",
+                "label": "Data Management & Retrieval",
                 "type": "module",
-                "link": "observability_and_evaluation",
-                "title": "Observability & Evaluation",
-                "description": "This module provides comprehensive tools for monitoring, tracing, and evaluating LangChain applications. It includes callback handlers for event processing, a robust framework for assessing LLM outputs and agent trajectories, and seamless integration with LangSmith for enhanced observability and dataset-driven evaluation."
+                "link": "data_management_and_retrieval",
+                "title": "Document & Knowledge Management",
+                "description": "Provides tools for loading, indexing, storing, and retrieving documents from various sources, crucial for retrieval-augmented generation (RAG) applications and maintaining external knowledge bases."
             },
             {
-                "id": "memory_and_state",
-                "label": "Memory & State Management",
+                "id": "developer_tools_and_integrations",
+                "label": "Developer Tools & Integrations",
                 "type": "module",
-                "link": "memory_and_state",
-                "title": "Memory & State Management",
-                "description": "This module provides various memory implementations for managing conversational history and state in AI applications, including simple buffers, summarization, vector store-backed memory, and entity tracking."
+                "link": "developer_tools_and_integrations",
+                "title": "Ecosystem & Development Support",
+                "description": "Offers a suite of tools for evaluation, testing, partner integrations, agent middleware, and general utilities to support the entire development lifecycle of LangChain applications."
             }
         ],
         "edges": [
             {
                 "source": "user",
-                "target": "core_abstractions_and_utilities",
-                "label": "configures framework",
-                "title": "Configures Framework",
-                "description": "Developers configure the foundational components and utilities of LangChain to set up their application environment."
+                "target": "core_framework",
+                "label": "builds upon",
+                "title": null,
+                "description": null
             },
             {
                 "source": "user",
-                "target": "llm_interaction_and_data_handling",
-                "label": "defines prompts & data",
-                "title": "Defines Prompts & Data",
-                "description": "Users define how LLMs interact with data, including prompt templates, output parsing, and data loading strategies."
+                "target": "language_model_interface",
+                "label": "configures & uses",
+                "title": null,
+                "description": null
             },
             {
                 "source": "user",
-                "target": "agent_and_workflow_orchestration",
-                "label": "builds applications",
-                "title": "Builds Applications",
-                "description": "Developers construct complex AI applications by orchestrating agents, chains, and runnables to achieve specific goals."
+                "target": "agent_and_chain_orchestration",
+                "label": "designs & runs",
+                "title": null,
+                "description": null
             },
             {
                 "source": "user",
-                "target": "observability_and_evaluation",
-                "label": "monitors & evaluates",
-                "title": "Monitors & Evaluates",
-                "description": "Users leverage observability and evaluation tools to track performance, debug issues, and assess the quality of their LLM applications."
+                "target": "data_management_and_retrieval",
+                "label": "manages data with",
+                "title": null,
+                "description": null
             },
             {
-                "source": "core_abstractions_and_utilities",
-                "target": "llm_interaction_and_data_handling",
-                "label": "provides base components",
-                "title": "Provides Base Components",
-                "description": "The core module offers fundamental interfaces and utilities that are utilized by LLM interaction and data handling components."
+                "source": "user",
+                "target": "developer_tools_and_integrations",
+                "label": "uses for testing & extending",
+                "title": null,
+                "description": null
             },
             {
-                "source": "core_abstractions_and_utilities",
-                "target": "agent_and_workflow_orchestration",
-                "label": "provides base runnables",
-                "title": "Provides Base Runnables",
-                "description": "Core abstractions like `Runnable` form the basis for building flexible and composable agents and workflows."
+                "source": "core_framework",
+                "target": "language_model_interface",
+                "label": "provides base abstractions for",
+                "title": null,
+                "description": null
             },
             {
-                "source": "core_abstractions_and_utilities",
-                "target": "observability_and_evaluation",
-                "label": "provides callback interfaces",
-                "title": "Provides Callback Interfaces",
-                "description": "The core defines standard callback interfaces used by the observability and evaluation systems for event handling."
+                "source": "core_framework",
+                "target": "agent_and_chain_orchestration",
+                "label": "provides base abstractions for",
+                "title": null,
+                "description": null
             },
             {
-                "source": "core_abstractions_and_utilities",
-                "target": "memory_and_state",
-                "label": "provides base memory",
-                "title": "Provides Base Memory",
-                "description": "Foundational memory interfaces from the core are implemented and extended by the memory and state management module."
+                "source": "core_framework",
+                "target": "data_management_and_retrieval",
+                "label": "provides base abstractions for",
+                "title": null,
+                "description": null
             },
             {
-                "source": "llm_interaction_and_data_handling",
-                "target": "agent_and_workflow_orchestration",
-                "label": "powers LLM calls & data",
-                "title": "Powers LLM Calls & Data",
-                "description": "LLM interaction and data handling components provide the necessary LLM integrations, prompts, and data for agents and workflows to function."
+                "source": "core_framework",
+                "target": "developer_tools_and_integrations",
+                "label": "provides core utilities to",
+                "title": null,
+                "description": null
             },
             {
-                "source": "agent_and_workflow_orchestration",
-                "target": "llm_interaction_and_data_handling",
-                "label": "orchestrates LLM interactions",
-                "title": "Orchestrates LLM Interactions",
-                "description": "Agents and chains orchestrate complex interactions with LLMs, utilizing the capabilities provided by the LLM interaction module."
+                "source": "language_model_interface",
+                "target": "agent_and_chain_orchestration",
+                "label": "powers agents & chains with",
+                "title": null,
+                "description": null
             },
             {
-                "source": "agent_and_workflow_orchestration",
-                "target": "memory_and_state",
-                "label": "uses for stateful context",
-                "title": "Uses for Stateful Context",
-                "description": "Agents and complex workflows rely on memory and state management to maintain conversational history and entity tracking."
+                "source": "language_model_interface",
+                "target": "developer_tools_and_integrations",
+                "label": "integrates with models via",
+                "title": null,
+                "description": null
             },
             {
-                "source": "memory_and_state",
-                "target": "agent_and_workflow_orchestration",
-                "label": "provides conversational context",
-                "title": "Provides Conversational Context",
-                "description": "Memory components supply agents and chains with the necessary historical context to enable stateful and coherent interactions."
+                "source": "data_management_and_retrieval",
+                "target": "agent_and_chain_orchestration",
+                "label": "provides context to",
+                "title": null,
+                "description": null
             },
             {
-                "source": "observability_and_evaluation",
-                "target": "agent_and_workflow_orchestration",
-                "label": "traces & evaluates runs",
-                "title": "Traces & Evaluates Runs",
-                "description": "The observability and evaluation module monitors and assesses the execution of agents and workflows for performance and correctness."
+                "source": "data_management_and_retrieval",
+                "target": "language_model_interface",
+                "label": "enhances prompts for",
+                "title": null,
+                "description": null
             },
             {
-                "source": "observability_and_evaluation",
-                "target": "llm_interaction_and_data_handling",
-                "label": "monitors LLM calls",
-                "title": "Monitors LLM Calls",
-                "description": "Observability tools track the inputs, outputs, and performance of individual LLM calls and data processing steps."
+                "source": "agent_and_chain_orchestration",
+                "target": "developer_tools_and_integrations",
+                "label": "monitored & enhanced by",
+                "title": null,
+                "description": null
             }
         ],
         "groups": [
             {
-                "id": "foundational_layer",
+                "id": "foundation_group",
                 "label": "Core Foundations",
                 "nodes": [
-                    "core_abstractions_and_utilities"
+                    "core_framework"
                 ],
-                "title": "Core Foundations",
-                "description": "The fundamental building blocks, interfaces, and utilities that underpin the entire LangChain ecosystem, providing essential services and abstractions for all other modules.",
+                "title": "LangChain Core Foundations",
+                "description": "This group encompasses the fundamental building blocks, abstract interfaces, and essential utilities that form the architectural backbone of the entire LangChain ecosystem.",
                 "role": null
             },
             {
-                "id": "llm_data_management",
-                "label": "LLM Interaction & Data",
+                "id": "ai_logic_orchestration_group",
+                "label": "AI Logic & Orchestration",
                 "nodes": [
-                    "llm_interaction_and_data_handling"
+                    "language_model_interface",
+                    "agent_and_chain_orchestration"
                 ],
-                "title": "LLM Interaction & Data",
-                "description": "Components for interacting with Large Language Models, including prompt engineering, output parsing, provider integrations, and data preparation, crucial for feeding and interpreting LLM responses.",
+                "title": "AI Logic & Workflow Orchestration",
+                "description": "This group focuses on defining how to interact with language models, engineer prompts, and orchestrate complex, multi-step AI workflows using agents and chains.",
                 "role": null
             },
             {
-                "id": "application_orchestration",
-                "label": "Intelligent Application Orchestration",
+                "id": "data_knowledge_group",
+                "label": "Data & Knowledge Management",
                 "nodes": [
-                    "agent_and_workflow_orchestration"
+                    "data_management_and_retrieval"
                 ],
-                "title": "Intelligent Application Orchestration",
-                "description": "Tools for building complex AI applications, defining agents, chaining operations, and integrating external capabilities and middleware to create sophisticated, goal-oriented systems.",
+                "title": "Data & Knowledge Management",
+                "description": "This group provides comprehensive tools for loading, indexing, storing, and retrieving documents, enabling applications to access and utilize external knowledge efficiently.",
                 "role": null
             },
             {
-                "id": "monitoring_enhancement",
-                "label": "System Monitoring & Enhancement",
+                "id": "development_ecosystem_group",
+                "label": "Development & Ecosystem Support",
                 "nodes": [
-                    "observability_and_evaluation",
-                    "memory_and_state"
+                    "developer_tools_and_integrations"
                 ],
-                "title": "System Monitoring & Enhancement",
-                "description": "Modules for monitoring, evaluating, and improving LangChain applications, including tracing, testing, and state management for persistent context and conversational history.",
+                "title": "Development & Ecosystem Support",
+                "description": "This group offers a suite of tools for evaluating, testing, integrating with external partners, and enhancing agent behavior, supporting the full development lifecycle of LangChain applications.",
                 "role": null
             }
         ]

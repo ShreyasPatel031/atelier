@@ -1,0 +1,107 @@
+{
+  "title": "CGO Webview Bindings",
+  "summary": "This module provides CGO (C-Go) bindings that enable the Go application to interact with the embedded webview. It facilitates dispatching events, binding Go functions to JavaScript, and unbinding them.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "dispatch_call",
+        "label": "Dispatch Webview Call",
+        "type": "component",
+        "link": null,
+        "title": "Dispatch Webview Call",
+        "description": "Dispatches a function call or event from the Go runtime to the underlying webview instance, executing a JavaScript function asynchronously."
+      },
+      {
+        "id": "bind_function",
+        "label": "Bind Go Function to Webview",
+        "type": "component",
+        "link": null,
+        "title": "Bind Go Function",
+        "description": "Establishes a binding between a Go function and a JavaScript function within the webview, allowing JavaScript to invoke Go code."
+      },
+      {
+        "id": "unbind_function",
+        "label": "Unbind Webview Function",
+        "type": "component",
+        "link": null,
+        "title": "Unbind Webview Function",
+        "description": "Removes a previously established binding between a Go function and a JavaScript function in the webview, preventing further invocations."
+      },
+      {
+        "id": "webview_instance",
+        "label": "Webview Instance",
+        "type": "external",
+        "link": "webview_core_api",
+        "title": "Underlying Webview",
+        "description": "The core webview component (e.g., WebKit, Edge, Webview2) that renders web content and interacts with native code."
+      },
+      {
+        "id": "go_runtime",
+        "label": "Go Application Runtime",
+        "type": "external",
+        "link": null,
+        "title": "Go Application",
+        "description": "The Go application runtime that utilizes these CGO bindings to control and interact with the embedded webview."
+      }
+    ],
+    "edges": [
+      {
+        "source": "go_runtime",
+        "target": "dispatch_call",
+        "label": "Initiates Dispatch",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "go_runtime",
+        "target": "bind_function",
+        "label": "Requests Binding",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "go_runtime",
+        "target": "unbind_function",
+        "label": "Requests Unbinding",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dispatch_call",
+        "target": "webview_instance",
+        "label": "Executes JS in Webview",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "bind_function",
+        "target": "webview_instance",
+        "label": "Registers JS-Go Bridge",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "unbind_function",
+        "target": "webview_instance",
+        "label": "Deregisters Bridge",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "webview_glue_api",
+        "label": "CGO Webview API",
+        "nodes": [
+          "dispatch_call",
+          "bind_function",
+          "unbind_function"
+        ],
+        "title": "CGO Webview API",
+        "description": "Core CGO functions for managing interactions between the Go application and the embedded webview.",
+        "role": "surface"
+      }
+    ]
+  }
+}

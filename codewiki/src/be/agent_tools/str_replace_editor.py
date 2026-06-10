@@ -479,9 +479,42 @@ class EditTool:
             path = path.with_suffix(".json")
         # Unescape literal \n and \t that LLMs sometimes output
         file_text = file_text.replace('\\n', '\n').replace('\\t', '\t')
+        if path.suffix == ".json":
+            file_text, json_ok = self._validate_and_repair_json(file_text, path)
+            if not json_ok:
+                self.logs.append(
+                    f"ERROR: The JSON you wrote to {self._get_display_path(path)} is invalid "
+                    f"and could not be auto-repaired. The file was NOT saved. "
+                    f"Please rewrite the complete, valid JSON file using the create command."
+                )
+                return
         self.write_file(path, file_text)
         self._file_history[path].append(file_text)
         self.logs.append(f"File created successfully at: {self._get_display_path(path)}")
+
+    def _validate_and_repair_json(self, file_text: str, path: Path) -> tuple[str, bool]:
+        """Validate JSON and attempt repair. Returns (text, is_valid)."""
+        try:
+            json.loads(file_text)
+            return file_text, True
+        except json.JSONDecodeError:
+            pass
+        import re
+        repaired = re.sub(r',n(\s)', r',\n\1', file_text)
+        repaired = re.sub(r',n([\]\}\"\'])', r',\n\1', repaired)
+        try:
+            json.loads(repaired)
+            logger.warning(
+                "[STR_REPLACE_EDITOR] Repaired ',n' → comma-newline corruption in %s",
+                self._get_display_path(path),
+            )
+            return repaired, True
+        except json.JSONDecodeError as e:
+            logger.error(
+                "[STR_REPLACE_EDITOR] JSON validation failed for %s: %s",
+                self._get_display_path(path), e,
+            )
+            return file_text, False
 
     def view(self, path: Path, view_range: Optional[List[int]] = None):
         """Implement the view command"""
@@ -598,6 +631,9 @@ class EditTool:
 
         # Replace old_str with new_str
         new_file_content = file_content.replace(old_str, new_str)
+
+        if path.suffix == ".json":
+            new_file_content, _ok = self._validate_and_repair_json(new_file_content, path)
 
         # Write the new content to the file
         self.write_file(path, new_file_content)

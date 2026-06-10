@@ -1,0 +1,155 @@
+{
+    "title": "Webview Host Integration",
+    "summary": "This module integrates the web-based user interface with the native host application, providing core APIs for webview management, platform-specific rendering engines, and CGO bindings for Go application interaction. It enables seamless communication and control between the native environment and the embedded web content.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "webview_core_api_mod",
+                "label": "Webview Core API",
+                "type": "module",
+                "link": "webview_core_api",
+                "title": "Core Webview API",
+                "description": "Provides the fundamental interface for managing the webview's lifecycle, UI properties, and executing JavaScript, abstracting platform specifics."
+            },
+            {
+                "id": "platform_engines_mod",
+                "label": "Platform-Specific Engines",
+                "type": "module",
+                "link": "platform_specific_engines",
+                "title": "Platform Webview Engines",
+                "description": "Contains the concrete implementations for rendering web content on different operating systems (e.g., GTK WebKit, Cocoa WKWebView, Win32 Edge WebView2)."
+            },
+            {
+                "id": "cgo_bindings_mod",
+                "label": "CGO Bindings",
+                "type": "module",
+                "link": "cgo_bindings",
+                "title": "Go-Webview CGO Bridge",
+                "description": "Facilitates communication between the native Go application and the embedded webview, allowing Go functions to be called from JavaScript and vice-versa."
+            },
+            {
+                "id": "native_host_app",
+                "label": "Native Host Application",
+                "type": "external",
+                "link": null,
+                "title": "Native Go Application",
+                "description": "The main application written in Go that embeds and controls the webview, providing native functionalities and managing the overall application lifecycle."
+            },
+            {
+                "id": "web_ui_frontend",
+                "label": "Web-based UI Frontend",
+                "type": "external",
+                "link": "user_interface",
+                "title": "User Interface Frontend",
+                "description": "The web content (HTML, CSS, JavaScript) rendered inside the webview, providing the interactive graphical user interface to the user."
+            },
+            {
+                "id": "os_system_apis",
+                "label": "Operating System APIs",
+                "type": "external",
+                "link": null,
+                "title": "OS System Services",
+                "description": "Low-level operating system functions and services used for window management, display settings (like DPI), and other system-level interactions."
+            },
+            {
+                "id": "underlying_webview_runtimes",
+                "label": "Underlying Webview Runtimes",
+                "type": "external",
+                "link": null,
+                "title": "Browser Engine Runtimes",
+                "description": "The actual browser rendering engines (e.g., WebKit, Chromium's WebView2) that power the embedded webview, responsible for parsing and displaying web content."
+            }
+        ],
+        "edges": [
+            {
+                "source": "native_host_app",
+                "target": "webview_core_api_mod",
+                "label": "Controls webview",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "native_host_app",
+                "target": "cgo_bindings_mod",
+                "label": "Initiates Go-JS calls",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "cgo_bindings_mod",
+                "target": "webview_core_api_mod",
+                "label": "Dispatches commands",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "webview_core_api_mod",
+                "target": "platform_engines_mod",
+                "label": "Delegates rendering",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "platform_engines_mod",
+                "target": "underlying_webview_runtimes",
+                "label": "Implemented by",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "webview_core_api_mod",
+                "target": "os_system_apis",
+                "label": "Uses system services",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "webview_core_api_mod",
+                "target": "web_ui_frontend",
+                "label": "Manages UI content",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "web_ui_frontend",
+                "target": "cgo_bindings_mod",
+                "label": "Calls Go functions",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "webview_control_layer",
+                "label": "Webview Control Layer",
+                "nodes": [
+                    "webview_core_api_mod"
+                ],
+                "title": "Core Webview Control",
+                "description": "This layer provides the high-level API for managing the webview's behavior, content, and interaction with the host application. It abstracts away platform-specific details.",
+                "role": null
+            },
+            {
+                "id": "platform_abstraction_layer",
+                "label": "Platform Abstraction Layer",
+                "nodes": [
+                    "platform_engines_mod"
+                ],
+                "title": "Platform-Specific Rendering",
+                "description": "This layer contains the concrete implementations of webview rendering engines tailored for different operating systems, ensuring native performance and integration.",
+                "role": null
+            },
+            {
+                "id": "host_integration_layer",
+                "label": "Host Integration Layer",
+                "nodes": [
+                    "cgo_bindings_mod"
+                ],
+                "title": "Native Host Communication",
+                "description": "This layer handles the bidirectional communication bridge between the native Go application and the JavaScript context running within the webview, enabling seamless interaction.",
+                "role": null
+            }
+        ]
+    }
+}

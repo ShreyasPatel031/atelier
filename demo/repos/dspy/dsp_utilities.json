@@ -1,0 +1,83 @@
+{
+  "title": "DSP Utilities Module",
+  "summary": "This module provides essential utility functions for DSPy, including text tokenization, answer location within text, robust configuration management, and batch loading of background data for retrieval tasks.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "simple_tokenizer",
+        "label": "Tokenize Text",
+        "type": "component",
+        "link": null,
+        "title": "Simple Text Tokenizer",
+        "description": "A tokenizer that splits text into tokens based on alphanumeric characters and non-whitespace patterns, primarily used for text processing in retrieval tasks."
+      },
+      {
+        "id": "locate_answers",
+        "label": "Locate Answers in Text",
+        "type": "component",
+        "link": null,
+        "title": "Answer Location Utility",
+        "description": "Identifies and returns the character-based offset and end position of all occurrences of given tokenized answers within a larger body of text."
+      },
+      {
+        "id": "dspy_settings",
+        "label": "Manage DSPy Configuration",
+        "type": "component",
+        "link": null,
+        "title": "DSPy Global Settings",
+        "description": "A singleton class providing thread-safe management of global DSPy configuration settings, including language models, adapters, and callbacks, with support for thread-local overrides via context managers."
+      },
+      {
+        "id": "load_backgrounds",
+        "label": "Load Batch Backgrounds",
+        "type": "component",
+        "link": null,
+        "title": "Batch Background Loader",
+        "description": "Retrieves and concatenates background passages for a list of query IDs from a collection, supporting both integer and string-based passage identifiers."
+      }
+    ],
+    "edges": [
+      {
+        "source": "simple_tokenizer",
+        "target": "locate_answers",
+        "label": "uses for tokenization",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "text_processing_group",
+        "label": "Text Processing",
+        "nodes": [
+          "simple_tokenizer",
+          "locate_answers"
+        ],
+        "title": "Text Processing Utilities",
+        "description": "Components for tokenizing text and locating specific phrases within tokenized content.",
+        "role": "analytical"
+      },
+      {
+        "id": "configuration_group",
+        "label": "Configuration Management",
+        "nodes": [
+          "dspy_settings"
+        ],
+        "title": "DSPy Configuration",
+        "description": "Manages global and thread-local settings for DSPy, ensuring consistent behavior across the application.",
+        "role": "surface"
+      },
+      {
+        "id": "data_loading_group",
+        "label": "Data Loading",
+        "nodes": [
+          "load_backgrounds"
+        ],
+        "title": "Background Data Loading",
+        "description": "Utility for loading and preparing background passages associated with query IDs.",
+        "role": "data"
+      }
+    ]
+  }
+}

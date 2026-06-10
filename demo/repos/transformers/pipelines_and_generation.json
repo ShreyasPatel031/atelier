@@ -1,116 +1,150 @@
 {
     "title": "Pipelines and Generation",
-    "summary": "This module provides high-level, task-specific pipelines for common NLP and multimodal applications, alongside the core logic and decoding strategies for efficient text generation, including continuous batching.",
+    "summary": "This module provides high-level, task-specific abstractions (pipelines) for common machine learning tasks and the underlying core generation logic for models. It enables efficient and flexible model inference and text generation.",
     "diagram": {
-        "direction": "LR",
+        "direction": "TD",
         "nodes": [
             {
-                "id": "core_generation",
-                "label": "Core Generation Logic",
-                "type": "module",
-                "link": "generation_core",
-                "title": "Core Text Generation Logic",
-                "description": "Provides the fundamental algorithms and control flow for auto-regressive text generation, including various decoding strategies like greedy, sampling, beam search, and continuous batching."
-            },
-            {
-                "id": "task_pipelines",
+                "id": "pipelines_module",
                 "label": "Task-Specific Pipelines",
                 "type": "module",
                 "link": "task_pipelines",
                 "title": "Task-Specific Pipelines",
-                "description": "Offers high-level, ready-to-use pipelines for common NLP and multimodal tasks such as automatic speech recognition, document question answering, and image-to-text generation, abstracting model complexities."
+                "description": "High-level, user-friendly interfaces for common machine learning tasks like ASR, DQA, and Image-to-Text generation, handling end-to-end workflows."
             },
             {
-                "id": "models",
+                "id": "generation_module",
+                "label": "Core Generation Logic",
+                "type": "module",
+                "link": "generation_core",
+                "title": "Core Generation Logic",
+                "description": "Provides the fundamental mechanisms for text generation, including various decoding strategies (greedy, beam search, sampling) and continuous batching for efficiency."
+            },
+            {
+                "id": "models_module",
                 "label": "Model Architectures",
                 "type": "external",
                 "link": "model_architectures",
-                "title": "Model Architectures",
-                "description": "Represents the collection of pre-trained model architectures (e.g., LLMs, vision models) that are used by the generation and pipeline components for inference."
+                "title": "Model Architectures Module",
+                "description": "Contains the definitions and implementations of various pre-trained models used by pipelines and the generation core for inference."
             },
             {
-                "id": "data_processors",
-                "label": "Data Processing Modules",
+                "id": "data_module",
+                "label": "Data Processing",
                 "type": "external",
                 "link": "data_processing",
-                "title": "Data Processing Modules",
-                "description": "Handles the preprocessing of raw input data (text, audio, images) into a format suitable for model consumption, including tokenization and feature extraction."
+                "title": "Data Processing Module",
+                "description": "Handles the preprocessing of raw input data (text, audio, images) into model-ready features, utilized by the pipelines."
             },
             {
-                "id": "serving_integrations",
-                "label": "Serving & Integrations",
+                "id": "user_input",
+                "label": "User Input",
                 "type": "external",
-                "link": "quantization_and_integrations",
-                "title": "Serving & Optimization Integrations",
-                "description": "Encompasses tools and integrations for optimizing model serving, such as quantization techniques and CLI tools for deploying models with continuous batching."
+                "link": null,
+                "title": "Raw User Input",
+                "description": "The initial raw data provided by the user, such as text prompts, audio files, or document images, for processing by the pipelines."
+            },
+            {
+                "id": "final_output",
+                "label": "Generated Output",
+                "type": "external",
+                "link": null,
+                "title": "Task-Specific Results",
+                "description": "The final results produced by the pipelines or generation core, such as transcribed text, QA answers, or generated text sequences."
             }
         ],
         "edges": [
             {
-                "source": "task_pipelines",
-                "target": "core_generation",
-                "label": "Utilizes generation strategies",
+                "source": "user_input",
+                "target": "pipelines_module",
+                "label": "Provides task input",
                 "title": null,
                 "description": null
             },
             {
-                "source": "task_pipelines",
-                "target": "models",
-                "label": "Uses models for tasks",
+                "source": "pipelines_module",
+                "target": "data_module",
+                "label": "Utilizes data processors",
                 "title": null,
                 "description": null
             },
             {
-                "source": "task_pipelines",
-                "target": "data_processors",
-                "label": "Consumes processed data",
+                "source": "pipelines_module",
+                "target": "models_module",
+                "label": "Loads and uses models",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_generation",
-                "target": "models",
-                "label": "Executes model forward pass",
+                "source": "pipelines_module",
+                "target": "generation_module",
+                "label": "Invokes for text generation",
                 "title": null,
                 "description": null
             },
             {
-                "source": "core_generation",
-                "target": "data_processors",
-                "label": "Uses tokenizers/processors",
+                "source": "generation_module",
+                "target": "models_module",
+                "label": "Operates on models",
                 "title": null,
                 "description": null
             },
             {
-                "source": "serving_integrations",
-                "target": "core_generation",
-                "label": "Optimizes generation serving",
+                "source": "generation_module",
+                "target": "final_output",
+                "label": "Produces generated text",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "pipelines_module",
+                "target": "final_output",
+                "label": "Delivers task results",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "internal_modules",
+                "id": "user_interface_layer",
+                "label": "User Interface Layer",
+                "nodes": [
+                    "user_input",
+                    "pipelines_module"
+                ],
+                "title": "User Interaction & Abstraction",
+                "description": "This group represents the entry point for users, where raw inputs are provided and high-level task pipelines abstract complex ML workflows.",
+                "role": null
+            },
+            {
+                "id": "core_functionality",
                 "label": "Core Functionality",
                 "nodes": [
-                    "core_generation",
-                    "task_pipelines"
+                    "generation_module"
                 ],
-                "title": "Core Generation & Pipelines",
-                "description": "The primary components within this module, responsible for orchestrating text generation and providing high-level task interfaces.",
+                "title": "Core Generation Engine",
+                "description": "This group encapsulates the fundamental logic and algorithms responsible for generating sequences, including various decoding strategies and performance optimizations.",
                 "role": null
             },
             {
                 "id": "external_dependencies",
                 "label": "External Dependencies",
                 "nodes": [
-                    "models",
-                    "data_processors",
-                    "serving_integrations"
+                    "models_module",
+                    "data_module"
                 ],
-                "title": "Dependent Modules",
-                "description": "Other modules within the Transformers library that provide essential models, data preprocessing, and serving optimizations for generation and pipelines.",
+                "title": "Supporting Modules",
+                "description": "This group highlights the essential external modules that provide models and data preprocessing capabilities, which are crucial for the pipelines and generation core to operate.",
+                "role": null
+            },
+            {
+                "id": "output_delivery",
+                "label": "Output Delivery",
+                "nodes": [
+                    "final_output"
+                ],
+                "title": "Result Delivery",
+                "description": "This group represents the final stage where the processed and generated results are delivered back to the user or downstream systems.",
                 "role": null
             }
         ]

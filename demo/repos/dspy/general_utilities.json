@@ -1,0 +1,359 @@
+{
+    "title": "DSPy General Utilities",
+    "summary": "This module provides a collection of essential utility functions for DSPy, including tools for managing asynchronous and synchronous execution, handling callbacks, downloading files, and providing dummy implementations for testing and development.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "async_program_node",
+                "label": "Wrap Sync Program for Async",
+                "type": "component",
+                "link": null,
+                "title": "Async Program Wrapper",
+                "description": "Converts a synchronous program into an awaitable asynchronous function, managing thread-local context and concurrency for safe execution in an async environment."
+            },
+            {
+                "id": "wrapped_program_node",
+                "label": "Manage Thread-Local Context",
+                "type": "component",
+                "link": null,
+                "title": "Thread-Local Context Manager",
+                "description": "An internal helper function used by `async_program` to correctly set and reset thread-local context overrides around the execution of the original synchronous program."
+            },
+            {
+                "id": "get_limiter_node",
+                "label": "Control Async Concurrency",
+                "type": "component",
+                "link": null,
+                "title": "Asynchronous Concurrency Limiter",
+                "description": "Provides and manages a concurrency limiter (`CapacityLimiter`) to control the number of concurrent asynchronous operations, preventing resource exhaustion."
+            },
+            {
+                "id": "async_wrapper_node",
+                "label": "Add Callbacks to Async Function",
+                "type": "component",
+                "link": null,
+                "title": "Async Callback Wrapper",
+                "description": "A decorator-like function that wraps an asynchronous function, injecting pre- and post-execution callback logic, and managing a call ID for tracing and context."
+            },
+            {
+                "id": "sync_wrapper_node",
+                "label": "Add Callbacks to Sync Function",
+                "type": "component",
+                "link": null,
+                "title": "Sync Callback Wrapper",
+                "description": "A decorator-like function that wraps a synchronous function, injecting pre- and post-execution callback logic, and managing a call ID for tracing and context."
+            },
+            {
+                "id": "sync_wrapper_class_node",
+                "label": "Convert Async Program to Sync",
+                "type": "component",
+                "link": null,
+                "title": "Async to Sync Program Wrapper",
+                "description": "A class that wraps an asynchronous program (`Module`) to expose a synchronous `forward` method, allowing it to be called seamlessly in synchronous contexts."
+            },
+            {
+                "id": "anyio_run_sync_ext",
+                "label": "Execute Async in Thread (anyio)",
+                "type": "external",
+                "link": null,
+                "title": "anyio.to_thread.run_sync",
+                "description": "An external utility from the `anyio` library that runs an asynchronous function in a separate thread, blocking the calling thread until its completion."
+            },
+            {
+                "id": "thread_local_overrides_ext",
+                "label": "Manage Thread-Specific Settings",
+                "type": "external",
+                "link": "dsp_utilities",
+                "title": "Thread-Local Settings Manager",
+                "description": "A mechanism to store and retrieve settings or context that are specific to the current execution thread, ensuring isolation and proper context propagation."
+            },
+            {
+                "id": "get_active_callbacks_helper",
+                "label": "Retrieve Active Callbacks",
+                "type": "component",
+                "link": null,
+                "title": "Active Callbacks Retriever",
+                "description": "An internal utility function responsible for fetching the list of currently active callback functions associated with a given instance."
+            },
+            {
+                "id": "execute_start_callbacks_helper",
+                "label": "Execute Pre-Call Callbacks",
+                "type": "component",
+                "link": null,
+                "title": "Pre-Call Callback Executor",
+                "description": "An internal utility function that iterates through and executes registered callback functions before the main wrapped function is invoked."
+            },
+            {
+                "id": "execute_end_callbacks_helper",
+                "label": "Execute Post-Call Callbacks",
+                "type": "component",
+                "link": null,
+                "title": "Post-Call Callback Executor",
+                "description": "An internal utility function that iterates through and executes registered callback functions after the main wrapped function has completed or raised an exception."
+            },
+            {
+                "id": "active_call_id_context_helper",
+                "label": "Track Current Call ID Context",
+                "type": "component",
+                "link": null,
+                "title": "Active Call ID Context",
+                "description": "A thread-local context variable used to store and retrieve the unique identifier for the currently executing function call, primarily for callback tracing and context management."
+            },
+            {
+                "id": "run_async_ext",
+                "label": "Execute Async Coroutine Sync",
+                "type": "external",
+                "link": null,
+                "title": "Synchronous Async Runner",
+                "description": "An external utility function that blocks the current thread until a given asynchronous coroutine completes, effectively running async code in a synchronous manner."
+            },
+            {
+                "id": "download_file",
+                "label": "Download File",
+                "type": "component",
+                "link": null,
+                "title": "File Downloader",
+                "description": "Downloads a file from a given URL, checking if it already exists and its size to avoid re-downloading unnecessary data."
+            },
+            {
+                "id": "experimental_decorator",
+                "label": "Mark Experimental Features",
+                "type": "component",
+                "link": null,
+                "title": "Experimental Feature Decorator",
+                "description": "A decorator used to mark functions or classes as experimental, providing a mechanism for managing feature development and deprecation."
+            },
+            {
+                "id": "dummy_lm",
+                "label": "Dummy Language Model",
+                "type": "component",
+                "link": null,
+                "title": "Simulate LM for Testing",
+                "description": "Provides a mock language model for unit testing, supporting various response modes like predefined lists, dictionary lookups, or example following to simulate LM behavior without actual API calls."
+            },
+            {
+                "id": "dummy_retriever_logic",
+                "label": "Dummy Retriever Logic",
+                "type": "component",
+                "link": null,
+                "title": "Simulate Retrieval Logic",
+                "description": "An internal function within a dummy retriever (likely `DummyRM` not shown here) that simulates document retrieval based on vector similarity for testing purposes."
+            },
+            {
+                "id": "base_lm_interface",
+                "label": "Base LM Interface",
+                "type": "external",
+                "link": "lm_clients",
+                "title": "Base Language Model Interface",
+                "description": "The foundational abstract class for all language models in DSPy, defining the common interface for LM operations."
+            },
+            {
+                "id": "chat_adapter_component",
+                "label": "Chat Adapter",
+                "type": "external",
+                "link": "external_adapters",
+                "title": "Format Chat Messages",
+                "description": "Adapts messages and responses to and from a chat-based language model format, handling roles and content structuring."
+            },
+            {
+                "id": "requests_library",
+                "label": "Requests Library",
+                "type": "external",
+                "link": null,
+                "title": "HTTP Request Utility",
+                "description": "A popular Python library for making HTTP requests, used by the download utility for fetching files from the web."
+            }
+        ],
+        "edges": [
+            {
+                "source": "async_program_node",
+                "target": "wrapped_program_node",
+                "label": "Uses for context",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "async_program_node",
+                "target": "get_limiter_node",
+                "label": "Obtains concurrency limit",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "async_program_node",
+                "target": "anyio_run_sync_ext",
+                "label": "Delegates sync execution",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "wrapped_program_node",
+                "target": "thread_local_overrides_ext",
+                "label": "Manages context",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "async_wrapper_node",
+                "target": "get_active_callbacks_helper",
+                "label": "Retrieves callbacks",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "async_wrapper_node",
+                "target": "execute_start_callbacks_helper",
+                "label": "Invokes on start",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "async_wrapper_node",
+                "target": "execute_end_callbacks_helper",
+                "label": "Invokes on end",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "async_wrapper_node",
+                "target": "active_call_id_context_helper",
+                "label": "Sets/Resets call ID",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sync_wrapper_node",
+                "target": "get_active_callbacks_helper",
+                "label": "Retrieves callbacks",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sync_wrapper_node",
+                "target": "execute_start_callbacks_helper",
+                "label": "Invokes on start",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sync_wrapper_node",
+                "target": "execute_end_callbacks_helper",
+                "label": "Invokes on end",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sync_wrapper_node",
+                "target": "active_call_id_context_helper",
+                "label": "Sets/Resets call ID",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "sync_wrapper_class_node",
+                "target": "run_async_ext",
+                "label": "Delegates async execution",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "download_file",
+                "target": "requests_library",
+                "label": "uses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dummy_lm",
+                "target": "base_lm_interface",
+                "label": "inherits from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dummy_lm",
+                "target": "chat_adapter_component",
+                "label": "uses for formatting",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "async_exec_group",
+                "label": "Asynchronous Execution Management",
+                "nodes": [
+                    "async_program_node",
+                    "wrapped_program_node",
+                    "get_limiter_node",
+                    "anyio_run_sync_ext",
+                    "thread_local_overrides_ext"
+                ],
+                "title": "Asynchronous Execution Management",
+                "description": "Components responsible for enabling synchronous code to run asynchronously, managing concurrency, and ensuring proper context propagation.",
+                "role": "generative"
+            },
+            {
+                "id": "sync_exec_group",
+                "label": "Synchronous Execution Management",
+                "nodes": [
+                    "sync_wrapper_class_node",
+                    "run_async_ext"
+                ],
+                "title": "Synchronous Execution Management",
+                "description": "Components focused on enabling asynchronous programs to be called from synchronous contexts.",
+                "role": "generative"
+            },
+            {
+                "id": "callback_system_group",
+                "label": "Callback System",
+                "nodes": [
+                    "async_wrapper_node",
+                    "sync_wrapper_node",
+                    "get_active_callbacks_helper",
+                    "execute_start_callbacks_helper",
+                    "execute_end_callbacks_helper",
+                    "active_call_id_context_helper"
+                ],
+                "title": "Callback System",
+                "description": "Components that provide a flexible callback mechanism for both synchronous and asynchronous function calls, allowing for pre- and post-execution hooks and tracing.",
+                "role": "surface"
+            },
+            {
+                "id": "testing_tools_group",
+                "label": "Testing Tools",
+                "nodes": [
+                    "dummy_lm",
+                    "dummy_retriever_logic",
+                    "base_lm_interface",
+                    "chat_adapter_component"
+                ],
+                "title": "Testing and Mocking Utilities",
+                "description": "Contains components for simulating external systems like Language Models and Retrievers, crucial for unit testing and development without external dependencies.",
+                "role": "generative"
+            },
+            {
+                "id": "file_management_group",
+                "label": "File Management",
+                "nodes": [
+                    "download_file",
+                    "requests_library"
+                ],
+                "title": "File Download Utility",
+                "description": "Provides a utility function for downloading files from URLs, with checks to prevent redundant downloads.",
+                "role": "data"
+            },
+            {
+                "id": "development_tools_group",
+                "label": "Development Tools",
+                "nodes": [
+                    "experimental_decorator"
+                ],
+                "title": "Developer Annotation Tools",
+                "description": "Includes decorators for marking code components, such as indicating experimental features, aiding in code maintenance and communication.",
+                "role": "surface"
+            }
+        ]
+    }
+}

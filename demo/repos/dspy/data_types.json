@@ -1,0 +1,690 @@
+{
+  "title": "DSPy Core Data Types",
+  "summary": "This module defines the fundamental data structures for interacting with Language Models, including request/response formats, streaming events, message roles, and custom types for multimodal and structured data. It provides a standardized way to represent and exchange information within DSPy programs.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "LMRequest",
+        "label": "LM Request",
+        "type": "component",
+        "link": null,
+        "title": "Language Model Request",
+        "description": "Defines the structure for a normalized request sent to a Language Model, including messages, tools, and configuration parameters like temperature and max tokens."
+      },
+      {
+        "id": "SystemMessage",
+        "label": "System Message",
+        "type": "component",
+        "link": null,
+        "title": "Create System Message",
+        "description": "Helper function to create an LMMessage with the 'system' role, used for providing model-level instructions such as tone, scope, or formatting rules to the LM."
+      },
+      {
+        "id": "DeveloperMessage",
+        "label": "Developer Message",
+        "type": "component",
+        "link": null,
+        "title": "Create Developer Message",
+        "description": "Helper function to create an LMMessage with the 'developer' role, used for implementation guidance that is separate from user requests but not model-level."
+      },
+      {
+        "id": "UserMessage",
+        "label": "User Message",
+        "type": "component",
+        "link": null,
+        "title": "Create User Message",
+        "description": "Helper function to create an LMMessage with the 'user' role, containing the primary request or data from the user, supporting plain text and multimodal content."
+      },
+      {
+        "id": "AssistantMessage",
+        "label": "Assistant Message",
+        "type": "component",
+        "link": null,
+        "title": "Create Assistant Message",
+        "description": "Helper function to create an LMMessage with the 'assistant' role, representing a previous model response or tool calls within a multi-turn conversation."
+      },
+      {
+        "id": "ToolResultMessage",
+        "label": "Tool Result Message",
+        "type": "component",
+        "link": null,
+        "title": "Create Tool Result Message",
+        "description": "Helper function to create an LMMessage with the 'tool' role, used to send the output of a tool execution back to the language model for further processing."
+      },
+      {
+        "id": "LMStream",
+        "label": "Sync LM Stream",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous LM Stream Handler",
+        "description": "Manages synchronous streaming of Language Model events, allowing for incremental processing of responses and providing the final LMResponse result upon completion."
+      },
+      {
+        "id": "AsyncLMStream",
+        "label": "Async LM Stream",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous LM Stream Handler",
+        "description": "Manages asynchronous streaming of Language Model events, enabling non-blocking processing of incremental responses and yielding the final LMResponse result."
+      },
+      {
+        "id": "LMHistoryEntry",
+        "label": "LM History Entry",
+        "type": "component",
+        "link": null,
+        "title": "Language Model History Record",
+        "description": "A typed record storing a canonical LM request and its corresponding response, providing convenient access to derived fields for historical analysis and debugging."
+      },
+      {
+        "id": "LMToolChoice",
+        "label": "LM Tool Choice Config",
+        "type": "component",
+        "link": null,
+        "title": "Tool Choice Configuration",
+        "description": "Defines controls for native tool-capable models, specifying how tools should be used, including allowed tool names and whether parallel execution is permitted."
+      },
+      {
+        "id": "LMReasoningConfig",
+        "label": "LM Reasoning Config",
+        "type": "component",
+        "link": null,
+        "title": "Reasoning Configuration",
+        "description": "Configures native reasoning support in Language Models, allowing control over reasoning effort, maximum tokens for reasoning, and summary generation."
+      },
+      {
+        "id": "LMCacheConfig",
+        "label": "LM Cache Config",
+        "type": "component",
+        "link": null,
+        "title": "DSPy Memoization Cache Config",
+        "description": "Controls DSPy's internal memoization cache, which skips provider calls entirely when an exact request match is found, improving efficiency."
+      },
+      {
+        "id": "LMPromptCacheConfig",
+        "label": "LM Prompt Cache Config",
+        "type": "component",
+        "link": null,
+        "title": "Provider-side Prompt Cache Config",
+        "description": "Configures provider-side prompt/token caching, which can reduce latency and input-token costs by reusing cached prompt prefixes or KV states."
+      },
+      {
+        "id": "_json_default",
+        "label": "JSON Default Serializer",
+        "type": "component",
+        "link": null,
+        "title": "JSON Serialization Helper",
+        "description": "A utility function used for serializing Pydantic models or other complex objects into a JSON-compatible format, typically by calling their model_dump method."
+      },
+      {
+        "id": "LMTextDelta",
+        "label": "Text Delta",
+        "type": "component",
+        "link": null,
+        "title": "Streamed Text Delta",
+        "description": "Represents an incremental text update received during Language Model streaming, containing a portion of the generated text output."
+      },
+      {
+        "id": "LMThinkingDelta",
+        "label": "Thinking Delta",
+        "type": "component",
+        "link": null,
+        "title": "Streamed Thinking Delta",
+        "description": "Represents an incremental thinking or reasoning update during Language Model streaming, providing insights into the model's internal process."
+      },
+      {
+        "id": "LMToolCallDelta",
+        "label": "Tool Call Delta",
+        "type": "component",
+        "link": null,
+        "title": "Streamed Tool Call Delta",
+        "description": "Represents an incremental update for a tool call during Language Model streaming, including partial tool name or arguments."
+      },
+      {
+        "id": "LMCitationDelta",
+        "label": "Citation Delta",
+        "type": "component",
+        "link": null,
+        "title": "Streamed Citation Delta",
+        "description": "Represents an incremental citation update during Language Model streaming, providing partial citation information as it becomes available."
+      },
+      {
+        "id": "LMImageDelta",
+        "label": "Image Delta",
+        "type": "component",
+        "link": null,
+        "title": "Streamed Image Delta",
+        "description": "Represents an incremental image update during Language Model streaming, typically containing a partial image or metadata."
+      },
+      {
+        "id": "LMAudioDelta",
+        "label": "Audio Delta",
+        "type": "component",
+        "link": null,
+        "title": "Streamed Audio Delta",
+        "description": "Represents an incremental audio update during Language Model streaming, providing partial audio data or metadata."
+      },
+      {
+        "id": "LMStreamStartEvent",
+        "label": "Stream Start Event",
+        "type": "component",
+        "link": null,
+        "title": "LM Stream Start Event",
+        "description": "An event signaling the beginning of an LM stream, typically indicating which model is being used for the generation."
+      },
+      {
+        "id": "LMStreamDeltaEvent",
+        "label": "Stream Delta Event",
+        "type": "component",
+        "link": null,
+        "title": "LM Stream Delta Event",
+        "description": "An event containing an incremental delta update within an LM stream, carrying one of the specific delta types like text, tool call, or citation."
+      },
+      {
+        "id": "LMStreamOutputEndEvent",
+        "label": "Stream Output End Event",
+        "type": "component",
+        "link": null,
+        "title": "LM Stream Output End Event",
+        "description": "An event marking the end of a specific output segment within an LM stream, providing details like the finish reason and whether the output was truncated."
+      },
+      {
+        "id": "LMStreamEndEvent",
+        "label": "Stream End Event",
+        "type": "component",
+        "link": null,
+        "title": "LM Stream End Event",
+        "description": "An event signaling the overall conclusion of an LM stream, providing final usage statistics, cost information, and the complete LMResponse."
+      },
+      {
+        "id": "AudioType",
+        "label": "Audio Type",
+        "type": "component",
+        "link": null,
+        "title": "Multimodal Audio Data",
+        "description": "A custom DSPy type for representing audio data, supporting encoding from URLs, local files, or NumPy-like arrays for use as Language Model input."
+      },
+      {
+        "id": "BaseType",
+        "label": "Base Custom Type",
+        "type": "component",
+        "link": null,
+        "title": "Base Class for Custom Types",
+        "description": "The abstract base class for all DSPy custom types, requiring subclasses to implement a 'format' method to convert their data into a format consumable by LMs."
+      },
+      {
+        "id": "CitationFromDictList",
+        "label": "Citations from Dict List",
+        "type": "component",
+        "link": null,
+        "title": "Create Citations from Dicts",
+        "description": "A utility function to convert a list of dictionaries, each representing citation information, into a structured Citations instance for use in LM interactions."
+      },
+      {
+        "id": "CitationFormat",
+        "label": "Format Citations",
+        "type": "component",
+        "link": null,
+        "title": "Format Citations for LM",
+        "description": "A utility function to format a Citations instance into a list of dictionaries, making it suitable for consumption by Language Models that support citation features."
+      },
+      {
+        "id": "CitationValidateInput",
+        "label": "Validate Citation Input",
+        "type": "component",
+        "link": null,
+        "title": "Validate Citation Input",
+        "description": "A utility function to validate and coerce various input formats (e.g., dictionaries, lists of dictionaries) into a standardized Citations instance."
+      },
+      {
+        "id": "CodeType",
+        "label": "Code Type",
+        "type": "component",
+        "link": null,
+        "title": "Structured Code Data",
+        "description": "A custom DSPy type for representing code snippets, useful for tasks involving code generation, analysis, or execution within DSPy programs."
+      },
+      {
+        "id": "DocumentType",
+        "label": "Document Type",
+        "type": "component",
+        "link": null,
+        "title": "Citable Document Data",
+        "description": "A custom DSPy type for representing document content with optional title and context, designed to enable citation-aware responses from Language Models."
+      },
+      {
+        "id": "FileType",
+        "label": "File Type",
+        "type": "component",
+        "link": null,
+        "title": "Generic File Data",
+        "description": "A custom DSPy type for representing generic file data, supporting encoding from local paths, raw bytes, or file IDs for use as Language Model input."
+      },
+      {
+        "id": "ImageType",
+        "label": "Image Type",
+        "type": "component",
+        "link": null,
+        "title": "Multimodal Image Data",
+        "description": "A custom DSPy type for representing image data, supporting various sources like URLs, local files, or PIL image objects for use as Language Model input."
+      },
+      {
+        "id": "GetFileExtension",
+        "label": "Get File Extension",
+        "type": "component",
+        "link": null,
+        "title": "Extract File Extension",
+        "description": "A utility function to extract the file extension from a given file path or URL, used internally for type detection and processing."
+      },
+      {
+        "id": "IsImage",
+        "label": "Is Image Check",
+        "type": "component",
+        "link": null,
+        "title": "Check if Object is Image",
+        "description": "A utility function to determine if a given object represents an image or a valid media file reference, supporting various input formats."
+      },
+      {
+        "id": "ToolDefinition",
+        "label": "Tool Definition",
+        "type": "component",
+        "link": null,
+        "title": "Define LLM Tool",
+        "description": "A class that simplifies the creation of tools for LLM function calling, automatically inferring tool names, descriptions, and argument schemas from Python functions."
+      },
+      {
+        "id": "ToolValidateInput",
+        "label": "Validate Tool Input",
+        "type": "component",
+        "link": null,
+        "title": "Validate Tool Call Input",
+        "description": "A utility function to validate and coerce various input formats into a structured representation of tool calls, ensuring compatibility with LM expectations."
+      }
+    ],
+    "edges": [
+      {
+        "source": "LMRequest",
+        "target": "LMToolChoice",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMRequest",
+        "target": "LMReasoningConfig",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMRequest",
+        "target": "LMCacheConfig",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMRequest",
+        "target": "LMPromptCacheConfig",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStream",
+        "target": "LMRequest",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStream",
+        "target": "LMStreamStartEvent",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStream",
+        "target": "LMStreamDeltaEvent",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStream",
+        "target": "LMStreamOutputEndEvent",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStream",
+        "target": "LMStreamEndEvent",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AsyncLMStream",
+        "target": "LMRequest",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AsyncLMStream",
+        "target": "LMStreamStartEvent",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AsyncLMStream",
+        "target": "LMStreamDeltaEvent",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AsyncLMStream",
+        "target": "LMStreamOutputEndEvent",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AsyncLMStream",
+        "target": "LMStreamEndEvent",
+        "label": "generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMHistoryEntry",
+        "target": "LMRequest",
+        "label": "contains",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMHistoryEntry",
+        "target": "_json_default",
+        "label": "uses for serialization",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStreamDeltaEvent",
+        "target": "LMTextDelta",
+        "label": "carries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStreamDeltaEvent",
+        "target": "LMThinkingDelta",
+        "label": "carries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStreamDeltaEvent",
+        "target": "LMToolCallDelta",
+        "label": "carries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStreamDeltaEvent",
+        "target": "LMCitationDelta",
+        "label": "carries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStreamDeltaEvent",
+        "target": "LMImageDelta",
+        "label": "carries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LMStreamDeltaEvent",
+        "target": "LMAudioDelta",
+        "label": "carries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AudioType",
+        "target": "BaseType",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CodeType",
+        "target": "BaseType",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DocumentType",
+        "target": "BaseType",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FileType",
+        "target": "BaseType",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ImageType",
+        "target": "BaseType",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolDefinition",
+        "target": "BaseType",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ImageType",
+        "target": "GetFileExtension",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ImageType",
+        "target": "IsImage",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SystemMessage",
+        "target": "LMRequest",
+        "label": "creates message for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DeveloperMessage",
+        "target": "LMRequest",
+        "label": "creates message for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "UserMessage",
+        "target": "LMRequest",
+        "label": "creates message for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "AssistantMessage",
+        "target": "LMRequest",
+        "label": "creates message for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ToolResultMessage",
+        "target": "LMRequest",
+        "label": "creates message for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "lm_request_history",
+        "label": "LM Request & History",
+        "nodes": [
+          "LMRequest",
+          "LMHistoryEntry"
+        ],
+        "title": "Language Model Request & History",
+        "description": "Core data structures for defining LM requests and storing historical interactions.",
+        "role": "data"
+      },
+      {
+        "id": "lm_message_builders",
+        "label": "LM Message Builders",
+        "nodes": [
+          "SystemMessage",
+          "DeveloperMessage",
+          "UserMessage",
+          "AssistantMessage",
+          "ToolResultMessage"
+        ],
+        "title": "Language Model Message Constructors",
+        "description": "Helper functions to construct various types of LM messages (system, user, assistant, tool result) with appropriate roles and content.",
+        "role": "generative"
+      },
+      {
+        "id": "lm_configuration",
+        "label": "LM Configuration",
+        "nodes": [
+          "LMToolChoice",
+          "LMReasoningConfig",
+          "LMCacheConfig",
+          "LMPromptCacheConfig"
+        ],
+        "title": "Language Model Configuration Options",
+        "description": "Classes defining various configuration options for Language Models, including tool choice, reasoning, and caching mechanisms.",
+        "role": "surface"
+      },
+      {
+        "id": "lm_streaming_core",
+        "label": "LM Streaming Core",
+        "nodes": [
+          "LMStream",
+          "AsyncLMStream",
+          "LMStreamStartEvent",
+          "LMStreamEndEvent"
+        ],
+        "title": "Language Model Streaming Core",
+        "description": "Components responsible for managing synchronous and asynchronous streaming of LM responses, including start and end events.",
+        "role": "data"
+      },
+      {
+        "id": "lm_streaming_text_tool_deltas",
+        "label": "LM Stream Text & Tool Deltas",
+        "nodes": [
+          "LMTextDelta",
+          "LMThinkingDelta",
+          "LMToolCallDelta",
+          "LMStreamDeltaEvent"
+        ],
+        "title": "Streamed Text & Tool Deltas",
+        "description": "Specific delta types representing incremental updates for text, thinking processes, and tool calls during LM streaming, bundled with the delta event.",
+        "role": "data"
+      },
+      {
+        "id": "lm_streaming_media_end_events",
+        "label": "LM Stream Media & End Events",
+        "nodes": [
+          "LMCitationDelta",
+          "LMImageDelta",
+          "LMAudioDelta",
+          "LMStreamOutputEndEvent"
+        ],
+        "title": "Streamed Media Deltas & Output End Events",
+        "description": "Specific delta types for incremental updates of citations, images, and audio during LM streaming, along with events marking the end of output segments.",
+        "role": "data"
+      },
+      {
+        "id": "base_media_types",
+        "label": "Base & Media Types",
+        "nodes": [
+          "BaseType",
+          "AudioType",
+          "ImageType"
+        ],
+        "title": "Base and Multimodal Media Types",
+        "description": "The foundational class for all custom DSPy types and specific types for handling audio and image data in multimodal LM interactions.",
+        "role": "data"
+      },
+      {
+        "id": "document_code_types",
+        "label": "Document & Code Types",
+        "nodes": [
+          "FileType",
+          "DocumentType",
+          "CodeType"
+        ],
+        "title": "Document, File, and Code Types",
+        "description": "Custom DSPy types for representing structured documents, generic files, and code snippets, enabling specialized handling in LM programs.",
+        "role": "data"
+      },
+      {
+        "id": "tooling_types_utilities",
+        "label": "Tooling Types & Utilities",
+        "nodes": [
+          "ToolDefinition",
+          "ToolValidateInput"
+        ],
+        "title": "Tool Definition and Validation",
+        "description": "Components for defining Language Model tools and utilities for validating tool-related input, facilitating function calling capabilities.",
+        "role": "data"
+      },
+      {
+        "id": "citation_types_utilities",
+        "label": "Citation Types & Utilities",
+        "nodes": [
+          "CitationFromDictList",
+          "CitationFormat",
+          "CitationValidateInput"
+        ],
+        "title": "Citation Handling and Formatting",
+        "description": "Utility functions for creating, formatting, and validating citation data, crucial for models that support source attribution.",
+        "role": "data"
+      },
+      {
+        "id": "general_type_utilities",
+        "label": "General Type Utilities",
+        "nodes": [
+          "_json_default",
+          "GetFileExtension",
+          "IsImage"
+        ],
+        "title": "General Type Utilities",
+        "description": "Miscellaneous utility functions for serialization, file extension extraction, and image type checking, supporting various data handling needs.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

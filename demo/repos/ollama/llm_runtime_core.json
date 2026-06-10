@@ -1,0 +1,217 @@
+{
+    "title": "LLM Runtime Core",
+    "summary": "This module serves as the core runtime for Large Language Models, managing model loading, inference context, text processing, token sampling, and multimodal data handling. It provides essential functionalities for efficient and controlled LLM execution.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "node_context_state",
+                "label": "Manage LLM Context & State",
+                "type": "module",
+                "link": "model_context_and_state",
+                "title": "LLM Context & State Management",
+                "description": "Handles the internal state of the LLM inference context, including saving, loading, querying, and providing utilities for performance monitoring and memory analysis."
+            },
+            {
+                "id": "node_text_sampling",
+                "label": "Process Text & Sample Tokens",
+                "type": "module",
+                "link": "text_processing_and_sampling",
+                "title": "Text Processing & Sampling",
+                "description": "Manages text tokenization, detokenization, grammar enforcement, and various token sampling strategies to ensure coherent and controlled text generation."
+            },
+            {
+                "id": "node_quant_io",
+                "label": "Handle Model Quantization & I/O",
+                "type": "module",
+                "link": "model_quantization_and_io",
+                "title": "Model Quantization & I/O",
+                "description": "Provides functionalities for quantizing LLMs to optimize size and performance, handles GGUF file metadata, and manages the Key-Value (KV) cache during inference."
+            },
+            {
+                "id": "node_multimodal",
+                "label": "Process Multimodal Inputs",
+                "type": "module",
+                "link": "multimodal_tools",
+                "title": "Multimodal Tooling for LLMs",
+                "description": "Offers core functionalities for processing and encoding multimodal data, such as images and audio, for integration and use with Large Language Models."
+            },
+            {
+                "id": "node_common_utils",
+                "label": "Provide Common Utilities",
+                "type": "module",
+                "link": "common_utilities",
+                "title": "Common Utilities",
+                "description": "Contains general-purpose utility functions for system interaction, string manipulation, model initialization, optimization parameter handling, and logging within the LLM ecosystem."
+            },
+            {
+                "id": "ext_ml_backend",
+                "label": "ML Backend (GGML)",
+                "type": "external",
+                "link": "ml_backend_ggml",
+                "title": "GGML Machine Learning Backend",
+                "description": "The underlying machine learning backend responsible for executing tensor operations, managing memory, and performing computations on various hardware (CPU, GPU)."
+            },
+            {
+                "id": "ext_file_system",
+                "label": "File System",
+                "type": "external",
+                "link": null,
+                "title": "Operating System File System",
+                "description": "The operating system's file system, used for persistent storage, loading model files, saving session states, and managing cache data."
+            },
+            {
+                "id": "ext_system_resources",
+                "label": "System Resources",
+                "type": "external",
+                "link": null,
+                "title": "System Hardware Resources",
+                "description": "Represents the underlying hardware resources of the system, including CPU information, memory, and other performance-related metrics."
+            }
+        ],
+        "edges": [
+            {
+                "source": "node_common_utils",
+                "target": "node_context_state",
+                "label": "Initializes & configures",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_common_utils",
+                "target": "node_quant_io",
+                "label": "Configures model loading",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_quant_io",
+                "target": "node_context_state",
+                "label": "Provides loaded model to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_context_state",
+                "target": "node_text_sampling",
+                "label": "Supplies context for generation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_text_sampling",
+                "target": "node_context_state",
+                "label": "Updates context with generated tokens",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_multimodal",
+                "target": "node_text_sampling",
+                "label": "Encodes multimodal data for tokenization",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_multimodal",
+                "target": "node_context_state",
+                "label": "Adds multimodal embeddings to context",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_context_state",
+                "target": "ext_ml_backend",
+                "label": "Executes computations on",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_text_sampling",
+                "target": "ext_ml_backend",
+                "label": "Uses for token probability calculations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_quant_io",
+                "target": "ext_ml_backend",
+                "label": "Optimizes models for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_context_state",
+                "target": "ext_file_system",
+                "label": "Loads/saves session & state",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_quant_io",
+                "target": "ext_file_system",
+                "label": "Loads/saves quantized models",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_common_utils",
+                "target": "ext_file_system",
+                "label": "Manages cache files",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_common_utils",
+                "target": "ext_system_resources",
+                "label": "Queries system info",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "node_context_state",
+                "target": "ext_system_resources",
+                "label": "Monitors memory/performance",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "llm_core_engine",
+                "label": "LLM Core Engine",
+                "nodes": [
+                    "node_context_state",
+                    "node_text_sampling"
+                ],
+                "title": "Core LLM Inference & Generation",
+                "description": "This group encapsulates the fundamental components for managing the LLM's operational state and generating text based on input and configured parameters.",
+                "role": "generative"
+            },
+            {
+                "id": "data_model_lifecycle",
+                "label": "Data & Model Lifecycle",
+                "nodes": [
+                    "node_quant_io",
+                    "node_multimodal"
+                ],
+                "title": "Model & Data Preparation",
+                "description": "Manages the lifecycle of LLM models, including optimization through quantization, handling file I/O, and processing diverse multimodal inputs for inference.",
+                "role": "data"
+            },
+            {
+                "id": "system_integration",
+                "label": "System Integration & Utilities",
+                "nodes": [
+                    "node_common_utils",
+                    "ext_ml_backend",
+                    "ext_file_system",
+                    "ext_system_resources"
+                ],
+                "title": "System Interaction & Support",
+                "description": "Provides essential utilities for interacting with the operating system, managing files, querying system resources, and interfacing with the underlying machine learning backend.",
+                "role": "analytical"
+            }
+        ]
+    }
+}

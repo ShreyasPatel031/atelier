@@ -268,6 +268,7 @@
             var members = Array.isArray(gr.nodes) ? gr.nodes : [];
             for (var m = 0; m < members.length; m++) {
                 var nid = String(members[m]);
+                if (nid === gid) continue;
                 if (!parentOf.has(nid)) parentOf.set(nid, gid);
             }
         }
@@ -307,10 +308,18 @@
             var gLabel = gg.label != null ? String(gg.label) : gId;
             var ls = estimateGroupLabelSize(gLabel, merged);
             var memberIds = Array.isArray(gg.nodes) ? gg.nodes.map(String) : [];
+            var compoundElkId = gId;
+            if (nodeById.has(gId) && memberIds.indexOf(gId) >= 0) {
+                warnings.push({
+                    code: 'r4_node_id_collides_with_group',
+                    id: gId,
+                });
+            }
             var compoundChildren = [];
             for (var mi = 0; mi < memberIds.length; mi++) {
                 var mid = memberIds[mi];
-                if (groupDefById.has(mid)) {
+                // Same id as this group (module node + wrapper group) → leaf, not nested compound.
+                if (groupDefById.has(mid) && mid !== gId) {
                     compoundChildren.push(buildGroupCompound(mid));
                 } else {
                     if (!nodeById.has(mid)) {
@@ -321,7 +330,7 @@
             }
             buildingCompounds.delete(gId);
             return {
-                id: gId,
+                id: compoundElkId,
                 width: defaultNonRootWidth,
                 height: ls.height,
                 labels: [elkLabel(gId, 0, ls.text, ls.width, ls.height)],
@@ -336,7 +345,6 @@
             if (!node || node.id == null) continue;
             var idStr = String(node.id);
             if (groupIdsSet.has(idStr)) {
-                warnings.push({ code: 'r4_node_id_collides_with_group', id: idStr });
                 continue;
             }
             if (inAnyGroup.has(idStr)) continue;

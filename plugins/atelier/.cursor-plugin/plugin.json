@@ -1,0 +1,14 @@
+{
+  "name": "atelier",
+  "displayName": "Atelier Architecture Diagrams",
+  "version": "0.7.0",
+  "description": "Browse, query, and live-edit architecture diagrams for any repository — powered by Atelier MCP.",
+  "author": {
+    "name": "Atelier Inc",
+    "email": "support@atelier-inc.net"
+  },
+  "license": "MIT",
+  "keywords": ["cursor", "architecture", "diagrams", "mcp", "react-flow", "viewer"],
+  "logo": "assets/logo.svg",
+  "mcpServers": "mcp.json"
+}

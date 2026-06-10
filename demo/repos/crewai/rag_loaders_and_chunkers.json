@@ -1,0 +1,340 @@
+{
+  "title": "RAG Loaders and Chunkers",
+  "summary": "This module provides a comprehensive set of data loaders for various sources (files, web, databases) and a utility for chunking text, essential for Retrieval-Augmented Generation (RAG) systems.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "BaseLoader",
+        "label": "Base Loader",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Base Loader",
+        "description": "Defines the abstract interface for all RAG data loaders, requiring a 'load' method and providing a utility for generating unique document IDs."
+      },
+      {
+        "id": "BaseChunker",
+        "label": "Base Chunker",
+        "type": "component",
+        "link": null,
+        "title": "Text Chunking Utility",
+        "description": "Splits large text documents into smaller, overlapping chunks using a recursive character text splitter, configurable by chunk size, overlap, and separators."
+      },
+      {
+        "id": "CSVLoader",
+        "label": "CSV Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load CSV Data",
+        "description": "Loads content from CSV files or URLs, parsing it into a readable text format with extracted headers and row data, and includes metadata about the CSV structure."
+      },
+      {
+        "id": "DirectoryLoader",
+        "label": "Directory Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load Files from Directory",
+        "description": "Recursively loads and processes multiple files from a specified directory, supporting filtering by file extensions and combining their content into a single result."
+      },
+      {
+        "id": "DocsSiteLoader",
+        "label": "Docs Site Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load Documentation Websites",
+        "description": "Extracts structured content from documentation websites by fetching HTML, parsing it with BeautifulSoup, and organizing text, titles, and navigation links."
+      },
+      {
+        "id": "DOCXLoader",
+        "label": "DOCX Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load DOCX Documents",
+        "description": "Loads content from Microsoft Word (.docx) files, either from local paths or URLs, extracting text from paragraphs and handling temporary file downloads."
+      },
+      {
+        "id": "GithubLoader",
+        "label": "GitHub Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load GitHub Repository Content",
+        "description": "Fetches and processes information from GitHub repositories, including repository metadata, READMEs, file structures, pull requests, and issues, using the GitHub API."
+      },
+      {
+        "id": "JSONLoader",
+        "label": "JSON Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load JSON Data",
+        "description": "Loads and parses JSON content from files or URLs, converting it into a readable string representation, and includes metadata about the JSON structure."
+      },
+      {
+        "id": "MDXLoader",
+        "label": "MDX Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load MDX Files",
+        "description": "Loads content from MDX (Markdown with JSX) files or URLs, cleaning it by removing import/export statements and JSX tags to extract pure markdown text."
+      },
+      {
+        "id": "MySQLLoader",
+        "label": "MySQL Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load MySQL Database Content",
+        "description": "Connects to a MySQL database using a provided URI and executes SQL queries to fetch and format data from tables into a readable text output."
+      },
+      {
+        "id": "PDFLoader",
+        "label": "PDF Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load PDF Documents",
+        "description": "Extracts text content from PDF files, supporting both local files and URLs, and handles temporary file downloads and page-by-page text extraction."
+      },
+      {
+        "id": "PostgresLoader",
+        "label": "PostgreSQL Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load PostgreSQL Database Content",
+        "description": "Connects to a PostgreSQL database using a provided URI and executes SQL queries to fetch and format data from tables into a readable text output."
+      },
+      {
+        "id": "TextFileLoader",
+        "label": "Text File Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load Local Text Files",
+        "description": "Loads raw text content directly from a specified local file path, ensuring the file exists and reading its entire content."
+      },
+      {
+        "id": "TextLoader",
+        "label": "Raw Text Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load Raw Text Input",
+        "description": "A simple loader that directly uses the provided string content as the document content, without external file or URL fetching."
+      },
+      {
+        "id": "WebPageLoader",
+        "label": "Web Page Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load Web Page Content",
+        "description": "Fetches and parses content from a given URL, extracting visible text from the HTML using BeautifulSoup, and removing scripts and styles."
+      },
+      {
+        "id": "XMLLoader",
+        "label": "XML Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load XML Data",
+        "description": "Loads and parses XML content from files or URLs, extracting all text content from the XML structure into a single readable string."
+      },
+      {
+        "id": "YoutubeChannelLoader",
+        "label": "YouTube Channel Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load YouTube Channel Info",
+        "description": "Extracts metadata and summaries of recent videos from a YouTube channel, optionally fetching transcript previews for each video."
+      },
+      {
+        "id": "YoutubeVideoLoader",
+        "label": "YouTube Video Loader",
+        "type": "component",
+        "link": null,
+        "title": "Load YouTube Video Transcript",
+        "description": "Fetches and extracts the transcript of a specific YouTube video, including metadata like title and author, to provide its textual content."
+      }
+    ],
+    "edges": [
+      {
+        "source": "BaseLoader",
+        "target": "CSVLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "DirectoryLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "DocsSiteLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "DOCXLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "GithubLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "JSONLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "MDXLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "MySQLLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "PDFLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "PostgresLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "TextFileLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "TextLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "WebPageLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "XMLLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "YoutubeChannelLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "BaseLoader",
+        "target": "YoutubeVideoLoader",
+        "label": "extends",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "CoreRAGComponents",
+        "label": "Core RAG Components",
+        "nodes": [
+          "BaseLoader",
+          "BaseChunker"
+        ],
+        "title": "Foundational RAG Building Blocks",
+        "description": "Abstract base classes for defining data loading and text chunking functionalities within Retrieval-Augmented Generation (RAG) workflows.",
+        "role": "generative"
+      },
+      {
+        "id": "DocumentLoaders",
+        "label": "Document Loaders",
+        "nodes": [
+          "DOCXLoader",
+          "PDFLoader",
+          "TextFileLoader",
+          "DirectoryLoader"
+        ],
+        "title": "Loaders for Common Document Formats",
+        "description": "Specialized loaders for extracting text from various document types like Microsoft Word (.docx), PDF files, and plain text files from local storage.",
+        "role": "data"
+      },
+      {
+        "id": "StructuredDataLoaders",
+        "label": "Structured Data Loaders",
+        "nodes": [
+          "CSVLoader",
+          "JSONLoader",
+          "XMLLoader",
+          "MDXLoader"
+        ],
+        "title": "Loaders for Structured Data Formats",
+        "description": "Loaders designed to parse and extract information from structured data formats such as CSV, JSON, XML, and MDX, converting them into readable text.",
+        "role": "data"
+      },
+      {
+        "id": "WebAPILoaders",
+        "label": "Web & API Loaders",
+        "nodes": [
+          "WebPageLoader",
+          "DocsSiteLoader",
+          "GithubLoader"
+        ],
+        "title": "Loaders for Web Content and APIs",
+        "description": "Components for fetching and processing content from general web pages, structured documentation sites, and GitHub repositories via their respective APIs.",
+        "role": "data"
+      },
+      {
+        "id": "VideoContentLoaders",
+        "label": "Video Content Loaders",
+        "nodes": [
+          "YoutubeChannelLoader",
+          "YoutubeVideoLoader"
+        ],
+        "title": "Loaders for YouTube Video Content",
+        "description": "Specialized loaders for extracting information and transcripts from YouTube channels and individual videos, providing their textual content for RAG.",
+        "role": "data"
+      },
+      {
+        "id": "DatabaseLoaders",
+        "label": "Database Loaders",
+        "nodes": [
+          "MySQLLoader",
+          "PostgresLoader"
+        ],
+        "title": "Loaders for Relational Databases",
+        "description": "Loaders for connecting to and querying relational databases like MySQL and PostgreSQL to retrieve structured data and format it for RAG processing.",
+        "role": "data"
+      }
+    ]
+  }
+}

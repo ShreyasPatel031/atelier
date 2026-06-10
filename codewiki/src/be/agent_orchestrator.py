@@ -1,5 +1,6 @@
 from pydantic_ai import Agent
 # import logfire
+import asyncio
 import logging
 import os
 import time
@@ -481,17 +482,29 @@ class AgentOrchestrator:
             raise
 
         # STAGE 4-FAST: Small modules → JSON mode, no agent
-        SMALL_MODULE_THRESHOLD = 50
-        if len(core_component_ids) <= SMALL_MODULE_THRESHOLD:
-            logger.info(
-                f"[STAGE 4-FAST] Small module ({len(core_component_ids)} components "
-                f"<= {SMALL_MODULE_THRESHOLD}) — using direct JSON mode for {module_name}"
-            )
+        SMALL_MODULE_THRESHOLD = 60
+        force_fast = os.environ.get("CODEWIKI_FORCE_FAST_LEAF", "").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        if force_fast or len(core_component_ids) <= SMALL_MODULE_THRESHOLD:
+            if force_fast and len(core_component_ids) > SMALL_MODULE_THRESHOLD:
+                logger.info(
+                    f"[STAGE 4-FAST] CODEWIKI_FORCE_FAST_LEAF — forcing direct JSON mode "
+                    f"for {module_name} ({len(core_component_ids)} components)"
+                )
+            elif len(core_component_ids) <= SMALL_MODULE_THRESHOLD:
+                logger.info(
+                    f"[STAGE 4-FAST] Small module ({len(core_component_ids)} components "
+                    f"<= {SMALL_MODULE_THRESHOLD}) — using direct JSON mode for {module_name}"
+                )
             try:
                 from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
                 import json as _json
 
-                doc = generate_leaf_doc_json(
+                doc = await asyncio.to_thread(
+                    generate_leaf_doc_json,
                     module_name=module_name,
                     core_component_ids=core_component_ids,
                     components=components,
@@ -505,25 +518,21 @@ class AgentOrchestrator:
 
 
 
-                # Update module tree
+                # Update module tree (navigate via "children" like apply_metadata_to_tree_path)
                 if module_tree_lock:
-                    async with module_tree_lock:
+                    with module_tree_lock:
                         current_tree = file_manager.load_json(module_tree_path)
-                        node = current_tree
-                        for key in module_path:
-                            node = node.setdefault(key, {})
-                        node["title"] = doc["title"]
-                        node["description"] = doc["summary"]
-                        node["diagram"] = doc["diagram"]
+                        apply_metadata_to_tree_path(
+                            current_tree, module_path,
+                            doc["title"], doc["summary"], doc["diagram"],
+                        )
                         file_manager.save_json(current_tree, module_tree_path)
                         deps.module_tree = current_tree
                 else:
-                    node = deps.module_tree
-                    for key in module_path:
-                        node = node.setdefault(key, {})
-                    node["title"] = doc["title"]
-                    node["description"] = doc["summary"]
-                    node["diagram"] = doc["diagram"]
+                    apply_metadata_to_tree_path(
+                        deps.module_tree, module_path,
+                        doc["title"], doc["summary"], doc["diagram"],
+                    )
                     file_manager.save_json(deps.module_tree, module_tree_path)
 
                 logger.info(
@@ -641,8 +650,7 @@ class AgentOrchestrator:
             
             # Save updated module tree (with lock if provided)
             if module_tree_lock:
-                async with module_tree_lock:
-                    # Reload to get latest, merge our changes, save
+                with module_tree_lock:
                     current_tree = file_manager.load_json(module_tree_path)
                     self._merge_module_tree(current_tree, deps.module_tree)
                     file_manager.save_json(current_tree, module_tree_path)
@@ -781,12 +789,9 @@ class AgentOrchestrator:
             # Save updated module tree (with lock if provided for parallel safety)
             save_start = time.time()
             if module_tree_lock:
-                async with module_tree_lock:
-                    # Reload to get latest changes from other parallel tasks
+                with module_tree_lock:
                     current_tree = file_manager.load_json(module_tree_path)
-                    # Merge our changes
                     self._merge_module_tree(current_tree, deps.module_tree)
-                    # Apply extracted metadata (title, description, diagram) to correct nested position
                     if extracted_title:
                         apply_metadata_to_tree_path(
                             current_tree,

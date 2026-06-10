@@ -1,0 +1,118 @@
+{
+    "title": "Language Model Integration",
+    "summary": "This module orchestrates all interactions with Language Models (LMs) within DSPy, providing client integrations for various LMs, caching for performance, API-specific data formatting, and essential utilities for logging and secure data handling.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "lm_clients_node",
+                "label": "LM Client Integrations",
+                "type": "module",
+                "link": "lm_clients",
+                "title": "Language Model Clients",
+                "description": "Manages connections and interactions with various Language Models, including LiteLLM-based clients and finetuning integrations."
+            },
+            {
+                "id": "lm_caching_node",
+                "label": "LM Caching & Embeddings",
+                "type": "module",
+                "link": "lm_caching_and_embeddings",
+                "title": "Caching & Embedding Services",
+                "description": "Provides caching mechanisms for LM calls and embedding computations, optimizing performance and reducing API costs."
+            },
+            {
+                "id": "openai_formatting_node",
+                "label": "OpenAI API Formatting",
+                "type": "module",
+                "link": "openai_formatting",
+                "title": "OpenAI Data Conversion",
+                "description": "Handles conversion between DSPy's internal data structures and OpenAI's specific API request/response formats, including cost tracking."
+            },
+            {
+                "id": "lm_utilities_node",
+                "label": "LM Client Utilities",
+                "type": "module",
+                "link": "lm_client_utilities",
+                "title": "Client Utilities & Security",
+                "description": "Offers utility functions for managing LiteLLM logging and secure disk serialization, enhancing observability and data integrity."
+            }
+        ],
+        "edges": [
+            {
+                "source": "lm_clients_node",
+                "target": "lm_caching_node",
+                "label": "Leverages for caching",
+                "title": "Leverages for caching",
+                "description": "LM clients utilize the caching module to store and retrieve responses, reducing redundant API calls."
+            },
+            {
+                "source": "lm_caching_node",
+                "target": "lm_clients_node",
+                "label": "Calls if uncached",
+                "title": "Calls if uncached",
+                "description": "The caching module invokes LM clients to fetch responses when a requested item is not found in the cache."
+            },
+            {
+                "source": "lm_clients_node",
+                "target": "openai_formatting_node",
+                "label": "Uses for OpenAI API",
+                "title": "Uses for OpenAI API",
+                "description": "OpenAI-specific LM clients rely on the formatting module to prepare requests and parse responses according to OpenAI's API specifications."
+            },
+            {
+                "source": "openai_formatting_node",
+                "target": "lm_clients_node",
+                "label": "Provides formatted data to",
+                "title": "Provides formatted data to",
+                "description": "The OpenAI formatting module supplies structured requests to and processes responses from OpenAI-compatible LM clients."
+            },
+            {
+                "source": "lm_clients_node",
+                "target": "lm_utilities_node",
+                "label": "Utilizes for support",
+                "title": "Utilizes for support",
+                "description": "LM clients use the utility module for features like logging and secure data handling during their operations."
+            },
+            {
+                "source": "lm_utilities_node",
+                "target": "lm_clients_node",
+                "label": "Configures/Secures",
+                "title": "Configures/Secures",
+                "description": "The utility module provides configuration (e.g., logging) and security features (e.g., serialization) that support the LM clients."
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_lm_interaction",
+                "label": "Core LM Interaction",
+                "nodes": [
+                    "lm_clients_node"
+                ],
+                "title": "Core Language Model Interaction",
+                "description": "Manages the direct communication and integration with various Language Models, serving as the primary interface for LM operations.",
+                "role": null
+            },
+            {
+                "id": "data_processing_optimization",
+                "label": "Data Processing & Optimization",
+                "nodes": [
+                    "lm_caching_node",
+                    "openai_formatting_node"
+                ],
+                "title": "Data Processing & Optimization",
+                "description": "Handles efficient data exchange, caching, and API-specific formatting for LM interactions, ensuring performance and compatibility.",
+                "role": null
+            },
+            {
+                "id": "system_utilities",
+                "label": "System Utilities",
+                "nodes": [
+                    "lm_utilities_node"
+                ],
+                "title": "System Utilities & Security",
+                "description": "Provides foundational utilities for logging, debugging, and secure data handling within the LM integration layer, supporting robust operations.",
+                "role": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,415 @@
+{
+  "title": "Quantization and Graph Operations",
+  "summary": "This module provides core functionalities for quantizing tensor data into various low-precision formats and managing the computational graph within the GGML backend. It includes tools for model optimization, graph construction (forward and backward passes), and tensor memory management.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "opt_fit",
+        "label": "Fit Model to Data",
+        "type": "component",
+        "link": null,
+        "title": "Fit Model to Data",
+        "description": "Orchestrates the training process for a model, iterating through epochs, managing data batches, and applying optimization steps. It handles data splitting, shuffling, and progress reporting."
+      },
+      {
+        "id": "opt_init",
+        "label": "Initialize Optimizer Context",
+        "type": "component",
+        "link": null,
+        "title": "Initialize Optimizer Context",
+        "description": "Sets up the optimization context, including backend scheduler, compute context, loss type, and graph building parameters, preparing for model training."
+      },
+      {
+        "id": "opt_progress",
+        "label": "Display Training Progress",
+        "type": "component",
+        "link": null,
+        "title": "Display Training Progress",
+        "description": "Provides a visual progress bar and statistics (loss, accuracy, time) for each training or validation batch during an epoch."
+      },
+      {
+        "id": "quant_iq3s",
+        "label": "Quantize Row to IQ3_S",
+        "type": "component",
+        "link": null,
+        "title": "Quantize Row to IQ3_S",
+        "description": "Quantizes a row of float data into the IQ3_S format, a specific low-precision integer quantization scheme."
+      },
+      {
+        "id": "quant_iq2s",
+        "label": "Quantize Row to IQ2_S",
+        "type": "component",
+        "link": null,
+        "title": "Quantize Row to IQ2_S",
+        "description": "Quantizes a row of float data into the IQ2_S format, a specific low-precision integer quantization scheme."
+      },
+      {
+        "id": "validate_quant",
+        "label": "Validate Quantized Row Data",
+        "type": "component",
+        "link": null,
+        "title": "Validate Quantized Row Data",
+        "description": "Checks the integrity and validity of quantized tensor row data for various GGML types, ensuring no NaNs or infinities are present."
+      },
+      {
+        "id": "quant_iq3xxs",
+        "label": "Quantize Row to IQ3_XXS",
+        "type": "component",
+        "link": null,
+        "title": "Quantize Row to IQ3_XXS",
+        "description": "Quantizes a row of float data into the IQ3_XXS format, a specific low-precision integer quantization scheme."
+      },
+      {
+        "id": "quant_iq4xs",
+        "label": "Quantize Row to IQ4_XS",
+        "type": "component",
+        "link": null,
+        "title": "Quantize Row to IQ4_XS",
+        "description": "Quantizes a row of float data into the IQ4_XS format, a specific low-precision integer quantization scheme."
+      },
+      {
+        "id": "quant_chunk",
+        "label": "Quantize Data Chunk",
+        "type": "component",
+        "link": null,
+        "title": "Quantize Data Chunk",
+        "description": "Quantizes a chunk of float data into a specified GGML type, handling various quantization schemes and requiring an importance matrix for some types."
+      },
+      {
+        "id": "build_backward",
+        "label": "Build Backward Graph",
+        "type": "component",
+        "link": null,
+        "title": "Build Backward Graph",
+        "description": "Constructs the backward pass computational graph for gradient calculation, identifying trainable parameters and loss tensors, and adding gradient accumulation nodes."
+      },
+      {
+        "id": "quant_free",
+        "label": "Free Quantization Resources",
+        "type": "component",
+        "link": null,
+        "title": "Free Quantization Resources",
+        "description": "Releases resources associated with specific quantization types, cleaning up memory used by quantization implementations."
+      },
+      {
+        "id": "graph_cpy",
+        "label": "Copy Computational Graph",
+        "type": "component",
+        "link": null,
+        "title": "Copy Computational Graph",
+        "description": "Creates a deep copy of a computational graph, including its nodes, leafs, and hash set entries, preserving the graph structure and tensor references."
+      },
+      {
+        "id": "graph_dump",
+        "label": "Dump Graph to DOT File",
+        "type": "component",
+        "link": null,
+        "title": "Dump Graph to DOT File",
+        "description": "Generates a Graphviz DOT file representation of the computational graph, useful for visualization and debugging its structure and tensor properties."
+      },
+      {
+        "id": "is_contiguous_alloc",
+        "label": "Check Contiguous Allocation",
+        "type": "component",
+        "link": null,
+        "title": "Check Contiguous Allocation",
+        "description": "Determines if a given tensor's data is contiguously allocated in memory based on its total bytes and element count."
+      },
+      {
+        "id": "graph_overhead",
+        "label": "Calculate Graph Overhead",
+        "type": "component",
+        "link": null,
+        "title": "Calculate Graph Overhead",
+        "description": "Computes the memory overhead required for a computational graph, indicating the additional memory needed beyond tensor data."
+      },
+      {
+        "id": "nbytes_pad",
+        "label": "Calculate Padded Tensor Bytes",
+        "type": "component",
+        "link": null,
+        "title": "Calculate Padded Tensor Bytes",
+        "description": "Calculates the total number of bytes a tensor occupies in memory, including padding to ensure proper alignment."
+      },
+      {
+        "id": "is_contiguous_1d",
+        "label": "Check 1D Contiguity",
+        "type": "component",
+        "link": null,
+        "title": "Check 1D Contiguity",
+        "description": "Checks if a tensor is contiguous along its first dimension, indicating a simple, linear memory layout."
+      },
+      {
+        "id": "is_contiguous_2d",
+        "label": "Check 2D Contiguity",
+        "type": "component",
+        "link": null,
+        "title": "Check 2D Contiguity",
+        "description": "Checks if a tensor is contiguous along its first two dimensions, indicating a row-major or column-major memory layout."
+      },
+      {
+        "id": "max_tensor_size",
+        "label": "Get Max Tensor Size",
+        "type": "component",
+        "link": null,
+        "title": "Get Max Tensor Size",
+        "description": "Iterates through all tensors in a GGML context to find and return the maximum memory size occupied by any single tensor."
+      },
+      {
+        "id": "is_contiguous_rows",
+        "label": "Check Row Contiguity",
+        "type": "component",
+        "link": null,
+        "title": "Check Row Contiguity",
+        "description": "Determines if the rows of a tensor are stored contiguously in memory, which is important for efficient row-wise operations."
+      },
+      {
+        "id": "can_repeat_rows",
+        "label": "Check Row Repeatability",
+        "type": "component",
+        "link": null,
+        "title": "Check Row Repeatability",
+        "description": "Checks if the rows of two tensors can be repeated or broadcasted compatibly, often used in broadcasting operations."
+      },
+      {
+        "id": "graph_reset",
+        "label": "Reset Graph Gradients",
+        "type": "component",
+        "link": null,
+        "title": "Reset Graph Gradients",
+        "description": "Resets the gradients and gradient accumulators within a computational graph, typically at the start of a new optimization step or epoch."
+      },
+      {
+        "id": "can_fuse_subgraph",
+        "label": "Check Subgraph Fusion",
+        "type": "component",
+        "link": null,
+        "title": "Check Subgraph Fusion",
+        "description": "Determines if a sequence of operations within a computational graph can be fused into a single, more efficient operation."
+      },
+      {
+        "id": "hash_contains",
+        "label": "Check Hash Set for Tensor",
+        "type": "component",
+        "link": null,
+        "title": "Check Hash Set for Tensor",
+        "description": "Verifies if a specific tensor is present in the graph's internal hash set, used for tracking visited nodes."
+      },
+      {
+        "id": "hash_find_insert",
+        "label": "Find or Insert Tensor in Hash Set",
+        "type": "component",
+        "link": null,
+        "title": "Find or Insert Tensor in Hash Set",
+        "description": "Locates a tensor in the graph's hash set or inserts it if not found, returning its index."
+      },
+      {
+        "id": "fp16_to_fp32",
+        "label": "Convert FP16 to FP32",
+        "type": "component",
+        "link": null,
+        "title": "Convert FP16 to FP32",
+        "description": "Converts a 16-bit floating-point value (half-precision) to a 32-bit floating-point value (single-precision)."
+      },
+      {
+        "id": "fp32_to_fp16",
+        "label": "Convert FP32 to FP16",
+        "type": "component",
+        "link": null,
+        "title": "Convert FP32 to FP16",
+        "description": "Converts a 32-bit floating-point value (single-precision) to a 16-bit floating-point value (half-precision)."
+      }
+    ],
+    "edges": [
+      {
+        "source": "opt_fit",
+        "target": "opt_init",
+        "label": "initializes with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "opt_fit",
+        "target": "opt_progress",
+        "label": "reports progress via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "opt_init",
+        "target": "build_backward",
+        "label": "builds graph for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "quant_chunk",
+        "target": "quant_iq3s",
+        "label": "dispatches to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "quant_chunk",
+        "target": "quant_iq2s",
+        "label": "dispatches to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "quant_chunk",
+        "target": "quant_iq3xxs",
+        "label": "dispatches to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "quant_chunk",
+        "target": "quant_iq4xs",
+        "label": "dispatches to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_quant",
+        "target": "quant_chunk",
+        "label": "validates output of",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "build_backward",
+        "target": "graph_reset",
+        "label": "may reset gradients",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "graph_cpy",
+        "target": "build_backward",
+        "label": "copies graph for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "can_fuse_subgraph",
+        "target": "build_backward",
+        "label": "optimizes graph for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hash_contains",
+        "target": "graph_cpy",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "hash_find_insert",
+        "target": "graph_cpy",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fp32_to_fp16",
+        "target": "quant_chunk",
+        "label": "pre-processes for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "fp16_to_fp32",
+        "target": "validate_quant",
+        "label": "post-processes for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "optimization_engine",
+        "label": "Optimization Engine",
+        "nodes": [
+          "opt_fit",
+          "opt_init",
+          "opt_progress"
+        ],
+        "title": "Model Optimization Engine",
+        "description": "Components responsible for the training loop, model fitting, and reporting progress during optimization.",
+        "role": "generative"
+      },
+      {
+        "id": "quantization_core",
+        "label": "Quantization Core",
+        "nodes": [
+          "quant_chunk",
+          "quant_iq3s",
+          "quant_iq2s",
+          "quant_iq3xxs",
+          "quant_iq4xs",
+          "quant_free",
+          "validate_quant"
+        ],
+        "title": "Tensor Quantization Core",
+        "description": "Functions for converting floating-point tensor data into various low-precision integer formats and validating the quantized output.",
+        "role": "data"
+      },
+      {
+        "id": "graph_management",
+        "label": "Graph Management",
+        "nodes": [
+          "build_backward",
+          "graph_cpy",
+          "graph_dump",
+          "graph_reset",
+          "graph_overhead"
+        ],
+        "title": "Computational Graph Management",
+        "description": "Operations for building, copying, resetting, and debugging the computational graph structure, including backward pass generation.",
+        "role": "generative"
+      },
+      {
+        "id": "tensor_utilities",
+        "label": "Tensor Utilities",
+        "nodes": [
+          "is_contiguous_alloc",
+          "nbytes_pad",
+          "is_contiguous_1d",
+          "is_contiguous_2d",
+          "max_tensor_size",
+          "is_contiguous_rows",
+          "can_repeat_rows"
+        ],
+        "title": "Tensor Memory and Layout Utilities",
+        "description": "Utility functions for inspecting tensor memory allocation, contiguity, padding, and size characteristics.",
+        "role": "analytical"
+      },
+      {
+        "id": "graph_helpers",
+        "label": "Internal Graph Helpers",
+        "nodes": [
+          "can_fuse_subgraph",
+          "hash_contains",
+          "hash_find_insert"
+        ],
+        "title": "Internal Graph Helper Functions",
+        "description": "Internal functions supporting graph operations, such as subgraph fusion checks and hash set management for tensors.",
+        "role": "analytical"
+      },
+      {
+        "id": "data_type_conversion",
+        "label": "Data Type Conversion",
+        "nodes": [
+          "fp16_to_fp32",
+          "fp32_to_fp16"
+        ],
+        "title": "Floating-Point Type Conversion",
+        "description": "Functions for converting between 16-bit and 32-bit floating-point data types.",
+        "role": "data"
+      }
+    ]
+  }
+}

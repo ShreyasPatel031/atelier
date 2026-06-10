@@ -1,0 +1,240 @@
+{
+  "title": "Document Indexing and Management",
+  "summary": "This module provides core functionalities for indexing documents into vector stores or document indexes, including asynchronous indexing, document lifecycle management, and utilities for creating vector store indexes from various data sources.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "aindex_func",
+        "label": "Asynchronously Index Documents",
+        "type": "component",
+        "link": null,
+        "title": "Async Document Indexer",
+        "description": "Asynchronously indexes documents from various sources into a vector store or document index, managing updates, deletions, and deduplication using a record manager. Supports different cleanup strategies."
+      },
+      {
+        "id": "hash_dict_util",
+        "label": "Hash Nested Dictionary",
+        "type": "component",
+        "link": null,
+        "title": "Hashing Utility",
+        "description": "Generates a UUID by hashing a nested dictionary using a specified algorithm (e.g., SHA-1, SHA-256). Used internally for creating unique identifiers for documents."
+      },
+      {
+        "id": "document_index_interface",
+        "label": "Document Index Interface",
+        "type": "component",
+        "link": null,
+        "title": "Abstract Document Index",
+        "description": "An abstract base class defining the core operations for managing and retrieving documents by ID, including upserting, deleting, and fetching. Serves as a generic abstraction for indexing systems."
+      },
+      {
+        "id": "in_memory_index",
+        "label": "In-Memory Document Index",
+        "type": "component",
+        "link": null,
+        "title": "Ephemeral Document Storage",
+        "description": "A concrete implementation of the DocumentIndex interface that stores documents in a Python dictionary. Provides basic keyword-based search functionality for quick retrieval."
+      },
+      {
+        "id": "vectorstore_index_creator",
+        "label": "Create Vector Store Index",
+        "type": "component",
+        "link": null,
+        "title": "Vector Store Index Builder",
+        "description": "A utility class for constructing vector store indexes. It takes document loaders or raw documents, applies text splitting, generates embeddings, and populates a chosen vector store."
+      },
+      {
+        "id": "default_text_splitter_provider",
+        "label": "Provide Default Text Splitter",
+        "type": "component",
+        "link": null,
+        "title": "Default Text Splitter",
+        "description": "A helper function that returns a default RecursiveCharacterTextSplitter instance, used by VectorstoreIndexCreator for chunking documents into manageable segments."
+      },
+      {
+        "id": "record_manager",
+        "label": "Record Manager",
+        "type": "external",
+        "link": "other_module",
+        "title": "Document State Tracker",
+        "description": "Manages the state and timestamps of indexed documents, helping to track updates, deletions, and prevent re-indexing of unchanged content. Used by the aindex function."
+      },
+      {
+        "id": "vector_store",
+        "label": "Vector Store",
+        "type": "external",
+        "link": "data_and_retrieval.vector_stores",
+        "title": "Vector Database",
+        "description": "A database optimized for storing and querying vector embeddings. It allows for efficient similarity searches and is a primary destination for indexed documents."
+      },
+      {
+        "id": "base_loader",
+        "label": "Document Loader",
+        "type": "external",
+        "link": "data_and_retrieval.document_loaders",
+        "title": "Data Ingestion Source",
+        "description": "An abstract interface for loading documents from various data sources, such as files, web pages, or databases. Provides the raw content for indexing."
+      },
+      {
+        "id": "text_splitter",
+        "label": "Text Splitter",
+        "type": "external",
+        "link": "data_and_retrieval.text_splitters",
+        "title": "Document Chunking Utility",
+        "description": "Breaks down large text documents into smaller, more manageable chunks, often to fit within the context window limits of language models or for efficient vector indexing."
+      },
+      {
+        "id": "embeddings",
+        "label": "Embeddings Generator",
+        "type": "external",
+        "link": "language_models_and_prompts.embeddings",
+        "title": "Vector Representation Creator",
+        "description": "Converts text or other data into numerical vector representations (embeddings) that capture semantic meaning, essential for vector store indexing and similarity search."
+      },
+      {
+        "id": "document_data",
+        "label": "Document Data Structure",
+        "type": "external",
+        "link": null,
+        "title": "Standard Document Format",
+        "description": "A standardized data structure representing a piece of content, typically including page content and metadata. It is the fundamental unit processed by indexing components."
+      }
+    ],
+    "edges": [
+      {
+        "source": "aindex_func",
+        "target": "record_manager",
+        "label": "manages state via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aindex_func",
+        "target": "vector_store",
+        "label": "indexes into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aindex_func",
+        "target": "document_index_interface",
+        "label": "indexes into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aindex_func",
+        "target": "base_loader",
+        "label": "loads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aindex_func",
+        "target": "hash_dict_util",
+        "label": "uses for IDs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "in_memory_index",
+        "target": "document_index_interface",
+        "label": "implements",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "base_loader",
+        "label": "loads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "text_splitter",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "embeddings",
+        "label": "generates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "vector_store",
+        "label": "creates/populates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "default_text_splitter_provider",
+        "label": "gets default from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_loader",
+        "target": "document_data",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aindex_func",
+        "target": "document_data",
+        "label": "processes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "vectorstore_index_creator",
+        "target": "document_data",
+        "label": "processes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_indexing_operations",
+        "label": "Core Indexing Operations",
+        "nodes": [
+          "aindex_func",
+          "hash_dict_util"
+        ],
+        "title": "Primary Indexing Logic",
+        "description": "Handles the primary asynchronous indexing process, including document processing, hashing, and interaction with record managers and vector stores.",
+        "role": "generative"
+      },
+      {
+        "id": "document_index_abstraction",
+        "label": "Document Index Abstraction",
+        "nodes": [
+          "document_index_interface",
+          "in_memory_index"
+        ],
+        "title": "Document Storage Interfaces",
+        "description": "Defines and provides an in-memory implementation for a generic interface to store, retrieve, and manage documents by their unique identifiers.",
+        "role": "data"
+      },
+      {
+        "id": "vector_store_indexing_tools",
+        "label": "Vector Store Indexing Tools",
+        "nodes": [
+          "vectorstore_index_creator",
+          "default_text_splitter_provider"
+        ],
+        "title": "Vector Index Creation",
+        "description": "Provides utilities for creating and populating vector store indexes from various data sources, incorporating text splitting and embedding generation.",
+        "role": "generative"
+      }
+    ]
+  }
+}

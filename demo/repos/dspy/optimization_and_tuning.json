@@ -1,0 +1,361 @@
+{
+    "title": "Optimization & Tuning",
+    "summary": "This module provides a suite of teleprompters and tools for automatically optimizing DSPy programs. It enables automated prompt engineering, few-shot example selection, and program refinement through techniques like evolutionary search, Bayesian optimization, and reinforcement learning.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "better_together_node",
+                "label": "Orchestrate Optimization Sequence",
+                "type": "component",
+                "link": null,
+                "title": "BetterTogether Meta-Optimizer",
+                "description": "A meta-optimizer that combines and sequences various prompt and weight optimization strategies to enhance DSPy programs by leveraging multiple teleprompters."
+            },
+            {
+                "id": "mipro_v2_node",
+                "label": "Optimize Prompts with Bayesian Search",
+                "type": "component",
+                "link": null,
+                "title": "MIPROv2 Optimizer",
+                "description": "Optimizes program prompt parameters (instructions and few-shot examples) using Bayesian optimization (Optuna) across multiple stages to find optimal configurations."
+            },
+            {
+                "id": "gepa_node",
+                "label": "Evolve Prompts with Reflection",
+                "type": "component",
+                "link": null,
+                "title": "GEPA Evolutionary Optimizer",
+                "description": "An evolutionary optimizer that uses reflection on execution traces to propose and evolve improved instructions for program components, enhancing performance iteratively."
+            },
+            {
+                "id": "grpo_node",
+                "label": "Finetune LM via RL",
+                "type": "component",
+                "link": null,
+                "title": "GRPO Finetune Teleprompter",
+                "description": "Applies Grouped Reinforcement Learning with Policy Optimization to finetune language models based on program execution traces and associated rewards, directly improving LM behavior."
+            },
+            {
+                "id": "knn_fewshot_node",
+                "label": "Dynamically Select Demos",
+                "type": "component",
+                "link": null,
+                "title": "KNN Few-Shot Selector",
+                "description": "Selects the k-nearest neighbor examples from a training set at inference time to dynamically provide highly relevant few-shot demonstrations, improving context for the LM."
+            },
+            {
+                "id": "feedback_instruction_node",
+                "label": "Refine Instructions with Feedback",
+                "type": "component",
+                "link": null,
+                "title": "Feedback-Based Instruction Refinement",
+                "description": "Generates new or improved instructions for program components by analyzing positive and negative execution examples and incorporating specific feedback."
+            },
+            {
+                "id": "program_instruction_gen_node",
+                "label": "Generate Program Instructions",
+                "type": "component",
+                "link": null,
+                "title": "Program-Grounded Instruction Generation",
+                "description": "Creates instructions for specific modules within a larger program by first understanding the program's overall structure, individual module roles, and dataset characteristics."
+            },
+            {
+                "id": "rule_induction_node",
+                "label": "Induce Natural Language Rules",
+                "type": "component",
+                "link": null,
+                "title": "Natural Language Rule Induction",
+                "description": "Extracts concise and non-redundant natural language rules from successful program executions or examples, integrating them into predictor instructions for clearer guidance."
+            },
+            {
+                "id": "execution_tracer_node",
+                "label": "Capture Program Execution Trace",
+                "type": "component",
+                "link": null,
+                "title": "Program Execution Tracer",
+                "description": "Patches a program's forward method to capture its detailed execution trace, including inputs, outputs, intermediate steps, and handling of parsing errors, for analysis."
+            },
+            {
+                "id": "feedback_generator_node",
+                "label": "Generate Module Feedback",
+                "type": "component",
+                "link": null,
+                "title": "Module-Specific Feedback Generator",
+                "description": "Generates concrete, actionable advice for individual modules within a program by contrasting good and bad execution trajectories, helping modules learn from past performance."
+            },
+            {
+                "id": "dataset_analyzer_node",
+                "label": "Analyze Dataset Characteristics",
+                "type": "component",
+                "link": null,
+                "title": "Dataset Descriptor & Summarizer",
+                "description": "Analyzes sample data points to describe dataset trends, topics, content, and syntax, and summarizes observations to inform instruction generation and optimization strategies."
+            },
+            {
+                "id": "metric_calculator_node",
+                "label": "Calculate Performance Metrics",
+                "type": "component",
+                "link": null,
+                "title": "Program Quality & Usage Metrics",
+                "description": "Computes average and best quality scores for proposed programs and logs token usage by language models during trials, providing key performance indicators."
+            },
+            {
+                "id": "dspy_program_ext",
+                "label": "DSPy Program",
+                "type": "external",
+                "link": "core_abstractions",
+                "title": "DSPy Program Module",
+                "description": "The core DSPy program or module that is the target for optimization and tuning."
+            },
+            {
+                "id": "training_data_ext",
+                "label": "Training Data",
+                "type": "external",
+                "link": "data_retrieval_and_evaluation/datasets",
+                "title": "Training Dataset",
+                "description": "A collection of input-output examples used to guide the optimization process, providing ground truth and performance signals."
+            },
+            {
+                "id": "evaluation_metric_ext",
+                "label": "Evaluation Metric",
+                "type": "external",
+                "link": "data_retrieval_and_evaluation/evaluation_metrics",
+                "title": "Program Evaluation Metric",
+                "description": "A function used to score the performance of a DSPy program on given examples, providing the objective for optimization."
+            },
+            {
+                "id": "language_model_ext",
+                "label": "Language Model",
+                "type": "external",
+                "link": "language_model_integration/lm_clients",
+                "title": "Language Model",
+                "description": "The underlying large language model used by DSPy predictors, whose behavior or prompting is being optimized."
+            }
+        ],
+        "edges": [
+            {
+                "source": "dspy_program_ext",
+                "target": "better_together_node",
+                "label": "is optimized by",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "training_data_ext",
+                "target": "better_together_node",
+                "label": "provides examples to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "evaluation_metric_ext",
+                "target": "better_together_node",
+                "label": "guides",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "language_model_ext",
+                "target": "better_together_node",
+                "label": "interacts with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "better_together_node",
+                "target": "mipro_v2_node",
+                "label": "orchestrates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "better_together_node",
+                "target": "gepa_node",
+                "label": "orchestrates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "better_together_node",
+                "target": "grpo_node",
+                "label": "orchestrates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "better_together_node",
+                "target": "knn_fewshot_node",
+                "label": "orchestrates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "mipro_v2_node",
+                "target": "feedback_instruction_node",
+                "label": "requests instruction refinement",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "gepa_node",
+                "target": "feedback_instruction_node",
+                "label": "requests instruction refinement",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "gepa_node",
+                "target": "rule_induction_node",
+                "label": "induces rules for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "knn_fewshot_node",
+                "target": "training_data_ext",
+                "label": "selects demos from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "feedback_instruction_node",
+                "target": "dspy_program_ext",
+                "label": "updates instructions in",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "program_instruction_gen_node",
+                "target": "dspy_program_ext",
+                "label": "updates instructions in",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "rule_induction_node",
+                "target": "dspy_program_ext",
+                "label": "adds rules to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_program_ext",
+                "target": "execution_tracer_node",
+                "label": "generates execution trace",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "execution_tracer_node",
+                "target": "feedback_generator_node",
+                "label": "provides trace data to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "feedback_generator_node",
+                "target": "feedback_instruction_node",
+                "label": "generates feedback for",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "training_data_ext",
+                "target": "dataset_analyzer_node",
+                "label": "is analyzed by",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dataset_analyzer_node",
+                "target": "program_instruction_gen_node",
+                "label": "informs instruction generation",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "execution_tracer_node",
+                "target": "metric_calculator_node",
+                "label": "provides usage data to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "metric_calculator_node",
+                "target": "better_together_node",
+                "label": "reports performance to",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "grpo_node",
+                "target": "language_model_ext",
+                "label": "finetunes",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "language_model_ext",
+                "target": "grpo_node",
+                "label": "provides parameters to",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "optimization_algorithms",
+                "label": "Optimization Algorithms (Teleprompters)",
+                "nodes": [
+                    "better_together_node",
+                    "mipro_v2_node",
+                    "gepa_node",
+                    "grpo_node",
+                    "knn_fewshot_node"
+                ],
+                "title": "Core Optimization Algorithms",
+                "description": "The primary algorithms and meta-optimizers that drive the tuning process, employing various strategies like Bayesian search, evolutionary methods, and reinforcement learning to improve DSPy programs.",
+                "role": "surface"
+            },
+            {
+                "id": "instruction_refinement",
+                "label": "Instruction & Prompt Refinement",
+                "nodes": [
+                    "feedback_instruction_node",
+                    "program_instruction_gen_node",
+                    "rule_induction_node"
+                ],
+                "title": "Instruction & Prompt Engineering",
+                "description": "Components focused on generating, refining, and managing the textual instructions and few-shot examples that guide language models within DSPy programs.",
+                "role": "generative"
+            },
+            {
+                "id": "analysis_feedback",
+                "label": "Performance Analysis & Data Insights",
+                "nodes": [
+                    "execution_tracer_node",
+                    "feedback_generator_node",
+                    "dataset_analyzer_node",
+                    "metric_calculator_node"
+                ],
+                "title": "Program Analysis & Feedback",
+                "description": "Tools for evaluating program execution, gathering detailed feedback, analyzing dataset characteristics, and tracking performance metrics to inform the optimization process.",
+                "role": "analytical"
+            },
+            {
+                "id": "core_inputs",
+                "label": "Core Optimization Inputs",
+                "nodes": [
+                    "dspy_program_ext",
+                    "training_data_ext",
+                    "evaluation_metric_ext",
+                    "language_model_ext"
+                ],
+                "title": "Essential Optimization Inputs",
+                "description": "The fundamental external elements required for any optimization process, including the DSPy program itself, training data, evaluation criteria, and the underlying language model.",
+                "role": "data"
+            }
+        ]
+    }
+}

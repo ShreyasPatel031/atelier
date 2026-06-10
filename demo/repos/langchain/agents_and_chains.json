@@ -1,0 +1,127 @@
+{
+    "title": "Agents and Chains Module",
+    "summary": "This module provides the core components for building intelligent agents and orchestrating complex workflows (chains) using language models, tools, memory, and runnables.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "agents_mod",
+                "label": "AI Agents",
+                "type": "module",
+                "link": "agents",
+                "title": "AI Agent Framework",
+                "description": "Provides a comprehensive framework for building and managing AI agents, offering various agent types, orchestration mechanisms, and tools for integrating language models with external functionalities."
+            },
+            {
+                "id": "chains_mod",
+                "label": "LLM Chains",
+                "type": "module",
+                "link": "chains",
+                "title": "LLM Chains",
+                "description": "Provides building blocks for creating complex sequences of operations, combining LLMs with other components for various tasks."
+            },
+            {
+                "id": "runnables_mod",
+                "label": "Runnable Core & Utilities",
+                "type": "module",
+                "link": "runnables",
+                "title": "Runnable Core & Utilities",
+                "description": "Defines the foundational `Runnable` interface for composable units of work, enabling serialization, dynamic configuration, and specialized functionalities."
+            },
+            {
+                "id": "tools_parsers_mod",
+                "label": "Tools & Output Parsers",
+                "type": "module",
+                "link": "tools_and_output_parsers",
+                "title": "Tools and Output Parsers",
+                "description": "Provides foundational classes and utilities for defining and interacting with tools, alongside a comprehensive suite of output parsers to structure LLM responses."
+            },
+            {
+                "id": "memory_middleware_mod",
+                "label": "Agent Memory & Middleware",
+                "type": "module",
+                "link": "memory_and_middleware",
+                "title": "Agent Memory and Middleware",
+                "description": "Provides memory implementations for conversational AI agents to manage chat history and entities, alongside middleware for controlling and enhancing agent behavior."
+            }
+        ],
+        "edges": [
+            {
+                "source": "runnables_mod",
+                "target": "agents_mod",
+                "label": "Enables agent composition",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "runnables_mod",
+                "target": "chains_mod",
+                "label": "Enables chain composition",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tools_parsers_mod",
+                "target": "agents_mod",
+                "label": "Provides tools & parsing",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tools_parsers_mod",
+                "target": "chains_mod",
+                "label": "Provides parsing capabilities",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "memory_middleware_mod",
+                "target": "agents_mod",
+                "label": "Manages state & behavior",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "memory_middleware_mod",
+                "target": "chains_mod",
+                "label": "Manages state & behavior",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_orchestration",
+                "label": "Core Orchestration",
+                "nodes": [
+                    "agents_mod",
+                    "chains_mod"
+                ],
+                "title": "Core Orchestration",
+                "description": "These modules define the primary logic for intelligent agents and structured workflows, enabling complex AI applications.",
+                "role": null
+            },
+            {
+                "id": "foundational_components",
+                "label": "Foundational Components",
+                "nodes": [
+                    "runnables_mod",
+                    "tools_parsers_mod"
+                ],
+                "title": "Foundational Building Blocks",
+                "description": "Provides the basic units of work (runnables) and external interaction capabilities (tools, parsers) that agents and chains utilize.",
+                "role": null
+            },
+            {
+                "id": "state_and_control",
+                "label": "State & Control",
+                "nodes": [
+                    "memory_middleware_mod"
+                ],
+                "title": "State Management & Control",
+                "description": "Offers mechanisms for agents and chains to maintain conversational context, manage long-term memory, and apply behavioral enhancements or restrictions.",
+                "role": null
+            }
+        ]
+    }
+}

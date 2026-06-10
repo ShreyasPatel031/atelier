@@ -1,0 +1,446 @@
+{
+  "title": "Agent & Execution Core",
+  "summary": "This module defines the core components for agent creation, execution, and interaction within CrewAI. It includes agent adapters, execution engines, and utilities for tool management and structured output.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "agent_meta",
+        "label": "Manage Agent Extensions",
+        "type": "component",
+        "link": null,
+        "title": "AgentMeta",
+        "description": "Applies extension logic like A2A during agent initialization, wrapping core setup methods to inject additional functionality."
+      },
+      {
+        "id": "agent_planning",
+        "label": "Handle Agent Planning",
+        "type": "component",
+        "link": null,
+        "title": "handle_reasoning",
+        "description": "Manages the agent's reasoning and planning process, generating a plan that is appended to the task description for execution."
+      },
+      {
+        "id": "structured_output_interface",
+        "label": "Define Structured Output Interface",
+        "type": "component",
+        "link": null,
+        "title": "BaseConverterAdapter",
+        "description": "Abstract base for converting agent outputs to structured formats (JSON, Pydantic), enhancing prompts, and post-processing results."
+      },
+      {
+        "id": "langgraph_adapter",
+        "label": "Integrate LangGraph Agents",
+        "type": "component",
+        "link": null,
+        "title": "LangGraphAgentAdapter",
+        "description": "Adapts LangGraph's ReAct agents for CrewAI, handling memory, tool integration, and task execution within LangGraph workflows."
+      },
+      {
+        "id": "openai_adapter",
+        "label": "Integrate OpenAI Agents",
+        "type": "component",
+        "link": null,
+        "title": "OpenAIAgentAdapter",
+        "description": "Adapts OpenAI Assistants API for CrewAI, managing tool configuration, structured output, and task execution for OpenAI-powered agents."
+      },
+      {
+        "id": "crew_agent_executor",
+        "label": "Execute Agent Tasks (Legacy)",
+        "type": "component",
+        "link": null,
+        "title": "CrewAgentExecutor",
+        "description": "Manages the full lifecycle of agent task execution, including prompt formatting, LLM interaction, tool use (ReAct/native), and human feedback. *Deprecated.*"
+      },
+      {
+        "id": "tool_usage_handler",
+        "label": "Manage Tool Usage & Caching",
+        "type": "component",
+        "link": null,
+        "title": "ToolsHandler",
+        "description": "Handles the lifecycle of tool calls, including caching tool outputs and tracking the most recently used tool for agents."
+      },
+      {
+        "id": "async_executor_context",
+        "label": "Enable Async Execution",
+        "type": "component",
+        "link": null,
+        "title": "AsyncExecutorContext",
+        "description": "Extends the base executor context to provide support for asynchronous invocation patterns, allowing agents to perform non-blocking operations and manage concurrent tasks efficiently."
+      },
+      {
+        "id": "lite_agent",
+        "label": "Run Lightweight Agent",
+        "type": "component",
+        "link": null,
+        "title": "LiteAgent",
+        "description": "A simplified agent for direct message processing and tool usage, supporting memory, guardrails, and A2A extensions without full delegation. *Deprecated.*"
+      },
+      {
+        "id": "tool_access_filter",
+        "label": "Control Tool Access",
+        "type": "component",
+        "link": null,
+        "title": "create_static_tool_filter",
+        "description": "Creates functions to filter tool availability based on allow and block lists, enhancing security and control over agent capabilities in various execution environments."
+      },
+      {
+        "id": "agent_delegation_tools",
+        "label": "Provide Agent Delegation Tools",
+        "type": "component",
+        "link": null,
+        "title": "BaseAgentTool",
+        "description": "Base class for tools that enable agents to delegate tasks to other agents, including name sanitization and task execution logic for collaborative workflows."
+      },
+      {
+        "id": "convert_to_structured_tool",
+        "label": "Convert Tools to Structured Format",
+        "type": "component",
+        "link": null,
+        "title": "to_langchain",
+        "description": "Converts various tool representations (BaseTool, CrewStructuredTool) into a standardized CrewStructuredTool format for consistent use across the framework, ensuring compatibility."
+      },
+      {
+        "id": "auto_args_schema",
+        "label": "Auto-Generate Tool Argument Schema",
+        "type": "component",
+        "link": null,
+        "title": "_default_args_schema",
+        "description": "Dynamically creates Pydantic argument schemas for tools by introspecting their `_run` or `_arun` method signatures, simplifying tool definition."
+      },
+      {
+        "id": "create_tool_from_function",
+        "label": "Create Tool from Function",
+        "type": "component",
+        "link": null,
+        "title": "_make_tool",
+        "description": "Generates a Tool instance from a Python function, extracting its description from the docstring and argument schema from type annotations for easy tool creation."
+      },
+      {
+        "id": "async_tool_execution",
+        "label": "Execute Tools Asynchronously",
+        "type": "component",
+        "link": null,
+        "title": "arun",
+        "description": "Provides an asynchronous execution method for tools, managing usage limits and invoking the underlying async tool logic for non-blocking operations."
+      },
+      {
+        "id": "validate_tool_instance",
+        "label": "Validate & Resolve Tool Instances",
+        "type": "component",
+        "link": null,
+        "title": "_validate_tool",
+        "description": "Ensures tool instances are valid and correctly configured, handling deserialization from dictionary formats to proper tool objects for runtime use."
+      },
+      {
+        "id": "convert_from_langchain",
+        "label": "Convert from Langchain Tool",
+        "type": "component",
+        "link": null,
+        "title": "from_langchain",
+        "description": "Creates a CrewAI BaseTool instance from a Langchain-compatible tool, inferring argument schemas as needed for seamless integration and compatibility."
+      },
+      {
+        "id": "tool_decorator",
+        "label": "Simplify Tool Creation",
+        "type": "component",
+        "link": null,
+        "title": "decorator",
+        "description": "A Python decorator that simplifies the process of turning a regular function into a CrewAI Tool, automatically handling schema generation and metadata."
+      },
+      {
+        "id": "llm_integration",
+        "label": "LLM Integration",
+        "type": "other_module",
+        "link": "llm_integration",
+        "title": "LLM Integration",
+        "description": "Handles interactions with various Large Language Models."
+      },
+      {
+        "id": "tasks_and_flow",
+        "label": "Tasks and Flow Management",
+        "type": "other_module",
+        "link": "tasks_and_flow",
+        "title": "Tasks and Flow",
+        "description": "Manages tasks, workflows, and their execution within a crew."
+      },
+      {
+        "id": "a2a_core_logic",
+        "label": "Agent-to-Agent Communication Logic",
+        "type": "other_module",
+        "link": "a2a_core_logic",
+        "title": "A2A Core Logic",
+        "description": "Core logic for agent-to-agent communication and delegation."
+      },
+      {
+        "id": "mcp_server",
+        "label": "MCP Server (External)",
+        "type": "external",
+        "link": null,
+        "title": "MCP Server",
+        "description": "An external Model Context Protocol server for tool execution."
+      }
+    ],
+    "edges": [
+      {
+        "source": "agent_meta",
+        "target": "a2a_core_logic",
+        "label": "Injects A2A Extensions",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_planning",
+        "target": "crew_agent_executor",
+        "label": "Provides Planning",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_output_interface",
+        "target": "langgraph_adapter",
+        "label": "Configures Structured Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "structured_output_interface",
+        "target": "openai_adapter",
+        "label": "Configures Structured Output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "langgraph_adapter",
+        "target": "llm_integration",
+        "label": "Interacts with LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "langgraph_adapter",
+        "target": "tool_usage_handler",
+        "label": "Uses Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_adapter",
+        "target": "llm_integration",
+        "label": "Interacts with LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_adapter",
+        "target": "tool_usage_handler",
+        "label": "Uses Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_agent_executor",
+        "target": "llm_integration",
+        "label": "Interacts with LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_agent_executor",
+        "target": "tool_usage_handler",
+        "label": "Uses Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_agent_executor",
+        "target": "tasks_and_flow",
+        "label": "Manages Task Context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crew_agent_executor",
+        "target": "async_executor_context",
+        "label": "Supports Async Operations",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_usage_handler",
+        "target": "async_tool_execution",
+        "label": "Manages Async Tool Calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_executor_context",
+        "target": "crew_agent_executor",
+        "label": "Provides Async Context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lite_agent",
+        "target": "llm_integration",
+        "label": "Interacts with LLM",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lite_agent",
+        "target": "tool_usage_handler",
+        "label": "Uses Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lite_agent",
+        "target": "a2a_core_logic",
+        "label": "Integrates A2A",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "lite_agent",
+        "target": "tasks_and_flow",
+        "label": "Manages Task Context",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_access_filter",
+        "target": "mcp_server",
+        "label": "Applies Tool Policy",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_delegation_tools",
+        "target": "crew_agent_executor",
+        "label": "Enables Delegation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_delegation_tools",
+        "target": "lite_agent",
+        "label": "Enables Delegation",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "convert_to_structured_tool",
+        "target": "crew_agent_executor",
+        "label": "Prepares Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "convert_to_structured_tool",
+        "target": "lite_agent",
+        "label": "Prepares Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "auto_args_schema",
+        "target": "create_tool_from_function",
+        "label": "Infers Schema",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "create_tool_from_function",
+        "target": "convert_to_structured_tool",
+        "label": "Creates Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "async_tool_execution",
+        "target": "tool_usage_handler",
+        "label": "Reports Usage",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "validate_tool_instance",
+        "target": "convert_to_structured_tool",
+        "label": "Validates Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "convert_from_langchain",
+        "target": "convert_to_structured_tool",
+        "label": "Converts Tools",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tool_decorator",
+        "target": "create_tool_from_function",
+        "label": "Simplifies Tool Creation",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "agent_core_lifecycle",
+        "label": "Agent Core & Lifecycle",
+        "nodes": [
+          "agent_meta",
+          "agent_planning",
+          "lite_agent"
+        ],
+        "title": "Agent Core & Lifecycle",
+        "description": "Components responsible for the fundamental definition, initialization, and lifecycle management of agents, including extensions and planning.",
+        "role": "surface"
+      },
+      {
+        "id": "agent_adapters",
+        "label": "Agent Adapters",
+        "nodes": [
+          "structured_output_interface",
+          "langgraph_adapter",
+          "openai_adapter"
+        ],
+        "title": "Agent Adapters",
+        "description": "Modules that integrate different agent frameworks (e.g., LangGraph, OpenAI Assistants) into the CrewAI ecosystem, providing a unified interface for diverse LLM backends.",
+        "role": "generative"
+      },
+      {
+        "id": "execution_orchestration",
+        "label": "Execution Orchestration",
+        "nodes": [
+          "crew_agent_executor",
+          "async_executor_context"
+        ],
+        "title": "Execution Orchestration",
+        "description": "Components that manage the overall flow and execution of agent tasks, handling LLM interactions, iteration loops, and asynchronous operations.",
+        "role": "generative"
+      },
+      {
+        "id": "tool_definition_management",
+        "label": "Tool Definition & Management",
+        "nodes": [
+          "tool_usage_handler",
+          "tool_access_filter",
+          "agent_delegation_tools",
+          "convert_to_structured_tool",
+          "auto_args_schema",
+          "create_tool_from_function",
+          "async_tool_execution",
+          "validate_tool_instance",
+          "convert_from_langchain",
+          "tool_decorator"
+        ],
+        "title": "Tool Definition & Management",
+        "description": "Utilities and base classes for defining, managing, converting, and executing tools used by agents, including schema generation, caching, and access control.",
+        "role": "data"
+      }
+    ]
+  }
+}

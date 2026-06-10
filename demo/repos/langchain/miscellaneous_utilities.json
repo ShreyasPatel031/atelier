@@ -1,0 +1,658 @@
+{
+  "title": "Miscellaneous Utilities Module",
+  "summary": "This module provides a collection of general-purpose utilities, including dynamic module import, logging, model comparison, various output parsers, embedding caching, text and JSON splitting, agent orchestration components, and serialization helpers.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "DynamicModuleImport",
+        "label": "Dynamically Import Modules",
+        "type": "component",
+        "link": null,
+        "title": "import_by_name",
+        "description": "Imports modules or components dynamically by name, handling deprecation warnings and ensuring imports are from allowed top-level packages."
+      },
+      {
+        "id": "LoggingCallback",
+        "label": "Log System Events",
+        "type": "component",
+        "link": null,
+        "title": "LoggingCallbackHandler",
+        "description": "A callback handler that logs system events and traces using a provided Python logger at a specified level."
+      },
+      {
+        "id": "InitializeChatModel",
+        "label": "Initialize Chat Model",
+        "type": "component",
+        "link": null,
+        "title": "init_chat_model",
+        "description": "Provides a unified interface to initialize chat models from various providers, supporting fixed or configurable models and handling provider inference."
+      },
+      {
+        "id": "InitializeEmbeddings",
+        "label": "Initialize Embedding Model",
+        "type": "component",
+        "link": null,
+        "title": "init_embeddings",
+        "description": "Initializes an embedding model from a model name and optional provider, abstracting away provider-specific implementations."
+      },
+      {
+        "id": "SerializeEmbeddings",
+        "label": "Serialize Embedding Vectors",
+        "type": "component",
+        "link": null,
+        "title": "_value_serializer",
+        "description": "Converts a sequence of float (embedding vector) into a byte string using JSON serialization."
+      },
+      {
+        "id": "DeserializeEmbeddings",
+        "label": "Deserialize Embedding Vectors",
+        "type": "component",
+        "link": null,
+        "title": "_value_deserializer",
+        "description": "Converts a byte string back into a list of float (embedding vector) using JSON deserialization."
+      },
+      {
+        "id": "CacheEmbeddings",
+        "label": "Cache Embedding Outputs",
+        "type": "component",
+        "link": null,
+        "title": "CacheBackedEmbeddings",
+        "description": "An interface for caching results from embedding models, using a byte store to store and retrieve embeddings for documents and queries."
+      },
+      {
+        "id": "CompareModels",
+        "label": "Compare Model Performance",
+        "type": "component",
+        "link": null,
+        "title": "ModelLaboratory",
+        "description": "A utility to experiment with and compare the performance of different language models or chains by running them on input text."
+      },
+      {
+        "id": "ParseDatetimeOutput",
+        "label": "Parse Datetime from LLM",
+        "type": "component",
+        "link": null,
+        "title": "DatetimeOutputParser",
+        "description": "Parses the string output of an LLM call into a Python datetime object based on a specified format."
+      },
+      {
+        "id": "ParseEnumOutput",
+        "label": "Parse Enum from LLM",
+        "type": "component",
+        "link": null,
+        "title": "EnumOutputParser",
+        "description": "Parses the string output of an LLM call into a predefined Enum value, ensuring the response is one of the expected options."
+      },
+      {
+        "id": "FixOutputParsing",
+        "label": "Fix LLM Output Parsing Errors",
+        "type": "component",
+        "link": null,
+        "title": "OutputFixingParser",
+        "description": "Wraps another output parser and attempts to fix parsing errors by sending the problematic output to an LLM for correction."
+      },
+      {
+        "id": "ParsePandasDataFrame",
+        "label": "Parse Pandas DataFrame from LLM",
+        "type": "component",
+        "link": null,
+        "title": "PandasDataFrameOutputParser",
+        "description": "Parses LLM output into a Pandas DataFrame, supporting various request types like column, row, or aggregation operations."
+      },
+      {
+        "id": "RetryOutputParsing",
+        "label": "Retry LLM Output Parsing",
+        "type": "component",
+        "link": null,
+        "title": "RetryOutputParser",
+        "description": "Wraps another output parser and retries parsing if it fails, using an LLM to regenerate the completion with the original prompt context."
+      },
+      {
+        "id": "ParseStructuredOutput",
+        "label": "Parse Structured LLM Output",
+        "type": "component",
+        "link": null,
+        "title": "StructuredOutputParser",
+        "description": "Parses the output of an LLM call into a structured dictionary based on a list of defined response schemas."
+      },
+      {
+        "id": "ParseYamlOutput",
+        "label": "Parse YAML from LLM",
+        "type": "component",
+        "link": null,
+        "title": "YamlOutputParser",
+        "description": "Parses LLM output formatted as YAML into a Pydantic object, extracting YAML blocks from the completion string."
+      },
+      {
+        "id": "SerializeSerializable",
+        "label": "Serialize Serializable Object",
+        "type": "component",
+        "link": null,
+        "title": "_dump_as_bytes",
+        "description": "Converts a LangChain `Serializable` object into a UTF-8 encoded byte representation."
+      },
+      {
+        "id": "SerializeDocument",
+        "label": "Serialize Document Object",
+        "type": "component",
+        "link": null,
+        "title": "_dump_document_as_bytes",
+        "description": "Converts a LangChain `Document` object into a UTF-8 encoded byte representation."
+      },
+      {
+        "id": "LoadDocument",
+        "label": "Load Document from Bytes",
+        "type": "component",
+        "link": null,
+        "title": "_load_document_from_bytes",
+        "description": "Reconstructs a LangChain `Document` object from its byte representation."
+      },
+      {
+        "id": "LoadSerializable",
+        "label": "Load Serializable from Bytes",
+        "type": "component",
+        "link": null,
+        "title": "_load_from_bytes",
+        "description": "Reconstructs a LangChain `Serializable` object from its byte representation, with security considerations for untrusted input."
+      },
+      {
+        "id": "CreateAgentGraph",
+        "label": "Create Agent Execution Graph",
+        "type": "component",
+        "link": null,
+        "title": "create_agent",
+        "description": "Constructs a compiled state graph for agents, integrating language models, tools, and middleware for iterative execution."
+      },
+      {
+        "id": "HandleSyncModelRequest",
+        "label": "Handle Sync Agent Model Request",
+        "type": "component",
+        "link": null,
+        "title": "model_node",
+        "description": "Synchronous handler for processing model requests within an agent's execution flow, applying middleware and handling structured outputs."
+      },
+      {
+        "id": "HandleAsyncModelRequest",
+        "label": "Handle Async Agent Model Request",
+        "type": "component",
+        "link": null,
+        "title": "amodel_node",
+        "description": "Asynchronous handler for processing model requests within an agent's execution flow, applying middleware and handling structured outputs."
+      },
+      {
+        "id": "ManageOutputToolBinding",
+        "label": "Manage Structured Output Tools",
+        "type": "component",
+        "link": null,
+        "title": "OutputToolBinding",
+        "description": "Manages metadata and parsing logic for structured responses generated via tool calls within an agent."
+      },
+      {
+        "id": "ManageProviderStrategy",
+        "label": "Manage Native Structured Output",
+        "type": "component",
+        "link": null,
+        "title": "ProviderStrategyBinding",
+        "description": "Manages metadata and parsing logic for native structured responses directly from language model providers within an agent."
+      },
+      {
+        "id": "TokenizeTextSplitter",
+        "label": "Split Text by Tokens",
+        "type": "component",
+        "link": null,
+        "title": "TokenTextSplitter",
+        "description": "Splits input text into smaller chunks based on tokenization using a specified model tokenizer (e.g., tiktoken)."
+      },
+      {
+        "id": "SplitHTMLByHeaders",
+        "label": "Split HTML by Header Tags",
+        "type": "component",
+        "link": null,
+        "title": "HTMLHeaderTextSplitter",
+        "description": "Splits HTML content into structured documents based on specified header tags (e.g., h1, h2), preserving semantic hierarchy."
+      },
+      {
+        "id": "SplitHTMLSemantically",
+        "label": "Split HTML Semantically",
+        "type": "component",
+        "link": null,
+        "title": "HTMLSemanticPreservingSplitter",
+        "description": "Splits HTML content into generalized chunks, preserving semantic structure, full HTML elements, and converting links/media to Markdown."
+      },
+      {
+        "id": "SplitHTMLSections",
+        "label": "Split HTML into Sections",
+        "type": "component",
+        "link": null,
+        "title": "HTMLSectionSplitter",
+        "description": "Splits HTML files into sections based on specified header tags and font sizes, optionally using XSLT transformations."
+      },
+      {
+        "id": "SplitJsonRecursively",
+        "label": "Recursively Split JSON",
+        "type": "component",
+        "link": null,
+        "title": "RecursiveJsonSplitter",
+        "description": "Splits nested JSON data into smaller, structured chunks while preserving hierarchy, based on configurable maximum and minimum sizes."
+      },
+      {
+        "id": "SplitTextWithSpacy",
+        "label": "Split Text with SpaCy",
+        "type": "component",
+        "link": null,
+        "title": "SpacyTextSplitter",
+        "description": "Splits text into sentences or segments using the spaCy natural language processing library."
+      },
+      {
+        "id": "RefreshModelProfiles",
+        "label": "Refresh Model Profile Data",
+        "type": "component",
+        "link": null,
+        "title": "main (model-profiles)",
+        "description": "CLI entrypoint to download and merge model profile data from models.dev for a specified provider."
+      },
+      {
+        "id": "CheckCoreVersion",
+        "label": "Check Core Package Version",
+        "type": "component",
+        "link": null,
+        "title": "main (core check_version)",
+        "description": "CLI tool to validate version consistency between pyproject.toml and the version.py file for the core package."
+      },
+      {
+        "id": "CheckAnthropicVersion",
+        "label": "Check Anthropic Package Version",
+        "type": "component",
+        "link": null,
+        "title": "main (anthropic check_version)",
+        "description": "CLI tool to validate version consistency between pyproject.toml and the _version.py file for the Anthropic integration package."
+      },
+      {
+        "id": "CheckLangchainV1Version",
+        "label": "Check Langchain V1 Version",
+        "type": "component",
+        "link": null,
+        "title": "main (langchain_v1 check_version)",
+        "description": "CLI tool to validate version consistency between pyproject.toml and the __init__.py file for the langchain_v1 package."
+      },
+      {
+        "id": "LLM",
+        "label": "Language Model",
+        "type": "external",
+        "link": null,
+        "title": "LLM",
+        "description": "An external Language Model used for generating text or fixing parsing errors."
+      },
+      {
+        "id": "BaseOutputParser",
+        "label": "Base Output Parser",
+        "type": "external",
+        "link": null,
+        "title": "BaseOutputParser",
+        "description": "The base interface for parsing outputs from language models."
+      },
+      {
+        "id": "Chain",
+        "label": "LangChain Chain",
+        "type": "external",
+        "link": null,
+        "title": "Chain",
+        "description": "An external LangChain Chain object, representing a sequence of operations."
+      },
+      {
+        "id": "Document",
+        "label": "LangChain Document",
+        "type": "external",
+        "link": null,
+        "title": "Document",
+        "description": "An external LangChain Document object, typically containing page content and metadata."
+      },
+      {
+        "id": "Serializable",
+        "label": "LangChain Serializable",
+        "type": "external",
+        "link": null,
+        "title": "Serializable",
+        "description": "An external LangChain Serializable object, capable of being serialized and deserialized."
+      },
+      {
+        "id": "BaseStore",
+        "label": "Base Key-Value Store",
+        "type": "external",
+        "link": null,
+        "title": "BaseStore",
+        "description": "An external base interface for key-value storage, used for caching."
+      },
+      {
+        "id": "RecursiveCharacterTextSplitter",
+        "label": "Recursive Text Splitter",
+        "type": "external",
+        "link": null,
+        "title": "RecursiveCharacterTextSplitter",
+        "description": "An external text splitter that recursively splits text by characters, often used for fine-grained chunking."
+      }
+    ],
+    "edges": [
+      {
+        "source": "InitializeChatModel",
+        "target": "CreateAgentGraph",
+        "label": "uses to init model",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "InitializeEmbeddings",
+        "target": "CacheEmbeddings",
+        "label": "provides underlying embedder",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SerializeEmbeddings",
+        "target": "CacheEmbeddings",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DeserializeEmbeddings",
+        "target": "CacheEmbeddings",
+        "label": "used by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CacheEmbeddings",
+        "target": "BaseStore",
+        "label": "stores embeddings in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CompareModels",
+        "target": "Chain",
+        "label": "compares",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CompareModels",
+        "target": "LLM",
+        "label": "compares (via chains)",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ParseDatetimeOutput",
+        "target": "BaseOutputParser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ParseEnumOutput",
+        "target": "BaseOutputParser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FixOutputParsing",
+        "target": "BaseOutputParser",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FixOutputParsing",
+        "target": "LLM",
+        "label": "uses to fix",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ParsePandasDataFrame",
+        "target": "BaseOutputParser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RetryOutputParsing",
+        "target": "BaseOutputParser",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "RetryOutputParsing",
+        "target": "LLM",
+        "label": "uses to retry",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ParseStructuredOutput",
+        "target": "BaseOutputParser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ParseYamlOutput",
+        "target": "BaseOutputParser",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SerializeSerializable",
+        "target": "Serializable",
+        "label": "dumps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SerializeDocument",
+        "target": "Document",
+        "label": "dumps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadDocument",
+        "target": "Document",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LoadSerializable",
+        "target": "Serializable",
+        "label": "loads",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentGraph",
+        "target": "HandleSyncModelRequest",
+        "label": "defines node",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentGraph",
+        "target": "HandleAsyncModelRequest",
+        "label": "defines node",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentGraph",
+        "target": "ManageOutputToolBinding",
+        "label": "uses for structured output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CreateAgentGraph",
+        "target": "ManageProviderStrategy",
+        "label": "uses for structured output",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "HandleSyncModelRequest",
+        "target": "LLM",
+        "label": "invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "HandleAsyncModelRequest",
+        "target": "LLM",
+        "label": "invokes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SplitHTMLSemantically",
+        "target": "RecursiveCharacterTextSplitter",
+        "label": "uses for sub-splitting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SplitHTMLSections",
+        "target": "RecursiveCharacterTextSplitter",
+        "label": "uses for sub-splitting",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SplitHTMLSections",
+        "target": "Document",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "SplitJsonRecursively",
+        "target": "Document",
+        "label": "creates",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "ModuleUtilities",
+        "label": "Module Utilities",
+        "nodes": [
+          "DynamicModuleImport",
+          "LoggingCallback",
+          "CompareModels"
+        ],
+        "title": "Module Utilities",
+        "description": "General helper functions and utilities for dynamic imports, logging, and model comparison.",
+        "role": "surface"
+      },
+      {
+        "id": "OutputParsing",
+        "label": "Output Parsing",
+        "nodes": [
+          "ParseDatetimeOutput",
+          "ParseEnumOutput",
+          "FixOutputParsing",
+          "ParsePandasDataFrame",
+          "RetryOutputParsing",
+          "ParseStructuredOutput",
+          "ParseYamlOutput"
+        ],
+        "title": "Output Parsing",
+        "description": "Components focused on interpreting and structuring outputs from Language Models into various formats.",
+        "role": "analytical"
+      },
+      {
+        "id": "EmbeddingManagement",
+        "label": "Embedding Management",
+        "nodes": [
+          "InitializeEmbeddings",
+          "SerializeEmbeddings",
+          "DeserializeEmbeddings",
+          "CacheEmbeddings"
+        ],
+        "title": "Embedding Management",
+        "description": "Components for initializing, serializing, deserializing, and caching embedding model outputs.",
+        "role": "data"
+      },
+      {
+        "id": "TextProcessing",
+        "label": "Text Processing",
+        "nodes": [
+          "TokenizeTextSplitter",
+          "SplitHTMLByHeaders",
+          "SplitHTMLSemantically",
+          "SplitHTMLSections",
+          "SplitJsonRecursively",
+          "SplitTextWithSpacy"
+        ],
+        "title": "Text Processing",
+        "description": "Components for splitting and manipulating text and document content, including HTML and JSON.",
+        "role": "data"
+      },
+      {
+        "id": "AgentOrchestration",
+        "label": "Agent Orchestration",
+        "nodes": [
+          "CreateAgentGraph",
+          "HandleSyncModelRequest",
+          "HandleAsyncModelRequest",
+          "ManageOutputToolBinding",
+          "ManageProviderStrategy"
+        ],
+        "title": "Agent Orchestration",
+        "description": "Components related to the creation and execution flow of agents, including model request handling and structured output management.",
+        "role": "generative"
+      },
+      {
+        "id": "Serialization",
+        "label": "Serialization",
+        "nodes": [
+          "SerializeSerializable",
+          "SerializeDocument",
+          "LoadDocument",
+          "LoadSerializable"
+        ],
+        "title": "Serialization",
+        "description": "Components for converting LangChain objects to and from byte representations for storage or transmission.",
+        "role": "data"
+      },
+      {
+        "id": "CLITools",
+        "label": "CLI Tools",
+        "nodes": [
+          "RefreshModelProfiles",
+          "CheckCoreVersion",
+          "CheckAnthropicVersion",
+          "CheckLangchainV1Version"
+        ],
+        "title": "CLI Tools",
+        "description": "Command-line interface utilities for various maintenance and validation tasks.",
+        "role": "surface"
+      },
+      {
+        "id": "ModelInitialization",
+        "label": "Model Initialization",
+        "nodes": [
+          "InitializeChatModel",
+          "InitializeEmbeddings"
+        ],
+        "title": "Model Initialization",
+        "description": "Unified interfaces for initializing different types of language models.",
+        "role": "surface"
+      }
+    ]
+  }
+}

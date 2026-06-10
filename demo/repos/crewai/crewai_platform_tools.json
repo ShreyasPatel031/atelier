@@ -1,0 +1,119 @@
+{
+  "title": "CrewAI Platform Tools",
+  "summary": "Provides a specialized tool for CrewAI agents to execute predefined actions on the CrewAI platform. It dynamically configures itself based on action schemas and handles authenticated API interactions.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "execute_platform_action",
+        "label": "Execute Platform Action",
+        "type": "component",
+        "link": null,
+        "title": "Platform Action Executor",
+        "description": "A dynamically configured tool that allows agents to trigger and execute predefined actions available on the CrewAI platform by making authenticated API calls."
+      },
+      {
+        "id": "dynamic_schema_gen",
+        "label": "Generate Dynamic Tool Schema",
+        "type": "component",
+        "link": null,
+        "title": "Dynamic Schema Creator",
+        "description": "Constructs Pydantic models dynamically from action schemas to define the arguments required for platform actions, ensuring type safety and validation for tool inputs."
+      },
+      {
+        "id": "platform_api_config",
+        "label": "Configure Platform API Access",
+        "type": "component",
+        "link": null,
+        "title": "API Access Configuration",
+        "description": "Retrieves the base URL and authentication token necessary for securely connecting to and interacting with the CrewAI Platform API."
+      },
+      {
+        "id": "api_request_execution",
+        "label": "Execute & Process API Request",
+        "type": "component",
+        "link": null,
+        "title": "API Request Processor",
+        "description": "Handles the actual HTTP POST request to the CrewAI Platform API, including payload construction, timeout management, and parsing the API response for success or error."
+      },
+      {
+        "id": "crewai_platform_api",
+        "label": "CrewAI Platform API",
+        "type": "external",
+        "link": null,
+        "title": "External Platform API",
+        "description": "The external API endpoint of the CrewAI platform, responsible for processing and executing requested actions and returning results."
+      }
+    ],
+    "edges": [
+      {
+        "source": "execute_platform_action",
+        "target": "dynamic_schema_gen",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_platform_action",
+        "target": "api_request_execution",
+        "label": "delegates execution to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_request_execution",
+        "target": "platform_api_config",
+        "label": "uses credentials from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "api_request_execution",
+        "target": "crewai_platform_api",
+        "label": "sends request to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "crewai_platform_api",
+        "target": "api_request_execution",
+        "label": "returns response to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "tool_interface_group",
+        "label": "Tool Interface",
+        "nodes": [
+          "execute_platform_action"
+        ],
+        "title": "Agent-Facing Tool",
+        "description": "Defines the primary interface for agents to interact with the CrewAI Platform, abstracting underlying API complexities.",
+        "role": "surface"
+      },
+      {
+        "id": "config_setup_group",
+        "label": "Configuration & Setup",
+        "nodes": [
+          "dynamic_schema_gen",
+          "platform_api_config"
+        ],
+        "title": "Tool Configuration",
+        "description": "Manages the dynamic setup of the tool, including argument schema generation and API access credentials.",
+        "role": "generative"
+      },
+      {
+        "id": "api_comm_group",
+        "label": "API Communication",
+        "nodes": [
+          "api_request_execution"
+        ],
+        "title": "Platform API Interaction",
+        "description": "Handles the secure and reliable communication with the external CrewAI Platform API, including request formatting and response processing.",
+        "role": "data"
+      }
+    ]
+  }
+}

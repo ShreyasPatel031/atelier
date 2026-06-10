@@ -1,0 +1,149 @@
+{
+    "title": "Pydantic AI Integrations",
+    "summary": "This module serves as the integration layer for the Pydantic AI framework, connecting its core components with a wide array of external Large Language Model (LLM) providers, embedding services, and other third-party tools. It provides a unified interface for interacting with diverse AI services and platforms.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "llm_providers",
+                "label": "Integrate LLM Providers",
+                "type": "module",
+                "link": "llm_providers",
+                "title": "LLM Provider Integrations",
+                "description": "Connects to various Large Language Model APIs, handling authentication, client instantiation, and model-specific configurations."
+            },
+            {
+                "id": "model_specific_adapters",
+                "label": "Adapt LLM Behaviors",
+                "type": "module",
+                "link": "model_specific_adapters",
+                "title": "Model-Specific Adapters",
+                "description": "Provides specialized logic for different LLM providers, managing unique behaviors like tool forcing, usage mapping, and streaming responses."
+            },
+            {
+                "id": "embedding_models",
+                "label": "Manage Text Embeddings",
+                "type": "module",
+                "link": "embedding_models",
+                "title": "Text Embedding Services",
+                "description": "Offers a unified interface for generating text embeddings using diverse models and providers, including usage tracking and configuration."
+            },
+            {
+                "id": "external_integrations",
+                "label": "Connect External Tools",
+                "type": "module",
+                "link": "external_integrations",
+                "title": "External Tool & Framework Integrations",
+                "description": "Facilitates integration with third-party toolsets and frameworks, adapting them for use within the Pydantic AI ecosystem."
+            },
+            {
+                "id": "pydantic_ai_core",
+                "label": "Pydantic AI Core",
+                "type": "external",
+                "link": "pydantic_ai_core",
+                "title": "Pydantic AI Core Framework",
+                "description": "The foundational components of the Pydantic AI framework, including core utilities and abstractions."
+            },
+            {
+                "id": "model_abstraction",
+                "label": "LLM Model Abstraction",
+                "type": "external",
+                "link": "model_abstraction",
+                "title": "LLM Model Abstraction Layer",
+                "description": "Defines the abstract interface for interacting with Large Language Models, used by providers and adapters."
+            },
+            {
+                "id": "capabilities_and_tools",
+                "label": "Agent Capabilities & Tools",
+                "type": "external",
+                "link": "capabilities_and_tools",
+                "title": "Agent Capabilities & Tool Management",
+                "description": "Manages the definition, discovery, and execution of agent capabilities and tools."
+            }
+        ],
+        "edges": [
+            {
+                "source": "pydantic_ai_core",
+                "target": "llm_providers",
+                "label": "Utilizes for LLM access",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_abstraction",
+                "target": "llm_providers",
+                "label": "Implemented by",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "llm_providers",
+                "target": "model_specific_adapters",
+                "label": "Leverages for specific logic",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "model_abstraction",
+                "target": "model_specific_adapters",
+                "label": "Adapts for model-specifics",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "pydantic_ai_core",
+                "target": "embedding_models",
+                "label": "Uses for text embeddings",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "capabilities_and_tools",
+                "target": "external_integrations",
+                "label": "Integrates external toolsets",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "pydantic_ai_core",
+                "target": "external_integrations",
+                "label": "Extends core functionality",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "llm_integration_layer",
+                "label": "LLM Integration Layer",
+                "nodes": [
+                    "llm_providers",
+                    "model_specific_adapters"
+                ],
+                "title": "LLM Integration Layer",
+                "description": "Components responsible for connecting to and adapting to various Large Language Model APIs and their unique behaviors.",
+                "role": null
+            },
+            {
+                "id": "embedding_integration",
+                "label": "Embedding Integration",
+                "nodes": [
+                    "embedding_models"
+                ],
+                "title": "Embedding Service Integration",
+                "description": "Manages the integration and usage of different text embedding models and services.",
+                "role": null
+            },
+            {
+                "id": "third_party_extensions",
+                "label": "Third-Party Extensions",
+                "nodes": [
+                    "external_integrations"
+                ],
+                "title": "External Tool & Framework Extensions",
+                "description": "Provides mechanisms for integrating Pydantic AI with external toolsets and other frameworks.",
+                "role": null
+            }
+        ]
+    }
+}

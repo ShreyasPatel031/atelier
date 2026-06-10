@@ -1,0 +1,229 @@
+{
+  "title": "Program Analysis & Feedback",
+  "summary": "This module provides tools for analyzing program execution, evaluating performance, and generating feedback or new instructions to optimize DSPy programs. It includes mechanisms for tracing execution, comparing trajectories, and summarizing dataset characteristics.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "comparator_sig",
+        "label": "Compare Program Trajectories",
+        "type": "component",
+        "link": null,
+        "title": "Program Trajectory Comparator",
+        "description": "Defines a signature for comparing program execution trajectories (good vs. bad) and generating feedback to improve performance on negative inputs by identifying patterns and suggesting tool modifications."
+      },
+      {
+        "id": "patched_forward_func",
+        "label": "Capture Program Execution Trace",
+        "type": "component",
+        "link": null,
+        "title": "Patched Forward Execution Trace",
+        "description": "Patches a program's forward method to capture its execution trace, including inputs, outputs, and handling of parsing errors. Records failed predictions with a format reward."
+      },
+      {
+        "id": "gepa_feedback_metric",
+        "label": "Define GEPA Feedback Metric",
+        "type": "component",
+        "link": null,
+        "title": "GEPA Feedback Metric Protocol",
+        "description": "A protocol defining the interface for feedback metrics used in GEPA optimization. It allows for generating feedback at the program level or for individual predictors based on gold examples, predictions, and execution traces."
+      },
+      {
+        "id": "append_rule_func",
+        "label": "Generate & Append Optimization Rule",
+        "type": "component",
+        "link": null,
+        "title": "Append Optimization Rule",
+        "description": "Generates and appends a new optimization rule (advice) to a predictor's instructions. It contrasts good and bad program execution trajectories to formulate concrete advice for improving module behavior."
+      },
+      {
+        "id": "append_demo_func",
+        "label": "Append Few-Shot Demo",
+        "type": "component",
+        "link": null,
+        "title": "Append Few-Shot Demo",
+        "description": "Appends a successful program execution trace as a few-shot demonstration to a predictor's examples, helping it learn from good behavior."
+      },
+      {
+        "id": "offer_feedback_sig",
+        "label": "Generate Module-Specific Feedback",
+        "type": "component",
+        "link": null,
+        "title": "Module Feedback Generation Signature",
+        "description": "Defines a signature for generating concrete, module-specific advice by contrasting good and bad program execution trajectories. Aims to help modules learn from past performance to improve future behavior."
+      },
+      {
+        "id": "get_history_func",
+        "label": "Retrieve Task Model History",
+        "type": "component",
+        "link": null,
+        "title": "Get Task Model History",
+        "description": "Retrieves the complete execution history or trace of a task model for a given candidate program and a subset of the development set, useful for detailed analysis."
+      },
+      {
+        "id": "log_tokens_func",
+        "label": "Log Model Token Usage",
+        "type": "component",
+        "link": null,
+        "title": "Log Token Usage",
+        "description": "Extracts and logs the total input and output tokens used by each language model during a trial, storing this information in the trial logs for performance monitoring."
+      },
+      {
+        "id": "calculate_quality_func",
+        "label": "Calculate Program Quality Metrics",
+        "type": "component",
+        "link": null,
+        "title": "Calculate Proposed Program Quality",
+        "description": "Computes the average and best quality scores for the last 'n' proposed programs based on their performance on training and development sets, indicating improvement over time."
+      },
+      {
+        "id": "observation_summarizer_sig",
+        "label": "Summarize Dataset Observations",
+        "type": "component",
+        "link": null,
+        "title": "Dataset Observation Summarizer",
+        "description": "Defines a signature for summarizing a series of detailed observations about a dataset into a concise, 2-3 sentence summary highlighting only the most important details."
+      },
+      {
+        "id": "dataset_descriptor_sig",
+        "label": "Describe Dataset Trends",
+        "type": "component",
+        "link": null,
+        "title": "Dataset Descriptor",
+        "description": "Defines a signature for generating observations about trends, topics, content, and syntax from sample data points in a dataset, and making an educated guess about the task it enables."
+      },
+      {
+        "id": "dataset_descriptor_prior_sig",
+        "label": "Describe Dataset with Prior Observations",
+        "type": "component",
+        "link": null,
+        "title": "Dataset Descriptor with Prior Observations",
+        "description": "Defines a signature for generating new observations about a dataset, building upon or completing a set of provided prior observations, focusing on trends and task nature."
+      },
+      {
+        "id": "create_instruction_history_func",
+        "label": "Format Top Program Instructions",
+        "type": "component",
+        "link": null,
+        "title": "Create Instruction Set History String",
+        "description": "Generates a formatted string containing the instruction sets of the top-performing programs from trial logs, ordered by score, useful for reviewing successful program configurations."
+      }
+    ],
+    "edges": [
+      {
+        "source": "patched_forward_func",
+        "target": "gepa_feedback_metric",
+        "label": "provides trace to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "patched_forward_func",
+        "target": "append_rule_func",
+        "label": "provides trace to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "patched_forward_func",
+        "target": "append_demo_func",
+        "label": "provides trace to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "append_rule_func",
+        "target": "offer_feedback_sig",
+        "label": "invokes predictor with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "log_tokens_func",
+        "target": "calculate_quality_func",
+        "label": "updates trial logs for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "log_tokens_func",
+        "target": "create_instruction_history_func",
+        "label": "updates trial logs for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_descriptor_sig",
+        "target": "dataset_descriptor_prior_sig",
+        "label": "generates observations for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_descriptor_sig",
+        "target": "observation_summarizer_sig",
+        "label": "provides observations to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dataset_descriptor_prior_sig",
+        "target": "observation_summarizer_sig",
+        "label": "provides observations to",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "program_analysis_evaluation",
+        "label": "Program Analysis & Evaluation",
+        "nodes": [
+          "patched_forward_func",
+          "gepa_feedback_metric",
+          "get_history_func",
+          "calculate_quality_func"
+        ],
+        "title": "Program Analysis & Evaluation",
+        "description": "Components for observing, tracing, and evaluating the performance and execution of DSPy programs.",
+        "role": "analytical"
+      },
+      {
+        "id": "feedback_instruction_generation",
+        "label": "Feedback & Instruction Generation",
+        "nodes": [
+          "comparator_sig",
+          "offer_feedback_sig",
+          "append_rule_func",
+          "append_demo_func"
+        ],
+        "title": "Feedback & Instruction Generation",
+        "description": "Components responsible for generating feedback, advice, or new instructions to optimize program modules based on performance analysis.",
+        "role": "generative"
+      },
+      {
+        "id": "dataset_description_summarization",
+        "label": "Dataset Description & Summarization",
+        "nodes": [
+          "observation_summarizer_sig",
+          "dataset_descriptor_sig",
+          "dataset_descriptor_prior_sig"
+        ],
+        "title": "Dataset Description & Summarization",
+        "description": "Components for analyzing and summarizing characteristics and trends within datasets, aiding in understanding data for program optimization.",
+        "role": "generative"
+      },
+      {
+        "id": "logging_history_management",
+        "label": "Logging & History Management",
+        "nodes": [
+          "log_tokens_func",
+          "create_instruction_history_func"
+        ],
+        "title": "Logging & History Management",
+        "description": "Utilities for logging token usage and managing historical data of program instruction sets and trial results.",
+        "role": "data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "title": "CrewAI Project Creation",
+  "summary": "This module facilitates the creation of new CrewAI projects by copying template files and provides a blueprint for defining a sample content generation crew with agents and tasks.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "cli_trigger",
+        "label": "Trigger Project Creation",
+        "type": "external",
+        "link": "cli_commands",
+        "title": "CLI Project Creation",
+        "description": "User initiates the creation of a new CrewAI project via a command-line interface command, typically through the CrewAI CLI."
+      },
+      {
+        "id": "copy_templates",
+        "label": "Copy Project Template Files",
+        "type": "component",
+        "link": null,
+        "title": "Template File Copying",
+        "description": "Copies a set of predefined template files, including project structure, configuration, and sample crew definitions, into the newly designated project directory."
+      },
+      {
+        "id": "content_crew_blueprint",
+        "label": "Provide Content Crew Blueprint",
+        "type": "component",
+        "link": null,
+        "title": "Content Crew Template",
+        "description": "Defines a foundational structure for a content generation crew, including methods for defining agents and tasks, and assembling the final crew instance."
+      },
+      {
+        "id": "load_yaml_configs",
+        "label": "Load Agent/Task Configurations",
+        "type": "external",
+        "link": null,
+        "title": "YAML Configuration Loading",
+        "description": "Reads agent and task definitions from external YAML configuration files (e.g., agents.yaml, tasks.yaml) to parameterize the crew's components dynamically."
+      },
+      {
+        "id": "define_agents",
+        "label": "Define Crew Agents",
+        "type": "external",
+        "link": "core_framework",
+        "title": "Agent Definition",
+        "description": "Specifies the roles, capabilities, and configurations for individual AI agents (e.g., planner, writer, editor) within the crew, based on loaded configurations."
+      },
+      {
+        "id": "define_tasks",
+        "label": "Define Crew Tasks",
+        "type": "external",
+        "link": "core_framework",
+        "title": "Task Definition",
+        "description": "Outlines the specific tasks (e.g., planning, writing, editing) that agents will perform, including their objectives, dependencies, and expected outputs."
+      },
+      {
+        "id": "build_crew",
+        "label": "Build Crew Instance",
+        "type": "external",
+        "link": "core_framework",
+        "title": "Crew Assembly",
+        "description": "Assembles the defined agents and tasks into a cohesive CrewAI crew, ready for execution with a specified process flow and verbose logging."
+      }
+    ],
+    "edges": [
+      {
+        "source": "cli_trigger",
+        "target": "copy_templates",
+        "label": "Initiates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "copy_templates",
+        "target": "content_crew_blueprint",
+        "label": "Includes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "content_crew_blueprint",
+        "target": "load_yaml_configs",
+        "label": "References",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_yaml_configs",
+        "target": "define_agents",
+        "label": "Provides Config For",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "load_yaml_configs",
+        "target": "define_tasks",
+        "label": "Provides Config For",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "content_crew_blueprint",
+        "target": "define_agents",
+        "label": "Defines Methods For",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "content_crew_blueprint",
+        "target": "define_tasks",
+        "label": "Defines Methods For",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "define_agents",
+        "target": "build_crew",
+        "label": "Contributes Agents To",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "define_tasks",
+        "target": "build_crew",
+        "label": "Contributes Tasks To",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "define_agents",
+        "target": "core_framework",
+        "label": "Utilizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "define_tasks",
+        "target": "core_framework",
+        "label": "Utilizes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "build_crew",
+        "target": "core_framework",
+        "label": "Utilizes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "cli_interface",
+        "label": "CLI Interface",
+        "nodes": [
+          "cli_trigger"
+        ],
+        "title": "Command Line Interface",
+        "description": "Handles user interaction for initiating new project creation through command-line commands.",
+        "role": "surface"
+      },
+      {
+        "id": "project_scaffolding",
+        "label": "Project Scaffolding",
+        "nodes": [
+          "copy_templates"
+        ],
+        "title": "New Project Generation",
+        "description": "Manages the creation of new CrewAI project directories and populates them with initial template files and basic structure.",
+        "role": "generative"
+      },
+      {
+        "id": "crew_definition",
+        "label": "Crew Definition",
+        "nodes": [
+          "content_crew_blueprint",
+          "define_agents",
+          "define_tasks",
+          "build_crew"
+        ],
+        "title": "Crew Blueprint & Assembly",
+        "description": "Provides the template for defining a CrewAI crew, including its agents and tasks, and orchestrates their assembly into a functional unit.",
+        "role": "generative"
+      },
+      {
+        "id": "configuration_data",
+        "label": "Configuration Data",
+        "nodes": [
+          "load_yaml_configs"
+        ],
+        "title": "Crew Configuration Files",
+        "description": "External YAML files that store the detailed configurations for agents and tasks, allowing for flexible and declarative crew setup.",
+        "role": "data"
+      }
+    ]
+  }
+}

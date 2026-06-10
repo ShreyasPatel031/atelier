@@ -1,0 +1,373 @@
+{
+  "title": "File Content and Management Tools",
+  "summary": "This module provides a collection of tools for interacting with file systems and various file types, including reading, searching, and compressing. It also includes a specialized tool for fetching and downloading academic papers from Arxiv.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "BaseTool",
+        "label": "Base Tool Interface",
+        "type": "component",
+        "link": null,
+        "title": "Base Tool Interface",
+        "description": "Provides the foundational structure and common methods for all tools within the CrewAI framework."
+      },
+      {
+        "id": "RagTool",
+        "label": "Base RAG Tool",
+        "type": "component",
+        "link": null,
+        "title": "Base RAG Tool",
+        "description": "Extends the BaseTool to provide Retrieval-Augmented Generation capabilities, enabling semantic search over various data types."
+      },
+      {
+        "id": "CSVSearchTool",
+        "label": "Search CSV Content",
+        "type": "component",
+        "link": null,
+        "title": "CSV Search Tool",
+        "description": "Enables semantic search queries against the content of CSV files, returning relevant information based on similarity."
+      },
+      {
+        "id": "DirectoryReadTool",
+        "label": "List Directory Files",
+        "type": "component",
+        "link": null,
+        "title": "Directory Read Tool",
+        "description": "Recursively lists all files within a specified directory, providing their paths for further processing."
+      },
+      {
+        "id": "DirectorySearchTool",
+        "label": "Search Directory Content",
+        "type": "component",
+        "link": null,
+        "title": "Directory Search Tool",
+        "description": "Performs semantic search across all text content found within files in a given directory."
+      },
+      {
+        "id": "DOCXSearchTool",
+        "label": "Search DOCX Content",
+        "type": "component",
+        "link": null,
+        "title": "DOCX Search Tool",
+        "description": "Allows semantic search queries to be executed against the textual content of DOCX (Microsoft Word) documents."
+      },
+      {
+        "id": "FileCompressorTool",
+        "label": "Compress Files/Directories",
+        "type": "component",
+        "link": null,
+        "title": "File Compressor Tool",
+        "description": "Compresses a specified file or directory into an archive format (e.g., ZIP, TAR), useful for archiving data."
+      },
+      {
+        "id": "FileReadTool",
+        "label": "Read File Content",
+        "type": "component",
+        "link": null,
+        "title": "File Read Tool",
+        "description": "Reads the entire content of a specified file or a specific range of lines from it."
+      },
+      {
+        "id": "JSONSearchTool",
+        "label": "Search JSON Content",
+        "type": "component",
+        "link": null,
+        "title": "JSON Search Tool",
+        "description": "Facilitates semantic search within JSON file content, extracting relevant data based on the query."
+      },
+      {
+        "id": "MDXSearchTool",
+        "label": "Search MDX Content",
+        "type": "component",
+        "link": null,
+        "title": "MDX Search Tool",
+        "description": "Enables semantic search queries against the content of MDX (Markdown with JSX) files."
+      },
+      {
+        "id": "PDFSearchTool",
+        "label": "Search PDF Content",
+        "type": "component",
+        "link": null,
+        "title": "PDF Search Tool",
+        "description": "Performs semantic search on the textual content of PDF documents, retrieving information relevant to a query."
+      },
+      {
+        "id": "TXTSearchTool",
+        "label": "Search TXT Content",
+        "type": "component",
+        "link": null,
+        "title": "TXT Search Tool",
+        "description": "Allows semantic search queries to be executed against the content of plain text (.txt) files."
+      },
+      {
+        "id": "XMLSearchTool",
+        "label": "Search XML Content",
+        "type": "component",
+        "link": null,
+        "title": "XML Search Tool",
+        "description": "Enables semantic search queries against the content of XML files, extracting relevant data."
+      },
+      {
+        "id": "ArxivPaperTool",
+        "label": "Fetch Arxiv Papers",
+        "type": "component",
+        "link": null,
+        "title": "Arxiv Paper Tool",
+        "description": "Fetches metadata for academic papers from the Arxiv API and optionally downloads their PDF versions."
+      },
+      {
+        "id": "ArxivAPI",
+        "label": "Arxiv API",
+        "type": "external",
+        "link": null,
+        "title": "Arxiv API",
+        "description": "External API for accessing academic paper metadata and PDF links."
+      },
+      {
+        "id": "FileSystem",
+        "label": "Local File System",
+        "type": "external",
+        "link": null,
+        "title": "Local File System",
+        "description": "The local storage system where files and directories are managed, read, and written."
+      }
+    ],
+    "edges": [
+      {
+        "source": "RagTool",
+        "target": "BaseTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CSVSearchTool",
+        "target": "RagTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DirectorySearchTool",
+        "target": "RagTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DOCXSearchTool",
+        "target": "RagTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JSONSearchTool",
+        "target": "RagTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MDXSearchTool",
+        "target": "RagTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PDFSearchTool",
+        "target": "RagTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TXTSearchTool",
+        "target": "RagTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "XMLSearchTool",
+        "target": "RagTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DirectoryReadTool",
+        "target": "BaseTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FileCompressorTool",
+        "target": "BaseTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FileReadTool",
+        "target": "BaseTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ArxivPaperTool",
+        "target": "BaseTool",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ArxivPaperTool",
+        "target": "ArxivAPI",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ArxivPaperTool",
+        "target": "FileSystem",
+        "label": "downloads to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FileCompressorTool",
+        "target": "FileSystem",
+        "label": "accesses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "FileReadTool",
+        "target": "FileSystem",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DirectoryReadTool",
+        "target": "FileSystem",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "CSVSearchTool",
+        "target": "FileSystem",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DirectorySearchTool",
+        "target": "FileSystem",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DOCXSearchTool",
+        "target": "FileSystem",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "JSONSearchTool",
+        "target": "FileSystem",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "MDXSearchTool",
+        "target": "FileSystem",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PDFSearchTool",
+        "target": "FileSystem",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TXTSearchTool",
+        "target": "FileSystem",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "XMLSearchTool",
+        "target": "FileSystem",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "FileContentSearchTools",
+        "label": "File Content Search Tools",
+        "nodes": [
+          "CSVSearchTool",
+          "DirectorySearchTool",
+          "DOCXSearchTool",
+          "JSONSearchTool",
+          "MDXSearchTool",
+          "PDFSearchTool",
+          "TXTSearchTool",
+          "XMLSearchTool"
+        ],
+        "title": "RAG-based File Search",
+        "description": "A collection of tools designed for semantic search across various file formats using Retrieval-Augmented Generation (RAG).",
+        "role": "analytical"
+      },
+      {
+        "id": "FileSystemManagement",
+        "label": "File System Management",
+        "nodes": [
+          "DirectoryReadTool",
+          "FileReadTool",
+          "FileCompressorTool"
+        ],
+        "title": "Local File Operations",
+        "description": "Tools for fundamental interactions with the local file system, including reading file contents, listing directories, and compressing files.",
+        "role": "data"
+      },
+      {
+        "id": "ExternalDataRetrieval",
+        "label": "External Data Retrieval",
+        "nodes": [
+          "ArxivPaperTool"
+        ],
+        "title": "Arxiv Paper Access",
+        "description": "A specialized tool for fetching academic paper metadata and optionally downloading PDFs from the Arxiv platform.",
+        "role": "data"
+      },
+      {
+        "id": "ToolBaseClasses",
+        "label": "Tool Base Classes",
+        "nodes": [
+          "BaseTool",
+          "RagTool"
+        ],
+        "title": "Foundational Tool Structures",
+        "description": "Abstract base classes that define the common interfaces and core functionalities for all tools in the system.",
+        "role": "generative"
+      }
+    ]
+  }
+}

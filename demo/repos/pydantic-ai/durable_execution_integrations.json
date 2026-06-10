@@ -1,0 +1,363 @@
+{
+  "title": "Durable Execution Integrations",
+  "summary": "This module provides integrations for AI agents and toolsets with durable execution frameworks like DBOS, Prefect, and Temporal. It enables agents to run reliably by offloading operations to these systems' workflows and activities.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "DBOSAgent",
+        "label": "DBOS Agent Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "DBOSAgent",
+        "description": "Wraps an AI agent to enable durable execution via DBOS workflows, offloading model requests and tool calls to DBOS steps."
+      },
+      {
+        "id": "PrefectAgent",
+        "label": "Prefect Agent Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "PrefectAgent",
+        "description": "Wraps an AI agent for durable execution using Prefect flows, offloading model requests and tool calls to Prefect tasks."
+      },
+      {
+        "id": "TemporalAgent",
+        "label": "Temporal Agent Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "TemporalAgent",
+        "description": "Wraps an AI agent for durable execution with Temporal workflows, offloading model requests and tool calls to Temporal activities."
+      },
+      {
+        "id": "DBOSMCPToolsetBase",
+        "label": "DBOS MCP Toolset Base",
+        "type": "component",
+        "link": null,
+        "title": "DBOSMCPToolsetBase",
+        "description": "Abstract base for integrating Multi-Component Platform (MCP) toolsets with DBOS, converting tool operations into DBOS steps."
+      },
+      {
+        "id": "PrefectAgentInputs",
+        "label": "Prefect Agent Cache Policy",
+        "type": "component",
+        "link": null,
+        "title": "PrefectAgentInputs",
+        "description": "A Prefect cache policy for PrefectAgent inputs, ensuring consistent cache keys by filtering volatile run-specific data."
+      },
+      {
+        "id": "prefectify_toolset",
+        "label": "Prefect Toolset Adapter",
+        "type": "component",
+        "link": null,
+        "title": "prefectify_toolset",
+        "description": "Function to adapt various toolsets for Prefect, wrapping them to execute operations as Prefect tasks."
+      },
+      {
+        "id": "TemporalMCPToolsetBase",
+        "label": "Temporal MCP Toolset Base",
+        "type": "component",
+        "link": null,
+        "title": "TemporalMCPToolsetBase",
+        "description": "Abstract base for integrating Multi-Component Platform (MCP) toolsets with Temporal, converting tool operations into Temporal activities."
+      },
+      {
+        "id": "TemporalRunContext",
+        "label": "Temporal Run Context",
+        "type": "component",
+        "link": null,
+        "title": "TemporalRunContext",
+        "description": "Specialized RunContext for Temporal, handling serialization and deserialization of agent run context for Temporal activities."
+      },
+      {
+        "id": "temporalize_toolset",
+        "label": "Temporal Toolset Adapter",
+        "type": "component",
+        "link": null,
+        "title": "temporalize_toolset",
+        "description": "Function to adapt various toolsets for Temporal, wrapping them to execute operations as Temporal activities."
+      },
+      {
+        "id": "LogfireSetup",
+        "label": "Logfire Instrumentation Setup",
+        "type": "component",
+        "link": null,
+        "title": "_default_setup_logfire",
+        "description": "Configures Logfire for observability within Temporal workflows, instrumenting Pydantic AI components."
+      },
+      {
+        "id": "AbstractAgent",
+        "label": "Base AI Agent",
+        "type": "external",
+        "link": "agents_and_orchestration",
+        "title": "AbstractAgent",
+        "description": "Represents the core AI agent functionality that is being wrapped by durable execution integrations."
+      },
+      {
+        "id": "AbstractToolset",
+        "label": "Base Toolset Interface",
+        "type": "external",
+        "link": "capabilities_and_tools",
+        "title": "AbstractToolset",
+        "description": "Defines the interface for collections of tools used by AI agents, which are adapted for durable execution."
+      },
+      {
+        "id": "DBOSFramework",
+        "label": "DBOS Framework",
+        "type": "external",
+        "link": null,
+        "title": "DBOS",
+        "description": "The DBOS durable execution framework, providing reliable workflow and step execution."
+      },
+      {
+        "id": "PrefectFramework",
+        "label": "Prefect Framework",
+        "type": "external",
+        "link": null,
+        "title": "Prefect",
+        "description": "The Prefect durable execution framework, orchestrating data pipelines and workflows as flows and tasks."
+      },
+      {
+        "id": "TemporalFramework",
+        "label": "Temporal Framework",
+        "type": "external",
+        "link": null,
+        "title": "Temporal",
+        "description": "The Temporal durable execution framework, enabling fault-tolerant and long-running workflows and activities."
+      },
+      {
+        "id": "Logfire",
+        "label": "Logfire Observability",
+        "type": "external",
+        "link": null,
+        "title": "Logfire",
+        "description": "An observability tool used for logging and tracing, integrated for monitoring durable executions."
+      }
+    ],
+    "edges": [
+      {
+        "source": "DBOSAgent",
+        "target": "AbstractAgent",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSAgent",
+        "target": "DBOSFramework",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSAgent",
+        "target": "DBOSMCPToolsetBase",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSMCPToolsetBase",
+        "target": "AbstractToolset",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "DBOSMCPToolsetBase",
+        "target": "DBOSFramework",
+        "label": "executes as steps in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "AbstractAgent",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "PrefectFramework",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "prefectify_toolset",
+        "label": "uses to adapt toolsets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "PrefectAgent",
+        "target": "PrefectAgentInputs",
+        "label": "uses cache policy",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prefectify_toolset",
+        "target": "AbstractToolset",
+        "label": "adapts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "prefectify_toolset",
+        "target": "PrefectFramework",
+        "label": "generates tasks for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "AbstractAgent",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "TemporalFramework",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "temporalize_toolset",
+        "label": "uses to adapt toolsets",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "TemporalRunContext",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalAgent",
+        "target": "LogfireSetup",
+        "label": "configures observability via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalMCPToolsetBase",
+        "target": "AbstractToolset",
+        "label": "wraps",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalMCPToolsetBase",
+        "target": "TemporalFramework",
+        "label": "executes as activities in",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "TemporalRunContext",
+        "target": "TemporalFramework",
+        "label": "provides context for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporalize_toolset",
+        "target": "AbstractToolset",
+        "label": "adapts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "temporalize_toolset",
+        "target": "TemporalFramework",
+        "label": "generates activities for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LogfireSetup",
+        "target": "Logfire",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "LogfireSetup",
+        "target": "TemporalFramework",
+        "label": "monitors",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "DBOSIntegration",
+        "label": "DBOS Integration",
+        "nodes": [
+          "DBOSAgent",
+          "DBOSMCPToolsetBase"
+        ],
+        "title": "DBOS Integration",
+        "description": "Components for integrating AI agents and toolsets with the DBOS durable execution framework.",
+        "role": "generative"
+      },
+      {
+        "id": "PrefectIntegration",
+        "label": "Prefect Integration",
+        "nodes": [
+          "PrefectAgent",
+          "PrefectAgentInputs",
+          "prefectify_toolset"
+        ],
+        "title": "Prefect Integration",
+        "description": "Components for integrating AI agents and toolsets with the Prefect durable execution framework.",
+        "role": "generative"
+      },
+      {
+        "id": "TemporalIntegration",
+        "label": "Temporal Integration",
+        "nodes": [
+          "TemporalAgent",
+          "TemporalMCPToolsetBase",
+          "TemporalRunContext",
+          "temporalize_toolset",
+          "LogfireSetup"
+        ],
+        "title": "Temporal Integration",
+        "description": "Components for integrating AI agents and toolsets with the Temporal durable execution framework.",
+        "role": "generative"
+      },
+      {
+        "id": "ExternalAIComponents",
+        "label": "External AI Components",
+        "nodes": [
+          "AbstractAgent",
+          "AbstractToolset"
+        ],
+        "title": "External AI Components",
+        "description": "Core AI components from other modules that are integrated with durable execution frameworks.",
+        "role": "surface"
+      },
+      {
+        "id": "DurableExecutionPlatforms",
+        "label": "Durable Execution Platforms",
+        "nodes": [
+          "DBOSFramework",
+          "PrefectFramework",
+          "TemporalFramework",
+          "Logfire"
+        ],
+        "title": "Durable Execution Platforms",
+        "description": "External durable execution frameworks and observability tools that this module integrates with.",
+        "role": "external"
+      }
+    ]
+  }
+}

@@ -1,0 +1,239 @@
+{
+  "title": "Online Evaluation & Reporting",
+  "summary": "This module provides tools for online evaluation of AI agent runs and function calls, dispatching evaluators asynchronously, and reporting results to various sinks including OpenTelemetry. It also includes utilities for rendering evaluation metrics and durations.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "online_eval_config",
+        "label": "Configure Online Evaluation",
+        "type": "component",
+        "link": null,
+        "title": "OnlineEvalConfig",
+        "description": "Defines global and default settings for online evaluation, including sinks, sampling rates, and error handling strategies."
+      },
+      {
+        "id": "function_wrapper",
+        "label": "Decorate Functions for Eval",
+        "type": "component",
+        "link": null,
+        "title": "online.wrapper",
+        "description": "A decorator that enables online evaluation for any Python function, capturing inputs/outputs and dispatching evaluators asynchronously."
+      },
+      {
+        "id": "agent_capability",
+        "label": "Enable Agent Online Eval",
+        "type": "component",
+        "link": null,
+        "title": "OnlineEvaluation",
+        "description": "A capability that integrates online evaluation directly into AI agent runs, dispatching evaluators after each completed agent execution."
+      },
+      {
+        "id": "run_and_collect_eval",
+        "label": "Run & Collect Evaluator Results",
+        "type": "component",
+        "link": null,
+        "title": "_run_and_collect",
+        "description": "Executes a single online evaluator, manages concurrency, emits OpenTelemetry events, and stashes results for batch submission."
+      },
+      {
+        "id": "submit_to_sink",
+        "label": "Submit Batched Results to Sink",
+        "type": "component",
+        "link": null,
+        "title": "_submit_group_to_sink",
+        "description": "Handles the submission of batched evaluation outcomes to a configured evaluation sink, managing error routing."
+      },
+      {
+        "id": "otel_context_manager",
+        "label": "Manage OTel Span Context",
+        "type": "component",
+        "link": null,
+        "title": "context_subtree",
+        "description": "A context manager for OpenTelemetry spans, allowing the collection and analysis of span trees for evaluation tracing."
+      },
+      {
+        "id": "render_num_diff",
+        "label": "Render Numeric Differences",
+        "type": "component",
+        "link": null,
+        "title": "default_render_number_diff",
+        "description": "Formats and renders the difference between two numerical values, including absolute and relative changes."
+      },
+      {
+        "id": "render_duration_diff",
+        "label": "Render Duration Differences",
+        "type": "component",
+        "link": null,
+        "title": "default_render_duration_diff",
+        "description": "Formats and renders the difference between two durations, providing clear, human-readable comparisons."
+      },
+      {
+        "id": "render_duration",
+        "label": "Render Duration",
+        "type": "component",
+        "link": null,
+        "title": "default_render_duration",
+        "description": "Formats a given duration in seconds into a human-readable string, adjusting units (microseconds, milliseconds, seconds) as appropriate."
+      },
+      {
+        "id": "evaluator_external",
+        "label": "External Evaluator Logic",
+        "type": "external",
+        "link": "evaluator_implementations",
+        "title": "Evaluator",
+        "description": "Represents the core logic of an evaluator, which processes context and produces evaluation results."
+      },
+      {
+        "id": "eval_sink_external",
+        "label": "Evaluation Result Sink",
+        "type": "external",
+        "link": null,
+        "title": "EvaluationSink",
+        "description": "An external destination (e.g., database, logging system) where evaluation results are submitted for storage or further processing."
+      },
+      {
+        "id": "agent_run_result_external",
+        "label": "Agent Run Result",
+        "type": "external",
+        "link": "agents_and_orchestration",
+        "title": "AgentRunResult",
+        "description": "The outcome of an AI agent's execution, including its final output, which serves as input for online evaluation."
+      },
+      {
+        "id": "open_telemetry_external",
+        "label": "OpenTelemetry System",
+        "type": "external",
+        "link": null,
+        "title": "OpenTelemetry",
+        "description": "An external observability framework used for emitting structured events and traces related to evaluation runs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "function_wrapper",
+        "target": "online_eval_config",
+        "label": "Uses configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "function_wrapper",
+        "target": "run_and_collect_eval",
+        "label": "Dispatches evaluators",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "function_wrapper",
+        "target": "agent_run_result_external",
+        "label": "Processes output from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_capability",
+        "target": "online_eval_config",
+        "label": "Uses configuration",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_capability",
+        "target": "run_and_collect_eval",
+        "label": "Dispatches evaluators",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "agent_capability",
+        "target": "agent_run_result_external",
+        "label": "Processes output from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_and_collect_eval",
+        "target": "evaluator_external",
+        "label": "Executes",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_and_collect_eval",
+        "target": "open_telemetry_external",
+        "label": "Emits events to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "run_and_collect_eval",
+        "target": "submit_to_sink",
+        "label": "Batches results for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "submit_to_sink",
+        "target": "eval_sink_external",
+        "label": "Submits to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "otel_context_manager",
+        "target": "open_telemetry_external",
+        "label": "Manages context in",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "surface_api",
+        "label": "Surface API",
+        "nodes": [
+          "function_wrapper",
+          "agent_capability"
+        ],
+        "title": "User-Facing Integration Points",
+        "description": "Entry points for integrating online evaluation into functions and AI agents.",
+        "role": "surface"
+      },
+      {
+        "id": "evaluation_dispatch",
+        "label": "Evaluation Dispatch & Processing",
+        "nodes": [
+          "run_and_collect_eval",
+          "submit_to_sink",
+          "otel_context_manager"
+        ],
+        "title": "Core Evaluation Logic",
+        "description": "Components responsible for running evaluators, collecting results, and dispatching them to sinks.",
+        "role": "generative"
+      },
+      {
+        "id": "reporting_utilities",
+        "label": "Reporting Utilities",
+        "nodes": [
+          "render_num_diff",
+          "render_duration_diff",
+          "render_duration"
+        ],
+        "title": "Metric Rendering for Reports",
+        "description": "Helper functions for formatting and rendering numerical and duration-based metrics for human-readable reports.",
+        "role": "analytical"
+      },
+      {
+        "id": "configuration",
+        "label": "Configuration",
+        "nodes": [
+          "online_eval_config"
+        ],
+        "title": "Online Evaluation Settings",
+        "description": "Defines the configurable parameters and defaults for the online evaluation system.",
+        "role": "data"
+      }
+    ]
+  }
+}

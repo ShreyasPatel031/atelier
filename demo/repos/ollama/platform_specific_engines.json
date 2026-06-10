@@ -1,0 +1,107 @@
+{
+  "title": "Platform-Specific Webview Engines",
+  "summary": "This module provides platform-specific implementations for webview engines, handling the creation and destruction of webview components and their associated windows for different operating systems. It ensures proper resource management and integration with native UI frameworks.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "gtk_webkit_engine",
+        "label": "GTK WebKit Engine",
+        "type": "component",
+        "link": null,
+        "title": "GTK WebKit Engine",
+        "description": "Manages the lifecycle of a WebKitGTK webview component and its associated GTK window, ensuring proper destruction and resource release."
+      },
+      {
+        "id": "cocoa_wkwebview_engine",
+        "label": "Cocoa WKWebView Engine",
+        "type": "component",
+        "link": null,
+        "title": "Cocoa WKWebView Engine",
+        "description": "Handles the creation and destruction of WKWebView instances and their integration with Cocoa windows, managing delegates and releasing Objective-C objects."
+      },
+      {
+        "id": "win32_edge_engine",
+        "label": "Win32 Edge WebView2 Engine",
+        "type": "component",
+        "link": null,
+        "title": "Win32 Edge WebView2 Engine",
+        "description": "Controls the lifetime of an Edge WebView2 component on Windows, including COM object management, window procedure replacement, and window destruction."
+      },
+      {
+        "id": "webview_core_api",
+        "label": "Webview Core API",
+        "type": "other_module",
+        "link": "webview_core_api",
+        "title": "Webview Core API",
+        "description": "Provides a unified, platform-agnostic interface for webview operations, abstracting away the complexities of platform-specific implementations and enabling consistent web content display across different operating systems."
+      },
+      {
+        "id": "native_ui_frameworks",
+        "label": "Native UI Frameworks",
+        "type": "external",
+        "link": null,
+        "title": "Native UI Frameworks",
+        "description": "Operating system-specific UI toolkits and APIs (GTK, Cocoa, Win32) that the webview engines interact with for rendering and window management."
+      }
+    ],
+    "edges": [
+      {
+        "source": "webview_core_api",
+        "target": "gtk_webkit_engine",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "webview_core_api",
+        "target": "cocoa_wkwebview_engine",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "webview_core_api",
+        "target": "win32_edge_engine",
+        "label": "Uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "gtk_webkit_engine",
+        "target": "native_ui_frameworks",
+        "label": "Integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "cocoa_wkwebview_engine",
+        "target": "native_ui_frameworks",
+        "label": "Integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "win32_edge_engine",
+        "target": "native_ui_frameworks",
+        "label": "Integrates with",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "platform_engines_group",
+        "label": "Platform Engines",
+        "nodes": [
+          "gtk_webkit_engine",
+          "cocoa_wkwebview_engine",
+          "win32_edge_engine"
+        ],
+        "title": "Platform-Specific Webview Engines",
+        "description": "These components provide the concrete implementations for webview rendering and interaction on different operating systems, handling native resource management.",
+        "role": "surface"
+      }
+    ]
+  }
+}

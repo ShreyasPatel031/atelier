@@ -1,0 +1,280 @@
+{
+  "title": "OpenAI Formatting & Conversion",
+  "summary": "This module handles the conversion between DSPy's internal LMRequest/LMResponse objects and various OpenAI API formats. It serializes DSPy requests for OpenAI and deserializes OpenAI responses back into DSPy's standardized structures, including cost extraction.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "dspy_lm_request",
+        "label": "DSPy LM Request",
+        "type": "component",
+        "link": null,
+        "title": "DSPy Language Model Request",
+        "description": "Standardized request object within DSPy for language model interactions."
+      },
+      {
+        "id": "to_openai_responses_req_node",
+        "label": "Format for Responses API",
+        "type": "component",
+        "link": null,
+        "title": "Format for OpenAI Responses API",
+        "description": "Transforms a DSPy LMRequest into the specific JSON structure required by OpenAI's Responses API, including messages, tools, and configuration."
+      },
+      {
+        "id": "openai_responses_api_req",
+        "label": "OpenAI Responses API Request",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI Responses API Request",
+        "description": "The formatted request payload sent to OpenAI's Responses API endpoint."
+      },
+      {
+        "id": "to_openai_text_req_node",
+        "label": "Format for Text Completion",
+        "type": "component",
+        "link": null,
+        "title": "Format for OpenAI Text Completion",
+        "description": "Converts a DSPy LMRequest into the legacy text-completion format expected by older OpenAI API endpoints."
+      },
+      {
+        "id": "openai_text_completion_req",
+        "label": "OpenAI Text Completion Request",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI Text Completion Request",
+        "description": "The formatted request payload sent to OpenAI's legacy text completion API."
+      },
+      {
+        "id": "openai_api",
+        "label": "OpenAI API Service",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI API Service",
+        "description": "The external OpenAI service that processes language model requests and returns responses."
+      },
+      {
+        "id": "openai_responses_api_res",
+        "label": "OpenAI Responses API Response",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI Responses API Response",
+        "description": "Raw response object received from OpenAI's Responses API, containing rich, structured output like messages, tools, and media."
+      },
+      {
+        "id": "openai_completion_res",
+        "label": "OpenAI Completion Response",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI Completion Response",
+        "description": "Raw response object received from OpenAI's standard Chat or Text Completion API, typically containing text choices and usage information."
+      },
+      {
+        "id": "responses_to_lm_res_node",
+        "label": "Parse Responses API Output",
+        "type": "component",
+        "link": null,
+        "title": "Parse OpenAI Responses API Output",
+        "description": "Processes a rich OpenAI Responses API response and converts its various parts (messages, tools, images, reasoning) into a DSPy LMResponse."
+      },
+      {
+        "id": "completion_to_lm_res_node",
+        "label": "Parse Completion Output",
+        "type": "component",
+        "link": null,
+        "title": "Parse OpenAI Completion Output",
+        "description": "Converts a standard OpenAI Chat or Text Completion response into a DSPy LMResponse object, extracting choices and usage details."
+      },
+      {
+        "id": "dspy_lm_response",
+        "label": "DSPy LM Response",
+        "type": "component",
+        "link": null,
+        "title": "DSPy Language Model Response",
+        "description": "Standardized response object within DSPy, containing parsed outputs, usage, and metadata from the language model."
+      },
+      {
+        "id": "extract_cost_node",
+        "label": "Extract Response Cost",
+        "type": "component",
+        "link": null,
+        "title": "Extract Response Cost",
+        "description": "Retrieves the estimated monetary cost associated with an OpenAI API response from its internal or hidden parameters."
+      },
+      {
+        "id": "response_cost",
+        "label": "API Call Cost",
+        "type": "data",
+        "link": null,
+        "title": "API Call Cost Data",
+        "description": "The calculated monetary cost of an OpenAI API interaction, typically in USD."
+      }
+    ],
+    "edges": [
+      {
+        "source": "dspy_lm_request",
+        "target": "to_openai_responses_req_node",
+        "label": "Converts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "to_openai_responses_req_node",
+        "target": "openai_responses_api_req",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "dspy_lm_request",
+        "target": "to_openai_text_req_node",
+        "label": "Converts",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "to_openai_text_req_node",
+        "target": "openai_text_completion_req",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_responses_api_req",
+        "target": "openai_api",
+        "label": "Sends to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_text_completion_req",
+        "target": "openai_api",
+        "label": "Sends to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_api",
+        "target": "openai_responses_api_res",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_api",
+        "target": "openai_completion_res",
+        "label": "Returns",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_responses_api_res",
+        "target": "responses_to_lm_res_node",
+        "label": "Processed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "completion_to_lm_res_node",
+        "target": "dspy_lm_response",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "responses_to_lm_res_node",
+        "target": "dspy_lm_response",
+        "label": "Generates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_completion_res",
+        "target": "completion_to_lm_res_node",
+        "label": "Processed by",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_responses_api_res",
+        "target": "extract_cost_node",
+        "label": "Extracts from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_completion_res",
+        "target": "extract_cost_node",
+        "label": "Extracts from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "extract_cost_node",
+        "target": "response_cost",
+        "label": "Outputs",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "dspy_interfaces_group",
+        "label": "DSPy Interfaces",
+        "nodes": [
+          "dspy_lm_request",
+          "dspy_lm_response"
+        ],
+        "title": "DSPy Internal Data Structures",
+        "description": "Represents the standardized request and response objects used within the DSPy framework.",
+        "role": "data"
+      },
+      {
+        "id": "request_formatting_group",
+        "label": "Request Formatting",
+        "nodes": [
+          "to_openai_responses_req_node",
+          "to_openai_text_req_node"
+        ],
+        "title": "OpenAI Request Formatting",
+        "description": "Components responsible for transforming DSPy's generic LMRequest into specific OpenAI API request formats.",
+        "role": "surface"
+      },
+      {
+        "id": "response_parsing_group",
+        "label": "Response Parsing",
+        "nodes": [
+          "responses_to_lm_res_node",
+          "completion_to_lm_res_node"
+        ],
+        "title": "OpenAI Response Parsing",
+        "description": "Components that parse raw responses from various OpenAI APIs and convert them into DSPy's standardized LMResponse format.",
+        "role": "generative"
+      },
+      {
+        "id": "cost_analysis_group",
+        "label": "Cost Analysis",
+        "nodes": [
+          "extract_cost_node",
+          "response_cost"
+        ],
+        "title": "API Cost Extraction",
+        "description": "Component dedicated to extracting and providing cost information from OpenAI API responses.",
+        "role": "analytical"
+      },
+      {
+        "id": "openai_interfaces_group",
+        "label": "OpenAI Interfaces",
+        "nodes": [
+          "openai_responses_api_req",
+          "openai_text_completion_req",
+          "openai_api",
+          "openai_responses_api_res",
+          "openai_completion_res"
+        ],
+        "title": "External OpenAI Systems",
+        "description": "Represents the various request/response formats and the external OpenAI API service itself.",
+        "role": "external"
+      }
+    ]
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "title": "Scripts and Testing Utilities",
+  "summary": "This module contains various utility scripts and testing components for managing VCR cassettes, verifying CLI behavior, and validating cloud service integrations, particularly with Google Cloud's Vertex AI and GCS.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "node_parse_cassette",
+        "label": "Parse VCR Cassette",
+        "type": "component",
+        "link": null,
+        "title": "Parse VCR Cassette",
+        "description": "Parses a VCR cassette YAML file to inspect recorded HTTP interactions, optionally focusing on a specific interaction index. This utility helps in debugging and understanding network interactions captured during tests."
+      },
+      {
+        "id": "node_clai_cli",
+        "label": "Run CLAI CLI",
+        "type": "component",
+        "link": null,
+        "title": "Run CLAI CLI",
+        "description": "Executes the main command-line interface for the CLAI application. It handles argument parsing, command dispatch, and ensures proper exit codes, providing a direct user interaction point for various CLAI functionalities."
+      },
+      {
+        "id": "node_test_cli_help",
+        "label": "Verify CLI Help in README",
+        "type": "component",
+        "link": null,
+        "title": "Verify CLI Help in README",
+        "description": "Tests if the `clai --help` output matches the expected content and updates the help section in `README.md`. This ensures documentation consistency and fails the test if the CLI help message changes unexpectedly."
+      },
+      {
+        "id": "node_check_cassettes",
+        "label": "Check Orphaned Cassettes",
+        "type": "component",
+        "link": null,
+        "title": "Check Orphaned Cassettes",
+        "description": "Scans for VCR cassette files and compares them against VCR-marked tests to identify and report any orphaned cassettes. This helps maintain a clean test suite by flagging unused or outdated network recordings."
+      },
+      {
+        "id": "node_upload_test_files",
+        "label": "Upload Provider Test Files",
+        "type": "component",
+        "link": null,
+        "title": "Upload Provider Test Files",
+        "description": "Uploads various test files to different cloud providers such as OpenAI, Anthropic, Google, and Bedrock. This script is crucial for setting up and preparing data for integration tests across multiple LLM platforms."
+      },
+      {
+        "id": "node_verify_vertex_gcs",
+        "label": "Verify Vertex GCS Access",
+        "type": "component",
+        "link": null,
+        "title": "Verify Vertex GCS Access",
+        "description": "Verifies Vertex AI's ability to access and process files directly from Google Cloud Storage (GCS) URIs. It tests specific file types to ensure seamless integration and data handling within the Vertex AI environment."
+      },
+      {
+        "id": "node_verify_vertex_gcs_all_types",
+        "label": "Verify Vertex GCS All Types",
+        "type": "component",
+        "link": null,
+        "title": "Verify Vertex GCS All Types",
+        "description": "Tests Vertex AI's capability to handle a comprehensive range of file types from Google Cloud Storage (GCS) URIs. This ensures robust support for diverse data formats when interacting with Vertex AI tools and models."
+      },
+      {
+        "id": "node_test_vertex_gcs_tool_result",
+        "label": "Test Vertex GCS Tool Result",
+        "type": "component",
+        "link": null,
+        "title": "Test Vertex GCS Tool Result",
+        "description": "Performs detailed tests to ensure Vertex AI models can correctly process GCS URIs provided within function responses or as separate file data parts during tool calls. This validates the model's ability to interpret and utilize external data sources."
+      }
+    ],
+    "edges": [
+      {
+        "source": "node_test_cli_help",
+        "target": "node_clai_cli",
+        "label": "invokes",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "group_cli_management",
+        "label": "CLI Management",
+        "nodes": [
+          "node_clai_cli",
+          "node_test_cli_help"
+        ],
+        "title": "CLI Management",
+        "description": "Components related to the command-line interface and its documentation verification.",
+        "role": "surface"
+      },
+      {
+        "id": "group_vcr_cassette_management",
+        "label": "VCR Cassette Management",
+        "nodes": [
+          "node_parse_cassette",
+          "node_check_cassettes"
+        ],
+        "title": "VCR Cassette Management",
+        "description": "Utilities for parsing and validating VCR cassette files used in testing network interactions.",
+        "role": "analytical"
+      },
+      {
+        "id": "group_cloud_integration_verification",
+        "label": "Cloud Integration Verification",
+        "nodes": [
+          "node_upload_test_files",
+          "node_verify_vertex_gcs",
+          "node_verify_vertex_gcs_all_types",
+          "node_test_vertex_gcs_tool_result"
+        ],
+        "title": "Cloud Integration Verification",
+        "description": "Scripts for uploading test data and verifying the integration and functionality of cloud services, especially Google Cloud's Vertex AI with GCS.",
+        "role": "analytical"
+      }
+    ]
+  }
+}

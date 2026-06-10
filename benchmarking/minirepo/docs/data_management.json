@@ -1,0 +1,47 @@
+{
+    "title": "Data Management Module",
+    "summary": "This module provides core functionalities for handling data, including reading from and writing to various file formats like JSON and CSV, ensuring data persistence and accessibility.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "data_management_module",
+                "label": "Data Management Module",
+                "type": "module",
+                "link": "data_management",
+                "title": "Core Data Management",
+                "description": "This module provides essential services for handling data, including input/output operations, ensuring data persistence and accessibility across the system."
+            },
+            {
+                "id": "input_output_module",
+                "label": "File Input/Output",
+                "type": "module",
+                "link": "input_output",
+                "title": "File I/O Operations",
+                "description": "Manages reading and writing data to and from various file formats, such as JSON and CSV, facilitating data exchange and storage within the application."
+            }
+        ],
+        "edges": [
+            {
+                "source": "data_management_module",
+                "target": "input_output_module",
+                "label": "Contains sub-module",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "module_structure_group",
+                "label": "Module Structure",
+                "nodes": [
+                    "data_management_module",
+                    "input_output_module"
+                ],
+                "title": "Data Management Subsystems",
+                "description": "Overview of the main data management module and its primary sub-module responsible for file input and output operations.",
+                "role": null
+            }
+        ]
+    }
+}

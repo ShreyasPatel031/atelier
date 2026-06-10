@@ -1,0 +1,365 @@
+{
+  "title": "Language Model Client Integrations",
+  "summary": "This module provides core abstractions for interacting with various language models, including LiteLLM-based clients for different completion types, and integrations for managing local and cloud-based (Databricks, OpenAI) finetuning and serving.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_lm",
+        "label": "Base Language Model Interface",
+        "type": "component",
+        "link": null,
+        "title": "BaseLM",
+        "description": "Defines the fundamental contract for all language models in DSPy, including request handling, response processing, and history management."
+      },
+      {
+        "id": "litellm_sync_chat",
+        "label": "Synchronous Chat Completion",
+        "type": "component",
+        "link": null,
+        "title": "litellm_completion",
+        "description": "Facilitates synchronous chat completion requests to various LLMs via LiteLLM, handling caching and retries."
+      },
+      {
+        "id": "litellm_async_chat",
+        "label": "Asynchronous Chat Completion",
+        "type": "component",
+        "link": null,
+        "title": "alitellm_completion",
+        "description": "Enables asynchronous chat completion requests to various LLMs via LiteLLM, supporting non-blocking operations."
+      },
+      {
+        "id": "litellm_sync_responses",
+        "label": "Synchronous Responses Completion",
+        "type": "component",
+        "link": null,
+        "title": "litellm_responses_completion",
+        "description": "Manages synchronous requests to LiteLLM's 'responses' API, converting chat requests to the appropriate format."
+      },
+      {
+        "id": "litellm_async_responses",
+        "label": "Asynchronous Responses Completion",
+        "type": "component",
+        "link": null,
+        "title": "alitellm_responses_completion",
+        "description": "Handles asynchronous requests to LiteLLM's 'responses' API, ensuring non-blocking interaction with LLMs."
+      },
+      {
+        "id": "litellm_sync_text",
+        "label": "Synchronous Text Completion",
+        "type": "component",
+        "link": null,
+        "title": "litellm_text_completion",
+        "description": "Processes synchronous text completion requests through LiteLLM, including prompt construction and API key management."
+      },
+      {
+        "id": "litellm_async_text",
+        "label": "Asynchronous Text Completion",
+        "type": "component",
+        "link": null,
+        "title": "alitellm_text_completion",
+        "description": "Manages asynchronous text completion requests via LiteLLM, handling prompt formatting and API interactions."
+      },
+      {
+        "id": "async_stream_helper",
+        "label": "Asynchronous Stream Handler",
+        "type": "component",
+        "link": null,
+        "title": "async_stream_completion",
+        "description": "An internal utility for managing and processing asynchronous streaming responses from language models."
+      },
+      {
+        "id": "local_provider",
+        "label": "Local LLM Server & Finetuning",
+        "type": "component",
+        "link": null,
+        "title": "LocalProvider",
+        "description": "Manages the lifecycle of local SGLang servers for LLMs and orchestrates local finetuning processes."
+      },
+      {
+        "id": "local_tokenizer",
+        "label": "Local Finetuning Tokenizer",
+        "type": "component",
+        "link": null,
+        "title": "tokenize_function",
+        "description": "Provides tokenization logic specifically for preparing data for local finetuning of language models."
+      },
+      {
+        "id": "databricks_provider",
+        "label": "Databricks LLM Integration",
+        "type": "component",
+        "link": null,
+        "title": "DatabricksProvider",
+        "description": "Connects DSPy with Databricks for deploying finetuned models as serving endpoints and managing finetuning jobs."
+      },
+      {
+        "id": "databricks_training",
+        "label": "Databricks Finetuning Job Tracker",
+        "type": "component",
+        "link": null,
+        "title": "TrainingJobDatabricks",
+        "description": "Represents and tracks the status and details of a finetuning job executed on the Databricks platform."
+      },
+      {
+        "id": "openai_training",
+        "label": "OpenAI Finetuning Job Tracker",
+        "type": "component",
+        "link": null,
+        "title": "TrainingJobOpenAI",
+        "description": "Manages the state and operations, including cancellation, for finetuning jobs submitted to OpenAI."
+      },
+      {
+        "id": "litellm_api",
+        "label": "LiteLLM API",
+        "type": "external",
+        "link": null,
+        "title": "LiteLLM API",
+        "description": "External API for interacting with various language models through the LiteLLM library."
+      },
+      {
+        "id": "sglang_server",
+        "label": "SGLang Local Server",
+        "type": "external",
+        "link": null,
+        "title": "SGLang Local Server",
+        "description": "A local server for serving language models, often used for development and testing."
+      },
+      {
+        "id": "databricks_api",
+        "label": "Databricks API",
+        "type": "external",
+        "link": null,
+        "title": "Databricks API",
+        "description": "The external API for Databricks services, including model serving and finetuning."
+      },
+      {
+        "id": "openai_api",
+        "label": "OpenAI API",
+        "type": "external",
+        "link": null,
+        "title": "OpenAI API",
+        "description": "The external API for OpenAI services, including finetuning jobs."
+      }
+    ],
+    "edges": [
+      {
+        "source": "base_lm",
+        "target": "litellm_sync_chat",
+        "label": "Processes sync chat",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm",
+        "target": "litellm_async_chat",
+        "label": "Processes async chat",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm",
+        "target": "litellm_sync_responses",
+        "label": "Processes sync responses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm",
+        "target": "litellm_async_responses",
+        "label": "Processes async responses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm",
+        "target": "litellm_sync_text",
+        "label": "Processes sync text",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_lm",
+        "target": "litellm_async_text",
+        "label": "Processes async text",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_sync_chat",
+        "target": "async_stream_helper",
+        "label": "Uses for streaming",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_async_chat",
+        "target": "async_stream_helper",
+        "label": "Uses for streaming",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_sync_chat",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_async_chat",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_sync_responses",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_async_responses",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_sync_text",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "litellm_async_text",
+        "target": "litellm_api",
+        "label": "Calls LiteLLM API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "local_provider",
+        "target": "sglang_server",
+        "label": "Launches & Manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "local_provider",
+        "target": "local_tokenizer",
+        "label": "Uses for finetuning data prep",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "databricks_provider",
+        "target": "databricks_training",
+        "label": "Orchestrates finetuning",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "databricks_provider",
+        "target": "databricks_api",
+        "label": "Interacts with Databricks API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "databricks_training",
+        "target": "databricks_api",
+        "label": "Monitors Databricks API",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "openai_training",
+        "target": "openai_api",
+        "label": "Monitors & Controls OpenAI API",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "core_lm_abstraction_group",
+        "label": "Core LM Abstraction",
+        "nodes": [
+          "base_lm"
+        ],
+        "title": "Core LM Abstraction",
+        "description": "The foundational interface for all language model interactions within DSPy.",
+        "role": "surface"
+      },
+      {
+        "id": "litellm_chat_clients_group",
+        "label": "LiteLLM Chat Clients",
+        "nodes": [
+          "litellm_sync_chat",
+          "litellm_async_chat",
+          "async_stream_helper"
+        ],
+        "title": "LiteLLM Chat Clients",
+        "description": "Components for synchronous and asynchronous chat completions using LiteLLM, including streaming support.",
+        "role": "generative"
+      },
+      {
+        "id": "litellm_responses_clients_group",
+        "label": "LiteLLM Responses Clients",
+        "nodes": [
+          "litellm_sync_responses",
+          "litellm_async_responses"
+        ],
+        "title": "LiteLLM Responses Clients",
+        "description": "Components for synchronous and asynchronous structured responses completions via LiteLLM.",
+        "role": "generative"
+      },
+      {
+        "id": "litellm_text_clients_group",
+        "label": "LiteLLM Text Clients",
+        "nodes": [
+          "litellm_sync_text",
+          "litellm_async_text"
+        ],
+        "title": "LiteLLM Text Clients",
+        "description": "Components for synchronous and asynchronous raw text completions using LiteLLM.",
+        "role": "generative"
+      },
+      {
+        "id": "local_model_infrastructure_group",
+        "label": "Local Model Infrastructure",
+        "nodes": [
+          "local_provider",
+          "local_tokenizer"
+        ],
+        "title": "Local Model Infrastructure",
+        "description": "Manages local LLM serving environments and data preparation for local finetuning.",
+        "role": "generative"
+      },
+      {
+        "id": "databricks_integration_group",
+        "label": "Databricks Integration",
+        "nodes": [
+          "databricks_provider",
+          "databricks_training"
+        ],
+        "title": "Databricks Integration",
+        "description": "Provides capabilities for integrating with Databricks for LLM deployment and finetuning job management.",
+        "role": "data"
+      },
+      {
+        "id": "openai_finetuning_management_group",
+        "label": "OpenAI Finetuning Management",
+        "nodes": [
+          "openai_training"
+        ],
+        "title": "OpenAI Finetuning Management",
+        "description": "Handles the tracking and control of finetuning jobs submitted to OpenAI.",
+        "role": "data"
+      }
+    ]
+  }
+}

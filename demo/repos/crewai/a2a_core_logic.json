@@ -1,0 +1,355 @@
+{
+  "title": "A2A Core Logic",
+  "summary": "This module provides the core logic for Agent-to-Agent (A2A) communication, enabling agents to delegate tasks and kickoff processes to other agents. It integrates A2A capabilities into existing agent operations, handling both synchronous and asynchronous execution flows.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "aexecute_task_with_a2a",
+        "label": "A2A Async Task Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Task Execution",
+        "description": "Wraps the asynchronous task execution to enable Agent-to-Agent delegation if A2A is configured for the agent."
+      },
+      {
+        "id": "execute_task_with_a2a",
+        "label": "A2A Sync Task Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Task Execution",
+        "description": "Wraps the synchronous task execution to enable Agent-to-Agent delegation if A2A is configured for the agent."
+      },
+      {
+        "id": "kickoff_async_with_a2a",
+        "label": "A2A Async Kickoff Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Asynchronous Agent Kickoff",
+        "description": "Wraps the asynchronous agent kickoff process to incorporate A2A delegation capabilities."
+      },
+      {
+        "id": "kickoff_with_a2a",
+        "label": "A2A Sync Kickoff Wrapper",
+        "type": "component",
+        "link": null,
+        "title": "Synchronous Agent Kickoff",
+        "description": "Wraps the synchronous agent kickoff process to incorporate A2A delegation capabilities."
+      },
+      {
+        "id": "_fetch_card_from_config",
+        "label": "Retrieve Agent Card",
+        "type": "component",
+        "link": null,
+        "title": "Fetch Agent Configuration Card",
+        "description": "Fetches an agent's configuration card from a specified endpoint using A2A configuration, handling potential network or authentication errors."
+      },
+      {
+        "id": "get_a2a_agents_and_response_model",
+        "label": "Identify A2A Agents & Model",
+        "type": "component",
+        "link": null,
+        "title": "Determine A2A Delegation Targets",
+        "description": "Analyzes the agent's A2A configuration to identify target agents for delegation and their expected response models."
+      },
+      {
+        "id": "internal_a2a_task_exec_async",
+        "label": "Execute A2A Task (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Internal Async A2A Task Logic",
+        "description": "Handles the core asynchronous logic for delegating and executing tasks through the A2A mechanism, integrating with original task functions and extensions."
+      },
+      {
+        "id": "internal_a2a_task_exec_sync",
+        "label": "Execute A2A Task (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Internal Sync A2A Task Logic",
+        "description": "Handles the core synchronous logic for delegating and executing tasks through the A2A mechanism, integrating with original task functions and extensions."
+      },
+      {
+        "id": "internal_a2a_kickoff_async",
+        "label": "Perform A2A Kickoff (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Internal Async A2A Kickoff Logic",
+        "description": "Manages the core asynchronous process of initiating an agent's workflow with A2A delegation, leveraging original kickoff functions and extensions."
+      },
+      {
+        "id": "internal_a2a_kickoff_sync",
+        "label": "Perform A2A Kickoff (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Internal Sync A2A Kickoff Logic",
+        "description": "Manages the core synchronous process of initiating an agent's workflow with A2A delegation, leveraging original kickoff functions and extensions."
+      },
+      {
+        "id": "original_async_task_logic",
+        "label": "Original Async Task Logic",
+        "type": "external",
+        "link": null,
+        "title": "Standard Asynchronous Task Execution",
+        "description": "The default, non-A2A asynchronous task execution logic of an agent, used as a fallback or part of the A2A flow."
+      },
+      {
+        "id": "original_sync_task_logic",
+        "label": "Original Sync Task Logic",
+        "type": "external",
+        "link": null,
+        "title": "Standard Synchronous Task Execution",
+        "description": "The default, non-A2A synchronous task execution logic of an agent, used as a fallback or part of the A2A flow."
+      },
+      {
+        "id": "original_async_kickoff_logic",
+        "label": "Original Async Kickoff Logic",
+        "type": "external",
+        "link": null,
+        "title": "Standard Asynchronous Agent Kickoff",
+        "description": "The default, non-A2A asynchronous kickoff logic for an agent, used as a fallback or part of the A2A flow."
+      },
+      {
+        "id": "original_sync_kickoff_logic",
+        "label": "Original Sync Kickoff Logic",
+        "type": "external",
+        "link": null,
+        "title": "Standard Synchronous Agent Kickoff",
+        "description": "The default, non-A2A synchronous kickoff logic for an agent, used as a fallback or part of the A2A flow."
+      },
+      {
+        "id": "a2a_extension_system",
+        "label": "A2A Extension System",
+        "type": "external",
+        "link": "a2a_updates_and_extensions",
+        "title": "A2A Extension Management",
+        "description": "A registry and mechanism for managing and applying A2A extensions that can modify or enhance delegation behavior."
+      },
+      {
+        "id": "external_agent_card_fetch",
+        "label": "External Agent Card Fetch",
+        "type": "external",
+        "link": "a2a_utilities",
+        "title": "Utility for Fetching Agent Cards",
+        "description": "A utility function responsible for making external requests to retrieve agent capability cards."
+      },
+      {
+        "id": "a2a_configuration",
+        "label": "A2A Configuration",
+        "type": "external",
+        "link": "a2a_utilities",
+        "title": "Agent-to-Agent Configuration",
+        "description": "Configuration object defining A2A settings, including endpoints, authentication, and timeouts."
+      },
+      {
+        "id": "agent_capability_card",
+        "label": "Agent Capability Card",
+        "type": "external",
+        "link": "a2a_utilities",
+        "title": "Agent's Public Interface",
+        "description": "A data structure representing the capabilities, interface, and metadata of an agent for A2A delegation."
+      }
+    ],
+    "edges": [
+      {
+        "source": "aexecute_task_with_a2a",
+        "target": "get_a2a_agents_and_response_model",
+        "label": "if A2A enabled",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "aexecute_task_with_a2a",
+        "target": "original_async_task_logic",
+        "label": "if A2A disabled",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_a2a_agents_and_response_model",
+        "target": "internal_a2a_task_exec_async",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "internal_a2a_task_exec_async",
+        "target": "original_async_task_logic",
+        "label": "uses original fn",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "internal_a2a_task_exec_async",
+        "target": "a2a_extension_system",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_task_with_a2a",
+        "target": "get_a2a_agents_and_response_model",
+        "label": "if A2A enabled",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "execute_task_with_a2a",
+        "target": "original_sync_task_logic",
+        "label": "if A2A disabled",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_a2a_agents_and_response_model",
+        "target": "internal_a2a_task_exec_sync",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "internal_a2a_task_exec_sync",
+        "target": "original_sync_task_logic",
+        "label": "uses original fn",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "internal_a2a_task_exec_sync",
+        "target": "a2a_extension_system",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kickoff_async_with_a2a",
+        "target": "get_a2a_agents_and_response_model",
+        "label": "if A2A enabled",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kickoff_async_with_a2a",
+        "target": "original_async_kickoff_logic",
+        "label": "if A2A disabled",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_a2a_agents_and_response_model",
+        "target": "internal_a2a_kickoff_async",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "internal_a2a_kickoff_async",
+        "target": "original_async_kickoff_logic",
+        "label": "uses original fn",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "internal_a2a_kickoff_async",
+        "target": "a2a_extension_system",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kickoff_with_a2a",
+        "target": "get_a2a_agents_and_response_model",
+        "label": "if A2A enabled",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "kickoff_with_a2a",
+        "target": "original_sync_kickoff_logic",
+        "label": "if A2A disabled",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "get_a2a_agents_and_response_model",
+        "target": "internal_a2a_kickoff_sync",
+        "label": "delegates to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "internal_a2a_kickoff_sync",
+        "target": "original_sync_kickoff_logic",
+        "label": "uses original fn",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "internal_a2a_kickoff_sync",
+        "target": "a2a_extension_system",
+        "label": "integrates with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_fetch_card_from_config",
+        "target": "a2a_configuration",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "_fetch_card_from_config",
+        "target": "external_agent_card_fetch",
+        "label": "calls",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "external_agent_card_fetch",
+        "target": "agent_capability_card",
+        "label": "returns",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "a2a_entrypoints",
+        "label": "A2A Entrypoints",
+        "nodes": [
+          "aexecute_task_with_a2a",
+          "execute_task_with_a2a",
+          "kickoff_async_with_a2a",
+          "kickoff_with_a2a"
+        ],
+        "title": "Public A2A Delegation Wrappers",
+        "description": "These components serve as the primary entry points for enabling Agent-to-Agent communication within task execution and agent kickoff processes.",
+        "role": "surface"
+      },
+      {
+        "id": "a2a_core_processing",
+        "label": "A2A Core Processing",
+        "nodes": [
+          "get_a2a_agents_and_response_model",
+          "internal_a2a_task_exec_async",
+          "internal_a2a_task_exec_sync",
+          "internal_a2a_kickoff_async",
+          "internal_a2a_kickoff_sync"
+        ],
+        "title": "Internal A2A Delegation Logic",
+        "description": "These components handle the internal mechanics of identifying A2A agents and orchestrating the actual delegation and execution of tasks or kickoffs.",
+        "role": "generative"
+      },
+      {
+        "id": "config_and_discovery",
+        "label": "Configuration & Discovery",
+        "nodes": [
+          "_fetch_card_from_config"
+        ],
+        "title": "Agent Card Management",
+        "description": "This component is responsible for retrieving and managing agent capability cards based on A2A configuration.",
+        "role": "data"
+      }
+    ]
+  }
+}

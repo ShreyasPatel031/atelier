@@ -199,6 +199,8 @@ class CLIDocumentationGenerator:
         
         # Initialize metrics tracking
         from codewiki.src.utils.metrics import get_metrics_collector
+        from codewiki.src.be.llm_services import get_token_tracker
+        get_token_tracker().reset()
         metrics_collector = get_metrics_collector()
         repo_name = os.path.basename(os.path.normpath(self.repo_path))
         metrics = metrics_collector.start_repo(repo_name, str(self.repo_path))
@@ -270,6 +272,8 @@ class CLIDocumentationGenerator:
         
         # Stage 2: Module Clustering
         click.echo(f"[DEBUG] [{time.time() - stage_start:.1f}s] Starting Stage 2: Module Clustering", err=True)
+        from codewiki.src.be.llm_services import get_token_tracker
+        get_token_tracker().set_stage("Module Clustering")
         stage_metrics = metrics.start_stage("Module Clustering")
         stage_2_start = time.time()
         self.progress_tracker.start_stage(2, "Module Clustering")
@@ -331,6 +335,7 @@ class CLIDocumentationGenerator:
         
         # Stage 3: Documentation Generation
         click.echo(f"[DEBUG] [{time.time() - stage_start:.1f}s] Starting Stage 3: Documentation Generation", err=True)
+        get_token_tracker().set_stage("Documentation Generation")
         stage_metrics = metrics.start_stage("Documentation Generation")
         stage_3_start = time.time()
         self.progress_tracker.start_stage(3, "Documentation Generation")
@@ -402,6 +407,12 @@ class CLIDocumentationGenerator:
         # Save metrics
         metrics_output = Path(working_dir) / "metrics.json"
         metrics.save(metrics_output)
+        click.echo(
+            f"[DEBUG] Tokens: {metrics.total_tokens:,} | "
+            f"Est. cost: ${metrics.estimated_cost_usd:.4f} | "
+            f"LLM calls: {metrics.total_llm_calls}",
+            err=True,
+        )
     
     def _run_html_generation(self):
         """Run HTML generation stage."""

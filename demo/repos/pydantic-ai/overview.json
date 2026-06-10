@@ -1,247 +1,163 @@
 {
     "title": "pydantic-ai",
-    "summary": "Pydantic-AI is a comprehensive framework for building, running, and managing intelligent AI agents. It provides core agent logic, integrates with various language models and embedding services, and offers extensive tool management and extensible capabilities. The framework also supports durable workflow integrations for robust, fault-tolerant agent deployments. It includes UI components for interactive applications and evaluation tools for performance assessment.",
+    "summary": "Pydantic-AI is a comprehensive framework for building, deploying, and evaluating AI agents. It provides core abstractions for interacting with Large Language Models, managing agent capabilities and tools, and ensuring durable execution. Developers can seamlessly integrate with various LLM providers, create interactive user interfaces, and rigorously assess agent performance.",
     "diagram": {
         "direction": "LR",
         "nodes": [
             {
-                "id": "user",
+                "id": "user_developer",
                 "label": "Developer / User",
                 "type": "external",
                 "link": null,
-                "title": "Human User / Developer",
-                "description": "Interacts with the Pydantic AI framework to build, run, and evaluate AI agents and applications."
+                "title": "Developer / User",
+                "description": "Represents the human user or developer who interacts with the Pydantic-AI framework to build, deploy, and evaluate AI agents."
             },
             {
-                "id": "agent_core_node",
-                "label": "Core Agent Logic",
+                "id": "pydantic_ai_core",
+                "label": "Core AI Agent Framework",
                 "type": "module",
-                "link": "agent_core",
-                "title": "Agent Core Module",
-                "description": "Defines the foundational architecture for AI agents, managing their execution flow, model interactions, output handling, and configuration."
+                "link": "pydantic_ai_core",
+                "title": "Core AI Agent Framework",
+                "description": "The foundational framework for building, running, and extending AI agents, providing core abstractions for LLM interaction, agent capabilities, tool management, and durable execution."
             },
             {
-                "id": "models_embeddings_node",
-                "label": "AI Models & Embeddings",
+                "id": "pydantic_ai_integrations",
+                "label": "LLM & External Service Integrations",
                 "type": "module",
-                "link": "models_and_embeddings",
-                "title": "Models and Embeddings Module",
-                "description": "Provides interfaces and implementations for various large language models (LLMs) and text embedding services, abstracting provider-specific details."
+                "link": "pydantic_ai_integrations",
+                "title": "LLM & External Service Integrations",
+                "description": "Connects the core framework to a wide array of external Large Language Model (LLM) providers, embedding services, and other third-party tools, offering a unified integration layer."
             },
             {
-                "id": "tools_capabilities_node",
-                "label": "Agent Tools & Capabilities",
+                "id": "pydantic_ai_ui_and_mcp_server",
+                "label": "User Interface & Protocol Server",
                 "type": "module",
-                "link": "tools_and_capabilities",
-                "title": "Tools and Capabilities Module",
-                "description": "Manages the discovery, execution, and lifecycle of tools and extensible capabilities that enhance an agent's functionality and interaction with external systems."
+                "link": "pydantic_ai_ui_and_mcp_server",
+                "title": "User Interface & Protocol Server",
+                "description": "Provides components for integrating Pydantic-AI agents with various user interfaces and for implementing Model Context Protocol (MCP) servers, handling interaction and deployment."
             },
             {
-                "id": "durable_integrations_node",
-                "label": "Durable Workflow Integrations",
+                "id": "pydantic_evals",
+                "label": "AI Agent Evaluation Framework",
                 "type": "module",
-                "link": "durable_integrations",
-                "title": "Durable Integrations Module",
-                "description": "Offers integrations with workflow orchestration systems (e.g., DBOS, Prefect, Temporal) to ensure AI agents are durable, fault-tolerant, and recoverable."
+                "link": "pydantic_evals",
+                "title": "AI Agent Evaluation Framework",
+                "description": "A comprehensive framework for defining, configuring, and executing both online and dataset-based evaluations, including LLM-driven dataset generation and various evaluator types."
             },
             {
-                "id": "ui_utilities_node",
-                "label": "UI & Utility Components",
+                "id": "utilities_and_graph",
+                "label": "Foundational Utilities & Graph Engine",
                 "type": "module",
-                "link": "ui_and_utilities",
-                "title": "UI and Utility Module",
-                "description": "Contains general-purpose utilities for asynchronous operations, concurrency, data formatting, and adapters for various user interfaces and communication protocols."
-            },
-            {
-                "id": "evaluation_node",
-                "label": "Evaluation Framework",
-                "type": "module",
-                "link": "evaluation",
-                "title": "Evaluation Module",
-                "description": "Provides a comprehensive framework for evaluating AI agent and function performance, encompassing online evaluation, dataset generation, diverse evaluator types, and robust reporting and telemetry."
-            },
-            {
-                "id": "graph_engine_node",
-                "label": "Graph Engine",
-                "type": "module",
-                "link": "graph_engine",
-                "title": "Graph Engine Module",
-                "description": "Provides a robust framework for defining, executing, persisting, and visualizing complex directed acyclic graphs (DAGs) or state machines, enabling structured workflow orchestration."
-            },
-            {
-                "id": "utilities_and_docs_node",
-                "label": "Utilities & Documentation",
-                "type": "module",
-                "link": "utilities_and_docs",
-                "title": "Utilities & Documentation Module",
-                "description": "Provides general-purpose utilities, command-line tools, and documentation generation enhancements, including scripts for testing and cloud service verification, alongside custom MkDocs hooks."
+                "link": "utilities_and_graph",
+                "title": "Foundational Utilities & Graph Engine",
+                "description": "Aggregates foundational utilities, including a graph processing framework for complex workflows, tools for documentation generation, and scripts for testing and cloud integration verification."
             }
         ],
         "edges": [
             {
-                "source": "user",
-                "target": "agent_core_node",
-                "label": "Develops & Configures Agents",
+                "source": "user_developer",
+                "target": "pydantic_ai_core",
+                "label": "Builds & Configures Agents",
                 "title": null,
                 "description": null
             },
             {
-                "source": "user",
-                "target": "ui_utilities_node",
-                "label": "Interacts via UI/CLI",
+                "source": "pydantic_ai_core",
+                "target": "pydantic_ai_integrations",
+                "label": "Utilizes LLM & Tools",
                 "title": null,
                 "description": null
             },
             {
-                "source": "user",
-                "target": "durable_integrations_node",
-                "label": "Deploys Durable Workflows",
+                "source": "pydantic_ai_integrations",
+                "target": "pydantic_ai_core",
+                "label": "Provides External Services",
                 "title": null,
                 "description": null
             },
             {
-                "source": "user",
-                "target": "evaluation_node",
-                "label": "Runs Evaluations",
+                "source": "pydantic_ai_core",
+                "target": "pydantic_ai_ui_and_mcp_server",
+                "label": "Powers UI & MCP Logic",
                 "title": null,
                 "description": null
             },
             {
-                "source": "user",
-                "target": "graph_engine_node",
-                "label": "Designs & Executes Graphs",
+                "source": "pydantic_ai_ui_and_mcp_server",
+                "target": "user_developer",
+                "label": "Facilitates User Interaction",
                 "title": null,
                 "description": null
             },
             {
-                "source": "agent_core_node",
-                "target": "models_embeddings_node",
-                "label": "Utilizes LLMs & Embeddings",
+                "source": "pydantic_ai_core",
+                "target": "pydantic_evals",
+                "label": "Provides Agents for Evaluation",
                 "title": null,
                 "description": null
             },
             {
-                "source": "agent_core_node",
-                "target": "tools_capabilities_node",
-                "label": "Integrates Tools & Capabilities",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "agent_core_node",
-                "target": "graph_engine_node",
-                "label": "Orchestrates via Graph",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "durable_integrations_node",
-                "target": "agent_core_node",
-                "label": "Orchestrates Agent Runs",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "durable_integrations_node",
-                "target": "tools_capabilities_node",
-                "label": "Durable Tool Execution",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "ui_utilities_node",
-                "target": "agent_core_node",
-                "label": "Drives Agent Interactions",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "ui_utilities_node",
-                "target": "tools_capabilities_node",
-                "label": "Exposes UI-driven Tools",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "evaluation_node",
-                "target": "agent_core_node",
+                "source": "pydantic_evals",
+                "target": "pydantic_ai_core",
                 "label": "Evaluates Agent Performance",
                 "title": null,
                 "description": null
             },
             {
-                "source": "evaluation_node",
-                "target": "models_embeddings_node",
-                "label": "Uses Models for Judging",
+                "source": "pydantic_ai_core",
+                "target": "utilities_and_graph",
+                "label": "Leverages Core Utilities & Graph",
                 "title": null,
                 "description": null
             },
             {
-                "source": "graph_engine_node",
-                "target": "agent_core_node",
-                "label": "Provides Workflow Orchestration",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "utilities_and_docs_node",
-                "target": "agent_core_node",
-                "label": "Supports Development & Testing",
-                "title": null,
-                "description": null
-            },
-            {
-                "source": "utilities_and_docs_node",
-                "target": "evaluation_node",
-                "label": "Aids Evaluation Reporting",
+                "source": "utilities_and_graph",
+                "target": "pydantic_ai_core",
+                "label": "Provides Workflow & Foundational Support",
                 "title": null,
                 "description": null
             }
         ],
         "groups": [
             {
-                "id": "actors",
-                "label": "Actors",
+                "id": "agent_core_group",
+                "label": "Agent Core & Orchestration",
                 "nodes": [
-                    "user"
+                    "pydantic_ai_core",
+                    "utilities_and_graph"
                 ],
-                "title": "External Actors",
-                "description": "Represents the human users or developers interacting with the Pydantic AI system.",
+                "title": "Agent Core & Orchestration",
+                "description": "This group encompasses the central components for defining, orchestrating, and executing AI agents, along with the foundational utilities and graph processing engine that support complex workflows.",
                 "role": null
             },
             {
-                "id": "core_ai_framework",
-                "label": "Core AI Framework",
+                "id": "external_connectivity_group",
+                "label": "External Service Connectivity",
                 "nodes": [
-                    "agent_core_node",
-                    "models_embeddings_node",
-                    "tools_capabilities_node"
+                    "pydantic_ai_integrations"
                 ],
-                "title": "Foundational AI Building Blocks",
-                "description": "These modules provide the essential intelligence, model interaction, and functional extensions required for building and operating AI agents.",
+                "title": "External Service Connectivity",
+                "description": "This group manages all external connections, providing seamless integration with diverse Large Language Model providers, embedding services, and other third-party AI tools.",
                 "role": null
             },
             {
-                "id": "system_orchestration_and_resilience",
-                "label": "Orchestration & Resilience",
+                "id": "interaction_deployment_group",
+                "label": "Interaction & Deployment",
                 "nodes": [
-                    "durable_integrations_node",
-                    "graph_engine_node"
+                    "pydantic_ai_ui_and_mcp_server"
                 ],
-                "title": "Workflow Orchestration & Durability",
-                "description": "Ensures the reliability, recoverability, and structured execution of AI agent operations through robust workflow systems and graph-based orchestration.",
+                "title": "Interaction & Deployment",
+                "description": "This group focuses on how agents interact with users and other systems, offering frameworks for building user interfaces and implementing the Model Context Protocol (MCP) for broader deployment.",
                 "role": null
             },
             {
-                "id": "interfaces_and_support",
-                "label": "Interfaces & Support",
+                "id": "quality_assurance_group",
+                "label": "Quality Assurance & Evaluation",
                 "nodes": [
-                    "ui_utilities_node",
-                    "evaluation_node",
-                    "utilities_and_docs_node"
+                    "pydantic_evals"
                 ],
-                "title": "User Interfaces, Evaluation & Utilities",
-                "description": "This group handles user-facing interactions, performance evaluation, general system utilities, and documentation support for the entire framework.",
+                "title": "Quality Assurance & Evaluation",
+                "description": "Dedicated to ensuring the quality and performance of AI agents, this group provides a robust framework for defining, running, and analyzing evaluations, including various assessment types and reporting tools.",
                 "role": null
             }
         ]

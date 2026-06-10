@@ -1,0 +1,280 @@
+{
+    "title": "DSPy Core Abstractions",
+    "summary": "This module defines the foundational building blocks for DSPy programs, including base modules, signature definitions, standardized data types for LM communication, and adapters for integrating with various Language Models.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "base_module",
+                "label": "BaseModule Class",
+                "type": "component",
+                "link": "base_modules",
+                "title": "BaseModule Class",
+                "description": "The foundational class for all DSPy modules, providing core functionalities like parameter management and state persistence."
+            },
+            {
+                "id": "dspy_module",
+                "label": "Module Class",
+                "type": "component",
+                "link": "base_modules",
+                "title": "DSPy Module Class",
+                "description": "The primary base class for building DSPy programs, extending BaseModule with execution logic, LM interaction, and lifecycle management."
+            },
+            {
+                "id": "dspy_predict_type",
+                "label": "DSPy Predict Module",
+                "type": "external",
+                "link": "prediction_strategies",
+                "title": "DSPy Predict Module",
+                "description": "A specialized DSPy module responsible for making predictions using a language model, often built upon the core Module class."
+            },
+            {
+                "id": "signature_meta",
+                "label": "Define DSPy Signatures",
+                "type": "component",
+                "link": "signatures",
+                "title": "DSPy Signature Metaclass",
+                "description": "The metaclass that dynamically creates and validates DSPy Signature classes, handling field ordering, type inference, and instructions for LM prompts."
+            },
+            {
+                "id": "pydantic_base_model",
+                "label": "Pydantic BaseModel",
+                "type": "external",
+                "link": null,
+                "title": "Pydantic's BaseModel",
+                "description": "The foundational class from Pydantic that provides data validation, settings management, and serialization, which DSPy signatures build upon."
+            },
+            {
+                "id": "LMRequest",
+                "label": "LM Request Structure",
+                "type": "component",
+                "link": "data_types",
+                "title": "Language Model Request",
+                "description": "Defines the standardized structure for requests sent to a Language Model, including messages, tools, and configuration parameters."
+            },
+            {
+                "id": "LMResponse",
+                "label": "LM Response Structure",
+                "type": "component",
+                "link": "data_types",
+                "title": "Language Model Response",
+                "description": "Defines the standardized structure for responses received from a Language Model, containing generated text, tool calls, and metadata."
+            },
+            {
+                "id": "SystemMessage",
+                "label": "System Message Type",
+                "type": "component",
+                "link": "data_types",
+                "title": "System Message",
+                "description": "A specific type of message within an LMRequest, used for providing model-level instructions or context to the Language Model."
+            },
+            {
+                "id": "BaseType",
+                "label": "Base Custom Data Type",
+                "type": "component",
+                "link": "data_types",
+                "title": "Base Class for Custom Types",
+                "description": "The abstract base class for all DSPy custom data types (e.g., Audio, Image), ensuring they can be formatted for LM consumption."
+            },
+            {
+                "id": "LMStream",
+                "label": "LM Streaming Handler",
+                "type": "component",
+                "link": "data_types",
+                "title": "Language Model Streaming Handler",
+                "description": "Manages the incremental streaming of Language Model events and responses, allowing for real-time processing of generated content."
+            },
+            {
+                "id": "adapter_base",
+                "label": "Base Adapter Interface",
+                "type": "component",
+                "link": "external_adapters",
+                "title": "DSPy Base Adapter",
+                "description": "Defines the core interface for transforming DSPy inputs and signatures into LM calls and parsing LM outputs, integrating native LM features."
+            },
+            {
+                "id": "adapter_baml",
+                "label": "BAML Adapter",
+                "type": "component",
+                "link": "external_adapters",
+                "title": "BAML Adapter",
+                "description": "A specialized adapter for rendering complex Pydantic models into compact, human-readable schemas for LMs, optimizing structured output generation."
+            },
+            {
+                "id": "adapter_two_step",
+                "label": "Two-Step Adapter",
+                "type": "component",
+                "link": "external_adapters",
+                "title": "Two-Step Adapter",
+                "description": "Orchestrates a two-stage process: a main LM generates a response, then a smaller LM extracts structured data from the raw output."
+            },
+            {
+                "id": "lm_client_external",
+                "label": "External LM Client",
+                "type": "external",
+                "link": "lm_clients",
+                "title": "External Language Model Client",
+                "description": "Represents an external Language Model client (e.g., OpenAI, LiteLLM) that DSPy adapters interact with for generating responses."
+            }
+        ],
+        "edges": [
+            {
+                "source": "dspy_module",
+                "target": "base_module",
+                "label": "inherits from",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_predict_type",
+                "target": "dspy_module",
+                "label": "is a specialized",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "dspy_module",
+                "target": "signature_meta",
+                "label": "uses to define behavior",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "signature_meta",
+                "target": "pydantic_base_model",
+                "label": "builds upon",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "LMRequest",
+                "target": "SystemMessage",
+                "label": "includes message types like",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "LMRequest",
+                "target": "BaseType",
+                "label": "can contain custom data types like",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "LMStream",
+                "target": "LMRequest",
+                "label": "processes",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "LMStream",
+                "target": "LMResponse",
+                "label": "generates incremental",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "adapter_base",
+                "target": "dspy_module",
+                "label": "adapts",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "adapter_base",
+                "target": "signature_meta",
+                "label": "uses for formatting",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "adapter_base",
+                "target": "LMRequest",
+                "label": "generates",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "adapter_base",
+                "target": "LMResponse",
+                "label": "parses",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "adapter_base",
+                "target": "lm_client_external",
+                "label": "interacts with",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "adapter_baml",
+                "target": "adapter_base",
+                "label": "extends",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "adapter_two_step",
+                "target": "adapter_base",
+                "label": "extends",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "program_foundations",
+                "label": "Program Foundations",
+                "nodes": [
+                    "base_module",
+                    "dspy_module",
+                    "dspy_predict_type"
+                ],
+                "title": "Core Program Building Blocks",
+                "description": "Defines the fundamental classes for constructing DSPy programs and modules, including the base module and specialized prediction components.",
+                "role": null
+            },
+            {
+                "id": "interaction_definitions",
+                "label": "Interaction Definitions",
+                "nodes": [
+                    "signature_meta",
+                    "pydantic_base_model"
+                ],
+                "title": "LM Interaction Definitions",
+                "description": "Establishes how DSPy programs define and structure their interactions with Language Models, leveraging Pydantic for robust schema definition.",
+                "role": null
+            },
+            {
+                "id": "data_exchange_structures",
+                "label": "Data Exchange Structures",
+                "nodes": [
+                    "LMRequest",
+                    "LMResponse",
+                    "SystemMessage",
+                    "BaseType",
+                    "LMStream"
+                ],
+                "title": "LM Communication Data Structures",
+                "description": "Provides the standardized data formats for sending requests to, receiving responses from, and handling streaming data from Language Models.",
+                "role": null
+            },
+            {
+                "id": "lm_integration_adapters",
+                "label": "LM Integration Adapters",
+                "nodes": [
+                    "adapter_base",
+                    "adapter_baml",
+                    "adapter_two_step",
+                    "lm_client_external"
+                ],
+                "title": "Language Model Integration Layer",
+                "description": "Contains the core interfaces and specialized implementations for adapting DSPy programs to various Language Model APIs and managing their interactions.",
+                "role": null
+            }
+        ]
+    }
+}

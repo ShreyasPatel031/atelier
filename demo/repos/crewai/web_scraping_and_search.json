@@ -1,0 +1,23 @@
+```json
+{
+    "title": "Web Scraping and Search",
+    "summary": "Provides tools for web scraping, content extraction, and diverse web searches using various external APIs like Brave, Firecrawl, Oxylabs, Serper, and Tavily.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "brave_search_tools", "label": "Brave Search Tools", "type": "module", "link": "brave_search_tools", "title": "Brave Search Tools", "description": "Integrates with Brave Search API for general web searches and local points of interest."}, 
+            {"id": "firecrawl_tools", "label": "Firecrawl Tools", "type": "module", "link": "firecrawl_tools", "title": "Firecrawl Tools", "description": "Provides functionalities for crawling, scraping, and searching websites using the Firecrawl API."}, 
+            {"id": "jina_scrape_tool", "label": "Jina Scrape Tool", "type": "module", "link": "jina_scrape_tool", "title": "Jina Scrape Tool", "description": "Scrapes website content and converts it to markdown using the Jina.ai reader."}, 
+            {"id": "oxylabs_scraper_tools", "label": "Oxylabs Scraper Tools", "type": "module", "link": "oxylabs_scraper_tools", "title": "Oxylabs Scraper Tools", "description": "Offers specialized scraping tools for Amazon products/searches, Google searches, and general web pages via Oxylabs."}, 
+            {"id": "serper_tools", "label": "Serper Tools", "type": "module", "link": "serper_tools", "title": "Serper Tools", "description": "Facilitates web searches and website scraping using the Serper.dev API."}, 
+            {"id": "serply_tools", "label": "Serply Tools", "type": "module", "link": "serply_tools", "title": "Serply Tools", "description": "Converts web pages to markdown format for easier processing by LLMs using the Serply API."}, 
+            {"id": "tavily_tools", "label": "Tavily Tools", "type": "module", "link": "tavily_tools", "title": "Tavily Tools", "description": "Provides advanced web extraction, research, and search capabilities through the Tavily API."}, 
+            {"id": "exa_tools", "label": "EXA Search Tools", "type": "module", "link": "exa_tools", "title": "EXA Search Tools", "description": "Includes tools for performing web searches using the EXA search service."}
+        ],
+        "edges": [],
+        "groups": [
+            {"id": "search_and_extraction_services", "label": "Search and Extraction Services", "title": "Search and Extraction Services", "description": "Integrates with various external APIs to perform web searches, crawl websites, and extract structured or unstructured content.", "role": "analytical", "nodes": ["brave_search_tools", "firecrawl_tools", "jina_scrape_tool", "oxylabs_scraper_tools", "serper_tools", "serply_tools", "tavily_tools", "exa_tools"]}
+        ]
+    }
+}
+```

@@ -1,7 +1,9 @@
+import asyncio
 import logging
 import os
 import json
 import time
+import threading
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Callable
 from copy import deepcopy
@@ -339,8 +341,9 @@ class DocumentationGenerator:
                 logger.info(f"[STAGE 3] 🚀 PARALLEL MODE: {len(batches)} depth levels, {total_modules} total modules")
                 logger.info(f"[STAGE 3] Max concurrent: {max_concurrent}")
                 
-                # Shared lock for module_tree file access to prevent race conditions
-                module_tree_lock = asyncio.Lock()
+                # threading.Lock so it protects both asyncio coroutines and
+                # asyncio.to_thread workers that run sync call_llm.
+                module_tree_lock = threading.Lock()
                 
                 processed_count = 0
                 for batch_idx, batch in enumerate(batches):
@@ -369,7 +372,7 @@ class DocumentationGenerator:
                                     )
                                 else:
                                     logger.info(f"[STAGE 3] 📁 Processing parent: {module_key}")
-                                    await self.generate_parent_module_docs(module_path, working_dir)
+                                    await self.generate_parent_module_docs(module_path, working_dir, module_tree_lock=lock)
                                     result_tree = None
                                 
                                 duration = time.time() - module_start
@@ -557,6 +560,19 @@ class DocumentationGenerator:
                 continue
             diagram = data.get("diagram")
             if isinstance(diagram, dict) and isinstance(diagram.get("nodes"), list):
+                from codewiki.src.be.diagram_ir_validator import validate_diagram_ir
+
+                issues = validate_diagram_ir(diagram)
+                errors = [i for i in issues if i.get("severity") == "error"]
+                if errors:
+                    codes = [e.get("code") for e in errors[:5]]
+                    logger.warning(
+                        "[STAGE 3.5] Reject diagram for %s (%s error(s)): %s",
+                        stem,
+                        len(errors),
+                        codes,
+                    )
+                    continue
                 if self._apply_diagram_to_tree(module_tree, stem, diagram):
                     diagrams_found += 1
 
@@ -576,7 +592,8 @@ class DocumentationGenerator:
         return False
 
     async def generate_parent_module_docs(self, module_path: List[str], 
-                                        working_dir: str) -> Dict[str, Any]:
+                                        working_dir: str,
+                                        module_tree_lock: Optional[threading.Lock] = None) -> Dict[str, Any]:
         """Generate documentation for a parent module based on its children's documentation."""
         module_name = module_path[-1] if len(module_path) >= 1 else os.path.basename(os.path.normpath(self.config.repo_path))
 
@@ -629,7 +646,7 @@ class DocumentationGenerator:
             logger.info(f"[STAGE 3] Generating parent documentation for '{module_name}'...")
             logger.info(f"[STAGE 3] Prompt size: {len(prompt)} chars")
             parent_docs_start = time.time()
-            parent_docs = call_llm(prompt, self.config)
+            parent_docs = await asyncio.to_thread(call_llm, prompt, self.config)
             parent_docs_duration = time.time() - parent_docs_start
             logger.info(f"[STAGE 3] LLM call completed in {parent_docs_duration:.1f}s, response length: {len(parent_docs)} chars")
             
@@ -675,15 +692,23 @@ class DocumentationGenerator:
                         parent_docs_path
                     )
                     if ext_title:
-                        fresh_tree = file_manager.load_json(module_tree_path)
-                        if apply_metadata_to_tree_path(
-                            fresh_tree,
-                            module_path,
-                            ext_title,
-                            ext_desc,
-                            ext_diagram,
-                        ):
-                            file_manager.save_json(fresh_tree, module_tree_path)
+                        def _apply_parent_metadata():
+                            fresh_tree = file_manager.load_json(module_tree_path)
+                            ok = apply_metadata_to_tree_path(
+                                fresh_tree, module_path,
+                                ext_title, ext_desc, ext_diagram,
+                            )
+                            if ok:
+                                file_manager.save_json(fresh_tree, module_tree_path)
+                            return ok, fresh_tree
+
+                        if module_tree_lock:
+                            with module_tree_lock:
+                                applied, fresh_tree = _apply_parent_metadata()
+                        else:
+                            applied, fresh_tree = _apply_parent_metadata()
+
+                        if applied:
                             module_tree = fresh_tree
                             logger.info(
                                 "[STAGE 3] Applied parent metadata to tree for path %s: title=%r",

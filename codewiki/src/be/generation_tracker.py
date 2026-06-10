@@ -29,6 +29,7 @@ Usage:
 
 import json
 import logging
+import threading
 import time
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
@@ -130,12 +131,13 @@ class GenerationReport:
 
 
 class GenerationTracker:
-    """Tracks all generation events and produces reports."""
+    """Tracks all generation events and produces reports. Thread-safe."""
     
     def __init__(self):
         self.report: Optional[GenerationReport] = None
         self._module_start_times: Dict[str, float] = {}
         self._generation_start: float = 0
+        self._lock = threading.Lock()
     
     def start_generation(self, repo_name: str) -> None:
         """Start tracking a new generation run."""
@@ -150,33 +152,35 @@ class GenerationTracker:
     
     def track_event(self, event: GenerationEvent) -> None:
         """Track a generation event."""
-        if self.report:
-            self.report.events.append(event)
+        with self._lock:
+            if self.report:
+                self.report.events.append(event)
     
     def track_module_start(self, module_name: str, component_count: int, 
                            prompt_tokens: int) -> None:
         """Track start of module processing."""
-        if not self.report:
-            return
-        
-        self._module_start_times[module_name] = time.time()
-        
-        if module_name not in self.report.modules:
-            self.report.modules[module_name] = ModuleStats(module_name=module_name)
-        
-        stats = self.report.modules[module_name]
-        stats.component_count = component_count
-        stats.prompt_tokens = prompt_tokens
-        
-        self.track_event(GenerationEvent(
-            timestamp=datetime.now().isoformat(),
-            event_type="module_start",
-            module=module_name,
-            details={
-                "component_count": component_count,
-                "prompt_tokens": prompt_tokens
-            }
-        ))
+        with self._lock:
+            if not self.report:
+                return
+            
+            self._module_start_times[module_name] = time.time()
+            
+            if module_name not in self.report.modules:
+                self.report.modules[module_name] = ModuleStats(module_name=module_name)
+            
+            stats = self.report.modules[module_name]
+            stats.component_count = component_count
+            stats.prompt_tokens = prompt_tokens
+            
+            self.report.events.append(GenerationEvent(
+                timestamp=datetime.now().isoformat(),
+                event_type="module_start",
+                module=module_name,
+                details={
+                    "component_count": component_count,
+                    "prompt_tokens": prompt_tokens
+                }
+            ))
         
         logger.info(f"[GENERATION_TRACKER] Module started: {module_name} "
                    f"(components={component_count}, tokens={prompt_tokens})")
@@ -186,42 +190,42 @@ class GenerationTracker:
                        duration_s: float = 0, model: str = "",
                        error_type: str = None, error_message: str = None) -> None:
         """Track an LLM call."""
-        if not self.report:
-            return
-        
-        if module_name not in self.report.modules:
-            self.report.modules[module_name] = ModuleStats(module_name=module_name)
-        
-        stats = self.report.modules[module_name]
-        stats.llm_calls += 1
-        
-        self.report.total_llm_calls += 1
-        self.report.total_tokens += prompt_tokens + completion_tokens
-        
-        if success:
-            stats.llm_success += 1
-            self.report.successful_llm_calls += 1
-        else:
-            stats.llm_failures += 1
-            self.report.failed_llm_calls += 1
+        with self._lock:
+            if not self.report:
+                return
             
-            # Categorize error
-            if error_type:
-                self.report.errors_by_type[error_type] = \
-                    self.report.errors_by_type.get(error_type, 0) + 1
+            if module_name not in self.report.modules:
+                self.report.modules[module_name] = ModuleStats(module_name=module_name)
+            
+            stats = self.report.modules[module_name]
+            stats.llm_calls += 1
+            
+            self.report.total_llm_calls += 1
+            self.report.total_tokens += prompt_tokens + completion_tokens
+            
+            if success:
+                stats.llm_success += 1
+                self.report.successful_llm_calls += 1
+            else:
+                stats.llm_failures += 1
+                self.report.failed_llm_calls += 1
                 
-                if error_type == ErrorType.RATE_LIMIT.value:
-                    self.report.rate_limit_count += 1
-                elif error_type == ErrorType.CONTEXT_LENGTH.value:
-                    self.report.context_exceeded_count += 1
-                elif error_type == ErrorType.TIMEOUT.value:
-                    self.report.timeout_count += 1
-            
-            stats.errors.append({
-                "type": error_type or "unknown",
-                "message": error_message,
-                "tokens": prompt_tokens
-            })
+                if error_type:
+                    self.report.errors_by_type[error_type] = \
+                        self.report.errors_by_type.get(error_type, 0) + 1
+                    
+                    if error_type == ErrorType.RATE_LIMIT.value:
+                        self.report.rate_limit_count += 1
+                    elif error_type == ErrorType.CONTEXT_LENGTH.value:
+                        self.report.context_exceeded_count += 1
+                    elif error_type == ErrorType.TIMEOUT.value:
+                        self.report.timeout_count += 1
+                
+                stats.errors.append({
+                    "type": error_type or "unknown",
+                    "message": error_message,
+                    "tokens": prompt_tokens
+                })
         
         self.track_event(GenerationEvent(
             timestamp=datetime.now().isoformat(),
@@ -351,11 +355,12 @@ class GenerationTracker:
         if not docs_dir:
             return
         record = {**record, "recorded_at": datetime.now().isoformat()}
-        if self.report:
-            self.report.submodule_md_failures.append(record)
-            self.report.errors_by_type[ErrorType.SUBMODULE_MD_MISSING.value] = (
-                self.report.errors_by_type.get(ErrorType.SUBMODULE_MD_MISSING.value, 0) + 1
-            )
+        with self._lock:
+            if self.report:
+                self.report.submodule_md_failures.append(record)
+                self.report.errors_by_type[ErrorType.SUBMODULE_MD_MISSING.value] = (
+                    self.report.errors_by_type.get(ErrorType.SUBMODULE_MD_MISSING.value, 0) + 1
+                )
         outp = Path(docs_dir) / "submodule_md_failures.json"
         try:
             existing: List[Dict[str, Any]] = []
@@ -404,8 +409,20 @@ class GenerationTracker:
         self.report.end_time = datetime.now().isoformat()
         self.report.total_duration_s = time.time() - self._generation_start
         
-        # Estimate cost (rough: $0.02 per 1K tokens for GPT-4o equivalent)
-        self.report.estimated_cost = (self.report.total_tokens / 1000) * 0.02
+        try:
+            from codewiki.src.be.llm_services import get_token_tracker
+
+            tracker = get_token_tracker()
+            if tracker.calls:
+                self.report.total_tokens = tracker.total_tokens
+                self.report.estimated_cost = tracker.total_cost
+                self.report.total_llm_calls = len(tracker.calls)
+                self.report.successful_llm_calls = tracker.successful_calls
+                self.report.failed_llm_calls = tracker.failed_calls
+            else:
+                self.report.estimated_cost = (self.report.total_tokens / 1000) * 0.02
+        except Exception:
+            self.report.estimated_cost = (self.report.total_tokens / 1000) * 0.02
         
         # If docs_dir provided, scan for actual files
         if docs_dir:

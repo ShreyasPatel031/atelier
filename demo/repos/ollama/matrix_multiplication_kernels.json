@@ -1,0 +1,17 @@
+ proyects/matrix_multiplication_kernels.json
+{
+    "title": "Matrix Multiplication Kernels",
+    "summary": "Optimized kernels for efficient matrix and matrix-vector multiplication, supporting various architectures and quantization schemes.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "ppc_kernels", "label": "PowerPC Optimized Kernels", "type": "module", "link": "ppc_kernels", "title": "PowerPC Kernels", "description": "Contains matrix multiplication kernels optimized for PowerPC architectures, handling tiled and general matrix operations."}, 
+            {"id": "x86_avx_kernels", "label": "x86 AVX Optimized Kernels", "type": "module", "link": "x86_avx_kernels", "title": "x86 AVX Kernels", "description": "Provides highly optimized matrix and matrix-vector multiplication kernels for x86 architectures using AVX512, with support for quantized data."}
+        ],
+        "edges": [
+        ],
+        "groups": [
+            {"id": "architecture_specific", "label": "Architecture-Specific Optimizations", "title": "Architecture-Specific Optimizations", "description": "Groups matrix multiplication kernels tailored for different CPU architectures to maximize performance.", "role": "analytical", "nodes": ["ppc_kernels", "x86_avx_kernels"]}
+        ]
+    }
+}

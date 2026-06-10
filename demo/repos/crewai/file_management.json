@@ -1,0 +1,370 @@
+{
+  "title": "File Management & Caching",
+  "summary": "This module provides utilities for managing files, including caching, cleanup, and resolution for various file sources and providers. It handles normalizing file inputs, configuring file handling strategies, and logging file operations.",
+  "diagram": {
+    "direction": "LR",
+    "nodes": [
+      {
+        "id": "node_normalize_source",
+        "label": "Normalize File Source Input",
+        "type": "component",
+        "link": null,
+        "title": "Normalize File Source Input",
+        "description": "Converts various raw inputs (strings, paths, bytes, streams) into standardized FileSource objects for internal use."
+      },
+      {
+        "id": "node_file_source_coercer",
+        "label": "Coerce File Source Type",
+        "type": "component",
+        "link": null,
+        "title": "Coerce File Source Type",
+        "description": "Pydantic-compatible utility to coerce diverse inputs into a FileSource type, ensuring consistent file representation."
+      },
+      {
+        "id": "node_normalize_input_files",
+        "label": "Normalize Input File List",
+        "type": "component",
+        "link": null,
+        "title": "Normalize Input File List",
+        "description": "Transforms a list of mixed file inputs (paths, URLs, raw data) into a dictionary of named FileInput objects, ready for processing."
+      },
+      {
+        "id": "node_create_resolver",
+        "label": "Configure File Resolver",
+        "type": "component",
+        "link": null,
+        "title": "Configure File Resolver",
+        "description": "Initializes a FileResolver instance, setting policies for file handling like preferring upload over inline and defining upload size thresholds."
+      },
+      {
+        "id": "node_get_supported_types",
+        "label": "Get Supported Content Types",
+        "type": "component",
+        "link": null,
+        "title": "Get Supported Content Types",
+        "description": "Retrieves a list of MIME type prefixes (e.g., 'image/', 'application/pdf') that a specific file provider supports for processing."
+      },
+      {
+        "id": "node_cleanup_expired_sync",
+        "label": "Cleanup Expired Files (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Cleanup Expired Files (Sync)",
+        "description": "Synchronously identifies and removes expired file entries from the local cache, with an option to delete them from the external provider."
+      },
+      {
+        "id": "node_cleanup_provider_sync",
+        "label": "Cleanup Provider Files (Sync)",
+        "type": "component",
+        "link": null,
+        "title": "Cleanup Provider Files (Sync)",
+        "description": "Synchronously deletes files associated with a given provider, either from the cache or all files directly from the provider's storage."
+      },
+      {
+        "id": "node_cleanup_on_exit",
+        "label": "Trigger Exit Cleanup",
+        "type": "component",
+        "link": null,
+        "title": "Trigger Exit Cleanup",
+        "description": "Registers a function to automatically clean up uploaded files from the cache when the application process terminates."
+      },
+      {
+        "id": "node_cleanup_uploaded_async",
+        "label": "Cleanup Uploaded Files (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Cleanup Uploaded Files (Async)",
+        "description": "Asynchronously removes all uploaded files from the cache and optionally from external providers, supporting concurrent deletions."
+      },
+      {
+        "id": "node_cleanup_expired_async",
+        "label": "Cleanup Expired Files (Async)",
+        "type": "component",
+        "link": null,
+        "title": "Cleanup Expired Files (Async)",
+        "description": "Asynchronously identifies and removes expired file entries from the local cache, with an option to delete them from the external provider using concurrency."
+      },
+      {
+        "id": "node_log_file_operation",
+        "label": "Log File Operation Metrics",
+        "type": "component",
+        "link": null,
+        "title": "Log File Operation Metrics",
+        "description": "Records detailed metrics for file operations, including type, filename, provider, size, duration, success status, and any errors."
+      },
+      {
+        "id": "node_openai_opts",
+        "label": "OpenAI Uploader Options",
+        "type": "component",
+        "link": null,
+        "title": "OpenAI Uploader Options",
+        "description": "Defines configuration options specific to the OpenAI file uploader, such as chunk size for uploads."
+      },
+      {
+        "id": "ext_upload_cache",
+        "label": "Upload Cache",
+        "type": "external",
+        "link": null,
+        "title": "Upload Cache",
+        "description": "Stores metadata about uploaded files, including their IDs, providers, and expiration times, facilitating efficient management and cleanup."
+      },
+      {
+        "id": "ext_file_uploader",
+        "label": "File Uploader Service",
+        "type": "external",
+        "link": null,
+        "title": "File Uploader Service",
+        "description": "An interface or service responsible for interacting with external file storage providers to upload, delete, or list files."
+      },
+      {
+        "id": "ext_file_source",
+        "label": "File Source Object",
+        "type": "external",
+        "link": null,
+        "title": "File Source Object",
+        "description": "A standardized representation of a file, encapsulating its origin (path, bytes, stream, URL) and metadata."
+      },
+      {
+        "id": "ext_file_input",
+        "label": "File Input Wrapper",
+        "type": "external",
+        "link": null,
+        "title": "File Input Wrapper",
+        "description": "A structured object that wraps a FileSource and potentially other file-related metadata for consistent handling."
+      },
+      {
+        "id": "ext_file_resolver",
+        "label": "File Resolution Logic",
+        "type": "external",
+        "link": null,
+        "title": "File Resolution Logic",
+        "description": "The core logic that decides whether a file should be uploaded to an external service or handled inline, based on configured policies."
+      },
+      {
+        "id": "ext_provider_constraints",
+        "label": "Provider Constraints",
+        "type": "external",
+        "link": null,
+        "title": "Provider Constraints",
+        "description": "Configuration data specifying limitations and capabilities of different file storage providers, such as supported file types or upload size limits."
+      },
+      {
+        "id": "ext_external_storage",
+        "label": "External File Storage",
+        "type": "external",
+        "link": null,
+        "title": "External File Storage",
+        "description": "Cloud storage services or remote file systems where files are stored and managed by file uploaders."
+      },
+      {
+        "id": "ext_metrics_system",
+        "label": "Metrics & Logging System",
+        "type": "external",
+        "link": null,
+        "title": "Metrics & Logging System",
+        "description": "A system that collects, stores, and analyzes operational metrics and logs generated by the file management module."
+      }
+    ],
+    "edges": [
+      {
+        "source": "node_normalize_source",
+        "target": "ext_file_source",
+        "label": "creates",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_file_source_coercer",
+        "target": "ext_file_source",
+        "label": "coerces to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_normalize_input_files",
+        "target": "node_normalize_source",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_normalize_input_files",
+        "target": "ext_file_input",
+        "label": "produces",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_create_resolver",
+        "target": "ext_provider_constraints",
+        "label": "reads from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_create_resolver",
+        "target": "ext_upload_cache",
+        "label": "configures with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_create_resolver",
+        "target": "ext_file_resolver",
+        "label": "outputs",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_get_supported_types",
+        "target": "ext_provider_constraints",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_cleanup_expired_sync",
+        "target": "ext_upload_cache",
+        "label": "manages",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_cleanup_expired_sync",
+        "target": "ext_file_uploader",
+        "label": "deletes via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_cleanup_provider_sync",
+        "target": "ext_file_uploader",
+        "label": "deletes via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_cleanup_provider_sync",
+        "target": "ext_upload_cache",
+        "label": "removes from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_cleanup_on_exit",
+        "target": "node_cleanup_uploaded_async",
+        "label": "triggers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_cleanup_uploaded_async",
+        "target": "ext_upload_cache",
+        "label": "clears",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_cleanup_uploaded_async",
+        "target": "ext_file_uploader",
+        "label": "deletes via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_cleanup_expired_async",
+        "target": "ext_upload_cache",
+        "label": "manages async",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_cleanup_expired_async",
+        "target": "ext_file_uploader",
+        "label": "deletes async via",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_log_file_operation",
+        "target": "ext_metrics_system",
+        "label": "sends data to",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "ext_file_uploader",
+        "target": "ext_external_storage",
+        "label": "interacts with",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_openai_opts",
+        "target": "ext_file_uploader",
+        "label": "configures",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "group_file_input_handling",
+        "label": "File Input Handling",
+        "nodes": [
+          "node_normalize_source",
+          "node_file_source_coercer",
+          "node_normalize_input_files"
+        ],
+        "title": "File Input Handling",
+        "description": "Components responsible for processing raw file inputs and converting them into standardized internal representations.",
+        "role": "surface"
+      },
+      {
+        "id": "group_file_resolution_config",
+        "label": "File Resolution & Configuration",
+        "nodes": [
+          "node_create_resolver",
+          "node_get_supported_types",
+          "node_openai_opts"
+        ],
+        "title": "File Resolution & Configuration",
+        "description": "Manages how files are resolved, uploaded, or inlined based on configuration and provider-specific constraints.",
+        "role": "generative"
+      },
+      {
+        "id": "group_sync_cleanup",
+        "label": "Synchronous Cache & File Cleanup",
+        "nodes": [
+          "node_cleanup_expired_sync",
+          "node_cleanup_provider_sync",
+          "node_cleanup_on_exit"
+        ],
+        "title": "Synchronous Cache & File Cleanup",
+        "description": "Functions for synchronously cleaning up cached files and files associated with specific providers.",
+        "role": "analytical"
+      },
+      {
+        "id": "group_async_cleanup",
+        "label": "Asynchronous Cache & File Cleanup",
+        "nodes": [
+          "node_cleanup_uploaded_async",
+          "node_cleanup_expired_async"
+        ],
+        "title": "Asynchronous Cache & File Cleanup",
+        "description": "Asynchronous functions for cleaning up cached files and provider files, often with concurrency control for performance.",
+        "role": "analytical"
+      },
+      {
+        "id": "group_monitoring_metrics",
+        "label": "Operational Monitoring",
+        "nodes": [
+          "node_log_file_operation"
+        ],
+        "title": "Operational Monitoring",
+        "description": "Component dedicated to logging file operation events for monitoring, debugging, and performance analysis.",
+        "role": "data"
+      }
+    ]
+  }
+}

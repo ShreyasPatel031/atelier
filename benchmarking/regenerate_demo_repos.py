@@ -107,6 +107,7 @@ REPOS = {
     "ollama": "https://github.com/ollama/ollama.git",
     "pydantic-ai": "https://github.com/pydantic/pydantic-ai.git",
     "transformers": "https://github.com/huggingface/transformers.git",
+    "persona-selection-model": "https://github.com/ShreyasPatel031/Persona-Selection-Model.git",
 }
 
 DEMO_REPOS = REPO_ROOT / "demo" / "repos"
@@ -134,7 +135,10 @@ def _find_codewiki_exe() -> str:
     import shutil
     # 1. Explicit override via env var
     if exe := os.environ.get("CODEWIKI_EXE"):
-        return exe
+        p = Path(exe)
+        if not p.is_absolute():
+            p = (REPO_ROOT / p).resolve()
+        return str(p)
     # 2. `codewiki` on PATH (installed via pipx or pip install --user)
     if found := shutil.which("codewiki"):
         return found
@@ -158,6 +162,10 @@ def generate_docs(name: str, clone_path: Path) -> dict:
                "--no-cache", "--demo-slug", name, "--verbose"]
         use_shell = False
 
+    env = os.environ.copy()
+    # Relative PYTHONPATH breaks when cwd is the clone dir — always use repo root.
+    env["PYTHONPATH"] = str(REPO_ROOT)
+
     start = time.time()
     result = subprocess.run(
         cmd,
@@ -165,6 +173,7 @@ def generate_docs(name: str, clone_path: Path) -> dict:
         cwd=str(clone_path),
         capture_output=True,
         text=True,
+        env=env,
         timeout=int(os.environ.get("CODEWIKI_REGEN_TIMEOUT_SEC", str(4 * 3600))),
     )
     duration = time.time() - start

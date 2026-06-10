@@ -2,7 +2,9 @@
 
 AI-powered repository documentation generation with interactive diagrams and multi-level module exploration.
 
-**Full documentation:** [docs/README.md](docs/README.md)
+**Moving this repo to another laptop / Cursor:** [SETUP-OTHER-MACHINE.md](SETUP-OTHER-MACHINE.md) · one-command zip: `./scripts/make-portable-archive.sh`
+
+**Full documentation:** [docs/README.md](docs/README.md) · **Cursor diagram MCP:** [docs/CURSOR-MCP.md](docs/CURSOR-MCP.md)
 
 Quick start:
 

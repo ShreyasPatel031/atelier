@@ -1,0 +1,25 @@
+{
+    "title": "DETR Family Model Conversion",
+    "summary": "This module facilitates the conversion of various DETR-family models, including DETR, Deformable DETR, RT-DETR, MaskFormer, and Table Transformer, from their original frameworks to the Hugging Face Transformers format.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "detr_converters", "label": "Convert Core DETR Models", "type": "module", "link": "detr_converters", "title": "Core DETR Model Converters", "description": "Handles the conversion of original DETR checkpoints to the Hugging Face format."}, 
+            {"id": "deformable_detr_d_fine_converters", "label": "Convert Deformable DETR & D-FINE", "type": "module", "link": "deformable_detr_d_fine_converters", "title": "Deformable DETR & D-FINE Converters", "description": "Manages the conversion of Deformable DETR, DAB-DETR, D-FINE, and DEIMv2 model checkpoints."}, 
+            {"id": "rtdetr_converters", "label": "Convert RT-DETR Models", "type": "module", "link": "rtdetr_converters", "title": "RT-DETR Model Converters", "description": "Provides utilities for converting RT-DETR and RT-DETR v2 models to the Hugging Face ecosystem."}, 
+            {"id": "maskformer_converters", "label": "Convert MaskFormer Models", "type": "module", "link": "maskformer_converters", "title": "MaskFormer Model Converters", "description": "Converts MaskFormer models, including ResNet and Swin backbones, to the Hugging Face format."}, 
+            {"id": "table_transformer_converters", "label": "Convert Table Transformer Models", "type": "module", "link": "table_transformer_converters", "title": "Table Transformer Model Converters", "description": "Dedicated converters for Table Transformer models, supporting versions with and without Timm backbones."}, 
+            {"id": "misc_detr_converters", "label": "Other DETR-like Converters", "type": "module", "link": "misc_detr_converters", "title": "Miscellaneous DETR Converters", "description": "Includes conversion scripts for other specialized DETR-like models such as LW-DETR and RF-DETR."}
+        ],
+        "edges": [
+            {"source": "detr_converters", "target": "deformable_detr_d_fine_converters", "label": "similar architecture principles"},
+            {"source": "deformable_detr_d_fine_converters", "target": "rtdetr_converters", "label": "object detection focus"},
+            {"source": "rtdetr_converters", "target": "maskformer_converters", "label": "potential shared image processing"},
+            {"source": "maskformer_converters", "target": "table_transformer_converters", "label": "segmentation/detection tasks"},
+            {"source": "detr_converters", "target": "misc_detr_converters", "label": "core DETR foundation"}
+        ],
+        "groups": [
+            {"id": "detr_conversion_tools", "label": "DETR Family Conversion Tools", "title": "DETR Family Conversion Tools", "description": "A collection of tools for migrating various DETR-based models to the Hugging Face Transformers library.", "role": "generative", "nodes": ["detr_converters", "deformable_detr_d_fine_converters", "rtdetr_converters", "maskformer_converters", "table_transformer_converters", "misc_detr_converters"]}
+        ]
+    }
+}

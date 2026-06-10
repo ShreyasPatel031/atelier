@@ -1,83 +1,19 @@
 {
   "repos": [
     {
-      "repo": "crewai",
-      "generation": {
-        "exit_code": 0,
-        "duration_seconds": 1306.2,
-        "stdout_lines": 1264,
-        "stderr_lines": 33,
-        "docs_exist": true,
-        "md_files": 0
-      },
-      "validation": {
-        "validation_passed": true,
-        "errors": 0,
-        "warnings": 7
-      }
-    },
-    {
-      "repo": "dspy",
-      "generation": {
-        "exit_code": 0,
-        "duration_seconds": 642.6,
-        "stdout_lines": 912,
-        "stderr_lines": 33,
-        "docs_exist": true,
-        "md_files": 0
-      },
-      "validation": {
-        "validation_passed": true,
-        "errors": 0,
-        "warnings": 5
-      }
-    },
-    {
-      "repo": "ollama",
-      "generation": {
-        "exit_code": 0,
-        "duration_seconds": 1200.7,
-        "stdout_lines": 1845,
-        "stderr_lines": 33,
-        "docs_exist": true,
-        "md_files": 0
-      },
-      "validation": {
-        "validation_passed": true,
-        "errors": 0,
-        "warnings": 3
-      }
-    },
-    {
       "repo": "pydantic-ai",
       "generation": {
         "exit_code": 0,
-        "duration_seconds": 940.9,
-        "stdout_lines": 926,
-        "stderr_lines": 33,
+        "duration_seconds": 234.1,
+        "stdout_lines": 923,
+        "stderr_lines": 36,
         "docs_exist": true,
         "md_files": 0
       },
       "validation": {
         "validation_passed": true,
         "errors": 0,
-        "warnings": 2
-      }
-    },
-    {
-      "repo": "transformers",
-      "generation": {
-        "exit_code": 0,
-        "duration_seconds": 1875.5,
-        "stdout_lines": 890,
-        "stderr_lines": 33,
-        "docs_exist": true,
-        "md_files": 0
-      },
-      "validation": {
-        "validation_passed": true,
-        "errors": 0,
-        "warnings": 3
+        "warnings": 10
       }
     }
   ]

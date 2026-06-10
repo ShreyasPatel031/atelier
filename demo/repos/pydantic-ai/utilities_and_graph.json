@@ -1,0 +1,119 @@
+{
+    "title": "Utilities and Graph",
+    "summary": "This module aggregates foundational utilities, including a graph processing framework for complex workflows, tools for documentation generation, and scripts for testing and cloud integration verification.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "graph_processing_core",
+                "label": "Graph Processing Core",
+                "type": "module",
+                "link": "graph_processing",
+                "title": "Graph Execution Framework",
+                "description": "Provides a robust framework for defining, executing, and managing complex workflows as directed acyclic graphs (DAGs) or state machines."
+            },
+            {
+                "id": "documentation_tools",
+                "label": "Documentation Build Tools",
+                "type": "module",
+                "link": "documentation_tools",
+                "title": "MkDocs Documentation Utilities",
+                "description": "Enhances the MkDocs documentation generation process with features like code snippet injection, Algolia search indexing, and environment configuration."
+            },
+            {
+                "id": "scripts_and_testing",
+                "label": "Scripts & Testing Utilities",
+                "type": "module",
+                "link": "scripts_and_testing",
+                "title": "Development & Testing Tools",
+                "description": "Contains various scripts for VCR cassette management, CLI behavior verification, and integration testing with cloud services like Google Cloud."
+            },
+            {
+                "id": "pydantic_ai_core",
+                "label": "Pydantic AI Core",
+                "type": "external",
+                "link": "pydantic_ai_core",
+                "title": "Main AI Agent Framework",
+                "description": "The central framework for building and running AI agents, which can leverage graph processing for complex orchestrations."
+            },
+            {
+                "id": "external_docs_system",
+                "label": "External Documentation System",
+                "type": "external",
+                "link": null,
+                "title": "MkDocs & Algolia",
+                "description": "The external systems (MkDocs, Algolia) that consume the output and are configured by the documentation tools."
+            },
+            {
+                "id": "external_cloud_platforms",
+                "label": "External Cloud Platforms",
+                "type": "external",
+                "link": null,
+                "title": "Cloud Services (GCS, Vertex AI)",
+                "description": "Cloud providers and services (e.g., Google Cloud Storage, Vertex AI) that are targeted and verified by the testing scripts."
+            }
+        ],
+        "edges": [
+            {
+                "source": "pydantic_ai_core",
+                "target": "graph_processing_core",
+                "label": "Can utilize for workflows",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "documentation_tools",
+                "target": "external_docs_system",
+                "label": "Generates & Configures",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "scripts_and_testing",
+                "target": "external_cloud_platforms",
+                "label": "Tests & Verifies Integrations",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "scripts_and_testing",
+                "target": "pydantic_ai_core",
+                "label": "Tests agent components",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "core_utilities",
+                "label": "Core Utilities",
+                "nodes": [
+                    "graph_processing_core"
+                ],
+                "title": "Core Graph Processing",
+                "description": "Provides a flexible and robust framework for defining and executing complex graph-based workflows and state machines.",
+                "role": null
+            },
+            {
+                "id": "documentation_support",
+                "label": "Documentation Support",
+                "nodes": [
+                    "documentation_tools"
+                ],
+                "title": "Documentation Generation Tools",
+                "description": "Tools and hooks that enhance the documentation build process, including snippet injection and search indexing for MkDocs.",
+                "role": null
+            },
+            {
+                "id": "development_and_testing",
+                "label": "Development & Testing",
+                "nodes": [
+                    "scripts_and_testing"
+                ],
+                "title": "Development & Testing Utilities",
+                "description": "Scripts and components for managing test infrastructure, verifying CLI behavior, and validating integrations with external cloud services.",
+                "role": null
+            }
+        ]
+    }
+}

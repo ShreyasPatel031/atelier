@@ -1,160 +1,192 @@
 {
-    "title": "Core Framework Overview",
-    "summary": "This module encompasses the fundamental building blocks of CrewAI, including agent and crew orchestration, task and flow management, LLM integrations, event and state management, and a suite of core utilities and extensions. It provides the essential infrastructure for building and running intelligent agent systems.",
+    "title": "CrewAI Core Framework",
+    "summary": "This module forms the foundational architecture of CrewAI, orchestrating intelligent agents, managing task workflows, and integrating with various Large Language Models. It provides essential utilities, handles event management, state persistence, and facilitates agent-to-agent communication and tool integration.",
     "diagram": {
         "direction": "TD",
         "nodes": [
             {
-                "id": "agent_orchestration_node",
-                "label": "Agent & Crew Orchestration",
+                "id": "agents_exec",
+                "label": "Agent & Execution Core",
                 "type": "module",
-                "link": "agent_and_crew_orchestration",
-                "title": "Agent & Crew Management",
-                "description": "Manages the execution, interaction, and lifecycle of individual agents and collaborative crews, including tool usage and agent adapters for various LLM frameworks."
+                "link": "agents_and_execution",
+                "title": "Agent & Execution Core",
+                "description": "Defines the core logic for creating, managing, and executing AI agents, including their reasoning, planning, and interaction with tools."
             },
             {
-                "id": "task_flow_node",
-                "label": "Task & Flow Management",
+                "id": "tasks_flow",
+                "label": "Flow Orchestration & Tasks",
                 "type": "module",
-                "link": "task_and_flow_management",
-                "title": "Workflow & Task Orchestration",
-                "description": "Defines, orchestrates, and manages complex AI agent workflows (flows) and individual tasks. It handles state persistence, human-in-the-loop interactions, and flow visualization."
+                "link": "tasks_and_flow",
+                "title": "Flow Orchestration & Tasks",
+                "description": "Manages the definition, execution, and visualization of multi-step agent workflows, handling task dependencies, state, and human feedback."
             },
             {
-                "id": "llm_integration_node",
+                "id": "llm_int",
                 "label": "LLM Integration",
                 "type": "module",
                 "link": "llm_integration",
-                "title": "Large Language Model Integration",
-                "description": "Provides abstract and concrete interfaces for integrating with various LLM providers (e.g., Anthropic, Azure, Gemini). It handles message formatting, tool calling, streaming, and token usage tracking."
+                "title": "LLM Integration",
+                "description": "Provides a unified interface for connecting to and interacting with various Large Language Models, abstracting provider-specific details for agents."
             },
             {
-                "id": "event_state_node",
+                "id": "events_state",
                 "label": "Event & State Management",
                 "type": "module",
-                "link": "event_and_state_management",
-                "title": "Event Bus & State Persistence",
-                "description": "Manages system-wide events, their emission and processing, and tracks application runtime state. This includes checkpointing, event records, and A2A communication events."
+                "link": "events_and_state",
+                "title": "Event & State Management",
+                "description": "Implements a robust event bus for system-wide communication, manages execution state, memory, and checkpointing for crew operations."
             },
             {
-                "id": "utilities_node",
-                "label": "Core Utilities & Extensions",
+                "id": "utils_config",
+                "label": "Core Utilities & Configuration",
                 "type": "module",
-                "link": "utilities_and_extensions",
-                "title": "Framework Utilities & Hooks",
-                "description": "Offers a diverse set of utility functions, project structure annotations, memory analysis, logging, streaming, and custom hook management for the CrewAI framework."
+                "link": "utilities_and_config",
+                "title": "Core Utilities & Configuration",
+                "description": "Offers a collection of foundational helper functions, configuration management, project annotations, security settings, and telemetry for the framework."
+            },
+            {
+                "id": "a2a_comm",
+                "label": "Agent-to-Agent Communication",
+                "type": "module",
+                "link": "agent_to_agent_communication",
+                "title": "Agent-to-Agent Communication",
+                "description": "Enables secure and structured delegation of tasks and information exchange between different AI agents, supporting collaborative workflows."
+            },
+            {
+                "id": "tools_rag",
+                "label": "Tools & RAG System",
+                "type": "module",
+                "link": "agent_tools_and_rag",
+                "title": "Tools & RAG System",
+                "description": "Manages the definition, adaptation, and usage of external tools by agents, including Retrieval-Augmented Generation (RAG) for knowledge retrieval."
             }
         ],
         "edges": [
             {
-                "source": "task_flow_node",
-                "target": "agent_orchestration_node",
-                "label": "Orchestrates Agents/Crews",
-                "title": "Flows Orchestrate Agents",
-                "description": "Flows define and orchestrate the sequence of tasks, delegating them to agents and crews for execution according to the workflow logic."
+                "source": "agents_exec",
+                "target": "llm_int",
+                "label": "Uses LLMs for reasoning",
+                "title": null,
+                "description": null
             },
             {
-                "source": "agent_orchestration_node",
-                "target": "llm_integration_node",
-                "label": "Utilizes LLMs for Reasoning",
-                "title": "Agents Use LLMs",
-                "description": "Agents and their adapters interact with LLMs for generating responses, planning, and making decisions based on prompts and context."
+                "source": "agents_exec",
+                "target": "tasks_flow",
+                "label": "Executes tasks within flows",
+                "title": null,
+                "description": null
             },
             {
-                "source": "agent_orchestration_node",
-                "target": "event_state_node",
-                "label": "Emits Agent Events",
-                "title": "Agent Activities Generate Events",
-                "description": "Agent activities, such as tool calls, task completions, and state changes, generate events that are managed by the central event bus."
+                "source": "agents_exec",
+                "target": "tools_rag",
+                "label": "Utilizes tools and RAG",
+                "title": null,
+                "description": null
             },
             {
-                "source": "agent_orchestration_node",
-                "target": "utilities_node",
-                "label": "Uses Tools & Hooks",
-                "title": "Agents Leverage Utilities",
-                "description": "Agents leverage various utility functions, tools, and custom hooks for enhanced functionality, logging, and structured output."
+                "source": "agents_exec",
+                "target": "a2a_comm",
+                "label": "Delegates tasks to other agents",
+                "title": null,
+                "description": null
             },
             {
-                "source": "task_flow_node",
-                "target": "llm_integration_node",
-                "label": "Uses LLMs for Feedback/Guardrails",
-                "title": "Flows Use LLMs for Control",
-                "description": "Flows may use LLMs for interpreting human feedback, validating content, enforcing guardrails, or making routing decisions within the workflow."
+                "source": "tasks_flow",
+                "target": "agents_exec",
+                "label": "Orchestrates agent actions",
+                "title": null,
+                "description": null
             },
             {
-                "source": "task_flow_node",
-                "target": "event_state_node",
-                "label": "Emits Flow Events & Persists State",
-                "title": "Flows Interact with Event/State",
-                "description": "Flows emit events for lifecycle changes, state transitions, and rely on the event and state management system for persistence and checkpointing."
+                "source": "tasks_flow",
+                "target": "events_state",
+                "label": "Manages state and emits events",
+                "title": null,
+                "description": null
             },
             {
-                "source": "task_flow_node",
-                "target": "utilities_node",
-                "label": "Uses Serialization & Memory",
-                "title": "Flows Use Utilities",
-                "description": "Flows utilize utilities for state serialization, memory management, and other helper functions to maintain context and structure."
+                "source": "llm_int",
+                "target": "events_state",
+                "label": "Emits LLM call events",
+                "title": null,
+                "description": null
             },
             {
-                "source": "llm_integration_node",
-                "target": "event_state_node",
-                "label": "Emits LLM Call Events",
-                "title": "LLM Calls Generate Events",
-                "description": "LLM interactions trigger events (e.g., before/after call, token usage) that are managed by the event bus for observability and custom reactions."
+                "source": "events_state",
+                "target": "utils_config",
+                "label": "Uses utilities for logging/config",
+                "title": null,
+                "description": null
             },
             {
-                "source": "llm_integration_node",
-                "target": "utilities_node",
-                "label": "Uses Hooks & Output Validation",
-                "title": "LLM Integrations Use Utilities",
-                "description": "LLM integrations use hooks for pre/post-processing of calls and utilities for structured output validation and message formatting."
+                "source": "utils_config",
+                "target": "agents_exec",
+                "label": "Provides agent utilities",
+                "title": null,
+                "description": null
             },
             {
-                "source": "event_state_node",
-                "target": "utilities_node",
-                "label": "Logs & Traces via Telemetry",
-                "title": "Event System Uses Utilities",
-                "description": "The event system integrates with utilities for logging, telemetry, and tracing application activities, providing insights into execution."
+                "source": "utils_config",
+                "target": "tasks_flow",
+                "label": "Provides flow utilities",
+                "title": null,
+                "description": null
             },
             {
-                "source": "utilities_node",
-                "target": "llm_integration_node",
-                "label": "Uses LLMs for Memory Analysis",
-                "title": "Utilities Leverage LLMs",
-                "description": "Memory analysis utilities leverage LLMs for intelligent processing and consolidation of memory records, enhancing agent context."
+                "source": "utils_config",
+                "target": "llm_int",
+                "label": "Provides LLM configuration",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "a2a_comm",
+                "target": "events_state",
+                "label": "Emits A2A specific events",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "tools_rag",
+                "target": "utils_config",
+                "label": "Uses utilities for file/tool management",
+                "title": null,
+                "description": null
             }
         ],
         "groups": [
             {
-                "id": "core_orchestration_group",
-                "label": "Core Orchestration",
+                "id": "core_components",
+                "label": "Core Components",
                 "nodes": [
-                    "agent_orchestration_node",
-                    "task_flow_node"
+                    "agents_exec",
+                    "tasks_flow"
                 ],
-                "title": "Agent & Workflow Core",
-                "description": "The central components responsible for defining, executing, and managing AI agents and their collaborative workflows (flows) within the CrewAI framework.",
+                "title": "Core CrewAI Components",
+                "description": "The foundational modules that define and orchestrate the intelligent agents and their workflows within the CrewAI framework.",
                 "role": null
             },
             {
-                "id": "foundational_services_group",
-                "label": "Foundational Services",
+                "id": "supporting_infrastructure",
+                "label": "Supporting Infrastructure",
                 "nodes": [
-                    "llm_integration_node",
-                    "event_state_node"
+                    "llm_int",
+                    "events_state",
+                    "utils_config"
                 ],
-                "title": "LLM & Event Infrastructure",
-                "description": "Provides essential underlying services, including seamless integration with various Large Language Models and a robust system for event handling, state management, and checkpointing.",
+                "title": "Supporting Infrastructure",
+                "description": "Essential modules providing underlying services such as LLM integration, event handling, state management, and general utilities to the core components.",
                 "role": null
             },
             {
-                "id": "support_extensions_group",
-                "label": "Support & Extensions",
+                "id": "external_interactions",
+                "label": "External Interactions",
                 "nodes": [
-                    "utilities_node"
+                    "a2a_comm",
+                    "tools_rag"
                 ],
-                "title": "Framework Utilities & Hooks",
-                "description": "A comprehensive collection of helper functions, project structure annotations, memory analysis tools, logging, streaming capabilities, and custom hook management to extend and support the core framework.",
+                "title": "External Interactions",
+                "description": "Modules that enable CrewAI to interact with external systems, including other agents (A2A) and various tools or Retrieval-Augmented Generation (RAG) systems.",
                 "role": null
             }
         ]

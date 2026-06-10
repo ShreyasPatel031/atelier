@@ -1,0 +1,76 @@
+{
+    "title": "Model Providers & Wrappers",
+    "summary": "This module defines abstract model interfaces, concrete model implementations, and provider integrations for various LLM services. It enables flexible model selection and interaction.",
+    "diagram": {
+        "direction": "LR",
+        "nodes": [
+            {
+                "id": "core_model_abstractions",
+                "label": "Core Model Abstractions",
+                "type": "module",
+                "link": "core_model_abstractions",
+                "title": "Core Model Abstractions",
+                "description": "Defines base interfaces and utility classes for working with language models, including the abstract Model and StreamedResponse classes, along with concurrency limiting and model wrapping."
+            },
+            {
+                "id": "model_implementations",
+                "label": "Model Implementations",
+                "type": "module",
+                "link": "model_implementations",
+                "title": "Model Implementations",
+                "description": "Provides concrete implementations of various language models, handling their specific APIs, response processing, and tool integration."
+            },
+            {
+                "id": "provider_abstractions",
+                "label": "Provider Abstractions",
+                "type": "module",
+                "link": "provider_abstractions",
+                "title": "Provider Abstractions",
+                "description": "Establishes the foundational interface for interacting with external LLM service providers, ensuring consistent authentication and client management."
+            },
+            {
+                "id": "provider_implementations",
+                "label": "Provider Implementations",
+                "type": "module",
+                "link": "provider_implementations",
+                "title": "Provider Implementations",
+                "description": "Contains specific integrations for various LLM providers, managing API keys, client initialization, and model-specific configurations."
+            }
+        ],
+        "edges": [
+            {
+                "source": "core_model_abstractions",
+                "target": "model_implementations",
+                "label": "implements/uses"
+            },
+            {
+                "source": "provider_abstractions",
+                "target": "provider_implementations",
+                "label": "implements"
+            },
+            {
+                "source": "provider_implementations",
+                "target": "model_implementations",
+                "label": "configures/supports"
+            }
+        ],
+        "groups": [
+            {
+                "id": "model_definitions",
+                "label": "Model Definitions",
+                "title": "Model Definitions",
+                "description": "Defines and implements various language model interfaces and their concrete functionalities.",
+                "role": "analytical", 
+                "nodes": ["core_model_abstractions", "model_implementations"]
+            },
+            {
+                "id": "llm_providers",
+                "label": "LLM Providers",
+                "title": "LLM Service Providers",
+                "description": "Manages connections and configurations for external Large Language Model services.",
+                "role": "data",
+                "nodes": ["provider_abstractions", "provider_implementations"]
+            }
+        ]
+    }
+}

@@ -1,0 +1,280 @@
+{
+  "title": "Common Utilities Module",
+  "summary": "This module provides a collection of general-purpose utility functions for system interaction, string manipulation, model initialization, optimization parameter handling, and logging within the Llama.cpp ecosystem.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "node_postprocess_cpu_params",
+        "label": "Adjust CPU Thread Parameters",
+        "type": "component",
+        "link": null,
+        "title": "Adjust CPU Threads",
+        "description": "Adjusts the number of CPU threads for processing based on system capabilities or a reference model, ensuring optimal resource utilization and logging potential performance issues."
+      },
+      {
+        "id": "node_fs_get_cache_file",
+        "label": "Retrieve Cache File Path",
+        "type": "component",
+        "link": null,
+        "title": "Cache File Path",
+        "description": "Generates the full path for a cache file within the application's designated cache directory, creating the directory if it does not already exist."
+      },
+      {
+        "id": "node_common_init_from_params",
+        "label": "Initialize Llama Model & Context",
+        "type": "component",
+        "link": null,
+        "title": "Model & Context Init",
+        "description": "Performs comprehensive initialization of the Llama model and its inference context, including loading LoRA adapters, applying control vectors, and executing a warmup run to prepare the model for use."
+      },
+      {
+        "id": "node_string_from_batch",
+        "label": "Format Llama Batch to String",
+        "type": "component",
+        "link": null,
+        "title": "Batch to String",
+        "description": "Converts a `llama_batch` structure, containing token data and metadata, into a detailed, human-readable string representation for debugging or logging purposes."
+      },
+      {
+        "id": "node_common_params_get_system_info",
+        "label": "Gather System Information",
+        "type": "component",
+        "link": null,
+        "title": "System Info",
+        "description": "Collects and formats system-specific details, such as the number of active CPU threads and overall hardware concurrency, providing insights into the execution environment."
+      },
+      {
+        "id": "node_string_remove_suffix",
+        "label": "Remove String Suffix",
+        "type": "component",
+        "link": null,
+        "title": "Remove Suffix",
+        "description": "Removes a specified suffix from the end of a given string if it exists, returning a boolean indicating whether the modification occurred."
+      },
+      {
+        "id": "node_string_find_partial_stop",
+        "label": "Find Partial Stop Sequence",
+        "type": "component",
+        "link": null,
+        "title": "Partial Stop Finder",
+        "description": "Identifies if a string ends with a partial match of a predefined stop sequence, useful for managing text generation termination conditions."
+      },
+      {
+        "id": "node_string_join",
+        "label": "Join String Vector",
+        "type": "component",
+        "link": null,
+        "title": "String Joiner",
+        "description": "Concatenates a collection of strings into a single string, inserting a specified separator between each element."
+      },
+      {
+        "id": "node_common_opt_lr_pars",
+        "label": "Configure Optimizer Learning Rate",
+        "type": "component",
+        "link": null,
+        "title": "Optimizer LR Config",
+        "description": "Sets the learning rate and weight decay parameters for GGML optimizers (SGD or AdamW) based on the current epoch and user-defined data."
+      },
+      {
+        "id": "node_common_opt_get_optimizer",
+        "label": "Identify Optimizer Type",
+        "type": "component",
+        "link": null,
+        "title": "Optimizer Type",
+        "description": "Determines the appropriate GGML optimizer type (e.g., AdamW, SGD) by parsing a case-insensitive string input."
+      },
+      {
+        "id": "node_llm_ffn_exps_block_regex",
+        "label": "Generate FFN Block Regex",
+        "type": "component",
+        "link": null,
+        "title": "FFN Regex Generator",
+        "description": "Constructs a regular expression pattern specifically designed to match and identify Feed-Forward Network (FFN) blocks within the LLM architecture."
+      },
+      {
+        "id": "node_llm_ffn_exps_cpu_override",
+        "label": "FFN CPU Buffer Type Override",
+        "type": "component",
+        "link": null,
+        "title": "FFN CPU Override",
+        "description": "Provides a configuration to explicitly assign Feed-Forward Network (FFN) tensors to use the CPU backend buffer type, optimizing memory allocation."
+      },
+      {
+        "id": "node_gbnf_format_literal",
+        "label": "Format GBNF Literal",
+        "type": "component",
+        "link": null,
+        "title": "GBNF Literal Formatter",
+        "description": "Formats a given string literal according to the GBNF (Grammar-based Neural Fuzzing) specification, preparing it for grammar generation."
+      },
+      {
+        "id": "node_common_log_default_callback",
+        "label": "Default Logging Callback",
+        "type": "component",
+        "link": null,
+        "title": "Default Logger",
+        "description": "Implements a standard logging callback function that filters messages based on a global verbosity threshold and directs them to the main application log."
+      },
+      {
+        "id": "external_system_cpu_info",
+        "label": "System CPU Info",
+        "type": "external",
+        "link": null,
+        "title": "System CPU Info",
+        "description": "Provides information about the system's CPU, including the number of available cores and hardware concurrency."
+      },
+      {
+        "id": "external_file_system",
+        "label": "File System Operations",
+        "type": "external",
+        "link": null,
+        "title": "File System",
+        "description": "Handles file system operations such as retrieving directory paths and creating directories."
+      },
+      {
+        "id": "external_llm_runtime_core",
+        "label": "LLM Runtime Core",
+        "type": "external",
+        "link": "llm_runtime_core",
+        "title": "LLM Runtime Core",
+        "description": "The core runtime for the Llama model, providing functionalities for model loading, context management, inference, and system information."
+      },
+      {
+        "id": "external_ggml_optimization",
+        "label": "GGML Optimization",
+        "type": "external",
+        "link": "ml_backend_ggml",
+        "title": "GGML Optimization",
+        "description": "Provides functions for GGML optimizer parameter management."
+      },
+      {
+        "id": "external_ggml_backend_management",
+        "label": "GGML Backend Management",
+        "type": "external",
+        "link": "ml_backend_ggml",
+        "title": "GGML Backend",
+        "description": "Manages GGML backend operations, including buffer type retrieval."
+      }
+    ],
+    "edges": [
+      {
+        "source": "node_postprocess_cpu_params",
+        "target": "external_system_cpu_info",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_fs_get_cache_file",
+        "target": "external_file_system",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_common_init_from_params",
+        "target": "external_llm_runtime_core",
+        "label": "initializes & configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_string_from_batch",
+        "target": "external_llm_runtime_core",
+        "label": "formats data from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_common_params_get_system_info",
+        "target": "external_system_cpu_info",
+        "label": "queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_common_opt_lr_pars",
+        "target": "external_ggml_optimization",
+        "label": "configures",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_common_opt_get_optimizer",
+        "target": "external_ggml_optimization",
+        "label": "identifies type for",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_llm_ffn_exps_cpu_override",
+        "target": "external_ggml_backend_management",
+        "label": "specifies backend for",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "group_system_env",
+        "label": "System & Environment",
+        "nodes": [
+          "node_postprocess_cpu_params",
+          "node_fs_get_cache_file",
+          "node_common_params_get_system_info",
+          "node_llm_ffn_exps_cpu_override"
+        ],
+        "title": "System & Environment Management",
+        "description": "Functions for managing system resources, environment settings, and file system interactions.",
+        "role": "surface"
+      },
+      {
+        "id": "group_string_utils",
+        "label": "String & Text Processing",
+        "nodes": [
+          "node_string_remove_suffix",
+          "node_string_find_partial_stop",
+          "node_string_join",
+          "node_string_from_batch"
+        ],
+        "title": "String & Text Utilities",
+        "description": "A collection of utilities for manipulating strings, detecting patterns, and formatting text data.",
+        "role": "data"
+      },
+      {
+        "id": "group_model_config",
+        "label": "Model Initialization",
+        "nodes": [
+          "node_common_init_from_params",
+          "node_llm_ffn_exps_block_regex"
+        ],
+        "title": "Model Initialization & Configuration",
+        "description": "Core functions responsible for setting up and configuring the Llama model and its operational context.",
+        "role": "generative"
+      },
+      {
+        "id": "group_opt_grammar",
+        "label": "Optimization & Grammar",
+        "nodes": [
+          "node_common_opt_lr_pars",
+          "node_common_opt_get_optimizer",
+          "node_gbnf_format_literal"
+        ],
+        "title": "Optimization & Grammar Utilities",
+        "description": "Functions related to configuring optimization parameters and formatting grammar literals for language models.",
+        "role": "analytical"
+      },
+      {
+        "id": "group_logging",
+        "label": "Logging",
+        "nodes": [
+          "node_common_log_default_callback"
+        ],
+        "title": "Logging Utilities",
+        "description": "Provides a default mechanism for logging messages within the application, with verbosity control.",
+        "role": "surface"
+      }
+    ]
+  }
+}

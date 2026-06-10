@@ -1,0 +1,403 @@
+{
+  "title": "Event Management and State Persistence",
+  "summary": "This module provides a robust event bus for managing synchronous and asynchronous events within CrewAI, along with mechanisms for event context tracking, state persistence, and memory analysis. It enables structured event emission, handling, and checkpointing for crew operations.",
+  "diagram": {
+    "direction": "TD",
+    "nodes": [
+      {
+        "id": "base_event",
+        "label": "Define Base Event Structure",
+        "type": "component",
+        "link": null,
+        "title": "Base Event Definition",
+        "description": "Establishes the fundamental structure and common attributes for all events in the system, serving as the base class for specific event types."
+      },
+      {
+        "id": "event_bus",
+        "label": "Manage Event Dispatch & Handlers",
+        "type": "component",
+        "link": null,
+        "title": "CrewAI Event Bus",
+        "description": "A singleton event bus responsible for registering, emitting, and dispatching synchronous and asynchronous events to their respective handlers, managing their execution."
+      },
+      {
+        "id": "event_context_manager",
+        "label": "Manage Event Context Scope",
+        "type": "component",
+        "link": null,
+        "title": "Event Context Manager",
+        "description": "Provides a context manager to establish and manage the parent-child hierarchy and scope of events, ensuring proper event lineage tracking during execution."
+      },
+      {
+        "id": "tracing_confirmation",
+        "label": "Confirm Tracing on First Run",
+        "type": "component",
+        "link": null,
+        "title": "Tracing Confirmation Utility",
+        "description": "Prompts the user to enable tracing features during the first execution of CrewAI, integrating with CLI tools to configure event listeners for debugging."
+      },
+      {
+        "id": "a2a_push_received",
+        "label": "A2A Push Notification Received",
+        "type": "component",
+        "link": null,
+        "title": "A2A Push Received Event",
+        "description": "Represents an event triggered when a push notification is successfully received from a remote A2A agent, indicating a status update or message."
+      },
+      {
+        "id": "a2a_push_sent",
+        "label": "A2A Push Notification Sent",
+        "type": "component",
+        "link": null,
+        "title": "A2A Push Sent Event",
+        "description": "Represents an event triggered when a push notification is sent by the A2A server to a client's registered callback URL, reporting task status."
+      },
+      {
+        "id": "a2a_agent_card_fetched",
+        "label": "A2A Agent Card Fetched",
+        "type": "component",
+        "link": null,
+        "title": "A2A Agent Card Fetched Event",
+        "description": "Represents an event triggered when an A2A agent's metadata (agent card) is successfully retrieved, providing details about the agent's capabilities."
+      },
+      {
+        "id": "a2a_parallel_delegation_started",
+        "label": "A2A Parallel Delegation Started",
+        "type": "component",
+        "link": null,
+        "title": "A2A Parallel Delegation Start Event",
+        "description": "Indicates the beginning of a parallel delegation process where a task is distributed to multiple A2A agents concurrently for execution."
+      },
+      {
+        "id": "a2a_parallel_delegation_completed",
+        "label": "A2A Parallel Delegation Completed",
+        "type": "component",
+        "link": null,
+        "title": "A2A Parallel Delegation Complete Event",
+        "description": "Indicates the completion of a parallel delegation process to multiple A2A agents, summarizing the outcomes, including success and failure counts."
+      },
+      {
+        "id": "a2a_context_created",
+        "label": "A2A Context Created",
+        "type": "component",
+        "link": null,
+        "title": "A2A Context Created Event",
+        "description": "Signals the creation of a new A2A context, which serves to group related tasks or conversations, providing a logical boundary for interactions."
+      },
+      {
+        "id": "a2a_context_expired",
+        "label": "A2A Context Expired",
+        "type": "component",
+        "link": null,
+        "title": "A2A Context Expired Event",
+        "description": "Signals that an A2A context has expired due to its configured Time-To-Live (TTL) setting, leading to its automatic removal from active state."
+      },
+      {
+        "id": "a2a_context_idle",
+        "label": "A2A Context Became Idle",
+        "type": "component",
+        "link": null,
+        "title": "A2A Context Idle Event",
+        "description": "Signals that an A2A context has become idle, meaning no activity has occurred within it for a specified period, potentially triggering cleanup."
+      },
+      {
+        "id": "a2a_context_completed",
+        "label": "A2A Context Completed",
+        "type": "component",
+        "link": null,
+        "title": "A2A Context Completed Event",
+        "description": "Signals that all tasks within an A2A context have been successfully completed, marking the end of the context's active lifecycle."
+      },
+      {
+        "id": "a2a_context_pruned",
+        "label": "A2A Context Pruned",
+        "type": "component",
+        "link": null,
+        "title": "A2A Context Pruned Event",
+        "description": "Signals that an A2A context has been pruned (deleted) from the system, removing its metadata and associated tasks, often due to expiration or completion."
+      },
+      {
+        "id": "memory_analysis_save",
+        "label": "Analyze Memory for Saving",
+        "type": "component",
+        "link": null,
+        "title": "Memory Save Analysis",
+        "description": "Infers optimal scope, categories, importance, and extracts metadata for new memory content using an LLM, facilitating structured storage and retrieval."
+      },
+      {
+        "id": "memory_analysis_consolidate",
+        "label": "Analyze Memory for Consolidation",
+        "type": "component",
+        "link": null,
+        "title": "Memory Consolidation Analysis",
+        "description": "Determines appropriate actions (insert, update, delete) for new memory content by comparing it against existing semantically similar records using an LLM."
+      },
+      {
+        "id": "checkpoint_coercion",
+        "label": "Coerce Checkpoint Configuration",
+        "type": "component",
+        "link": null,
+        "title": "Checkpoint Config Coercion",
+        "description": "Transforms raw input (e.g., boolean `True`) into a structured CheckpointConfig object and ensures necessary checkpoint handlers are registered."
+      },
+      {
+        "id": "checkpoint_event_handler",
+        "label": "Handle Events for Checkpointing",
+        "type": "component",
+        "link": null,
+        "title": "Checkpoint Event Listener",
+        "description": "A universal event listener that monitors all events and triggers automatic checkpointing based on predefined configurations and event types."
+      },
+      {
+        "id": "event_record_manager",
+        "label": "Manage Event Execution Record",
+        "type": "component",
+        "link": null,
+        "title": "Event Record Management",
+        "description": "Stores and manages a directed graph of execution events, automatically wiring relationships like parent-child and triggered-by, enabling historical analysis."
+      },
+      {
+        "id": "event_resolver",
+        "label": "Resolve Event Type",
+        "type": "component",
+        "link": null,
+        "title": "Event Type Resolver",
+        "description": "Validates and dynamically resolves raw event data (e.g., from a dictionary) into the correct specific BaseEvent subclass for accurate processing."
+      },
+      {
+        "id": "llm_external",
+        "label": "LLM",
+        "type": "external",
+        "link": null,
+        "title": "External LLM Service",
+        "description": "An external Large Language Model service used for complex natural language understanding and generation tasks, such as memory analysis."
+      },
+      {
+        "id": "cli_external",
+        "label": "CLI",
+        "type": "external",
+        "link": "cli_and_developer_tools",
+        "title": "Command Line Interface",
+        "description": "The Command Line Interface, serving as the primary user interaction point for configuring and managing system features like tracing."
+      }
+    ],
+    "edges": [
+      {
+        "source": "event_bus",
+        "target": "base_event",
+        "label": "Emits/Registers",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "event_bus",
+        "target": "event_context_manager",
+        "label": "Manages Context With",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "event_bus",
+        "target": "event_record_manager",
+        "label": "Records Events In",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "event_record_manager",
+        "target": "event_resolver",
+        "label": "Uses to Validate Events",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_event",
+        "target": "a2a_push_received",
+        "label": "Specializes Into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_event",
+        "target": "a2a_push_sent",
+        "label": "Specializes Into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_event",
+        "target": "a2a_agent_card_fetched",
+        "label": "Specializes Into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_event",
+        "target": "a2a_parallel_delegation_started",
+        "label": "Specializes Into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_event",
+        "target": "a2a_parallel_delegation_completed",
+        "label": "Specializes Into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_event",
+        "target": "a2a_context_created",
+        "label": "Specializes Into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_event",
+        "target": "a2a_context_expired",
+        "label": "Specializes Into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_event",
+        "target": "a2a_context_idle",
+        "label": "Specializes Into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_event",
+        "target": "a2a_context_completed",
+        "label": "Specializes Into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "base_event",
+        "target": "a2a_context_pruned",
+        "label": "Specializes Into",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "checkpoint_event_handler",
+        "target": "event_bus",
+        "label": "Listens To Events From",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "checkpoint_event_handler",
+        "target": "checkpoint_coercion",
+        "label": "Applies Checkpoint Config",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "memory_analysis_save",
+        "target": "llm_external",
+        "label": "Queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "memory_analysis_consolidate",
+        "target": "llm_external",
+        "label": "Queries",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tracing_confirmation",
+        "target": "cli_external",
+        "label": "Interacts With",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "tracing_confirmation",
+        "target": "event_bus",
+        "label": "Influences Listeners On",
+        "title": null,
+        "description": null
+      }
+    ],
+    "groups": [
+      {
+        "id": "event_core_system",
+        "label": "Event Core System",
+        "nodes": [
+          "event_bus",
+          "base_event",
+          "event_context_manager",
+          "event_record_manager",
+          "event_resolver"
+        ],
+        "title": "Core Event Management",
+        "description": "Components forming the foundation of the event handling and recording system, including the event bus, base event structure, and event context management.",
+        "role": "surface"
+      },
+      {
+        "id": "a2a_notification_delegation_events",
+        "label": "A2A Notification & Delegation Events",
+        "nodes": [
+          "a2a_push_received",
+          "a2a_push_sent",
+          "a2a_agent_card_fetched",
+          "a2a_parallel_delegation_started",
+          "a2a_parallel_delegation_completed"
+        ],
+        "title": "Agent-to-Agent Communication Events",
+        "description": "Specific event types related to Agent-to-Agent (A2A) communication, including push notifications, agent card fetching, and parallel delegation processes.",
+        "role": "data"
+      },
+      {
+        "id": "a2a_context_lifecycle_events",
+        "label": "A2A Context Lifecycle Events",
+        "nodes": [
+          "a2a_context_created",
+          "a2a_context_expired",
+          "a2a_context_idle",
+          "a2a_context_completed",
+          "a2a_context_pruned"
+        ],
+        "title": "A2A Context Management Events",
+        "description": "Event types that signal various stages in the lifecycle of an A2A context, such as creation, expiration, idleness, completion, and pruning.",
+        "role": "data"
+      },
+      {
+        "id": "state_checkpointing",
+        "label": "State & Checkpointing",
+        "nodes": [
+          "checkpoint_coercion",
+          "checkpoint_event_handler"
+        ],
+        "title": "State Persistence and Checkpointing",
+        "description": "Components responsible for managing the system's state persistence, including checkpoint configuration and event-driven checkpointing logic.",
+        "role": "data"
+      },
+      {
+        "id": "memory_analysis",
+        "label": "Memory Analysis",
+        "nodes": [
+          "memory_analysis_save",
+          "memory_analysis_consolidate"
+        ],
+        "title": "Memory Content Analysis",
+        "description": "Functions that leverage LLMs to analyze memory content for optimal storage (saving) and efficient management (consolidation) against existing records.",
+        "role": "analytical"
+      },
+      {
+        "id": "tracing_utilities",
+        "label": "Tracing Utilities",
+        "nodes": [
+          "tracing_confirmation"
+        ],
+        "title": "Tracing Configuration",
+        "description": "Utility for configuring tracing features, typically involving user interaction via the command line interface during initial setup.",
+        "role": "surface"
+      }
+    ]
+  }
+}

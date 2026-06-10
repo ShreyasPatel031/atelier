@@ -1,0 +1,95 @@
+{
+    "title": "External API Integration",
+    "summary": "This module provides a unified interface for interacting with external application programming interfaces, abstracting communication details and ensuring reliable data exchange with remote services.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {
+                "id": "internal_caller",
+                "label": "Internal System Caller",
+                "type": "component",
+                "link": null,
+                "title": "Application Logic Initiator",
+                "description": "Represents the internal parts of the application that initiate requests to external services through the API interface."
+            },
+            {
+                "id": "external_api_module",
+                "label": "External API Module",
+                "type": "module",
+                "link": "external_api",
+                "title": "External API Sub-Module",
+                "description": "The core sub-module within `api_interface` responsible for handling the specifics of communicating with external application servers."
+            },
+            {
+                "id": "external_service",
+                "label": "External Application Service",
+                "type": "external",
+                "link": null,
+                "title": "Remote API Endpoint",
+                "description": "The actual external application or service that provides data and functionality, accessed via its API."
+            }
+        ],
+        "edges": [
+            {
+                "source": "internal_caller",
+                "target": "external_api_module",
+                "label": "Sends API Request",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "external_api_module",
+                "target": "external_service",
+                "label": "Forwards Request To",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "external_service",
+                "target": "external_api_module",
+                "label": "Returns API Response",
+                "title": null,
+                "description": null
+            },
+            {
+                "source": "external_api_module",
+                "target": "internal_caller",
+                "label": "Delivers Response To",
+                "title": null,
+                "description": null
+            }
+        ],
+        "groups": [
+            {
+                "id": "internal_components",
+                "label": "Internal Application",
+                "nodes": [
+                    "internal_caller"
+                ],
+                "title": "Application Internal Components",
+                "description": "Represents the parts of the application that consume the API interface to interact with external systems.",
+                "role": null
+            },
+            {
+                "id": "api_interface_layer",
+                "label": "API Interface Layer",
+                "nodes": [
+                    "external_api_module"
+                ],
+                "title": "API Communication Abstraction",
+                "description": "This group encapsulates the `external_api` sub-module, which manages all direct interactions with external APIs, handling protocols and data formats.",
+                "role": null
+            },
+            {
+                "id": "external_dependencies",
+                "label": "External Dependencies",
+                "nodes": [
+                    "external_service"
+                ],
+                "title": "External Service Providers",
+                "description": "External systems or third-party services that the application integrates with to extend its functionality or retrieve necessary data.",
+                "role": null
+            }
+        ]
+    }
+}

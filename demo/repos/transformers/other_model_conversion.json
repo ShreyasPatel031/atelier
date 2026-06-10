@@ -1,0 +1,26 @@
+{
+    "title": "Model Checkpoint Conversion",
+    "summary": "This module is dedicated to converting various model checkpoints from their original formats (e.g., TensorFlow, native PyTorch, Flax, NeMo) into compatible Hugging Face PyTorch models, ensuring seamless integration and functionality within the Transformers ecosystem.",
+    "diagram": {
+        "direction": "TD",
+        "nodes": [
+            {"id": "original_tf_checkpoints", "label": "Original TensorFlow Checkpoints", "type": "external", "title": "TensorFlow Checkpoints", "description": "Model weights and configurations originally trained and saved in TensorFlow format."},            {"id": "original_pytorch_checkpoints", "label": "Original PyTorch Checkpoints", "type": "external", "title": "PyTorch Checkpoints", "description": "Model weights and configurations from various native PyTorch implementations, often from research projects or other libraries."},            {"id": "flax_checkpoints", "label": "Flax / JAX Checkpoints", "type": "external", "title": "Flax / JAX Checkpoints", "description": "Model weights and configurations trained and saved using the Flax or JAX frameworks."},            {"id": "nemo_checkpoints", "label": "NeMo Checkpoints", "type": "external", "title": "NeMo Checkpoints", "description": "Model weights and configurations from NVIDIA NeMo toolkit."},            {"id": "pytorch_conversions", "label": "PyTorch Model Conversions", "type": "module", "link": "pytorch_conversions", "title": "PyTorch Model Conversions", "description": "Functions and utilities for converting various original PyTorch model checkpoints to Hugging Face PyTorch format."},            {"id": "tf_conversions", "label": "TensorFlow Model Conversions", "type": "module", "link": "tf_conversions", "title": "TensorFlow Model Conversions", "description": "Handles the conversion of models from TensorFlow checkpoints into Hugging Face PyTorch compatible structures."},            {"id": "flax_conversions", "label": "Flax Model Conversions", "type": "module", "link": "flax_conversions", "title": "Flax Model Conversions", "description": "Provides methods for converting models from Flax/JAX checkpoints to be usable within the Hugging Face PyTorch ecosystem."},            {"id": "nemo_conversions", "label": "NeMo Model Conversions", "type": "module", "link": "nemo_conversions", "title": "NeMo Model Conversions", "description": "Converts model checkpoints from the NeMo framework to Hugging Face PyTorch models."},            {"id": "processor_conversions", "label": "Processor Conversions", "type": "module", "link": "processor_conversions", "title": "Processor Conversions", "description": "Manages the conversion and setup of model-specific processors (e.g., tokenizers, image processors) for use with Hugging Face models."},            {"id": "hf_pytorch_model", "label": "Hugging Face PyTorch Model", "type": "external", "title": "Hugging Face PyTorch Model", "description": "The final converted model and associated assets, ready for use within the Hugging Face Transformers library."}
+        ],
+        "edges": [
+            {"source": "original_tf_checkpoints", "target": "tf_conversions", "label": "TF weights"},
+            {"source": "original_pytorch_checkpoints", "target": "pytorch_conversions", "label": "Original PyTorch weights"},
+            {"source": "flax_checkpoints", "target": "flax_conversions", "label": "Flax/JAX weights"},
+            {"source": "nemo_checkpoints", "target": "nemo_conversions", "label": "NeMo weights"},
+            {"source": "tf_conversions", "target": "hf_pytorch_model", "label": "HF PyTorch model"},
+            {"source": "pytorch_conversions", "target": "hf_pytorch_model", "label": "HF PyTorch model"},
+            {"source": "flax_conversions", "target": "hf_pytorch_model", "label": "HF PyTorch model"},
+            {"source": "nemo_conversions", "target": "hf_pytorch_model", "label": "HF PyTorch model"},
+            {"source": "processor_conversions", "target": "hf_pytorch_model", "label": "HF processor/tokenizer"}
+        ],
+        "groups": [
+            {"id": "input_checkpoints", "label": "Source Checkpoints", "title": "Input Checkpoints", "description": "Various model checkpoints from different frameworks that serve as input for conversion.", "role": "surface", "nodes": ["original_tf_checkpoints", "original_pytorch_checkpoints", "flax_checkpoints", "nemo_checkpoints"]},
+            {"id": "conversion_logic", "label": "Conversion Logic", "title": "Conversion Logic", "description": "The core functionalities responsible for translating model architectures and weights between different frameworks.", "role": "analytical", "nodes": ["pytorch_conversions", "tf_conversions", "flax_conversions", "nemo_conversions", "processor_conversions"]},
+            {"id": "output_models", "label": "Hugging Face Outputs", "title": "Hugging Face Outputs", "description": "The resulting Hugging Face PyTorch models and related components after successful conversion.", "role": "data", "nodes": ["hf_pytorch_model"]}
+        ]
+    }
+}

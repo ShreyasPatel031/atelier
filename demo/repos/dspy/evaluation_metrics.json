@@ -1,156 +1,349 @@
 {
-  "title": "Evaluation Metrics Module",
-  "summary": "This module provides a collection of metrics for evaluating language model responses, including both LLM-based auto-evaluation techniques for semantic understanding and traditional string/token-based comparison methods.",
+  "title": "Evaluation Metrics and Auto-Evaluation",
+  "summary": "This module provides a suite of metrics for evaluating DSPy programs, including LLM-based auto-evaluation for semantic F1, answer completeness, and groundedness, alongside traditional metrics like exact match, token-level precision, and F1 scores.",
   "diagram": {
     "direction": "TD",
     "nodes": [
       {
-        "id": "SemanticF1",
+        "id": "node_semantic_f1",
         "label": "Calculate Semantic F1 Score",
         "type": "component",
         "link": null,
-        "title": "Semantic F1 Score",
-        "description": "Computes the semantic F1 score between a prediction and ground truth using LLM-based precision and recall. It can operate in a standard or decompositional mode."
+        "title": "SemanticF1",
+        "description": "Computes semantic F1 between a prediction and ground truth using LLM-based precision and recall."
       },
       {
-        "id": "CompleteAndGrounded",
-        "label": "Evaluate Completeness & Groundedness",
+        "id": "node_complete_grounded",
+        "label": "Assess Answer Completeness & Groundedness",
         "type": "component",
         "link": null,
-        "title": "Completeness & Groundedness Metric",
-        "description": "Combines individual scores for answer completeness and groundedness into a single metric, leveraging LLM-based modules for each assessment."
+        "title": "CompleteAndGrounded",
+        "description": "Combines scores for answer completeness and groundedness into a single metric, leveraging LLMs."
       },
       {
-        "id": "SemanticRecallPrecision",
-        "label": "Define Semantic Recall & Precision",
+        "id": "node_sem_recall_prec_sig",
+        "label": "Define Semantic Recall/Precision",
         "type": "component",
         "link": null,
-        "title": "Semantic Recall/Precision Signature",
-        "description": "A DSPy Signature that defines the inputs and outputs for an LLM to compute semantic recall and precision between a system response and ground truth."
+        "title": "SemanticRecallPrecision",
+        "description": "Signature for an LLM to compare a system's response to ground truth to compute recall and precision."
       },
       {
-        "id": "DecompositionalSemanticRecallPrecision",
-        "label": "Define Decompositional Semantic Recall & Precision",
+        "id": "node_decomp_sem_recall_prec_sig",
+        "label": "Define Decompositional Semantic Recall/Precision",
         "type": "component",
         "link": null,
-        "title": "Decompositional Semantic Recall/Precision Signature",
-        "description": "A DSPy Signature for LLM-based semantic recall and precision that involves enumerating key ideas from both ground truth and system response before discussing their overlap."
+        "title": "DecompositionalSemanticRecallPrecision",
+        "description": "Signature for an LLM to perform detailed recall/precision by enumerating key ideas and discussing overlap."
       },
       {
-        "id": "AnswerCompleteness",
+        "id": "node_answer_completeness_sig",
         "label": "Define Answer Completeness",
         "type": "component",
         "link": null,
-        "title": "Answer Completeness Signature",
-        "description": "A DSPy Signature for an LLM to estimate the completeness of a system's response against a ground truth, by identifying and comparing key ideas."
+        "title": "AnswerCompleteness",
+        "description": "Signature for an LLM to estimate the completeness of a system's responses against ground truth."
       },
       {
-        "id": "AnswerGroundedness",
+        "id": "node_answer_groundedness_sig",
         "label": "Define Answer Groundedness",
         "type": "component",
         "link": null,
-        "title": "Answer Groundedness Signature",
-        "description": "A DSPy Signature for an LLM to estimate the groundedness of a system's response by evaluating how well its claims are supported by retrieved context."
+        "title": "AnswerGroundedness",
+        "description": "Signature for an LLM to estimate the groundedness of a system's responses against retrieved context."
       },
       {
-        "id": "answer_exact_match",
+        "id": "node_exact_match",
         "label": "Check Exact Answer Match",
         "type": "component",
         "link": null,
-        "title": "Exact Match Metric",
-        "description": "Evaluates if a predicted answer exactly matches or achieves a minimum F1-score threshold against a ground truth answer or a list of possible answers."
+        "title": "answer_exact_match",
+        "description": "Evaluates if a predicted answer exactly matches or F1-threshold matches a reference answer."
       },
       {
-        "id": "passage_has_answers",
-        "label": "Check Passage for Answers",
+        "id": "node_passage_has_answers",
+        "label": "Verify Passage Contains Answers",
         "type": "component",
         "link": null,
-        "title": "Passage Contains Answers Metric",
-        "description": "Determines if a given text passage contains any of the specified reference answers, after applying text normalization."
+        "title": "passage_has_answers",
+        "description": "Checks if a given passage string contains any of the specified answers after normalization."
       },
       {
-        "id": "precision_score",
-        "label": "Calculate Token Precision",
+        "id": "node_precision_score",
+        "label": "Calculate Token-Level Precision",
         "type": "component",
         "link": null,
-        "title": "Token Precision Score",
-        "description": "Computes the token-level precision of a predicted answer against a ground truth answer, after text normalization."
+        "title": "precision_score",
+        "description": "Computes token-level precision of a prediction against a reference after text normalization."
       },
       {
-        "id": "HotPotF1",
+        "id": "node_hotpot_f1",
         "label": "Calculate HotPotQA F1 Score",
         "type": "component",
         "link": null,
-        "title": "HotPotQA F1 Metric",
-        "description": "Calculates the maximum HotPotQA-style F1 score between a prediction and a list of reference answers, with specific handling for 'yes', 'no', and 'noanswer' cases."
+        "title": "HotPotF1",
+        "description": "Computes the maximum HotPotQA-style F1 score, specifically handling 'yes/no/noanswer' cases."
       },
       {
-        "id": "answer_passage_match",
-        "label": "Check Answer-Passage Match",
+        "id": "node_answer_passage_match",
+        "label": "Match Answer to Passage Context",
         "type": "component",
         "link": null,
-        "title": "Answer-Passage Match Metric",
-        "description": "Verifies if any passage within a provided context contains the reference answer(s), after text normalization."
+        "title": "answer_passage_match",
+        "description": "Determines if any passage in the prediction's context contains the reference answer(s)."
+      },
+      {
+        "id": "node_gsm8k_metric",
+        "label": "Evaluate GSM8K Numeric Answer",
+        "type": "component",
+        "link": null,
+        "title": "gsm8k_metric",
+        "description": "Compares parsed integer answers for evaluation on the GSM8K dataset."
+      },
+      {
+        "id": "ext_base_module",
+        "label": "Base Module",
+        "type": "external",
+        "link": "base_modules",
+        "title": "dspy.primitives.base_module.BaseModule",
+        "description": "The foundational class for all DSPy modules, providing core functionality and structure."
+      },
+      {
+        "id": "ext_signature",
+        "label": "Signature Definition",
+        "type": "external",
+        "link": "signatures",
+        "title": "dspy.signatures.signature.SignatureMeta",
+        "description": "Defines the input and output fields for an LLM call, structuring the prompt and response."
+      },
+      {
+        "id": "ext_chain_of_thought",
+        "label": "Chain of Thought Strategy",
+        "type": "external",
+        "link": "prediction_strategies",
+        "title": "dspy.predict.ChainOfThought",
+        "description": "A prediction strategy that encourages the Language Model to generate intermediate reasoning steps."
+      },
+      {
+        "id": "ext_dspy_example",
+        "label": "DSPy Example",
+        "type": "external",
+        "link": null,
+        "title": "dspy.Example",
+        "description": "Represents a single input-output example used for training, development, or evaluation in DSPy."
+      },
+      {
+        "id": "ext_dspy_prediction",
+        "label": "DSPy Prediction",
+        "type": "external",
+        "link": null,
+        "title": "dspy.Prediction",
+        "description": "Represents the output generated by a DSPy program or module for a given input."
       }
     ],
     "edges": [
       {
-        "source": "SemanticF1",
-        "target": "SemanticRecallPrecision",
+        "source": "node_semantic_f1",
+        "target": "ext_base_module",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_semantic_f1",
+        "target": "ext_chain_of_thought",
         "label": "uses",
         "title": null,
         "description": null
       },
       {
-        "source": "SemanticF1",
-        "target": "DecompositionalSemanticRecallPrecision",
-        "label": "uses (optional)",
-        "title": null,
-        "description": null
-      },
-      {
-        "source": "CompleteAndGrounded",
-        "target": "AnswerCompleteness",
+        "source": "node_semantic_f1",
+        "target": "node_sem_recall_prec_sig",
         "label": "uses",
         "title": null,
         "description": null
       },
       {
-        "source": "CompleteAndGrounded",
-        "target": "AnswerGroundedness",
+        "source": "node_semantic_f1",
+        "target": "node_decomp_sem_recall_prec_sig",
         "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_semantic_f1",
+        "target": "ext_dspy_example",
+        "label": "takes input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_semantic_f1",
+        "target": "ext_dspy_prediction",
+        "label": "takes input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_complete_grounded",
+        "target": "ext_base_module",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_complete_grounded",
+        "target": "ext_chain_of_thought",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_complete_grounded",
+        "target": "node_answer_completeness_sig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_complete_grounded",
+        "target": "node_answer_groundedness_sig",
+        "label": "uses",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_complete_grounded",
+        "target": "ext_dspy_example",
+        "label": "takes input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_complete_grounded",
+        "target": "ext_dspy_prediction",
+        "label": "takes input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_sem_recall_prec_sig",
+        "target": "ext_signature",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_decomp_sem_recall_prec_sig",
+        "target": "ext_signature",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_answer_completeness_sig",
+        "target": "ext_signature",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_answer_groundedness_sig",
+        "target": "ext_signature",
+        "label": "inherits from",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_exact_match",
+        "target": "ext_dspy_example",
+        "label": "takes input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_exact_match",
+        "target": "ext_dspy_prediction",
+        "label": "takes input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_answer_passage_match",
+        "target": "ext_dspy_example",
+        "label": "takes input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_answer_passage_match",
+        "target": "ext_dspy_prediction",
+        "label": "takes input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_gsm8k_metric",
+        "target": "ext_dspy_example",
+        "label": "takes input",
+        "title": null,
+        "description": null
+      },
+      {
+        "source": "node_gsm8k_metric",
+        "target": "ext_dspy_prediction",
+        "label": "takes input",
         "title": null,
         "description": null
       }
     ],
     "groups": [
       {
-        "id": "llm_auto_eval",
+        "id": "group_auto_eval",
         "label": "LLM-based Auto-Evaluation",
         "nodes": [
-          "SemanticF1",
-          "CompleteAndGrounded",
-          "SemanticRecallPrecision",
-          "DecompositionalSemanticRecallPrecision",
-          "AnswerCompleteness",
-          "AnswerGroundedness"
+          "node_semantic_f1",
+          "node_complete_grounded"
         ],
         "title": "LLM-based Auto-Evaluation Metrics",
-        "description": "Metrics that leverage Language Models (LLMs) to perform nuanced evaluations of responses, such as semantic similarity, completeness, and groundedness.",
+        "description": "Metrics that leverage Language Models to automatically evaluate program responses based on semantic understanding, completeness, and groundedness.",
         "role": "generative"
       },
       {
-        "id": "traditional_metrics",
-        "label": "Traditional Metrics",
+        "id": "group_auto_eval_signatures",
+        "label": "Auto-Evaluation Signatures",
         "nodes": [
-          "answer_exact_match",
-          "passage_has_answers",
-          "precision_score",
-          "HotPotF1",
-          "answer_passage_match"
+          "node_sem_recall_prec_sig",
+          "node_decomp_sem_recall_prec_sig",
+          "node_answer_completeness_sig",
+          "node_answer_groundedness_sig"
         ],
-        "title": "Traditional String/Token Metrics",
-        "description": "Rule-based or string/token matching metrics for evaluating responses, focusing on exact matches, F1 scores, and passage containment.",
+        "title": "Auto-Evaluation Signatures",
+        "description": "Signatures defining the prompts and expected outputs for LLM-based auto-evaluation tasks.",
+        "role": "generative"
+      },
+      {
+        "id": "group_exact_match_metrics",
+        "label": "Exact Match & Passage Metrics",
+        "nodes": [
+          "node_exact_match",
+          "node_passage_has_answers",
+          "node_answer_passage_match"
+        ],
+        "title": "Exact Match & Passage Metrics",
+        "description": "Metrics focused on direct string or passage content matching for evaluation.",
+        "role": "analytical"
+      },
+      {
+        "id": "group_token_f1_metrics",
+        "label": "Token & F1-based Metrics",
+        "nodes": [
+          "node_precision_score",
+          "node_hotpot_f1",
+          "node_gsm8k_metric"
+        ],
+        "title": "Token & F1-based Metrics",
+        "description": "Metrics that evaluate outputs based on token-level overlap and F1 scores, including specialized F1 variants.",
         "role": "analytical"
       }
     ]
