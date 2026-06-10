@@ -2,12 +2,10 @@
   "mcpServers": {
     "atelier": {
       "type": "stdio",
-      "command": "/bin/bash",
-      "args": ["${workspaceFolder}/scripts/run_codewiki_mcp.sh"],
-      "cwd": "${workspaceFolder}",
+      "command": "node",
+      "args": ["${workspaceFolder}/packages/atelier-mcp/dist/index.js"],
       "env": {
-        "CODEWIKI_MCP_PORT": "18765",
-        "PYTHONWARNINGS": "ignore::FutureWarning"
+        "ATELIER_LOCAL_REPO_ROOT": "${workspaceFolder}/demo/repos"
       }
     }
   }

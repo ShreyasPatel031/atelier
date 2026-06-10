@@ -1,0 +1,9 @@
+{
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "node hooks/open-atelier-viewer.mjs"
+      }
+    ]
+  }
+}

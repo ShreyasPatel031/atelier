@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { applyOperations, type PatchOp } from "../patch.js";
 import { clearFetchCache } from "../fetch.js";
-import { getLocalOrigin } from "../local-server.js";
+import { ensureLocalServer, getLocalOrigin } from "../local-server.js";
 import {
   getModule,
   getOverview,
@@ -122,6 +122,8 @@ export async function patchDiagram(args: {
   const newTitle = meta.title ?? source.title;
   const newDescription = meta.description ?? source.description;
 
+  await ensureLocalServer();
+
   if (isOverview) {
     await saveOverview(repo_id, newTitle, newDescription, diagram);
   } else {
@@ -131,7 +133,7 @@ export async function patchDiagram(args: {
   invalidateRepo(repo_id);
   clearFetchCache();
 
-  const origin = getLocalOrigin() || "http://127.0.0.1:9892";
+  const origin = getLocalOrigin() || `http://127.0.0.1:${await ensureLocalServer()}`;
 
   return {
     content: [
@@ -145,8 +147,8 @@ export async function patchDiagram(args: {
             ...result,
             title: newTitle,
             description: newDescription,
-            viewer_url: `${origin}/?repo=${repo_id}`,
-            hint: "Viewer will hot-reload via viewer_epoch.json",
+            viewer_url: `${origin}/#${repo_id}`,
+            hint: "Viewer will hot-reload via SSE (GET /repos/{id}/viewer-events) or viewer_epoch.json fallback",
           },
           null,
           2

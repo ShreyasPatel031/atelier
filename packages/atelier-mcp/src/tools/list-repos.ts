@@ -47,7 +47,7 @@ export async function listRepos(): Promise<{
                 id: r.id,
                 label: r.label,
                 description: r.description || "",
-                viewer_url: `${origin}/?repo=${r.id}`,
+                viewer_url: `${origin}/#${r.id}`,
               })),
           },
           null,

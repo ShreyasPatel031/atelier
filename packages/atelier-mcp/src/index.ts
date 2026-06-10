@@ -8,11 +8,11 @@ import { listRepos, listReposSchema } from "./tools/list-repos.js";
 import { getDiagram, getDiagramSchema } from "./tools/get-diagram.js";
 import { patchDiagram, patchDiagramSchema } from "./tools/patch-diagram.js";
 import { writeModuleDocTool, writeModuleDocSchema } from "./tools/write-module-doc.js";
-import { openViewer } from "./local-server.js";
+import { openViewer, bootAtelierStack, getViewerOrigin } from "./local-server.js";
 
 const server = new McpServer({
   name: "atelier",
-  version: "0.6.0",
+  version: "0.7.2",
 });
 
 server.tool(
@@ -39,10 +39,12 @@ server.registerTool(
   "open_viewer",
   {
     description: [
-      "Start local viewer server for a repo diagram.",
-      "Returns a localhost URL. After this call: browser_navigate(url). When done, reply with that URL on its own last line.",
-      "Never use shell open or open -a Cursor.",
-    ].join("\n"),
+      "Open the interactive architecture diagram viewer for a repository.",
+      "IMPORTANT: After this tool returns, you MUST immediately call",
+      "browser_navigate(url=<returned url>) on server cursor-ide-browser",
+      "to open the viewer in Cursor. Do not skip this step.",
+      "The viewer URL is the last line of your reply.",
+    ].join(" "),
     inputSchema: {
       repo_id: z.string().describe("Repository id — any repo on hosted site or under ATELIER_LOCAL_REPO_ROOT"),
       refresh: z
@@ -57,12 +59,16 @@ server.registerTool(
       content: [
         {
           type: "text" as const,
-          text: JSON.stringify({
-            url: result.url,
-            port: result.port,
-            source: result.source,
-            hint: "browser_navigate " + result.url + " — when done, put " + result.url + " on its own last line.",
-          }),
+          text: [
+            `Viewer ready at ${result.url}`,
+            ``,
+            `ACTION REQUIRED: Call browser_navigate now:`,
+            `  server: cursor-ide-browser`,
+            `  tool:   browser_navigate`,
+            `  args:   {"url": "${result.url}", "position": "active", "newTab": true}`,
+            ``,
+            `Then reply with ${result.url} as the last line.`,
+          ].join("\n"),
         },
       ],
     };
@@ -90,8 +96,19 @@ server.tool(
 );
 
 async function main() {
+  // Connect transport FIRST so tools are available immediately.
   const transport = new StdioServerTransport();
   await server.connect(transport);
+
+  // Boot daemons in the background — never block the agent.
+  bootAtelierStack()
+    .then(async (stack) => {
+      const origin = (await getViewerOrigin()) || `http://127.0.0.1:${stack.viewerPort}`;
+      console.error(`[atelier-mcp] stack ready demo=${stack.demoPort} viewer=${origin}/`);
+    })
+    .catch((err) => {
+      console.error("[atelier-mcp] stack boot failed:", err);
+    });
 }
 
 main().catch((err) => {

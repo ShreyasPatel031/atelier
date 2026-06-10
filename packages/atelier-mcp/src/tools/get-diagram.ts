@@ -117,7 +117,7 @@ async function getOverview(
         title: overview.title,
         description: overview.summary,
         diagram: overview.diagram,
-        viewer_url: `${getDataOrigin()}/?repo=${repoId}`,
+        viewer_url: `${getDataOrigin()}/#${repoId}`,
       },
       null,
       2
@@ -152,7 +152,7 @@ async function getInventory(
           groups: ov.groups.length,
         },
         modules: countModules(tree),
-        viewer_url: `${getDataOrigin()}/?repo=${repoId}`,
+        viewer_url: `${getDataOrigin()}/#${repoId}`,
       },
       null,
       2
@@ -178,7 +178,7 @@ async function getModule(
         title: doc.title,
         description: doc.summary || "",
         diagram: doc.diagram || null,
-        viewer_url: `${getDataOrigin()}/?repo=${repoId}`,
+        viewer_url: `${getDataOrigin()}/#${repoId}`,
       },
       null,
       2

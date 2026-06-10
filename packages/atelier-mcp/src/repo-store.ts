@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import type { DiagramIR, ModuleDoc, OverviewDoc } from "./diagram-types.js";
 import { emptyDiagram } from "./diagram-types.js";
 import { repoDir, getLocalRepoRoot } from "./paths.js";
+import { notifyRepoReload } from "./repo-events.js";
 
 interface OverviewState {
   doc: OverviewDoc;
@@ -39,10 +40,42 @@ async function writeJson(path: string, data: unknown): Promise<void> {
   await writeFile(path, JSON.stringify(data, null, 4) + "\n", "utf-8");
 }
 
-export async function bumpViewerEpoch(repoId: string): Promise<void> {
+async function nextViewerEpochMs(repoId: string): Promise<number> {
   const path = join(repoDir(repoId), "viewer_epoch.json");
+  let next = Date.now();
+  try {
+    const raw = await readFile(path, "utf-8");
+    const parsed = JSON.parse(raw) as { epoch?: unknown };
+    if (typeof parsed.epoch === "number" && parsed.epoch >= next) {
+      next = parsed.epoch + 1;
+    }
+  } catch {
+    /* first bump */
+  }
+  return next;
+}
+
+async function writeViewerEpoch(repoId: string, epoch: number): Promise<void> {
+  const payload = JSON.stringify({ epoch }) + "\n";
+  const cachePath = join(repoDir(repoId), "viewer_epoch.json");
   await mkdir(repoDir(repoId), { recursive: true });
-  await writeFile(path, JSON.stringify({ epoch: Date.now() }) + "\n", "utf-8");
+  await writeFile(cachePath, payload, "utf-8");
+
+  const localRoot = getLocalRepoRoot();
+  if (!localRoot) return;
+  const localPath = join(localRoot, repoId, "viewer_epoch.json");
+  try {
+    await mkdir(dirname(localPath), { recursive: true });
+    await writeFile(localPath, payload, "utf-8");
+  } catch {
+    /* local mirror optional */
+  }
+}
+
+export async function bumpViewerEpoch(repoId: string): Promise<void> {
+  const epoch = await nextViewerEpochMs(repoId);
+  await writeViewerEpoch(repoId, epoch);
+  notifyRepoReload(repoId, epoch);
 }
 
 export function invalidateRepo(repoId: string): void {
@@ -117,6 +150,7 @@ export async function saveOverview(
   state.overview.doc.summary = description;
   state.overview.doc.diagram = diagram;
   await writeJson(join(repoDir(repoId), "overview.json"), state.overview.doc);
+  await mirrorToLocalRepo(repoId, "overview.json", state.overview.doc);
   await bumpViewerEpoch(repoId);
 }
 

@@ -1,0 +1,19 @@
+{
+  "name": "atelier-plugins",
+  "owner": {
+    "name": "Atelier Inc",
+    "email": "support@atelier-inc.net"
+  },
+  "metadata": {
+    "description": "Cursor marketplace plugins from Atelier — architecture diagrams and code visualization",
+    "version": "0.7.0",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "atelier",
+      "source": "./plugins/atelier",
+      "description": "Browse, query, and live-edit architecture diagrams for any repository"
+    }
+  ]
+}

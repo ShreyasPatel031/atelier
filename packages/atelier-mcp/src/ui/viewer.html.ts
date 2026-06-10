@@ -55,7 +55,7 @@ export const VIEWER_UI_HTML = `<!DOCTYPE html>
       if (msg.method === "ui/notifications/tool-input") {
         const repoId = msg.params && msg.params.repo_id;
         if (typeof repoId === "string") {
-          showUrl("http://127.0.0.1:9891/?repo=" + encodeURIComponent(repoId));
+          showUrl("http://127.0.0.1:9891/#" + encodeURIComponent(repoId));
         }
       }
     });

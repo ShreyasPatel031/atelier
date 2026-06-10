@@ -18,6 +18,7 @@ import {
     MarkerType,
     useStore,
     useReactFlow,
+    getViewportForBounds,
 } from 'https://esm.sh/@xyflow/react@12.4.2?deps=react@18.3.1,react-dom@18.3.1';
 import { timer } from 'https://esm.sh/d3-timer@3';
 
@@ -1567,6 +1568,166 @@ function rfCubicInOut(t) {
 
 var RF_LAYOUT_ANIM_MS = 350;
 var RF_LAYOUT_EXIT_MS = 200;
+var RF_FITVIEW_PADDING_RATIO = 0.16;
+var RF_FITVIEW_EDGE_PAD_PX = 48;
+
+function rfPaneDimensions() {
+    var root = document.getElementById('reactflowRoot');
+    var paneEl = root ? root.querySelector('.react-flow') : null;
+    if (!paneEl) return null;
+    var w = paneEl.clientWidth;
+    var h = paneEl.clientHeight;
+    if (!(w > 0 && h > 0)) {
+        var rect = paneEl.getBoundingClientRect();
+        w = rect.width;
+        h = rect.height;
+    }
+    if (!(w > 0 && h > 0)) return null;
+    return { width: w, height: h };
+}
+
+function rfWaitForPaneLayout() {
+    return new Promise(function (resolve) {
+        requestAnimationFrame(function () {
+            requestAnimationFrame(resolve);
+        });
+    });
+}
+
+/** Bounds for fitView: node boxes plus ELK orthogonal edge route points (labels/arrows). */
+function rfAbsoluteNodeBounds(nodes) {
+    var list = Array.isArray(nodes) ? nodes : [];
+    if (!list.length) return null;
+    var byId = new Map();
+    for (var i = 0; i < list.length; i++) {
+        byId.set(String(list[i].id), list[i]);
+    }
+    function absPos(n) {
+        var x = n.position.x;
+        var y = n.position.y;
+        var cur = n.parentId ? String(n.parentId) : null;
+        while (cur) {
+            var p = byId.get(cur);
+            if (!p) break;
+            x += p.position.x;
+            y += p.position.y;
+            cur = p.parentId ? String(p.parentId) : null;
+        }
+        return { x: x, y: y };
+    }
+    var minX = Infinity;
+    var minY = Infinity;
+    var maxX = -Infinity;
+    var maxY = -Infinity;
+    for (var j = 0; j < list.length; j++) {
+        var nd = list[j];
+        var ap = absPos(nd);
+        var w = nd.width || 0;
+        var h = nd.height || 0;
+        minX = Math.min(minX, ap.x);
+        minY = Math.min(minY, ap.y);
+        maxX = Math.max(maxX, ap.x + w);
+        maxY = Math.max(maxY, ap.y + h);
+    }
+    if (!Number.isFinite(minX)) return null;
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
+
+function rfComputeBoundsFromLayout(nodes, edges) {
+    var api = window.__atelierR6ViewportApi;
+    var nodeBounds =
+        api && typeof api.getNodesBounds === 'function' && nodes === api.getNodes()
+            ? api.getNodesBounds(nodes)
+            : rfAbsoluteNodeBounds(nodes);
+    if (!nodeBounds || nodeBounds.width <= 0 || nodeBounds.height <= 0) return null;
+    var minX = nodeBounds.x;
+    var minY = nodeBounds.y;
+    var maxX = nodeBounds.x + nodeBounds.width;
+    var maxY = nodeBounds.y + nodeBounds.height;
+    var pad = RF_FITVIEW_EDGE_PAD_PX;
+    if (Array.isArray(edges)) {
+        for (var i = 0; i < edges.length; i++) {
+            var pts = edges[i] && edges[i].data && edges[i].data.routePoints;
+            if (!Array.isArray(pts)) continue;
+            for (var j = 0; j < pts.length; j++) {
+                var x = Number(pts[j].x);
+                var y = Number(pts[j].y);
+                if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x);
+                maxY = Math.max(maxY, y);
+            }
+        }
+    }
+    return {
+        x: minX - pad,
+        y: minY - pad,
+        width: maxX - minX + pad * 2,
+        height: maxY - minY + pad * 2,
+    };
+}
+
+function rfViewportForLayout(nodes, edges) {
+    var dims = rfPaneDimensions();
+    if (!dims) return null;
+    var bounds = rfComputeBoundsFromLayout(nodes, edges);
+    if (!bounds) return null;
+    /** xyflow 12.4: numeric padding is a legacy ratio (not px) — use RF_FITVIEW_PADDING_RATIO. */
+    return getViewportForBounds(
+        bounds,
+        dims.width,
+        dims.height,
+        0.08,
+        1.15,
+        RF_FITVIEW_PADDING_RATIO
+    );
+}
+
+/** Smooth center/zoom — one 350ms tween, includes edge routes in bounds. */
+window.atelierRfFitViewCenterImpl = async function atelierRfFitViewCenterImpl() {
+    var api = window.__atelierR6ViewportApi;
+    if (!api || typeof api.getViewport !== 'function' || typeof api.setViewport !== 'function') {
+        return;
+    }
+    await rfWaitForPaneLayout();
+    for (var i = 0; i < 80; i++) {
+        var nodes = typeof api.getNodes === 'function' ? api.getNodes() : [];
+        var edges = typeof api.getEdges === 'function' ? api.getEdges() : [];
+        var sized = nodes.filter(function (n) {
+            return n.width && n.height;
+        });
+        if (nodes.length && sized.length < nodes.length) {
+            await new Promise(function (r) {
+                setTimeout(r, 40);
+            });
+            continue;
+        }
+        var target = rfViewportForLayout(nodes, edges);
+        if (!target) return;
+        var current = api.getViewport();
+        if (
+            current &&
+            Math.abs(current.x - target.x) < 2 &&
+            Math.abs(current.y - target.y) < 2 &&
+            Math.abs(current.zoom - target.zoom) < 0.02
+        ) {
+            return;
+        }
+        try {
+            var r = api.setViewport(target, { duration: RF_LAYOUT_ANIM_MS });
+            if (r && typeof r.then === 'function') await r;
+            else {
+                await new Promise(function (res) {
+                    setTimeout(res, RF_LAYOUT_ANIM_MS + 40);
+                });
+            }
+        } catch (_) {
+            /* ignore */
+        }
+        return;
+    }
+};
 
 /** Ensure edges are fully visible after layout tween (avoids stuck style.opacity from fade-in). */
 function rfFinalizeLayoutEdges(edges) {
@@ -2089,6 +2250,11 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
     /** Collapse: show new edge routes immediately so cross-group links stay visible. */
     var isCollapseTransition = enteringIsCollapse.size > 0;
 
+    var shouldFitViewport = !!window.__atelierRfShouldFitView;
+    var vpStart = null;
+    var vpTarget = null;
+    var vpApi = window.__atelierR6ViewportApi;
+
     rfLayoutAnimPendingFinal = {
         targetNodes: targetNodes,
         targetEdges: targetEdges,
@@ -2096,7 +2262,19 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
         epoch: epoch,
     };
 
-    rfLayoutAnimTimer = timer(function (elapsed) {
+    function startLayoutAnimTimer() {
+        if (
+            shouldFitViewport &&
+            vpApi &&
+            typeof vpApi.getViewport === 'function' &&
+            typeof vpApi.setViewport === 'function' &&
+            !vpTarget
+        ) {
+            vpStart = vpApi.getViewport();
+            vpTarget = rfViewportForLayout(targetNodes, targetEdges);
+        }
+
+        rfLayoutAnimTimer = timer(function (elapsed) {
         function staleAnim() {
             return epoch != null && epoch !== window.__atelierRfLayoutEpoch;
         }
@@ -2114,6 +2292,21 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
         var tPos = Math.min(1, elapsed / duration);
         var easedPos = rfCubicInOut(tPos);
         var exitAlpha = elapsed >= exitMs ? 0 : 1 - elapsed / exitMs;
+
+        if (vpStart && vpTarget && vpApi) {
+            try {
+                vpApi.setViewport(
+                    {
+                        x: vpStart.x + (vpTarget.x - vpStart.x) * easedPos,
+                        y: vpStart.y + (vpTarget.y - vpStart.y) * easedPos,
+                        zoom: vpStart.zoom + (vpTarget.zoom - vpStart.zoom) * easedPos,
+                    },
+                    { duration: 0 }
+                );
+            } catch (_) {
+                /* ignore */
+            }
+        }
 
         /** Target nodes first — preserves ELK parent-before-child order for xyflow. */
         var frameNodes = [];
@@ -2260,6 +2453,15 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
             });
         }
     });
+    }
+
+    if (shouldFitViewport && vpApi) {
+        void rfWaitForPaneLayout().then(function () {
+            startLayoutAnimTimer();
+        });
+    } else {
+        startLayoutAnimTimer();
+    }
 
     return rfLayoutAnimTimer;
 };
@@ -2501,8 +2703,7 @@ function Inner(props) {
             onSelectionChange,
             nodeTypes,
             edgeTypes,
-            fitView: true,
-            fitViewOptions: { padding: 0.15 },
+            fitView: false,
             nodesDraggable: false,
             nodesConnectable: false,
             elementsSelectable: true,
@@ -2646,6 +2847,7 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
             key,
             initialNodes: nodes,
             initialEdges: edges,
+            skipInitialFitView: !!window.__atelierRfShouldFitView,
         })
     );
     queueMicrotask(function () {
@@ -2654,6 +2856,9 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
         }
         if (window.atelierRfDebugLayout && typeof window.atelierRfLogLayoutDebug === 'function') {
             window.atelierRfLogLayoutDebug('rf-mount epoch=' + String(epoch));
+        }
+        if (typeof window.atelierRfFitViewCenterImpl === 'function') {
+            void window.atelierRfFitViewCenterImpl();
         }
     });
 };

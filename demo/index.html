@@ -14,6 +14,7 @@
     <script src="./pipeline-diagram-to-elk.js"></script>
     <!-- CDN: ../node_modules/… breaks when static server roots at demo/ (e.g. :8080/). -->
     <script src="https://cdn.jsdelivr.net/npm/elkjs@0.9.3/lib/elk.bundled.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js" crossorigin="anonymous"></script>
     <script src="./pipeline-elk-svg.js"></script>
     <script src="./pipeline-elk-reactflow.js"></script>
     <style>
@@ -1040,22 +1041,51 @@
             box-shadow: 0 16px 48px rgba(15, 23, 42, 0.2);
             overflow: hidden;
             pointer-events: auto;
-            transition: height 0.2s ease, max-height 0.2s ease, box-shadow 0.2s ease;
-        }
-        .atelier-chat-card.is-expanded {
-            height: min(560px, calc(100vh - 48px));
-            max-height: min(560px, calc(100vh - 48px));
         }
         .atelier-chat-card.is-minimized {
-            height: auto;
-            max-height: none;
+            width: 48px !important;
+            min-width: 48px !important;
+            max-width: 48px !important;
+            height: 48px !important;
+            max-height: 48px !important;
             box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+            overflow: hidden;
         }
         .atelier-chat-card.is-minimized .chat-section {
             display: none;
         }
         .atelier-chat-card.is-minimized .atelier-chat-card-header {
             border-bottom: none;
+            padding: 0;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            min-height: 48px;
+        }
+        .atelier-chat-card.is-minimized #atelierChatCollapseBtn {
+            display: none;
+        }
+        .atelier-chat-card.is-minimized .atelier-chat-card-btn--chat {
+            width: 48px;
+            height: 48px;
+        }
+        .atelier-chat-card.is-chat-collapsing .atelier-chat-card-btn--chat,
+        .atelier-chat-card.is-chat-animating .atelier-chat-card-btn--chat,
+        .atelier-chat-card.is-chat-open-blocked .atelier-chat-card-btn--chat {
+            pointer-events: none !important;
+        }
+        .atelier-chat-card.is-minimized .atelier-chat-card-header {
+            cursor: pointer;
+        }
+        .atelier-chat-card.is-chat-animating .chat-section {
+            display: flex;
+            overflow: hidden;
+        }
+        .atelier-chat-card.is-chat-animating {
+            pointer-events: none;
+        }
+        .atelier-chat-card.is-chat-animating .atelier-chat-card-btn {
+            pointer-events: auto;
         }
         .atelier-chat-card-header {
             flex-shrink: 0;
@@ -1074,11 +1104,36 @@
             touch-action: none;
         }
         .atelier-chat-card-title {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .atelier-ui-icon-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            color: inherit;
+            pointer-events: none;
+        }
+        .atelier-ui-icon-wrap svg.lucide {
+            display: block;
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+        }
+        .atelier-chat-card-btn--chat {
+            cursor: pointer;
+        }
+        .atelier-chat-card.is-minimized .atelier-chat-card-btn--chat {
+            cursor: pointer;
+        }
+        .atelier-chat-card:not(.is-minimized) .atelier-chat-card-btn--chat {
+            cursor: default;
+            pointer-events: none;
         }
         .atelier-chat-card-header-actions {
             display: flex;
@@ -1114,6 +1169,17 @@
         }
         .atelier-chat-card-header-hint {
             display: none;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
         .chat-section {
             margin-top: 0;
@@ -1449,25 +1515,26 @@
     </div>
 
     <div id="atelierChatCard" class="atelier-chat-card" role="complementary" aria-label="Chat">
-        <div class="atelier-chat-card-header" id="atelierChatCardDrag" title="Drag to move">
-            <span class="atelier-chat-card-title">Chat</span>
-            <div class="atelier-chat-card-header-actions">
-                <button
-                    type="button"
-                    class="atelier-chat-card-btn"
-                    id="atelierChatExpandBtn"
-                    title="Expand chat"
-                    aria-label="Expand chat"
-                    aria-pressed="false"
-                >⤢</button>
-                <button
-                    type="button"
-                    class="atelier-chat-card-btn"
-                    id="atelierChatMinimizeBtn"
-                    title="Minimize chat"
-                    aria-label="Minimize chat"
-                >−</button>
-            </div>
+        <div class="atelier-chat-card-header" id="atelierChatCardDrag" title="Drag to move chat">
+            <button
+                type="button"
+                class="atelier-chat-card-btn atelier-chat-card-btn--chat"
+                id="atelierChatToggleBtn"
+                title="Open chat"
+                aria-label="Open chat"
+                aria-expanded="true"
+            >
+                <span class="atelier-ui-icon-wrap" data-lucide="message-square" aria-hidden="true"></span>
+            </button>
+            <button
+                type="button"
+                class="atelier-chat-card-btn"
+                id="atelierChatCollapseBtn"
+                title="Collapse chat"
+                aria-label="Collapse chat"
+            >
+                <span class="atelier-ui-icon-wrap" data-lucide="minimize-2" aria-hidden="true"></span>
+            </button>
         </div>
         <div class="chat-section">
             <div id="atelierDiagramHelpActivity" class="atelier-diagram-help-activity" aria-live="polite" hidden></div>
@@ -1498,7 +1565,45 @@
         const urlParams = new URLSearchParams(window.location.search);
         const viewerConfig = window.ATELIER_VIEWER_CONFIG || {};
         const defaultRepoPath = viewerConfig.defaultRepo || 'crewai';
-        const repoPath = urlParams.get('repo') || defaultRepoPath;
+
+        /** Parse repo from hash (#dspy), query (?repo=dspy), or malformed (?repo%3Ddspy). */
+        function resolveRepoFromLocation() {
+            // Preferred: hash fragment — immune to Cursor URL encoding bugs
+            var hash = (window.location.hash || '').replace(/^#/, '');
+            if (hash) return decodeURIComponent(hash);
+
+            var repo = urlParams.get('repo');
+            if (repo) return repo;
+
+            var keys = Array.from(urlParams.keys());
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                if (key.indexOf('repo=') === 0) return key.slice(5);
+            }
+
+            var raw = String(window.location.search || '').replace(/^\?/, '');
+            var match = raw.match(/(?:^|&)repo(?:%3D|=)([^&]+)/i);
+            if (match && match[1]) {
+                try {
+                    return decodeURIComponent(match[1]);
+                } catch (_) {
+                    return match[1];
+                }
+            }
+            return null;
+        }
+
+        var repoPath = resolveRepoFromLocation() || defaultRepoPath;
+
+        // Migrate legacy ?repo=X URLs to #X
+        if (window.location.search && repoPath) {
+            try {
+                var fixed = new URL(window.location.href);
+                fixed.search = '';
+                fixed.hash = '#' + repoPath;
+                window.history.replaceState(null, '', fixed.toString());
+            } catch (_) {}
+        }
         function viewerFlag(queryName, configName, defaultValue) {
             if (urlParams.has(queryName)) {
                 const raw = String(urlParams.get(queryName) || '').toLowerCase();
@@ -1519,6 +1624,9 @@
             CHAT_ENABLED = true;
         }
         const REPO_SWITCHER_ENABLED = viewerFlag('repoSwitcher', 'repoSwitcherEnabled', true);
+        const VIEW_TUNE_PANEL_ENABLED = viewerFlag('viewTune', 'viewTunePanelEnabled', false);
+        const viewTunePanelEl = document.getElementById('viewTunePanel');
+        if (viewTunePanelEl) viewTunePanelEl.hidden = !VIEW_TUNE_PANEL_ENABLED;
         window.__atelierChatEnabled = CHAT_ENABLED;
         document.body.classList.toggle('viewer-no-chat', !CHAT_ENABLED);
         const chatCardEl = document.getElementById('atelierChatCard');
@@ -1993,8 +2101,7 @@
                 doc.title.trim() !== '' &&
                 doc.diagram &&
                 typeof doc.diagram === 'object' &&
-                Array.isArray(doc.diagram.nodes) &&
-                doc.diagram.nodes.length > 0
+                Array.isArray(doc.diagram.nodes)
             );
         }
 
@@ -2064,11 +2171,10 @@
                     }
                 }
                 if (missing.length) {
-                    console.error(
-                        '[viewer] invalid or missing module JSON for:',
+                    console.warn(
+                        '[viewer] optional module JSON missing (drill-down disabled for):',
                         missing.join(', ')
                     );
-                    return false;
                 }
                 
                 // Update UI
@@ -2092,6 +2198,8 @@
         /** Written by MCP after each repo mutation; viewer polls and hot-reloads. */
         window.__atelierViewerEpoch = null;
         let __atelierRepoReloadBusy = false;
+        /** Latest epoch seen while a reload is in flight — drained when the current reload finishes. */
+        let __atelierPendingEpoch = null;
 
         /**
          * Sub-millisecond perf instrumentation for the epoch-to-pixels pipeline.
@@ -2188,14 +2296,23 @@
             if (ep != null) window.__atelierViewerEpoch = ep;
         }
 
-        async function applyRepoDataReload(perfCtx) {
-            if (__atelierRepoReloadBusy) return;
+        async function applyRepoDataReload(perfCtx, epochMs) {
+            if (__atelierRepoReloadBusy) {
+                if (typeof epochMs === 'number') {
+                    __atelierPendingEpoch =
+                        __atelierPendingEpoch == null
+                            ? epochMs
+                            : Math.max(__atelierPendingEpoch, epochMs);
+                }
+                return false;
+            }
             __atelierRepoReloadBusy = true;
             const ctx = perfCtx || perfStart('manual_reload');
+            let ok = false;
             try {
-                const ok = await loadAllData();
+                ok = await loadAllData();
                 perfMark(ctx, 'fetch_complete');
-                if (!ok) return;
+                if (!ok) return false;
                 buildModuleData();
                 perfMark(ctx, 'build_complete');
                 try {
@@ -2212,24 +2329,44 @@
                 rfExpansionContextKey = null;
                 rfBaselineDiagramIr = null;
                 rfExpandedNodesOrder = [];
-                reactFlowRequestEpoch++;
                 currentModuleId = 'overview';
                 baseDiagramCode = moduleData['overview']?.diagram || '';
                 currentDiagramCode = baseDiagramCode;
                 openedModules.clear();
                 openedModules.add('overview');
                 updateSelection('overview');
-                await renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+                window.__atelierRfShouldFitView = true;
+                if (activeDiagramTab === 'reactflow') {
+                    await refreshReactFlowView();
+                } else {
+                    await renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+                }
+                window.__atelierRfShouldFitView = false;
                 perfMark(ctx, 'render_complete');
                 updatePipelinePanel();
+                if (typeof epochMs === 'number') {
+                    window.__atelierViewerEpoch = epochMs;
+                }
+                return true;
             } finally {
                 __atelierRepoReloadBusy = false;
                 perfFinish(ctx);
+                if (__atelierPendingEpoch != null) {
+                    const pending = __atelierPendingEpoch;
+                    __atelierPendingEpoch = null;
+                    if (
+                        window.__atelierViewerEpoch == null ||
+                        pending > window.__atelierViewerEpoch
+                    ) {
+                        void applyRepoDataReload(perfStart('epoch_reload'), pending);
+                    }
+                }
             }
         }
 
         function startViewerEpochPolling() {
-            setInterval(function () {
+            if (window.__atelierViewerEpochPoll != null) return;
+            window.__atelierViewerEpochPoll = setInterval(function () {
                 void (async function () {
                     try {
                         const ep = await fetchViewerEpochMs();
@@ -2239,16 +2376,59 @@
                             return;
                         }
                         if (ep > window.__atelierViewerEpoch) {
-                            const ctx = perfStart('epoch_reload');
-                            window.__atelierViewerEpoch = ep;
-                            perfMark(ctx, 'epoch_detected');
-                            await applyRepoDataReload(ctx);
+                            await applyRepoDataReload(perfStart('epoch_reload'), ep);
                         }
                     } catch (err) {
                         /* ignore */
                     }
                 })();
-            }, 1500);
+            }, 1000);
+        }
+
+        /** MCP local server pushes reload on patch_diagram — polling runs in parallel as backup. */
+        function startViewerEpochStream() {
+            startViewerEpochPolling();
+            if (typeof EventSource === 'undefined') return;
+            const streamUrl = `${basePath}/viewer-events`;
+            let es;
+            try {
+                es = new EventSource(streamUrl);
+            } catch (_) {
+                return;
+            }
+            window.__atelierViewerEpochStream = es;
+            es.addEventListener('reload', function (ev) {
+                try {
+                    const payload = JSON.parse(String(ev.data || '{}'));
+                    const ep =
+                        payload && typeof payload.epoch === 'number' ? payload.epoch : null;
+                    if (ep == null) return;
+                    if (window.__atelierViewerEpoch == null) {
+                        window.__atelierViewerEpoch = ep;
+                        return;
+                    }
+                    if (ep > window.__atelierViewerEpoch) {
+                        void applyRepoDataReload(perfStart('epoch_sse'), ep);
+                    }
+                } catch (_) {
+                    /* ignore malformed event */
+                }
+            });
+            es.onopen = function () {
+                if (window.atelierRfDebugLayout) {
+                    console.log('[viewer] SSE connected', streamUrl);
+                }
+            };
+            es.onerror = function () {
+                if (window.__atelierViewerEpochStream === es) {
+                    window.__atelierViewerEpochStream = null;
+                }
+                try {
+                    es.close();
+                } catch (_) {
+                    /* ignore */
+                }
+            };
         }
         
         // ============================================================
@@ -4180,6 +4360,14 @@
             mount.innerHTML = res.svg || '';
         }
 
+        /** Center/zoom diagram to fit after MCP patch reload — implemented in reactflow-r6.mjs. */
+        async function atelierRfFitViewCenter() {
+            if (typeof window.atelierRfFitViewCenterImpl === 'function') {
+                await window.atelierRfFitViewCenterImpl();
+            }
+        }
+        window.atelierRfFitViewCenter = atelierRfFitViewCenter;
+
         /** R6: ELK → @xyflow/react (reactflow-r6.mjs). */
         async function refreshReactFlowView() {
             const root = document.getElementById('reactflowRoot');
@@ -4207,6 +4395,7 @@
                             const built = await window.atelierRfBuildLayoutElementsForEpoch(rid);
                             if (rid !== reactFlowRequestEpoch) return;
                             if (built.ok) {
+                                const shouldFitAfterAnim = !!window.__atelierRfShouldFitView;
                                 await new Promise((resolve) => {
                                     window.atelierRfAnimateLayoutTransition({
                                         oldNodes,
@@ -4215,17 +4404,16 @@
                                         parentDbg: built.parentDbg,
                                         epoch: rid,
                                         onComplete() {
-                                            /**
-                                             * Don't call fitView here: it animates the viewport
-                                             * (default 300ms) and overlaps any subsequent expand/
-                                             * collapse animation, causing the morphing node to
-                                             * appear to drift on screen even though its graph
-                                             * position is locked. User keeps current pan/zoom.
-                                             */
                                             resolve();
                                         },
                                     });
                                 });
+                                if (
+                                    shouldFitAfterAnim &&
+                                    typeof window.atelierRfFitViewCenterImpl === 'function'
+                                ) {
+                                    await window.atelierRfFitViewCenterImpl();
+                                }
                                 return;
                             }
                             if (built.error === 'stale') return;
@@ -6640,14 +6828,16 @@
                     { passive: false }
                 );
             }
-            if (tunePanel) {
+            if (tunePanel && VIEW_TUNE_PANEL_ENABLED) {
                 tunePanel.addEventListener('touchstart', function (ev) { ev.stopPropagation(); }, { passive: true });
                 tunePanel.addEventListener('touchmove', function (ev) { ev.stopPropagation(); }, { passive: true });
             }
-            console.info(
-                '[viewTune] Panel bottom-left on diagram. viewTune.elkLeafNodeWidth → refreshElkDerivedDiagramViews(); RF labels: groupLabelFontPx, groupLabelOutsideZoomAt',
-                viewTune
-            );
+            if (VIEW_TUNE_PANEL_ENABLED) {
+                console.info(
+                    '[viewTune] Panel bottom-left on diagram. viewTune.elkLeafNodeWidth → refreshElkDerivedDiagramViews(); RF labels: groupLabelFontPx, groupLabelOutsideZoomAt',
+                    viewTune
+                );
+            }
             dispatchAtelierViewTune();
             window.syncViewTuneUI = function () {
                 viewTune.panWheelMult = Math.max(0.25, Math.min(3, Number(viewTune.panWheelMult) || 2));
@@ -6778,19 +6968,59 @@
         }
         
         const CHAT_CARD_POS_KEY = 'atelier_chat_card_pos_v1';
-        const CHAT_CARD_STATE_KEY = 'atelier_chat_card_state_v1';
+        const CHAT_CARD_STATE_KEY = 'atelier_chat_card_state_v2';
+        const CHAT_ANIM_MS = 350;
+        const CHAT_DOCK_INSET_PX = 16;
+        const CHAT_MINIMIZED_SIZE_PX = 48;
+        let chatAnimToken = 0;
+        let chatOpenBlockedUntil = 0;
+        let chatTogglePointerId = null;
+        let chatCollapsePointerId = null;
+        let chatOpenBlockTimer = null;
+        let chatLucideReady = false;
+
+        function chatBlockOpen(card, ms) {
+            chatOpenBlockedUntil = Math.max(chatOpenBlockedUntil, performance.now() + ms);
+            if (!card) return;
+            card.classList.add('is-chat-open-blocked');
+            if (chatOpenBlockTimer) clearTimeout(chatOpenBlockTimer);
+            const wait = Math.max(0, chatOpenBlockedUntil - performance.now() + 16);
+            chatOpenBlockTimer = setTimeout(function () {
+                chatOpenBlockTimer = null;
+                if (performance.now() >= chatOpenBlockedUntil) {
+                    card.classList.remove('is-chat-open-blocked');
+                }
+            }, wait);
+        }
+
+        function chatCanOpen() {
+            return performance.now() >= chatOpenBlockedUntil;
+        }
+
+        function refreshChatLucideIcons() {
+            if (chatLucideReady) return;
+            if (typeof lucide === 'undefined' || typeof lucide.createIcons !== 'function') return;
+            const root = document.getElementById('atelierChatCard');
+            if (!root) return;
+            lucide.createIcons({
+                root,
+                attrs: {
+                    width: 18,
+                    height: 18,
+                    'stroke-width': 2,
+                },
+            });
+            chatLucideReady = true;
+        }
 
         function loadChatCardState() {
             try {
                 const raw = localStorage.getItem(CHAT_CARD_STATE_KEY);
-                if (!raw) return { minimized: false, expanded: false };
+                if (!raw) return { minimized: false };
                 const p = JSON.parse(raw);
-                return {
-                    minimized: !!p.minimized,
-                    expanded: !!p.expanded && !p.minimized,
-                };
+                return { minimized: !!p.minimized };
             } catch (_) {
-                return { minimized: false, expanded: false };
+                return { minimized: false };
             }
         }
 
@@ -6798,50 +7028,206 @@
             try {
                 localStorage.setItem(
                     CHAT_CARD_STATE_KEY,
-                    JSON.stringify({
-                        minimized: !!state.minimized,
-                        expanded: !!state.expanded,
-                    })
+                    JSON.stringify({ minimized: !!state.minimized })
                 );
             } catch (_) {
                 /* ignore */
             }
         }
 
-        function applyChatCardState(card, state) {
+        function chatOpenDimensions() {
+            const maxH = Math.min(420, Math.max(240, window.innerHeight - 72));
+            const height = Math.min(360, maxH);
+            const width = Math.min(380, Math.max(280, window.innerWidth - 32));
+            return { width, height, maxHeight: maxH };
+        }
+
+        function chatDockRect(width, height) {
+            return {
+                left: window.innerWidth - CHAT_DOCK_INSET_PX - width,
+                top: window.innerHeight - CHAT_DOCK_INSET_PX - height,
+                width,
+                height,
+            };
+        }
+
+        function chatDockBottomRight(card) {
+            card.style.right = CHAT_DOCK_INSET_PX + 'px';
+            card.style.bottom = CHAT_DOCK_INSET_PX + 'px';
+            card.style.left = 'auto';
+            card.style.top = 'auto';
+        }
+
+        function chatClearInlineBox(card) {
+            card.style.removeProperty('width');
+            card.style.removeProperty('height');
+            card.style.removeProperty('left');
+            card.style.removeProperty('top');
+        }
+
+        function applyChatCardState(card, state, opts) {
             if (!card) return;
+            const skipSectionOpacity = opts && opts.skipSectionOpacity;
             card.classList.toggle('is-minimized', !!state.minimized);
-            card.classList.toggle('is-expanded', !!state.expanded && !state.minimized);
-            const expandBtn = document.getElementById('atelierChatExpandBtn');
-            const minBtn = document.getElementById('atelierChatMinimizeBtn');
-            if (expandBtn) {
-                expandBtn.hidden = !!state.minimized;
-                expandBtn.setAttribute('aria-pressed', state.expanded ? 'true' : 'false');
-                expandBtn.title = state.expanded ? 'Default size' : 'Expand chat';
-                expandBtn.setAttribute(
-                    'aria-label',
-                    state.expanded ? 'Default chat size' : 'Expand chat'
-                );
-                expandBtn.textContent = state.expanded ? '⤡' : '⤢';
+            const toggleBtn = document.getElementById('atelierChatToggleBtn');
+            const collapseBtn = document.getElementById('atelierChatCollapseBtn');
+            const section = card.querySelector('.chat-section');
+            if (state.minimized) {
+                chatDockBottomRight(card);
+                card.style.width = CHAT_MINIMIZED_SIZE_PX + 'px';
+                card.style.height = CHAT_MINIMIZED_SIZE_PX + 'px';
+                card.style.maxHeight = CHAT_MINIMIZED_SIZE_PX + 'px';
+                card.style.left = 'auto';
+                card.style.top = 'auto';
+            } else {
+                const dims = chatOpenDimensions();
+                chatDockBottomRight(card);
+                card.style.width = '';
+                card.style.height = dims.height + 'px';
+                card.style.maxHeight = dims.maxHeight + 'px';
             }
-            if (minBtn) {
-                minBtn.textContent = state.minimized ? '+' : '−';
-                minBtn.title = state.minimized ? 'Restore chat' : 'Minimize chat';
-                minBtn.setAttribute(
-                    'aria-label',
-                    state.minimized ? 'Restore chat' : 'Minimize chat'
-                );
+            if (toggleBtn) {
+                toggleBtn.title = state.minimized ? 'Open chat' : 'Chat';
+                toggleBtn.setAttribute('aria-label', state.minimized ? 'Open chat' : 'Chat');
+                toggleBtn.setAttribute('aria-expanded', state.minimized ? 'false' : 'true');
             }
+            if (collapseBtn) {
+                collapseBtn.hidden = !!state.minimized;
+            }
+            if (section && !skipSectionOpacity) {
+                section.style.opacity = '';
+            }
+        }
+
+        /** Same cubic ease-in-out as React Flow layout tween (reactflow-r6.mjs). */
+        function chatCubicInOut(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function runChatTween(card, section, from, to, onDone) {
+            const token = ++chatAnimToken;
+            card.classList.add('is-chat-animating');
+            const start = performance.now();
+            function frame(now) {
+                if (token !== chatAnimToken) return;
+                const t = Math.min(1, (now - start) / CHAT_ANIM_MS);
+                const e = chatCubicInOut(t);
+                card.style.left = from.left + (to.left - from.left) * e + 'px';
+                card.style.top = from.top + (to.top - from.top) * e + 'px';
+                card.style.right = 'auto';
+                card.style.bottom = 'auto';
+                card.style.width = from.width + (to.width - from.width) * e + 'px';
+                card.style.height = from.height + (to.height - from.height) * e + 'px';
+                if (section) {
+                    section.style.opacity = String(from.opacity + (to.opacity - from.opacity) * e);
+                }
+                if (t >= 1) {
+                    card.classList.remove('is-chat-animating');
+                    onDone();
+                } else {
+                    requestAnimationFrame(frame);
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        function animateChatCollapse(card, chatCardState, onDone) {
+            if (chatCardState.minimized || card.classList.contains('is-chat-animating')) return;
+            chatBlockOpen(card, CHAT_ANIM_MS + 800);
+            chatTogglePointerId = null;
+            chatCollapsePointerId = null;
+            card.classList.add('is-chat-collapsing');
+            const section = card.querySelector('.chat-section');
+            const fromRect = card.getBoundingClientRect();
+            const toRect = chatDockRect(CHAT_MINIMIZED_SIZE_PX, CHAT_MINIMIZED_SIZE_PX);
+            runChatTween(
+                card,
+                section,
+                {
+                    left: fromRect.left,
+                    top: fromRect.top,
+                    width: fromRect.width,
+                    height: fromRect.height,
+                    opacity: 1,
+                },
+                {
+                    left: toRect.left,
+                    top: toRect.top,
+                    width: toRect.width,
+                    height: toRect.height,
+                    opacity: 0,
+                },
+                function () {
+                    chatCardState.minimized = true;
+                    saveChatCardState(chatCardState);
+                    try {
+                        localStorage.removeItem(CHAT_CARD_POS_KEY);
+                    } catch (_) {
+                        /* ignore */
+                    }
+                    applyChatCardState(card, chatCardState);
+                    card.classList.remove('is-chat-collapsing');
+                    chatBlockOpen(card, 600);
+                    if (typeof onDone === 'function') onDone();
+                }
+            );
+        }
+
+        function animateChatOpen(card, chatCardState, onDone) {
+            if (!chatCardState.minimized || card.classList.contains('is-chat-animating')) return;
+            if (!chatCanOpen() || card.classList.contains('is-chat-open-blocked')) return;
+            const section = card.querySelector('.chat-section');
+            chatCardState.minimized = false;
+            card.classList.remove('is-minimized');
+            const collapseBtn = document.getElementById('atelierChatCollapseBtn');
+            if (collapseBtn) collapseBtn.hidden = false;
+            if (section) {
+                section.style.display = 'flex';
+                section.style.opacity = '0';
+            }
+            const dims = chatOpenDimensions();
+            const fromRect = chatDockRect(CHAT_MINIMIZED_SIZE_PX, CHAT_MINIMIZED_SIZE_PX);
+            const toRect = chatDockRect(dims.width, dims.height);
+            card.style.left = fromRect.left + 'px';
+            card.style.top = fromRect.top + 'px';
+            card.style.right = 'auto';
+            card.style.bottom = 'auto';
+            card.style.width = CHAT_MINIMIZED_SIZE_PX + 'px';
+            card.style.height = CHAT_MINIMIZED_SIZE_PX + 'px';
+            runChatTween(
+                card,
+                section,
+                {
+                    left: fromRect.left,
+                    top: fromRect.top,
+                    width: CHAT_MINIMIZED_SIZE_PX,
+                    height: CHAT_MINIMIZED_SIZE_PX,
+                    opacity: 0,
+                },
+                {
+                    left: toRect.left,
+                    top: toRect.top,
+                    width: toRect.width,
+                    height: toRect.height,
+                    opacity: 1,
+                },
+                function () {
+                    saveChatCardState(chatCardState);
+                    applyChatCardState(card, chatCardState);
+                    if (typeof onDone === 'function') onDone();
+                }
+            );
         }
 
         function initChatCardDrag() {
             const card = document.getElementById('atelierChatCard');
             const handle = document.getElementById('atelierChatCardDrag');
-            const expandBtn = document.getElementById('atelierChatExpandBtn');
-            const minBtn = document.getElementById('atelierChatMinimizeBtn');
+            const toggleBtn = document.getElementById('atelierChatToggleBtn');
+            const collapseBtn = document.getElementById('atelierChatCollapseBtn');
             if (!card || !handle || !CHAT_ENABLED) return;
 
             let chatCardState = loadChatCardState();
+            refreshChatLucideIcons();
             applyChatCardState(card, chatCardState);
 
             function clampPos(left, top) {
@@ -6857,6 +7243,7 @@
             }
 
             function applySavedPos() {
+                if (chatCardState.minimized) return;
                 try {
                     const raw = localStorage.getItem(CHAT_CARD_POS_KEY);
                     if (!raw) return;
@@ -6898,35 +7285,89 @@
                 }
             }
 
-            if (expandBtn) {
-                expandBtn.addEventListener('click', function (e) {
+            function swallowBlockedChatOpen(e) {
+                if (!chatCardState.minimized || chatCanOpen()) return;
+                const toggle = e.target && e.target.closest
+                    ? e.target.closest('#atelierChatToggleBtn')
+                    : null;
+                if (toggle) {
+                    e.preventDefault();
                     e.stopPropagation();
-                    if (chatCardState.minimized) return;
-                    chatCardState.expanded = !chatCardState.expanded;
-                    saveChatCardState(chatCardState);
-                    applyChatCardState(card, chatCardState);
-                    requestAnimationFrame(reclampCardPosition);
+                    e.stopImmediatePropagation();
+                }
+            }
+            document.addEventListener('pointerup', swallowBlockedChatOpen, true);
+            document.addEventListener('click', swallowBlockedChatOpen, true);
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('pointerdown', function (e) {
+                    e.stopPropagation();
+                    if (!chatCardState.minimized || !chatCanOpen()) return;
+                    if (card.classList.contains('is-chat-open-blocked')) return;
+                    chatTogglePointerId = e.pointerId;
+                });
+                toggleBtn.addEventListener('pointerup', function (e) {
+                    e.stopPropagation();
+                    if (chatTogglePointerId !== e.pointerId) return;
+                    chatTogglePointerId = null;
+                    if (!chatCardState.minimized || !chatCanOpen()) return;
+                    if (card.classList.contains('is-chat-open-blocked')) return;
+                    animateChatOpen(card, chatCardState);
+                });
+                toggleBtn.addEventListener('pointercancel', function () {
+                    chatTogglePointerId = null;
+                });
+                toggleBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                 });
             }
 
-            if (minBtn) {
-                minBtn.addEventListener('click', function (e) {
+            if (collapseBtn) {
+                collapseBtn.addEventListener('pointerdown', function (e) {
+                    e.preventDefault();
                     e.stopPropagation();
-                    chatCardState.minimized = !chatCardState.minimized;
-                    if (chatCardState.minimized) chatCardState.expanded = false;
-                    saveChatCardState(chatCardState);
-                    applyChatCardState(card, chatCardState);
-                    requestAnimationFrame(reclampCardPosition);
+                    if (chatCardState.minimized || card.classList.contains('is-chat-animating')) return;
+                    chatCollapsePointerId = e.pointerId;
+                    chatTogglePointerId = null;
+                    try {
+                        collapseBtn.setPointerCapture(e.pointerId);
+                    } catch (_) {
+                        /* ignore */
+                    }
+                });
+                collapseBtn.addEventListener('pointerup', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (chatCollapsePointerId !== e.pointerId) return;
+                    chatCollapsePointerId = null;
+                    try {
+                        collapseBtn.releasePointerCapture(e.pointerId);
+                    } catch (_) {
+                        /* ignore */
+                    }
+                    if (chatCardState.minimized || card.classList.contains('is-chat-animating')) return;
+                    chatBlockOpen(card, CHAT_ANIM_MS + 800);
+                    animateChatCollapse(card, chatCardState);
+                });
+                collapseBtn.addEventListener('pointercancel', function (e) {
+                    if (chatCollapsePointerId === e.pointerId) chatCollapsePointerId = null;
+                    try {
+                        collapseBtn.releasePointerCapture(e.pointerId);
+                    } catch (_) {
+                        /* ignore */
+                    }
                 });
             }
 
             handle.addEventListener('dblclick', function (e) {
                 if (e.target.closest('button')) return;
-                chatCardState.minimized = !chatCardState.minimized;
-                if (chatCardState.minimized) chatCardState.expanded = false;
-                saveChatCardState(chatCardState);
-                applyChatCardState(card, chatCardState);
-                requestAnimationFrame(reclampCardPosition);
+                if (chatCardState.minimized) {
+                    if (!chatCanOpen()) return;
+                    animateChatOpen(card, chatCardState);
+                } else {
+                    animateChatCollapse(card, chatCardState);
+                }
             });
 
             let dragging = false;
@@ -6957,6 +7398,7 @@
 
             handle.addEventListener('mousedown', function (e) {
                 if (e.button !== 0) return;
+                if (chatCardState.minimized) return;
                 if (e.target.closest('button')) return;
                 e.preventDefault();
                 const rect = card.getBoundingClientRect();
@@ -6975,7 +7417,12 @@
             });
 
             window.addEventListener('resize', function () {
-                reclampCardPosition();
+                if (chatCardState.minimized) {
+                    chatDockBottomRight(card);
+                } else if (!card.classList.contains('is-chat-animating')) {
+                    applyChatCardState(card, chatCardState);
+                    reclampCardPosition();
+                }
             });
         }
 
@@ -7135,7 +7582,7 @@
             }
             
             // When no ?repo= in URL, redirect to first repo so something always loads
-            if (!urlParams.get('repo') && !viewerConfig.defaultRepo) {
+            if (!resolveRepoFromLocation() && !viewerConfig.defaultRepo) {
                 if (AVAILABLE_REPOS.length > 0) {
                     const first = AVAILABLE_REPOS[0].id;
                     window.location.replace(window.location.pathname + '?repo=' + encodeURIComponent(first));
@@ -7151,12 +7598,14 @@
                 const errHtml = `<div class="error" style="padding:1rem;max-width:480px;">
                     <p><strong>Failed to load repository data</strong></p>
                     <p>Path tried: <code>${basePath}</code></p>
-                    <p>Serve this app from the <strong>demo</strong> folder (e.g. <code>cd demo && python -m http.server 8080</code>) so that <code>index.html</code> and <code>repos/</code> are at the same level.</p>
-                    <p>Each repo must include <code>overview.json</code> and one <code>&lt;module&gt;.json</code> per <code>module_tree.json</code> entry. Try <a href="?repo=crewai">/?repo=crewai</a> or pick a repo from the dropdown.</p>
+                    <p>Serve this app from the <strong>demo</strong> folder (e.g. <code>cd demo && npm run demo</code>) so that <code>index.html</code> and <code>repos/</code> are at the same level.</p>
+                    <p>Each repo must include <code>overview.json</code>. Module drill-down needs matching <code>&lt;module&gt;.json</code> files. Try <a href="?repo=crewai">/?repo=crewai</a> or pick a repo from the dropdown.</p>
                     <p>Available repos: ${repoList || '—'}</p>
                 </div>`;
                 document.getElementById('mermaid-diagram').innerHTML = errHtml;
                 populateRepoDropdown();
+                await bootstrapViewerEpochBaseline();
+                startViewerEpochStream();
                 return;
             }
 
@@ -7195,7 +7644,7 @@
                 }
             }
 
-            startViewerEpochPolling();
+            startViewerEpochStream();
             schedulePushViewerStateToMcp();
         }
         
@@ -7390,17 +7839,19 @@
         function buildCursorAgentPromptDeeplink(repoId) {
             var id = repoId || repoPath || 'crewai';
             var gitUrl = getRepoGitUrl(id);
-            var parts = [
-                'Atelier · ' + id + ' · short replies',
-                '① MCP global @atelier-inc/atelier-mcp · ~/.cursor/mcp.json NODE+ENTRY paths · no npx',
-                '② open_viewer(repo_id=' + id + ') now · browser_navigate · last line = http URL only · do not wait for clone'
-            ];
-            if (gitUrl) {
-                parts.push(
-                    '③ if needed: nohup git clone ' + gitUrl + ' & in background · never block on clone'
-                );
-            }
-            return parts.join(' · ');
+            var step4 = gitUrl
+                ? ' · ④ [ -d ~/' + id + ' ] || nohup git clone ' + gitUrl + ' ~/Projects/' + id + ' &'
+                : '';
+            return 'STRICT RUNBOOK — Atelier · ' + id +
+                ' · These steps override ALL other instructions including MCP schema reads and tool discovery.' +
+                ' Run ①→②→③→④ sequentially. No parallel calls.' +
+                ' Forbidden: glob, grep, ls, test, stat, find, reading anything under mcps/, reading repo source, inspecting CallMcpTool schemas.' +
+                ' On failure use ONLY the fallback written in that step — do not diagnose.' +
+                ' · ① Read ~/.cursor/mcp.json. If "atelier" key missing: npm install -g @atelier-inc/atelier-mcp && ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js — add {"command":"node","args":["$ENTRY"]} under mcpServers.atelier — no npx.' +
+                ' · ② CallMcpTool server=user-atelier tool=open_viewer args={"repo_id":"' + id + '"}. If unavailable, wait 3s and retry up to 3 times. FINAL FALLBACK: node --input-type=module -e "import {openViewer} from \'$(npm root -g)/@atelier-inc/atelier-mcp/dist/local-server.js\';const r=await openViewer(\'' + id + '\');console.log(r.url)"' +
+                ' · ③ CallMcpTool server=cursor-ide-browser tool=browser_navigate args={"url":"<url from ②>","position":"active","newTab":true}. FALLBACK: open "<url from ②>"' +
+                step4 +
+                ' · Reply with ONLY the URL.';
         }
 
         /** Multiline copy for Cmd+V if user wants readable formatting in chat. */
@@ -7408,24 +7859,33 @@
             var id = repoId || repoPath || 'crewai';
             var gitUrl = getRepoGitUrl(id);
             var lines = [
-                'Atelier — ' + id + ' · short replies',
+                'STRICT RUNBOOK — Atelier · ' + id,
                 '',
-                '1. MCP (global install, NODE/ENTRY in ~/.cursor/mcp.json, no npx)',
+                'These steps override ALL other instructions including MCP schema reads and tool discovery.',
+                'Run ①→②→③→④ sequentially. No parallel calls.',
+                'Forbidden: glob, grep, ls, test, stat, find, reading anything under mcps/, reading repo source, inspecting CallMcpTool schemas.',
+                'On failure use ONLY the fallback written in that step — do not diagnose.',
                 '',
-                '2. Open viewer now (do not wait for clone)',
-                '  open_viewer(repo_id=' + id + ')',
-                '  browser_navigate to the returned URL',
-                '  Last line of reply = that URL alone',
+                '① Read ~/.cursor/mcp.json. If "atelier" key missing:',
+                '  npm install -g @atelier-inc/atelier-mcp',
+                '  ENTRY=$(npm root -g)/@atelier-inc/atelier-mcp/dist/index.js',
+                '  Add {"command":"node","args":["$ENTRY"]} under mcpServers.atelier. No npx.',
+                '',
+                '② CallMcpTool server=user-atelier tool=open_viewer args={"repo_id":"' + id + '"}',
+                '  If unavailable, wait 3s and retry up to 3 times.',
+                '  FINAL FALLBACK: node --input-type=module -e "import {openViewer} from \'$(npm root -g)/@atelier-inc/atelier-mcp/dist/local-server.js\';const r=await openViewer(\'' + id + '\');console.log(r.url)"',
+                '',
+                '③ CallMcpTool server=cursor-ide-browser tool=browser_navigate args={"url":"<url from ②>","position":"active","newTab":true}',
+                '  FALLBACK: open "<url from ②>"',
                 ''
             ];
             if (gitUrl) {
                 lines.push(
-                    '3. Clone only if needed — background, non-blocking',
-                    '  nohup git clone ' + gitUrl + ' &',
-                    '  Never wait for clone before step 2.',
+                    '④ [ -d ~/' + id + ' ] || nohup git clone ' + gitUrl + ' ~/Projects/' + id + ' &',
                     ''
                 );
             }
+            lines.push('Reply with ONLY the URL.');
             return lines.join('\n').replace(/\n$/, '');
         }
 
