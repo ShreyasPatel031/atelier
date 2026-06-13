@@ -1,0 +1,96 @@
+[
+  {
+    "timestamp": "2026-05-24T17:29:30.439214",
+    "repo": "minirepo",
+    "total_modules": 1,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-24T17:35:07.806601",
+    "repo": "minirepo",
+    "total_modules": 16,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 24,
+    "issues_by_type": {
+      "missing_title": 12,
+      "missing_description": 12
+    }
+  },
+  {
+    "timestamp": "2026-05-24T17:45:42.433599",
+    "repo": "minirepo",
+    "total_modules": 16,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 24,
+    "issues_by_type": {
+      "missing_title": 12,
+      "missing_description": 12
+    }
+  },
+  {
+    "timestamp": "2026-05-24T18:15:13.510364",
+    "repo": "minirepo",
+    "total_modules": 9,
+    "missing_files": 9,
+    "failure_rate_pct": 100.0,
+    "success_rate_pct": 0.0,
+    "errors": 14,
+    "warnings": 18,
+    "issues_by_type": {
+      "missing_title": 9,
+      "missing_description": 9,
+      "missing_md_file": 9,
+      "missing_diagram": 5
+    }
+  },
+  {
+    "timestamp": "2026-05-24T18:15:51.398836",
+    "repo": "minirepo",
+    "total_modules": 9,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-24T19:49:07.451251",
+    "repo": "minirepo",
+    "total_modules": 9,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 10,
+    "issues_by_type": {
+      "missing_title": 5,
+      "missing_description": 5
+    }
+  },
+  {
+    "timestamp": "2026-05-24T20:44:47.978210",
+    "repo": "minirepo",
+    "total_modules": 9,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 10,
+    "issues_by_type": {
+      "missing_title": 5,
+      "missing_description": 5
+    }
+  }
+]

@@ -4,8 +4,7 @@ Documentation Validation Module
 
 Validates generated documentation for:
 1. Diagram generation - each module with children must have a diagram with submodules as nodes
-2. Mermaid rendering - syntax validation for Mermaid diagrams
-3. Metadata - title, description, and documentation for each module
+2. Metadata - title, description, and documentation for each module
 
 Usage:
     python codewiki/src/be/validation.py <docs_path>
@@ -15,7 +14,6 @@ Example:
 """
 
 import json
-import re
 import sys
 from pathlib import Path
 from dataclasses import dataclass, field
@@ -60,67 +58,6 @@ class ValidationResult:
     
     def merge(self, other: 'ValidationResult'):
         self.issues.extend(other.issues)
-
-
-# ============================================================
-# MERMAID EXTRACTION & VALIDATION
-# ============================================================
-
-def extract_mermaid_from_markdown(content: str) -> Optional[str]:
-    """Extract the first Mermaid diagram from markdown content."""
-    pattern = r'```mermaid\s*([\s\S]*?)```'
-    match = re.search(pattern, content)
-    return match.group(1).strip() if match else None
-
-
-def extract_diagram_nodes(diagram: str) -> List[str]:
-    """Extract node IDs from a Mermaid diagram."""
-    nodes = set()
-    
-    # Pattern for node definitions: nodeId[Label] or nodeId["Label"]
-    node_def_pattern = r'\b([A-Za-z_][A-Za-z0-9_]*)\s*\[(?:"[^"]+"|[^\]]+)\]'
-    for match in re.finditer(node_def_pattern, diagram):
-        nodes.add(match.group(1).lower())
-    
-    # Pattern for edges: A --> B or A -> B
-    edge_pattern = r'\b([A-Za-z_][A-Za-z0-9_]*)\s*(?:-->|->|--)\s*([A-Za-z_][A-Za-z0-9_]*)'
-    for match in re.finditer(edge_pattern, diagram):
-        nodes.add(match.group(1).lower())
-        nodes.add(match.group(2).lower())
-    
-    # Pattern for subgraph labels
-    subgraph_pattern = r'subgraph\s+([A-Za-z_][A-Za-z0-9_]*)'
-    for match in re.finditer(subgraph_pattern, diagram):
-        nodes.add(match.group(1).lower())
-    
-    return list(nodes)
-
-
-def validate_mermaid_syntax(diagram: str, module: str, result: ValidationResult):
-    """Validate Mermaid diagram syntax via the real Mermaid.js 11 parser.
-
-    No regex/character-counting heuristics — defers to ``mermaid_validator``,
-    which spawns the same Mermaid stack the viewer uses.
-    """
-    from codewiki.src.be.mermaid_validator import (
-        validate_mermaid,
-        MermaidErrorType,
-    )
-
-    vr = validate_mermaid(diagram, source_info=f"validation.py:{module}")
-    for err in vr.errors:
-        if err.error_type == MermaidErrorType.PARSER_UNAVAILABLE:
-            result.add(module, "MERMAID_PARSER_UNAVAILABLE", err.message, Severity.WARNING)
-        elif err.error_type == MermaidErrorType.EMPTY_DIAGRAM:
-            result.add(module, "EMPTY_MERMAID", err.message)
-        elif err.error_type == MermaidErrorType.PARSE_ERROR:
-            loc = f" (line {err.line_number})" if err.line_number else ""
-            result.add(module, "MERMAID_PARSE_ERROR", f"{err.message}{loc}")
-        else:
-            result.add(module, "INVALID_MERMAID", err.message)
-    for warn in vr.warnings:
-        if warn.error_type == MermaidErrorType.FORBIDDEN_DIAGRAM_TYPE:
-            result.add(module, "FORBIDDEN_DIAGRAM_TYPE", warn.message, Severity.WARNING)
 
 
 # ============================================================

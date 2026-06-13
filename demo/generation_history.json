@@ -722,5 +722,40 @@
       "missing_description": 2,
       "missing_diagram": 1
     }
+  },
+  {
+    "timestamp": "2026-05-24T19:05:41.620606",
+    "repo": "minirepo",
+    "total_modules": 9,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-26T12:41:25.123525",
+    "repo": "langchain",
+    "total_modules": 31,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 0,
+    "issues_by_type": {}
+  },
+  {
+    "timestamp": "2026-05-27T01:18:28.922520",
+    "repo": "pydantic-ai",
+    "total_modules": 22,
+    "missing_files": 0,
+    "failure_rate_pct": 0.0,
+    "success_rate_pct": 100.0,
+    "errors": 0,
+    "warnings": 2,
+    "issues_by_type": {
+      "diagram_ir_sync_dropped_edges": 2
+    }
   }
 ]

@@ -105,7 +105,9 @@ def analyze_slug(slug: str, repo_root: Path) -> Dict[str, Any]:
             stems = {p.stem for p in md_files}
             missing = len(sorted(_module_keys(tree) - stems - {"overview"}))
             row["missing_md_vs_tree"] = missing
-        mp = repo_root / "metrics.json"
+        mp = repo_root / "generation_metrics.json"
+        if not mp.is_file():
+            mp = repo_root / "metrics.json"
         if mp.is_file():
             row["metrics_present"] = True
             met = json.loads(mp.read_text(encoding="utf8"))

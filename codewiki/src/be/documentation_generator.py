@@ -335,6 +335,20 @@ class DocumentationGenerator:
 
         if len(module_tree) > 0:
             if use_parallel:
+                # The asyncio default thread pool is only min(32, cpu+4) (~14 on a 10-core
+                # box). Every leaf LLM call runs via asyncio.to_thread, so a starved pool
+                # serializes "parallel" work ~14-at-a-time. Size the pool to comfortably
+                # exceed the global LLM semaphore (MAX_CONCURRENT_LLM_CALLS) so threads are
+                # never the bottleneck; the semaphore — not the pool — bounds API concurrency.
+                import concurrent.futures
+                from codewiki.src.config import MAX_CONCURRENT_LLM_CALLS
+                loop = asyncio.get_running_loop()
+                pool_size = max(max_concurrent, MAX_CONCURRENT_LLM_CALLS) + 8
+                loop.set_default_executor(
+                    concurrent.futures.ThreadPoolExecutor(max_workers=pool_size)
+                )
+                logger.info(f"[STAGE 3] Thread pool sized to {pool_size} workers (LLM semaphore={MAX_CONCURRENT_LLM_CALLS})")
+
                 # PARALLEL PROCESSING: Group by depth, process each depth level in parallel
                 batches = self.get_parallel_processing_order(first_module_tree)
                 total_modules = sum(len(batch) for batch in batches)
@@ -472,7 +486,7 @@ class DocumentationGenerator:
                 [], working_dir
             )
             
-            # POST-PROCESSING: Extract diagrams from module JSON (and legacy markdown) into module_tree
+            # POST-PROCESSING: copy diagrams from per-module *.json into module_tree
             self._extract_all_diagrams(working_dir, module_tree_path)
         else:
             # No modules in tree - this should be rare after the clustering fixes
@@ -517,7 +531,7 @@ class DocumentationGenerator:
                     os.rename(repo_json, dest)
                     logger.info("[STAGE 3] Renamed %s to %s", os.path.basename(repo_json), OVERVIEW_FILENAME)
             
-            # POST-PROCESSING: Extract diagrams from module JSON (and legacy markdown) into module_tree
+            # POST-PROCESSING: copy diagrams from per-module *.json into module_tree
             self._extract_all_diagrams(working_dir, module_tree_path)
         
         return working_dir
@@ -527,8 +541,6 @@ class DocumentationGenerator:
         Post-process: copy diagrams from per-module ``*.json``
         into module_tree nodes.
         """
-        import re
-
         logger.info("[STAGE 3.5] Post-processing: extracting diagrams from module docs")
 
         module_tree = file_manager.load_json(module_tree_path)
@@ -540,6 +552,7 @@ class DocumentationGenerator:
             "metadata",
             "entry_points",
             "generation_report",
+            "generation_metrics",
             "viewer_epoch",
             "sync_issues",
             "overview",
@@ -646,23 +659,14 @@ class DocumentationGenerator:
             logger.info(f"[STAGE 3] Generating parent documentation for '{module_name}'...")
             logger.info(f"[STAGE 3] Prompt size: {len(prompt)} chars")
             parent_docs_start = time.time()
-            parent_docs = await asyncio.to_thread(call_llm, prompt, self.config)
+            parent_docs = await asyncio.to_thread(
+                call_llm, prompt, self.config, thinking_budget=0
+            )
             parent_docs_duration = time.time() - parent_docs_start
             logger.info(f"[STAGE 3] LLM call completed in {parent_docs_duration:.1f}s, response length: {len(parent_docs)} chars")
             
-            # Parse and save parent documentation
-            # Handle cases where LLM doesn't include the <OVERVIEW> tags
-            if "<OVERVIEW>" in parent_docs and "</OVERVIEW>" in parent_docs:
-                parent_content = parent_docs.split("<OVERVIEW>")[1].split("</OVERVIEW>")[0].strip()
-                logger.debug(f"[STAGE 3] Extracted content from <OVERVIEW> tags: {len(parent_content)} chars")
-            else:
-                logger.warning(f"[STAGE 3] LLM response missing <OVERVIEW> tags, using full response")
-                # If no tags, use the entire response (LLM might have generated markdown directly)
-                parent_content = parent_docs.strip()
-                # Remove any XML-like tags if present but not properly formatted
-                if parent_content.startswith("<OVERVIEW>"):
-                    parent_content = parent_content.replace("<OVERVIEW>", "").replace("</OVERVIEW>", "").strip()
-            
+            parent_content = parent_docs.strip()
+
             # Remove markdown code block wrapper if present (e.g., ```markdown ... ```)
             # but only if it's a simple outer wrapper — not if the content has inner fenced blocks
             if parent_content.startswith("```") and parent_content.count("```") == 2:

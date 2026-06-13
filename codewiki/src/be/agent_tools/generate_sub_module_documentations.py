@@ -5,8 +5,8 @@ from codewiki.src.be.agent_tools.read_code_components import read_code_component
 from codewiki.src.be.agent_tools.str_replace_editor import str_replace_editor_tool
 from codewiki.src.be.llm_services import create_fallback_models
 from codewiki.src.be.prompt_template import SYSTEM_PROMPT, LEAF_SYSTEM_PROMPT, format_user_prompt
-from codewiki.src.be.utils import is_complex_module, count_module_tokens
-from codewiki.src.config import MAX_TOKEN_PER_LEAF_MODULE, MIN_DEPTH, MODULE_TREE_FILENAME
+from codewiki.src.be.utils import count_module_tokens
+from codewiki.src.config import MODULE_TREE_FILENAME
 from codewiki.src.file_manager import file_manager
 import asyncio
 import copy
@@ -45,6 +45,99 @@ def _record_submodule_md_missing(
         )
     except Exception as ex:
         logger.warning("Could not record submodule_md_failure for %s: %s", sub_module_name, ex)
+
+
+async def _process_one_sub_module(
+    sub_module_name: str,
+    spec: dict[str, Any],
+    sub_deps: CodeWikiDeps,
+    *,
+    children_container: dict[str, Any],
+    fallback_models,
+) -> None:
+    """Generate documentation for a single sub-module (parallel-safe with isolated sub_deps)."""
+    core_component_ids = spec["components"]
+    parent_depth = sub_deps.current_depth - 1
+    indent = "  " * parent_depth
+    arrow = "└─" if parent_depth > 0 else "→"
+
+    logger.info(f"{indent}{arrow} Generating documentation for sub-module: {sub_module_name}")
+
+    from codewiki.src.config import AUTO_SPLIT_TOKEN_THRESHOLD
+    num_tokens = count_module_tokens(core_component_ids, sub_deps.components)
+    sub_json_path = os.path.join(sub_deps.absolute_docs_path, f"{sub_module_name}.json")
+    ncomp = len(core_component_ids)
+
+    # Use the same token threshold as process_module: prefer 4-FAST for small modules,
+    # agent path only for modules that genuinely need multi-turn reasoning.
+    if num_tokens > AUTO_SPLIT_TOKEN_THRESHOLD:
+        logger.info(
+            f"{indent}  Complex agent (tokens={num_tokens:,} > {AUTO_SPLIT_TOKEN_THRESHOLD:,}, "
+            f"depth={sub_deps.current_depth})"
+        )
+        sub_agent = Agent(
+            model=fallback_models,
+            retries=3,
+            name=sub_module_name,
+            deps_type=CodeWikiDeps,
+            system_prompt=SYSTEM_PROMPT.format(module_name=sub_module_name),
+            tools=[
+                read_code_components_tool,
+                str_replace_editor_tool,
+                generate_sub_module_documentation_tool,
+            ],
+        )
+        user_msg = format_user_prompt(
+            module_name=sub_deps.current_module_name,
+            core_component_ids=core_component_ids,
+            components=sub_deps.components,
+            module_tree=sub_deps.module_tree,
+        )
+        try:
+            await sub_agent.run(user_msg, deps=sub_deps)
+        except Exception as sub_err:
+            logger.error(f"{indent}  Agent failed for {sub_module_name}: {sub_err}")
+            _record_submodule_md_missing(
+                sub_deps,
+                sub_module_name,
+                "agent_exception",
+                detail=str(sub_err)[:4000],
+                component_count=ncomp,
+            )
+    else:
+        logger.info(
+            f"{indent}  Leaf JSON mode (depth={sub_deps.current_depth}, tokens={num_tokens})"
+        )
+        try:
+            from codewiki.src.be.agent_orchestrator import generate_leaf_doc_json_throttled
+            import json as _json
+
+            doc = await generate_leaf_doc_json_throttled(
+                module_name=sub_module_name,
+                core_component_ids=core_component_ids,
+                components=sub_deps.components,
+                module_tree=sub_deps.module_tree if isinstance(sub_deps.module_tree, dict) else {},
+                config=sub_deps.config,
+            )
+            with open(sub_json_path, "w") as f:
+                _json.dump(doc, f, indent=2)
+            logger.info(f"{indent}  Wrote {sub_module_name}.json")
+
+            tree_node = children_container.get(sub_module_name, {})
+            tree_node["title"] = doc["title"]
+            tree_node["description"] = doc["summary"]
+            tree_node["diagram"] = doc["diagram"]
+            children_container[sub_module_name] = tree_node
+
+        except Exception as json_err:
+            logger.error(f"{indent}  JSON mode failed for {sub_module_name}: {json_err}")
+            _record_submodule_md_missing(
+                sub_deps,
+                sub_module_name,
+                "json_mode_failed",
+                detail=str(json_err)[:4000],
+                component_count=ncomp,
+            )
 
 
 async def generate_sub_module_documentation(
@@ -152,92 +245,22 @@ async def generate_sub_module_documentation(
             "children": {}
         }
     
+    sub_tasks = []
     for sub_module_name, spec in parsed_specs.items():
-        core_component_ids = spec["components"]
-
-        indent = "  " * deps.current_depth
-        arrow = "└─" if deps.current_depth > 0 else "→"
-
-        logger.info(f"{indent}{arrow} Generating documentation for sub-module: {sub_module_name}")
-
-        num_tokens = count_module_tokens(core_component_ids, ctx.deps.components)
-
-        can_delegate = ctx.deps.current_depth < ctx.deps.max_depth
-        force_subagent = ctx.deps.current_depth < MIN_DEPTH and len(core_component_ids) >= 2
-        normal_criteria = (
-            is_complex_module(ctx.deps.components, core_component_ids) and 
-            ctx.deps.current_depth < ctx.deps.max_depth and 
-            num_tokens >= MAX_TOKEN_PER_LEAF_MODULE
+        sub_deps = copy.copy(deps)
+        sub_deps.path_to_current_module = list(deps.path_to_current_module) + [sub_module_name]
+        sub_deps.current_module_name = sub_module_name
+        sub_deps.current_depth = deps.current_depth + 1
+        sub_tasks.append(
+            _process_one_sub_module(
+                sub_module_name,
+                spec,
+                sub_deps,
+                children_container=value,
+                fallback_models=fallback_models,
+            )
         )
-        wants_nested = force_subagent or normal_criteria
-
-        deps.current_module_name = sub_module_name
-        deps.path_to_current_module.append(sub_module_name)
-        deps.current_depth += 1
-
-        sub_json_path = os.path.join(deps.absolute_docs_path, f"{sub_module_name}.json")
-        ncomp = len(core_component_ids)
-
-        if wants_nested and can_delegate:
-            # Complex module — recursive agent with sub-module delegation
-            logger.info(f"{indent}  Complex agent (force={force_subagent}, normal={normal_criteria}, depth={ctx.deps.current_depth})")
-            sub_agent = Agent(
-                model=fallback_models,
-                retries=3,
-                name=sub_module_name,
-                deps_type=CodeWikiDeps,
-                system_prompt=SYSTEM_PROMPT.format(module_name=sub_module_name),
-                tools=[read_code_components_tool, str_replace_editor_tool, generate_sub_module_documentation_tool],
-            )
-            user_msg = format_user_prompt(
-                module_name=deps.current_module_name,
-                core_component_ids=core_component_ids,
-                components=ctx.deps.components,
-                module_tree=ctx.deps.module_tree,
-            )
-            try:
-                await sub_agent.run(user_msg, deps=ctx.deps)
-            except Exception as sub_err:
-                logger.error(f"{indent}  Agent failed for {sub_module_name}: {sub_err}")
-                _record_submodule_md_missing(
-                    deps, sub_module_name, "agent_exception",
-                    detail=str(sub_err)[:4000], component_count=ncomp,
-                )
-        else:
-            # Leaf module — JSON mode, one shot, no agent
-            logger.info(f"{indent}  Leaf JSON mode (depth={ctx.deps.current_depth}, tokens={num_tokens})")
-            try:
-                from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
-                import json as _json
-
-                doc = await asyncio.to_thread(
-                    generate_leaf_doc_json,
-                    module_name=sub_module_name,
-                    core_component_ids=core_component_ids,
-                    components=ctx.deps.components,
-                    module_tree=ctx.deps.module_tree if isinstance(ctx.deps.module_tree, dict) else {},
-                    config=deps.config,
-                )
-                with open(sub_json_path, "w") as f:
-                    _json.dump(doc, f, indent=2)
-                logger.info(f"{indent}  Wrote {sub_module_name}.json")
-
-                # Update module tree directly from structured data
-                tree_node = value.get(sub_module_name, {})
-                tree_node["title"] = doc["title"]
-                tree_node["description"] = doc["summary"]
-                tree_node["diagram"] = doc["diagram"]
-                value[sub_module_name] = tree_node
-
-            except Exception as json_err:
-                logger.error(f"{indent}  JSON mode failed for {sub_module_name}: {json_err}")
-                _record_submodule_md_missing(
-                    deps, sub_module_name, "json_mode_failed",
-                    detail=str(json_err)[:4000], component_count=ncomp,
-                )
-
-        deps.path_to_current_module.pop()
-        deps.current_depth -= 1
+    await asyncio.gather(*sub_tasks)
 
     deps.current_module_name = previous_module_name
 

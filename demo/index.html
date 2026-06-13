@@ -1042,6 +1042,40 @@
             overflow: hidden;
             pointer-events: auto;
         }
+        .atelier-chat-resize-handle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            z-index: 3;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 4px 0 0 4px;
+            cursor: nwse-resize;
+            touch-action: none;
+            border-radius: 12px 0 0 0;
+            color: #94a3b8;
+            opacity: 0.55;
+            transition: opacity 0.12s ease, color 0.12s ease, background 0.12s ease;
+        }
+        .atelier-chat-resize-grip {
+            display: block;
+            width: 10px;
+            height: 10px;
+            flex-shrink: 0;
+            pointer-events: none;
+        }
+        .atelier-chat-resize-handle:hover,
+        .atelier-chat-resize-handle.is-resizing {
+            opacity: 0.95;
+            color: #64748b;
+            background: linear-gradient(135deg, rgba(148, 163, 184, 0.1) 0%, transparent 65%);
+        }
+        .atelier-chat-card.is-minimized .atelier-chat-resize-handle {
+            display: none;
+        }
         .atelier-chat-card.is-minimized {
             width: 48px !important;
             min-width: 48px !important;
@@ -1093,7 +1127,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
-            padding: 10px 10px 10px 14px;
+            padding: 10px 10px 10px 16px;
             font-size: 13px;
             font-weight: 600;
             color: #334155;
@@ -1515,6 +1549,27 @@
     </div>
 
     <div id="atelierChatCard" class="atelier-chat-card" role="complementary" aria-label="Chat">
+        <div
+            class="atelier-chat-resize-handle"
+            id="atelierChatResize"
+            title="Drag to resize chat"
+            aria-label="Resize chat"
+            role="separator"
+            aria-orientation="both"
+        >
+            <svg
+                class="atelier-chat-resize-grip"
+                xmlns="http://www.w3.org/2000/svg"
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+                aria-hidden="true"
+            >
+                <path d="M1 9L9 1" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                <path d="M1 5.5L5.5 1" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            </svg>
+        </div>
         <div class="atelier-chat-card-header" id="atelierChatCardDrag" title="Drag to move chat">
             <button
                 type="button"
@@ -1614,7 +1669,27 @@
             }
             return defaultValue;
         }
-        let CHAT_ENABLED = viewerFlag('chat', 'chatEnabled', true);
+        function parseChatQueryMode() {
+            if (urlParams.has('chat')) {
+                const raw = String(urlParams.get('chat') || '').toLowerCase();
+                if (raw === 'off' || raw === 'none' || raw === 'hidden') return 'off';
+                if (raw === '0' || raw === 'false' || raw === 'no' || raw === 'icon' || raw === 'minimized' || raw === 'mini') {
+                    return 'icon';
+                }
+                return 'full';
+            }
+            if (Object.prototype.hasOwnProperty.call(viewerConfig, 'chatEnabled') && viewerConfig.chatEnabled === false) {
+                return 'off';
+            }
+            return 'full';
+        }
+        /** full | icon (collapsed FAB) | off */
+        let CHAT_QUERY_MODE = parseChatQueryMode();
+        if (urlParams.get('embed') === '1' && !urlParams.has('chat')) {
+            CHAT_QUERY_MODE = 'icon';
+        }
+        let CHAT_ENABLED = CHAT_QUERY_MODE !== 'off';
+        const CHAT_START_MINIMIZED = CHAT_QUERY_MODE === 'icon';
         /** Local static demo (:9891 / :8080): keep chat visible unless ?chat=0 (avoids stale viewer-config cache). */
         if (
             !urlParams.has('chat') &&
@@ -1623,7 +1698,10 @@
         ) {
             CHAT_ENABLED = true;
         }
-        const REPO_SWITCHER_ENABLED = viewerFlag('repoSwitcher', 'repoSwitcherEnabled', true);
+        let REPO_SWITCHER_ENABLED = viewerFlag('repoSwitcher', 'repoSwitcherEnabled', true);
+        if (urlParams.get('embed') === '1' && !urlParams.has('repoSwitcher')) {
+            REPO_SWITCHER_ENABLED = false;
+        }
         const VIEW_TUNE_PANEL_ENABLED = viewerFlag('viewTune', 'viewTunePanelEnabled', false);
         const viewTunePanelEl = document.getElementById('viewTunePanel');
         if (viewTunePanelEl) viewTunePanelEl.hidden = !VIEW_TUNE_PANEL_ENABLED;
@@ -4299,7 +4377,17 @@
                 }
             }
 
-            if (payload && payload.expandable && payload.targetModuleId) {
+            let isExpandable = !!(payload && payload.expandable);
+            let targetModId = payload && payload.targetModuleId;
+            if (!isExpandable) {
+                const target = resolveRfTargetModule(nodeId, payload && payload.label || '', null);
+                if (target && moduleData[target] && moduleData[target].structuredDiagram &&
+                    Array.isArray(moduleData[target].structuredDiagram.nodes)) {
+                    isExpandable = true;
+                    targetModId = target;
+                }
+            }
+            if (isExpandable && targetModId) {
                 if (rfExpandedNodeIds.has(nodeId)) {
                     const tm = rfExpandedNodeToModule.get(nodeId);
                     expandDiagramSelectionEpoch += 1;
@@ -4311,7 +4399,7 @@
                     rfDbgSel('rf-click re-expand ' + nodeId);
                     return;
                 }
-                void window.atelierRfTriggerExpansion(nodeId, payload.targetModuleId);
+                void window.atelierRfTriggerExpansion(nodeId, targetModId);
                 return;
             }
 
@@ -4373,30 +4461,35 @@
             const root = document.getElementById('reactflowRoot');
             if (!root || activeDiagramTab !== 'reactflow') return;
             const rid = ++reactFlowRequestEpoch;
+            window.__atelierRfLayoutEpoch = rid;
 
-            reactFlowRefreshChain = reactFlowRefreshChain
-                .catch(() => {})
-                .then(async () => {
-                    try {
-                        if (rid !== reactFlowRequestEpoch) return;
-                        window.__atelierRfLayoutEpoch = rid;
-                        rfEnsureExpansionContext();
+            async function doRefresh() {
+                if (rid !== reactFlowRequestEpoch) return;
+                rfEnsureExpansionContext();
 
-                        const canAnimateInPlace =
-                            typeof window.__atelierR6SetNodes === 'function' &&
-                            typeof window.__atelierR6SetEdges === 'function' &&
-                            typeof window.__atelierR6GetNodes === 'function' &&
-                            typeof window.atelierRfBuildLayoutElementsForEpoch === 'function' &&
-                            typeof window.atelierRfAnimateLayoutTransition === 'function' &&
-                            root.querySelector('.react-flow');
+                const canAnimateInPlace =
+                    typeof window.__atelierR6SetNodes === 'function' &&
+                    typeof window.__atelierR6SetEdges === 'function' &&
+                    typeof window.__atelierR6GetNodes === 'function' &&
+                    typeof window.atelierRfBuildLayoutElementsForEpoch === 'function' &&
+                    root.querySelector('.react-flow');
 
-                        if (canAnimateInPlace) {
+                if (canAnimateInPlace) {
+                    const built = await window.atelierRfBuildLayoutElementsForEpoch(rid);
+                    if (built.ok) {
+                        const shouldFitAfterAnim = !!window.__atelierRfShouldFitView;
+                        const applied =
+                            typeof window.atelierRfApplyLayoutInstant === 'function' &&
+                            window.atelierRfApplyLayoutInstant({
+                                targetNodes: built.nodes,
+                                targetEdges: built.edges,
+                                parentDbg: built.parentDbg,
+                                epoch: rid,
+                            });
+                        if (!applied) {
                             const oldNodes = window.__atelierR6GetNodes();
-                            const built = await window.atelierRfBuildLayoutElementsForEpoch(rid);
-                            if (rid !== reactFlowRequestEpoch) return;
-                            if (built.ok) {
-                                const shouldFitAfterAnim = !!window.__atelierRfShouldFitView;
-                                await new Promise((resolve) => {
+                            await Promise.race([
+                                new Promise((resolve) => {
                                     window.atelierRfAnimateLayoutTransition({
                                         oldNodes,
                                         targetNodes: built.nodes,
@@ -4407,50 +4500,78 @@
                                             resolve();
                                         },
                                     });
+                                }),
+                                new Promise((resolve) => setTimeout(resolve, 1200)),
+                            ]);
+                            if (typeof window.atelierRfApplyLayoutInstant === 'function') {
+                                window.atelierRfApplyLayoutInstant({
+                                    targetNodes: built.nodes,
+                                    targetEdges: built.edges,
+                                    parentDbg: built.parentDbg,
+                                    epoch: rid,
                                 });
-                                if (
-                                    shouldFitAfterAnim &&
-                                    typeof window.atelierRfFitViewCenterImpl === 'function'
-                                ) {
-                                    await window.atelierRfFitViewCenterImpl();
-                                }
-                                return;
                             }
-                            if (built.error === 'stale') return;
-                            console.warn('[R6] in-place layout failed, remounting', built.error);
                         }
-
-                        if (typeof window.atelierUnmountReactFlowR6 === 'function') {
-                            window.atelierUnmountReactFlowR6();
-                        }
-                        root.innerHTML =
-                            '<div class="loading" style="padding:16px">Loading React Flow…</div>';
-                        let tries = 0;
-                        while (
-                            typeof window.atelierMountReactFlowR6 !== 'function' &&
-                            tries < 80
+                        if (
+                            rid === reactFlowRequestEpoch &&
+                            shouldFitAfterAnim &&
+                            typeof window.atelierRfFitViewCenterImpl === 'function'
                         ) {
-                            await new Promise((r) => setTimeout(r, 50));
-                            tries++;
+                            await window.atelierRfFitViewCenterImpl();
                         }
-                        if (rid !== reactFlowRequestEpoch) return;
-                        if (typeof window.atelierMountReactFlowR6 !== 'function') {
-                            root.innerHTML = '';
-                            const e = document.createElement('div');
-                            e.className = 'error';
-                            e.style.padding = '16px';
-                            e.textContent =
-                                'R6 module failed to load (reactflow-r6.mjs). Check network / console; ensure ES modules are allowed.';
-                            root.appendChild(e);
-                            return;
-                        }
-                        await window.atelierMountReactFlowR6(root, rid);
-                    } catch (err) {
-                        console.error('[R6] refreshReactFlowView', err);
+                        return;
                     }
-                });
+                    if (rid !== reactFlowRequestEpoch) return;
+                    if (built.error === 'stale') return;
+                    console.warn('[R6] in-place layout failed, remounting', built.error);
+                }
 
-            await reactFlowRefreshChain;
+                if (typeof window.atelierUnmountReactFlowR6 === 'function') {
+                    window.atelierUnmountReactFlowR6();
+                }
+                root.innerHTML =
+                    '<div class="loading" style="padding:16px">Loading React Flow…</div>';
+                let tries = 0;
+                while (
+                    typeof window.atelierMountReactFlowR6 !== 'function' &&
+                    tries < 80
+                ) {
+                    await new Promise((r) => setTimeout(r, 50));
+                    tries++;
+                }
+                if (rid !== reactFlowRequestEpoch) return;
+                if (typeof window.atelierMountReactFlowR6 !== 'function') {
+                    root.innerHTML = '';
+                    const e = document.createElement('div');
+                    e.className = 'error';
+                    e.style.padding = '16px';
+                    e.textContent =
+                        'R6 module failed to load (reactflow-r6.mjs). Check network / console; ensure ES modules are allowed.';
+                    root.appendChild(e);
+                    return;
+                }
+                await window.atelierMountReactFlowR6(root, rid);
+                if (typeof window.atelierRfFitViewCenter === 'function') {
+                    await window.atelierRfFitViewCenter();
+                }
+            }
+
+            try {
+                await Promise.race([
+                    doRefresh(),
+                    new Promise((resolve) => {
+                        setTimeout(() => {
+                            console.warn('[R6] refreshReactFlowView timed out (epoch', rid, ')');
+                            if (typeof window.atelierRfStopLayoutAnimation === 'function') {
+                                window.atelierRfStopLayoutAnimation();
+                            }
+                            resolve();
+                        }, 12000);
+                    }),
+                ]);
+            } catch (err) {
+                console.error('[R6] refreshReactFlowView', err);
+            }
         }
 
         /** Re-run ELK layout → R6 React Flow when sizing inputs change. */
@@ -4472,9 +4593,7 @@
             }
                 if (canvas) canvas.style.display = 'none';
                 if (placeholder) placeholder.hidden = false;
-                refreshReactFlowView();
             updatePipelinePanel();
-            schedulePushViewerStateToMcp();
         }
 
         function updatePipelinePanel() {
@@ -6968,10 +7087,13 @@
         }
         
         const CHAT_CARD_POS_KEY = 'atelier_chat_card_pos_v1';
+        const CHAT_CARD_SIZE_KEY = 'atelier_chat_card_size_v1';
         const CHAT_CARD_STATE_KEY = 'atelier_chat_card_state_v2';
         const CHAT_ANIM_MS = 350;
         const CHAT_DOCK_INSET_PX = 16;
         const CHAT_MINIMIZED_SIZE_PX = 48;
+        const CHAT_MIN_WIDTH_PX = 280;
+        const CHAT_MIN_HEIGHT_PX = 240;
         let chatAnimToken = 0;
         let chatOpenBlockedUntil = 0;
         let chatTogglePointerId = null;
@@ -7042,6 +7164,43 @@
             return { width, height, maxHeight: maxH };
         }
 
+        function loadChatCardSize() {
+            try {
+                const raw = localStorage.getItem(CHAT_CARD_SIZE_KEY);
+                if (!raw) return null;
+                const p = JSON.parse(raw);
+                if (typeof p.width !== 'number' || typeof p.height !== 'number') return null;
+                const maxW = Math.max(CHAT_MIN_WIDTH_PX, window.innerWidth - 32);
+                const maxH = Math.min(420, Math.max(CHAT_MIN_HEIGHT_PX, window.innerHeight - 72));
+                return {
+                    width: Math.max(CHAT_MIN_WIDTH_PX, Math.min(p.width, maxW)),
+                    height: Math.max(CHAT_MIN_HEIGHT_PX, Math.min(p.height, maxH)),
+                    maxHeight: maxH,
+                };
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function saveChatCardSize(card) {
+            const rect = card.getBoundingClientRect();
+            try {
+                localStorage.setItem(
+                    CHAT_CARD_SIZE_KEY,
+                    JSON.stringify({
+                        width: Math.round(rect.width),
+                        height: Math.round(rect.height),
+                    })
+                );
+            } catch (_) {
+                /* ignore */
+            }
+        }
+
+        function getChatCardDimensions() {
+            return loadChatCardSize() || chatOpenDimensions();
+        }
+
         function chatDockRect(width, height) {
             return {
                 left: window.innerWidth - CHAT_DOCK_INSET_PX - width,
@@ -7080,9 +7239,9 @@
                 card.style.left = 'auto';
                 card.style.top = 'auto';
             } else {
-                const dims = chatOpenDimensions();
+                const dims = getChatCardDimensions();
                 chatDockBottomRight(card);
-                card.style.width = '';
+                card.style.width = dims.width + 'px';
                 card.style.height = dims.height + 'px';
                 card.style.maxHeight = dims.maxHeight + 'px';
             }
@@ -7185,7 +7344,7 @@
                 section.style.display = 'flex';
                 section.style.opacity = '0';
             }
-            const dims = chatOpenDimensions();
+            const dims = getChatCardDimensions();
             const fromRect = chatDockRect(CHAT_MINIMIZED_SIZE_PX, CHAT_MINIMIZED_SIZE_PX);
             const toRect = chatDockRect(dims.width, dims.height);
             card.style.left = fromRect.left + 'px';
@@ -7226,7 +7385,7 @@
             const collapseBtn = document.getElementById('atelierChatCollapseBtn');
             if (!card || !handle || !CHAT_ENABLED) return;
 
-            let chatCardState = loadChatCardState();
+            let chatCardState = CHAT_START_MINIMIZED ? { minimized: true } : loadChatCardState();
             refreshChatLucideIcons();
             applyChatCardState(card, chatCardState);
 
@@ -7423,6 +7582,80 @@
                     applyChatCardState(card, chatCardState);
                     reclampCardPosition();
                 }
+            });
+
+            initChatCardResize(card, chatCardState);
+        }
+
+        function initChatCardResize(card, chatCardState) {
+            const handle = document.getElementById('atelierChatResize');
+            if (!card || !handle) return;
+
+            let resizing = false;
+            let anchorRight = 0;
+            let anchorBottom = 0;
+
+            function onResizeMove(e) {
+                if (!resizing) return;
+                const maxW = Math.max(CHAT_MIN_WIDTH_PX, window.innerWidth - 16);
+                const maxH = Math.max(CHAT_MIN_HEIGHT_PX, window.innerHeight - 16);
+                let newLeft = Math.max(8, Math.min(e.clientX, anchorRight - CHAT_MIN_WIDTH_PX));
+                let newTop = Math.max(8, Math.min(e.clientY, anchorBottom - CHAT_MIN_HEIGHT_PX));
+                let newW = Math.min(maxW, anchorRight - newLeft);
+                let newH = Math.min(maxH, anchorBottom - newTop);
+                newW = Math.max(CHAT_MIN_WIDTH_PX, newW);
+                newH = Math.max(CHAT_MIN_HEIGHT_PX, newH);
+                newLeft = anchorRight - newW;
+                newTop = anchorBottom - newH;
+                card.style.width = newW + 'px';
+                card.style.height = newH + 'px';
+                card.style.maxHeight = newH + 'px';
+                card.style.left = newLeft + 'px';
+                card.style.top = newTop + 'px';
+                card.style.right = 'auto';
+                card.style.bottom = 'auto';
+            }
+
+            function onResizeEnd() {
+                if (!resizing) return;
+                resizing = false;
+                handle.classList.remove('is-resizing');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                document.removeEventListener('mousemove', onResizeMove);
+                document.removeEventListener('mouseup', onResizeEnd);
+                saveChatCardSize(card);
+                try {
+                    const rect = card.getBoundingClientRect();
+                    localStorage.setItem(
+                        CHAT_CARD_POS_KEY,
+                        JSON.stringify({ left: Math.round(rect.left), top: Math.round(rect.top) })
+                    );
+                } catch (_) {
+                    /* ignore */
+                }
+            }
+
+            handle.addEventListener('mousedown', function (e) {
+                if (e.button !== 0 || chatCardState.minimized) return;
+                e.preventDefault();
+                e.stopPropagation();
+                const rect = card.getBoundingClientRect();
+                card.style.left = rect.left + 'px';
+                card.style.top = rect.top + 'px';
+                card.style.right = 'auto';
+                card.style.bottom = 'auto';
+                card.style.width = rect.width + 'px';
+                card.style.height = rect.height + 'px';
+                card.style.maxHeight = rect.height + 'px';
+                anchorRight = rect.right;
+                anchorBottom = rect.bottom;
+                resizing = true;
+                handle.classList.add('is-resizing');
+                document.body.style.cursor = 'nwse-resize';
+                document.body.style.userSelect = 'none';
+                document.addEventListener('mousemove', onResizeMove);
+                document.addEventListener('mouseup', onResizeEnd);
             });
         }
 
@@ -7627,7 +7860,7 @@
             
             // Initialize selection and breadcrumb
             updateSelection('overview');
-            
+
             renderDiagram(currentDiagramCode, overviewLinks, 'overview');
             updatePipelinePanel();
 
@@ -8013,18 +8246,10 @@
         const chatSend = document.getElementById('chatSend');
         const chatMessages = document.getElementById('chatMessages');
         
-        // API base: static demo (8080 / npm run demo :9891) → FastAPI on 8001; production → same-origin /api (Vercel)
         function resolveChatApiBase() {
             const explicit = new URLSearchParams(window.location.search).get('chatApi');
             if (explicit != null && String(explicit).trim() !== '') {
                 return String(explicit).trim();
-            }
-            const port = window.location.port;
-            if (port === '8080' || port === '9891') {
-                return 'http://127.0.0.1:8001';
-            }
-            if (port === '8000' || port === '8001') {
-                return window.location.origin;
             }
             const origin = window.location.origin;
             if (!origin || origin === 'null') return '';
@@ -8433,8 +8658,19 @@
                 }
                 const data = await res.json();
                 chatHistory = data.history != null ? data.history : null;
-                if (loadingEl) loadingEl.remove();
-                if (ui) addChatMessage(data.response || 'No response.', 'assistant');
+                if (ui) {
+                    const reply = data.response || 'No response.';
+                    if (loadingEl) {
+                        streamTextIntoChatElement(loadingEl, reply);
+                        loadingEl = null;
+                    } else {
+                        const el = addChatMessage('', 'assistant');
+                        streamTextIntoChatElement(el, reply);
+                    }
+                } else if (loadingEl) {
+                    loadingEl.remove();
+                    loadingEl = null;
+                }
                 return { ok: true, mode: 'api' };
             } catch (e) {
                 if (loadingEl) loadingEl.remove();
@@ -8631,7 +8867,7 @@
             window.__atelierSSE = es;
         })();
     </script>
-    <script type="module" src="./reactflow-r6.mjs?v=hide-help-when-detail-v1"></script>
+    <script type="module" src="./reactflow-r6.mjs?v=layout-instant-v6"></script>
 </body>
 </html>
 

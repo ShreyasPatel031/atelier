@@ -1,0 +1,2788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeWiki Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11.9.0/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 15px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-button {
+            padding: 8px 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background: #1d4ed8;
+        }
+
+        .back-button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            flex: 1;
+        }
+        
+        .repo-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: white;
+            color: #2563eb;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .repo-link:hover {
+            background: #f8fafc;
+            border-color: #2563eb;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .diagram-pane {
+            width: 50%;
+            border-right: 1px solid #e2e8f0;
+            overflow: hidden;
+            background: #ffffff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .zoom-controls {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            color: #475569;
+        }
+        
+        .zoom-btn:hover {
+            background: #f1f5f9;
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+        
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .zoom-level {
+            font-size: 13px;
+            color: #64748b;
+            min-width: 50px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .zoom-hint {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-left: auto;
+        }
+        
+        .view-tune-panel {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            z-index: 9999;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 11px;
+            background: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 0;
+            max-width: min(320px, calc(100vw - 24px));
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+        }
+        .view-tune-panel > summary {
+            cursor: pointer;
+            padding: 8px 12px;
+            list-style: none;
+            user-select: none;
+            color: #94a3b8;
+        }
+        .view-tune-panel > summary::-webkit-details-marker { display: none; }
+        .view-tune-panel[open] > summary { border-bottom: 1px solid #334155; color: #cbd5e1; }
+        .view-tune-body {
+            padding: 10px 12px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .view-tune-row label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            color: #94a3b8;
+        }
+        .view-tune-row input[type="range"] { width: 100%; accent-color: #38bdf8; }
+        .view-tune-val { color: #38bdf8; font-weight: 600; }
+        .view-tune-hint { color: #64748b; font-size: 10px; line-height: 1.35; }
+        
+        .diagram-viewport {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+        }
+        
+        /* Pointer over diagram nodes (overrides inherited grab from .diagram-viewport) */
+        #diagramViewport #mermaid-diagram svg g.node,
+        #diagramViewport #mermaid-diagram svg g.node * {
+            cursor: pointer !important;
+        }
+        
+        #diagramViewport #mermaid-diagram svg g.cluster,
+        #diagramViewport #mermaid-diagram svg g.edgePath,
+        #diagramViewport #mermaid-diagram svg g.edgePaths {
+            cursor: default;
+        }
+        
+        #diagramViewport #mermaid-diagram svg g.node rect,
+        #diagramViewport #mermaid-diagram svg g.node circle,
+        #diagramViewport #mermaid-diagram svg g.node polygon,
+        #diagramViewport #mermaid-diagram svg g.node ellipse,
+        #diagramViewport #mermaid-diagram svg g.node .label-container path,
+        #diagramViewport #mermaid-diagram svg g.cluster rect,
+        #diagramViewport #mermaid-diagram svg g.cluster path,
+        #diagramViewport #mermaid-diagram svg g.edgePath path,
+        #diagramViewport #mermaid-diagram svg g.edgePath line,
+        #diagramViewport #mermaid-diagram svg g.edgePath polyline,
+        #diagramViewport #mermaid-diagram svg g.edgePaths > path,
+        #diagramViewport #mermaid-diagram svg g.edgePaths > line,
+        #diagramViewport #mermaid-diagram svg g.edgePaths > polyline {
+            transition: stroke-width 0.12s ease, stroke 0.12s ease;
+        }
+        
+        #diagramViewport #mermaid-diagram svg g.edgePath path,
+        #diagramViewport #mermaid-diagram svg g.edgePath line,
+        #diagramViewport #mermaid-diagram svg g.edgePath polyline,
+        #diagramViewport #mermaid-diagram svg g.edgePath polygon,
+        #diagramViewport #mermaid-diagram svg g.edgePaths > path,
+        #diagramViewport #mermaid-diagram svg g.edgePaths > line,
+        #diagramViewport #mermaid-diagram svg g.edgePaths > polyline,
+        #diagramViewport #mermaid-diagram svg g.edgePaths > polygon {
+            pointer-events: stroke;
+        }
+        
+        .diagram-viewport:active {
+            cursor: grabbing;
+        }
+        
+        .diagram-canvas {
+            transform-origin: 0 0;
+            transition: transform 0.1s ease-out;
+            padding: 20px;
+            min-width: 100%;
+            min-height: 100%;
+        }
+        
+        .diagram-canvas.panning {
+            transition: none;
+        }
+
+        .doc-pane {
+            width: 50%;
+            overflow: auto;
+            padding: 20px 30px;
+            background: #ffffff;
+        }
+
+        .doc-content {
+            max-width: 800px;
+            line-height: 1.7;
+            color: #334155;
+        }
+        
+        .doc-content h1 {
+            font-size: 28px;
+            margin-bottom: 16px;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+        
+        .doc-content h2 {
+            font-size: 22px;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            color: #334155;
+        }
+        
+        .doc-content h3 {
+            font-size: 18px;
+            margin-top: 24px;
+            margin-bottom: 10px;
+            color: #475569;
+        }
+        
+        .doc-content p {
+            margin: 12px 0;
+        }
+        
+        .doc-content ul, .doc-content ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        
+        .doc-content li {
+            margin: 6px 0;
+        }
+        
+        .doc-content a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        
+        .doc-content a:hover {
+            text-decoration: underline;
+        }
+        
+        .doc-content code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            color: #e11d48;
+        }
+        
+        .doc-content pre {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        
+        .doc-content pre code {
+            background: transparent;
+            padding: 0;
+            color: #334155;
+        }
+
+        .doc-content blockquote {
+            border-left: 4px solid #2563eb;
+            padding-left: 16px;
+            margin: 16px 0;
+            color: #64748b;
+            background: #f8fafc;
+            padding: 16px 16px 16px 24px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .doc-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        .doc-content th, .doc-content td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .doc-content th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+        
+        /* Q&A Section */
+        .qa-section {
+            position: sticky;
+            bottom: 0;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 12px 16px;
+            margin: 20px -30px -20px -30px;
+        }
+        
+        .qa-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .qa-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        
+        .qa-input:focus {
+            border-color: #2563eb;
+        }
+        
+        .qa-input::placeholder {
+            color: #94a3b8;
+        }
+        
+        .qa-btn {
+            padding: 10px 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+        
+        .qa-btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .qa-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        .qa-response {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #334155;
+            display: none;
+        }
+        
+        .qa-response.visible {
+            display: block;
+        }
+        
+        .qa-response.loading {
+            color: #64748b;
+            font-style: italic;
+        }
+        
+        .qa-response.error {
+            color: #dc2626;
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+        
+        .qa-hint {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+        
+        .api-key-setup {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .api-key-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: monospace;
+        }
+        
+        .api-key-btn {
+            padding: 8px 14px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .api-key-btn:hover {
+            background: #059669;
+        }
+        
+        .api-key-status {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .api-key-status.connected {
+            color: #10b981;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #dc2626;
+            background: #fef2f2;
+            border-radius: 8px;
+            margin: 20px;
+        }
+
+        /* Make clickable nodes have blue border only */
+        svg g.node.clickable-node rect,
+        svg g.node.clickable-node circle,
+        svg g.node.clickable-node polygon,
+        svg g.node.clickable-node ellipse,
+        .mermaid g.node.clickable-node rect,
+        .mermaid g.node.clickable-node circle,
+        .mermaid g.node.clickable-node polygon,
+        .mermaid g.node.clickable-node ellipse,
+        #mermaid-diagram g.node.clickable-node rect,
+        #mermaid-diagram g.node.clickable-node circle,
+        #mermaid-diagram g.node.clickable-node polygon,
+        #mermaid-diagram g.node.clickable-node ellipse,
+        g.clickable-node rect,
+        g.clickable-node circle,
+        g.clickable-node polygon,
+        g.clickable-node ellipse,
+        .clickable-node rect,
+        .clickable-node circle,
+        .clickable-node polygon,
+        .clickable-node path:not(.edgePath *),
+        .clickable-node ellipse {
+            stroke: #2563eb !important;
+            stroke-width: 3px !important;
+        }
+
+        .clickable-node text,
+        .clickable-node tspan {
+            font-weight: 600 !important;
+        }
+
+        .clickable-node,
+        g.node.clickable-node {
+            cursor: pointer !important;
+        }
+        
+        .clickable-node *,
+        g.node.clickable-node * {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+        
+        .mermaid .edgePath path,
+        .mermaid .edgePath .path,
+        .mermaid .edgePaths > path {
+            stroke: inherit !important;
+        }
+
+        #diagramViewport #mermaid-diagram svg g.edgeLabels,
+        #diagramViewport #mermaid-diagram svg g.edgeLabel {
+            pointer-events: auto;
+        }
+
+        #diagramViewport #mermaid-diagram svg g.edgeLabel span.edgeLabel {
+            color: #000000 !important;
+        }
+        #diagramViewport #mermaid-diagram svg g.edgeLabel rect {
+            fill: #ffffff !important;
+            stroke: #e2e8f0 !important;
+            stroke-width: 1px !important;
+        }
+        #diagramViewport #mermaid-diagram svg g.edgeLabel text,
+        #diagramViewport #mermaid-diagram svg g.edgeLabel tspan {
+            fill: #000000 !important;
+        }
+        #diagramViewport #mermaid-diagram svg g.edgeLabel foreignObject div.labelBkg {
+            color: #000000 !important;
+            background-color: #ffffff !important;
+        }
+        
+        /* Selection styling - light grey border */
+        .selected-node rect,
+        .selected-node circle,
+        .selected-node polygon,
+        .selected-node path,
+        .selected-node ellipse {
+            stroke: #94a3b8 !important;
+            stroke-width: 4px !important;
+            fill: #f1f5f9 !important;
+        }
+        
+        .selected-subgraph > rect,
+        .selected-subgraph > .cluster-label rect,
+        svg g.selected-subgraph > rect {
+            stroke: #94a3b8 !important;
+            stroke-width: 3px !important;
+            fill: rgba(148, 163, 184, 0.1) !important;
+        }
+        
+        .selected-subgraph .flowchart-labelBox {
+            stroke: #94a3b8 !important;
+            stroke-width: 3px !important;
+        }
+        
+        /* Breadcrumb navigation */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+            color: #64748b;
+            flex-shrink: 0;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .breadcrumb-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .breadcrumb-link {
+            color: #2563eb;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+        
+        .breadcrumb-link:hover {
+            background: #e0e7ff;
+        }
+        
+        .breadcrumb-current {
+            color: #1e293b;
+            font-weight: 600;
+        }
+        
+        .breadcrumb-separator {
+            color: #cbd5e1;
+            font-size: 10px;
+        }
+
+        .collapse-button rect,
+        .collapse-button circle,
+        .collapse-button polygon {
+            stroke: #dc2626 !important;
+            stroke-width: 2px !important;
+        }
+
+        .collapse-button {
+            cursor: pointer !important;
+        }
+        
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            .diagram-pane, .doc-pane {
+                width: 100%;
+                height: 50%;
+            }
+            .diagram-pane {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="back-button" id="backButton" onclick="goBack()">← Back</button>
+        <div class="title" id="moduleTitle">📚 Loading...</div>
+        <a href="#" class="repo-link" id="repoLink" target="_blank" style="display: none;">🔗 View Repository</a>
+    </div>
+            
+    <div class="container">
+        <div class="diagram-pane">
+            <div class="breadcrumb" id="breadcrumb">
+                <span class="breadcrumb-item">
+                    <span class="breadcrumb-current" id="breadcrumbRoot">Loading...</span>
+                </span>
+            </div>
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                <span class="zoom-level" id="zoomLevel">100%</span>
+                <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⟲</button>
+                <button class="zoom-btn" onclick="fitToView()" title="Fit to View">⊡</button>
+                <span class="zoom-hint">Scroll / two-finger trackpad → pan • ⌘/Ctrl+scroll or pinch → zoom • Drag to pan</span>
+            </div>
+            <details class="view-tune-panel" id="viewTunePanel">
+                <summary>Pan / zoom tune (dev)</summary>
+                <div class="view-tune-body">
+                    <div class="view-tune-row">
+                        <label>
+                            Wheel / trackpad pan sensitivity
+                            <span class="view-tune-val" id="tunePanVal">2.00</span>
+                            <input type="range" id="tunePanMult" min="0.25" max="3" step="0.05" value="2" />
+                        </label>
+                    </div>
+                    <div class="view-tune-row">
+                        <label>
+                            Zoom step (⌘/Ctrl+scroll &amp; +/− buttons)
+                            <span class="view-tune-val" id="tuneZoomVal">0.20</span>
+                            <input type="range" id="tuneZoomStep" min="0.05" max="1" step="0.05" value="0.2" />
+                        </label>
+                    </div>
+                    <div class="view-tune-row">
+                        <label>
+                            Edge hover hit width (px)
+                            <span class="view-tune-val" id="tuneEdgeHitVal">14</span>
+                            <input type="range" id="tuneEdgeHit" min="6" max="48" step="1" value="14" />
+                        </label>
+                    </div>
+                    <p class="view-tune-hint">Console: <code style="color:#94a3b8">viewTune.panWheelMult = 1.2</code> then <code style="color:#94a3b8">syncViewTuneUI()</code></p>
+                </div>
+            </details>
+            <div class="diagram-viewport" id="diagramViewport">
+                <div class="diagram-canvas" id="diagramCanvas">
+                    <div id="mermaid-diagram" class="loading">Loading diagram...</div>
+                </div>
+            </div>
+        </div>
+        <div class="doc-pane">
+            <div class="doc-content" id="docContent">Loading documentation...</div>
+            <div class="qa-section" id="qaSection">
+                <div id="apiKeySetup" class="api-key-setup" style="display: none;">
+                    <input type="password" id="apiKeyInput" class="api-key-input" placeholder="Enter Gemini API key...">
+                    <button class="api-key-btn" onclick="saveApiKey()">Save</button>
+                    <span class="api-key-status" id="apiKeyStatus"></span>
+                </div>
+                <div id="qaInterface">
+                    <div class="qa-input-row">
+                        <input type="text" id="qaInput" class="qa-input" placeholder="Ask about this module..." onkeypress="handleQaKeypress(event)">
+                        <button class="qa-btn" id="qaBtn" onclick="askQuestion()">Ask</button>
+                    </div>
+                    <div class="qa-response" id="qaResponse"></div>
+                    <div class="qa-hint" id="qaHint">Press / to focus • Enter to ask • Answers are brief</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ============================================================
+        // GENERIC VIEWER ENGINE
+        // This viewer dynamically loads repo data from JSON/MD files
+        // ============================================================
+        
+        // Get repo path from URL query param: ?repo=flask or ?repo=repos/flask
+        const urlParams = new URLSearchParams(window.location.search);
+        const repoPath = urlParams.get('repo') || 'flask';
+        // Ensure relative path with ./ prefix for correct resolution
+        const basePath = repoPath.startsWith('repos/') ? `./${repoPath}` : `./repos/${repoPath}`;
+        
+        // State
+        let REPO_TITLE = '';
+        let REPO_URL = '';
+        let MODULE_TREE = {};
+        let DOCS_CONTENT = {};
+        let moduleData = {};
+        let overviewLinks = {};
+        let currentDiagramCode = '';
+        let baseDiagramCode = '';
+        let navigationHistory = [];
+        let expandedNodes = new Set();
+        let currentModuleId = 'overview';
+        let selectedModuleId = null;  // Currently selected module
+        let selectedDiagramNodeId = null;
+        let selectionPath = [];       // Breadcrumb path: [{id, name}, ...]
+        /** Last object from buildDiagramLogicalIdRegistry() for the current render. */
+        let lastDiagramRegistry = null;
+        
+        // Initialize mermaid — NYC Subway (MTA) palette (aligned with demo/index.html)
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            securityLevel: 'loose',
+            themeVariables: {
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontSize: '14px',
+                primaryColor: '#0039A6',
+                primaryTextColor: '#ffffff',
+                primaryBorderColor: '#002f85',
+                secondaryColor: '#ffffff',
+                secondaryTextColor: '#0039A6',
+                secondaryBorderColor: '#FF6319',
+                tertiaryColor: '#f9fafb',
+                tertiaryTextColor: '#1e293b',
+                tertiaryBorderColor: '#00933C',
+                lineColor: '#808183',
+                clusterBkg: '#ebecee',
+                clusterBorder: '#A7A9AC',
+                edgeLabelBackground: '#ffffff',
+                edgeLabelColor: '#000000',
+                mainBkg: '#ffffff',
+                secondBkg: '#fff5f0'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 12,
+                nodeSpacing: 56,
+                rankSpacing: 64,
+                diagramPadding: 16
+            }
+        });
+        
+        // ============================================================
+        // DATA LOADING
+        // ============================================================
+        
+        async function loadFile(filename) {
+            try {
+                const response = await fetch(`${basePath}/${filename}`);
+                if (!response.ok) throw new Error(`Failed to load ${filename}`);
+                const text = await response.text();
+                return filename.endsWith('.json') ? JSON.parse(text) : text;
+            } catch (err) {
+                console.error(`Error loading ${filename}:`, err);
+                return null;
+            }
+        }
+        
+        async function loadAllData() {
+            try {
+                // Load metadata
+                const metadata = await loadFile('metadata.json');
+                if (metadata) {
+                    const repoPathParts = (metadata.generation_info?.repo_path || repoPath).split('/');
+                    REPO_TITLE = repoPathParts[repoPathParts.length - 1] || 'Repository';
+                }
+                
+                // Load module tree
+                MODULE_TREE = await loadFile('module_tree.json') || {};
+                
+                // Load overview.md
+                const overviewMd = await loadFile('overview.md');
+                if (overviewMd) {
+                    DOCS_CONTENT['overview.md'] = overviewMd;
+                }
+                
+                // Load all module documentation files
+                const moduleFiles = Object.keys(MODULE_TREE).map(key => `${key}.md`);
+                await Promise.all(moduleFiles.map(async (filename) => {
+                    const content = await loadFile(filename);
+                    if (content) {
+                        DOCS_CONTENT[filename] = content;
+                    }
+                }));
+                
+                // Update UI
+                document.title = REPO_TITLE;
+                document.getElementById('moduleTitle').textContent = `📚 ${REPO_TITLE}`;
+                
+                // Try to extract repo URL from overview or hide link
+                const repoLinkEl = document.getElementById('repoLink');
+                if (REPO_URL) {
+                    repoLinkEl.href = REPO_URL;
+                    repoLinkEl.style.display = 'inline-flex';
+                }
+                
+                return true;
+            } catch (err) {
+                console.error('Failed to load data:', err);
+                return false;
+            }
+        }
+        
+        // ============================================================
+        // HELPER FUNCTIONS
+        // ============================================================
+        
+        function formatModuleName(key) {
+            return key.split('_').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        }
+
+        // ------------------------------------------------------------
+        // RENDERER BOUNDARY — diagram engine is pluggable (see demo/index.html)
+        // ------------------------------------------------------------
+
+        const MERMAID_NODE_ID_RESERVED = new Set([
+            'subgraph', 'graph', 'flowchart', 'end', 'classdef', 'class', 'style',
+            'direction', 'linkstyle', 'click'
+        ]);
+
+        function decodeMermaidLabelFromSource(raw) {
+            if (raw == null) return '';
+            return String(raw)
+                .replace(/#quot;/g, '"')
+                .replace(/#40;/g, '(')
+                .replace(/#41;/g, ')')
+                .replace(/#91;/g, '[')
+                .replace(/#93;/g, ']')
+                .replace(/#123;/g, '{')
+                .replace(/#125;/g, '}');
+        }
+
+        function normalizeDiagramLabelKey(s) {
+            return decodeMermaidLabelFromSource(String(s)).replace(/\s+/g, ' ').trim();
+        }
+
+        function tryParseMermaidEdgeLine(trimmed) {
+            const m = trimmed.match(
+                /^([A-Za-z_][\w]*)\s*(?:={2,3}>|-{2,3}[.=]?-?>|-\.->|\.-{2,}>)\s*(.+)$/
+            );
+            if (!m) return null;
+            const src = m[1];
+            let rest = m[2].trim();
+            let label = '';
+            if (rest.startsWith('|')) {
+                const close = rest.indexOf('|', 1);
+                if (close === -1) return null;
+                label = rest.slice(1, close).replace(/^"|"$/g, '').trim();
+                rest = rest.slice(close + 1).trim();
+            }
+            const dm = rest.match(/^([A-Za-z_][\w]*)\s*$/);
+            if (!dm) return null;
+            const dst = dm[1];
+            if (MERMAID_NODE_ID_RESERVED.has(src.toLowerCase()) || MERMAID_NODE_ID_RESERVED.has(dst.toLowerCase())) {
+                return null;
+            }
+            return { source: src, target: dst, rawLabel: label };
+        }
+
+        function parseMermaidEdgesForRegistry(mermaidCode) {
+            const edges = [];
+            const lines = String(mermaidCode || '').split(/\r?\n/);
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('%%')) continue;
+                const tl = trimmed.toLowerCase();
+                if (/^subgraph\s|^classdef\s|^class\s|^style\s|^linkstyle|^direction\s|^click\s/.test(tl)) continue;
+                if (/^\s*end\s*$/i.test(trimmed)) continue;
+                if (!/(?:={2,3}>|-{2,3}[.=]?-?>|-\.->|\.-{2,}>)/.test(trimmed)) continue;
+                const e = tryParseMermaidEdgeLine(trimmed);
+                if (e) edges.push(e);
+            }
+            return edges;
+        }
+
+        function parseMermaidDefinitionsForRegistry(mermaidCode) {
+            const nodeDefs = [];
+            const clusterDefs = [];
+            const lines = String(mermaidCode || '').split(/\r?\n/);
+            const nodeBracketRe = /\b([A-Za-z_][\w]*)\s*\[\s*"([^"]*)"\s*\]/g;
+            const nodeCircleQuotedRe = /\b([A-Za-z_][\w]*)\s*\(\(\s*"([^"]*)"\s*\)\)/g;
+            const nodeStadiumQuotedRe = /\b([A-Za-z_][\w]*)\s*\(\s*"([^"]*)"\s*\)/g;
+
+            function pushNodeIfAllowed(id, rawLabel) {
+                if (MERMAID_NODE_ID_RESERVED.has(id.toLowerCase())) return;
+                nodeDefs.push({ logicalId: id, rawLabel });
+            }
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('%%')) continue;
+                if (/^classdef\s|^class\s|^linkstyle\s|^style\s|^\s*direction\s/i.test(trimmed)) continue;
+
+                if (/^subgraph\s+/i.test(trimmed)) {
+                    const sm = trimmed.match(/^subgraph\s+([A-Za-z_][\w]*)\s*\[\s*"([^"]*)"\s*\]/i);
+                    if (sm) {
+                        clusterDefs.push({ logicalId: sm[1], rawLabel: sm[2] });
+                    }
+                    continue;
+                }
+
+                let nm;
+                while ((nm = nodeBracketRe.exec(line)) !== null) {
+                    pushNodeIfAllowed(nm[1], nm[2]);
+                }
+                nodeBracketRe.lastIndex = 0;
+
+                while ((nm = nodeCircleQuotedRe.exec(line)) !== null) {
+                    pushNodeIfAllowed(nm[1], nm[2]);
+                }
+                nodeCircleQuotedRe.lastIndex = 0;
+
+                while ((nm = nodeStadiumQuotedRe.exec(line)) !== null) {
+                    pushNodeIfAllowed(nm[1], nm[2]);
+                }
+                nodeStadiumQuotedRe.lastIndex = 0;
+            }
+            return { nodeDefs, clusterDefs };
+        }
+
+        function collectDuplicateLabelWarnings(defs, kind) {
+            const byLabel = new Map();
+            for (const { logicalId, rawLabel } of defs) {
+                const k = normalizeDiagramLabelKey(rawLabel);
+                if (!k) continue;
+                if (!byLabel.has(k)) byLabel.set(k, new Set());
+                byLabel.get(k).add(logicalId);
+            }
+            const out = [];
+            for (const [label, ids] of byLabel) {
+                if (ids.size > 1) {
+                    out.push(`[diagram] Duplicate ${kind} display label "${label}" → logical ids: ${[...ids].join(', ')}`);
+                }
+            }
+            return out;
+        }
+
+        function buildLabelQueues(defs) {
+            const m = new Map();
+            for (const { logicalId, rawLabel } of defs) {
+                const k = normalizeDiagramLabelKey(rawLabel);
+                if (!m.has(k)) m.set(k, []);
+                m.get(k).push(logicalId);
+            }
+            return m;
+        }
+
+        function cloneQueueMap(queueMap) {
+            const out = new Map();
+            for (const [k, arr] of queueMap) {
+                out.set(k, [...arr]);
+            }
+            return out;
+        }
+
+        function buildDiagramLogicalIdRegistry(mermaidCode) {
+            const { nodeDefs, clusterDefs } = parseMermaidDefinitionsForRegistry(mermaidCode);
+            const edgeDefs = parseMermaidEdgesForRegistry(mermaidCode);
+            const warnings = [
+                ...collectDuplicateLabelWarnings(nodeDefs, 'node'),
+                ...collectDuplicateLabelWarnings(clusterDefs, 'cluster')
+            ];
+            return {
+                nodeQueues: buildLabelQueues(nodeDefs),
+                clusterQueues: buildLabelQueues(clusterDefs),
+                edgeDefs,
+                duplicateLabelWarnings: warnings
+            };
+        }
+
+        function getFlowchartNodeVisibleLabel(g) {
+            const fo = g.querySelector('foreignObject');
+            if (fo && fo.textContent) return fo.textContent.trim();
+            const nl = g.querySelector('.nodeLabel');
+            if (nl && nl.textContent) return nl.textContent.trim();
+            const tx = g.querySelector('text');
+            if (tx && tx.textContent) return tx.textContent.trim();
+            return '';
+        }
+
+        function getClusterVisibleLabel(clusterG) {
+            const lab = clusterG.querySelector('.cluster-label');
+            if (lab && lab.textContent) return lab.textContent.trim();
+            const fo = clusterG.querySelector('foreignObject');
+            if (fo && fo.textContent) return fo.textContent.trim();
+            const tx = clusterG.querySelector('text');
+            if (tx && tx.textContent) return tx.textContent.trim();
+            return '';
+        }
+
+        function buildMermaidEdgePathIdToDefMap(edgeDefs) {
+            const idToDef = new Map();
+            if (!edgeDefs || !edgeDefs.length) return idToDef;
+            const pairCount = new Map();
+            for (const def of edgeDefs) {
+                if (!def || !def.source || !def.target) continue;
+                const pk = `${def.source}\0${def.target}`;
+                const prev = pairCount.get(pk) || 0;
+                const counter = prev === 0 ? 0 : prev + 1;
+                pairCount.set(pk, prev + 1);
+                const pathId = `L_${def.source}_${def.target}_${counter}`;
+                idToDef.set(pathId, def);
+            }
+            return idToDef;
+        }
+
+        function getFlowchartEdgePathDomId(edgePathEl) {
+            if (!edgePathEl) return '';
+            const tag = edgePathEl.tagName && edgePathEl.tagName.toLowerCase();
+            if (tag === 'path') {
+                return edgePathEl.getAttribute('id') || edgePathEl.id || '';
+            }
+            const p =
+                edgePathEl.querySelector('path.edge-thickness-normal[id], path.edge-thickness-thick[id], path[id]') ||
+                edgePathEl.querySelector('path');
+            if (!p) return '';
+            return p.getAttribute('id') || p.id || '';
+        }
+
+        function getFlatFlowchartEdgePathElements(svg) {
+            const eps = svg && svg.querySelector('g.edgePaths');
+            if (!eps) return [];
+            return [...eps.querySelectorAll(':scope > path')].filter(
+                (p) => !p.classList.contains('edge-hit-area') && !(p.closest && p.closest('defs'))
+            );
+        }
+
+        function lookupEdgeDefByMermaidPathId(idToDef, rawPathId) {
+            if (!rawPathId || !idToDef.size) return null;
+            if (idToDef.has(rawPathId)) return idToDef.get(rawPathId);
+            for (const [k, def] of idToDef) {
+                if (rawPathId === k || rawPathId.endsWith(`-${k}`)) return def;
+            }
+            return null;
+        }
+
+        function stampLogicalIdsOntoSvg(svg, registry) {
+            if (!svg || !registry) {
+                return {
+                    unstampedNodes: [],
+                    unstampedClusters: [],
+                    edgePathMismatch: null,
+                    unstampedEdgePathIds: []
+                };
+            }
+            const nq = cloneQueueMap(registry.nodeQueues);
+            const cq = cloneQueueMap(registry.clusterQueues);
+            const unstampedNodes = [];
+            const unstampedClusters = [];
+
+            function takeFromQueue(queueMap, labelKey) {
+                const q = queueMap.get(labelKey);
+                if (!q || q.length === 0) return null;
+                return q.shift();
+            }
+
+            svg.querySelectorAll('g.node').forEach((g) => {
+                const labelKey = normalizeDiagramLabelKey(getFlowchartNodeVisibleLabel(g));
+                const lid = labelKey ? takeFromQueue(nq, labelKey) : null;
+                if (lid) {
+                    g.setAttribute('data-logical-id', lid);
+                } else if (labelKey) {
+                    unstampedNodes.push(labelKey);
+                }
+            });
+
+            svg.querySelectorAll('g.cluster').forEach((g) => {
+                const labelKey = normalizeDiagramLabelKey(getClusterVisibleLabel(g));
+                const lid = labelKey ? takeFromQueue(cq, labelKey) : null;
+                if (lid) {
+                    g.setAttribute('data-logical-id', lid);
+                } else if (labelKey) {
+                    unstampedClusters.push(labelKey);
+                }
+            });
+
+            const edgeDefs = registry.edgeDefs || [];
+            let edgePathMismatch = null;
+            const unstampedEdgePathIds = [];
+            const idToDef = buildMermaidEdgePathIdToDefMap(edgeDefs);
+            const legacyEdgeGroups = [...svg.querySelectorAll('g.edgePath')];
+            const flatEdgePaths = legacyEdgeGroups.length ? [] : getFlatFlowchartEdgePathElements(svg);
+            const domEdgeCount = legacyEdgeGroups.length || flatEdgePaths.length;
+            if (edgeDefs.length > 0 || domEdgeCount > 0) {
+                const stampEdgeEl = (el, pid) => {
+                    const def = lookupEdgeDefByMermaidPathId(idToDef, pid);
+                    if (def) {
+                        el.setAttribute('data-edge-source', def.source);
+                        el.setAttribute('data-edge-target', def.target);
+                        if (def.rawLabel) {
+                            el.setAttribute('data-edge-label', def.rawLabel);
+                        }
+                    } else if (pid) {
+                        unstampedEdgePathIds.push(pid);
+                    }
+                };
+                if (legacyEdgeGroups.length) {
+                    legacyEdgeGroups.forEach((g) => stampEdgeEl(g, getFlowchartEdgePathDomId(g)));
+                } else {
+                    flatEdgePaths.forEach((p) => stampEdgeEl(p, getFlowchartEdgePathDomId(p)));
+                }
+                if (domEdgeCount !== edgeDefs.length) {
+                    edgePathMismatch = { dom: domEdgeCount, parsed: edgeDefs.length };
+                }
+            }
+
+            return { unstampedNodes, unstampedClusters, edgePathMismatch, unstampedEdgePathIds };
+        }
+
+        function queryDiagramElementByLogicalId(svg, logicalId) {
+            if (!svg || !logicalId) return null;
+            try {
+                if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+                    return svg.querySelector(`[data-logical-id="${CSS.escape(logicalId)}"]`);
+                }
+            } catch (_) { /* fall through */ }
+            return svg.querySelector(`[data-logical-id="${String(logicalId).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"]`);
+        }
+
+        function clearDiagramShapeSelection() {
+            selectedDiagramNodeId = null;
+            updateSelectionHighlight(null);
+        }
+
+        function attachDiagramBackgroundDeselect(svg) {
+            if (!svg || svg.dataset.bgDeselectBound === '1') return;
+            svg.dataset.bgDeselectBound = '1';
+            svg.addEventListener(
+                'click',
+                (e) => {
+                    const t = e.target;
+                    if (
+                        t &&
+                        t.closest &&
+                        (t.closest('g.node') ||
+                            t.closest('g.cluster') ||
+                            t.closest('g.edgePath') ||
+                            t.closest('g.edgePaths') ||
+                            t.closest('g.edgeLabels'))
+                    ) {
+                        return;
+                    }
+                    clearDiagramShapeSelection();
+                },
+                false
+            );
+        }
+        
+        function extractMermaidFromMarkdown(markdown) {
+            const mermaidRegex = /```mermaid\n([\s\S]*?)```/g;
+            const match = mermaidRegex.exec(markdown);
+            return match ? match[1].trim() : null;
+        }
+        
+        function stripClickStatements(diagram) {
+            // Strip out click statements to allow custom click handling
+            // Also strip :::className styling from node definitions
+            let cleaned = diagram.replace(/^\s*click\s+.+$/gm, '');
+            cleaned = cleaned.replace(/:::[a-zA-Z_][a-zA-Z0-9_]*/g, '');
+            return cleaned;
+        }
+        
+        function sanitizeMermaidDiagram(diagram) {
+            return diagram || '';
+        }
+
+        /** DevTools: `getDiagramRegistry()` — registry for current diagram state. */
+        window.getDiagramRegistry = function getDiagramRegistry() {
+            const code = sanitizeMermaidDiagram(typeof currentDiagramCode !== 'undefined' ? currentDiagramCode : '');
+            const { nodeDefs, clusterDefs } = parseMermaidDefinitionsForRegistry(code);
+            const reg = buildDiagramLogicalIdRegistry(code);
+            const serializeQueues = (map) => {
+                const o = {};
+                for (const [k, v] of map) o[k] = [...v];
+                return o;
+            };
+            return {
+                diagramCodeChars: code.length,
+                currentModuleId: typeof currentModuleId !== 'undefined' ? currentModuleId : null,
+                duplicateLabelWarnings: reg.duplicateLabelWarnings,
+                nodeDefs,
+                clusterDefs,
+                edgeDefs: reg.edgeDefs || [],
+                nodeQueues: serializeQueues(reg.nodeQueues),
+                clusterQueues: serializeQueues(reg.clusterQueues),
+            };
+        };
+        
+        function generateModuleDiagram(key, data) {
+            if (!data.children || Object.keys(data.children).length === 0) {
+                return '';
+            }
+            
+            const formattedName = formatModuleName(key);
+            let diagram = `graph TD\n    ${key}["${formattedName}"]\n`;
+            
+            for (const [childKey, childData] of Object.entries(data.children)) {
+                const childFormatted = formatModuleName(childKey);
+                diagram += `    ${childKey}["${childFormatted}"]\n`;
+                diagram += `    ${key} --> ${childKey}\n`;
+            }
+            
+            return diagram;
+        }
+        
+        // ============================================================
+        // BUILD MODULE DATA
+        // ============================================================
+        
+        function buildModuleData() {
+            // Build overview from overview.md
+            const overviewContent = DOCS_CONTENT['overview.md'] || '';
+            const overviewDiagram = extractMermaidFromMarkdown(overviewContent);
+            
+            // FIRST: Build module data from tree so we have all modules available
+            buildModulesFromTree(MODULE_TREE, '');
+            
+            if (overviewDiagram) {
+                // Parse click statements to build node-to-module mappings (legacy support)
+                const clickRegex = /click\s+(\w+)\s+"([^"]+)"/g;
+                let match;
+                while ((match = clickRegex.exec(overviewDiagram)) !== null) {
+                    const nodeId = match[1];
+                    const targetFile = match[2];
+                    const moduleId = targetFile.replace('.md', '');
+                    overviewLinks[nodeId] = moduleId;
+                }
+                
+                // Also build label-to-module mappings from node definitions
+                const nodeDefRegex = /(\w+)\s*\["([^"]+)"\]/g;
+                while ((match = nodeDefRegex.exec(overviewDiagram)) !== null) {
+                    const nodeId = match[1];
+                    const label = match[2];
+                    if (overviewLinks[nodeId]) {
+                        overviewLinks[label] = overviewLinks[nodeId];
+                    }
+                }
+                
+                // Map nodes to modules ONLY if they match an actual module key in MODULE_TREE
+                // No fuzzy matching - only exact matches
+                buildExactModuleMappings(overviewDiagram);
+            }
+            
+            moduleData['overview'] = {
+                name: REPO_TITLE + ' Overview',
+                diagram: stripClickStatements(overviewDiagram || ''),
+                documentation: overviewContent || '# Overview\n\nNo overview available.',
+                links: overviewLinks
+            };
+        }
+        
+        // Build EXACT module mappings - only map nodes that exactly match module keys
+        // NO fuzzy matching - prevents false positives like mapping "Resolver" to "main"
+        function buildExactModuleMappings(diagram) {
+            // Get all module keys from the tree (flattened)
+            const moduleKeys = new Set();
+            
+            function collectModuleKeys(tree) {
+                for (const [key, data] of Object.entries(tree)) {
+                    moduleKeys.add(key);
+                    if (data.children) {
+                        collectModuleKeys(data.children);
+                    }
+                }
+            }
+            collectModuleKeys(MODULE_TREE);
+            
+            // Parse all node definitions from diagram
+            const nodeDefRegex = /(\w+)\s*\[["']?([^\]"']+)["']?\]/g;
+            let match;
+            while ((match = nodeDefRegex.exec(diagram)) !== null) {
+                const nodeId = match[1];
+                const label = match[2];
+                
+                // Skip if already mapped (from click statements)
+                if (overviewLinks[nodeId]) continue;
+                
+                // ONLY map if nodeId exactly matches a module key
+                if (moduleKeys.has(nodeId)) {
+                    overviewLinks[nodeId] = nodeId;
+                    overviewLinks[label] = nodeId;
+                }
+            }
+        }
+        
+        function buildModulesFromTree(tree, parentPath) {
+            for (const [key, data] of Object.entries(tree)) {
+                const moduleId = parentPath ? `${parentPath}/${key}` : key;
+                const formattedName = formatModuleName(key);
+                
+                // Try to get documentation for this module
+                const docFilename = `${key}.md`;
+                const documentation = DOCS_CONTENT[docFilename] || `# ${formattedName}\n\nNo documentation available.`;
+                
+                // Extract diagram from markdown FIRST, then fallback to generated
+                const extractedDiagram = extractMermaidFromMarkdown(documentation);
+                const diagram = extractedDiagram || generateModuleDiagram(key, data);
+                
+                // Build links for children and from diagram click statements
+                const links = {};
+                if (data.children) {
+                    for (const [childKey, childData] of Object.entries(data.children)) {
+                        const childFormattedName = formatModuleName(childKey);
+                        links[childFormattedName] = childKey;
+                    }
+                }
+                
+                // Parse click statements from extracted diagram
+                if (extractedDiagram) {
+                    const clickRegex = /click\s+(\w+)\s+"([^"]+)"/g;
+                    let match;
+                    while ((match = clickRegex.exec(extractedDiagram)) !== null) {
+                        const nodeId = match[1];
+                        const targetFile = match[2];
+                        const targetModuleId = targetFile.replace('.md', '');
+                        links[nodeId] = targetModuleId;
+                    }
+                }
+                
+                moduleData[key] = {
+                    name: formattedName,
+                    diagram: stripClickStatements(diagram),
+                    documentation: documentation,
+                    links: links,
+                    path: data.path
+                };
+                
+                // Recursively process children
+                if (data.children && Object.keys(data.children).length > 0) {
+                    buildModulesFromTree(data.children, moduleId);
+                }
+            }
+        }
+        
+        // ============================================================
+        // RENDERING
+        // ============================================================
+        
+        async function renderDiagram(code, links, moduleId) {
+            const container = document.getElementById('mermaid-diagram');
+            if (!code || !code.trim()) {
+                container.innerHTML = '<div class="loading">No diagram available</div>';
+                lastDiagramRegistry = null;
+                return;
+            }
+            
+            const sanitizedCode = sanitizeMermaidDiagram(code);
+            const diagramRegistry = buildDiagramLogicalIdRegistry(sanitizedCode);
+            lastDiagramRegistry = diagramRegistry;
+            for (const w of diagramRegistry.duplicateLabelWarnings) {
+                console.warn(w);
+            }
+
+            try {
+                container.innerHTML = '';
+                const id = 'mermaid-' + Date.now();
+                const { svg } = await mermaid.render(id, sanitizedCode);
+                container.innerHTML = svg;
+                const svgEl = container.querySelector('svg');
+                if (svgEl) {
+                    const stamp = stampLogicalIdsOntoSvg(svgEl, diagramRegistry);
+                    if (stamp.unstampedNodes.length) {
+                        console.warn('[diagram] Unstamped node label(s) after registry match:', stamp.unstampedNodes);
+                    }
+                    if (stamp.unstampedClusters.length) {
+                        console.warn('[diagram] Unstamped cluster label(s) after registry match:', stamp.unstampedClusters);
+                    }
+                    if (stamp.edgePathMismatch) {
+                        console.warn(
+                            '[diagram] edgePath count mismatch: SVG',
+                            stamp.edgePathMismatch.dom,
+                            'vs parsed',
+                            stamp.edgePathMismatch.parsed
+                        );
+                    }
+                    if (stamp.unstampedEdgePathIds && stamp.unstampedEdgePathIds.length) {
+                        console.warn(
+                            '[diagram] Edge path id(s) could not be matched to parsed edges:',
+                            stamp.unstampedEdgePathIds
+                        );
+                    }
+                }
+                
+                setTimeout(() => processNodes(links, moduleId), 100);
+            } catch (err) {
+                console.error('Mermaid render error:', err);
+                try {
+                    const id2 = 'mermaid-fallback-' + Date.now();
+                    const fallbackRegistry = buildDiagramLogicalIdRegistry(code);
+                    lastDiagramRegistry = fallbackRegistry;
+                    for (const w of fallbackRegistry.duplicateLabelWarnings) {
+                        console.warn(w);
+                    }
+                    const { svg } = await mermaid.render(id2, code);
+                    container.innerHTML = svg;
+                    const svgEl = container.querySelector('svg');
+                    if (svgEl) {
+                        const stamp = stampLogicalIdsOntoSvg(svgEl, fallbackRegistry);
+                        if (stamp.unstampedNodes.length) {
+                            console.warn('[diagram] Unstamped node label(s) after registry match:', stamp.unstampedNodes);
+                        }
+                        if (stamp.unstampedClusters.length) {
+                            console.warn('[diagram] Unstamped cluster label(s) after registry match:', stamp.unstampedClusters);
+                        }
+                        if (stamp.edgePathMismatch) {
+                            console.warn(
+                                '[diagram] edgePath count mismatch: SVG',
+                                stamp.edgePathMismatch.dom,
+                                'vs parsed',
+                                stamp.edgePathMismatch.parsed
+                            );
+                        }
+                        if (stamp.unstampedEdgePathIds && stamp.unstampedEdgePathIds.length) {
+                            console.warn(
+                                '[diagram] Edge path id(s) could not be matched to parsed edges:',
+                                stamp.unstampedEdgePathIds
+                            );
+                        }
+                    }
+                    setTimeout(() => processNodes(links, moduleId), 100);
+                } catch (err2) {
+                    container.innerHTML = `<div class="error">Error rendering diagram.<br>${err2.message}</div>`;
+                    lastDiagramRegistry = null;
+                }
+            }
+        }
+        
+        function renderDocumentation(content) {
+            const docEl = document.getElementById('docContent');
+            
+            // Remove mermaid blocks from documentation display
+            const cleanContent = content.replace(/```mermaid[\s\S]*?```/g, '');
+            
+            // Handle markdown links to other modules
+            const linkedContent = cleanContent.replace(/\[([^\]]+)\]\(([^)]+\.md)\)/g, (match, text, href) => {
+                const moduleId = href.replace('.md', '');
+                return `<a href="#" onclick="navigateToModule('${moduleId}'); return false;">${text}</a>`;
+            });
+            
+            docEl.innerHTML = marked.parse(linkedContent);
+        }
+        
+        // ============================================================
+        // SELECTION & BREADCRUMB
+        // ============================================================
+        
+        function updateSelection(moduleId, nodeId = null) {
+            selectedModuleId = moduleId;
+            selectedDiagramNodeId = nodeId != null ? nodeId : null;
+            
+            // Build selection path
+            selectionPath = [{id: 'overview', name: REPO_TITLE}];
+            
+            if (moduleId && moduleId !== 'overview') {
+                const mod = moduleData[moduleId];
+                if (mod) {
+                    selectionPath.push({id: moduleId, name: mod.name});
+                }
+            }
+            
+            // Update breadcrumb UI
+            updateBreadcrumb();
+            
+            // Update selection highlighting in diagram
+            updateSelectionHighlight(nodeId);
+            
+            // Update documentation
+            if (moduleId && moduleData[moduleId]) {
+                renderDocumentation(moduleData[moduleId].documentation);
+                document.getElementById('moduleTitle').textContent = moduleData[moduleId].name;
+            }
+        }
+        
+        function updateBreadcrumb() {
+            const breadcrumbEl = document.getElementById('breadcrumb');
+            if (!breadcrumbEl) return;
+            
+            let html = '';
+            selectionPath.forEach((item, index) => {
+                if (index > 0) {
+                    html += '<span class="breadcrumb-separator">›</span>';
+                }
+                
+                if (index === selectionPath.length - 1) {
+                    // Current item (not clickable)
+                    html += `<span class="breadcrumb-item"><span class="breadcrumb-current">${item.name}</span></span>`;
+                } else {
+                    // Clickable parent
+                    html += `<span class="breadcrumb-item"><a class="breadcrumb-link" onclick="navigateToBreadcrumb('${item.id}')">${item.name}</a></span>`;
+                }
+            });
+            
+            breadcrumbEl.innerHTML = html;
+        }
+        
+        function navigateToBreadcrumb(moduleId) {
+            if (moduleId === 'overview') {
+                // Go back to overview
+                expandedNodes.clear();
+                currentDiagramCode = baseDiagramCode;
+                currentModuleId = 'overview';
+                updateSelection('overview');
+                renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+            } else {
+                updateSelection(moduleId);
+            }
+        }
+        
+        function updateSelectionHighlight(nodeId) {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            
+            svg.querySelectorAll('.selected-node, .selected-subgraph').forEach(el => {
+                el.classList.remove('selected-node', 'selected-subgraph');
+            });
+            
+            if (!nodeId) return;
+            
+            const expansionClusterId = nodeId.endsWith('_sub')
+                ? nodeId
+                : `${nodeId}_sub`;
+
+            const clusterEl = queryDiagramElementByLogicalId(svg, expansionClusterId);
+            if (clusterEl && clusterEl.classList.contains('cluster')) {
+                clusterEl.classList.add('selected-subgraph');
+            }
+
+            const nodeGroup = queryDiagramElementByLogicalId(svg, nodeId);
+            if (nodeGroup && nodeGroup.classList.contains('node')) {
+                nodeGroup.classList.add('selected-node');
+            }
+
+            if (!clusterEl && !nodeGroup) {
+                const onlyCluster = queryDiagramElementByLogicalId(svg, nodeId);
+                if (onlyCluster && onlyCluster.classList.contains('cluster')) {
+                    onlyCluster.classList.add('selected-subgraph');
+                }
+            }
+        }
+        
+        // ============================================================
+        // NODE PROCESSING & CLICK HANDLING
+        // ============================================================
+        
+        /**
+         * Diagram hover: listeners on stamped g.node / g.cluster / stamped g.edgePath; 2× stroke-width on hover.
+         */
+        const DIAGRAM_NODE_HOVER_SHAPE_SELECTOR =
+            'rect, circle, polygon, ellipse, path, use, .label-container rect, .label-container path, .basic rect, .basic path, g.shape rect, g.shape path';
+        const DIAGRAM_CLUSTER_HOVER_SHAPE_SELECTOR = 'rect, circle, polygon, ellipse, path';
+        const DIAGRAM_HOVER_WIDTH_FACTOR = 2;
+
+        function collectDiagramNodeHoverTargets(nodeGroup) {
+            return [...nodeGroup.querySelectorAll(DIAGRAM_NODE_HOVER_SHAPE_SELECTOR)].filter((el) => {
+                if (el.closest('g.edgePath') || el.closest('g.edgePaths')) return false;
+                if (el.closest('defs')) return false;
+                return true;
+            });
+        }
+
+        function collectDiagramClusterHoverTargets(clusterG) {
+            return [...clusterG.querySelectorAll(DIAGRAM_CLUSTER_HOVER_SHAPE_SELECTOR)].filter((el) => {
+                if (el.closest('defs')) return false;
+                if (el.closest('g.node')) return false;
+                const oc = el.closest('g.cluster');
+                return oc === clusterG;
+            });
+        }
+
+        function collectDiagramEdgeHoverTargets(edgeG) {
+            return [...edgeG.querySelectorAll('path, line, polyline, polygon')].filter((el) => {
+                if (el.closest('defs')) return false;
+                if (el.classList.contains('edge-hit-area')) return false;
+                return true;
+            });
+        }
+
+        function ensureDiagramEdgePointerEvents(edgeG) {
+            if (!edgeG) return;
+            edgeG.querySelectorAll('path.edge-hit-area').forEach((el) => el.remove());
+            edgeG.querySelectorAll('path, line, polyline, polygon').forEach((el) => {
+                if (el.closest('defs')) return;
+                if (el.classList.contains('edge-hit-area')) return;
+                el.style.setProperty('pointer-events', 'stroke');
+            });
+            const pathNodes = edgeG.classList && edgeG.classList.contains('edgePaths')
+                ? [...edgeG.querySelectorAll(':scope > path')].filter(
+                      (path) => !path.classList.contains('edge-hit-area') && !(path.closest && path.closest('defs'))
+                  )
+                : [...edgeG.querySelectorAll('path:not(.edge-hit-area)')].filter(
+                      (path) => !(path.closest && path.closest('defs'))
+                  );
+            pathNodes.forEach((path) => {
+                const hit = path.cloneNode(true);
+                hit.removeAttribute('id');
+                hit.removeAttribute('marker-start');
+                hit.removeAttribute('marker-end');
+                hit.removeAttribute('marker-mid');
+                hit.removeAttribute('style');
+                hit.setAttribute('class', 'edge-hit-area');
+                const hitPx = getEdgePointerHitWidthPx();
+                hit.style.setProperty('stroke', 'transparent', 'important');
+                hit.style.setProperty('fill', 'none', 'important');
+                hit.style.setProperty('stroke-width', `${hitPx}px`, 'important');
+                hit.style.setProperty('pointer-events', 'stroke', 'important');
+                hit.style.setProperty('stroke-opacity', '0', 'important');
+                path.insertAdjacentElement('afterend', hit);
+            });
+        }
+
+        function ensureDiagramHoverStrokeWidthCache(el) {
+            if (el.dataset.diagramStrokeHov) return;
+            let defStr = window.getComputedStyle(el).strokeWidth || '';
+            if (!defStr || parseFloat(defStr) === 0) {
+                const a = el.getAttribute('stroke-width');
+                defStr = a ? `${parseFloat(a)}px` : '1px';
+            }
+            let w = parseFloat(defStr);
+            if (!w || Number.isNaN(w)) w = 1.5;
+            const suf = String(defStr).replace(/^[\d.\s-]+/, '').trim() || 'px';
+            el.dataset.diagramStrokeDef = defStr;
+            el.dataset.diagramStrokeHov = String(w * DIAGRAM_HOVER_WIDTH_FACTOR) + suf;
+        }
+
+        function applyDiagramHoverStroke(elements, useHoverWidth) {
+            elements.forEach((el) => {
+                if (!el || !el.isConnected) return;
+                ensureDiagramHoverStrokeWidthCache(el);
+                const key = useHoverWidth ? 'diagramStrokeHov' : 'diagramStrokeDef';
+                const val = el.dataset[key];
+                if (val) el.style.setProperty('stroke-width', val, 'important');
+            });
+        }
+
+        function attachDiagramNodeHoverStroke(svg) {
+            if (!svg) return;
+            svg.querySelectorAll('g.node[data-logical-id]:not(.collapse-button)').forEach((g) => {
+                g.addEventListener('mouseenter', () => {
+                    const targets = collectDiagramNodeHoverTargets(g);
+                    applyDiagramHoverStroke(targets, true);
+                    g._diagramNodeHoverTargets = targets;
+                });
+                g.addEventListener('mouseleave', () => {
+                    const targets =
+                        g._diagramNodeHoverTargets && g._diagramNodeHoverTargets.length
+                            ? g._diagramNodeHoverTargets
+                            : collectDiagramNodeHoverTargets(g);
+                    g._diagramNodeHoverTargets = null;
+                    applyDiagramHoverStroke(targets, false);
+                });
+            });
+        }
+
+        function attachDiagramClusterHoverStroke(svg) {
+            if (!svg) return;
+            svg.querySelectorAll('g.cluster[data-logical-id]').forEach((g) => {
+                g.addEventListener(
+                    'mouseover',
+                    (e) => {
+                        if (!g.contains(e.target)) return;
+                        if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+                        const targets = collectDiagramClusterHoverTargets(g);
+                        applyDiagramHoverStroke(targets, true);
+                        g._diagramClusterHoverTargets = targets;
+                    },
+                    false
+                );
+                g.addEventListener(
+                    'mouseout',
+                    (e) => {
+                        if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+                        const targets =
+                            g._diagramClusterHoverTargets && g._diagramClusterHoverTargets.length
+                                ? g._diagramClusterHoverTargets
+                                : collectDiagramClusterHoverTargets(g);
+                        g._diagramClusterHoverTargets = null;
+                        applyDiagramHoverStroke(targets, false);
+                    },
+                    false
+                );
+            });
+        }
+
+        function resolveVisibleEdgePathFromPointerTarget(t, edgePathsRoot) {
+            if (!t || !edgePathsRoot || !edgePathsRoot.contains(t)) return null;
+            if (t.closest && t.closest('defs')) return null;
+            if (!t.tagName || t.tagName.toLowerCase() !== 'path') return null;
+            if (t.classList.contains('edge-hit-area')) {
+                const prev = t.previousElementSibling;
+                if (
+                    prev &&
+                    prev.tagName &&
+                    prev.tagName.toLowerCase() === 'path' &&
+                    !prev.classList.contains('edge-hit-area')
+                )
+                    return prev;
+                return null;
+            }
+            return t;
+        }
+
+        function collectDiagramFlatEdgeHoverTargets(visiblePath) {
+            return visiblePath ? [visiblePath] : [];
+        }
+
+        function stampEdgeLabelPathLinks(svg) {
+            if (!svg) return;
+            const labels = [...svg.querySelectorAll('g.edgeLabels > g.edgeLabel')];
+            if (!labels.length) return;
+            const paths = [];
+            const flat = svg.querySelector('g.edgePaths');
+            if (flat && flat.querySelector(':scope > path')) {
+                flat.querySelectorAll(':scope > path').forEach((p) => {
+                    if (!p.classList.contains('edge-hit-area') && !(p.closest && p.closest('defs'))) paths.push(p);
+                });
+            } else {
+                svg.querySelectorAll('g.edgePath').forEach((g) => {
+                    const p =
+                        g.querySelector('path.edge-thickness-normal[id], path.edge-thickness-thick[id], path[id]') ||
+                        g.querySelector('path:not(.edge-hit-area)');
+                    if (p && !p.classList.contains('edge-hit-area')) paths.push(p);
+                });
+            }
+            const n = Math.min(paths.length, labels.length);
+            for (let i = 0; i < n; i++) {
+                const pathEl = paths[i];
+                const id = pathEl.id || pathEl.getAttribute('id') || '';
+                if (id) labels[i].setAttribute('data-mermaid-edge-path-id', id);
+                const edgeHost = (pathEl.closest && pathEl.closest('g.edgePath')) || pathEl;
+                ['data-edge-source', 'data-edge-target', 'data-edge-label'].forEach((attr) => {
+                    const v = edgeHost.getAttribute(attr);
+                    if (v != null && v !== '') labels[i].setAttribute(attr, v);
+                });
+            }
+        }
+
+        function getFlatHoverVisiblePath(t, svg) {
+            if (!t || !svg || !svg.contains(t)) return null;
+            if (t.closest && t.closest('defs')) return null;
+            const edgePathsRoot = svg.querySelector('g.edgePaths');
+            if (edgePathsRoot && edgePathsRoot.contains(t)) {
+                return resolveVisibleEdgePathFromPointerTarget(t, edgePathsRoot);
+            }
+            const legacyG = t.closest && t.closest('g.edgePath');
+            if (legacyG) {
+                return resolveVisibleEdgePathFromPointerTarget(t, legacyG);
+            }
+            const labelG = t.closest && t.closest('g.edgeLabel');
+            if (!labelG) return null;
+            const pid = labelG.getAttribute('data-mermaid-edge-path-id');
+            if (!pid) return null;
+            try {
+                if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+                    return svg.querySelector(`path#${CSS.escape(pid)}`);
+                }
+            } catch (_) {
+                /* ignore */
+            }
+            return svg.getElementById(pid);
+        }
+
+        function collectDiagramEdgeHoverTargetsForPathEl(pathEl) {
+            if (!pathEl) return [];
+            const legacyG = pathEl.closest && pathEl.closest('g.edgePath');
+            if (legacyG) return collectDiagramEdgeHoverTargets(legacyG);
+            return collectDiagramFlatEdgeHoverTargets(pathEl);
+        }
+
+        function attachDiagramEdgeHoverStrokeFlat(edgePathsRoot, svg) {
+            stampEdgeLabelPathLinks(svg);
+            ensureDiagramEdgePointerEvents(edgePathsRoot);
+            const onOver = (e) => {
+                const cur = getFlatHoverVisiblePath(e.target, svg);
+                if (!cur) return;
+                const prev = getFlatHoverVisiblePath(e.relatedTarget, svg);
+                if (prev === cur) return;
+                const targets = collectDiagramEdgeHoverTargetsForPathEl(cur);
+                applyDiagramHoverStroke(targets, true);
+                svg._diagramEdgeHoverTargets = targets;
+            };
+            const onOut = (e) => {
+                const cur = getFlatHoverVisiblePath(e.target, svg);
+                if (!cur) return;
+                const next = getFlatHoverVisiblePath(e.relatedTarget, svg);
+                if (next === cur) return;
+                const targets =
+                    svg._diagramEdgeHoverTargets && svg._diagramEdgeHoverTargets.length
+                        ? svg._diagramEdgeHoverTargets
+                        : collectDiagramEdgeHoverTargetsForPathEl(cur);
+                svg._diagramEdgeHoverTargets = null;
+                applyDiagramHoverStroke(targets, false);
+            };
+            edgePathsRoot.addEventListener('mouseover', onOver, false);
+            edgePathsRoot.addEventListener('mouseout', onOut, false);
+            const labelsRoot = svg.querySelector('g.edgeLabels');
+            if (labelsRoot) {
+                labelsRoot.addEventListener('mouseover', onOver, false);
+                labelsRoot.addEventListener('mouseout', onOut, false);
+            }
+        }
+
+        function attachDiagramEdgeHoverStroke(svg) {
+            if (!svg) return;
+            const legacy = svg.querySelectorAll('g.edgePath');
+            if (legacy.length) {
+                stampEdgeLabelPathLinks(svg);
+                legacy.forEach((g) => {
+                    ensureDiagramEdgePointerEvents(g);
+                    g.addEventListener(
+                        'mouseover',
+                        (e) => {
+                            if (!g.contains(e.target)) return;
+                            if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+                            const targets = collectDiagramEdgeHoverTargets(g);
+                            applyDiagramHoverStroke(targets, true);
+                            g._diagramEdgeHoverTargets = targets;
+                        },
+                        false
+                    );
+                    g.addEventListener(
+                        'mouseout',
+                        (e) => {
+                            if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+                            const targets =
+                                g._diagramEdgeHoverTargets && g._diagramEdgeHoverTargets.length
+                                    ? g._diagramEdgeHoverTargets
+                                    : collectDiagramEdgeHoverTargets(g);
+                            g._diagramEdgeHoverTargets = null;
+                            applyDiagramHoverStroke(targets, false);
+                        },
+                        false
+                    );
+                });
+                const labelsRootLegacy = svg.querySelector('g.edgeLabels');
+                if (labelsRootLegacy) {
+                    const onLegacyLabelOver = (e) => {
+                        const cur = getFlatHoverVisiblePath(e.target, svg);
+                        if (!cur || !cur.closest('g.edgePath')) return;
+                        const prev = getFlatHoverVisiblePath(e.relatedTarget, svg);
+                        if (prev === cur) return;
+                        const lg = cur.closest('g.edgePath');
+                        const targets = collectDiagramEdgeHoverTargets(lg);
+                        applyDiagramHoverStroke(targets, true);
+                        svg._diagramLegacyEdgeLabelTargets = targets;
+                    };
+                    const onLegacyLabelOut = (e) => {
+                        const cur = getFlatHoverVisiblePath(e.target, svg);
+                        if (!cur || !cur.closest('g.edgePath')) return;
+                        const next = getFlatHoverVisiblePath(e.relatedTarget, svg);
+                        if (next === cur) return;
+                        const lg = cur.closest('g.edgePath');
+                        const targets =
+                            svg._diagramLegacyEdgeLabelTargets && svg._diagramLegacyEdgeLabelTargets.length
+                                ? svg._diagramLegacyEdgeLabelTargets
+                                : collectDiagramEdgeHoverTargets(lg);
+                        svg._diagramLegacyEdgeLabelTargets = null;
+                        applyDiagramHoverStroke(targets, false);
+                    };
+                    labelsRootLegacy.addEventListener('mouseover', onLegacyLabelOver, false);
+                    labelsRootLegacy.addEventListener('mouseout', onLegacyLabelOut, false);
+                }
+                return;
+            }
+            const edgePathsRoot = svg.querySelector('g.edgePaths');
+            if (edgePathsRoot) attachDiagramEdgeHoverStrokeFlat(edgePathsRoot, svg);
+        }
+
+        function attachDiagramHoverStrokes(svg) {
+            attachDiagramNodeHoverStroke(svg);
+            attachDiagramClusterHoverStroke(svg);
+            attachDiagramEdgeHoverStroke(svg);
+        }
+        
+        function processNodes(links, contextModuleId) {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            
+            const nodes = svg.querySelectorAll('.node');
+            
+            nodes.forEach(node => {
+                const nodeId = node.getAttribute('data-logical-id') || '';
+                const textEl = node.querySelector('text, .nodeLabel');
+                const fo = node.querySelector('foreignObject');
+                const nodeText =
+                    (fo && fo.textContent?.trim()) || textEl?.textContent?.trim() || '';
+                
+                // Handle collapse buttons
+                if (nodeText === '[-] Collapse' || nodeId.endsWith('_collapse')) {
+                    node.classList.add('collapse-button');
+                    const parentNodeId = nodeId.replace(/_collapse$/, '');
+                    node.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        collapseNode(parentNodeId);
+                    });
+                    return;
+                }
+                
+                // Try to find target module by various methods
+                let targetModule = null;
+                
+                // Skip prefixed nodes (inside subgraphs) - they're already expanded content
+                if (nodeId.includes('_')) {
+                    return;
+                }
+                
+                // 1. Direct ID match in overviewLinks (from click statements or auto-mapping)
+                if (overviewLinks[nodeId]) {
+                    targetModule = overviewLinks[nodeId];
+                }
+                
+                // 2. Context links (from current module's diagram)
+                if (!targetModule && links[nodeText]) {
+                    targetModule = links[nodeText];
+                }
+                
+                // 3. overviewLinks by label
+                if (!targetModule && overviewLinks[nodeText]) {
+                    targetModule = overviewLinks[nodeText];
+                }
+                
+                // NO fuzzy matching - only exact matches from click statements or module keys
+                
+                // Check if target exists in moduleData
+                if (targetModule && moduleData[targetModule]) {
+                    makeNodeClickable(node, nodeId, targetModule);
+                }
+            });
+            attachDiagramHoverStrokes(svg);
+            attachDiagramBackgroundDeselect(svg);
+        }
+        
+        function makeNodeClickable(node, nodeId, targetModuleId) {
+            node.classList.add('clickable-node');
+            
+            // Capture values for closure
+            const capturedNodeId = nodeId;
+            const capturedTargetModule = targetModuleId;
+            
+            const clickHandler = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                
+                if (capturedNodeId && capturedTargetModule && moduleData[capturedTargetModule]) {
+                    const targetModuleData = moduleData[capturedTargetModule];
+                    if (targetModuleData.diagram && targetModuleData.diagram.trim()) {
+                        if (!expandedNodes.has(capturedNodeId)) {
+                            expandNodeInline(capturedNodeId, capturedTargetModule);
+                        } else {
+                            selectNode(`${capturedNodeId}_sub`, capturedTargetModule);
+                        }
+                    } else {
+                        selectNode(capturedNodeId, capturedTargetModule);
+                    }
+                }
+            };
+            
+            node.addEventListener('click', clickHandler);
+            node.addEventListener('touchend', clickHandler);
+        }
+        
+        // ============================================================
+        // EXPANSION LOGIC
+        // ============================================================
+        
+        function expandNodeInline(nodeId, targetModuleId) {
+            const targetModule = moduleData[targetModuleId];
+            if (!targetModule) return;
+            
+            // Update selection (this updates breadcrumb and documentation)
+            updateSelection(targetModuleId, nodeId);
+            
+            // Try to expand diagram if module has one
+            if (targetModule.diagram && targetModule.diagram.trim()) {
+                const newDiagram = applyExpansionToDiagram(currentDiagramCode, nodeId, targetModuleId, targetModule.name);
+                if (newDiagram !== currentDiagramCode) {
+                    expandedNodes.add(nodeId);
+                    currentDiagramCode = newDiagram;
+                    renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
+                    
+                    // Re-apply selection highlight after re-render
+                    setTimeout(() => updateSelectionHighlight(nodeId), 150);
+                }
+            }
+        }
+        
+        function applyExpansionToDiagram(diagram, nodeId, targetModuleId, fallbackLabel) {
+            const targetModule = moduleData[targetModuleId];
+            if (!targetModule || !targetModule.diagram) {
+                return diagram;
+            }
+            
+            const subgraphName = `${nodeId}_sub`;
+            const prefix = `${nodeId}_`;
+            const collapseNodeId = `${prefix}collapse`;
+            
+            // Extract the ACTUAL node label from the diagram (not the module name)
+            // Pattern: nodeId["label"] or nodeId[label]
+            const labelPattern = new RegExp(`${nodeId}\\["?([^"\\]]+)"?\\]`);
+            const labelMatch = diagram.match(labelPattern);
+            const nodeLabel = labelMatch ? labelMatch[1] : fallbackLabel;
+            
+            // Get target module's diagram content
+            let subgraphContent = targetModule.diagram.trim().replace(/^(graph|flowchart)\s+\w+\s*\n?/, '');
+            
+            // Strip out styling statements incompatible with subgraphs
+            subgraphContent = subgraphContent.replace(/^\s*classDef\s+.+$/gm, '');
+            subgraphContent = subgraphContent.replace(/^\s*class\s+.+$/gm, '');
+            subgraphContent = subgraphContent.replace(/^\s*style\s+.+$/gm, '');
+            
+            // Prefix all node IDs to avoid conflicts
+            const nodeIdMatches = [...subgraphContent.matchAll(/\b([A-Za-z][A-Za-z0-9_]*)\b(?=\s*\[|-->|--)/g)];
+            const uniqueIds = [...new Set(nodeIdMatches.map(m => m[1]))].filter(id => 
+                !['subgraph', 'end', 'graph', 'flowchart', 'direction', 'style', 'classDef', 'class'].includes(id.toLowerCase())
+            );
+            for (const oldId of uniqueIds) {
+                const newId = prefix + oldId;
+                subgraphContent = subgraphContent.replace(new RegExp(`\\b${oldId}\\b`, 'g'), newId);
+            }
+            
+            // Build subgraph block - use the ACTUAL node label from the diagram
+            const subgraphLines = subgraphContent.split('\n').filter(l => l.trim());
+            const indentedContent = subgraphLines.map(l => '        ' + l.trim()).join('\n');
+            const subgraphDef = `subgraph ${subgraphName} ["${nodeLabel}"]\n${indentedContent}\n        ${collapseNodeId}["[-] Collapse"]\n    end`;
+            
+            // STEP 1: Normalize diagram - extract inline node definitions to separate lines
+            // Handles: A[Label] --> B[Label] or A -->|text| B[Label]
+            let normalizedDiagram = diagram;
+            
+            // First, strip inline node definitions from edge lines
+            // Pattern: NodeId[Label] in context of an edge (has --> or -- on same line)
+            normalizedDiagram = normalizedDiagram.replace(
+                new RegExp(`(\\s+)${nodeId}\\[[^\\]]+\\](\\s*)(-->|--[^>])`, 'g'),
+                `$1${nodeId}$2$3`
+            );
+            normalizedDiagram = normalizedDiagram.replace(
+                new RegExp(`(-->|\\|[^|]*\\|)\\s*${nodeId}\\[[^\\]]+\\]`, 'g'),
+                `$1 ${nodeId}`
+            );
+            
+            // STEP 2: Check if the node is defined standalone (on its own line or in a subgraph)
+            // Pattern 1: nodeId["label"] or nodeId[label] on its own line
+            const standaloneWithLabelPattern = new RegExp(`(^|\\n)(\\s*)${nodeId}\\[[^\\]]+\\]\\s*$`, 'm');
+            const standaloneWithLabelMatch = normalizedDiagram.match(standaloneWithLabelPattern);
+            
+            // Pattern 2: Plain nodeId on its own line (inside a subgraph typically)
+            const standalonePlainPattern = new RegExp(`(^|\\n)(\\s*)${nodeId}\\s*$`, 'm');
+            const standalonePlainMatch = normalizedDiagram.match(standalonePlainPattern);
+            
+            let newDiagram;
+            if (standaloneWithLabelMatch) {
+                // Replace standalone node definition (with label) with the subgraph
+                const indent = standaloneWithLabelMatch[2] || '    ';
+                const indentedSubgraph = subgraphDef.split('\n').map((line, i) => i === 0 ? indent + line : indent + line).join('\n');
+                newDiagram = normalizedDiagram.replace(standaloneWithLabelPattern, `$1${indentedSubgraph}`);
+            } else if (standalonePlainMatch) {
+                // Replace plain node reference (inside subgraph) with the subgraph
+                const indent = standalonePlainMatch[2] || '        ';
+                const indentedSubgraph = subgraphDef.split('\n').map((line, i) => i === 0 ? indent + line : indent + line).join('\n');
+                newDiagram = normalizedDiagram.replace(standalonePlainPattern, `$1${indentedSubgraph}`);
+            } else {
+                // Node is only referenced in edges, add subgraph after the graph header
+                const headerMatch = normalizedDiagram.match(/^(graph|flowchart)\s+\w+\s*\n/);
+                if (headerMatch) {
+                    const insertPos = headerMatch.index + headerMatch[0].length;
+                    newDiagram = normalizedDiagram.slice(0, insertPos) + 
+                                 '    ' + subgraphDef + '\n' + 
+                                 normalizedDiagram.slice(insertPos);
+                } else {
+                    // Fallback: append at end
+                    newDiagram = normalizedDiagram.trimEnd() + '\n    ' + subgraphDef + '\n';
+                }
+            }
+            
+            // STEP 3: Update edge references - any edge to/from nodeId should go to the subgraph
+            // Use word boundaries to avoid matching nodeId inside prefixed node names (e.g., Resolver_Resolver)
+            
+            // Handle simple edges: A --> B, B --> A
+            newDiagram = newDiagram.replace(new RegExp(`-->\\s*\\b${nodeId}\\b`, 'g'), `--> ${subgraphName}`);
+            newDiagram = newDiagram.replace(new RegExp(`\\b${nodeId}\\b\\s*-->`, 'g'), `${subgraphName} -->`);
+            // Handle labeled edges with pipe syntax: A -->|label| B
+            newDiagram = newDiagram.replace(new RegExp(`\\|\\s*\\b${nodeId}\\b`, 'g'), `| ${subgraphName}`);
+            newDiagram = newDiagram.replace(new RegExp(`\\b${nodeId}\\b\\s*\\|`, 'g'), `${subgraphName} |`);
+            // Handle labeled edges with dash syntax: A -- "label" --> B
+            newDiagram = newDiagram.replace(new RegExp(`\\b${nodeId}\\b\\s*--(?!>)`, 'g'), `${subgraphName} --`);
+            
+            return newDiagram;
+        }
+        
+        function collapseNode(nodeId) {
+            // Remove from expanded set and re-render from base
+            expandedNodes.delete(nodeId);
+            
+            // Rebuild diagram with remaining expansions
+            currentDiagramCode = baseDiagramCode;
+            
+            for (const expandedNodeId of expandedNodes) {
+                const targetModuleId = overviewLinks[expandedNodeId];
+                if (targetModuleId && moduleData[targetModuleId]) {
+                    currentDiagramCode = applyExpansionToDiagram(
+                        currentDiagramCode, 
+                        expandedNodeId, 
+                        targetModuleId, 
+                        moduleData[targetModuleId].name
+                    );
+                }
+            }
+            
+            // Update the title and documentation back to overview if no expansions remain
+            if (expandedNodes.size === 0) {
+                document.getElementById('moduleTitle').textContent = moduleData['overview']?.name || REPO_TITLE + ' Overview';
+                renderDocumentation(moduleData['overview']?.documentation || '');
+            }
+            
+            renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
+        }
+        
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        
+        function navigateToModule(moduleId) {
+            if (!moduleData[moduleId]) return;
+            
+            navigationHistory.push({
+                moduleId: currentModuleId,
+                diagramCode: currentDiagramCode,
+                expanded: new Set(expandedNodes)
+            });
+            
+            currentModuleId = moduleId;
+            expandedNodes.clear();
+            baseDiagramCode = moduleData[moduleId].diagram;
+            currentDiagramCode = baseDiagramCode;
+            
+            document.getElementById('moduleTitle').textContent = moduleData[moduleId].name;
+            
+            renderDiagram(currentDiagramCode, moduleData[moduleId].links || {}, moduleId);
+            renderDocumentation(moduleData[moduleId].documentation);
+        }
+        
+        function selectNode(nodeId, moduleId) {
+            if (!moduleData[moduleId]) return;
+            
+            updateSelection(moduleId, nodeId);
+        }
+        
+        function goBack() {
+            // If there's navigation history, go back in history
+            if (navigationHistory.length > 0) {
+                const prev = navigationHistory.pop();
+                currentModuleId = prev.moduleId;
+                currentDiagramCode = prev.diagramCode;
+                expandedNodes = prev.expanded;
+                baseDiagramCode = moduleData[currentModuleId]?.diagram || '';
+                
+                updateSelection(currentModuleId);
+                renderDiagram(currentDiagramCode, moduleData[currentModuleId]?.links || {}, currentModuleId);
+                return;
+            }
+            
+            // If on overview with expanded nodes, collapse all and reset selection
+            if (expandedNodes.size > 0) {
+                expandedNodes.clear();
+                currentDiagramCode = baseDiagramCode;
+                updateSelection('overview');
+                renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+                return;
+            }
+            
+            // Already at overview with no expansions - stay on current page
+            // (User can use browser back button to leave the viewer)
+            return;
+        }
+        
+        // ============================================================
+        // KEYBOARD SHORTCUTS
+        // ============================================================
+        
+        document.addEventListener('keydown', (e) => {
+            // Skip shortcuts if typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                // Only handle Escape in inputs
+                if (e.key === 'Escape') {
+                    e.target.blur();
+                }
+                return;
+            }
+            
+            // Number keys 1-9 to click on nodes
+            if (e.key >= '1' && e.key <= '9') {
+                const nodeIndex = parseInt(e.key) - 1;
+                const clickableNodes = document.querySelectorAll('.clickable-node');
+                if (clickableNodes[nodeIndex]) {
+                    // SVG elements don't have .click(), so dispatch a click event
+                    const clickEvent = new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    clickableNodes[nodeIndex].dispatchEvent(clickEvent);
+                }
+            }
+            // Key '0' or 'c' to click collapse buttons
+            if (e.key === '0' || e.key === 'c') {
+                const collapseButtons = document.querySelectorAll('.collapse-button');
+                if (collapseButtons.length > 0) {
+                    const clickEvent = new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    collapseButtons[0].dispatchEvent(clickEvent);
+                }
+            }
+            // Escape to go back
+            if (e.key === 'Escape') {
+                goBack();
+            }
+            // '/' to focus Q&A input
+            if (e.key === '/') {
+                e.preventDefault();
+                document.getElementById('qaInput').focus();
+            }
+        });
+        
+        // ============================================================
+        // ZOOM & PAN FUNCTIONALITY
+        // ============================================================
+        
+        let zoomScale = 1;
+        let panX = 0;
+        let panY = 0;
+        let isPanning = false;
+        let startPanX = 0;
+        let startPanY = 0;
+        let startMouseX = 0;
+        let startMouseY = 0;
+        
+        const MIN_ZOOM = 0.25;
+        const MAX_ZOOM = 4;
+        const VIEW_TUNE_STORAGE = {
+            pan: 'atelier_view_tune_pan_v2',
+            zoom: 'atelier_view_tune_zoom_v2',
+            edgeHit: 'atelier_view_tune_edge_hit_v1',
+        };
+        const viewTune = { panWheelMult: 2, zoomStep: 0.2, edgeHoverHitPx: 14 };
+        window.viewTune = viewTune;
+        
+        function updateZoomDisplay() {
+            document.getElementById('zoomLevel').textContent = Math.round(zoomScale * 100) + '%';
+        }
+        
+        function applyTransform() {
+            const canvas = document.getElementById('diagramCanvas');
+            canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+            syncDiagramHoverToCanvasZoom();
+        }
+        
+        function zoomIn() {
+            zoomScale = Math.min(MAX_ZOOM, zoomScale + viewTune.zoomStep);
+            applyTransform();
+            updateZoomDisplay();
+        }
+        
+        function zoomOut() {
+            zoomScale = Math.max(MIN_ZOOM, zoomScale - viewTune.zoomStep);
+            applyTransform();
+            updateZoomDisplay();
+        }
+        
+        function resetZoom() {
+            zoomScale = 1;
+            panX = 0;
+            panY = 0;
+            applyTransform();
+            updateZoomDisplay();
+        }
+        
+        function fitToView() {
+            const viewport = document.getElementById('diagramViewport');
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg || !viewport) return;
+            
+            const svgRect = svg.getBoundingClientRect();
+            const viewportRect = viewport.getBoundingClientRect();
+            
+            // Calculate scale to fit
+            const scaleX = (viewportRect.width - 40) / (svgRect.width / zoomScale);
+            const scaleY = (viewportRect.height - 40) / (svgRect.height / zoomScale);
+            zoomScale = Math.min(scaleX, scaleY, MAX_ZOOM);
+            zoomScale = Math.max(zoomScale, MIN_ZOOM);
+            
+            // Center the diagram
+            panX = 0;
+            panY = 0;
+            
+            applyTransform();
+            updateZoomDisplay();
+        }
+        
+        // Wheel: trackpad two-finger scroll fires wheel (not touch). Without ctrl/meta that must pan, not zoom.
+        function handleWheel(e) {
+            if (e.target.closest && e.target.closest('.view-tune-panel')) return;
+            e.preventDefault();
+            const viewport = document.getElementById('diagramViewport');
+            const rect = viewport.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const zoomChord = e.ctrlKey || e.metaKey;
+            if (zoomChord) {
+                const step = viewTune.zoomStep;
+                const delta = e.deltaY > 0 ? -step : step;
+                const newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomScale + delta));
+                if (newScale !== zoomScale) {
+                    const scaleRatio = newScale / zoomScale;
+                    panX = mouseX - (mouseX - panX) * scaleRatio;
+                    panY = mouseY - (mouseY - panY) * scaleRatio;
+                    zoomScale = newScale;
+                    applyTransform();
+                    updateZoomDisplay();
+                }
+                return;
+            }
+            let dx = e.deltaX;
+            let dy = e.deltaY;
+            if (e.deltaMode === 1) {
+                dx *= 16;
+                dy *= 16;
+            } else if (e.deltaMode === 2) {
+                dx *= rect.width;
+                dy *= rect.height;
+            }
+            const m = viewTune.panWheelMult;
+            panX -= dx * m;
+            panY -= dy * m;
+            applyTransform();
+        }
+        
+        function getEdgePointerHitWidthPx() {
+            const base = Math.max(4, Math.min(80, Number(viewTune && viewTune.edgeHoverHitPx) || 14));
+            const z = typeof zoomScale === 'number' && zoomScale > 0 ? zoomScale : 1;
+            return Math.max(2, Math.min(160, base / z));
+        }
+
+        function invalidateDiagramHoverStrokeWidthCaches(svg) {
+            if (!svg) return;
+            svg.querySelectorAll('[data-diagram-stroke-def]').forEach((el) => {
+                delete el.dataset.diagramStrokeDef;
+                delete el.dataset.diagramStrokeHov;
+            });
+        }
+
+        let _diagramHoverSyncZoom = null;
+        function syncDiagramHoverToCanvasZoom() {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            if (_diagramHoverSyncZoom === zoomScale) return;
+            _diagramHoverSyncZoom = zoomScale;
+            invalidateDiagramHoverStrokeWidthCaches(svg);
+            stampEdgeLabelPathLinks(svg);
+            svg.querySelectorAll('g.edgePath').forEach((g) => ensureDiagramEdgePointerEvents(g));
+            const ep = svg.querySelector('g.edgePaths');
+            if (ep) ensureDiagramEdgePointerEvents(ep);
+        }
+
+        function refreshDiagramEdgeHitAreas() {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+            stampEdgeLabelPathLinks(svg);
+            svg.querySelectorAll('g.edgePath').forEach((g) => ensureDiagramEdgePointerEvents(g));
+            const ep = svg.querySelector('g.edgePaths');
+            if (ep) ensureDiagramEdgePointerEvents(ep);
+        }
+        window.refreshDiagramEdgeHitAreas = refreshDiagramEdgeHitAreas;
+
+        function initViewTuneSliders() {
+            const panIn = document.getElementById('tunePanMult');
+            const panVal = document.getElementById('tunePanVal');
+            const zoomIn = document.getElementById('tuneZoomStep');
+            const zoomVal = document.getElementById('tuneZoomVal');
+            const edgeHitIn = document.getElementById('tuneEdgeHit');
+            const edgeHitVal = document.getElementById('tuneEdgeHitVal');
+            try {
+                const sp = localStorage.getItem(VIEW_TUNE_STORAGE.pan);
+                const sz = localStorage.getItem(VIEW_TUNE_STORAGE.zoom);
+                const se = localStorage.getItem(VIEW_TUNE_STORAGE.edgeHit);
+                if (sp != null) viewTune.panWheelMult = Math.max(0.25, Math.min(3, parseFloat(sp)));
+                if (sz != null) viewTune.zoomStep = Math.max(0.05, Math.min(1, parseFloat(sz)));
+                if (se != null) viewTune.edgeHoverHitPx = Math.max(6, Math.min(48, parseFloat(se)));
+            } catch (e) {}
+            if (panIn && panVal) {
+                panIn.value = String(viewTune.panWheelMult);
+                panVal.textContent = viewTune.panWheelMult.toFixed(2);
+                panIn.addEventListener('input', function () {
+                    viewTune.panWheelMult = parseFloat(panIn.value);
+                    panVal.textContent = viewTune.panWheelMult.toFixed(2);
+                    try { localStorage.setItem(VIEW_TUNE_STORAGE.pan, String(viewTune.panWheelMult)); } catch (e) {}
+                });
+            }
+            if (zoomIn && zoomVal) {
+                zoomIn.value = String(viewTune.zoomStep);
+                zoomVal.textContent = viewTune.zoomStep.toFixed(2);
+                zoomIn.addEventListener('input', function () {
+                    viewTune.zoomStep = parseFloat(zoomIn.value);
+                    zoomVal.textContent = viewTune.zoomStep.toFixed(2);
+                    try { localStorage.setItem(VIEW_TUNE_STORAGE.zoom, String(viewTune.zoomStep)); } catch (e) {}
+                });
+            }
+            if (edgeHitIn && edgeHitVal) {
+                edgeHitIn.value = String(viewTune.edgeHoverHitPx);
+                edgeHitVal.textContent = String(Math.round(viewTune.edgeHoverHitPx));
+                edgeHitIn.addEventListener('input', function () {
+                    viewTune.edgeHoverHitPx = parseFloat(edgeHitIn.value);
+                    edgeHitVal.textContent = String(Math.round(viewTune.edgeHoverHitPx));
+                    try {
+                        localStorage.setItem(VIEW_TUNE_STORAGE.edgeHit, String(viewTune.edgeHoverHitPx));
+                    } catch (e) {}
+                    refreshDiagramEdgeHitAreas();
+                });
+            }
+            const tunePanel = document.getElementById('viewTunePanel');
+            if (tunePanel) {
+                tunePanel.addEventListener('wheel', function (ev) { ev.stopPropagation(); }, { passive: true });
+                tunePanel.addEventListener('touchstart', function (ev) { ev.stopPropagation(); }, { passive: true });
+                tunePanel.addEventListener('touchmove', function (ev) { ev.stopPropagation(); }, { passive: true });
+            }
+            console.info('[viewTune] Sliders bottom-right. Console: viewTune.panWheelMult = 1.2; syncViewTuneUI()', viewTune);
+            window.syncViewTuneUI = function () {
+                viewTune.panWheelMult = Math.max(0.25, Math.min(3, Number(viewTune.panWheelMult) || 2));
+                viewTune.zoomStep = Math.max(0.05, Math.min(1, Number(viewTune.zoomStep) || 0.2));
+                viewTune.edgeHoverHitPx = Math.max(6, Math.min(48, Number(viewTune.edgeHoverHitPx) || 14));
+                const pi = document.getElementById('tunePanMult');
+                const pv = document.getElementById('tunePanVal');
+                const zi = document.getElementById('tuneZoomStep');
+                const zv = document.getElementById('tuneZoomVal');
+                const ei = document.getElementById('tuneEdgeHit');
+                const ev = document.getElementById('tuneEdgeHitVal');
+                if (pi && pv) { pi.value = String(viewTune.panWheelMult); pv.textContent = viewTune.panWheelMult.toFixed(2); }
+                if (zi && zv) { zi.value = String(viewTune.zoomStep); zv.textContent = viewTune.zoomStep.toFixed(2); }
+                if (ei && ev) {
+                    ei.value = String(viewTune.edgeHoverHitPx);
+                    ev.textContent = String(Math.round(viewTune.edgeHoverHitPx));
+                }
+                refreshDiagramEdgeHitAreas();
+            };
+        }
+        
+        // Pan with mouse drag
+        function handleMouseDown(e) {
+            // Only start panning on left click and not on nodes
+            if (e.button !== 0) return;
+            if (e.target.closest('.view-tune-panel')) return;
+            /* Any flowchart node: show pointer and don't start pan (not only .clickable-node) */
+            if (
+                e.target.closest('g.node, .collapse-button, g.edgePath, g.edgePaths, g.edgeLabels, g.cluster')
+            )
+                return;
+            
+            isPanning = true;
+            startMouseX = e.clientX;
+            startMouseY = e.clientY;
+            startPanX = panX;
+            startPanY = panY;
+            
+            document.getElementById('diagramCanvas').classList.add('panning');
+        }
+        
+        function handleMouseMove(e) {
+            if (!isPanning) return;
+            
+            const dx = e.clientX - startMouseX;
+            const dy = e.clientY - startMouseY;
+            
+            panX = startPanX + dx;
+            panY = startPanY + dy;
+            
+            applyTransform();
+        }
+        
+        function handleMouseUp() {
+            isPanning = false;
+            document.getElementById('diagramCanvas').classList.remove('panning');
+        }
+        
+        // Initialize pan/zoom event listeners
+        function initZoomPan() {
+            const viewport = document.getElementById('diagramViewport');
+            
+            viewport.addEventListener('wheel', handleWheel, { passive: false });
+            viewport.addEventListener('mousedown', handleMouseDown);
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            
+            // Touch support for mobile — match index.html (skip single-finger pan on nodes)
+            viewport.addEventListener('touchstart', (e) => {
+                if (e.target.closest && e.target.closest('.view-tune-panel')) return;
+                if (
+                    e.touches.length === 1 &&
+                    e.target.closest &&
+                    e.target.closest('g.node, .collapse-button, g.edgePath, g.edgePaths, g.edgeLabels, g.cluster')
+                ) {
+                    return;
+                }
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    isPanning = true;
+                    startMouseX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    startMouseY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                    startPanX = panX;
+                    startPanY = panY;
+                    document.getElementById('diagramCanvas').classList.add('panning');
+                } else if (e.touches.length === 1) {
+                    isPanning = true;
+                    startMouseX = e.touches[0].clientX;
+                    startMouseY = e.touches[0].clientY;
+                    startPanX = panX;
+                    startPanY = panY;
+                    document.getElementById('diagramCanvas').classList.add('panning');
+                }
+            }, { passive: false });
+            
+            viewport.addEventListener('touchmove', (e) => {
+                if (e.target.closest && e.target.closest('.view-tune-panel')) return;
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const currentCenter = {
+                        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                    };
+                    const dx = currentCenter.x - startMouseX;
+                    const dy = currentCenter.y - startMouseY;
+                    panX = startPanX + dx;
+                    panY = startPanY + dy;
+                    applyTransform();
+                } else if (e.touches.length === 1 && isPanning) {
+                    const dx = e.touches[0].clientX - startMouseX;
+                    const dy = e.touches[0].clientY - startMouseY;
+                    panX = startPanX + dx;
+                    panY = startPanY + dy;
+                    applyTransform();
+                }
+            }, { passive: false });
+            
+            viewport.addEventListener('touchend', () => {
+                isPanning = false;
+                document.getElementById('diagramCanvas').classList.remove('panning');
+            }, { passive: true });
+        }
+        
+        // ============================================================
+        // Q&A WITH GEMINI
+        // ============================================================
+        
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+        
+        function getApiKey() {
+            // Priority: URL param > localStorage
+            const urlKey = urlParams.get('key');
+            if (urlKey) {
+                localStorage.setItem('codewiki_gemini_key', urlKey);
+                return urlKey;
+            }
+            return localStorage.getItem('codewiki_gemini_key') || '';
+        }
+        
+        function saveApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            const key = input.value.trim();
+            if (key) {
+                localStorage.setItem('codewiki_gemini_key', key);
+                input.value = '';
+                updateApiKeyStatus();
+            }
+        }
+        
+        function updateApiKeyStatus() {
+            const hasKey = !!getApiKey();
+            const setupDiv = document.getElementById('apiKeySetup');
+            const statusSpan = document.getElementById('apiKeyStatus');
+            const hintDiv = document.getElementById('qaHint');
+            
+            if (hasKey) {
+                setupDiv.style.display = 'none';
+                hintDiv.textContent = 'Press / to focus • Enter to ask • Answers are brief';
+            } else {
+                setupDiv.style.display = 'flex';
+                statusSpan.textContent = 'API key required for Q&A';
+                statusSpan.className = 'api-key-status';
+                hintDiv.textContent = 'Add your Gemini API key above to enable Q&A';
+            }
+        }
+        
+        function handleQaKeypress(e) {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        }
+        
+        async function askQuestion() {
+            const input = document.getElementById('qaInput');
+            const btn = document.getElementById('qaBtn');
+            const responseDiv = document.getElementById('qaResponse');
+            const question = input.value.trim();
+            
+            if (!question) return;
+            
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                responseDiv.textContent = 'Please add your Gemini API key first.';
+                responseDiv.className = 'qa-response visible error';
+                document.getElementById('apiKeySetup').style.display = 'flex';
+                return;
+            }
+            
+            // Get current module context
+            const currentModule = moduleData[selectedModuleId] || moduleData['overview'];
+            const moduleName = currentModule?.name || 'Overview';
+            const moduleDoc = currentModule?.documentation || '';
+            
+            // Clean documentation (remove mermaid blocks for context)
+            const cleanDoc = moduleDoc.replace(/```mermaid[\s\S]*?```/g, '').trim();
+            
+            // Show loading
+            btn.disabled = true;
+            responseDiv.textContent = 'Thinking...';
+            responseDiv.className = 'qa-response visible loading';
+            
+            try {
+                const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `You are a concise code documentation assistant. Answer questions about the "${moduleName}" module.
+
+RULES:
+- Give EXTREMELY brief answers (1-2 sentences max)
+- Be direct and specific
+- No fluff, no introductions, no "Here's..."
+- If you don't know, say "Not covered in docs"
+
+MODULE DOCUMENTATION:
+${cleanDoc.substring(0, 8000)}
+
+QUESTION: ${question}`
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.3,
+                            maxOutputTokens: 150
+                        }
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error?.message || `API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received.';
+                
+                responseDiv.textContent = answer.trim();
+                responseDiv.className = 'qa-response visible';
+                input.value = '';
+                
+            } catch (err) {
+                console.error('Q&A error:', err);
+                responseDiv.textContent = err.message.includes('API key') 
+                    ? 'Invalid API key. Please check and try again.'
+                    : `Error: ${err.message}`;
+                responseDiv.className = 'qa-response visible error';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+        
+        // ============================================================
+        // INITIALIZATION
+        // ============================================================
+        
+        async function init() {
+            const success = await loadAllData();
+            if (!success) {
+                document.getElementById('mermaid-diagram').innerHTML = 
+                    `<div class="error">Failed to load repository data from "${basePath}"</div>`;
+                document.getElementById('docContent').innerHTML = 
+                    `<div class="error">Check that the repository exists and contains the required files.</div>`;
+                return;
+            }
+            
+            buildModuleData();
+            
+            // Initialize zoom/pan
+            initZoomPan();
+            initViewTuneSliders();
+            
+            // Initialize Q&A
+            updateApiKeyStatus();
+            
+            // Initialize with overview
+            currentModuleId = 'overview';
+            baseDiagramCode = moduleData['overview']?.diagram || '';
+            currentDiagramCode = baseDiagramCode;
+            
+            // Initialize selection and breadcrumb
+            updateSelection('overview');
+            
+            renderDiagram(currentDiagramCode, overviewLinks, 'overview');
+        }
+        
+        // Start
+        init();
+    </script>
+</body>
+</html>
+
+<!-- Trigger redeploy Fri Jan 16 22:19:39 IST 2026 -->
+

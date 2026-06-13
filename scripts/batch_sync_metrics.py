@@ -6,8 +6,6 @@ Default: read-only presync audit for each repo folder under --base (no file chan
 
 With --run-sync: runs run_full_sync (mutates module_tree.json, creates placeholders, etc.).
 
-Note: --deep-mermaid is deprecated (sync always uses validate_mermaid per block); flag kept for no-op compatibility.
-
 Example (local demo bundles, no API calls):
 
   python scripts/batch_sync_metrics.py --base demo/repos \\
@@ -15,14 +13,13 @@ Example (local demo bundles, no API calls):
 
 After a full codewiki generate into e.g. tmp/myrepo/docs:
 
-  python scripts/batch_sync_metrics.py --run-sync --deep-mermaid --base tmp/myrepo_parent myrepo
+  python scripts/batch_sync_metrics.py --run-sync --base tmp/myrepo_parent myrepo
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -52,34 +49,17 @@ def main() -> int:
         help="Run full run_full_sync (writes files; use on a copy if experimenting)",
     )
     ap.add_argument(
-        "--deep-mermaid",
-        action="store_true",
-        help="Enable deep mermaid validation (slower; export CODEWIKI_SYNC_DEEP_MERMAID=1)",
-    )
-    ap.add_argument(
         "-o",
         "--output",
         type=Path,
         default=None,
         help="Write JSON summary to this path (default: batch_sync_metrics.json in cwd)",
     )
-    ap.add_argument(
-        "--mermaid-bench",
-        action="store_true",
-        help="Run mermaid heuristic+deep validation only (no tree mutation); pairs with --deep-mermaid",
-    )
     args = ap.parse_args()
-
-    if args.deep_mermaid:
-        os.environ["CODEWIKI_SYNC_DEEP_MERMAID"] = "1"
 
     sys.path.insert(0, str(_repo_root()))
 
-    from codewiki.src.be.doc_file_sync import (
-        audit_docs_state,
-        run_full_sync,
-        validate_mermaid_diagrams,
-    )
+    from codewiki.src.be.doc_file_sync import audit_docs_state, run_full_sync
 
     base: Path = args.base
     out_rows: List[Dict[str, Any]] = []
@@ -93,9 +73,6 @@ def main() -> int:
             continue
 
         row["presync_audit"] = audit_docs_state(str(docs_dir))
-
-        if args.mermaid_bench:
-            row["mermaid_bench"] = validate_mermaid_diagrams(str(docs_dir))
 
         if args.run_sync:
             row["sync_result"] = run_full_sync(str(docs_dir), components=None, repo_name=slug)

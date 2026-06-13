@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting…</title>
+    <script>
+        // Legacy URL: /viewer.html?repo=… → canonical: /?repo=…
+        var q = window.location.search || '';
+        var h = window.location.hash || '';
+        window.location.replace((window.location.pathname.replace(/\/viewer\.html$/i, '/') || '/') + q + h);
+    </script>
+</head>
+<body>
+    <p><a href="/">Open documentation viewer</a></p>
+</body>
+</html>

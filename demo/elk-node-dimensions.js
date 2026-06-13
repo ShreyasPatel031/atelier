@@ -29,6 +29,16 @@
         reactFlowGroupHeightFactor: 3,
         /** Uniform ELK compound inset (px): top/left/right/bottom; matches former lateral inset in pipeline-diagram-to-elk. */
         elkCompoundPaddingPx: 14,
+        /**
+         * Unified ELK port + edge lane spacing (px). Drives portPort, edgeEdge, edgeNode,
+         * and layered between-layer variants so handle, edge-lane, and node-edge gaps match.
+         * @see https://eclipse.dev/elk/reference/options/org-eclipse-elk-spacing-portPort.html
+         * @see https://eclipse.dev/elk/reference/options/org-eclipse-elk-spacing-edgeEdge.html
+         * @see https://eclipse.dev/elk/reference/options/org-eclipse-elk-spacing-edgeNode.html
+         * @see https://eclipse.dev/elk/reference/options/org-eclipse-elk-layered-spacing-edgeEdgeBetweenLayers.html
+         * @see https://eclipse.dev/elk/reference/options/org-eclipse-elk-layered-spacing-edgeNodeBetweenLayers.html
+         */
+        elkPortEdgeSpacingPx: 16,
     };
 
     function clampLeafWidthPx(x) {
@@ -61,6 +71,24 @@
         void globalObj;
         var v = Math.round(Number(DEFAULTS.elkCompoundPaddingPx) || 14);
         return Math.max(4, Math.min(48, v));
+    }
+
+    /**
+     * ELK layoutOptions for matching port, edge-lane, and node-edge spacing (elkjs target).
+     * Uses DISTRIBUTED port alignment so spacing.portPort is honored (layered default is JUSTIFIED).
+     */
+    function getElkPortEdgeSpacingLayoutOptions(globalObj) {
+        void globalObj;
+        var sp = Math.round(Number(DEFAULTS.elkPortEdgeSpacingPx) || 16);
+        sp = Math.max(4, Math.min(48, sp));
+        return {
+            'elk.spacing.portPort': String(sp),
+            'elk.spacing.edgeEdge': String(sp),
+            'elk.spacing.edgeNode': String(sp),
+            'elk.layered.spacing.edgeEdgeBetweenLayers': String(sp),
+            'elk.layered.spacing.edgeNodeBetweenLayers': String(sp),
+            'elk.portAlignment.default': 'DISTRIBUTED',
+        };
     }
 
     /**
@@ -169,6 +197,7 @@
         clampLeafWidthPx: clampLeafWidthPx,
         resolveLeafNodeWidthPx: resolveLeafNodeWidthPx,
         getElkCompoundPaddingPx: getElkCompoundPaddingPx,
+        getElkPortEdgeSpacingLayoutOptions: getElkPortEdgeSpacingLayoutOptions,
         getReactFlowDimensionProfile: getReactFlowDimensionProfile,
         estimateElkLeafSize: estimateElkLeafSize,
         estimateElkGroupLabelSize: estimateElkGroupLabelSize,

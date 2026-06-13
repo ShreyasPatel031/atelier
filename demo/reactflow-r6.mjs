@@ -1512,8 +1512,10 @@ const edgeTypes = {
  * The pill layer is a sibling of .react-flow__nodes inside the transformed viewport, so
  * its children use flow coordinates and inherit the RF pan/zoom transform automatically.
  */
-function AtelierViewportApiBootstrap() {
+function AtelierViewportApiBootstrap(props) {
     const rf = useReactFlow();
+    const skipInitialFitView = !!(props && props.skipInitialFitView);
+    const didInitialFitRef = useRef(false);
     useLayoutEffect(
         function () {
             window.__atelierR6ViewportApi = rf;
@@ -1538,13 +1540,24 @@ function AtelierViewportApiBootstrap() {
                 window.__atelierR6PillLayer = layer;
                 window.dispatchEvent(new CustomEvent('atelier-rf-pill-layer-ready'));
             }
+            if (!skipInitialFitView && !didInitialFitRef.current) {
+                didInitialFitRef.current = true;
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        if (typeof window.atelierRfFitViewCenterImpl === 'function') {
+                            void window.atelierRfFitViewCenterImpl();
+                        }
+                    });
+                });
+            }
             return function () {
+                didInitialFitRef.current = false;
                 try {
                     delete window.__atelierR6ViewportApi;
                 } catch (_) {}
             };
         },
-        [rf]
+        [rf, skipInitialFitView]
     );
     return null;
 }
@@ -1622,8 +1635,8 @@ function rfAbsoluteNodeBounds(nodes) {
     for (var j = 0; j < list.length; j++) {
         var nd = list[j];
         var ap = absPos(nd);
-        var w = nd.width || 0;
-        var h = nd.height || 0;
+        var w = nd.width || (nd.data && nd.data.width) || 0;
+        var h = nd.height || (nd.data && nd.data.height) || 0;
         minX = Math.min(minX, ap.x);
         minY = Math.min(minY, ap.y);
         maxX = Math.max(maxX, ap.x + w);
@@ -1684,27 +1697,41 @@ function rfViewportForLayout(nodes, edges) {
     );
 }
 
+function rfNodeHasDimensions(node) {
+    if (!node) return false;
+    var w = node.width || (node.data && node.data.width);
+    var h = node.height || (node.data && node.data.height);
+    return !!(w && h);
+}
+
 /** Smooth center/zoom — one 350ms tween, includes edge routes in bounds. */
 window.atelierRfFitViewCenterImpl = async function atelierRfFitViewCenterImpl() {
-    var api = window.__atelierR6ViewportApi;
-    if (!api || typeof api.getViewport !== 'function' || typeof api.setViewport !== 'function') {
-        return;
-    }
     await rfWaitForPaneLayout();
     for (var i = 0; i < 80; i++) {
-        var nodes = typeof api.getNodes === 'function' ? api.getNodes() : [];
-        var edges = typeof api.getEdges === 'function' ? api.getEdges() : [];
-        var sized = nodes.filter(function (n) {
-            return n.width && n.height;
-        });
-        if (nodes.length && sized.length < nodes.length) {
+        var api = window.__atelierR6ViewportApi;
+        if (!api || typeof api.getViewport !== 'function' || typeof api.setViewport !== 'function') {
             await new Promise(function (r) {
                 setTimeout(r, 40);
             });
             continue;
         }
-        var target = rfViewportForLayout(nodes, edges);
-        if (!target) return;
+        var nodes = typeof api.getNodes === 'function' ? api.getNodes() : [];
+        var edges = typeof api.getEdges === 'function' ? api.getEdges() : [];
+        var sized = nodes.filter(rfNodeHasDimensions);
+        if (nodes.length && sized.length < nodes.length && i < 60) {
+            await new Promise(function (r) {
+                setTimeout(r, 40);
+            });
+            continue;
+        }
+        var fitNodes = sized.length ? sized : nodes;
+        var target = rfViewportForLayout(fitNodes, edges);
+        if (!target) {
+            await new Promise(function (r) {
+                setTimeout(r, 40);
+            });
+            continue;
+        }
         var current = api.getViewport();
         if (
             current &&
@@ -2046,6 +2073,28 @@ window.atelierRfStopLayoutAnimation = function () {
     }
 };
 
+/** Apply ELK layout to React Flow without d3-timer tween (expand/collapse must not hang refresh). */
+window.atelierRfApplyLayoutInstant = function atelierRfApplyLayoutInstant(opts) {
+    var targetNodes = (opts && opts.targetNodes) || [];
+    var targetEdges = (opts && opts.targetEdges) || [];
+    var parentDbg = opts && opts.parentDbg;
+    var epoch = opts && opts.epoch;
+    window.atelierRfStopLayoutAnimation();
+    var setNodes = window.__atelierR6SetNodes;
+    var setEdges = window.__atelierR6SetEdges;
+    if (typeof setNodes !== 'function' || typeof setEdges !== 'function') return false;
+    setNodes(clampElkCustomNodeDimensions(targetNodes));
+    setEdges(rfFinalizeLayoutEdges(targetEdges));
+    if (parentDbg) window.atelierRfLastNodeParentById = parentDbg;
+    if (epoch != null) rfAssignRfSnapshot(epoch, targetNodes, targetEdges);
+    queueMicrotask(function () {
+        if (typeof window.atelierRfSyncSelectionHighlight === 'function') {
+            window.atelierRfSyncSelectionHighlight();
+        }
+    });
+    return true;
+};
+
 /**
  * ELK + convert + enrich for the current working diagram. Used by mount and animated refresh.
  * @returns {Promise<{ ok: boolean, nodes?: any[], edges?: any[], parentDbg?: object, error?: string }>}
@@ -2262,6 +2311,29 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
         epoch: epoch,
     };
 
+    var layoutAnimCompleted = false;
+    function finishLayoutAnim() {
+        if (layoutAnimCompleted) return;
+        layoutAnimCompleted = true;
+        if (layoutAnimSafetyTimer) {
+            clearTimeout(layoutAnimSafetyTimer);
+            layoutAnimSafetyTimer = null;
+        }
+        onComplete();
+    }
+
+    /** Never leave refreshReactFlowView awaiting forever (stale epoch, throttled timers, etc.). */
+    var layoutAnimSafetyTimer = setTimeout(function () {
+        if (layoutAnimCompleted) return;
+        window.atelierRfStopLayoutAnimation();
+        queueMicrotask(function () {
+            if (typeof window.atelierRfSyncSelectionHighlight === 'function') {
+                window.atelierRfSyncSelectionHighlight();
+            }
+            finishLayoutAnim();
+        });
+    }, duration + exitMs + 500);
+
     function startLayoutAnimTimer() {
         if (
             shouldFitViewport &&
@@ -2286,6 +2358,7 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
                 } catch (_) {}
                 rfLayoutAnimTimer = null;
             }
+            finishLayoutAnim();
             return;
         }
 
@@ -2449,7 +2522,7 @@ window.atelierRfAnimateLayoutTransition = function (opts) {
                 if (typeof window.atelierRfSyncSelectionHighlight === 'function') {
                     window.atelierRfSyncSelectionHighlight();
                 }
-                onComplete();
+                finishLayoutAnim();
             });
         }
     });
@@ -2590,6 +2663,7 @@ function SemanticLegend({ nodes }) {
 function Inner(props) {
     const initialNodes = props.initialNodes || [];
     const initialEdges = props.initialEdges || [];
+    const skipInitialFitView = !!props.skipInitialFitView;
     const [nodes, setNodes] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
     const [hoveredNodeId, setHoveredNodeId] = useState(null);
@@ -2728,7 +2802,9 @@ function Inner(props) {
                 },
             },
         },
-        React.createElement(AtelierViewportApiBootstrap, null),
+        React.createElement(AtelierViewportApiBootstrap, {
+            skipInitialFitView: skipInitialFitView,
+        }),
         React.createElement(Background, { gap: 16, color: '#cbd5e1' }),
         React.createElement(Controls, { showInteractive: false }),
         React.createElement(SemanticLegend, { nodes })
@@ -2856,9 +2932,6 @@ window.atelierMountReactFlowR6 = async function (container, epoch) {
         }
         if (window.atelierRfDebugLayout && typeof window.atelierRfLogLayoutDebug === 'function') {
             window.atelierRfLogLayoutDebug('rf-mount epoch=' + String(epoch));
-        }
-        if (typeof window.atelierRfFitViewCenterImpl === 'function') {
-            void window.atelierRfFitViewCenterImpl();
         }
     });
 };

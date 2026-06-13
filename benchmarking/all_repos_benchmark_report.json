@@ -1,0 +1,179 @@
+{
+  "run_completed": "2026-06-13T11:17:13Z",
+  "repos_count": 7,
+  "total_wall_seconds": 938.6,
+  "total_pipeline_seconds": 899.7,
+  "all_validation_passed": true,
+  "repos": [
+    {
+      "repo": "crewai",
+      "wall_seconds": 129.0,
+      "stages": {
+        "Dependency Analysis": 5.3,
+        "Module Clustering": 43.1,
+        "Documentation Generation": 72.3
+      },
+      "total_pipeline_seconds": 121.4,
+      "time_to_first_overview": 121.4,
+      "total_tokens": 1334829,
+      "total_llm_calls": 29,
+      "estimated_cost_usd": 0.2382,
+      "modules": 28,
+      "diagram_coverage_pct": 100.0,
+      "overview_nodes": null,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 10,
+      "sync_errors": 0,
+      "sync_warnings": 3,
+      "diagram_ir_issues": {},
+      "quality_score": 61.0
+    },
+    {
+      "repo": "dspy",
+      "wall_seconds": 73.5,
+      "stages": {
+        "Dependency Analysis": 2.0,
+        "Module Clustering": 16.0,
+        "Documentation Generation": 49.6
+      },
+      "total_pipeline_seconds": 67.7,
+      "time_to_first_overview": 67.7,
+      "total_tokens": 608659,
+      "total_llm_calls": 24,
+      "estimated_cost_usd": 0.1143,
+      "modules": 22,
+      "diagram_coverage_pct": 100.0,
+      "overview_nodes": null,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 6,
+      "sync_errors": 0,
+      "sync_warnings": 0,
+      "diagram_ir_issues": {},
+      "quality_score": 64.0
+    },
+    {
+      "repo": "langchain",
+      "wall_seconds": 146.7,
+      "stages": {
+        "Dependency Analysis": 5.2,
+        "Module Clustering": 34.4,
+        "Documentation Generation": 100.8
+      },
+      "total_pipeline_seconds": 141.8,
+      "time_to_first_overview": 141.8,
+      "total_tokens": 1698637,
+      "total_llm_calls": 35,
+      "estimated_cost_usd": 0.3037,
+      "modules": 34,
+      "diagram_coverage_pct": 100.0,
+      "overview_nodes": null,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 8,
+      "sync_errors": 0,
+      "sync_warnings": 7,
+      "diagram_ir_issues": {
+        "r4_node_id_collides_with_group": 4
+      },
+      "quality_score": 60.0
+    },
+    {
+      "repo": "ollama",
+      "wall_seconds": 161.1,
+      "stages": {
+        "Dependency Analysis": 19.6,
+        "Module Clustering": 31.5,
+        "Documentation Generation": 102.4
+      },
+      "total_pipeline_seconds": 153.8,
+      "time_to_first_overview": 153.8,
+      "total_tokens": 1216962,
+      "total_llm_calls": 31,
+      "estimated_cost_usd": 0.2208,
+      "modules": 31,
+      "diagram_coverage_pct": 100.0,
+      "overview_nodes": null,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 8,
+      "sync_errors": 0,
+      "sync_warnings": 4,
+      "diagram_ir_issues": {},
+      "quality_score": 60.5
+    },
+    {
+      "repo": "persona-selection-model",
+      "wall_seconds": 64.2,
+      "stages": {
+        "Dependency Analysis": 1.8,
+        "Module Clustering": 8.1,
+        "Documentation Generation": 50.6
+      },
+      "total_pipeline_seconds": 60.6,
+      "time_to_first_overview": 60.6,
+      "total_tokens": 308582,
+      "total_llm_calls": 24,
+      "estimated_cost_usd": 0.0615,
+      "modules": 22,
+      "diagram_coverage_pct": 100.0,
+      "overview_nodes": null,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 7,
+      "sync_errors": 0,
+      "sync_warnings": 1,
+      "diagram_ir_issues": {},
+      "quality_score": 64.0
+    },
+    {
+      "repo": "pydantic-ai",
+      "wall_seconds": 196.1,
+      "stages": {
+        "Dependency Analysis": 3.7,
+        "Module Clustering": 133.9,
+        "Documentation Generation": 54.4
+      },
+      "total_pipeline_seconds": 192.2,
+      "time_to_first_overview": 192.2,
+      "total_tokens": 863834,
+      "total_llm_calls": 29,
+      "estimated_cost_usd": 0.1647,
+      "modules": 25,
+      "diagram_coverage_pct": 100.0,
+      "overview_nodes": null,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 4,
+      "sync_errors": 0,
+      "sync_warnings": 2,
+      "diagram_ir_issues": {},
+      "quality_score": 62.5
+    },
+    {
+      "repo": "transformers",
+      "wall_seconds": 168.0,
+      "stages": {
+        "Dependency Analysis": 22.2,
+        "Module Clustering": 49.6,
+        "Documentation Generation": 89.2
+      },
+      "total_pipeline_seconds": 162.2,
+      "time_to_first_overview": 162.2,
+      "total_tokens": 1830337,
+      "total_llm_calls": 45,
+      "estimated_cost_usd": 0.3313,
+      "modules": 48,
+      "diagram_coverage_pct": 100.0,
+      "overview_nodes": null,
+      "validation_passed": true,
+      "validation_errors": 0,
+      "validation_warnings": 15,
+      "sync_errors": 0,
+      "sync_warnings": 10,
+      "diagram_ir_issues": {},
+      "quality_score": 60.5
+    }
+  ]
+}
