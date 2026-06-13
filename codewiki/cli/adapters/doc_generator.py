@@ -404,8 +404,10 @@ class CLIDocumentationGenerator:
         # Finalize metrics
         metrics.finalize()
         
-        # Save metrics
-        metrics_output = Path(working_dir) / "metrics.json"
+        # Save pipeline metrics (never overwrite a module doc named metrics.json)
+        from codewiki.src.config import GENERATION_METRICS_FILENAME
+
+        metrics_output = Path(working_dir) / GENERATION_METRICS_FILENAME
         metrics.save(metrics_output)
         click.echo(
             f"[DEBUG] Tokens: {metrics.total_tokens:,} | "

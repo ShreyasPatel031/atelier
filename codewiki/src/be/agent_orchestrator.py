@@ -10,6 +10,32 @@ from typing import Dict, List, Any, Optional
 
 logger = logging.getLogger(__name__)
 
+# Global LLM concurrency limiter. Bounds total in-flight LLM calls across the entire
+# doc-gen tree (top-level modules AND auto-split sub-tasks, which otherwise bypass the
+# per-batch module semaphore). Created lazily on the running event loop.
+_llm_semaphore: Optional[asyncio.Semaphore] = None
+
+
+def _get_llm_semaphore() -> asyncio.Semaphore:
+    """Return the process-wide LLM semaphore, creating it on first use."""
+    global _llm_semaphore
+    if _llm_semaphore is None:
+        _llm_semaphore = asyncio.Semaphore(MAX_CONCURRENT_LLM_CALLS)
+    return _llm_semaphore
+
+
+async def generate_leaf_doc_json_throttled(**kwargs) -> Dict[str, Any]:
+    """Run generate_leaf_doc_json in a worker thread under the global LLM semaphore.
+
+    Centralizes throttling so every leaf JSON call (direct 4-FAST, forced 4-FAST, and
+    auto-split sub-modules) shares one concurrency budget instead of overwhelming the
+    thread pool.
+    """
+    from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
+
+    async with _get_llm_semaphore():
+        return await asyncio.to_thread(generate_leaf_doc_json, **kwargs)
+
 # try:
 #     # Configure logfire with environment variables for Docker compatibility
 #     logfire_token = os.getenv('LOGFIRE_TOKEN')
@@ -60,6 +86,7 @@ from codewiki.src.config import (
     OVERVIEW_FILENAME,
     LARGE_REPO_COMPONENT_THRESHOLD,
     MIN_DEPTH,
+    MAX_CONCURRENT_LLM_CALLS,
 )
 from codewiki.src.file_manager import file_manager
 from codewiki.src.be.dependency_analyzer.models.core import Node
@@ -194,129 +221,68 @@ class AgentOrchestrator:
         
         return agent
     
-    def _auto_split_module(self, core_component_ids: List[str], 
+    def _auto_split_module(self, core_component_ids: List[str],
                            components: Dict[str, Node]) -> Dict[str, Any]:
         """
-        Automatically split a large module into sub-modules based on directory structure.
-        Used when prompt tokens exceed LLM context limits.
+        Split a large module into balanced token-budget chunks.
+        Each chunk targets AUTO_SPLIT_TOKEN_THRESHOLD tokens so no single
+        MAP call overwhelms the LLM.
         """
-        from collections import defaultdict
-        
-        logger.info(f"[AUTO-SPLIT] Splitting {len(core_component_ids)} components by directory")
-        
-        # Group components by their top-level directory
-        dir_groups = defaultdict(list)
-        
+        from collections import OrderedDict
+        from codewiki.src.be.utils import count_module_tokens
+        from codewiki.src.config import AUTO_SPLIT_TOKEN_THRESHOLD
+
+        TARGET_TOKENS_PER_CHUNK = AUTO_SPLIT_TOKEN_THRESHOLD
+
+        logger.info(f"[AUTO-SPLIT] Splitting {len(core_component_ids)} components by token budget")
+
+        # Group components by file path to avoid double-counting.
+        file_groups: OrderedDict[str, list[str]] = OrderedDict()
         for comp_id in core_component_ids:
             if comp_id not in components:
                 continue
-            
-            component = components[comp_id]
-            path = component.relative_path
-            
-            # Get directory path
-            parts = path.split(os.sep)
-            if len(parts) > 2:
-                # Use first two directory levels for finer granularity
-                key = f"{parts[0]}_{parts[1]}"
-            elif len(parts) > 1:
-                key = parts[0]
-            else:
-                key = "root"
-            
-            dir_groups[key].append(comp_id)
-        
-        # If still too few groups, try third level
-        if len(dir_groups) <= 3:
-            logger.info(f"[AUTO-SPLIT] Only {len(dir_groups)} groups, trying finer split")
-            dir_groups = defaultdict(list)
-            
-            for comp_id in core_component_ids:
-                if comp_id not in components:
-                    continue
-                
-                component = components[comp_id]
-                path = component.relative_path
-                parts = path.split(os.sep)
-                
-                if len(parts) > 3:
-                    key = f"{parts[0]}_{parts[1]}_{parts[2]}"
-                elif len(parts) > 2:
-                    key = f"{parts[0]}_{parts[1]}"
-                elif len(parts) > 1:
-                    key = parts[0]
-                else:
-                    key = "root"
-                
-                dir_groups[key].append(comp_id)
-        
-        # Convert to sub-module format
-        sub_modules = {}
-        for dir_name, comp_list in dir_groups.items():
-            if not comp_list:
-                continue
-            
-            # Create clean module name
-            sub_name = dir_name.lower().replace("-", "_").replace(".", "_").replace(" ", "_")
-            if not sub_name:
-                sub_name = "other"
-            
-            sub_modules[sub_name] = {
-                "path": dir_name,
-                "components": comp_list
-            }
-        
-        # CRITICAL: If directory-based splitting didn't help (only 1 group with same components),
-        # fall back to token-budget based chunking
-        if len(sub_modules) <= 1:
-            logger.warning(f"[AUTO-SPLIT] Directory-based split created only {len(sub_modules)} group(s)")
-            logger.warning(f"[AUTO-SPLIT] Falling back to token-budget chunked splitting")
-            
-            from codewiki.src.be.utils import count_module_tokens
-            
-            # Target: each chunk should fit in LLM context (~80k tokens to leave room for response)
-            TARGET_TOKENS_PER_CHUNK = 80000
-            
-            sub_modules = {}
-            current_chunk = []
-            current_chunk_tokens = 0
-            chunk_idx = 0
-            
-            for comp_id in core_component_ids:
-                if comp_id not in components:
-                    continue
-                    
-                # Estimate tokens for this component
-                comp_tokens = count_module_tokens([comp_id], components)
-                
-                # If adding this component exceeds budget, start a new chunk
-                if current_chunk and (current_chunk_tokens + comp_tokens > TARGET_TOKENS_PER_CHUNK):
-                    chunk_idx += 1
-                    sub_name = f"part_{chunk_idx}"
-                    sub_modules[sub_name] = {
-                        "path": f"chunk_{chunk_idx}",
-                        "components": current_chunk
-                    }
-                    logger.info(f"[AUTO-SPLIT] Created chunk {chunk_idx}: {len(current_chunk)} components, {current_chunk_tokens} tokens")
-                    current_chunk = []
-                    current_chunk_tokens = 0
-                
-                current_chunk.append(comp_id)
-                current_chunk_tokens += comp_tokens
-            
-            # Add the last chunk
-            if current_chunk:
+            fpath = components[comp_id].relative_path
+            file_groups.setdefault(fpath, []).append(comp_id)
+
+        file_tokens: dict[str, int] = {}
+        for fpath, comp_ids in file_groups.items():
+            file_tokens[fpath] = count_module_tokens(comp_ids, components)
+
+        total_tokens = sum(file_tokens.values())
+        logger.info(f"[AUTO-SPLIT] {len(file_groups)} unique files, "
+                    f"total deduplicated tokens: {total_tokens:,}")
+
+        sub_modules: Dict[str, Any] = {}
+        current_chunk: list[str] = []
+        current_chunk_tokens = 0
+        chunk_idx = 0
+
+        for fpath, comp_ids in file_groups.items():
+            ft = file_tokens[fpath]
+            if current_chunk and (current_chunk_tokens + ft > TARGET_TOKENS_PER_CHUNK):
                 chunk_idx += 1
-                sub_name = f"part_{chunk_idx}"
-                sub_modules[sub_name] = {
+                sub_modules[f"part_{chunk_idx}"] = {
                     "path": f"chunk_{chunk_idx}",
-                    "components": current_chunk
+                    "components": current_chunk,
                 }
-                logger.info(f"[AUTO-SPLIT] Created chunk {chunk_idx}: {len(current_chunk)} components, {current_chunk_tokens} tokens")
-            
-            logger.info(f"[AUTO-SPLIT] Token-budget chunking created {len(sub_modules)} parts")
-        
-        logger.info(f"[AUTO-SPLIT] Created {len(sub_modules)} sub-modules")
+                logger.info(f"[AUTO-SPLIT] Chunk {chunk_idx}: "
+                            f"{len(current_chunk)} components, {current_chunk_tokens:,} tokens")
+                current_chunk = []
+                current_chunk_tokens = 0
+
+            current_chunk.extend(comp_ids)
+            current_chunk_tokens += ft
+
+        if current_chunk:
+            chunk_idx += 1
+            sub_modules[f"part_{chunk_idx}"] = {
+                "path": f"chunk_{chunk_idx}",
+                "components": current_chunk,
+            }
+            logger.info(f"[AUTO-SPLIT] Chunk {chunk_idx}: "
+                        f"{len(current_chunk)} components, {current_chunk_tokens:,} tokens")
+
+        logger.info(f"[AUTO-SPLIT] Created {len(sub_modules)} chunks")
         return sub_modules
     
     def _merge_module_tree(self, target: Dict[str, Any], source: Dict[str, Any]) -> None:
@@ -339,32 +305,6 @@ class AgentOrchestrator:
                         # Only overwrite if source has a value
                         target[key][field] = field_val
     
-    async def _generate_parent_overview(self, module_name: str, sub_modules: Dict[str, Any],
-                                        working_dir: str, deps: 'CodeWikiDeps') -> None:
-        """
-        Generate a simple overview JSON for a parent module after its sub-modules are processed.
-        """
-        import json as _json
-
-        parent_id = module_name.replace(" ", "_").lower()
-        nodes = [{"id": parent_id, "label": module_name.replace("_", " ").title(), "type": "module"}]
-        edges = []
-        for sub_name in sub_modules.keys():
-            cid = sub_name.replace(" ", "_").lower()
-            nodes.append({"id": cid, "label": sub_name.replace("_", " ").title(), "type": "module", "link": sub_name})
-            edges.append({"source": parent_id, "target": cid, "label": "contains"})
-        diagram_obj = {"direction": "TD", "nodes": nodes, "edges": edges, "groups": []}
-
-        doc = {
-            "title": module_name.replace("_", " ").title(),
-            "summary": f"This module contains {len(sub_modules)} sub-modules.",
-            "diagram": diagram_obj,
-        }
-        json_path = os.path.join(working_dir, f"{module_name}.json")
-        with open(json_path, "w") as f:
-            _json.dump(doc, f, indent=2)
-        logger.info(f"[AUTO-SPLIT] Generated parent overview: {json_path}")
-
     async def process_module(self, module_name: str, components: Dict[str, Node], 
                            core_component_ids: List[str], module_path: List[str], working_dir: str,
                            module_tree_lock=None) -> Dict[str, Any]:
@@ -481,30 +421,41 @@ class AgentOrchestrator:
             logger.error(f"[STAGE 4.4] Traceback: {traceback.format_exc()}")
             raise
 
-        # STAGE 4-FAST: Small modules → JSON mode, no agent
-        SMALL_MODULE_THRESHOLD = 60
+        # STAGE 4-FAST / AUTO-SPLIT: Token-based routing
+        # - Modules with prompt_tokens <= AUTO_SPLIT_TOKEN_THRESHOLD → direct JSON mode (4-FAST)
+        # - Modules exceeding the threshold → parallel auto-split by directory (no depth guard)
+        # Replaces the old component-count threshold (SMALL_MODULE_THRESHOLD=60) and the
+        # hardcoded MAX_LLM_CONTEXT=100K guard. Token count is always a better proxy than
+        # component count since file sizes vary widely.
+        from codewiki.src.be.utils import count_module_tokens
+        from codewiki.src.config import AUTO_SPLIT_TOKEN_THRESHOLD
+        prompt_tokens = count_module_tokens(core_component_ids, components)
+        logger.info(
+            f"[STAGE 4] Module token count: {prompt_tokens:,} "
+            f"(threshold: {AUTO_SPLIT_TOKEN_THRESHOLD:,}, components: {len(core_component_ids)})"
+        )
+
         force_fast = os.environ.get("CODEWIKI_FORCE_FAST_LEAF", "").strip().lower() in (
             "1",
             "true",
             "yes",
         )
-        if force_fast or len(core_component_ids) <= SMALL_MODULE_THRESHOLD:
-            if force_fast and len(core_component_ids) > SMALL_MODULE_THRESHOLD:
+
+        if force_fast or prompt_tokens <= AUTO_SPLIT_TOKEN_THRESHOLD:
+            if force_fast:
                 logger.info(
                     f"[STAGE 4-FAST] CODEWIKI_FORCE_FAST_LEAF — forcing direct JSON mode "
-                    f"for {module_name} ({len(core_component_ids)} components)"
+                    f"for {module_name} ({len(core_component_ids)} components, {prompt_tokens:,} tokens)"
                 )
-            elif len(core_component_ids) <= SMALL_MODULE_THRESHOLD:
+            else:
                 logger.info(
-                    f"[STAGE 4-FAST] Small module ({len(core_component_ids)} components "
-                    f"<= {SMALL_MODULE_THRESHOLD}) — using direct JSON mode for {module_name}"
+                    f"[STAGE 4-FAST] Module fits threshold ({prompt_tokens:,} <= {AUTO_SPLIT_TOKEN_THRESHOLD:,} tokens)"
+                    f" — using direct JSON mode for {module_name}"
                 )
             try:
-                from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
                 import json as _json
 
-                doc = await asyncio.to_thread(
-                    generate_leaf_doc_json,
+                doc = await generate_leaf_doc_json_throttled(
                     module_name=module_name,
                     core_component_ids=core_component_ids,
                     components=components,
@@ -515,8 +466,6 @@ class AgentOrchestrator:
                 with open(json_path, "w") as f:
                     _json.dump(doc, f, indent=2)
                 logger.info(f"[STAGE 4-FAST] Wrote {json_path}")
-
-
 
                 # Update module tree (navigate via "children" like apply_metadata_to_tree_path)
                 if module_tree_lock:
@@ -543,438 +492,140 @@ class AgentOrchestrator:
             except Exception as fast_err:
                 logger.warning(
                     f"[STAGE 4-FAST] JSON mode failed for {module_name}: {fast_err} "
-                    f"— falling through to complex agent"
+                    f"— falling through to auto-split"
                 )
 
-        # STAGE 4.3: Create agent
-        logger.info(f"[STAGE 4.3: AGENT CREATION] Creating agent for module: {module_name}")
-        agent_start = time.time()
-        
-        try:
-            from codewiki.src.be.utils import is_complex_module
-            is_complex = is_complex_module(components, core_component_ids)
-            logger.info(f"[STAGE 4.3] Module complexity: {'complex' if is_complex else 'leaf'}")
-            logger.info(f"[STAGE 4.3] Config summary:")
-            logger.info(f"[STAGE 4.3]   - Main model: {self.config.main_model}")
-            logger.info(f"[STAGE 4.3]   - Cluster model: {self.config.cluster_model}")
-            logger.info(f"[STAGE 4.3]   - Fallback model: {self.config.fallback_model}")
-            logger.info(f"[STAGE 4.3]   - LLM base URL: {self.config.llm_base_url}")
-            logger.info(f"[STAGE 4.3]   - Max depth: {self.config.max_depth}")
-            logger.info(f"[STAGE 4.3]   - Current depth: {agent_depth}")
-            
-            agent = self.create_agent(
-                module_name, components, core_component_ids, module_tree, current_depth=agent_depth
-            )
-            agent_duration = time.time() - agent_start
-            
-            agent_type = "complex" if is_complex else "leaf"
-            tools_count = len(agent.tools) if hasattr(agent, 'tools') else 'unknown'
-            logger.info(f"[STAGE 4.3] Agent created in {agent_duration:.3f}s")
-            logger.info(f"[STAGE 4.3] Agent type: {agent_type}")
-            logger.info(f"[STAGE 4.3] Tools count: {tools_count}")
-        except Exception as e:
-            agent_duration = time.time() - agent_start
-            logger.error(f"[STAGE 4.3] Agent creation FAILED after {agent_duration:.3f}s: {type(e).__name__}: {str(e)}")
-            import traceback
-            logger.error(f"[STAGE 4.3] Traceback: {traceback.format_exc()}")
-            raise
-        
-        # STAGE 4.5: Format user prompt
-        logger.info(f"[STAGE 4.5: PROMPT FORMATTING] Formatting user prompt...")
-        prompt_start = time.time()
-        
-        try:
-            from codewiki.src.be.utils import count_module_tokens
-            user_prompt = format_user_prompt(
-                module_name=module_name,
-                core_component_ids=core_component_ids,
-                components=components,
-                module_tree=deps.module_tree
-            )
-            prompt_tokens = count_module_tokens(core_component_ids, components)
-            prompt_duration = time.time() - prompt_start
-            
-            logger.info(f"[STAGE 4.5] Prompt formatted in {prompt_duration:.3f}s")
-            logger.info(f"[STAGE 4.5] Prompt size: {len(user_prompt)} chars")
-            logger.info(f"[STAGE 4.5] Prompt tokens: {prompt_tokens}")
-            logger.info(f"[STAGE 4.5] Core component IDs: {len(core_component_ids)}")
-        except Exception as e:
-            prompt_duration = time.time() - prompt_start
-            logger.error(f"[STAGE 4.5] Prompt formatting FAILED after {prompt_duration:.3f}s: {type(e).__name__}: {str(e)}")
-            import traceback
-            logger.error(f"[STAGE 4.5] Traceback: {traceback.format_exc()}")
-            raise
-        
-        # STAGE 4.5.5: PRE-FLIGHT CHECK - Auto-split if prompt exceeds LLM context
-        MAX_LLM_CONTEXT = 100000  # Safety margin below GPT-4o's 128k context
-        
-        current_depth = len(module_path)
-        if prompt_tokens > MAX_LLM_CONTEXT and current_depth < self.config.max_depth:
-            logger.warning(f"[STAGE 4.5.5: AUTO-SPLIT] Prompt too large ({prompt_tokens} tokens > {MAX_LLM_CONTEXT})")
-            logger.warning(f"[STAGE 4.5.5] Automatically splitting module '{module_name}' before LLM call")
-            
-            # Split using directory-based approach
-            sub_modules = self._auto_split_module(core_component_ids, components)
-            logger.info(f"[STAGE 4.5.5] Split into {len(sub_modules)} sub-modules")
-            
-            for sub_name, sub_info in sub_modules.items():
-                logger.info(f"[STAGE 4.5.5]   - {sub_name}: {len(sub_info['components'])} components")
-            
-            # Add sub-modules to module tree
-            # FIX: Navigate to the parent container correctly, then update children
-            if len(module_path) == 0:
-                # Root level call - shouldn't happen but handle it
-                target = deps.module_tree
-            elif len(module_path) == 1:
-                # Top-level module (e.g., "aten") - module is directly in module_tree
-                target = deps.module_tree
-            else:
-                # Nested module - navigate to parent's children
-                target = deps.module_tree
-                for key in module_path[:-1]:  # All path parts except the last
-                    if key in target:
-                        target = target[key].get("children", {})
-            
-            # Now update the module's children
-            if module_name in target:
-                target[module_name]["children"] = {}
-                for sub_name, sub_info in sub_modules.items():
-                    target[module_name]["children"][sub_name] = {
-                        "components": sub_info["components"],
-                        "children": {}
-                    }
-                logger.info(f"[STAGE 4.5.5] Updated module tree: {module_name} now has {len(sub_modules)} children")
-            else:
-                logger.error(f"[STAGE 4.5.5] BUG: Module '{module_name}' not found in tree at path {module_path}")
-                logger.error(f"[STAGE 4.5.5] Available keys in target: {list(target.keys())[:10]}")
-            
-            # Save updated module tree (with lock if provided)
-            if module_tree_lock:
-                with module_tree_lock:
-                    current_tree = file_manager.load_json(module_tree_path)
-                    self._merge_module_tree(current_tree, deps.module_tree)
-                    file_manager.save_json(current_tree, module_tree_path)
-                    deps.module_tree = current_tree
-            else:
-                file_manager.save_json(deps.module_tree, module_tree_path)
-            
-            # Recursively process each sub-module
-            for sub_name, sub_info in sub_modules.items():
-                sub_components = sub_info["components"]
-                # Must append sub_name so doc_stem and tree path match the child module (not duplicate parent key).
-                new_module_path = module_path + [sub_name]
-                logger.info(f"[STAGE 4.5.5] Recursively processing sub-module: {sub_name}")
-                await self.process_module(
-                    sub_name, 
-                    components, 
-                    sub_components, 
-                    new_module_path, 
-                    working_dir,
-                    module_tree_lock=module_tree_lock
-                )
-            
-            # After processing sub-modules, generate parent overview
-            logger.info(f"[STAGE 4.5.5] Sub-modules processed, generating parent overview for {module_name}")
-            await self._generate_parent_overview(module_name, sub_modules, working_dir, deps)
-            
-            module_duration = time.time() - module_start
-            logger.info(f"[STAGE 4: AGENT MODULE PROCESSING] COMPLETE in {module_duration:.1f}s (auto-split) for module: {module_name}")
-            return deps.module_tree
-        elif prompt_tokens > MAX_LLM_CONTEXT:
-            # Hit depth limit but still too large - log warning but proceed anyway
-            logger.warning(f"[STAGE 4.5.5] Module still too large ({prompt_tokens} tokens) but hit max_depth limit ({current_depth} >= {self.config.max_depth})")
-            logger.warning(f"[STAGE 4.5.5] Proceeding with LLM call - expect possible failure")
-        
-        # STAGE 4.6: Run agent
-        logger.info(f"[STAGE 4.6: AGENT EXECUTION] Running agent for module: {module_name}")
-        logger.info(f"[STAGE 4.6] Model: {self.config.main_model}")
-        logger.info(f"[STAGE 4.6] Prompt tokens: {prompt_tokens}")
-        execution_start = time.time()
-        
-        try:
-            result = await agent.run(
-                user_prompt,
-                deps=deps
-            )
-            execution_duration = time.time() - execution_start
-            
-            logger.info(f"[STAGE 4.6] Agent execution completed in {execution_duration:.1f}s")
-            logger.info(f"[STAGE 4.6] Result type: {type(result)}")
-            
-            # Track token usage from pydantic-ai result
-            try:
-                from codewiki.src.be.llm_services import get_token_tracker, LLMCallStats
-                tracker = get_token_tracker()
-                
-                # pydantic-ai stores usage in result._usage or result.usage()
-                if hasattr(result, 'usage'):
-                    usage = result.usage()
-                    if usage:
-                        stats = LLMCallStats(
-                            model=self.config.main_model,
-                            prompt_tokens=usage.request_tokens or 0,
-                            completion_tokens=usage.response_tokens or 0,
-                            duration_seconds=execution_duration,
-                            success=True
-                        )
-                        tracker.add_call(stats)
-                        logger.info(f"[STAGE 4.6] Token usage - Prompt: {stats.prompt_tokens:,}, Completion: {stats.completion_tokens:,}")
-                elif hasattr(result, '_usage'):
-                    usage = result._usage
-                    stats = LLMCallStats(
-                        model=self.config.main_model,
-                        prompt_tokens=getattr(usage, 'request_tokens', prompt_tokens) or prompt_tokens,
-                        completion_tokens=getattr(usage, 'response_tokens', 0) or 0,
-                        duration_seconds=execution_duration,
-                        success=True
-                    )
-                    tracker.add_call(stats)
-                    logger.info(f"[STAGE 4.6] Token usage - Prompt: {stats.prompt_tokens:,}, Completion: {stats.completion_tokens:,}")
-                else:
-                    # Fallback: estimate from prompt tokens
-                    stats = LLMCallStats(
-                        model=self.config.main_model,
-                        prompt_tokens=prompt_tokens,
-                        completion_tokens=2000,  # Rough estimate for documentation output
-                        duration_seconds=execution_duration,
-                        success=True
-                    )
-                    tracker.add_call(stats)
-                    logger.info(f"[STAGE 4.6] Token usage (estimated) - Prompt: {stats.prompt_tokens:,}, Completion: ~2000")
-            except Exception as track_err:
-                logger.debug(f"[STAGE 4.6] Token tracking failed (non-critical): {track_err}")
-            
-            # Extract metadata from generated JSON doc
-            extracted_title = None
-            extracted_desc = None
-            extracted_diagram = None
-            json_doc_path = os.path.join(working_dir, f"{doc_stem}.json")
-            if not os.path.exists(json_doc_path):
+        # STAGE 4.5.5: AUTO-SPLIT — module exceeds AUTO_SPLIT_TOKEN_THRESHOLD
+        # Split by directory into parallel sub-modules. No depth guard: auto-split is purely
+        # a context-reduction step, not agent delegation, so tree depth is irrelevant.
+        logger.warning(
+            f"[STAGE 4.5.5: AUTO-SPLIT] {module_name} has {prompt_tokens:,} tokens "
+            f"> {AUTO_SPLIT_TOKEN_THRESHOLD:,} threshold — splitting"
+        )
+
+        sub_modules = self._auto_split_module(core_component_ids, components)
+        logger.info(f"[STAGE 4.5.5] Split into {len(sub_modules)} sub-modules")
+        for sub_name, sub_info in sub_modules.items():
+            logger.info(f"[STAGE 4.5.5]   - {sub_name}: {len(sub_info['components'])} components")
+
+        # Guard against infinite recursion: if split produced one group with the same
+        # components, token chunking couldn't reduce further — fall back to 4-FAST.
+        if len(sub_modules) == 1:
+            only_info = next(iter(sub_modules.values()))
+            if set(only_info["components"]) == set(core_component_ids):
                 logger.warning(
-                    "[STAGE 4] Agent did not create %s — generating via JSON mode",
-                    json_doc_path,
+                    f"[STAGE 4.5.5] Auto-split could not reduce {module_name} "
+                    f"({prompt_tokens:,} tokens) — forcing 4-FAST"
                 )
                 try:
-                    from codewiki.src.be.direct_module_doc import generate_leaf_doc_json
                     import json as _json
 
-                    doc = generate_leaf_doc_json(
+                    doc = await generate_leaf_doc_json_throttled(
                         module_name=module_name,
                         core_component_ids=core_component_ids,
                         components=components,
-                        module_tree=deps.module_tree,
+                        module_tree=module_tree,
                         config=self.config,
                     )
-                    with open(json_doc_path, "w") as jf:
-                        _json.dump(doc, jf, indent=2)
-                    logger.info(
-                        "[STAGE 4] JSON-mode completion wrote %s",
-                        json_doc_path,
-                    )
-                except Exception as comp_err:
-                    logger.error(
-                        "[STAGE 4] JSON-mode completion failed for %s: %s",
-                        module_name, comp_err,
-                    )
-            if os.path.exists(json_doc_path):
-                try:
-                    extracted_title, extracted_desc, extracted_diagram = extract_module_metadata_from_file(
-                        json_doc_path
-                    )
-                    logger.info(f"[STAGE 4.6] Extracted metadata for '{module_name}': title='{extracted_title}'"
-                               f", diagram={'yes' if extracted_diagram else 'no'}")
-                except Exception as meta_err:
-                    logger.warning(f"[STAGE 4.6] Failed to extract metadata for '{module_name}': {meta_err}")
-            
-            # Save updated module tree (with lock if provided for parallel safety)
-            save_start = time.time()
-            if module_tree_lock:
-                with module_tree_lock:
-                    current_tree = file_manager.load_json(module_tree_path)
-                    self._merge_module_tree(current_tree, deps.module_tree)
-                    if extracted_title:
+                    json_path = os.path.join(working_dir, f"{doc_stem}.json")
+                    with open(json_path, "w") as f:
+                        _json.dump(doc, f, indent=2)
+                    if module_tree_lock:
+                        with module_tree_lock:
+                            current_tree = file_manager.load_json(module_tree_path)
+                            apply_metadata_to_tree_path(
+                                current_tree, module_path,
+                                doc["title"], doc["summary"], doc["diagram"],
+                            )
+                            file_manager.save_json(current_tree, module_tree_path)
+                            deps.module_tree = current_tree
+                    else:
                         apply_metadata_to_tree_path(
-                            current_tree,
-                            module_path,
-                            extracted_title,
-                            extracted_desc,
-                            extracted_diagram,
+                            deps.module_tree, module_path,
+                            doc["title"], doc["summary"], doc["diagram"],
                         )
-                    file_manager.save_json(current_tree, module_tree_path)
-                    deps.module_tree = current_tree
-            else:
-                if extracted_title:
-                    apply_metadata_to_tree_path(
-                        deps.module_tree,
-                        module_path,
-                        extracted_title,
-                        extracted_desc,
-                        extracted_diagram,
+                        file_manager.save_json(deps.module_tree, module_tree_path)
+                    logger.info(
+                        f"[STAGE 4-FAST] COMPLETE (forced after unsplittable module) "
+                        f"for {module_name} in {time.time() - module_start:.1f}s"
                     )
-                file_manager.save_json(deps.module_tree, module_tree_path)
-            save_duration = time.time() - save_start
-            
-            module_duration = time.time() - module_start
-            logger.info(f"[STAGE 4.6] Module tree saved in {save_duration:.3f}s")
-            logger.info(f"[STAGE 4: AGENT MODULE PROCESSING] COMPLETE in {module_duration:.1f}s for module: {module_name}")
-            
-            # Track module completion in generation tracker
-            try:
-                from codewiki.src.be.generation_tracker import get_generation_tracker
-                gen_tracker = get_generation_tracker()
-                json_exists = os.path.exists(os.path.join(working_dir, f"{doc_stem}.json"))
-                gen_tracker.track_module_complete(
-                    module_name=module_name,
-                    success=True,
-                    md_file_created=json_exists,
-                    in_module_tree=True,
-                    has_diagram=extracted_diagram is not None,
-                    has_title=extracted_title is not None,
-                    has_description=extracted_desc is not None
-                )
-            except Exception:
-                pass  # Non-critical
-            
-            return deps.module_tree
-            
-        except Exception as e:
-            execution_duration = time.time() - execution_start
-            module_duration = time.time() - module_start
-            import sys
-            import traceback
-            
-            logger.error(f"[STAGE 4.6] Agent execution FAILED after {execution_duration:.1f}s")
-            logger.error(f"[STAGE 4.6] Module: {module_name}")
-            logger.error(f"[STAGE 4.6] Component count: {len(core_component_ids)}")
-            logger.error(f"[STAGE 4.6] Prompt tokens: {prompt_tokens}")
-            logger.error(f"[STAGE 4.6] Error type: {type(e).__name__}")
-            logger.error(f"[STAGE 4.6] Error message: {str(e)}")
-            _log_pydantic_ai_failure_chain(e)
-            # pydantic-ai raises UnexpectedModelBehavior with __cause__=None on the "empty model
-            # response" path (_agent_graph.py ~1040: increment_retries without error=). Traceback
-            # shows that line when the model returned an empty / non-actionable turn twice.
-            if (
-                type(e).__name__ == "UnexpectedModelBehavior"
-                and "output validation" in str(e)
-                and getattr(e, "__cause__", None) is None
-            ):
-                logger.error(
-                    "[STAGE 4.6] DIAG NOTE: No __cause__ on this UnexpectedModelBehavior — in "
-                    "pydantic-ai this matches the empty-response retry path (~1040 in "
-                    "_agent_graph.py): the model returned an empty or stripped-to-empty turn; one "
-                    "silent resubmit; still empty; retries exhausted (budget=1)."
-                )
-            if isinstance(e, AssertionError) and e.args and e.args[0] == (1, 0, 1):
-                logger.error(
-                    "[STAGE 4.6] DIAG NOTE: (1,0,1) is str_replace_editor.WindowExpander.expand_window "
-                    "— invalid line window (stop < start) on a tiny/empty file; model str_replace "
-                    "args did not match file contents. See str_replace_editor.py expand_window assert."
-                )
-
-            # Diagnostics: why the agent failed (no result object when run raises)
-            fail_json = os.path.join(working_dir, f"{doc_stem}.json")
-            logger.error(
-                "[STAGE 4.6] DIAG: module_name=%r module_path=%r doc_stem=%r expected_json exists=%s path=%s",
-                module_name,
-                module_path,
-                doc_stem,
-                os.path.exists(fail_json),
-                fail_json,
-            )
-            if os.path.exists(fail_md):
-                try:
+                    return deps.module_tree
+                except Exception as fast_err:
                     logger.error(
-                        "[STAGE 4.6] DIAG: partial md file size=%d bytes (agent may have written before failure)",
-                        os.path.getsize(fail_md),
+                        f"[STAGE 4.5.5] Forced 4-FAST also failed for {module_name}: {fast_err}"
                     )
-                except OSError as ose:
-                    logger.error("[STAGE 4.6] DIAG: could not stat md: %s", ose)
-            try:
-                import json as _json
+                    raise
 
-                st = _json.dumps(deps.module_tree, default=str)
-                logger.error(
-                    "[STAGE 4.6] DIAG: deps.module_tree snapshot (truncated): %s%s",
-                    st[:4000],
-                    "..." if len(st) > 4000 else "",
+        # MAP: digest each chunk in parallel (ephemeral — chunks never enter the tree).
+        # Each call compresses raw source → node list + summary so the reduce step
+        # can reason over compact digests rather than raw code.
+        import json as _json
+        from codewiki.src.be.direct_module_doc import generate_digest_doc_json, generate_merged_doc_json
+
+        async def _digest_chunk(sub_name: str, sub_info: Dict[str, Any]) -> Dict[str, Any]:
+            logger.info(f"[STAGE 4.5.5 MAP] Digesting chunk '{sub_name}' ({len(sub_info['components'])} components)")
+            try:
+                return await generate_leaf_doc_json_throttled(
+                    module_name=sub_name,
+                    core_component_ids=sub_info["components"],
+                    components=components,
+                    module_tree=module_tree,
+                    config=self.config,
                 )
-            except Exception as dump_err:
-                logger.error("[STAGE 4.6] DIAG: could not serialize deps.module_tree: %s", dump_err)
-            for attr in (
-                "body",
-                "messages",
-                "message_history",
-                "model_response",
-                "response",
-                "args",
-            ):
-                if hasattr(e, attr):
-                    try:
-                        val = getattr(e, attr)
-                        logger.error(
-                            "[STAGE 4.6] DIAG: exception.%s=%s",
-                            attr,
-                            repr(val)[:2500],
-                        )
-                    except Exception:
-                        pass
-            
-            # Check for rate limiting
-            error_str = str(e).lower()
-            if "429" in str(e) or "rate limit" in error_str or "rate_limit" in error_str:
-                logger.error(f"[STAGE 4.6] RATE LIMIT DETECTED")
-                logger.error(f"[STAGE 4.6]   - Module: {module_name}")
-                logger.error(f"[STAGE 4.6]   - Prompt tokens: {prompt_tokens}")
-                logger.error(f"[STAGE 4.6]   - Model: {self.config.main_model}")
-                logger.error(f"[STAGE 4.6]   - Duration before failure: {execution_duration:.1f}s")
-            
-            # Print detailed error info to stderr for debugging
-            print(f"\n=== DETAILED ERROR INFO ===", file=sys.stderr)
-            print(f"Exception type: {type(e)}", file=sys.stderr)
-            print(f"Exception: {e}", file=sys.stderr)
-            print(f"Exception args: {e.args}", file=sys.stderr)
-            print(f"Exception attributes: {[x for x in dir(e) if not x.startswith('_')]}", file=sys.stderr)
-            
-            # Try to get sub-exceptions
-            if hasattr(e, 'exceptions'):
-                print(f"Found 'exceptions' attribute with {len(e.exceptions)} items", file=sys.stderr)
-                for i, sub_exc in enumerate(e.exceptions):
-                    print(f"\nSub-exception {i+1}:", file=sys.stderr)
-                    print(f"  Type: {type(sub_exc)}", file=sys.stderr)
-                    print(f"  Message: {sub_exc}", file=sys.stderr)
-                    if hasattr(sub_exc, '__traceback__') and sub_exc.__traceback__:
-                        print(f"  Traceback:", file=sys.stderr)
-                        print(''.join(traceback.format_exception(type(sub_exc), sub_exc, sub_exc.__traceback__)), file=sys.stderr)
-            
-            full_tb = traceback.format_exc()
-            logger.error(f"[STAGE 4.6] Full traceback:\n{full_tb}")
-            logger.error(f"[STAGE 4: AGENT MODULE PROCESSING] FAILED in {module_duration:.1f}s for module: {module_name}")
-            print(f"=== END ERROR INFO ===\n", file=sys.stderr)
+            except Exception as e:
+                logger.error(f"[STAGE 4.5.5 MAP] Chunk '{sub_name}' digest failed: {e}")
+                return {"title": sub_name, "summary": "", "diagram": {"nodes": [], "edges": [], "groups": []}}
 
-            # Track module failure in generation tracker
-            try:
-                from codewiki.src.be.generation_tracker import get_generation_tracker
-                gen_tracker = get_generation_tracker()
-                
-                # Categorize the error
-                error_str = str(e).lower()
-                if "429" in str(e) or "rate limit" in error_str:
-                    error_type = "rate_limit"
-                elif "context" in error_str or "length" in error_str:
-                    error_type = "context_length_exceeded"
-                elif "timeout" in error_str:
-                    error_type = "timeout"
-                else:
-                    error_type = type(e).__name__
-                
-                gen_tracker.track_module_complete(
+        chunk_docs: List[Dict[str, Any]] = await asyncio.gather(
+            *[_digest_chunk(name, info) for name, info in sub_modules.items()]
+        )
+        logger.info(f"[STAGE 4.5.5 MAP] All {len(chunk_docs)} chunks digested")
+
+        # REDUCE: one LLM call over node digests → final unified {title, summary, diagram}.
+        # No raw source in the prompt — just the compact node representations.
+        logger.info(f"[STAGE 4.5.5 REDUCE] Building unified diagram for {module_name}")
+        try:
+            async with _get_llm_semaphore():
+                doc = await asyncio.to_thread(
+                    generate_merged_doc_json,
                     module_name=module_name,
-                    success=False,
-                    md_file_created=False,
-                    error_type=error_type,
-                    error_message=str(e)[:200]
+                    chunk_docs=chunk_docs,
+                    module_tree=module_tree,
+                    config=self.config,
                 )
-            except Exception:
-                pass  # Non-critical
-            
-            raise
+        except Exception as reduce_err:
+            logger.error(f"[STAGE 4.5.5 REDUCE] Merge failed ({reduce_err}); falling back to first chunk doc")
+            doc = chunk_docs[0] if chunk_docs else {
+                "title": module_name.replace("_", " ").title(),
+                "summary": f"Documentation for {module_name}.",
+                "diagram": {"direction": "TD", "nodes": [], "edges": [], "groups": []},
+            }
+
+        # Write the module as a single leaf — no part_N children in the tree.
+        json_path = os.path.join(working_dir, f"{doc_stem}.json")
+        with open(json_path, "w", encoding="utf-8") as f:
+            _json.dump(doc, f, indent=2)
+        logger.info(f"[STAGE 4.5.5] Wrote unified doc: {json_path}")
+
+        if module_tree_lock:
+            with module_tree_lock:
+                current_tree = file_manager.load_json(module_tree_path)
+                apply_metadata_to_tree_path(
+                    current_tree, module_path,
+                    doc["title"], doc["summary"], doc["diagram"],
+                )
+                file_manager.save_json(current_tree, module_tree_path)
+                deps.module_tree = current_tree
+        else:
+            apply_metadata_to_tree_path(
+                deps.module_tree, module_path,
+                doc["title"], doc["summary"], doc["diagram"],
+            )
+            file_manager.save_json(deps.module_tree, module_tree_path)
+
+        module_duration = time.time() - module_start
+        logger.info(
+            f"[STAGE 4: AGENT MODULE PROCESSING] COMPLETE in {module_duration:.1f}s "
+            f"(auto-split map+reduce) for module: {module_name}"
+        )
+        return deps.module_tree

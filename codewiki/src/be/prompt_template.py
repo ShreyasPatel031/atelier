@@ -25,65 +25,43 @@ HOVER_COPY_GUIDELINES = """
 </HOVER_COPY_GUIDELINES>
 """.strip()
 
-SYSTEM_PROMPT = """
+_BASE_SYSTEM_PROMPT = """
 <ROLE>
 You are an AI documentation assistant. Generate a concise module overview with an architecture diagram as a JSON file. The output is displayed in an interactive React Flow viewer — users navigate via diagrams, not prose.
 </ROLE>
 
 <OUTPUT_FORMAT>
-Create `{module_name}.json` containing a JSON object with exactly these keys:
+Create `{{module_name}}.json` containing a JSON object with exactly these keys:
 - "title": A short human-readable title (2-6 words)
 - "summary": 1-2 sentences (~200 characters) summarizing what this module does
 - "diagram": An object with keys "direction", "nodes", "edges", "groups"
 
 </OUTPUT_FORMAT>
 
-<WORKFLOW>
-1. Analyze the provided code components and decide how to split them into sub-modules
-
-2. **IMMEDIATELY create `{module_name}.json`** with title + summary + diagram
-   - Do this FIRST, BEFORE calling generate_sub_module_documentation
-   - Your diagram nodes should reference the sub-modules you plan to create
-   - Each sub-module node: `"type": "module"`, `"link": "sub_module_name"`
-
-3. Call `generate_sub_module_documentation` to create the sub-modules
-   - Group related components together based on functionality
-   - Format:
-   ```
-   generate_sub_module_documentation({{
-       "sub_module_name": {{
-           "title": "2-4 Word Title",
-           "description": "One or two sentence description (~200 chars).",
-           "components": ["component.id.1", "component.id.2"]
-       }}
-   }})
-   ```
-
-4. CRITICAL: You MUST create `{module_name}.json` in step 2. If you skip it, the module has no documentation.
-</WORKFLOW>
+{workflow_section}
 
 <JSON_FORMAT>
 MANDATORY — the JSON file content must be:
-{{
+{{{{
     "title": "Short Module Title",
     "summary": "One or two sentences describing what this module does.",
-    "diagram": {{
+    "diagram": {{{{
         "direction": "TD",
         "nodes": [
-            {{"id": "request_handling", "label": "Handle Incoming Requests", "type": "module", "link": "request_handling", "title": "Request handling", "description": "Accepts and routes incoming work into the module's pipeline."}},
-            {{"id": "data_processing", "label": "Process and Transform Data", "type": "module", "link": "data_processing", "title": "Data processing", "description": "Transforms validated inputs into outputs used by the rest of the system."}}
+            {{{{"id": "request_handling", "label": "Handle Incoming Requests", "type": "module", "link": "request_handling", "title": "Request handling", "description": "Accepts and routes incoming work into the module's pipeline."}}}},
+            {{{{"id": "data_processing", "label": "Process and Transform Data", "type": "module", "link": "data_processing", "title": "Data processing", "description": "Transforms validated inputs into outputs used by the rest of the system."}}}}
         ],
         "edges": [
-            {{"source": "request_handling", "target": "data_processing", "label": "validated input"}}
+            {{{{"source": "request_handling", "target": "data_processing", "label": "validated input"}}}}
         ],
         "groups": [
-            {{"id": "intake", "label": "Intake", "title": "Intake surface", "description": "User-facing entry points and adapters that bring data into the module.", "role": "surface", "nodes": ["request_handling"]}},
-            {{"id": "core", "label": "Core Logic", "title": "Core logic", "description": "Internal computation and orchestration shared by sub-modules.", "role": "analytical", "nodes": ["data_processing"]}}
+            {{{{"id": "intake", "label": "Intake", "title": "Intake surface", "description": "User-facing entry points and adapters that bring data into the module.", "role": "surface", "nodes": ["request_handling"]}}}},
+            {{{{"id": "core", "label": "Core Logic", "title": "Core logic", "description": "Internal computation and orchestration shared by sub-modules.", "role": "analytical", "nodes": ["data_processing"]}}}}
         ]
-    }}
-}}
+    }}}}
+}}}}
 
-Node types: "module" (sub-module with docs), "external" (dependency outside this module)
+Node types: "module" (sub-module with docs), "component" (internal, not clickable), "external" (dependency outside this module)
 Group roles: "surface" (blue), "generative" (orange), "analytical" (purple), "data" (green)
 Link format: just the module name — e.g. "link": "request_handling"
 
@@ -109,119 +87,81 @@ TOOLTIP FIELDS (MANDATORY): Every `nodes[]` object MUST include non-empty `title
 5. TOOLTIPS: Every node and every group MUST include non-empty `title` and `description`. Obey `<HOVER_COPY_GUIDELINES>` so hover text is not unusably long.
 </DIAGRAM_DESIGN_RULES>
 
-""" + "\n" + HOVER_COPY_GUIDELINES + "\n" + RULES_FOR_PROMPT + "\n" + JSON_SERIALIZATION_RULES + """
-
 <NAMING_RULES>
 - All names use lowercase_with_underscores: `user_auth`, NOT `UserAuth` or `user-auth`
 - Link values must match sub-module name exactly (no extension): `"link": "module_name"`
 - NEVER create a sub-module with the same name as the current module
 </NAMING_RULES>
 
-<AVAILABLE_TOOLS>
-- `str_replace_editor`: Create and edit documentation files (.json only)
-- `read_code_components`: Explore code dependencies not in the provided components
-- `generate_sub_module_documentation`: Create sub-module documentation via sub-agents
-</AVAILABLE_TOOLS>
-""".strip()
+{tools_section}
+"""
 
-LEAF_SYSTEM_PROMPT = """
-<ROLE>
-You are an AI documentation assistant. Generate a concise module overview with an architecture diagram as a JSON file. The output is displayed in an interactive React Flow viewer.
-</ROLE>
+_WORKFLOW_WITH_SUBMODULES = """<WORKFLOW>
+1. Analyze the provided code components and decide how to split them into sub-modules
 
-<OUTPUT_FORMAT>
-Create `{module_name}.json` containing a JSON object with exactly these keys:
-- "title": A short human-readable title (2-6 words)
-- "summary": 1-2 sentences (~200 characters) summarizing what this module does
-- "diagram": An object with keys "direction", "nodes", "edges", "groups"
+2. **IMMEDIATELY create `{module_name}.json`** with title + summary + diagram
+   - Do this FIRST, BEFORE calling generate_sub_module_documentation
+   - Your diagram nodes should reference the sub-modules you plan to create
+   - Each sub-module node: `"type": "module"`, `"link": "sub_module_name"`
 
-</OUTPUT_FORMAT>
+3. Call `generate_sub_module_documentation` to create the sub-modules
+   - Group related components together based on functionality
+   - Format:
+   ```
+   generate_sub_module_documentation({{
+       "sub_module_name": {{
+           "title": "2-4 Word Title",
+           "description": "One or two sentence description (~200 chars).",
+           "components": ["component.id.1", "component.id.2"]
+       }}
+   }})
+   ```
 
-<JSON_FORMAT>
-{{
-    "title": "Short Module Title",
-    "summary": "One or two sentences describing what this module does.",
-    "diagram": {{
-        "direction": "TD",
-        "nodes": [
-            {{"id": "parse_input", "label": "Parse Incoming Data", "type": "component", "link": null, "title": "Parse input", "description": "Reads raw payloads and turns them into structured records for validation."}},
-            {{"id": "validate", "label": "Validate Against Schema", "type": "component", "link": null, "title": "Validate", "description": "Checks structured data against schemas before downstream use."}},
-            {{"id": "config", "label": "Configuration Module", "type": "external", "link": "config", "title": "Configuration", "description": "External module that owns shared settings consumed by this leaf."}}
-        ],
-        "edges": [
-            {{"source": "parse_input", "target": "validate", "label": "raw data"}},
-            {{"source": "validate", "target": "config", "label": "reads schema from"}}
-        ],
-        "groups": [
-            {{"id": "data_flow", "label": "Data Pipeline", "title": "Data pipeline", "description": "Internal steps that move data from parse to validation inside this module.", "role": "analytical", "nodes": ["parse_input", "validate"]}}
-        ]
-    }}
-}}
+4. CRITICAL: You MUST create `{module_name}.json` in step 2. If you skip it, the module has no documentation.
+</WORKFLOW>"""
 
-Node types: "component" (internal, not clickable), "external" (links to other module docs)
-Group roles: "surface" (blue), "generative" (orange), "analytical" (purple), "data" (green)
-Link format: just the module name — e.g. "link": "config"
-
-GROUPS INTEGRITY: Every id in `groups[].nodes[]` MUST match a `nodes[].id`. No empty groups.
-EDGE INTEGRITY: Every edge source/target must be a node id. No group ids as endpoints.
-ID UNIQUENESS: No string may appear as both a node id and a group id.
-NODE LABELS: Human-readable phrases only — never CamelCase or id-as-label.
-TOOLTIP FIELDS: Every node and group MUST have non-empty `title` and `description`.
-</JSON_FORMAT>
-
-<DIAGRAM_DESIGN_RULES>
-1. NODE LABELS: Describe what happens, NOT class/file names.
-2. CONNECTIONS: Every edge MUST have a label describing what flows.
-3. CROSS-MODULE LINKS: Include dependencies on other modules as external nodes with links.
-4. TOOLTIPS: Follow `<HOVER_COPY_GUIDELINES>` for length and tone.
-</DIAGRAM_DESIGN_RULES>
-
-<NAMING_RULES>
-- Link values must match module name exactly (no extension): `"link": "module_name"`
-- NEVER create a sub-module with the same name as the current module
-</NAMING_RULES>
-
-<WORKFLOW>
+_WORKFLOW_LEAF = """<WORKFLOW>
 1. Analyze provided code components and module structure
 2. Explore dependencies between components if needed
 3. Create `{module_name}.json` with the JSON object
-</WORKFLOW>
+</WORKFLOW>"""
 
-<AVAILABLE_TOOLS>
+_TOOLS_WITH_SUBMODULES = """<AVAILABLE_TOOLS>
 - `str_replace_editor`: Create and edit documentation files (.json only)
 - `read_code_components`: Explore code dependencies not in the provided components
-</AVAILABLE_TOOLS>
-""" + "\n" + HOVER_COPY_GUIDELINES + "\n" + RULES_FOR_PROMPT + "\n" + JSON_SERIALIZATION_RULES
+- `generate_sub_module_documentation`: Create sub-module documentation via sub-agents
+</AVAILABLE_TOOLS>"""
 
-# --- JSON-mode prompt for leaf modules (no tools, guaranteed structured output) ---
-LEAF_JSON_SYSTEM_PROMPT = """You are an AI documentation assistant. You analyze code components and produce a structured JSON object describing a module.
+_TOOLS_LEAF = """<AVAILABLE_TOOLS>
+- `str_replace_editor`: Create and edit documentation files (.json only)
+- `read_code_components`: Explore code dependencies not in the provided components
+</AVAILABLE_TOOLS>"""
 
-Return a single JSON object with exactly these keys:
-- "title": A short human-readable title (2-6 words)
-- "summary": 1-2 sentences (~200 characters) summarizing what this module does
-- "diagram": An object with keys "direction", "nodes", "edges", "groups"
+def _build_system_prompt(*, with_submodules: bool) -> str:
+    workflow = _WORKFLOW_WITH_SUBMODULES if with_submodules else _WORKFLOW_LEAF
+    tools = _TOOLS_WITH_SUBMODULES if with_submodules else _TOOLS_LEAF
+    return (
+        _BASE_SYSTEM_PROMPT.format(workflow_section=workflow, tools_section=tools)
+        + "\n" + HOVER_COPY_GUIDELINES
+        + "\n" + RULES_FOR_PROMPT
+        + "\n" + JSON_SERIALIZATION_RULES
+    ).strip()
 
-Diagram rules:
-- "direction": "TD" or "LR"
-- "nodes": array of {{"id": str, "label": str, "type": "component"|"external", "link": null|"other_module", "title": str (<=56 chars), "description": str (120-320 chars)}}
-- "edges": array of {{"source": str, "target": str, "label": str}} — source/target must be node ids
-- "groups": array of {{"id": str, "label": str, "title": str, "description": str, "role": "surface"|"generative"|"analytical"|"data", "nodes": [node_ids]}}
-- Every group.nodes[] id must exist in nodes[].id. Every edge source/target must exist in nodes[].id.
-- Node labels: describe what happens, NOT class names. Good: "Parse Incoming Data". Bad: "DataParser".
-- No id may appear as both a node id and a group id.
-- Omit groups you cannot populate with at least one valid node.
-""".strip()
+SYSTEM_PROMPT = _build_system_prompt(with_submodules=True)
+LEAF_SYSTEM_PROMPT = _build_system_prompt(with_submodules=False)
 
-LEAF_JSON_USER_PROMPT = """Analyze the {module_name} module and return a JSON object with "title", "summary", and "diagram".
+# JSON-mode prompt for leaf modules — no tools, guaranteed structured output.
+# Built from the same _BASE_SYSTEM_PROMPT so all diagram rules stay in sync.
+_WORKFLOW_JSON = """<WORKFLOW>
+1. Analyze provided code components
+2. Return the JSON object with "title", "summary", and "diagram"
+</WORKFLOW>"""
 
-<MODULE_TREE>
-{module_tree}
-</MODULE_TREE>
-
-<CORE_COMPONENT_CODES>
-{formatted_core_component_codes}
-</CORE_COMPONENT_CODES>
-""".strip()
+LEAF_JSON_SYSTEM_PROMPT = (
+    _BASE_SYSTEM_PROMPT.format(workflow_section=_WORKFLOW_JSON, tools_section="")
+    + "\n" + HOVER_COPY_GUIDELINES
+    + "\n" + RULES_FOR_PROMPT
+).strip()
 
 USER_PROMPT = """
 Generate a JSON documentation file for the {module_name} module. Output the JSON object with "title", "summary", and "diagram". No markdown, no narrative sections.

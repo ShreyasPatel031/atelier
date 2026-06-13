@@ -67,7 +67,9 @@ def _refresh_progress_from_artifacts(job: JobStatus, docs_dir: str, log_path: st
     has_module_tree = os.path.exists(os.path.join(docs_dir, "module_tree.json"))
     has_overview = os.path.exists(os.path.join(docs_dir, "overview.md"))
     has_report = os.path.exists(os.path.join(docs_dir, "generation_report.json"))
-    has_metrics = os.path.exists(os.path.join(docs_dir, "metrics.json"))
+    has_metrics = os.path.exists(os.path.join(docs_dir, "generation_metrics.json")) or os.path.exists(
+        os.path.join(docs_dir, "metrics.json")
+    )
     if has_metrics or has_report:
         job.generation_stage = 3
     elif has_overview:

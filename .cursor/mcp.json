@@ -1,3 +1,14 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "atelier": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/Users/shreyaspatel/atelier/packages/atelier-mcp/dist/index.js"
+      ],
+      "env": {
+        "ATELIER_LOCAL_REPO_ROOT": "/Users/shreyaspatel/atelier/demo/repos"
+      }
+    }
+  }
 }

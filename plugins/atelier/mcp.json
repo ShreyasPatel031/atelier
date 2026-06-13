@@ -4,11 +4,11 @@
     "atelier": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@atelier-inc/atelier-mcp"],
+      "args": ["-y", "@atelier-inc/atelier-mcp@latest"],
       "env": {
-        "ATELIER_DATA_ORIGIN": "https://app.atelier-inc.net"
+        "ATELIER_LOCAL_REPO_ROOT": "${workspaceFolder}/demo/repos"
       },
-      "description": "Read architecture diagrams from Atelier — overview, modules, and drill-down views for any indexed repository"
+      "description": "Browse and live-edit architecture diagrams — overview, modules, and drill-down views for any indexed repository"
     }
   }
 }

@@ -462,7 +462,7 @@ def _call_gemini_rest(
         prompt_tokens_estimated += count_tokens(system_instruction)
 
     gen_config: dict = {"temperature": temperature, "maxOutputTokens": 65536}
-    if thinking_budget and thinking_budget > 0:
+    if thinking_budget is not None:
         gen_config["thinkingConfig"] = {"thinkingBudget": thinking_budget}
     if json_mode:
         gen_config["responseMimeType"] = "application/json"
@@ -740,17 +740,13 @@ def call_llm(
     if model is None:
         model = config.main_model
     
-    # Use native Gemini if available
+    # Use Gemini REST API for all Gemini calls (gives explicit thinking control)
     if _is_gemini_model(model) and GENAI_AVAILABLE:
-        if json_mode or thinking_budget is not None:
-            return _call_gemini_rest(
-                prompt, config, model, temperature,
-                thinking_budget if thinking_budget is not None else 0,
-                system_instruction=system_prompt,
-                json_mode=json_mode,
-            )
-        return _call_gemini_native(
-            prompt, config, model, temperature, system_instruction=system_prompt
+        return _call_gemini_rest(
+            prompt, config, model, temperature,
+            thinking_budget if thinking_budget is not None else 0,
+            system_instruction=system_prompt,
+            json_mode=json_mode,
         )
 
     # Calculate prompt token count
