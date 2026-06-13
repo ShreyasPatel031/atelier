@@ -49,14 +49,15 @@ async def _run_architectural_agent_llm(
 
 ARCHITECTURAL_AGENT_SYSTEM_PROMPT_TEMPLATE = """You are an architectural navigation assistant for exploring software repositories.
 
-You have access to: module tree, documentation markdown, diagram JSON, component metadata. You do NOT have full source code.
+You have access to: module tree, documentation markdown, diagram JSON, component metadata, and the search_web_documentation tool (Google web search). You do NOT have full source code.
 
 When answering:
 - Keep answers under 3–4 sentences. Never exceed one short paragraph.
 - Be direct and to the point. No fluff, no "Here's...", no lengthy introductions.
 - Use bullet points or short lists when listing multiple items.
 - Reference module names when relevant.
-- If you can't answer (e.g. no source access), say so briefly and suggest what you can provide instead.
+- If repo docs lack detail, call search_web_documentation before saying you cannot answer.
+- When the user asks to search the web or internet, call search_web_documentation — you CAN search the public web; never claim you lack internet access.
 
 Viewer vs module diagrams:
 - A block labeled "VIEWER DIAGRAM SELECTION" describes which **node, cluster, or edge** is highlighted on the **interactive Mermaid diagram** (logical id from the viewer registry). Questions like "which diagram node is selected", "what did I click on the graph", "what's highlighted on the diagram" refer to **that** selection—not the open doc page title alone.
@@ -120,8 +121,28 @@ class ArchitecturalAgentRunner:
             or os.getenv("USE_VERTEX_AI", "").strip().lower() in ("1", "true", "yes"),
             gcp_project=os.getenv("GCP_PROJECT", "") or os.getenv("GOOGLE_CLOUD_PROJECT", ""),
         )
+        self.llm_config = llm_config
         self.model = create_main_model(llm_config)
-        
+
+    def search_web_documentation(self, query: str) -> str:
+        """
+        Tool: Gemini Google Search when generated repo docs are incomplete.
+        """
+        from codewiki.src.be.llm_services import _is_gemini_model
+        from codewiki.src.be.web_search import gemini_google_search
+
+        q = (query or "").strip()
+        logger.info("[ARCH-AGENT] tool search_web_documentation(%r)", q[:120])
+        if not q:
+            return "Provide a specific search query (class name, API, or topic)."
+        if not _is_gemini_model(self.main_model):
+            return "Web search is only available when MAIN_MODEL is a Gemini model."
+        try:
+            return gemini_google_search(q, self.llm_config, model=self.main_model)
+        except Exception as e:
+            logger.warning("[ARCH-AGENT] search_web_documentation failed: %s", e)
+            return f"Web search failed: {e}"
+
     def _load_module_tree(self) -> Dict[str, Any]:
         """Load module tree from docs."""
         tree_path = self.docs_path / "module_tree.json"
@@ -433,6 +454,36 @@ class ArchitecturalAgentRunner:
             return True
         return False
 
+    def _is_web_search_capability_question(self, message: str) -> bool:
+        """Pure 'can you search the web?' without a topic to look up."""
+        t = message.strip().lower()
+        if not t or len(t) > 100:
+            return False
+        has_search = bool(re.search(r"\b(search|google|look\s+up)\b", t))
+        has_web = bool(re.search(r"\b(internet|web|online)\b", t))
+        if not (has_search and has_web):
+            return False
+        # "search the web for X" is a search request, not a capability-only question
+        if re.search(r"\bfor\b", t) and len(t) > 35:
+            return False
+        return True
+
+    def _wants_web_search(self, message: str) -> bool:
+        """User explicitly asked to search the public web."""
+        t = message.strip().lower()
+        if re.search(r"\b(search|google|look\s+up)\b.{0,50}\b(internet|web|online)\b", t):
+            return True
+        if re.search(r"\b(internet|web|online)\b.{0,50}\b(search|for)\b", t):
+            return True
+        return False
+
+    def _deterministic_web_search_capability_answer(self) -> str:
+        return (
+            "Yes — I can search the public web with **search_web_documentation** when repo docs "
+            "don't cover a topic. Ask something specific (e.g. \"search the web for DiaModel\") "
+            "and I'll look it up."
+        )
+
     def _deterministic_viewer_ui_answer(
         self,
         diagram_selection: Optional[Dict[str, Any]] = None,
@@ -533,25 +584,46 @@ class ArchitecturalAgentRunner:
         logger.info(f"[ARCH-AGENT] System prompt length: {len(system_prompt)} chars")
         logger.debug(f"[ARCH-AGENT] System prompt preview: {system_prompt[:500]}...")
 
+        from codewiki.src.be.llm_services import _is_gemini_model
+
+        tools = [
+            Tool(
+                function=self.read_module_documentation,
+                name="read_module_documentation",
+                description=(
+                    "Load full markdown for one module from this docs bundle (`{module_id}.md`). "
+                    "Use when you need prose, bullet lists, or sections not present in the opened Mermaid excerpts "
+                    "or the module tree (e.g. details about a submodule the user asked about)."
+                ),
+            ),
+        ]
+        if _is_gemini_model(self.main_model):
+            tools.append(
+                Tool(
+                    function=self.search_web_documentation,
+                    name="search_web_documentation",
+                    description=(
+                        "Search the public web (Google) for documentation when this repo's generated docs "
+                        "do not cover the topic. Pass a focused query (class name, library, API)."
+                    ),
+                )
+            )
+
         agent = Agent(
             self.model,
             retries=3,
             system_prompt=system_prompt,
-            tools=[
-                Tool(
-                    function=self.read_module_documentation,
-                    name="read_module_documentation",
-                    description=(
-                        "Load full markdown for one module from this docs bundle (`{module_id}.md`). "
-                        "Use when you need prose, bullet lists, or sections not present in the opened Mermaid excerpts "
-                        "or the module tree (e.g. details about a submodule the user asked about)."
-                    ),
-                )
-            ],
+            tools=tools,
         )
 
         diagram_prefix = self._format_user_message_diagram_selections_prefix(selections)
         enhanced_message = diagram_prefix + message
+
+        if self._is_web_search_capability_question(message):
+            ans = self._deterministic_web_search_capability_answer()
+            logger.info("[ARCH-AGENT] Web search capability question — deterministic answer (no LLM)")
+            updated = self._append_turn_to_history(message_history, enhanced_message, ans)
+            return (ans, updated)
 
         if self._is_viewer_ui_meta_question(message):
             ans = self._deterministic_viewer_ui_answer(diagram_selection, diagram_selections)
@@ -560,6 +632,12 @@ class ArchitecturalAgentRunner:
                 message_history, enhanced_message, ans
             )
             return (ans, updated)
+
+        if self._wants_web_search(message) and _is_gemini_model(self.main_model):
+            enhanced_message = (
+                "[Required: User requested a web search. Call search_web_documentation with a "
+                "focused query, then answer using those results. Do not refuse or claim no internet.]\n\n"
+            ) + enhanced_message
 
         history_messages = None
         if message_history:

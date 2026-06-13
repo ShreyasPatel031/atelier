@@ -20,10 +20,22 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Optional
 
+import logging
+import os
+import subprocess
+import time
+import traceback
+
+_log = logging.getLogger(__name__)
+
 _REPO_ID_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$")
 _VIEWER_STATE_MAX_BYTES = 524_288
+_CHAT_MAX_BYTES = 1_048_576
 
 _PORT_TRY_COUNT = 48  # preferred port + this many fallbacks
+
+_llm_health_cache: dict = {"ts": 0.0, "payload": None}
+_LLM_HEALTH_TTL_SEC = 120.0
 
 
 class _ReusableThreadingHTTPServer(ThreadingHTTPServer):
@@ -119,54 +131,156 @@ class _QuietHandler(SimpleHTTPRequestHandler):
 
 
 class _CodewikiDemoHandler(_QuietHandler):
-    """Serves ``demo/`` and accepts POST ``/repos/<repo_id>/viewer_state.json`` from the viewer."""
+    """Serves ``demo/``, viewer state, and architectural-agent chat API."""
 
-    @staticmethod
-    def _viewer_state_target(raw_path: str) -> bool:
-        parts = raw_path.strip("/").split("/")
-        return (
-            len(parts) == 3
-            and parts[0] == "repos"
-            and parts[2] == "viewer_state.json"
-        )
+    # ---- helpers ----
 
-    def _viewer_state_cors(self) -> None:
-        """Allow the viewer on another localhost port (e.g. :18765) to POST state here."""
+    def _cors_headers(self) -> None:
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
 
-    def _viewer_state_json_fail(self, code: int, msg: str) -> None:
-        body = json.dumps({"ok": False, "error": msg}).encode("utf-8")
+    def _json_response(self, code: int, payload: dict) -> None:
+        body = json.dumps(payload).encode("utf-8")
         self.send_response(code)
-        self._viewer_state_cors()
+        self._cors_headers()
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
-    def do_OPTIONS(self) -> None:  # noqa: N802 — stdlib API
-        raw_path = urllib.parse.urlparse(self.path).path or "/"
-        if not self._viewer_state_target(raw_path):
-            self.send_error(501, "Unsupported method ('OPTIONS')")
-            return
+    def _read_json_body(self, max_bytes: int) -> Optional[dict]:
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            self._json_response(400, {"ok": False, "error": "Bad Content-Length"})
+            return None
+        if length < 0 or length > max_bytes:
+            self._json_response(413, {"ok": False, "error": "Body too large"})
+            return None
+        raw = self.rfile.read(length) if length else b""
+        try:
+            data = json.loads(raw.decode("utf-8") if raw else "{}")
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            self._json_response(400, {"ok": False, "error": "Invalid JSON"})
+            return None
+        if not isinstance(data, dict):
+            self._json_response(400, {"ok": False, "error": "JSON must be an object"})
+            return None
+        return data
+
+    def _resolve_docs_path(self, repo_id: str) -> Optional[Path]:
+        """Find docs dir for a repo: demo/repos/<id> or ~/.cache/atelier-mcp/repos/<id>."""
+        demo_root = Path(self.directory).resolve()
+        for base in [demo_root / "repos", Path.home() / ".cache" / "atelier-mcp" / "repos"]:
+            candidate = (base / repo_id).resolve()
+            try:
+                candidate.relative_to(base)
+            except ValueError:
+                continue
+            if candidate.is_dir() and (candidate / "module_tree.json").exists():
+                return candidate
+        return None
+
+    # ---- routing ----
+
+    def do_OPTIONS(self) -> None:  # noqa: N802
         self.send_response(204)
-        self._viewer_state_cors()
+        self._cors_headers()
         self.end_headers()
 
-    def do_POST(self) -> None:  # noqa: N802 — stdlib API
+    def do_GET(self) -> None:  # noqa: N802
         raw_path = urllib.parse.urlparse(self.path).path or "/"
-        parts = raw_path.strip("/").split("/")
-        if (
-            len(parts) != 3
-            or parts[0] != "repos"
-            or parts[2] != "viewer_state.json"
-        ):
-            self.send_error(404, "Not found")
+        if raw_path == "/api/llm-health":
+            self._handle_llm_health()
+        else:
+            super().do_GET()
+
+    def do_POST(self) -> None:  # noqa: N802
+        raw_path = urllib.parse.urlparse(self.path).path or "/"
+
+        if raw_path == "/api/arch-agent/chat":
+            self._handle_arch_agent_chat()
             return
-        repo_id = parts[1]
+
+        parts = raw_path.strip("/").split("/")
+        if len(parts) == 3 and parts[0] == "repos" and parts[2] == "viewer_state.json":
+            self._handle_viewer_state_post(parts[1])
+            return
+
+        self._json_response(404, {"ok": False, "error": "Not found"})
+
+    # ---- /api/llm-health ----
+
+    def _handle_llm_health(self) -> None:
+        now = time.time()
+        if (
+            _llm_health_cache["payload"] is not None
+            and now - _llm_health_cache["ts"] < _LLM_HEALTH_TTL_SEC
+        ):
+            self._json_response(200, _llm_health_cache["payload"])
+            return
+
+        from codewiki.src.fe.background_worker import resolve_codewiki_cli
+
+        cmd = resolve_codewiki_cli() + ["config", "validate", "--quick"]
+        try:
+            p = subprocess.run(cmd, capture_output=True, text=True, env=os.environ.copy(), timeout=30)
+        except (subprocess.TimeoutExpired, OSError) as e:
+            payload = {"ok": False, "detail": str(e)[:400]}
+            self._json_response(503, payload)
+            return
+
+        ok = p.returncode == 0
+        detail = (p.stdout or p.stderr or "").strip()[:400]
+        payload = {"ok": ok, "detail": detail} if not ok else {"ok": True}
+        _llm_health_cache["ts"] = now
+        _llm_health_cache["payload"] = payload
+        self._json_response(200, payload)
+
+    # ---- /api/arch-agent/chat ----
+
+    def _handle_arch_agent_chat(self) -> None:
+        data = self._read_json_body(_CHAT_MAX_BYTES)
+        if data is None:
+            return
+
+        repo_id = data.get("job_id", "")
+        message = data.get("message", "").strip()
+        if not repo_id or not message:
+            self._json_response(400, {"ok": False, "error": "job_id and message required"})
+            return
+
+        docs_path = self._resolve_docs_path(repo_id)
+        if docs_path is None:
+            self._json_response(404, {"ok": False, "error": f"Docs not found for {repo_id}"})
+            return
+
+        try:
+            from codewiki.src.be.architectural_agent import ArchitecturalAgentRunner
+
+            runner = ArchitecturalAgentRunner(str(docs_path))
+            opened = data.get("opened_modules") or ["overview"]
+            if "overview" not in opened:
+                opened = ["overview"] + opened
+
+            response_text, updated_history = runner.chat(
+                message=message,
+                opened_modules=opened,
+                message_history=data.get("history"),
+                diagram_selection=data.get("diagram_selection"),
+                diagram_selections=data.get("diagram_selections"),
+            )
+            self._json_response(200, {"response": response_text, "history": updated_history})
+        except Exception as e:
+            _log.error("[CHAT] arch-agent error: %s", traceback.format_exc())
+            self._json_response(500, {"ok": False, "error": str(e)[:400]})
+
+    # ---- /repos/<id>/viewer_state.json ----
+
+    def _handle_viewer_state_post(self, repo_id: str) -> None:
         if not _REPO_ID_RE.match(repo_id):
-            self._viewer_state_json_fail(400, "Invalid repo id")
+            self._json_response(400, {"ok": False, "error": "Invalid repo id"})
             return
 
         demo_root = Path(self.directory).resolve()
@@ -174,38 +288,20 @@ class _CodewikiDemoHandler(_QuietHandler):
         try:
             repo_dir.relative_to(demo_root / "repos")
         except ValueError:
-            self._viewer_state_json_fail(400, "Bad path")
+            self._json_response(400, {"ok": False, "error": "Bad path"})
             return
         if not repo_dir.is_dir():
-            self._viewer_state_json_fail(404, "Unknown repo")
+            self._json_response(404, {"ok": False, "error": "Unknown repo"})
             return
 
-        try:
-            length = int(self.headers.get("Content-Length", "0"))
-        except ValueError:
-            self._viewer_state_json_fail(400, "Bad Content-Length")
-            return
-        if length < 0:
-            self._viewer_state_json_fail(400, "Bad Content-Length")
-            return
-        if length > _VIEWER_STATE_MAX_BYTES:
-            self._viewer_state_json_fail(413, "Body too large")
-            return
-        body = self.rfile.read(length) if length else b""
-        try:
-            data = json.loads(body.decode("utf-8") if body else "{}")
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            self._viewer_state_json_fail(400, "Invalid JSON")
-            return
-        if not isinstance(data, dict):
-            self._viewer_state_json_fail(400, "JSON must be an object")
+        data = self._read_json_body(_VIEWER_STATE_MAX_BYTES)
+        if data is None:
             return
 
         out_path = repo_dir / "viewer_state.json"
         tmp_path = out_path.with_suffix(".json.tmp")
-        serialized = json.dumps(data, indent=2) + "\n"
         try:
-            tmp_path.write_text(serialized, encoding="utf-8")
+            tmp_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
             tmp_path.replace(out_path)
         except OSError:
             try:
@@ -213,16 +309,10 @@ class _CodewikiDemoHandler(_QuietHandler):
                     tmp_path.unlink()
             except OSError:
                 pass
-            self._viewer_state_json_fail(500, "Write failed")
+            self._json_response(500, {"ok": False, "error": "Write failed"})
             return
 
-        payload = json.dumps({"ok": True}).encode("utf-8")
-        self.send_response(200)
-        self._viewer_state_cors()
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(payload)))
-        self.end_headers()
-        self.wfile.write(payload)
+        self._json_response(200, {"ok": True})
 
 
 def _is_port_free(port: int) -> bool:
