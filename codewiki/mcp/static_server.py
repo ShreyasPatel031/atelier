@@ -115,6 +115,11 @@ class _StaticServer:
 class _QuietHandler(SimpleHTTPRequestHandler):
     """SimpleHTTPRequestHandler that doesn't spam stdout (which is the MCP transport)."""
 
+    extensions_map = {
+        **SimpleHTTPRequestHandler.extensions_map,
+        ".mjs": "application/javascript",
+    }
+
     def log_message(self, format: str, *args) -> None:  # noqa: A002 - matches stdlib signature
         return  # silence access logs to keep stdio clean
 

@@ -1,61 +1,47 @@
 #!/usr/bin/env node
 /**
- * Static server for demo/ with correct ES module MIME types (python http.server serves .mjs as octet-stream).
+ * Local demo viewer with integrated architectural-agent chat on the same origin.
+ *
+ * Uses Python static_server (codewiki.mcp.chat_sidecar) so /api/arch-agent/chat works
+ * at http://127.0.0.1:9891 — matching the MCP open_viewer stack from the generation branch.
+ * The previous Node-only static server returned HTTP 404 for chat routes.
  */
-import { createServer } from "node:http";
-import { readFile, stat } from "node:fs/promises";
-import { join, extname } from "node:path";
+import { spawn } from "node:child_process";
+import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const PORT = Number.parseInt(process.env.ATELIER_DEMO_PORT || "9891", 10);
 const DEMO_ROOT = join(fileURLToPath(new URL("../", import.meta.url)));
+const REPO_ROOT = join(DEMO_ROOT, "..");
+const PYTHON = process.env.PYTHON || "python3";
 
-const MIME = {
-  ".html": "text/html; charset=utf-8",
-  ".js": "application/javascript; charset=utf-8",
-  ".mjs": "application/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".ico": "image/x-icon",
-  ".woff2": "font/woff2",
-};
+const child = spawn(PYTHON, ["-m", "codewiki.mcp.chat_sidecar"], {
+  cwd: REPO_ROOT,
+  env: {
+    ...process.env,
+    ATELIER_CHAT_PORT: String(PORT),
+    ATELIER_DEMO_ROOT: DEMO_ROOT,
+  },
+  stdio: ["ignore", "pipe", "inherit"],
+});
 
-function contentType(path) {
-  return MIME[extname(path).toLowerCase()] || "application/octet-stream";
-}
-
-const server = createServer(async (req, res) => {
-  try {
-    const url = new URL(req.url || "/", `http://127.0.0.1:${PORT}`);
-    let pathname = decodeURIComponent(url.pathname);
-    if (pathname.endsWith("/")) pathname += "index.html";
-    const filePath = join(DEMO_ROOT, pathname);
-    if (!filePath.startsWith(DEMO_ROOT)) {
-      res.writeHead(403);
-      res.end("Forbidden");
-      return;
-    }
-    const info = await stat(filePath);
-    if (!info.isFile()) {
-      res.writeHead(404);
-      res.end("Not Found");
-      return;
-    }
-    const data = await readFile(filePath);
-    res.writeHead(200, {
-      "Content-Type": contentType(filePath),
-      "Cache-Control": "no-store, max-age=0",
-      "Access-Control-Allow-Origin": "*",
-    });
-    res.end(data);
-  } catch {
-    res.writeHead(404);
-    res.end("Not Found");
+child.stdout.on("data", (chunk) => {
+  const text = chunk.toString();
+  process.stdout.write(text);
+  if (text.includes("[atelier-chat] ready")) {
+    console.log(`Atelier demo viewer: http://127.0.0.1:${PORT}/  (chat API on same origin)`);
   }
 });
 
-server.listen(PORT, "127.0.0.1", () => {
-  console.log(`Atelier demo viewer: http://127.0.0.1:${PORT}/`);
+function shutdown() {
+  child.kill("SIGTERM");
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+child.on("exit", (code, signal) => {
+  if (signal === "SIGTERM" || signal === "SIGINT") {
+    process.exit(0);
+  }
+  process.exit(code ?? 1);
 });

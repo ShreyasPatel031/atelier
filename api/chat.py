@@ -321,13 +321,30 @@ class handler(BaseHTTPRequestHandler):
         allow = _cors_allow_origin(origin)
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", allow)
-        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Access-Control-Allow-Credentials", "true")
         self.end_headers()
 
     def do_GET(self):
         p = self.path.split("?", 1)[0].rstrip("/")
+        if p.endswith("/api/llm-health") or p.endswith("/llm-health"):
+            gem = _gemini_ready()
+            if gem:
+                _json_response(self, 200, {"ok": True})
+                return
+            _json_response(
+                self,
+                200,
+                {
+                    "ok": False,
+                    "detail": (
+                        "Vertex ADC not configured on Vercel. "
+                        "Set GOOGLE_ADC_JSON and GOOGLE_USE_ADC=1."
+                    ),
+                },
+            )
+            return
         if p.endswith("/api/health") or p == "/api" or p.endswith("/health"):
             gem = _gemini_ready()
             persona = _docs_path("persona-selection-model")
