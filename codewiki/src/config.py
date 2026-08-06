@@ -76,6 +76,10 @@ MODEL_CONTEXT_WINDOWS = {
     'claude-3-opus': 200_000,
     'claude-3-sonnet': 200_000,
     'claude-3-haiku': 200_000,
+    'claude-haiku-4-5': 200_000,
+    'claude-haiku-4-5-20251001': 200_000,
+    'claude-sonnet-4': 200_000,
+    'claude-sonnet-4-5': 200_000,
     'glm-4p5': 128_000,
 }
 DEFAULT_CONTEXT_WINDOW = 128_000  # Fallback for unknown models
@@ -93,6 +97,10 @@ MODEL_OUTPUT_LIMITS = {
     'claude-3-opus': 4_000,
     'claude-3-sonnet': 4_000,
     'claude-3-haiku': 4_000,
+    'claude-haiku-4-5': 8_192,
+    'claude-haiku-4-5-20251001': 8_192,
+    'claude-sonnet-4': 8_192,
+    'claude-sonnet-4-5': 8_192,
     'glm-4p5': 4_000,
 }
 DEFAULT_OUTPUT_LIMIT = 8_000
@@ -164,6 +172,9 @@ class Config:
     # Google Cloud / Vertex AI ADC mode (no expiring API key)
     use_vertex_ai: bool = False
     gcp_project: str = ""
+    # Provider: "gemini" (Vertex ADC / Gemini API) or "claude" (Anthropic API).
+    llm_provider: str = "gemini"
+    anthropic_api_key: str = ""
     
     @classmethod
     def from_args(cls, args: argparse.Namespace) -> 'Config':
@@ -196,6 +207,8 @@ class Config:
         fallback_model: str = FALLBACK_MODEL_1,
         use_vertex_ai: bool = False,
         gcp_project: str = "",
+        llm_provider: str = "gemini",
+        anthropic_api_key: str = "",
     ) -> 'Config':
         """
         Create configuration for CLI context.
@@ -228,4 +241,6 @@ class Config:
             fallback_model=fallback_model,
             use_vertex_ai=use_vertex_ai,
             gcp_project=gcp_project,
+            llm_provider=llm_provider or "gemini",
+            anthropic_api_key=anthropic_api_key or "",
         )

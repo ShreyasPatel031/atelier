@@ -156,6 +156,8 @@ class CLIDocumentationGenerator:
                 fallback_model=main_model,
                 use_vertex_ai=bool(self.config.get('use_vertex_ai', False)),
                 gcp_project=self.config.get('gcp_project', ''),
+                llm_provider=self.config.get('llm_provider') or 'gemini',
+                anthropic_api_key=self.config.get('anthropic_api_key') or '',
             )
             
             # Run backend documentation generation
